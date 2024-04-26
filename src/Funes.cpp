@@ -344,8 +344,7 @@ struct Funes : Module {
 		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
 		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
 		if (!pathC) {
-			// Fail silently
-			// TODO: do NOT fail silently!
+			// Fail silently			
 			return;
 		}
 		const std::string path = pathC;
@@ -448,11 +447,11 @@ struct FunesDisplay : TransparentWidget {
 
 	void drawLayer(const DrawArgs& args, int layer) override {
 		if (layer == 1) {
-			if (module && !module->isBypassed()) {
-				// Text
-				int shape = module ? module->patch.engine : 0;
+			if (module && !module->isBypassed()) {				
 				std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
 				if (font) {
+					// Text
+					int shape = module ? module->patch.engine : 0;
 					nvgFontSize(args.vg, 38);
 					nvgFontFaceId(args.vg, font->handle);
 					nvgTextLetterSpacing(args.vg, 2.5);
