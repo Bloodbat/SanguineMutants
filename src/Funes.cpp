@@ -1,12 +1,15 @@
 #include "plugin.hpp"
 
 #pragma GCC diagnostic push
+
 #ifndef __clang__
-	#pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wsuggest-override"
 #endif
+
 #include "plaits/dsp/voice.h"
 //#include "plaits/user_data_receiver.h"
 #include "plaits/user_data.h"
+
 #pragma GCC diagnostic pop
 
 #include <osdialog.h>
@@ -18,7 +21,7 @@ static const char WAVE_FILTERS[] = "BIN (*.bin):bin, BIN";
 static std::string waveDir;
 
 struct Funes : Module {
-	enum ParamIds {		
+	enum ParamIds {
 		MODEL_PARAM,
 		FREQ_PARAM,
 		HARMONICS_PARAM,
@@ -63,16 +66,16 @@ struct Funes : Module {
 
 	dsp::SampleRateConverter<16 * 2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<16 * 2>, 256> outputBuffer;
-	bool lowCpu = false;	
+	bool lowCpu = false;
 
 	bool loading = false;
 
 	Funes() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		
-        configParam(MODEL_PARAM, 0.0f, 23.0f, 0.0f, "Model", "", 0.0f, 1.0f, 1.0f);
+
+		configParam(MODEL_PARAM, 0.0f, 23.0f, 0.0f, "Model", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[MODEL_PARAM]->snapEnabled = true;
-		
+
 		configParam(FREQ_PARAM, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
 		configParam(FREQ_ROOT_PARAM, -4.0, 4.0, 0.0, "Frequency Root", " semitones", 0.f, 12.f);
 		configParam(HARMONICS_PARAM, 0.0, 1.0, 0.5, "Harmonics", "%", 0.f, 100.f);
@@ -175,7 +178,7 @@ struct Funes : Module {
 
 		if (outputBuffer.empty()) {
 			const int blockSize = 12;
-			
+
 			// Switch models
 			if (params[MODEL_PARAM].getValue() != patch.engine) {
 				patch.engine = params[MODEL_PARAM].getValue();
@@ -195,9 +198,10 @@ struct Funes : Module {
 				int activeEngine = voice[c].active_engine();
 				if (activeEngine < 8) {
 					activeLights[activeEngine] = true;
-					activeLights[activeEngine+8] = true;
-				} else {
-					activeLights[activeEngine-8] = true;
+					activeLights[activeEngine + 8] = true;
+				}
+				else {
+					activeLights[activeEngine - 8] = true;
 				}
 				// Pulse the light if at least one voice is using a different engine.
 				if (activeEngine != patch.engine)
@@ -209,10 +213,10 @@ struct Funes : Module {
 				// Transpose the [light][color] table
 				int lightId = (i % 8) * 2 + (i / 8);
 				float brightness = activeLights[i];
-				if (patch.engine == (i+8) && pulse)		// TODO: fix with orange colors
+				if (patch.engine == (i + 8) && pulse)		// TODO: fix with orange colors
 					brightness = tri;
 				lights[MODEL_LIGHT + lightId].setBrightness(brightness);
-			}			
+			}
 
 			// Calculate pitch for lowCpu mode if needed
 			float pitch = params[FREQ_PARAM].getValue();
@@ -224,12 +228,15 @@ struct Funes : Module {
 			// TODO: check with lowCpu mode.
 			if (frequencyMode == 0) {
 				patch.note = -48.37f + pitch * 15.f;
-			} else if (frequencyMode == 9) {
+			}
+			else if (frequencyMode == 9) {
 				float fineTune = params[FREQ_ROOT_PARAM].getValue() / 4.f;
 				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
-			} else if (frequencyMode == 10) {
+			}
+			else if (frequencyMode == 10) {
 				patch.note = 60.f + pitch * 12.f;
-			} else {
+			}
+			else {
 				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
 			}
 
@@ -276,12 +283,12 @@ struct Funes : Module {
 
 			// Convert output
 			if (lowCpu) {
-				int len = std::min((int) outputBuffer.capacity(), blockSize);
+				int len = std::min((int)outputBuffer.capacity(), blockSize);
 				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
 				outputBuffer.endIncr(len);
 			}
 			else {
-				outputSrc.setRates(48000, (int) args.sampleRate);
+				outputSrc.setRates(48000, (int)args.sampleRate);
 				int inLen = blockSize;
 				int outLen = outputBuffer.capacity();
 				outputSrc.setChannels(channels * 2);
@@ -304,22 +311,22 @@ struct Funes : Module {
 	}
 
 	void reset() {
-			bool success = user_data.Save(nullptr, patch.engine);
-			if (success) {
-				for (int c = 0; c < 16; c++) {
-					voice[c].ReloadUserData();
-				}
+		bool success = user_data.Save(nullptr, patch.engine);
+		if (success) {
+			for (int c = 0; c < 16; c++) {
+				voice[c].ReloadUserData();
 			}
+		}
 	}
 
 	void load(const std::string& path) {
 		loading = true;
-		DEFER({loading = false;});
+		DEFER({ loading = false; });
 		// HACK Sleep 100us so DSP thread is likely to finish processing before we resize the vector
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 
 		std::string ext = string::lowercase(system::getExtension(path));
-		
+
 		if (ext == ".bin") {
 			std::ifstream input(path, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
@@ -344,12 +351,12 @@ struct Funes : Module {
 		const std::string path = pathC;
 		std::free(pathC);
 
- 		waveDir = system::getDirectory(path);
+		waveDir = system::getDirectory(path);
 		load(path);
 	}
-	
+
 	void setEngine(int modelNum) {
-		params[MODEL_PARAM].setValue(modelNum);	
+		params[MODEL_PARAM].setValue(modelNum);
 	}
 };
 
@@ -449,15 +456,15 @@ struct FunesDisplay : TransparentWidget {
 					nvgFontSize(args.vg, 38);
 					nvgFontFaceId(args.vg, font->handle);
 					nvgTextLetterSpacing(args.vg, 2.5);
-					
-					Vec textPos = Vec(9, 48);					
+
+					Vec textPos = Vec(9, 48);
 					NVGcolor textColor = nvgRGB(200, 0, 0);
 					nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 					// Background of all segments
 					nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
-					nvgFillColor(args.vg, textColor);					
+					nvgFillColor(args.vg, textColor);
 					nvgText(args.vg, textPos.x, textPos.y, modelDisplays[shape].c_str(), NULL);
-			    }
+				}
 			}
 		}
 		Widget::drawLayer(args, layer);
@@ -465,28 +472,28 @@ struct FunesDisplay : TransparentWidget {
 };
 
 struct LitSvg : SvgWidget {
-	 Funes* module;
-	 
-	 void draw(const DrawArgs& args) override {
+	Funes* module;
+
+	void draw(const DrawArgs& args) override {
 		// Do not call SvgWidget::draw: it draws on the wrong layer.
 		Widget::draw(args);
 	}
-	 
-	 void drawLayer(const DrawArgs& args, int layer) override {
-		 if (layer == 1) {
-			 //From SvgWidget::draw()
+
+	void drawLayer(const DrawArgs& args, int layer) override {
+		if (layer == 1) {
+			//From SvgWidget::draw()
 			if (!svg)
 				return;
 			if (module && !module->isBypassed()) {
 				nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 				rack::window::svgDraw(args.vg, svg->handle);
 			}
-		 }
-		 Widget::drawLayer(args, layer);
-	 }
+		}
+		Widget::drawLayer(args, layer);
+	}
 };
 
-struct FunesWidget : ModuleWidget {	
+struct FunesWidget : ModuleWidget {
 
 	FunesWidget(Funes* module) {
 		setModule(module);
@@ -497,7 +504,7 @@ struct FunesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidgetCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29))));
-		
+
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::MODEL_PARAM));
 		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 62.502)), module, Funes::FREQ_PARAM));
 		addParam(createParamCentered<Rogan3PSGreen>(mm2px(Vec(86.86, 62.502)), module, Funes::HARMONICS_PARAM));
@@ -507,9 +514,9 @@ struct FunesWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 74.874)), module, Funes::FREQ_CV_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 95.96)), module, Funes::MORPH_CV_PARAM));
 
-		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::LPG_COLOR_PARAM));		
-		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::LPG_DECAY_PARAM));		
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 62.502)), module, Funes::FREQ_ROOT_PARAM));		
+		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::LPG_COLOR_PARAM));
+		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::LPG_DECAY_PARAM));
+		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 62.502)), module, Funes::FREQ_ROOT_PARAM));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 32.29)), module, Funes::ENGINE_INPUT));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 55.102)), module, Funes::TIMBRE_INPUT));
@@ -531,22 +538,22 @@ struct FunesWidget : ModuleWidget {
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(66.489, 15.85)), module, Funes::MODEL_LIGHT + 5 * 2));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(71.489, 15.85)), module, Funes::MODEL_LIGHT + 6 * 2));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(76.489, 15.85)), module, Funes::MODEL_LIGHT + 7 * 2));
-		
+
 		FunesDisplay* display = new FunesDisplay();
 		display->box.pos = Vec(25, 68);
 		display->box.size = Vec(296, 55);
 		display->module = module;
 		addChild(display);
-		
+
 		LitSvg* mutantsLogo = new LitSvg();
-		mutantsLogo->box.pos = Vec(246.53,344.31);
+		mutantsLogo->box.pos = Vec(246.53, 344.31);
 		mutantsLogo->box.size = Vec(36.06, 14.79);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		addChild(mutantsLogo);
-		
+
 		LitSvg* bloodLogo = new LitSvg();
-		bloodLogo->box.pos = Vec(220.57,319.57);
+		bloodLogo->box.pos = Vec(220.57, 319.57);
 		bloodLogo->box.size = Vec(11.2, 23.27);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
@@ -558,60 +565,60 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->lowCpu));		
+		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->lowCpu));
 
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createSubmenuItem("Frequency mode", "", [=](Menu* menu) {
 			for (int i = 0; i < 11; i++) {
-			menu->addChild(createCheckMenuItem(frequencyModes[i], "",
-				[=]() {return module->frequencyMode == i;},
-				[=]() {module->frequencyMode = i;}
-			));
-		}
-		}));		
+				menu->addChild(createCheckMenuItem(frequencyModes[i], "",
+					[=]() {return module->frequencyMode == i; },
+					[=]() {module->frequencyMode = i; }
+				));
+			}
+			}));
 
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createMenuItem("Reset custom data for current engine", "",
-			[=]() {module->reset();}
+			[=]() {module->reset(); }
 		));
 
 		menu->addChild(createMenuItem("Load custom data for current engine", "",
-			[=]() {module->loadDialog();}
+			[=]() {module->loadDialog(); }
 		));
 
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createSubmenuItem("Pitched models", "", [=](Menu* menu) {
 			for (int i = 8; i < 16; i++) {
-			menu->addChild(createCheckMenuItem(modelLabels[i], "",
-				[=]() {return module->patch.engine == i;},
-				[=]() {module->patch.engine = i;
-				module->setEngine(i);}
-			));
-		}
-		}));
+				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+					[=]() {return module->patch.engine == i; },
+					[=]() {module->patch.engine = i;
+				module->setEngine(i); }
+				));
+			}
+			}));
 
 		menu->addChild(createSubmenuItem("Noise/percussive models", "", [=](Menu* menu) {
-		for (int i = 16; i < 24; i++) {
-			menu->addChild(createCheckMenuItem(modelLabels[i], "",
-				[=]() {return module->patch.engine == i;},
-				[=]() {module->patch.engine = i;
-				module->setEngine(i);}
-			));
-		}
-		}));
+			for (int i = 16; i < 24; i++) {
+				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+					[=]() {return module->patch.engine == i; },
+					[=]() {module->patch.engine = i;
+				module->setEngine(i); }
+				));
+			}
+			}));
 
 		menu->addChild(createSubmenuItem("New synthesis models", "", [=](Menu* menu) {
-		for (int i = 0; i < 8; i++) {
-			menu->addChild(createCheckMenuItem(modelLabels[i], "",
-				[=]() {return module->patch.engine == i;},
-				[=]() {module->patch.engine = i;
-				module->setEngine(i);}
-			));
-		}
-		}));
+			for (int i = 0; i < 8; i++) {
+				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+					[=]() {return module->patch.engine == i; },
+					[=]() {module->patch.engine = i;
+				module->setEngine(i); }
+				));
+			}
+			}));
 	}
 };
 
