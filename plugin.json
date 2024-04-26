@@ -1,0 +1,22 @@
+{
+  "slug": "SanguineMutants",
+  "name": "Sanguine Modules Mutants",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "author": "Bloodbat, VCV, Tobi",
+  "pluginUrl": "https://github.com/Bloodbat/SanguineMutants",
+  "description": "Based on Mutable Instruments Eurorack modules and their variants",
+  "modules": [    
+    {
+      "slug": "Funes",
+      "name": "Funes",
+      "description": "Based on Mutable Instruments Plaits 1.2",	  
+      "manualUrl": "https://mutable-instruments.net/modules/plaits/manual/",      
+      "tags": [
+        "Oscillator",
+        "Hardware clone",
+        "Polyphonic"
+      ]
+    }       
+  ]
+}
