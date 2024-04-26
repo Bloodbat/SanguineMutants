@@ -338,6 +338,7 @@ struct Funes : Module {
 		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
 		if (!pathC) {
 			// Fail silently
+			// TODO: do NOT fail silently!
 			return;
 		}
 		const std::string path = pathC;
@@ -467,7 +468,7 @@ struct LitSvg : SvgWidget {
 	 Funes* module;
 	 
 	 void draw(const DrawArgs& args) override {
-		// Do not call SvgWidget::draw, as it will draw on the wrong layer
+		// Do not call SvgWidget::draw: it draws on the wrong layer.
 		Widget::draw(args);
 	}
 	 
