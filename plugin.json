@@ -3,9 +3,10 @@
   "name": "Sanguine Modules Mutants",
   "version": "2.0.0",
   "license": "GPL-3.0-or-later",
-  "author": "Bloodbat, VCV, Tobi",
+  "author": "Bloodbat",
   "pluginUrl": "https://github.com/Bloodbat/SanguineMutants",
-  "description": "Based on Mutable Instruments Eurorack modules and their variants",
+  "sourceUrl": "https://github.com/Bloodbat/SanguineMutants",
+  "description": "A collection of modules based on Mutable Instruments Eurorack devices and their variants.",
   "modules": [    
     {
       "slug": "Funes",
