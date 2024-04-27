@@ -70,7 +70,6 @@ struct Funes : Module {
 
 	bool loading = false;
 
-	// TODO: use engine instead of model: the code internally uses engine. For consistency.
 	int modelNum = 0;
 
 	Funes() {
@@ -113,7 +112,7 @@ struct Funes : Module {
 	}
 
 	void onReset() override {
-		patch.engine = 8;		
+		patch.engine = 8;
 		setEngine(8);
 		patch.lpg_colour = 0.5f;
 		patch.decay = 0.5f;
@@ -472,7 +471,7 @@ struct FunesDisplay : TransparentWidget {
 					nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 					// Background of all segments
 					nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
-					nvgFillColor(args.vg, textColor);					
+					nvgFillColor(args.vg, textColor);
 					nvgText(args.vg, textPos.x, textPos.y, modelDisplays[module->modelNum].c_str(), NULL);
 				}
 			}
