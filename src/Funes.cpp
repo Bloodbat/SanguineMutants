@@ -70,6 +70,9 @@ struct Funes : Module {
 
 	bool loading = false;
 
+	// TODO: use engine instead of model: the code internally uses engine. For consistency.
+	int modelNum = 0;
+
 	Funes() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
@@ -110,7 +113,7 @@ struct Funes : Module {
 	}
 
 	void onReset() override {
-		patch.engine = 8;
+		patch.engine = 8;		
 		setEngine(8);
 		patch.lpg_colour = 0.5f;
 		patch.decay = 0.5f;
@@ -145,8 +148,10 @@ struct Funes : Module {
 			lowCpu = json_boolean_value(lowCpuJ);
 
 		json_t* modelJ = json_object_get(rootJ, "model");
-		if (modelJ)
+		if (modelJ) {
 			patch.engine = json_integer_value(modelJ);
+			modelNum = patch.engine;
+		}
 
 		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
 		if (frequencyModeJ)
@@ -182,6 +187,7 @@ struct Funes : Module {
 			// Switch models
 			if (params[MODEL_PARAM].getValue() != patch.engine) {
 				patch.engine = params[MODEL_PARAM].getValue();
+				modelNum = patch.engine;
 			}
 
 			// Model lights
@@ -190,6 +196,11 @@ struct Funes : Module {
 			if (triPhase >= 1.f)
 				triPhase -= 1.f;
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
+
+			// Check if engine for first poly channel is different than "base" engine.
+			int activeEngine = voice[0].active_engine();
+			if (activeEngine != modelNum && activeEngine >= 0)
+				modelNum = activeEngine;
 
 			// Get active engines of all voice channels
 			bool activeLights[16] = {};
@@ -356,6 +367,7 @@ struct Funes : Module {
 
 	void setEngine(int modelNum) {
 		params[MODEL_PARAM].setValue(modelNum);
+		this->modelNum = modelNum;
 	}
 };
 
@@ -447,11 +459,10 @@ struct FunesDisplay : TransparentWidget {
 
 	void drawLayer(const DrawArgs& args, int layer) override {
 		if (layer == 1) {
-			if (module && !module->isBypassed()) {				
+			if (module && !module->isBypassed()) {
 				std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
 				if (font) {
-					// Text
-					int shape = module ? module->patch.engine : 0;
+					// Text					
 					nvgFontSize(args.vg, 38);
 					nvgFontFaceId(args.vg, font->handle);
 					nvgTextLetterSpacing(args.vg, 2.5);
@@ -461,8 +472,8 @@ struct FunesDisplay : TransparentWidget {
 					nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 					// Background of all segments
 					nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
-					nvgFillColor(args.vg, textColor);
-					nvgText(args.vg, textPos.x, textPos.y, modelDisplays[shape].c_str(), NULL);
+					nvgFillColor(args.vg, textColor);					
+					nvgText(args.vg, textPos.x, textPos.y, modelDisplays[module->modelNum].c_str(), NULL);
 				}
 			}
 		}
