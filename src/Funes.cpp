@@ -187,7 +187,12 @@ struct Funes : Module {
 			if (params[MODEL_PARAM].getValue() != patch.engine) {
 				patch.engine = params[MODEL_PARAM].getValue();
 				modelNum = patch.engine;
-			}
+			}			
+
+			// Check if engine for first poly channel is different than "base" engine.
+			int activeEngine = voice[0].active_engine();
+			if (activeEngine != modelNum && activeEngine >= 0)
+				modelNum = activeEngine;
 
 			// Model lights
 			// Pulse light at 2 Hz
@@ -195,11 +200,6 @@ struct Funes : Module {
 			if (triPhase >= 1.f)
 				triPhase -= 1.f;
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
-
-			// Check if engine for first poly channel is different than "base" engine.
-			int activeEngine = voice[0].active_engine();
-			if (activeEngine != modelNum && activeEngine >= 0)
-				modelNum = activeEngine;
 
 			// Get active engines of all voice channels
 			float activeLights[16] = {};
