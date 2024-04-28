@@ -68,6 +68,8 @@ struct Funes : Module {
 	dsp::DoubleRingBuffer<dsp::Frame<16 * 2>, 256> outputBuffer;
 	bool lowCpu = false;
 
+	bool displayModulatedModel = true;
+
 	bool loading = false;
 
 	int modelNum = 0;
@@ -129,6 +131,7 @@ struct Funes : Module {
 		json_t* rootJ = json_object();
 
 		json_object_set_new(rootJ, "lowCpu", json_boolean(lowCpu));
+		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(displayModulatedModel));
 		json_object_set_new(rootJ, "model", json_integer(patch.engine));
 		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
 
@@ -145,6 +148,10 @@ struct Funes : Module {
 		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
 		if (lowCpuJ)
 			lowCpu = json_boolean_value(lowCpuJ);
+
+		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
+		if (displayModulatedModelJ)
+			displayModulatedModel = json_boolean_value(displayModulatedModelJ);
 
 		json_t* modelJ = json_object_get(rootJ, "model");
 		if (modelJ) {
@@ -191,7 +198,7 @@ struct Funes : Module {
 
 			// Check if engine for first poly channel is different than "base" engine.
 			int activeEngine = voice[0].active_engine();
-			if (activeEngine != modelNum && activeEngine >= 0)
+			if (displayModulatedModel && (activeEngine != modelNum && activeEngine >= 0))
 				modelNum = activeEngine;
 
 			// Model lights
@@ -230,8 +237,8 @@ struct Funes : Module {
 					if (patch.engine < 8 && (patch.engine % 8 == clampedi))
 						brightness = tri;
 					else if (patch.engine == i + 8)
-						brightness = tri;					
-				}				
+						brightness = tri;
+				}
 				lights[MODEL_LIGHT + lightId].setBrightness(brightness);
 			}
 
@@ -374,6 +381,12 @@ struct Funes : Module {
 	void setEngine(int modelNum) {
 		params[MODEL_PARAM].setValue(modelNum);
 		this->modelNum = modelNum;
+	}
+
+	void toggleModulatedDisplay() {
+		displayModulatedModel = !displayModulatedModel;
+		if (!displayModulatedModel)
+			this->modelNum = params[MODEL_PARAM].getValue();
 	}
 };
 
@@ -635,6 +648,11 @@ struct FunesWidget : ModuleWidget {
 				));
 			}
 			}));
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
+			[=]() {return module->displayModulatedModel; },
+			[=]() {module->toggleModulatedDisplay(); }));
 	}
 };
 
