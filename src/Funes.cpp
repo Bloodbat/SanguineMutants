@@ -75,7 +75,7 @@ struct Funes : Module {
 	Funes() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-		configParam(MODEL_PARAM, 0.0f, 23.0f, 0.0f, "Model", "", 0.0f, 1.0f, 1.0f);
+		configParam(MODEL_PARAM, 0.0f, 23.0f, 8.0f, "Model", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[MODEL_PARAM]->snapEnabled = true;
 
 		configParam(FREQ_PARAM, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
