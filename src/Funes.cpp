@@ -202,16 +202,16 @@ struct Funes : Module {
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
 			// Get active engines of all voice channels
-			float activeLights[16] = {};
+			bool activeLights[16] = {};
 			bool pulse = false;
 			for (int c = 0; c < channels; c++) {
 				int activeEngine = voice[c].active_engine();
 				if (activeEngine < 8) {
-					activeLights[activeEngine] = 0.5f;
-					activeLights[activeEngine + 8] = 1;
+					activeLights[activeEngine] = true;
+					activeLights[activeEngine + 8] = true;
 				}
 				else {
-					activeLights[activeEngine - 8] = 1;
+					activeLights[activeEngine - 8] = true;
 				}
 				// Pulse the light if at least one voice is using a different engine.
 				if (activeEngine != patch.engine)
