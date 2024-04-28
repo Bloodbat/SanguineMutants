@@ -37,7 +37,7 @@ using namespace stmlib;
 
 void ChiptuneEngine::Init(BufferAllocator* allocator) {
   bass_.Init();
-  for (int i = 0; i < kChordNumNotes; ++i) {
+  for (int i = 0; i < kChordNumVoices; ++i) {
     voice_[i].Init();
   }
   
