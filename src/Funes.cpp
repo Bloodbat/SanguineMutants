@@ -187,7 +187,7 @@ struct Funes : Module {
 			if (params[MODEL_PARAM].getValue() != patch.engine) {
 				patch.engine = params[MODEL_PARAM].getValue();
 				modelNum = patch.engine;
-			}			
+			}
 
 			// Check if engine for first poly channel is different than "base" engine.
 			int activeEngine = voice[0].active_engine();
@@ -221,10 +221,17 @@ struct Funes : Module {
 			// Set model lights
 			for (int i = 0; i < 16; i++) {
 				// Transpose the [light][color] table
-				int lightId = (i % 8) * 2 + (i / 8);
+				int clampedi = i % 8;
+				int lightId = clampedi * 2 + (i / 8);
 				float brightness = activeLights[i];
-				if (patch.engine == (i + 8) && pulse)		// TODO: fix with orange colors
-					brightness = tri;
+
+				if (pulse)
+				{
+					if (patch.engine < 8 && (patch.engine % 8 == clampedi))
+						brightness = tri;
+					else if (patch.engine == i + 8)
+						brightness = tri;					
+				}				
 				lights[MODEL_LIGHT + lightId].setBrightness(brightness);
 			}
 
