@@ -7,6 +7,7 @@
   "pluginUrl": "https://github.com/Bloodbat/SanguineMutants",
   "sourceUrl": "https://github.com/Bloodbat/SanguineMutants",
   "description": "A collection of modules based on Mutable Instruments Eurorack devices and their variants.",
+  "changelogUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/CHANGELOG.md",
   "modules": [    
     {
       "slug": "Funes",
