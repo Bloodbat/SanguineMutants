@@ -72,7 +72,11 @@ struct Funes : Module {
 
 	bool loading = false;
 
+	bool notesModelSelection = false;
+
 	int modelNum = 0;
+
+	float lastModelVoltage = 0.f;
 
 	Funes() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -134,6 +138,7 @@ struct Funes : Module {
 		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(displayModulatedModel));
 		json_object_set_new(rootJ, "model", json_integer(patch.engine));
 		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
+		json_object_set_new(rootJ, "notesModelSelection", json_boolean(notesModelSelection));
 
 		const uint8_t* userDataBuffer = user_data.getBuffer();
 		if (userDataBuffer != nullptr) {
@@ -158,6 +163,10 @@ struct Funes : Module {
 			patch.engine = json_integer_value(modelJ);
 			modelNum = patch.engine;
 		}
+
+		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
+		if (notesModelSelectionJ)
+			notesModelSelection = json_boolean_value(notesModelSelectionJ);
 
 		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
 		if (frequencyModeJ)
@@ -191,7 +200,18 @@ struct Funes : Module {
 			const int blockSize = 12;
 
 			// Switch models
-			if (params[MODEL_PARAM].getValue() != patch.engine) {
+			if (notesModelSelection && inputs[ENGINE_INPUT].isConnected()) {
+				float currentModelVoltage = inputs[ENGINE_INPUT].getVoltage();
+				if (currentModelVoltage != lastModelVoltage) {
+					lastModelVoltage = currentModelVoltage;
+					int updatedModel = std::round((lastModelVoltage + 4.f) * 12.f);
+					if (updatedModel >= 0 && updatedModel < 24) {
+						patch.engine = updatedModel;
+						modelNum = patch.engine;
+					}
+				}
+			}
+			else if (params[MODEL_PARAM].getValue() != patch.engine) {
 				patch.engine = params[MODEL_PARAM].getValue();
 				modelNum = patch.engine;
 			}
@@ -318,7 +338,8 @@ struct Funes : Module {
 			for (int c = 0; c < channels; c++) {
 				// Construct modulations
 				plaits::Modulations modulations;
-				modulations.engine = inputs[ENGINE_INPUT].getPolyVoltage(c) / 5.f;
+				if (!notesModelSelection)
+					modulations.engine = inputs[ENGINE_INPUT].getPolyVoltage(c) / 5.f;
 				modulations.note = inputs[NOTE_INPUT].getVoltage(c) * 12.f;
 				modulations.frequency = inputs[FREQ_INPUT].getPolyVoltage(c) * 6.f;
 				modulations.harmonics = inputs[HARMONICS_INPUT].getPolyVoltage(c) / 5.f;
@@ -427,6 +448,14 @@ struct Funes : Module {
 		displayModulatedModel = !displayModulatedModel;
 		if (!displayModulatedModel)
 			this->modelNum = params[MODEL_PARAM].getValue();
+	}
+
+	void toggleNotesModelSelection() {
+		notesModelSelection = !notesModelSelection;
+		if (notesModelSelection)
+			inputs[ENGINE_INPUT].setChannels(0);
+		// Try to wait for DSP to finish.
+		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 	}
 };
 
@@ -693,6 +722,10 @@ struct FunesWidget : ModuleWidget {
 		menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
 			[=]() {return module->displayModulatedModel; },
 			[=]() {module->toggleModulatedDisplay(); }));
+
+		menu->addChild(createCheckMenuItem("C0 model modulation (monophonic)", "",
+			[=]() {return module->notesModelSelection; },
+			[=]() {module->toggleNotesModelSelection(); }));
 	}
 };
 
