@@ -52,7 +52,7 @@ struct Funes : Module {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		ENUMS(MODEL_LIGHT, 8 * 2),
+		ENUMS(MODEL_LIGHT, 8 * 3),
 		NUM_LIGHTS
 	};
 
@@ -208,38 +208,78 @@ struct Funes : Module {
 				triPhase -= 1.f;
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
-			// Get active engines of all voice channels
-			bool activeLights[16] = {};
+			// Get the active engines of all voice channels.
+			bool activeLights[24] = {};
 			bool pulse = false;
+			int currentLight;
+			int clampedEngine;
 			for (int c = 0; c < channels; c++) {
 				int activeEngine = voice[c].active_engine();
-				if (activeEngine < 8) {
-					activeLights[activeEngine] = true;
-					activeLights[activeEngine + 8] = true;
+				clampedEngine = (activeEngine % 8) * 3;
+
+				bool noiseModels = activeEngine & 0x10;
+				bool pitchedModels = activeEngine & 0x08;
+
+				if (noiseModels) {
+					currentLight = clampedEngine;
+					activeLights[currentLight] = true;
 				}
-				else {
-					activeLights[activeEngine - 8] = true;
+				else if (pitchedModels) {
+					currentLight = clampedEngine + 1;
+					activeLights[currentLight] = true;
 				}
+				else
+				{
+					currentLight = clampedEngine;
+					activeLights[currentLight] = true;
+					currentLight = clampedEngine + 1;
+					activeLights[currentLight] = true;
+				}
+
 				// Pulse the light if at least one voice is using a different engine.
 				if (activeEngine != patch.engine)
 					pulse = true;
 			}
 
-			// Set model lights
-			for (int i = 0; i < 16; i++) {
-				// Transpose the [light][color] table
-				int clampedi = i % 8;
-				int lightId = clampedi * 2 + (i / 8);
-				float brightness = activeLights[i];
+			// Set model lights.
+			clampedEngine = patch.engine % 8;
+			for (int i = 0; i < 8; i++) {
+				int currentLight = i * 3;
+				float brightnessRed = activeLights[currentLight];
+				float brightnessGreen = activeLights[currentLight + 1];
+				float brightnessBlue = activeLights[currentLight + 2];
 
-				if (pulse)
-				{
-					if (patch.engine < 8 && (patch.engine % 8 == clampedi))
-						brightness = tri;
-					else if (patch.engine == i + 8)
-						brightness = tri;
+				if (pulse && clampedEngine == i) {
+					switch (patch.engine) {
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+						brightnessRed = tri;
+						brightnessGreen = tri;
+						break;
+					case 8:
+					case 9:
+					case 10:
+					case 11:
+					case 12:
+					case 13:
+					case 14:
+					case 15:
+						brightnessGreen = tri;
+						break;
+					default:
+						brightnessRed = tri;
+					}
 				}
-				lights[MODEL_LIGHT + lightId].setBrightness(brightness);
+				// Lights are RGB and need a signal on every pin.
+				lights[MODEL_LIGHT + currentLight].setBrightness(brightnessRed);
+				lights[MODEL_LIGHT + currentLight + 1].setBrightness(brightnessGreen);
+				lights[MODEL_LIGHT + currentLight + 2].setBrightness(brightnessBlue);
 			}
 
 			// Calculate pitch for lowCpu mode if needed
@@ -559,14 +599,14 @@ struct FunesWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(147.979, 116.956)), module, Funes::OUT_OUTPUT));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(161.831, 116.956)), module, Funes::AUX_OUTPUT));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(41.489, 15.85)), module, Funes::MODEL_LIGHT + 0 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(46.489, 15.85)), module, Funes::MODEL_LIGHT + 1 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(51.489, 15.85)), module, Funes::MODEL_LIGHT + 2 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(56.489, 15.85)), module, Funes::MODEL_LIGHT + 3 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(61.489, 15.85)), module, Funes::MODEL_LIGHT + 4 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(66.489, 15.85)), module, Funes::MODEL_LIGHT + 5 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(71.489, 15.85)), module, Funes::MODEL_LIGHT + 6 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(76.489, 15.85)), module, Funes::MODEL_LIGHT + 7 * 2));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.489, 15.85)), module, Funes::MODEL_LIGHT + 0 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(46.489, 15.85)), module, Funes::MODEL_LIGHT + 1 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(51.489, 15.85)), module, Funes::MODEL_LIGHT + 2 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(56.489, 15.85)), module, Funes::MODEL_LIGHT + 3 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(61.489, 15.85)), module, Funes::MODEL_LIGHT + 4 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(66.489, 15.85)), module, Funes::MODEL_LIGHT + 5 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(71.489, 15.85)), module, Funes::MODEL_LIGHT + 6 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(76.489, 15.85)), module, Funes::MODEL_LIGHT + 7 * 3));
 
 		FunesDisplay* display = new FunesDisplay();
 		display->box.pos = Vec(25, 68);
