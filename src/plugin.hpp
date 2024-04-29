@@ -6,24 +6,6 @@ extern Plugin* pluginInstance;
 
 extern Model* modelFunes;
 
-struct BananutRed : app::SvgPort {
-	BananutRed() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
-	}
-};
-
-struct BananutGreen : app::SvgPort {
-	BananutGreen() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutGreen.svg")));
-	}
-};
-
-struct BananutPurple : app::SvgPort {
-	BananutPurple() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutPurple.svg")));
-	}
-};
-
 /*template <typename Base>
 struct Rogan6PSLight : Base {
 	Rogan6PSLight() {

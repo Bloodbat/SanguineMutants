@@ -1,4 +1,5 @@
 #include "plugin.hpp"
+#include "sanguinecomponents.hpp"
 
 #pragma GCC diagnostic push
 
