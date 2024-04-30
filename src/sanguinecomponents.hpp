@@ -1,25 +1,25 @@
+#include "rack.hpp"
+
 using namespace rack;
 
 struct BananutRed : app::SvgPort {
-	BananutRed() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
-	}
+	BananutRed();
 };
 
 struct BananutGreen : app::SvgPort {
-	BananutGreen() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutGreen.svg")));
-	}
+	BananutGreen();
 };
 
 struct BananutPurple : app::SvgPort {
-	BananutPurple() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutPurple.svg")));
-	}
+	BananutPurple();
 };
 
 struct BananutBlack : app::SvgPort {
-	BananutBlack() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
-	}
+	BananutBlack();
+};
+
+struct LightUpSvgWidget : widget::SvgWidget {
+	Module* module;
+	void draw(const DrawArgs& args) override;
+	void drawLayer(const DrawArgs& args, int layer) override;
 };
