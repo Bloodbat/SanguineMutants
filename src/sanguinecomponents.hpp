@@ -17,3 +17,9 @@ struct BananutPurple : app::SvgPort {
 		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutPurple.svg")));
 	}
 };
+
+struct BananutBlack : app::SvgPort {
+	BananutBlack() {
+		setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
+	}
+};
