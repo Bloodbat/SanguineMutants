@@ -615,25 +615,28 @@ struct FunesWidget : ModuleWidget {
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(71.489, 15.85)), module, Funes::MODEL_LIGHT + 6 * 3));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(76.489, 15.85)), module, Funes::MODEL_LIGHT + 7 * 3));
 
+		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
+		addChild(funesFrambuffer);
+
 		FunesDisplay* display = new FunesDisplay();
 		display->box.pos = Vec(25, 68);
 		display->box.size = Vec(296, 55);
 		display->module = module;
-		addChild(display);
+		funesFrambuffer->addChild(display);
 
 		LightUpSvgWidget* mutantsLogo = new LightUpSvgWidget();
 		mutantsLogo->box.pos = Vec(246.53, 344.31);
 		mutantsLogo->box.size = Vec(36.06, 14.79);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		addChild(mutantsLogo);
+		funesFrambuffer->addChild(mutantsLogo);
 
 		LightUpSvgWidget* bloodLogo = new LightUpSvgWidget();
 		bloodLogo->box.pos = Vec(220.57, 319.57);
 		bloodLogo->box.size = Vec(11.2, 23.27);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
-		addChild(bloodLogo);
+		funesFrambuffer->addChild(bloodLogo);
 	}
 
 	void appendContextMenu(Menu* menu) override {
