@@ -570,28 +570,6 @@ struct FunesDisplay : TransparentWidget {
 	}
 };
 
-struct LitSvg : SvgWidget {
-	Funes* module;
-
-	void draw(const DrawArgs& args) override {
-		// Do not call SvgWidget::draw: it draws on the wrong layer.
-		Widget::draw(args);
-	}
-
-	void drawLayer(const DrawArgs& args, int layer) override {
-		if (layer == 1) {
-			//From SvgWidget::draw()
-			if (!svg)
-				return;
-			if (module && !module->isBypassed()) {
-				nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
-				rack::window::svgDraw(args.vg, svg->handle);
-			}
-		}
-		Widget::drawLayer(args, layer);
-	}
-};
-
 struct FunesWidget : ModuleWidget {
 
 	FunesWidget(Funes* module) {
@@ -643,14 +621,14 @@ struct FunesWidget : ModuleWidget {
 		display->module = module;
 		addChild(display);
 
-		LitSvg* mutantsLogo = new LitSvg();
+		LightUpSvgWidget* mutantsLogo = new LightUpSvgWidget();
 		mutantsLogo->box.pos = Vec(246.53, 344.31);
 		mutantsLogo->box.size = Vec(36.06, 14.79);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		addChild(mutantsLogo);
 
-		LitSvg* bloodLogo = new LitSvg();
+		LightUpSvgWidget* bloodLogo = new LightUpSvgWidget();
 		bloodLogo->box.pos = Vec(220.57, 319.57);
 		bloodLogo->box.size = Vec(11.2, 23.27);
 		bloodLogo->module = module;
