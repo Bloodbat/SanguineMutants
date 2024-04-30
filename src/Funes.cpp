@@ -23,37 +23,37 @@ static std::string waveDir;
 
 struct Funes : Module {
 	enum ParamIds {
-		MODEL_PARAM,
-		FREQ_PARAM,
-		HARMONICS_PARAM,
-		TIMBRE_PARAM,
-		MORPH_PARAM,
-		TIMBRE_CV_PARAM,
-		FREQ_CV_PARAM,
-		MORPH_CV_PARAM,
-		LPG_COLOR_PARAM,
-		LPG_DECAY_PARAM,
-		FREQ_ROOT_PARAM,
+		PARAM_MODEL,
+		PARAM_FREQUENCY,
+		PARAM_HARMONICS,
+		PARAM_TIMBRE,
+		PARAM_MORPH,
+		PARAM_TIMBRE_CV,
+		PARAM_FREQUENCY_CV,
+		PARAM_MORPH_CV,
+		PARAM_LPG_COLOR,
+		PARAM_LPG_DECAY,
+		PARAM_FREQUENCY_ROOT,
 		NUM_PARAMS
 	};
 	enum InputIds {
-		ENGINE_INPUT,
-		TIMBRE_INPUT,
-		FREQ_INPUT,
-		MORPH_INPUT,
-		HARMONICS_INPUT,
-		TRIGGER_INPUT,
-		LEVEL_INPUT,
-		NOTE_INPUT,
+		INPUT_ENGINE,
+		INPUT_TIMBRE,
+		INPUT_FREQUENCY,
+		INPUT_MORPH,
+		INPUT_HARMONICS,
+		INPUT_TRIGGER,
+		INPUT_LEVEL,
+		INPUT_NOTE,
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		OUT_OUTPUT,
-		AUX_OUTPUT,
+		OUTPUT_OUT,
+		OUTPUT_AUX,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		ENUMS(MODEL_LIGHT, 8 * 3),
+		ENUMS(LIGHT_MODEL, 8 * 3),
 		NUM_LIGHTS
 	};
 
@@ -82,31 +82,31 @@ struct Funes : Module {
 	Funes() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-		configParam(MODEL_PARAM, 0.0f, 23.0f, 8.0f, "Model", "", 0.0f, 1.0f, 1.0f);
-		paramQuantities[MODEL_PARAM]->snapEnabled = true;
+		configParam(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", "", 0.0f, 1.0f, 1.0f);
+		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 
-		configParam(FREQ_PARAM, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
-		configParam(FREQ_ROOT_PARAM, -4.0, 4.0, 0.0, "Frequency Root", " semitones", 0.f, 12.f);
-		configParam(HARMONICS_PARAM, 0.0, 1.0, 0.5, "Harmonics", "%", 0.f, 100.f);
-		configParam(TIMBRE_PARAM, 0.0, 1.0, 0.5, "Timbre", "%", 0.f, 100.f);
-		configParam(LPG_COLOR_PARAM, 0.0, 1.0, 0.5, "Lowpass gate response", "%", 0.f, 100.f);
-		configParam(MORPH_PARAM, 0.0, 1.0, 0.5, "Morph", "%", 0.f, 100.f);
-		configParam(LPG_DECAY_PARAM, 0.0, 1.0, 0.5, "Lowpass gate decay", "%", 0.f, 100.f);
-		configParam(TIMBRE_CV_PARAM, -1.0, 1.0, 0.0, "Timbre CV");
-		configParam(FREQ_CV_PARAM, -1.0, 1.0, 0.0, "Frequency CV");
-		configParam(MORPH_CV_PARAM, -1.0, 1.0, 0.0, "Morph CV");
+		configParam(PARAM_FREQUENCY, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
+		configParam(PARAM_FREQUENCY_ROOT, -4.0, 4.0, 0.0, "Frequency Root", " semitones", 0.f, 12.f);
+		configParam(PARAM_HARMONICS, 0.0, 1.0, 0.5, "Harmonics", "%", 0.f, 100.f);
+		configParam(PARAM_TIMBRE, 0.0, 1.0, 0.5, "Timbre", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_COLOR, 0.0, 1.0, 0.5, "Lowpass gate response", "%", 0.f, 100.f);
+		configParam(PARAM_MORPH, 0.0, 1.0, 0.5, "Morph", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_DECAY, 0.0, 1.0, 0.5, "Lowpass gate decay", "%", 0.f, 100.f);
+		configParam(PARAM_TIMBRE_CV, -1.0, 1.0, 0.0, "Timbre CV");
+		configParam(PARAM_FREQUENCY_CV, -1.0, 1.0, 0.0, "Frequency CV");
+		configParam(PARAM_MORPH_CV, -1.0, 1.0, 0.0, "Morph CV");
 
-		configInput(ENGINE_INPUT, "Model");
-		configInput(TIMBRE_INPUT, "Timbre");
-		configInput(FREQ_INPUT, "FM");
-		configInput(MORPH_INPUT, "Morph");
-		configInput(HARMONICS_INPUT, "Harmonics");
-		configInput(TRIGGER_INPUT, "Trigger");
-		configInput(LEVEL_INPUT, "Level");
-		configInput(NOTE_INPUT, "Pitch (1V/oct)");
+		configInput(INPUT_ENGINE, "Model");
+		configInput(INPUT_TIMBRE, "Timbre");
+		configInput(INPUT_FREQUENCY, "FM");
+		configInput(INPUT_MORPH, "Morph");
+		configInput(INPUT_HARMONICS, "Harmonics");
+		configInput(INPUT_TRIGGER, "Trigger");
+		configInput(INPUT_LEVEL, "Level");
+		configInput(INPUT_NOTE, "Pitch (1V/oct)");
 
-		configOutput(OUT_OUTPUT, "Main");
-		configOutput(AUX_OUTPUT, "Auxiliary");
+		configOutput(OUTPUT_OUT, "Main");
+		configOutput(OUTPUT_AUX, "Auxiliary");
 
 		for (int i = 0; i < 16; i++) {
 			stmlib::BufferAllocator allocator(shared_buffer[i], sizeof(shared_buffer[i]));
@@ -186,23 +186,23 @@ struct Funes : Module {
 		// Legacy <=1.0.2
 		json_t* lpgColorJ = json_object_get(rootJ, "lpgColor");
 		if (lpgColorJ)
-			params[LPG_COLOR_PARAM].setValue(json_number_value(lpgColorJ));
+			params[PARAM_LPG_COLOR].setValue(json_number_value(lpgColorJ));
 
 		// Legacy <=1.0.2
 		json_t* decayJ = json_object_get(rootJ, "decay");
 		if (decayJ)
-			params[LPG_DECAY_PARAM].setValue(json_number_value(decayJ));
+			params[PARAM_LPG_DECAY].setValue(json_number_value(decayJ));
 	}
 
 	void process(const ProcessArgs& args) override {
-		int channels = std::max(inputs[NOTE_INPUT].getChannels(), 1);
+		int channels = std::max(inputs[INPUT_NOTE].getChannels(), 1);
 
 		if (outputBuffer.empty()) {
 			const int blockSize = 12;
 
 			// Switch models
-			if (notesModelSelection && inputs[ENGINE_INPUT].isConnected()) {
-				float currentModelVoltage = inputs[ENGINE_INPUT].getVoltage();
+			if (notesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
+				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
 				if (currentModelVoltage != lastModelVoltage) {
 					lastModelVoltage = currentModelVoltage;
 					int updatedModel = std::round((lastModelVoltage + 4.f) * 12.f);
@@ -212,8 +212,8 @@ struct Funes : Module {
 					}
 				}
 			}
-			else if (params[MODEL_PARAM].getValue() != patch.engine) {
-				patch.engine = params[MODEL_PARAM].getValue();
+			else if (params[PARAM_MODEL].getValue() != patch.engine) {
+				patch.engine = params[PARAM_MODEL].getValue();
 				modelNum = patch.engine;
 			}
 
@@ -298,13 +298,13 @@ struct Funes : Module {
 					}
 				}
 				// Lights are RGB and need a signal on every pin.
-				lights[MODEL_LIGHT + currentLight].setBrightness(brightnessRed);
-				lights[MODEL_LIGHT + currentLight + 1].setBrightness(brightnessGreen);
-				lights[MODEL_LIGHT + currentLight + 2].setBrightness(brightnessBlue);
+				lights[LIGHT_MODEL + currentLight].setBrightness(brightnessRed);
+				lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessGreen);
+				lights[LIGHT_MODEL + currentLight + 2].setBrightness(brightnessBlue);
 			}
 
 			// Calculate pitch for lowCpu mode if needed
-			float pitch = params[FREQ_PARAM].getValue();
+			float pitch = params[PARAM_FREQUENCY].getValue();
 			if (lowCpu)
 				pitch += std::log2(48000.f * args.sampleTime);
 			// Update patch
@@ -315,7 +315,7 @@ struct Funes : Module {
 				patch.note = -48.37f + pitch * 15.f;
 			}
 			else if (frequencyMode == 9) {
-				float fineTune = params[FREQ_ROOT_PARAM].getValue() / 4.f;
+				float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
 				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
 			}
 			else if (frequencyMode == 10) {
@@ -325,14 +325,14 @@ struct Funes : Module {
 				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
 			}
 
-			patch.harmonics = params[HARMONICS_PARAM].getValue();
-			patch.timbre = params[TIMBRE_PARAM].getValue();
-			patch.morph = params[MORPH_PARAM].getValue();
-			patch.lpg_colour = params[LPG_COLOR_PARAM].getValue();
-			patch.decay = params[LPG_DECAY_PARAM].getValue();
-			patch.frequency_modulation_amount = params[FREQ_CV_PARAM].getValue();
-			patch.timbre_modulation_amount = params[TIMBRE_CV_PARAM].getValue();
-			patch.morph_modulation_amount = params[MORPH_CV_PARAM].getValue();
+			patch.harmonics = params[PARAM_HARMONICS].getValue();
+			patch.timbre = params[PARAM_TIMBRE].getValue();
+			patch.morph = params[PARAM_MORPH].getValue();
+			patch.lpg_colour = params[PARAM_LPG_COLOR].getValue();
+			patch.decay = params[PARAM_LPG_DECAY].getValue();
+			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
+			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
+			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
 
 			// Render output buffer for each voice
 			dsp::Frame<16 * 2> outputFrames[blockSize];
@@ -340,21 +340,21 @@ struct Funes : Module {
 				// Construct modulations
 				plaits::Modulations modulations;
 				if (!notesModelSelection)
-					modulations.engine = inputs[ENGINE_INPUT].getPolyVoltage(c) / 5.f;
-				modulations.note = inputs[NOTE_INPUT].getVoltage(c) * 12.f;
-				modulations.frequency = inputs[FREQ_INPUT].getPolyVoltage(c) * 6.f;
-				modulations.harmonics = inputs[HARMONICS_INPUT].getPolyVoltage(c) / 5.f;
-				modulations.timbre = inputs[TIMBRE_INPUT].getPolyVoltage(c) / 8.f;
-				modulations.morph = inputs[MORPH_INPUT].getPolyVoltage(c) / 8.f;
+					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(c) / 5.f;
+				modulations.note = inputs[INPUT_NOTE].getVoltage(c) * 12.f;
+				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(c) * 6.f;
+				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(c) / 5.f;
+				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(c) / 8.f;
+				modulations.morph = inputs[INPUT_MORPH].getPolyVoltage(c) / 8.f;
 				// Triggers at around 0.7 V
-				modulations.trigger = inputs[TRIGGER_INPUT].getPolyVoltage(c) / 3.f;
-				modulations.level = inputs[LEVEL_INPUT].getPolyVoltage(c) / 8.f;
+				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(c) / 3.f;
+				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(c) / 8.f;
 
-				modulations.frequency_patched = inputs[FREQ_INPUT].isConnected();
-				modulations.timbre_patched = inputs[TIMBRE_INPUT].isConnected();
-				modulations.morph_patched = inputs[MORPH_INPUT].isConnected();
-				modulations.trigger_patched = inputs[TRIGGER_INPUT].isConnected();
-				modulations.level_patched = inputs[LEVEL_INPUT].isConnected();
+				modulations.frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
+				modulations.timbre_patched = inputs[INPUT_TIMBRE].isConnected();
+				modulations.morph_patched = inputs[INPUT_MORPH].isConnected();
+				modulations.trigger_patched = inputs[INPUT_TRIGGER].isConnected();
+				modulations.level_patched = inputs[INPUT_LEVEL].isConnected();
 
 				// Render frames
 				plaits::Voice::Frame output[blockSize];
@@ -388,12 +388,12 @@ struct Funes : Module {
 			dsp::Frame<16 * 2> outputFrame = outputBuffer.shift();
 			for (int c = 0; c < channels; c++) {
 				// Inverting op-amp on outputs
-				outputs[OUT_OUTPUT].setVoltage(-outputFrame.samples[c * 2 + 0] * 5.f, c);
-				outputs[AUX_OUTPUT].setVoltage(-outputFrame.samples[c * 2 + 1] * 5.f, c);
+				outputs[OUTPUT_OUT].setVoltage(-outputFrame.samples[c * 2 + 0] * 5.f, c);
+				outputs[OUTPUT_AUX].setVoltage(-outputFrame.samples[c * 2 + 1] * 5.f, c);
 			}
 		}
-		outputs[OUT_OUTPUT].setChannels(channels);
-		outputs[AUX_OUTPUT].setChannels(channels);
+		outputs[OUTPUT_OUT].setChannels(channels);
+		outputs[OUTPUT_AUX].setChannels(channels);
 	}
 
 	void reset() {
@@ -441,20 +441,20 @@ struct Funes : Module {
 	}
 
 	void setEngine(int modelNum) {
-		params[MODEL_PARAM].setValue(modelNum);
+		params[PARAM_MODEL].setValue(modelNum);
 		this->modelNum = modelNum;
 	}
 
 	void toggleModulatedDisplay() {
 		displayModulatedModel = !displayModulatedModel;
 		if (!displayModulatedModel)
-			this->modelNum = params[MODEL_PARAM].getValue();
+			this->modelNum = params[PARAM_MODEL].getValue();
 	}
 
 	void toggleNotesModelSelection() {
 		notesModelSelection = !notesModelSelection;
 		if (notesModelSelection)
-			inputs[ENGINE_INPUT].setChannels(0);
+			inputs[INPUT_ENGINE].setChannels(0);
 		// Try to wait for DSP to finish.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 	}
@@ -581,39 +581,39 @@ struct FunesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));		
 
-		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::MODEL_PARAM));
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 62.502)), module, Funes::FREQ_PARAM));
-		addParam(createParamCentered<Rogan3PSGreen>(mm2px(Vec(86.86, 62.502)), module, Funes::HARMONICS_PARAM));
-		addParam(createParamCentered<Rogan1PSRed>(mm2px(Vec(120.305, 55.102)), module, Funes::TIMBRE_PARAM));
-		addParam(createParamCentered<Rogan1PSGreen>(mm2px(Vec(120.305, 95.968)), module, Funes::MORPH_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 55.102)), module, Funes::TIMBRE_CV_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 74.874)), module, Funes::FREQ_CV_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 95.96)), module, Funes::MORPH_CV_PARAM));
+		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::PARAM_MODEL));
+		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 62.502)), module, Funes::PARAM_FREQUENCY));
+		addParam(createParamCentered<Rogan3PSGreen>(mm2px(Vec(86.86, 62.502)), module, Funes::PARAM_HARMONICS));
+		addParam(createParamCentered<Rogan1PSRed>(mm2px(Vec(120.305, 55.102)), module, Funes::PARAM_TIMBRE));
+		addParam(createParamCentered<Rogan1PSGreen>(mm2px(Vec(120.305, 95.968)), module, Funes::PARAM_MORPH));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 55.102)), module, Funes::PARAM_TIMBRE_CV));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 74.874)), module, Funes::PARAM_FREQUENCY_CV));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 95.96)), module, Funes::PARAM_MORPH_CV));
 
-		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::LPG_COLOR_PARAM));
-		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::LPG_DECAY_PARAM));
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 62.502)), module, Funes::FREQ_ROOT_PARAM));
+		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::PARAM_LPG_COLOR));
+		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::PARAM_LPG_DECAY));
+		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 62.502)), module, Funes::PARAM_FREQUENCY_ROOT));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 32.29)), module, Funes::ENGINE_INPUT));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 55.102)), module, Funes::TIMBRE_INPUT));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 74.874)), module, Funes::FREQ_INPUT));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 95.968)), module, Funes::MORPH_INPUT));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(97.154, 84.527)), module, Funes::HARMONICS_INPUT));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(14.378, 116.956)), module, Funes::TRIGGER_INPUT));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(27.855, 116.956)), module, Funes::LEVEL_INPUT));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(41.331, 116.956)), module, Funes::NOTE_INPUT));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 32.29)), module, Funes::INPUT_ENGINE));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 55.102)), module, Funes::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 74.874)), module, Funes::INPUT_FREQUENCY));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 95.968)), module, Funes::INPUT_MORPH));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(97.154, 84.527)), module, Funes::INPUT_HARMONICS));
+		addInput(createInputCentered<BananutGreen>(mm2px(Vec(14.378, 116.956)), module, Funes::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutGreen>(mm2px(Vec(27.855, 116.956)), module, Funes::INPUT_LEVEL));
+		addInput(createInputCentered<BananutGreen>(mm2px(Vec(41.331, 116.956)), module, Funes::INPUT_NOTE));
 
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(147.979, 116.956)), module, Funes::OUT_OUTPUT));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(161.831, 116.956)), module, Funes::AUX_OUTPUT));
+		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(147.979, 116.956)), module, Funes::OUTPUT_OUT));
+		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(161.831, 116.956)), module, Funes::OUTPUT_AUX));
 
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.489, 15.85)), module, Funes::MODEL_LIGHT + 0 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(46.489, 15.85)), module, Funes::MODEL_LIGHT + 1 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(51.489, 15.85)), module, Funes::MODEL_LIGHT + 2 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(56.489, 15.85)), module, Funes::MODEL_LIGHT + 3 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(61.489, 15.85)), module, Funes::MODEL_LIGHT + 4 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(66.489, 15.85)), module, Funes::MODEL_LIGHT + 5 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(71.489, 15.85)), module, Funes::MODEL_LIGHT + 6 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(76.489, 15.85)), module, Funes::MODEL_LIGHT + 7 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.489, 15.85)), module, Funes::LIGHT_MODEL + 0 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(46.489, 15.85)), module, Funes::LIGHT_MODEL + 1 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(51.489, 15.85)), module, Funes::LIGHT_MODEL + 2 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(56.489, 15.85)), module, Funes::LIGHT_MODEL + 3 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(61.489, 15.85)), module, Funes::LIGHT_MODEL + 4 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(66.489, 15.85)), module, Funes::LIGHT_MODEL + 5 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(71.489, 15.85)), module, Funes::LIGHT_MODEL + 6 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(76.489, 15.85)), module, Funes::LIGHT_MODEL + 7 * 3));
 
 		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
 		addChild(funesFrambuffer);
