@@ -601,8 +601,7 @@ struct FunesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidgetCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29))));
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));		
 
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::MODEL_PARAM));
 		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 62.502)), module, Funes::FREQ_PARAM));
