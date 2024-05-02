@@ -32,30 +32,32 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 // Displays
 
 struct SanguineAlphaDisplay : TransparentWidget {
-	std::shared_ptr<Font> font;
 	Module* module;
+	std::shared_ptr<Font> font;
 	std::vector<std::string>* itemList = nullptr;
 	int* selectedItem = nullptr;
+	NVGcolor textColor;
 	SanguineAlphaDisplay();
-	void draw(const DrawArgs& args) override;	
+	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineLedNumberDisplay : TransparentWidget {
+	Module* module;
 	std::shared_ptr<Font> font;
 	int* value = nullptr;
-	Module* module;
-	SanguineLedNumberDisplay();	
-	void draw(const DrawArgs& args) override;	
+	NVGcolor textColor;
+	SanguineLedNumberDisplay();
+	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 // Switches
 
-struct SanguineLightUpSwitch : app::SvgSwitch {	
+struct SanguineLightUpSwitch : app::SvgSwitch {
 	NVGcolor haloColorOn;
 	NVGcolor haloColorOff;
-	SanguineLightUpSwitch();	
+	SanguineLightUpSwitch();
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
