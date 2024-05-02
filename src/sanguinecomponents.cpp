@@ -7,8 +7,8 @@ extern Plugin* pluginInstance;
 
 // Ports
 
-BananutRed::BananutRed() {
-	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
+BananutBlack::BananutBlack() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
 }
 
 BananutGreen::BananutGreen() {
@@ -19,8 +19,8 @@ BananutPurple::BananutPurple() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutPurple.svg")));
 }
 
-BananutBlack::BananutBlack() {
-	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
+BananutRed::BananutRed() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
 }
 
 // Knobs

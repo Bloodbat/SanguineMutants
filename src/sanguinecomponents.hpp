@@ -7,8 +7,8 @@ using namespace rack;
 
 // Ports
 
-struct BananutRed : app::SvgPort {
-	BananutRed();
+struct BananutBlack : app::SvgPort {
+	BananutBlack();
 };
 
 struct BananutGreen : app::SvgPort {
@@ -19,8 +19,8 @@ struct BananutPurple : app::SvgPort {
 	BananutPurple();
 };
 
-struct BananutBlack : app::SvgPort {
-	BananutBlack();
+struct BananutRed : app::SvgPort {
+	BananutRed();
 };
 
 // Knobs
