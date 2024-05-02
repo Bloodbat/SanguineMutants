@@ -53,7 +53,7 @@ struct SanguineLightUpSwitch : app::SvgSwitch {
 
 // Decorations
 
-struct LightUpSvgWidget : widget::SvgWidget {
+struct SanguineShapedLight : widget::SvgWidget {
 	Module* module;
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
