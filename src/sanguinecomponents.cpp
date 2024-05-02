@@ -65,7 +65,7 @@ void SanguineAlphaDisplay::drawHalo(const DrawArgs& args) {
 	nvgBeginPath(args.vg);
 	nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
 
-	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 100), halo);
+	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 55), halo);
 
 	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
 	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
@@ -137,7 +137,7 @@ void SanguineLedNumberDisplay::drawHalo(const DrawArgs& args) {
 	nvgBeginPath(args.vg);
 	nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
 
-	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 100), halo);
+	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 55), halo);
 
 	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
 	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
