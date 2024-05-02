@@ -51,35 +51,9 @@ void SanguineAlphaDisplay::draw(const DrawArgs& args) {
 	Widget::draw(args);
 }
 
-void SanguineAlphaDisplay::drawHalo(const DrawArgs& args) {
-	// Adapted from MindMeld & LightWidget.
-	if (args.fb)
-		return;
-
-	const float halo = settings::haloBrightness;
-	if (halo == 0.f)
-		return;
-
-	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
-
-	nvgBeginPath(args.vg);
-	nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
-
-	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 55), halo);
-
-	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
-	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
-	nvgFillPaint(args.vg, paint);
-	nvgFill(args.vg);
-
-	nvgFillPaint(args.vg, paint);
-	nvgFill(args.vg);
-	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
-}
-
 void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
-		if (module && !module->isBypassed()) {			
+		if (module && !module->isBypassed()) {
 			if (font) {
 				// Text					
 				nvgFontSize(args.vg, 38);
@@ -97,7 +71,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 					std::string itemToPrint = itemList->at(*selectedItem);
 					nvgText(args.vg, textPos.x, textPos.y, itemToPrint.c_str(), NULL);
 				}
-				drawHalo(args);
+				drawRectHalo(args, box.size, textColor, 55, 0.f);
 			}
 		}
 	}
@@ -121,32 +95,6 @@ void SanguineLedNumberDisplay::draw(const DrawArgs& args) {
 	nvgStroke(args.vg);
 
 	Widget::draw(args);
-}
-
-void SanguineLedNumberDisplay::drawHalo(const DrawArgs& args) {
-	// Adapted from MindMeld & LightWidget.
-	if (args.fb)
-		return;
-
-	const float halo = settings::haloBrightness;
-	if (halo == 0.f)
-		return;
-
-	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
-
-	nvgBeginPath(args.vg);
-	nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
-
-	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 55), halo);
-
-	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
-	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
-	nvgFillPaint(args.vg, paint);
-	nvgFill(args.vg);
-
-	nvgFillPaint(args.vg, paint);
-	nvgFill(args.vg);
-	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
 }
 
 void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -174,7 +122,7 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-				drawHalo(args);
+				drawRectHalo(args, box.size,textColor,55, 0.f);
 			}
 		}
 	}
@@ -259,3 +207,32 @@ void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	}
 	Widget::drawLayer(args, layer);
 }
+
+// Drawing utils
+
+void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX)
+{
+	// Adapted from MindMeld & LightWidget.
+	if (args.fb)
+		return;
+
+	const float halo = settings::haloBrightness;
+	if (halo == 0.f)
+		return;
+
+	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+
+	nvgBeginPath(args.vg);
+	nvgRect(args.vg, -9 + positionX, -9, boxSize.x + 9, boxSize.y + 9);
+
+	NVGcolor icol = color::mult(nvgTransRGBA(haloColor, haloOpacity), halo);
+
+	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
+	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f + positionX, 4.5f, boxSize.x - 4.5, boxSize.y - 4.5, 5, 8, icol, ocol);
+	nvgFillPaint(args.vg, paint);
+	nvgFill(args.vg);
+
+	nvgFillPaint(args.vg, paint);
+	nvgFill(args.vg);
+	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
+};
