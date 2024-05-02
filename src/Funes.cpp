@@ -583,6 +583,7 @@ struct FunesWidget : ModuleWidget {
 		alphaDisplay->module = module;
 		alphaDisplay->itemList = &modelsList;
 		alphaDisplay->selectedItem = &module->modelNum;
+		alphaDisplay->textColor = nvgRGB(200, 0, 0);
 		funesFrambuffer->addChild(alphaDisplay);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();

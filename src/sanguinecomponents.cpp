@@ -61,7 +61,6 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 				nvgTextLetterSpacing(args.vg, 2.5);
 
 				Vec textPos = Vec(9, 48);
-				NVGcolor textColor = nvgRGB(200, 0, 0);
 				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 				// Background of all segments
 				nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
@@ -107,7 +106,6 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 				nvgTextLetterSpacing(args.vg, 2.5);
 
 				Vec textPos = Vec(2, 36);
-				NVGcolor textColor = nvgRGB(200, 0, 0);
 				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 				// Background of all segments
 				nvgText(args.vg, textPos.x, textPos.y, "88", NULL);
