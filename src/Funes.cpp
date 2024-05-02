@@ -488,7 +488,7 @@ static const std::string modelLabels[24] = {
 	"Analog hi-hat",
 };
 
-static const std::string modelDisplays[24] = {
+static std::vector<std::string> modelsList{
 	"FLTRWAVE",
 	"PHASDIST",
 	"6 OP.FM1",
@@ -527,75 +527,6 @@ static const std::string frequencyModes[11] = {
 	"C7 +/- 7 semitones",
 	"Octaves",
 	"C0 to C8",
-};
-
-struct SanguineAlphaDisplay : TransparentWidget {
-	Funes* module;
-
-	void draw(const DrawArgs& args) override {
-		// Background
-		NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
-		NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
-		nvgFillColor(args.vg, backgroundColor);
-		nvgFill(args.vg);
-		nvgStrokeWidth(args.vg, 1.0);
-		nvgStrokeColor(args.vg, borderColor);
-		nvgStroke(args.vg);
-
-		Widget::draw(args);
-	}
-
-	void drawHalo(const DrawArgs& args) {
-		// Adapted from MindMeld & LightWidget.
-		if (args.fb)
-			return;
-
-		const float halo = settings::haloBrightness;
-		if (halo == 0.f)
-			return;
-
-		nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
-
-		nvgBeginPath(args.vg);
-		nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
-
-		NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 100), halo);
-
-		NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
-		NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
-		nvgFillPaint(args.vg, paint);
-		nvgFill(args.vg);
-
-		nvgFillPaint(args.vg, paint);
-		nvgFill(args.vg);
-		nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
-	}
-
-	void drawLayer(const DrawArgs& args, int layer) override {
-		if (layer == 1) {
-			if (module && !module->isBypassed()) {
-				std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
-				if (font) {
-					// Text					
-					nvgFontSize(args.vg, 38);
-					nvgFontFaceId(args.vg, font->handle);
-					nvgTextLetterSpacing(args.vg, 2.5);
-
-					Vec textPos = Vec(9, 48);
-					NVGcolor textColor = nvgRGB(200, 0, 0);
-					nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-					// Background of all segments
-					nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
-					nvgFillColor(args.vg, textColor);
-					nvgText(args.vg, textPos.x, textPos.y, modelDisplays[module->modelNum].c_str(), NULL);
-					drawHalo(args);
-				}
-			}
-		}
-		Widget::drawLayer(args, layer);
-	}
 };
 
 struct FunesWidget : ModuleWidget {
@@ -646,11 +577,13 @@ struct FunesWidget : ModuleWidget {
 		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
 		addChild(funesFrambuffer);
 
-		SanguineAlphaDisplay* display = new SanguineAlphaDisplay();
-		display->box.pos = Vec(25, 68);
-		display->box.size = Vec(296, 55);
-		display->module = module;
-		funesFrambuffer->addChild(display);
+		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay();
+		alphaDisplay->box.pos = Vec(25, 68);
+		alphaDisplay->box.size = Vec(296, 55);
+		alphaDisplay->module = module;
+		alphaDisplay->itemList = &modelsList;
+		alphaDisplay->selectedItem = &module->modelNum;
+		funesFrambuffer->addChild(alphaDisplay);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = Vec(246.53, 344.31);

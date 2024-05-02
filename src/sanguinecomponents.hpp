@@ -41,6 +41,15 @@ struct SanguineLedNumberDisplay : TransparentWidget {
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
+struct SanguineAlphaDisplay : TransparentWidget {
+	Module* module;
+	std::vector<std::string>* itemList = nullptr;
+	int* selectedItem = nullptr;
+	void draw(const DrawArgs& args) override;
+	void drawHalo(const DrawArgs& args);
+	void drawLayer(const DrawArgs& args, int layer) override;
+};
+
 // Switches
 
 struct SanguineLightUpSwitch : app::SvgSwitch {	

@@ -32,6 +32,75 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 
 // Displays
 
+void SanguineAlphaDisplay::draw(const DrawArgs& args) {
+	// Background
+	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
+	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+	nvgBeginPath(args.vg);
+	nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
+	nvgFillColor(args.vg, backgroundColor);
+	nvgFill(args.vg);
+	nvgStrokeWidth(args.vg, 1.0);
+	nvgStrokeColor(args.vg, borderColor);
+	nvgStroke(args.vg);
+
+	Widget::draw(args);
+}
+
+void SanguineAlphaDisplay::drawHalo(const DrawArgs& args) {
+	// Adapted from MindMeld & LightWidget.
+	if (args.fb)
+		return;
+
+	const float halo = settings::haloBrightness;
+	if (halo == 0.f)
+		return;
+
+	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+
+	nvgBeginPath(args.vg);
+	nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
+
+	NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 100), halo);
+
+	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
+	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
+	nvgFillPaint(args.vg, paint);
+	nvgFill(args.vg);
+
+	nvgFillPaint(args.vg, paint);
+	nvgFill(args.vg);
+	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
+}
+
+void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
+	if (layer == 1) {
+		if (module && !module->isBypassed()) {
+			std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
+			if (font) {
+				// Text					
+				nvgFontSize(args.vg, 38);
+				nvgFontFaceId(args.vg, font->handle);
+				nvgTextLetterSpacing(args.vg, 2.5);
+
+				Vec textPos = Vec(9, 48);
+				NVGcolor textColor = nvgRGB(200, 0, 0);
+				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
+				// Background of all segments
+				nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
+				nvgFillColor(args.vg, textColor);
+				if (selectedItem && itemList)
+				{
+					std::string itemToPrint = itemList->at(*selectedItem);
+					nvgText(args.vg, textPos.x, textPos.y, itemToPrint.c_str(), NULL);
+				}
+				drawHalo(args);
+			}
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
 SanguineLedNumberDisplay::SanguineLedNumberDisplay() {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
 }
