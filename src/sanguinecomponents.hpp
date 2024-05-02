@@ -31,20 +31,22 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 
 // Displays
 
-struct SanguineLedNumberDisplay : TransparentWidget {
+struct SanguineAlphaDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
-	int* value = nullptr;
 	Module* module;
-	SanguineLedNumberDisplay();	
+	std::vector<std::string>* itemList = nullptr;
+	int* selectedItem = nullptr;
+	SanguineAlphaDisplay();
 	void draw(const DrawArgs& args) override;
 	void drawHalo(const DrawArgs& args);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineAlphaDisplay : TransparentWidget {
+struct SanguineLedNumberDisplay : TransparentWidget {
+	std::shared_ptr<Font> font;
+	int* value = nullptr;
 	Module* module;
-	std::vector<std::string>* itemList = nullptr;
-	int* selectedItem = nullptr;
+	SanguineLedNumberDisplay();	
 	void draw(const DrawArgs& args) override;
 	void drawHalo(const DrawArgs& args);
 	void drawLayer(const DrawArgs& args, int layer) override;

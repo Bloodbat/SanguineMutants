@@ -32,6 +32,10 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 
 // Displays
 
+SanguineAlphaDisplay::SanguineAlphaDisplay() {
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
+}
+
 void SanguineAlphaDisplay::draw(const DrawArgs& args) {
 	// Background
 	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
@@ -75,8 +79,7 @@ void SanguineAlphaDisplay::drawHalo(const DrawArgs& args) {
 
 void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
-		if (module && !module->isBypassed()) {
-			std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
+		if (module && !module->isBypassed()) {			
 			if (font) {
 				// Text					
 				nvgFontSize(args.vg, 38);
