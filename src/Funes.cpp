@@ -36,6 +36,7 @@ struct Funes : Module {
 		PARAM_FREQUENCY_ROOT,
 		NUM_PARAMS
 	};
+
 	enum InputIds {
 		INPUT_ENGINE,
 		INPUT_TIMBRE,
