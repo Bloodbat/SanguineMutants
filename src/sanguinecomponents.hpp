@@ -37,8 +37,7 @@ struct SanguineAlphaDisplay : TransparentWidget {
 	std::vector<std::string>* itemList = nullptr;
 	int* selectedItem = nullptr;
 	SanguineAlphaDisplay();
-	void draw(const DrawArgs& args) override;
-	void drawHalo(const DrawArgs& args);
+	void draw(const DrawArgs& args) override;	
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
@@ -47,8 +46,7 @@ struct SanguineLedNumberDisplay : TransparentWidget {
 	int* value = nullptr;
 	Module* module;
 	SanguineLedNumberDisplay();	
-	void draw(const DrawArgs& args) override;
-	void drawHalo(const DrawArgs& args);
+	void draw(const DrawArgs& args) override;	
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
@@ -69,3 +67,6 @@ struct SanguineShapedLight : widget::SvgWidget {
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
+
+// Drawing utils
+void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX);
