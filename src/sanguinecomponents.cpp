@@ -170,12 +170,12 @@ void SanguineLightUpSwitch::drawHalo(const DrawArgs& args) {
 
 // Decorations
 
-void LightUpSvgWidget::draw(const DrawArgs& args) {
+void SanguineShapedLight::draw(const DrawArgs& args) {
 	// Do not call SvgWidget::draw: it draws on the wrong layer.
 	Widget::draw(args);
 }
 
-void LightUpSvgWidget::drawLayer(const DrawArgs& args, int layer) {
+void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		//From SvgWidget::draw()
 		if (!svg)
