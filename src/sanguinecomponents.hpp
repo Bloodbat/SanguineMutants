@@ -55,8 +55,7 @@ struct SanguineLedNumberDisplay : TransparentWidget {
 struct SanguineLightUpSwitch : app::SvgSwitch {	
 	NVGcolor haloColorOn;
 	NVGcolor haloColorOff;
-	SanguineLightUpSwitch();
-	void drawHalo(const DrawArgs& args);
+	SanguineLightUpSwitch();	
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
@@ -69,4 +68,5 @@ struct SanguineShapedLight : widget::SvgWidget {
 };
 
 // Drawing utils
+void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor);
 void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX);
