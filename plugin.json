@@ -8,17 +8,17 @@
   "sourceUrl": "https://github.com/Bloodbat/SanguineMutants",
   "description": "A collection of modules based on Mutable Instruments Eurorack devices and their variants.",
   "changelogUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/CHANGELOG.md",
-  "modules": [    
+  "modules": [
     {
       "slug": "Funes",
       "name": "Funes",
-      "description": "Based on Mutable Instruments Plaits 1.2",	  
-      "manualUrl": "https://mutable-instruments.net/modules/plaits/manual/",      
+      "description": "Based on Mutable Instruments Plaits 1.2",
+      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",
       "tags": [
         "Oscillator",
         "Hardware clone",
         "Polyphonic"
       ]
-    }       
+    }
   ]
 }
