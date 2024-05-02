@@ -122,7 +122,7 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-				drawRectHalo(args, box.size,textColor,55, 0.f);
+				drawRectHalo(args, box.size, textColor, 55, 0.f);
 			}
 		}
 	}
@@ -148,44 +148,15 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 				return;
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 			rack::window::svgDraw(args.vg, svg->handle);
-			drawHalo(args);
+			if (getParamQuantity()->getValue() == 0) {
+				drawCircularHalo(args, box.size, haloColorOff, 175, 8.f);
+			}
+			else {
+				drawCircularHalo(args, box.size, haloColorOn, 175, 8.f);
+			}
 		}
 	}
 	Widget::drawLayer(args, layer);
-}
-
-void SanguineLightUpSwitch::drawHalo(const DrawArgs& args) {
-	// Adapted from LightWidget
-	// Don't draw halo if rendering in a framebuffer, e.g. screenshots or Module Browser
-	if (args.fb)
-		return;
-
-	const float halo = settings::haloBrightness;
-	if (halo == 0.f)
-		return;
-
-	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
-
-	math::Vec c = box.size.div(2);
-	float radius = std::min(box.size.x, box.size.y) / 8.0;
-	float oradius = radius + std::min(radius * 4.f, 15.f);
-
-	nvgBeginPath(args.vg);
-	nvgRect(args.vg, c.x - oradius, c.y - oradius, 2 * oradius, 2 * oradius);
-
-	NVGcolor icol;
-
-	if (getParamQuantity()->getValue() == 0) {
-		icol = color::mult(haloColorOff, halo);
-	}
-	else {
-		icol = color::mult(haloColorOn, halo);
-	}
-
-	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
-	NVGpaint paint = nvgRadialGradient(args.vg, c.x, c.y, radius, oradius, icol, ocol);
-	nvgFillPaint(args.vg, paint);
-	nvgFill(args.vg);
 }
 
 // Decorations
@@ -209,6 +180,34 @@ void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 }
 
 // Drawing utils
+
+void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor)
+{
+	// Adapted from LightWidget
+	// Don't draw halo if rendering in a framebuffer, e.g. screenshots or Module Browser
+	if (args.fb)
+		return;
+
+	const float halo = settings::haloBrightness;
+	if (halo == 0.f)
+		return;
+
+	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+
+	math::Vec c = boxSize.div(2);
+	float radius = std::min(boxSize.x, boxSize.y) / radiusFactor;
+	float oradius = radius + std::min(radius * 4.f, 15.f);
+
+	nvgBeginPath(args.vg);
+	nvgRect(args.vg, c.x - oradius, c.y - oradius, 2 * oradius, 2 * oradius);
+
+	NVGcolor icol = color::mult(nvgTransRGBA(haloColor, haloOpacity), halo);
+
+	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
+	NVGpaint paint = nvgRadialGradient(args.vg, c.x, c.y, radius, oradius, icol, ocol);
+	nvgFillPaint(args.vg, paint);
+	nvgFill(args.vg);
+};
 
 void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX)
 {
