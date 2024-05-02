@@ -529,7 +529,7 @@ static const std::string frequencyModes[11] = {
 	"C0 to C8",
 };
 
-struct FunesDisplay : TransparentWidget {
+struct SanguineAlphaDisplay : TransparentWidget {
 	Funes* module;
 
 	void draw(const DrawArgs& args) override {
@@ -545,6 +545,32 @@ struct FunesDisplay : TransparentWidget {
 		nvgStroke(args.vg);
 
 		Widget::draw(args);
+	}
+
+	void drawHalo(const DrawArgs& args) {
+		// Adapted from MindMeld & LightWidget.
+		if (args.fb)
+			return;
+
+		const float halo = settings::haloBrightness;
+		if (halo == 0.f)
+			return;
+
+		nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+
+		nvgBeginPath(args.vg);
+		nvgRect(args.vg, -9, -9, box.size.x + 9, box.size.y + 9);
+
+		NVGcolor icol = color::mult(nvgRGBA(200, 0, 0, 100), halo);
+
+		NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
+		NVGpaint paint = nvgBoxGradient(args.vg, 4.5f, 4.5f, box.size.x - 4.5, box.size.y - 4.5, 5, 8, icol, ocol);
+		nvgFillPaint(args.vg, paint);
+		nvgFill(args.vg);
+
+		nvgFillPaint(args.vg, paint);
+		nvgFill(args.vg);
+		nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
 	}
 
 	void drawLayer(const DrawArgs& args, int layer) override {
@@ -564,6 +590,7 @@ struct FunesDisplay : TransparentWidget {
 					nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
 					nvgFillColor(args.vg, textColor);
 					nvgText(args.vg, textPos.x, textPos.y, modelDisplays[module->modelNum].c_str(), NULL);
+					drawHalo(args);
 				}
 			}
 		}
@@ -580,7 +607,7 @@ struct FunesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));		
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::PARAM_MODEL));
 		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 62.502)), module, Funes::PARAM_FREQUENCY));
@@ -619,7 +646,7 @@ struct FunesWidget : ModuleWidget {
 		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
 		addChild(funesFrambuffer);
 
-		FunesDisplay* display = new FunesDisplay();
+		SanguineAlphaDisplay* display = new SanguineAlphaDisplay();
 		display->box.pos = Vec(25, 68);
 		display->box.size = Vec(296, 55);
 		display->module = module;
