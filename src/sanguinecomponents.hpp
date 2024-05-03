@@ -33,10 +33,10 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 
 struct SanguineAlphaDisplay : TransparentWidget {
 	Module* module;
-	std::shared_ptr<Font> font;
+	std::shared_ptr<Font> font = nullptr;
 	std::vector<std::string>* itemList = nullptr;
 	int* selectedItem = nullptr;
-	NVGcolor textColor;
+	NVGcolor textColor = nvgRGB(200, 0, 0);
 	SanguineAlphaDisplay();
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
@@ -44,9 +44,9 @@ struct SanguineAlphaDisplay : TransparentWidget {
 
 struct SanguineLedNumberDisplay : TransparentWidget {
 	Module* module;
-	std::shared_ptr<Font> font;
+	std::shared_ptr<Font> font = nullptr;
 	int* value = nullptr;
-	NVGcolor textColor;
+	NVGcolor textColor = nvgRGB(200, 0, 0);
 	SanguineLedNumberDisplay();
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
@@ -55,8 +55,8 @@ struct SanguineLedNumberDisplay : TransparentWidget {
 // Switches
 
 struct SanguineLightUpSwitch : app::SvgSwitch {
-	NVGcolor haloColorOn;
-	NVGcolor haloColorOff;
+	NVGcolor haloColorOn = nvgRGB(0, 100, 0);
+	NVGcolor haloColorOff = nvgRGB(100, 0, 0);
 	SanguineLightUpSwitch();
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
