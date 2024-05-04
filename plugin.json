@@ -19,6 +19,16 @@
         "Hardware clone",
         "Polyphonic"
       ]
+    },
+    {
+      "slug": "Sanguine-Mutants-Blank",
+      "name": "Sanguine Mutants Blank",
+      "description": "Put a goblin and the Mutants logo on your rack!",
+      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",
+      "tags": [
+        "Blank",
+        "Visual"
+      ]
     }
   ]
 }

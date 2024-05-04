@@ -5,6 +5,7 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 extern Model* modelFunes;
+extern Model* modelMutantsBlank;
 
 /*template <typename Base>
 struct Rogan6PSLight : Base {
