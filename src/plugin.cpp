@@ -5,6 +5,7 @@ Plugin* pluginInstance;
 
 void init(rack::Plugin* p) {
 	pluginInstance = p;
-	
-	p->addModel(modelFunes);			
+
+	p->addModel(modelFunes);
+	p->addModel(modelMutantsBlank);
 }
