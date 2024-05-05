@@ -33,7 +33,7 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 // Displays
 
 SanguineAlphaDisplay::SanguineAlphaDisplay() {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/hdad-segment14-1.002/Segment14.ttf"));
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
 }
 
 void SanguineAlphaDisplay::draw(const DrawArgs& args) {
