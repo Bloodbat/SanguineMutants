@@ -1001,6 +1001,34 @@ struct ApicesWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(90.05, 100.846))), module, Apices::OUT_1_OUTPUT));
 		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(90.05, 116.989))), module, Apices::OUT_2_OUTPUT));
 
+		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay();
+		oledDisplay1->box.pos = mm2px(Vec(23.585, 73.301));
+		oledDisplay1->module = module;
+		/*if (module)
+			oledDisplay->oledText = testText;*/
+		addChild(oledDisplay1);
+
+		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay();
+		oledDisplay2->box.pos = mm2px(Vec(62.817, 73.301));
+		oledDisplay2->module = module;
+		/*if (module)
+			oledDisplay->oledText = testText;*/
+		addChild(oledDisplay2);
+
+		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay();
+		oledDisplay3->box.pos = mm2px(Vec(23.585, 81.848));
+		oledDisplay3->module = module;
+		/*if (module)
+			oledDisplay->oledText = testText;*/
+		addChild(oledDisplay3);
+
+		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay();
+		oledDisplay4->box.pos = mm2px(Vec(62.817, 81.848));
+		oledDisplay4->module = module;
+		/*if (module)
+			oledDisplay->oledText = testText;*/
+		addChild(oledDisplay4);
+
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = mm2px(Vec(48.469, 114.607));
 		mutantsLogo->box.size = Vec(36.06, 14.79);
