@@ -34,8 +34,7 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 struct SanguineAlphaDisplay : TransparentWidget {
 	Module* module;
 	std::shared_ptr<Font> font = nullptr;
-	std::vector<std::string>* itemList = nullptr;
-	int* selectedItem = nullptr;
+	std::string* displayText = nullptr;
 	NVGcolor textColor = nvgRGB(200, 0, 0);
 	SanguineAlphaDisplay();
 	void draw(const DrawArgs& args) override;
