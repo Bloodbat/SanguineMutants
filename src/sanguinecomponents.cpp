@@ -65,10 +65,10 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 				// Background of all segments
 				nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
 				nvgFillColor(args.vg, textColor);
-				if (selectedItem && itemList)
-				{
-					std::string itemToPrint = itemList->at(*selectedItem);
-					nvgText(args.vg, textPos.x, textPos.y, itemToPrint.c_str(), NULL);
+				if (displayText && !(displayText->empty()))
+				{	
+					// TODO: Make sure we only display max. display chars.
+					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
 				}
 				drawRectHalo(args, box.size, textColor, 55, 0.f);
 			}

@@ -21,6 +21,33 @@
 static const char WAVE_FILTERS[] = "BIN (*.bin):bin, BIN";
 static std::string waveDir;
 
+static const std::string modelsList[24] = {
+  "FLTRWAVE",
+  "PHASDIST",
+  "6 OP.FM1",
+  "6 OP.FM2",
+  "6 OP.FM3",
+  "WAVETRRN",
+  "STRGMACH",
+  "CHIPTUNE",
+  "DUALWAVE",
+  "WAVESHAP",
+  "2 OP.FM",
+  "GRANFORM",
+  "HARMONIC",
+  "WAVETABL",
+  "CHORDS",
+  "VOWLSPCH",
+  "GR.CLOUD",
+  "FLT.NOIS",
+  "PRT.NOIS",
+  "STG.MODL",
+  "MODALRES",
+  "BASSDRUM",
+  "SNARDRUM",
+  "HI-HAT",
+};
+
 struct Funes : Module {
 	enum ParamIds {
 		PARAM_MODEL,
@@ -77,8 +104,12 @@ struct Funes : Module {
 	bool notesModelSelection = false;
 
 	int modelNum = 0;
+	std::string displayText = "";
 
 	float lastModelVoltage = 0.f;
+
+	static const int textUpdateFrequency = 16;
+	dsp::ClockDivider clockDivider;
 
 	Funes() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -115,6 +146,8 @@ struct Funes : Module {
 		}
 
 		octaveQuantizer.Init(9, 0.01f, false);
+
+		clockDivider.setDivision(textUpdateFrequency);
 
 		onReset();
 	}
@@ -222,6 +255,11 @@ struct Funes : Module {
 			int activeEngine = voice[0].active_engine();
 			if (displayModulatedModel && (activeEngine != modelNum && activeEngine >= 0))
 				modelNum = activeEngine;
+
+			// Update model text every 16 samples only.
+			if (clockDivider.process()) {
+				displayText = modelsList[modelNum];
+			}
 
 			// Model lights
 			// Pulse light at 2 Hz
@@ -488,33 +526,6 @@ static const std::string modelLabels[24] = {
 	"Analog hi-hat",
 };
 
-static std::vector<std::string> modelsList{
-	"FLTRWAVE",
-	"PHASDIST",
-	"6 OP.FM1",
-	"6 OP.FM2",
-	"6 OP.FM3",
-	"WAVETRRN",
-	"STRGMACH",
-	"CHIPTUNE",
-	"DUALWAVE",
-	"WAVESHAP",
-	"2 OP.FM",
-	"GRANFORM",
-	"HARMONIC",
-	"WAVETABL",
-	"CHORDS",
-	"VOWLSPCH",
-	"GR.CLOUD",
-	"FLT.NOIS",
-	"PRT.NOIS",
-	"STG.MODL",
-	"MODALRES",
-	"BASSDRUM",
-	"SNARDRUM",
-	"HI-HAT",
-};
-
 static const std::string frequencyModes[11] = {
 	"LFO mode",
 	"C0 +/- 7 semitones",
@@ -581,8 +592,7 @@ struct FunesWidget : ModuleWidget {
 		alphaDisplay->box.pos = Vec(25, 68);
 		alphaDisplay->box.size = Vec(296, 55);
 		alphaDisplay->module = module;
-		alphaDisplay->itemList = &modelsList;
-		alphaDisplay->selectedItem = &module->modelNum;
+		alphaDisplay->displayText = &module->displayText;
 		alphaDisplay->textColor = nvgRGB(200, 0, 0);
 		funesFrambuffer->addChild(alphaDisplay);
 
