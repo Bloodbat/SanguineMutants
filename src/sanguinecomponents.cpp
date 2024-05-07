@@ -80,6 +80,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineLedNumberDisplay::SanguineLedNumberDisplay() {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
+	box.size = mm2px(Vec(15.5, 15));
 }
 
 void SanguineLedNumberDisplay::draw(const DrawArgs& args) {
