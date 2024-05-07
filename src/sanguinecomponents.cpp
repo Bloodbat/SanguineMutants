@@ -158,7 +158,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 					nvgFillColor(args.vg, textColor);
 
-					Vec textPos = Vec(3, 7);
+					Vec textPos = Vec(3, 7.5);
 					std::string textCopy;
 					textCopy.assign(oledText->data());
 					bool multiLine = oledText->size() > 8;
@@ -168,7 +168,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 							displayText += textCopy[i];
 						textCopy.erase(0, 8);
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
-						textPos = Vec(3, 15);
+						textPos = Vec(3, 14.5);
 						displayText = "";
 						for (uint32_t i = 0; (i < 8 || i < textCopy.length()); i++)
 							displayText += textCopy[i];
