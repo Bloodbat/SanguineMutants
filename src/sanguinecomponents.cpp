@@ -135,7 +135,7 @@ Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay() {
 void Sanguine96x32OLEDDisplay::draw(const DrawArgs& args) {
 	// Background
 	NVGcolor backgroundColor = nvgRGB(10, 10, 10);
-	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+	NVGcolor borderColor = nvgRGB(100, 100, 100);
 	nvgBeginPath(args.vg);
 	nvgRect(args.vg, 0.0, 0.0, box.size.x, box.size.y);
 	nvgFillColor(args.vg, backgroundColor);
