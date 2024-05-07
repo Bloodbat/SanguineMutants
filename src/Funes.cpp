@@ -552,8 +552,8 @@ struct FunesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::PARAM_MODEL));
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 62.502)), module, Funes::PARAM_FREQUENCY));
-		addParam(createParamCentered<Rogan3PSGreen>(mm2px(Vec(86.86, 62.502)), module, Funes::PARAM_HARMONICS));
+		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 67.293)), module, Funes::PARAM_FREQUENCY));
+		addParam(createParamCentered<Rogan3PSGreen>(mm2px(Vec(86.86, 67.293)), module, Funes::PARAM_HARMONICS));
 		addParam(createParamCentered<Rogan1PSRed>(mm2px(Vec(120.305, 55.102)), module, Funes::PARAM_TIMBRE));
 		addParam(createParamCentered<Rogan1PSGreen>(mm2px(Vec(120.305, 95.968)), module, Funes::PARAM_MORPH));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 55.102)), module, Funes::PARAM_TIMBRE_CV));
@@ -562,13 +562,13 @@ struct FunesWidget : ModuleWidget {
 
 		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::PARAM_LPG_COLOR));
 		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::PARAM_LPG_DECAY));
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 62.502)), module, Funes::PARAM_FREQUENCY_ROOT));
+		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 67.293)), module, Funes::PARAM_FREQUENCY_ROOT));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 32.29)), module, Funes::INPUT_ENGINE));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 55.102)), module, Funes::INPUT_TIMBRE));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 74.874)), module, Funes::INPUT_FREQUENCY));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 95.968)), module, Funes::INPUT_MORPH));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(97.154, 84.527)), module, Funes::INPUT_HARMONICS));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(97.154, 89.884)), module, Funes::INPUT_HARMONICS));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(14.378, 116.956)), module, Funes::INPUT_TRIGGER));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(27.855, 116.956)), module, Funes::INPUT_LEVEL));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(41.331, 116.956)), module, Funes::INPUT_NOTE));
@@ -589,22 +589,21 @@ struct FunesWidget : ModuleWidget {
 		addChild(funesFrambuffer);
 
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay();
-		alphaDisplay->box.pos = Vec(25, 68);
-		alphaDisplay->box.size = Vec(296, 55);
+		alphaDisplay->box.pos = mm2px(Vec(8.674, 21.713));
 		alphaDisplay->module = module;
 		alphaDisplay->displayText = &module->displayText;
 		alphaDisplay->textColor = nvgRGB(200, 0, 0);
 		funesFrambuffer->addChild(alphaDisplay);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = Vec(246.53, 344.31);
+		mutantsLogo->box.pos = mm2px(Vec(83.49, 116.46));
 		mutantsLogo->box.size = Vec(36.06, 14.79);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		funesFrambuffer->addChild(mutantsLogo);
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = Vec(220.57, 319.57);
+		bloodLogo->box.pos = mm2px(Vec(74.699, 108.091));
 		bloodLogo->box.size = Vec(11.2, 23.27);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
