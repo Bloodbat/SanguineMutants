@@ -32,12 +32,7 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 
 // Displays
 
-SanguineAlphaDisplay::SanguineAlphaDisplay() {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));	
-	box.size = mm2px(Vec(100.8, 21.2));
-}
-
-void SanguineAlphaDisplay::draw(const DrawArgs& args) {
+void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 	// Background
 	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
 	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
@@ -50,6 +45,11 @@ void SanguineAlphaDisplay::draw(const DrawArgs& args) {
 	nvgStroke(args.vg);
 
 	Widget::draw(args);
+}
+
+SanguineAlphaDisplay::SanguineAlphaDisplay() {
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
+	box.size = mm2px(Vec(100.8, 21.2));
 }
 
 void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -67,7 +67,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 				nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
 				nvgFillColor(args.vg, textColor);
 				if (displayText && !(displayText->empty()))
-				{	
+				{
 					// TODO: Make sure we only display max. display chars.
 					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
 				}
@@ -81,21 +81,6 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 SanguineLedNumberDisplay::SanguineLedNumberDisplay() {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
 	box.size = mm2px(Vec(15.5, 15));
-}
-
-void SanguineLedNumberDisplay::draw(const DrawArgs& args) {
-	// Background
-	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
-	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
-	nvgBeginPath(args.vg);
-	nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
-	nvgFillColor(args.vg, backgroundColor);
-	nvgFill(args.vg);
-	nvgStrokeWidth(args.vg, 1.0);
-	nvgStrokeColor(args.vg, borderColor);
-	nvgStroke(args.vg);
-
-	Widget::draw(args);
 }
 
 void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -179,7 +164,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
 					}
 					else {
-						nvgText(args.vg, textPos.x, textPos.y, oledText->c_str(), NULL);						
+						nvgText(args.vg, textPos.x, textPos.y, oledText->c_str(), NULL);
 					}
 					//drawRectHalo(args, box.size, textColor, 55, 0.f);					
 				}
