@@ -100,6 +100,8 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		if (module && !module->isBypassed()) {
 			if (font) {
+				// TODO don't do all this if there's no value.
+
 				// Text					
 				nvgFontSize(args.vg, 33.95);
 				nvgFontFaceId(args.vg, font->handle);
@@ -221,10 +223,10 @@ void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
 				// Background of all segments
 				nvgText(args.vg, textPos.x, textPos.y, "████████████", NULL);
 				nvgFillColor(args.vg, textColor);
-				if (selectedItem && itemList)
+				if (displayText && !(displayText->empty()))
 				{
-					std::string itemToPrint = itemList->at(*selectedItem);
-					nvgText(args.vg, textPos.x, textPos.y, itemToPrint.c_str(), NULL);
+					// TODO make sure we only display max. display chars					
+					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
 				}
 				drawRectHalo(args, box.size, textColor, 55, 0.f);
 			}
