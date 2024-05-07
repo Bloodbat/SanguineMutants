@@ -27,6 +27,7 @@ enum Function {
 	FUNCTION_PULSE_SHAPER,
 	FUNCTION_PULSE_RANDOMIZER,
 	FUNCTION_FM_DRUM_GENERATOR,
+	FUNCTION_RADIO_STATION,
 	FUNCTION_LAST,
 	FUNCTION_FIRST_ALTERNATE_FUNCTION = FUNCTION_MINI_SEQUENCER
 };
@@ -123,8 +124,6 @@ struct Apices : Module {
 	dsp::SampleRateConverter<2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 
-	bool initNumberStation = false;
-
 	struct Block {
 		peaks::GateFlags input[kNumChannels][kBlockSize] = {};
 		uint16_t output[kNumChannels][kBlockSize] = {};
@@ -149,7 +148,7 @@ struct Apices : Module {
 
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-		configParam(PARAM_MODE, 0.0f, 7.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
+		configParam(PARAM_MODE, 0.0f, 8.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
 		configParam(PARAM_KNOB_1, 0.0f, 65535.0f, 32678.0f, "Knob 1", "", 0.f, 1.f / 65535.f);
@@ -217,23 +216,6 @@ struct Apices : Module {
 	}
 
 	void updateOleds() {
-		
-		if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION) {
-			if (edit_mode_ == EDIT_MODE_TWIN) {
-				oledText1 = "1&2. Frequency";
-				oledText2 = "1&2. Var. Prob";
-				oledText3 = "1&2. Noise";
-				oledText4 = "1&2. Distort";
-			}
-			if (edit_mode_ == EDIT_MODE_SPLIT) {
-				oledText1 = "1. Frequency";
-				oledText2 = "1. Var. Prob";
-				oledText3 = "2. frequency";
-				oledText4 = "2. Var. Prob";
-			}
-			return;
-		}
-
 		if (edit_mode_ == EDIT_MODE_SPLIT) {
 			switch (function_[0]) {
 			case FUNCTION_ENVELOPE: {
@@ -290,6 +272,13 @@ struct Apices : Module {
 				oledText2 = "1. BD prst. Var";
 				oledText3 = "2. SD prst. Mrph";
 				oledText4 = "2. SD prst. Var";
+				break;
+			}
+			case FUNCTION_RADIO_STATION: {
+				oledText1 = "1. Frequency";
+				oledText2 = "1. Var. Prob";
+				oledText3 = "2. frequency";
+				oledText4 = "2. Var. Prob";
 				break;
 			}
 			default: break;
@@ -369,6 +358,13 @@ struct Apices : Module {
 				oledText4 = channelText + "Color";
 				break;
 			}
+			case FUNCTION_RADIO_STATION: {
+				oledText1 = channelText + "Frequency";
+				oledText2 = channelText + "Var. Prob";
+				oledText3 = channelText + "Noise";
+				oledText4 = channelText + "Distortion";
+				break;
+			}
 			default: break;
 			}
 		}
@@ -438,13 +434,6 @@ struct Apices : Module {
 			pollSwitches();
 			pollPots();
 			updateOleds();
-		}
-
-		// Initialize "secret" number station mode.
-		if (initNumberStation) {
-			processors[0].set_function(peaks::PROCESSOR_FUNCTION_NUMBER_STATION);
-			processors[1].set_function(peaks::PROCESSOR_FUNCTION_NUMBER_STATION);
-			initNumberStation = false;
 		}
 
 		Function CurrentFunction = function();
@@ -569,6 +558,7 @@ const peaks::ProcessorFunction Apices::function_table_[FUNCTION_LAST][2] = {
 	{ peaks::PROCESSOR_FUNCTION_PULSE_SHAPER, peaks::PROCESSOR_FUNCTION_PULSE_SHAPER },
 	{ peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
 	{ peaks::PROCESSOR_FUNCTION_FM_DRUM, peaks::PROCESSOR_FUNCTION_FM_DRUM },
+	{ peaks::PROCESSOR_FUNCTION_NUMBER_STATION, peaks::PROCESSOR_FUNCTION_NUMBER_STATION},
 };
 
 
@@ -868,7 +858,7 @@ static std::vector<std::string> modeListChan1{
 	"1:PLS. SHAP*",
 	"1:PLS. RAND*",
 	"1:DRUM FM*",
-	"1:RADIO T»",
+	"1:RADIO T&",
 };
 
 static std::vector<std::string> modeListChan2{
@@ -880,7 +870,7 @@ static std::vector<std::string> modeListChan2{
 	"2:PLS. SHAP*",
 	"2:PLS. RAND*",
 	"2:DRUM FM*",
-	"1:RADIO T»",
+	"1:RADIO T&",
 };
 
 struct ApicesWidget : ModuleWidget {
@@ -998,19 +988,6 @@ struct ApicesWidget : ModuleWidget {
 		Apices* peaks = dynamic_cast<Apices*>(this->module);
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &peaks->snap_mode_));
-
-		menu->addChild(createSubmenuItem("Secret Modes", "",
-			[=](Menu* menu) {
-				menu->addChild(createBoolMenuItem("Number station", "",
-				[=]() {
-						return peaks->processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
-					},
-					[=](bool val) {
-						peaks->initNumberStation = val;
-						peaks->init();
-					}));
-			}
-		));
 	}
 
 };
