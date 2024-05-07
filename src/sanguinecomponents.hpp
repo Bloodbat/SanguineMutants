@@ -52,6 +52,27 @@ struct SanguineLedNumberDisplay : TransparentWidget {
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
+struct SanguineMatrixDisplay :TransparentWidget {
+	Module* module;
+	std::shared_ptr<Font> font = nullptr;
+	std::vector<std::string>* itemList = nullptr;
+	int* selectedItem = nullptr;
+	NVGcolor textColor = nvgRGB(200, 0, 0);
+	SanguineMatrixDisplay();
+	void draw(const DrawArgs& args) override;
+	void drawLayer(const DrawArgs& args, int layer) override;
+};
+
+struct Sanguine96x32OLEDDisplay :TransparentWidget {
+	Module* module;
+	std::shared_ptr<Font> font = nullptr;
+	std::string oledText;
+	NVGcolor textColor = nvgRGB(254, 254, 254);
+	Sanguine96x32OLEDDisplay();
+	void draw(const DrawArgs& args) override;
+	void drawLayer(const DrawArgs& args, int layer) override;
+};
+
 // Switches
 
 struct SanguineLightUpSwitch : app::SvgSwitch {
@@ -60,6 +81,15 @@ struct SanguineLightUpSwitch : app::SvgSwitch {
 	SanguineLightUpSwitch();
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
+
+// Lights
+template <typename TBase = GrayModuleLightWidget>
+struct TOrangeLight : TBase {
+	TOrangeLight() {
+		this->addBaseColor(SCHEME_ORANGE);
+	}
+};
+using OrangeLight = TOrangeLight<>;
 
 // Decorations
 
