@@ -4,7 +4,6 @@
 
 enum SwitchIndex {
 	SWITCH_TWIN_MODE,
-	//SWITCH_FUNCTION,
 	SWITCH_EXPERT,
 	SWITCH_CHANNEL_SELECT,
 	SWITCH_GATE_TRIG_1,
@@ -57,7 +56,6 @@ struct Apices : Module {
 		PARAM_KNOB_3,
 		PARAM_KNOB_4,
 		PARAM_EDIT_MODE,
-		//PARAM_BUTTON_2,		
 		PARAM_EXPERT_MODE,
 		PARAM_CHANNEL_SELECT,
 		PARAM_TRIGGER_1,
@@ -116,7 +114,7 @@ struct Apices : Module {
 
 	dsp::SchmittTrigger switches_[kButtonCount];
 
-	// update descriptions/knobs every 16 samples
+	// update descriptions/oleds every 16 samples
 	static const int cvUpdateFrequency = 16;
 	dsp::ClockDivider cvDivider;
 
@@ -142,67 +140,10 @@ struct Apices : Module {
 	size_t io_block_ = 0;
 	size_t render_block_ = kNumBlocks / 2;
 
-	struct EditModeParam : ParamQuantity {
-		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				Apices* modulePeaks = static_cast<Apices*>(module);
-
-				if (paramId == PARAM_EDIT_MODE) {
-					int editMode = modulePeaks->settings_.edit_mode;
-					switch (editMode) {
-					case EDIT_MODE_SPLIT: return "Split";
-					case EDIT_MODE_TWIN: return "Twin";
-					default: return "";
-					}
-				}
-				else {
-					assert(false);
-				}
-			}
-			else {
-				return "";
-			}
-		}
-	};
-
-	static std::string functionLabelFromEnum(int function) {
-		switch (function) {
-		case FUNCTION_ENVELOPE: return "Envelope";
-		case FUNCTION_LFO: return "LFO";
-		case FUNCTION_TAP_LFO: return "Tap LFO";
-		case FUNCTION_DRUM_GENERATOR: return "Drum generator";
-		case FUNCTION_MINI_SEQUENCER: return "Sequencer (easter egg)";
-		case FUNCTION_PULSE_SHAPER: return "Pulse Shaper (easter egg";
-		case FUNCTION_PULSE_RANDOMIZER: return "Pulse randomizer (easter egg)";
-		case FUNCTION_FM_DRUM_GENERATOR: return "Drum generate FM (easter egg)";
-		default: return "";
-		}
-	}
-
-	struct FunctionParam : ParamQuantity {
-		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				Apices* modulePeaks = static_cast<Apices*>(module);
-
-				/*if (paramId == PARAM_BUTTON_2) {
-					int function1 = modulePeaks->settings_.function[0];
-					int function2 = modulePeaks->settings_.function[1];
-					if (function1 == function2) {
-						return functionLabelFromEnum(function1);
-					}
-					else {
-						return "1: " + functionLabelFromEnum(function1) + ", 2: " + functionLabelFromEnum(function2);
-					}
-				}
-				else {
-					assert(false);
-				}*/
-				/* }
-				else {*/
-				return "";
-			}
-		}
-	};
+	std::string oledText1 = "";
+	std::string oledText2 = "";
+	std::string oledText3 = "";
+	std::string oledText4 = "";
 
 	Apices() {
 
@@ -215,10 +156,8 @@ struct Apices : Module {
 		configParam(PARAM_KNOB_2, 0.0f, 65535.0f, 32678.0f, "Knob 2", "", 0.f, 1.f / 65535.f);
 		configParam(PARAM_KNOB_3, 0.0f, 65535.0f, 32678.0f, "Knob 3", "", 0.f, 1.f / 65535.f);
 		configParam(PARAM_KNOB_4, 0.0f, 65535.0f, 32678.0f, "Knob 4", "", 0.f, 1.f / 65535.f);
-		configButton<EditModeParam>(PARAM_EDIT_MODE, "Edit Mode");
-		//configButton<FunctionParam>(PARAM_BUTTON_2, "Function");
-		// TODO: Disable tooltip when expert is disabled (look at examples above
-		configButton(PARAM_CHANNEL_SELECT, "Channel select");
+		configButton(PARAM_EDIT_MODE, "Toggle split mode");
+		configButton(PARAM_CHANNEL_SELECT, "Expert mode channel select");
 		configButton(PARAM_EXPERT_MODE, "Toggle expert mode");
 		configButton(PARAM_TRIGGER_1, "Trigger 1");
 		configButton(PARAM_TRIGGER_2, "Trigger 2");
@@ -277,8 +216,9 @@ struct Apices : Module {
 		setFunction(1, function_[1]);
 	}
 
-	void updateKnobDescriptions() {
+	void updateOleds() {
 
+		// TODO: Fix this!
 		if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION) {
 			getParamQuantity(PARAM_KNOB_1)->description = "????";
 			getParamQuantity(PARAM_KNOB_2)->description = "????";
@@ -290,59 +230,59 @@ struct Apices : Module {
 		if (edit_mode_ == EDIT_MODE_SPLIT) {
 			switch (function_[0]) {
 			case FUNCTION_ENVELOPE: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 Attack";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 Decay";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 Attack";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 Decay";
+				oledText1.assign("1. Attack");
+				oledText2 = "1. Decay";
+				oledText3 = "2. Attack";
+				oledText3 = "2. Decay";
 				break;
 			}
 			case FUNCTION_LFO: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 Frequency";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 Waveform";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 Frequency";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 Waveform";
+				oledText1 = "1. Frequency";
+				oledText2 = "1. Waveform";
+				oledText3 = "2. Frequency";
+				oledText4 = "2. Waveform";
 				break;
 			}
 			case FUNCTION_TAP_LFO: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 Waveform";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 Waveform variation";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 Waveform";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 Waveform variation";
+				oledText1 = "1. Waveform";
+				oledText2 = "1. Wave. Var";
+				oledText3 = "2. Waveform";
+				oledText4 = "2. Wave. Var";
 				break;
 			}
 			case FUNCTION_DRUM_GENERATOR: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 BD Tone";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 BD Decay";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 SD Tone";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 SD Snappy";
+				oledText1 = "1. BD Tone";
+				oledText2 = "1. BD Decay";
+				oledText3 = "2. SD Tone";
+				oledText4 = "2. SD Snappy";
 				break;
 			}
 			case FUNCTION_MINI_SEQUENCER: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 Step 1";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 Step 2";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 Step 1";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 Step 2";
+				oledText1 = "1. Step 1";
+				oledText2 = "1. Step 2";
+				oledText3 = "2. Step 1";
+				oledText4 = "2. Step 2";
 				break;
 			}
 			case FUNCTION_PULSE_SHAPER: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 Delay";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 Number of repeats";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 Delay";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 Number of repeats";
+				oledText1 = "1. Delay";
+				oledText2 = "1. Repeats #";
+				oledText3 = "2. Delay";
+				oledText4 = "2. Repeats #";
 				break;
 			}
 			case FUNCTION_PULSE_RANDOMIZER: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 Acceptance/regeneration probability";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 Delay";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 Acceptance/regeneration probability";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 Delay";
+				oledText1 = "1. Acc./rgn. prob";
+				oledText2 = "1. Delay";
+				oledText3 = "2. Acc./rgn. Prob";
+				oledText4 = "2. Delay";
 				break;
 			}
 			case FUNCTION_FM_DRUM_GENERATOR: {
-				getParamQuantity(PARAM_KNOB_1)->description = "Ch. 1 BD presets morphing";
-				getParamQuantity(PARAM_KNOB_2)->description = "Ch. 1 BD presets variations";
-				getParamQuantity(PARAM_KNOB_3)->description = "Ch. 2 SD presets morphing";
-				getParamQuantity(PARAM_KNOB_4)->description = "Ch. 2 SD presets variations";
+				oledText1 = "1. BD prst. Mrph";
+				oledText2 = "1. BD prst. Var";
+				oledText3 = "2. SD prst. Mrph";
+				oledText4 = "2. SD prst. Var";
 				break;
 			}
 			default: break;
@@ -363,63 +303,63 @@ struct Apices : Module {
 				return;
 			}
 
-			std::string channelText = (edit_mode_ == EDIT_MODE_TWIN) ? "Ch. 1&2 " : string::f("Ch. %d ", edit_mode_ - EDIT_MODE_FIRST + 1);
+			std::string channelText = (edit_mode_ == EDIT_MODE_TWIN) ? "1&2. " : string::f("%d. ", edit_mode_ - EDIT_MODE_FIRST + 1);
 
 			switch (currentFunction) {
 			case FUNCTION_ENVELOPE: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Attack";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Decay";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "Sustain";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Release";
+				oledText1 = channelText + "Attack";
+				oledText2 = channelText + "Decay";
+				oledText3 = channelText + "Sustain";
+				oledText4 = channelText + "Release";
 				break;
 			}
 			case FUNCTION_LFO: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Frequency";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Waveform (sine, linear slope, square, steps, random)";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "Waveform variation (wavefolder for sine; ascending/triangle/descending balance for slope, pulse-width for square, number of steps, and interpolation method)";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Phase on restart";
+				oledText1 = channelText + "Frequency";
+				oledText2 = channelText + "Waveform";
+				oledText3 = channelText + "Wave. Var";
+				oledText4 = channelText + "Phase";
 				break;
 			}
 			case FUNCTION_TAP_LFO: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Amplitude";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Waveform";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "Waveform variation";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Phase on restart";
+				oledText1 = channelText + "Amplitude";
+				oledText2 = channelText + "Waveform";
+				oledText3 = channelText + "Wave. Var";
+				oledText4 = channelText + "Phase";
 				break;
 			}
 			case FUNCTION_DRUM_GENERATOR: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Base frequency";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Frequency modulation (“Punch” for BD, “Tone” for SD)";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "High-frequency content (“Tone” for BD, “Snappy” for SD)";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Decay";
+				oledText1 = channelText + "Base freq";
+				oledText2 = channelText + "Freq. Mod";
+				oledText3 = channelText + "High freq.";
+				oledText4 = channelText + "Decay";
 				break;
 			}
 			case FUNCTION_MINI_SEQUENCER: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Step 1";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Step 2";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "Step 3";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Step 4";
+				oledText1 = channelText + "Step 1";
+				oledText2 = channelText + "Step 2";
+				oledText3 = channelText + "Step 3";
+				oledText4 = channelText + "Step 4";
 				break;
 			}
 			case FUNCTION_PULSE_SHAPER: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Pre-delay";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Gate duration";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "Delay";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Number of repeats";
+				oledText1 = channelText + "Pre-delay";
+				oledText2 = channelText + "Gate time";
+				oledText3 = channelText + "Delay";
+				oledText4 = channelText + "Repeats #";
 				break;
 			}
 			case FUNCTION_PULSE_RANDOMIZER: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Probability that an incoming trigger is processed";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "Probability that the trigger is regenerated after the delay";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "Delay time";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Jitter";
+				oledText1 = channelText + "In. Trg. Prob";
+				oledText2 = channelText + "Tr. Reg. Prob";
+				oledText3 = channelText + "Delay time";
+				oledText4 = channelText + "Jitter";
 				break;
 			}
 			case FUNCTION_FM_DRUM_GENERATOR: {
-				getParamQuantity(PARAM_KNOB_1)->description = channelText + "Frequency";
-				getParamQuantity(PARAM_KNOB_2)->description = channelText + "FM intensity";
-				getParamQuantity(PARAM_KNOB_3)->description = channelText + "FM and AM envelope decay time (the FM envelope has a shorter decay than the AM envelope, but the two values are tied to this parameter)";
-				getParamQuantity(PARAM_KNOB_4)->description = channelText + "Color. At 12 o'clock, no modification is brought to the oscillator signal. Turn right to increase the amount of noise (for snares). Turn left to increase the amount of distortion (for 909 style kicks).";
+				oledText1 = channelText + "Frequency";
+				oledText2 = channelText + "FM intensity";
+				oledText3 = channelText + "Env decay";
+				oledText4 = channelText + "Color";
 				break;
 			}
 			default: break;
@@ -482,6 +422,7 @@ struct Apices : Module {
 
 		// Update module internal state from settings.
 		init();
+		saveState();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -489,7 +430,7 @@ struct Apices : Module {
 		if (cvDivider.process()) {
 			pollSwitches();
 			pollPots();
-			updateKnobDescriptions();
+			updateOleds();
 		}
 
 		// Initialize "secret" number station mode.
@@ -982,8 +923,8 @@ struct ApicesWidget : ModuleWidget {
 		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(83.215, 42.136)), module, Apices::LIGHT_FUNCTION_3));
 		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(98.965, 42.136)), module, Apices::LIGHT_FUNCTION_4));
 
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(4.933, 27.965)), module, Apices::LIGHT_CHANNEL1));
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(4.933, 40.557)), module, Apices::LIGHT_CHANNEL2));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.633, 27.965)), module, Apices::LIGHT_CHANNEL1));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.633, 40.557)), module, Apices::LIGHT_CHANNEL2));
 
 		addParam(createParamCentered<Rogan2PSRed>(mm2px(Vec(31.734, 63.829)), module, Apices::PARAM_KNOB_1));
 		addParam(createParamCentered<Rogan2PSRed>(mm2px(Vec(70.966, 63.829)), module, Apices::PARAM_KNOB_2));
@@ -1004,29 +945,29 @@ struct ApicesWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay();
 		oledDisplay1->box.pos = mm2px(Vec(23.585, 73.301));
 		oledDisplay1->module = module;
-		/*if (module)
-			oledDisplay->oledText = testText;*/
+		if (module)
+			oledDisplay1->oledText = &module->oledText1;
 		addChild(oledDisplay1);
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay();
 		oledDisplay2->box.pos = mm2px(Vec(62.817, 73.301));
 		oledDisplay2->module = module;
-		/*if (module)
-			oledDisplay->oledText = testText;*/
+		if (module)
+			oledDisplay2->oledText = &module->oledText2;
 		addChild(oledDisplay2);
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay();
 		oledDisplay3->box.pos = mm2px(Vec(23.585, 81.848));
 		oledDisplay3->module = module;
-		/*if (module)
-			oledDisplay->oledText = testText;*/
+		if (module)
+			oledDisplay3->oledText = &module->oledText3;
 		addChild(oledDisplay3);
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay();
 		oledDisplay4->box.pos = mm2px(Vec(62.817, 81.848));
 		oledDisplay4->module = module;
-		/*if (module)
-			oledDisplay->oledText = testText;*/
+		if (module)
+			oledDisplay4->oledText = &module->oledText4;
 		addChild(oledDisplay4);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
