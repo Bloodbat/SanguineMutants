@@ -33,7 +33,8 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 // Displays
 
 SanguineAlphaDisplay::SanguineAlphaDisplay() {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));	
+	box.size = mm2px(Vec(100.8, 21.2));
 }
 
 void SanguineAlphaDisplay::draw(const DrawArgs& args) {
@@ -56,11 +57,11 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 		if (module && !module->isBypassed()) {
 			if (font) {
 				// Text					
-				nvgFontSize(args.vg, 38);
+				nvgFontSize(args.vg, 40);
 				nvgFontFaceId(args.vg, font->handle);
 				nvgTextLetterSpacing(args.vg, 2.5);
 
-				Vec textPos = Vec(9, 48);
+				Vec textPos = Vec(9, 52);
 				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 				// Background of all segments
 				nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
