@@ -66,7 +66,7 @@ struct SanguineMatrixDisplay :TransparentWidget {
 struct Sanguine96x32OLEDDisplay :TransparentWidget {
 	Module* module;
 	std::shared_ptr<Font> font = nullptr;
-	std::string oledText;
+	std::string* oledText = nullptr;
 	NVGcolor textColor = nvgRGB(254, 254, 254);
 	Sanguine96x32OLEDDisplay();
 	void draw(const DrawArgs& args) override;

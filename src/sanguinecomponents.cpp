@@ -151,7 +151,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		if (module && !module->isBypassed()) {
 			if (font) {
-				if (!oledText.empty()) {
+				if (oledText && !(oledText->empty())) {
 					// Text					
 					nvgFontSize(args.vg, 6);
 					nvgFontFaceId(args.vg, font->handle);
@@ -160,8 +160,8 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 					Vec textPos = Vec(3, 7);
 					std::string textCopy;
-					textCopy.assign(oledText.data());
-					bool multiLine = oledText.size() > 8;
+					textCopy.assign(oledText->data());
+					bool multiLine = oledText->size() > 8;
 					if (multiLine) {
 						std::string displayText = "";
 						for (uint32_t i = 0; i < 8; i++)
@@ -175,7 +175,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
 					}
 					else {
-						nvgText(args.vg, textPos.x, textPos.y, oledText.c_str(), NULL);						
+						nvgText(args.vg, textPos.x, textPos.y, oledText->c_str(), NULL);						
 					}
 					//drawRectHalo(args, box.size, textColor, 55, 0.f);					
 				}
