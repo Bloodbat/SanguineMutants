@@ -29,6 +29,20 @@
         "Blank",
         "Visual"
       ]
+    },
+    {
+      "slug": "Sanguine-Apices",
+      "name": "Sanguine Apices",
+      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",      
+      "description": "Based on Mutable Instruments Peaks",
+      "tags": [
+        "Drum",
+        "Envelope generator",
+        "Oscillator",
+        "LFO",
+        "Sequencer",
+        "Hardware clone"
+      ]
     }
   ]
 }

@@ -6,6 +6,7 @@ extern Plugin* pluginInstance;
 
 extern Model* modelFunes;
 extern Model* modelMutantsBlank;
+extern Model* modelApices;
 
 /*template <typename Base>
 struct Rogan6PSLight : Base {
