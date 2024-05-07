@@ -219,11 +219,11 @@ struct Apices : Module {
 	void updateOleds() {
 
 		// TODO: Fix this!
-		if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION) {
-			getParamQuantity(PARAM_KNOB_1)->description = "????";
-			getParamQuantity(PARAM_KNOB_2)->description = "????";
-			getParamQuantity(PARAM_KNOB_3)->description = "????";
-			getParamQuantity(PARAM_KNOB_4)->description = "????";
+		if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION && edit_mode_ == EDIT_MODE_TWIN) {
+			oledText1 = "1&2. Frequency";
+			oledText2 = "1&2. Var. Prob ";
+			oledText3 = "1&2. Noise";
+			oledText4 = "1&2. Distort";
 			return;
 		}
 
