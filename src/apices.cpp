@@ -261,17 +261,17 @@ struct Apices : Module {
 				break;
 			}
 			case FUNCTION_PULSE_RANDOMIZER: {
-				oledText1 = "1. Acc./rgn. prob";
+				oledText1 = "1. Acc/rgn prob";
 				oledText2 = "1. Delay";
-				oledText3 = "2. Acc./rgn. Prob";
+				oledText3 = "2. Acc/rgn prob";
 				oledText4 = "2. Delay";
 				break;
 			}
 			case FUNCTION_FM_DRUM_GENERATOR: {
-				oledText1 = "1. BD prst. Mrph";
-				oledText2 = "1. BD prst. Var";
-				oledText3 = "2. SD prst. Mrph";
-				oledText4 = "2. SD prst. Var";
+				oledText1 = "1. BD Mrph";
+				oledText2 = "1. BD Var";
+				oledText3 = "2. SD Mrph";
+				oledText4 = "2. SD Var";
 				break;
 			}
 			case FUNCTION_RADIO_STATION: {
@@ -345,15 +345,15 @@ struct Apices : Module {
 				break;
 			}
 			case FUNCTION_PULSE_RANDOMIZER: {
-				oledText1 = channelText + "In. Trg. Prob";
-				oledText2 = channelText + "Tr. Reg. Prob";
+				oledText1 = channelText + "Trg. Prob";
+				oledText2 = channelText + "Reg. Prob";
 				oledText3 = channelText + "Delay time";
 				oledText4 = channelText + "Jitter";
 				break;
 			}
 			case FUNCTION_FM_DRUM_GENERATOR: {
 				oledText1 = channelText + "Frequency";
-				oledText2 = channelText + "FM intensity";
+				oledText2 = channelText + "FM intens.";
 				oledText3 = channelText + "Env decay";
 				oledText4 = channelText + "Color";
 				break;
