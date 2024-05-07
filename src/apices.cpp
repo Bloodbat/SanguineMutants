@@ -105,9 +105,6 @@ struct Apices : Module {
 	int32_t adc_value_[kNumAdcChannels] = { 0, 0, 0, 0 };
 	int32_t adc_threshold_[kNumAdcChannels] = { 0, 0, 0, 0 };
 
-	int function1 = 0;
-	int function2 = 0;
-
 	peaks::Processors processors[2] = {};
 
 	int16_t output[kBlockSize] = {};
@@ -138,6 +135,9 @@ struct Apices : Module {
 	size_t io_frame_ = 0;
 	size_t io_block_ = 0;
 	size_t render_block_ = kNumBlocks / 2;
+
+	std::string displayText1 = "";
+	std::string displayText2 = "";
 
 	std::string oledText1 = "";
 	std::string oledText2 = "";
@@ -725,14 +725,29 @@ void Apices::pollSwitches() {
 	refreshLeds();
 }
 
+static const std::string chan1Prefix = "1:";
+static const std::string chan2Prefix = "2:";
+
+static const std::vector<std::string> modeListChan1{
+	"ENVELOPE",
+	"LFO",
+	"TAP LFO",
+	"DRUM GEN",
+	"SEQUENCER*",
+	"PLS. SHAP*",
+	"PLS. RAND*",
+	"DRUM FM*",
+	"RADIO TOW&",
+};
+
 void Apices::saveState() {
 	settings_.edit_mode = edit_mode_;
 	settings_.function[0] = function_[0];
 	settings_.function[1] = function_[1];
 	std::copy(&pot_value_[0], &pot_value_[8], &settings_.pot_value[0]);
 	settings_.snap_mode = snap_mode_;
-	function1 = settings_.function[0];
-	function2 = settings_.function[1];
+	displayText1 = chan1Prefix + modeListChan1[settings_.function[0]];
+	displayText2 = chan2Prefix + modeListChan1[settings_.function[1]];
 }
 
 void Apices::refreshLeds() {
@@ -849,30 +864,6 @@ void Apices::refreshLeds() {
 	lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(b[1]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
 }
 
-static std::vector<std::string> modeListChan1{
-	"1:ENVELOPE",
-	"1:LFO",
-	"1:TAP LFO",
-	"1:DRUM GEN",
-	"1:SEQUENCER*",
-	"1:PLS. SHAP*",
-	"1:PLS. RAND*",
-	"1:DRUM FM*",
-	"1:RADIO T&",
-};
-
-static std::vector<std::string> modeListChan2{
-	"2:ENVELOPE",
-	"2:LFO",
-	"2:TAP LFO",
-	"2:DRUM GEN",
-	"2:SEQUENCER*",
-	"2:PLS. SHAP*",
-	"2:PLS. RAND*",
-	"2:DRUM FM*",
-	"1:RADIO T&",
-};
-
 struct ApicesWidget : ModuleWidget {
 	ApicesWidget(Apices* module) {
 		setModule(module);
@@ -894,10 +885,8 @@ struct ApicesWidget : ModuleWidget {
 		addChild(displayChannel2);
 
 		if (module) {
-			displayChannel1->itemList = &modeListChan1;
-			displayChannel1->selectedItem = &module->function1;
-			displayChannel2->itemList = &modeListChan2;
-			displayChannel2->selectedItem = &module->function2;
+			displayChannel1->displayText = &module->displayText1;
+			displayChannel2->displayText = &module->displayText2;
 		}
 
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(91.09, 34.261)), module, Apices::PARAM_MODE));
