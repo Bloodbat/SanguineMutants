@@ -767,7 +767,7 @@ void Apices::refreshLeds() {
 		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 		for (int i = 0; i < 4; i++) {
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(5.f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(0.5f, sampleTime);
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(0.f, sampleTime);
 		}
 		break;
@@ -777,8 +777,8 @@ void Apices::refreshLeds() {
 		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
 		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(1.f, sampleTime);
 		for (int i = 0; i < 4; i++) {
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(5.f, sampleTime);
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(5.f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(0.5f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(0.5f, sampleTime);
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(0.f, sampleTime);
 		}
 		break;
@@ -788,9 +788,9 @@ void Apices::refreshLeds() {
 		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 		for (int i = 0; i < 4; i++) {
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(5.f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(0.5f, sampleTime);
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(5.f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(0.5f, sampleTime);
 		}
 		break;
 	}
@@ -800,14 +800,14 @@ void Apices::refreshLeds() {
 		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 		for (int i = 0; i < 2; i++) {
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(5.f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(0.5f, sampleTime);
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(0.f, sampleTime);
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(0.f, sampleTime);
 		}
 		for (int i = 2; i < 4; i++) {
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[(LIGHT_KNOBS_MODE + i * 3) + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(5.f, sampleTime);
+			lights[(LIGHT_KNOBS_MODE + i * 3) + 2].setBrightnessSmooth(0.5f, sampleTime);
 		}
 		break;
 	}
