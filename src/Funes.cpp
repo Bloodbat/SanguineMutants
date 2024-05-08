@@ -61,7 +61,7 @@ struct Funes : Module {
 		PARAM_LPG_COLOR,
 		PARAM_LPG_DECAY,
 		PARAM_FREQUENCY_ROOT,
-		NUM_PARAMS
+		PARAM_COUNT
 	};
 
 	enum InputIds {
@@ -73,16 +73,16 @@ struct Funes : Module {
 		INPUT_TRIGGER,
 		INPUT_LEVEL,
 		INPUT_NOTE,
-		NUM_INPUTS
+		INPUT_COUNT
 	};
 	enum OutputIds {
 		OUTPUT_OUT,
 		OUTPUT_AUX,
-		NUM_OUTPUTS
+		OUTPUT_COUNT
 	};
 	enum LightIds {
 		ENUMS(LIGHT_MODEL, 8 * 3),
-		NUM_LIGHTS
+		LIGHT_COUNT
 	};
 
 	plaits::Voice voice[16];
@@ -112,7 +112,7 @@ struct Funes : Module {
 	dsp::ClockDivider clockDivider;
 
 	Funes() {
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
 
 		configParam(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODEL]->snapEnabled = true;

@@ -62,17 +62,17 @@ struct Apices : Module {
 		PARAM_TRIGGER_1,
 		PARAM_TRIGGER_2,
 		PARAM_MODE,
-		NUM_PARAMS
+		PARAM_COUNT
 	};
 	enum InputIds {
 		GATE_1_INPUT,
 		GATE_2_INPUT,
-		NUM_INPUTS
+		INPUT_COUNT
 	};
 	enum OutputIds {
 		OUT_1_OUTPUT,
 		OUT_2_OUTPUT,
-		NUM_OUTPUTS
+		OUTPUT_COUNT
 	};
 	enum LightIds {
 		LIGHT_TRIGGER_1,
@@ -87,7 +87,7 @@ struct Apices : Module {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
-		NUM_LIGHTS
+		LIGHT_COUNT
 	};
 
 	static const peaks::ProcessorFunction processorFunctionTable[FUNCTION_LAST][2];
@@ -146,7 +146,7 @@ struct Apices : Module {
 
 	Apices() {
 
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
 
 		configParam(PARAM_MODE, 0.0f, 8.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
@@ -159,9 +159,7 @@ struct Apices : Module {
 		configButton(PARAM_CHANNEL_SELECT, "Expert mode channel select");
 		configButton(PARAM_EXPERT_MODE, "Toggle expert mode");
 		configButton(PARAM_TRIGGER_1, "Trigger 1");
-		configButton(PARAM_TRIGGER_2, "Trigger 2");
-
-		//getParamQuantity(PARAM_BUTTON_2)->description = "Long press to enable/disable Easter Egg Modes";
+		configButton(PARAM_TRIGGER_2, "Trigger 2");		
 
 		settings.editMode = EDIT_MODE_TWIN;
 		settings.processorFunction[0] = FUNCTION_ENVELOPE;
