@@ -169,10 +169,11 @@ struct Apices : Module {
 		settings_.snap_mode = false;
 		std::fill(&settings_.pot_value[0], &settings_.pot_value[8], 0);
 
-		memset(&processors[0], 0, sizeof(processors[0]));
-		memset(&processors[1], 0, sizeof(processors[1]));
-		processors[0].Init(0);
-		processors[1].Init(1);
+		for (int i = 0; i < 2; i++) 
+		{
+			memset(&processors[i], 0, sizeof(processors[i]));
+			processors[i].Init(i);
+		}	
 
 		cvDivider.setDivision(cvUpdateFrequency);
 
