@@ -18,7 +18,7 @@ enum EditMode {
 	EDIT_MODE_LAST
 };
 
-enum Function {
+enum ProcessorFunction {
 	FUNCTION_ENVELOPE,
 	FUNCTION_LFO,
 	FUNCTION_TAP_LFO,
@@ -33,9 +33,9 @@ enum Function {
 };
 
 struct Settings {
-	uint8_t edit_mode;
-	uint8_t function[2];
-	uint8_t pot_value[8];
+	uint8_t editMode;
+	uint8_t processorFunction[2];
+	uint8_t potValue[8];
 	bool snap_mode;
 };
 
@@ -90,31 +90,31 @@ struct Apices : Module {
 		NUM_LIGHTS
 	};
 
-	static const peaks::ProcessorFunction function_table_[FUNCTION_LAST][2];
+	static const peaks::ProcessorFunction processorFunctionTable[FUNCTION_LAST][2];
 
-	EditMode edit_mode_ = EDIT_MODE_TWIN;
-	Function function_[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
-	Settings settings_;
+	EditMode editMode = EDIT_MODE_TWIN;
+	ProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
+	Settings settings;
 
-	uint8_t pot_value_[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	bool snap_mode_ = false;
-	bool snapped_[4] = { false, false, false, false };
+	bool snapMode = false;
+	bool snapped[4] = { false, false, false, false };
 
-	int32_t adc_lp_[kNumAdcChannels] = { 0, 0, 0, 0 };
-	int32_t adc_value_[kNumAdcChannels] = { 0, 0, 0, 0 };
-	int32_t adc_threshold_[kNumAdcChannels] = { 0, 0, 0, 0 };
+	int32_t adcLp[kNumAdcChannels] = { 0, 0, 0, 0 };
+	int32_t adcValue[kNumAdcChannels] = { 0, 0, 0, 0 };
+	int32_t adcThreshold[kNumAdcChannels] = { 0, 0, 0, 0 };
 
 	peaks::Processors processors[2] = {};
 
 	int16_t output[kBlockSize] = {};
 	int16_t brightness[kNumChannels] = { 0, 0 };
 
-	dsp::SchmittTrigger switches_[kButtonCount];
+	dsp::SchmittTrigger switches[kButtonCount];
 
 	// update descriptions/oleds every 16 samples
-	static const int cvUpdateFrequency = 16;
-	dsp::ClockDivider cvDivider;
+	static const int kClockUpdateFrequency = 16;
+	dsp::ClockDivider clockDivider;
 
 	peaks::GateFlags gate_flags[2] = { 0, 0 };
 
@@ -131,10 +131,10 @@ struct Apices : Module {
 		size_t frame_index;
 	};
 
-	Block block_[kNumBlocks] = {};
-	size_t io_frame_ = 0;
-	size_t io_block_ = 0;
-	size_t render_block_ = kNumBlocks / 2;
+	Block block[kNumBlocks] = {};
+	size_t ioFrame = 0;
+	size_t ioBlock = 0;
+	size_t renderBlock = kNumBlocks / 2;
 
 	std::string displayText1 = "";
 	std::string displayText2 = "";
@@ -163,11 +163,11 @@ struct Apices : Module {
 
 		//getParamQuantity(PARAM_BUTTON_2)->description = "Long press to enable/disable Easter Egg Modes";
 
-		settings_.edit_mode = EDIT_MODE_TWIN;
-		settings_.function[0] = FUNCTION_ENVELOPE;
-		settings_.function[1] = FUNCTION_ENVELOPE;
-		settings_.snap_mode = false;
-		std::fill(&settings_.pot_value[0], &settings_.pot_value[8], 0);
+		settings.editMode = EDIT_MODE_TWIN;
+		settings.processorFunction[0] = FUNCTION_ENVELOPE;
+		settings.processorFunction[1] = FUNCTION_ENVELOPE;
+		settings.snap_mode = false;
+		std::fill(&settings.potValue[0], &settings.potValue[8], 0);
 
 		for (int i = 0; i < 2; i++)
 		{
@@ -175,7 +175,7 @@ struct Apices : Module {
 			processors[i].Init(i);
 		}
 
-		cvDivider.setDivision(cvUpdateFrequency);
+		clockDivider.setDivision(kClockUpdateFrequency);
 
 		init();
 	}
@@ -185,40 +185,40 @@ struct Apices : Module {
 	}
 
 	void init() {
-		std::fill(&pot_value_[0], &pot_value_[8], 0);
+		std::fill(&potValue[0], &potValue[8], 0);
 		std::fill(&brightness[0], &brightness[1], 0);
-		std::fill(&adc_lp_[0], &adc_lp_[kNumAdcChannels], 0);
-		std::fill(&adc_value_[0], &adc_value_[kNumAdcChannels], 0);
-		std::fill(&adc_threshold_[0], &adc_threshold_[kNumAdcChannels], 0);
-		std::fill(&snapped_[0], &snapped_[kNumAdcChannels], false);
+		std::fill(&adcLp[0], &adcLp[kNumAdcChannels], 0);
+		std::fill(&adcValue[0], &adcValue[kNumAdcChannels], 0);
+		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels], 0);
+		std::fill(&snapped[0], &snapped[kNumAdcChannels], false);
 
-		edit_mode_ = static_cast<EditMode>(settings_.edit_mode);
-		function_[0] = static_cast<Function>(settings_.function[0]);
-		function_[1] = static_cast<Function>(settings_.function[1]);
-		std::copy(&settings_.pot_value[0], &settings_.pot_value[8], &pot_value_[0]);
+		editMode = static_cast<EditMode>(settings.editMode);
+		processorFunction[0] = static_cast<ProcessorFunction>(settings.processorFunction[0]);
+		processorFunction[1] = static_cast<ProcessorFunction>(settings.processorFunction[1]);
+		std::copy(&settings.potValue[0], &settings.potValue[8], &potValue[0]);
 
-		if (edit_mode_ == EDIT_MODE_FIRST || edit_mode_ == EDIT_MODE_SECOND) {
+		if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
 			lockPots();
 			for (uint8_t i = 0; i < 4; ++i) {
 				processors[0].set_parameter(
 					i,
-					static_cast<uint16_t>(pot_value_[i]) << 8);
+					static_cast<uint16_t>(potValue[i]) << 8);
 				processors[1].set_parameter(
 					i,
-					static_cast<uint16_t>(pot_value_[i + 4]) << 8);
+					static_cast<uint16_t>(potValue[i + 4]) << 8);
 			}
 		}
 
-		snap_mode_ = settings_.snap_mode;
+		snapMode = settings.snap_mode;
 
 		changeControlMode();
-		setFunction(0, function_[0]);
-		setFunction(1, function_[1]);
+		setFunction(0, processorFunction[0]);
+		setFunction(1, processorFunction[1]);
 	}
 
 	void updateOleds() {
-		if (edit_mode_ == EDIT_MODE_SPLIT) {
-			switch (function_[0]) {
+		if (editMode == EDIT_MODE_SPLIT) {
+			switch (processorFunction[0]) {
 			case FUNCTION_ENVELOPE: {
 				oledText1.assign("1. Attack");
 				oledText2 = "1. Decay";
@@ -289,18 +289,18 @@ struct Apices : Module {
 
 			int currentFunction = -1;
 			// same for both
-			if (edit_mode_ == EDIT_MODE_TWIN) {
-				currentFunction = function_[0]; 	// == function_[1]
+			if (editMode == EDIT_MODE_TWIN) {
+				currentFunction = processorFunction[0];
 			}
 			// if expert, pick the active set of labels
-			else if (edit_mode_ == EDIT_MODE_FIRST || edit_mode_ == EDIT_MODE_SECOND) {
-				currentFunction = function_[edit_mode_ - EDIT_MODE_FIRST];
+			else if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
+				currentFunction = processorFunction[editMode - EDIT_MODE_FIRST];
 			}
 			else {
 				return;
 			}
 
-			std::string channelText = (edit_mode_ == EDIT_MODE_TWIN) ? "1&2. " : string::f("%d. ", edit_mode_ - EDIT_MODE_FIRST + 1);
+			std::string channelText = (editMode == EDIT_MODE_TWIN) ? "1&2. " : string::f("%d. ", editMode - EDIT_MODE_FIRST + 1);
 
 			switch (currentFunction) {
 			case FUNCTION_ENVELOPE: {
@@ -378,18 +378,18 @@ struct Apices : Module {
 
 		json_t* rootJ = json_object();
 
-		json_object_set_new(rootJ, "edit_mode", json_integer((int)settings_.edit_mode));
-		json_object_set_new(rootJ, "fcn_channel_1", json_integer((int)settings_.function[0]));
-		json_object_set_new(rootJ, "fcn_channel_2", json_integer((int)settings_.function[1]));
+		json_object_set_new(rootJ, "edit_mode", json_integer((int)settings.editMode));
+		json_object_set_new(rootJ, "fcn_channel_1", json_integer((int)settings.processorFunction[0]));
+		json_object_set_new(rootJ, "fcn_channel_2", json_integer((int)settings.processorFunction[1]));
 
 		json_t* potValuesJ = json_array();
-		for (int p : pot_value_) {
+		for (int p : potValue) {
 			json_t* pJ = json_integer(p);
 			json_array_append_new(potValuesJ, pJ);
 		}
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
-		json_object_set_new(rootJ, "snap_mode", json_boolean(settings_.snap_mode));
+		json_object_set_new(rootJ, "snap_mode", json_boolean(settings.snap_mode));
 
 		return rootJ;
 	}
@@ -397,30 +397,30 @@ struct Apices : Module {
 	void dataFromJson(json_t* rootJ) override {
 		json_t* editModeJ = json_object_get(rootJ, "edit_mode");
 		if (editModeJ) {
-			settings_.edit_mode = static_cast<EditMode>(json_integer_value(editModeJ));
+			settings.editMode = static_cast<EditMode>(json_integer_value(editModeJ));
 		}
 
 		json_t* fcnChannel1J = json_object_get(rootJ, "fcn_channel_1");
 		if (fcnChannel1J) {
-			settings_.function[0] = static_cast<Function>(json_integer_value(fcnChannel1J));
+			settings.processorFunction[0] = static_cast<ProcessorFunction>(json_integer_value(fcnChannel1J));
 		}
 
 		json_t* fcnChannel2J = json_object_get(rootJ, "fcn_channel_2");
 		if (fcnChannel2J) {
-			settings_.function[1] = static_cast<Function>(json_integer_value(fcnChannel2J));
+			settings.processorFunction[1] = static_cast<ProcessorFunction>(json_integer_value(fcnChannel2J));
 		}
 
 		json_t* snapModeJ = json_object_get(rootJ, "snap_mode");
 		if (snapModeJ) {
-			settings_.snap_mode = json_boolean_value(snapModeJ);
+			settings.snap_mode = json_boolean_value(snapModeJ);
 		}
 
 		json_t* potValuesJ = json_object_get(rootJ, "pot_values");
 		size_t potValueId;
 		json_t* pJ;
 		json_array_foreach(potValuesJ, potValueId, pJ) {
-			if (potValueId < sizeof(pot_value_) / sizeof(pot_value_)[0]) {
-				settings_.pot_value[potValueId] = json_integer_value(pJ);
+			if (potValueId < sizeof(potValue) / sizeof(potValue)[0]) {
+				settings.potValue[potValueId] = json_integer_value(pJ);
 			}
 		}
 
@@ -431,24 +431,24 @@ struct Apices : Module {
 
 	void process(const ProcessArgs& args) override {
 		// only update knobs / lights every 16 samples
-		if (cvDivider.process()) {
+		if (clockDivider.process()) {
 			pollSwitches();
 			pollPots();
 			updateOleds();
 		}
 
-		Function CurrentFunction = function();
+		ProcessorFunction CurrentFunction = getProcessorFunction();
 		if (params[PARAM_MODE].getValue() != CurrentFunction) {
-			CurrentFunction = static_cast<Function>(params[PARAM_MODE].getValue());
-			setFunction(edit_mode_ - EDIT_MODE_FIRST, CurrentFunction);
+			CurrentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
+			setFunction(editMode - EDIT_MODE_FIRST, CurrentFunction);
 			saveState();
 		}
 
 		if (outputBuffer.empty()) {
 
-			while (render_block_ != io_block_) {
-				process(&block_[render_block_], kBlockSize);
-				render_block_ = (render_block_ + 1) % kNumBlocks;
+			while (renderBlock != ioBlock) {
+				processChannels(&block[renderBlock], kBlockSize);
+				renderBlock = (renderBlock + 1) % kNumBlocks;
 			}
 
 			uint32_t external_gate_inputs = 0;
@@ -505,39 +505,39 @@ struct Apices : Module {
 
 	inline Slice NextSlice(size_t size) {
 		Slice s;
-		s.block = &block_[io_block_];
-		s.frame_index = io_frame_;
-		io_frame_ += size;
-		if (io_frame_ >= kBlockSize) {
-			io_frame_ -= kBlockSize;
-			io_block_ = (io_block_ + 1) % kNumBlocks;
+		s.block = &block[ioBlock];
+		s.frame_index = ioFrame;
+		ioFrame += size;
+		if (ioFrame >= kBlockSize) {
+			ioFrame -= kBlockSize;
+			ioBlock = (ioBlock + 1) % kNumBlocks;
 		}
 		return s;
 	}
 
-	inline Function function() const {
-		return edit_mode_ == EDIT_MODE_SECOND ? function_[1] : function_[0];
+	inline ProcessorFunction getProcessorFunction() const {
+		return editMode == EDIT_MODE_SECOND ? processorFunction[1] : processorFunction[0];
 	}
 
-	inline void set_led_brightness(int channel, int16_t value) {
+	inline void setLedBrightness(int channel, int16_t value) {
 		brightness[channel] = value;
 	}
 
-	inline void process(Block* block, size_t size) {
+	inline void processChannels(Block* block, size_t size) {
 		for (size_t i = 0; i < kNumChannels; ++i) {
 			processors[i].Process(block->input[i], output, size);
-			set_led_brightness(i, output[0]);
+			setLedBrightness(i, output[0]);
 			for (size_t j = 0; j < size; ++j) {
 				// From calibration_data.h, shifting signed to unsigned values.
-				int32_t shifted_value = 32767 + static_cast<int32_t>(output[j]);
-				CONSTRAIN(shifted_value, 0, 65535);
-				block->output[i][j] = static_cast<uint16_t>(shifted_value);
+				int32_t shiftedValue = 32767 + static_cast<int32_t>(output[j]);
+				CONSTRAIN(shiftedValue, 0, 65535);
+				block->output[i][j] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
 	}
 
 	void changeControlMode();
-	void setFunction(uint8_t index, Function f);
+	void setFunction(uint8_t index, ProcessorFunction f);
 	void onPotChanged(uint16_t id, uint16_t value);
 	void onSwitchReleased(uint16_t id);
 	void saveState();
@@ -549,7 +549,7 @@ struct Apices : Module {
 	long long getSystemTimeMs();
 };
 
-const peaks::ProcessorFunction Apices::function_table_[FUNCTION_LAST][2] = {
+const peaks::ProcessorFunction Apices::processorFunctionTable[FUNCTION_LAST][2] = {
 	{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
 	{ peaks::PROCESSOR_FUNCTION_LFO, peaks::PROCESSOR_FUNCTION_LFO },
 	{ peaks::PROCESSOR_FUNCTION_TAP_LFO, peaks::PROCESSOR_FUNCTION_TAP_LFO },
@@ -566,16 +566,16 @@ const peaks::ProcessorFunction Apices::function_table_[FUNCTION_LAST][2] = {
 void Apices::changeControlMode() {
 	uint16_t parameters[4];
 	for (int i = 0; i < 4; ++i) {
-		parameters[i] = adc_value_[i];
+		parameters[i] = adcValue[i];
 	}
 
-	if (edit_mode_ == EDIT_MODE_SPLIT) {
+	if (editMode == EDIT_MODE_SPLIT) {
 		processors[0].CopyParameters(&parameters[0], 2);
 		processors[1].CopyParameters(&parameters[2], 2);
 		processors[0].set_control_mode(peaks::CONTROL_MODE_HALF);
 		processors[1].set_control_mode(peaks::CONTROL_MODE_HALF);
 	}
-	else if (edit_mode_ == EDIT_MODE_TWIN) {
+	else if (editMode == EDIT_MODE_TWIN) {
 		processors[0].CopyParameters(&parameters[0], 4);
 		processors[1].CopyParameters(&parameters[0], 4);
 		processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
@@ -587,23 +587,23 @@ void Apices::changeControlMode() {
 	}
 }
 
-void Apices::setFunction(uint8_t index, Function f) {
-	if (edit_mode_ == EDIT_MODE_SPLIT || edit_mode_ == EDIT_MODE_TWIN) {
-		function_[0] = function_[1] = f;
-		processors[0].set_function(function_table_[f][0]);
-		processors[1].set_function(function_table_[f][1]);
+void Apices::setFunction(uint8_t index, ProcessorFunction f) {
+	if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
+		processorFunction[0] = processorFunction[1] = f;
+		processors[0].set_function(processorFunctionTable[f][0]);
+		processors[1].set_function(processorFunctionTable[f][1]);
 	}
 	else {
-		function_[index] = f;
-		processors[index].set_function(function_table_[f][index]);
+		processorFunction[index] = f;
+		processors[index].set_function(processorFunctionTable[f][index]);
 	}
 }
 
 void Apices::onSwitchReleased(uint16_t id) {
 	switch (id) {
 	case SWITCH_TWIN_MODE: {
-		if (edit_mode_ <= EDIT_MODE_SPLIT) {
-			edit_mode_ = static_cast<EditMode>(EDIT_MODE_SPLIT - edit_mode_);
+		if (editMode <= EDIT_MODE_SPLIT) {
+			editMode = static_cast<EditMode>(EDIT_MODE_SPLIT - editMode);
 		}
 		changeControlMode();
 		saveState();
@@ -611,11 +611,11 @@ void Apices::onSwitchReleased(uint16_t id) {
 	}
 
 	case SWITCH_EXPERT: {
-		edit_mode_ = static_cast<EditMode>(
-			(edit_mode_ + EDIT_MODE_FIRST) % EDIT_MODE_LAST);
-		function_[0] = function_[1];
-		processors[0].set_function(function_table_[function_[0]][0]);
-		processors[1].set_function(function_table_[function_[0]][1]);
+		editMode = static_cast<EditMode>(
+			(editMode + EDIT_MODE_FIRST) % EDIT_MODE_LAST);
+		processorFunction[0] = processorFunction[1];
+		processors[0].set_function(processorFunctionTable[processorFunction[0]][0]);
+		processors[1].set_function(processorFunctionTable[processorFunction[0]][1]);
 		lockPots();
 		changeControlMode();
 		saveState();
@@ -623,16 +623,16 @@ void Apices::onSwitchReleased(uint16_t id) {
 	}
 
 	case SWITCH_CHANNEL_SELECT: {
-		if (edit_mode_ >= EDIT_MODE_FIRST) {
-			edit_mode_ = static_cast<EditMode>(EDIT_MODE_SECOND - (edit_mode_ & 1));
+		if (editMode >= EDIT_MODE_FIRST) {
+			editMode = static_cast<EditMode>(EDIT_MODE_SECOND - (editMode & 1));
 
-			switch (edit_mode_)
+			switch (editMode)
 			{
 			case EDIT_MODE_FIRST:
-				params[PARAM_MODE].setValue(function_[0]);
+				params[PARAM_MODE].setValue(processorFunction[0]);
 				break;
 			case EDIT_MODE_SECOND:
-				params[PARAM_MODE].setValue(function_[1]);
+				params[PARAM_MODE].setValue(processorFunction[1]);
 				break;
 			default:
 				break;
@@ -650,33 +650,33 @@ void Apices::onSwitchReleased(uint16_t id) {
 
 void Apices::lockPots() {
 	std::fill(
-		&adc_threshold_[0],
-		&adc_threshold_[kNumAdcChannels],
+		&adcThreshold[0],
+		&adcThreshold[kNumAdcChannels],
 		kAdcThresholdLocked);
-	std::fill(&snapped_[0], &snapped_[kNumAdcChannels], false);
+	std::fill(&snapped[0], &snapped[kNumAdcChannels], false);
 }
 
 void Apices::pollPots() {
 	for (uint8_t i = 0; i < kNumAdcChannels; ++i) {
-		adc_lp_[i] = (int32_t(params[PARAM_KNOB_1 + i].getValue()) + adc_lp_[i] * 7) >> 3;
-		int32_t value = adc_lp_[i];
-		int32_t current_value = adc_value_[i];
-		if (value >= current_value + adc_threshold_[i] ||
-			value <= current_value - adc_threshold_[i] ||
-			!adc_threshold_[i]) {
+		adcLp[i] = (int32_t(params[PARAM_KNOB_1 + i].getValue()) + adcLp[i] * 7) >> 3;
+		int32_t value = adcLp[i];
+		int32_t current_value = adcValue[i];
+		if (value >= current_value + adcThreshold[i] ||
+			value <= current_value - adcThreshold[i] ||
+			!adcThreshold[i]) {
 			onPotChanged(i, value);
-			adc_value_[i] = value;
-			adc_threshold_[i] = kAdcThresholdUnlocked;
+			adcValue[i] = value;
+			adcThreshold[i] = kAdcThresholdUnlocked;
 		}
 	}
 }
 
 void Apices::onPotChanged(uint16_t id, uint16_t value) {
-	switch (edit_mode_) {
+	switch (editMode) {
 	case EDIT_MODE_TWIN:
 		processors[0].set_parameter(id, value);
 		processors[1].set_parameter(id, value);
-		pot_value_[id] = value >> 8;
+		potValue[id] = value >> 8;
 		break;
 
 	case EDIT_MODE_SPLIT:
@@ -686,27 +686,27 @@ void Apices::onPotChanged(uint16_t id, uint16_t value) {
 		else {
 			processors[1].set_parameter(id - 2, value);
 		}
-		pot_value_[id] = value >> 8;
+		potValue[id] = value >> 8;
 		break;
 
 	case EDIT_MODE_FIRST:
 	case EDIT_MODE_SECOND: {
-		uint8_t index = id + (edit_mode_ - EDIT_MODE_FIRST) * 4;
-		peaks::Processors* p = &processors[edit_mode_ - EDIT_MODE_FIRST];
+		uint8_t index = id + (editMode - EDIT_MODE_FIRST) * 4;
+		peaks::Processors* p = &processors[editMode - EDIT_MODE_FIRST];
 
-		int16_t delta = static_cast<int16_t>(pot_value_[index]) - \
+		int16_t delta = static_cast<int16_t>(potValue[index]) - \
 			static_cast<int16_t>(value >> 8);
 		if (delta < 0) {
 			delta = -delta;
 		}
 
-		if (!snap_mode_ || snapped_[id] || delta <= 2) {
+		if (!snapMode || snapped[id] || delta <= 2) {
 			p->set_parameter(id, value);
-			pot_value_[index] = value >> 8;
-			snapped_[id] = true;
+			potValue[index] = value >> 8;
+			snapped[id] = true;
 		}
+		break;
 	}
-						 break;
 
 	case EDIT_MODE_LAST:
 		break;
@@ -721,7 +721,7 @@ long long Apices::getSystemTimeMs() {
 
 void Apices::pollSwitches() {
 	for (uint8_t i = 0; i < kButtonCount; ++i) {
-		if (switches_[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
+		if (switches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
 			onSwitchReleased(SWITCH_TWIN_MODE + i);
 		}
 	}
@@ -744,22 +744,22 @@ static const std::vector<std::string> modeListChan1{
 };
 
 void Apices::saveState() {
-	settings_.edit_mode = edit_mode_;
-	settings_.function[0] = function_[0];
-	settings_.function[1] = function_[1];
-	std::copy(&pot_value_[0], &pot_value_[8], &settings_.pot_value[0]);
-	settings_.snap_mode = snap_mode_;
-	displayText1 = chan1Prefix + modeListChan1[settings_.function[0]];
-	displayText2 = chan2Prefix + modeListChan1[settings_.function[1]];
+	settings.editMode = editMode;
+	settings.processorFunction[0] = processorFunction[0];
+	settings.processorFunction[1] = processorFunction[1];
+	std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
+	settings.snap_mode = snapMode;
+	displayText1 = chan1Prefix + modeListChan1[settings.processorFunction[0]];
+	displayText2 = chan2Prefix + modeListChan1[settings.processorFunction[1]];
 }
 
 void Apices::refreshLeds() {
 
 	// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
-	const float sampleTime = APP->engine->getSampleTime() * cvUpdateFrequency;
+	const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
 
 	uint8_t flash = (getSystemTimeMs() >> 7) & 7;
-	switch (edit_mode_) {
+	switch (editMode) {
 	case EDIT_MODE_FIRST:
 		lights[LIGHT_CHANNEL1].setBrightnessSmooth((flash == 1) ? 1.0f : 0.0f, sampleTime);
 		lights[LIGHT_CHANNEL2].setBrightnessSmooth(0.f, sampleTime);
@@ -815,23 +815,23 @@ void Apices::refreshLeds() {
 		break;
 	}
 
-	lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((edit_mode_ == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
-	lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((edit_mode_ & 2) ? 1.0F : 0.F, sampleTime);
+	lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
+	lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.0F : 0.F, sampleTime);
 
-	if ((getSystemTimeMs() & 256) && function() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
+	if ((getSystemTimeMs() & 256) && getProcessorFunction() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
 		for (size_t i = 0; i < 4; ++i) {
 			lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(0.0f, sampleTime);
 		}
 	}
 	else {
 		for (size_t i = 0; i < 4; ++i) {
-			lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((function() & 3) == i) ? 1.0f : 0.0f, sampleTime);
+			lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((getProcessorFunction() & 3) == i) ? 1.0f : 0.0f, sampleTime);
 		}
 	}
 
 	uint8_t b[2];
 	for (uint8_t i = 0; i < 2; ++i) {
-		switch (function_[i]) {
+		switch (processorFunction[i]) {
 		case FUNCTION_DRUM_GENERATOR:
 		case FUNCTION_FM_DRUM_GENERATOR:
 			b[i] = (int16_t)abs(brightness[i]) >> 8;
@@ -845,8 +845,8 @@ void Apices::refreshLeds() {
 			brightnessVal >>= 8;
 			CONSTRAIN(brightnessVal, 0, 255);
 			b[i] = brightnessVal;
+			break;
 		}
-									break;
 		default:
 			b[i] = brightness[i] >> 7;
 			break;
@@ -981,7 +981,7 @@ struct ApicesWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 		Apices* peaks = dynamic_cast<Apices*>(this->module);
 
-		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &peaks->snap_mode_));
+		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &peaks->snapMode));
 	}
 
 };
