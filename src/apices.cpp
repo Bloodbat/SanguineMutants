@@ -219,7 +219,7 @@ struct Apices : Module {
 		if (editMode == EDIT_MODE_SPLIT) {
 			switch (processorFunction[0]) {
 			case FUNCTION_ENVELOPE: {
-				oledText1.assign("1. Attack");
+				oledText1 = "1. Attack";
 				oledText2 = "1. Decay";
 				oledText3 = "2. Attack";
 				oledText3 = "2. Decay";
