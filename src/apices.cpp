@@ -539,7 +539,7 @@ struct Apices : Module {
 	void changeControlMode();
 	void setFunction(uint8_t index, ProcessorFunction f);
 	void onPotChanged(uint16_t id, uint16_t value);
-	void onSwitchReleased(uint16_t id);
+	void processSwitch(uint16_t id);
 	void saveState();
 	void lockPots();
 	void pollSwitches();
@@ -599,7 +599,7 @@ void Apices::setFunction(uint8_t index, ProcessorFunction f) {
 	}
 }
 
-void Apices::onSwitchReleased(uint16_t id) {
+void Apices::processSwitch(uint16_t id) {
 	switch (id) {
 	case SWITCH_TWIN_MODE: {
 		if (editMode <= EDIT_MODE_SPLIT) {
@@ -722,7 +722,7 @@ long long Apices::getSystemTimeMs() {
 void Apices::pollSwitches() {
 	for (uint8_t i = 0; i < kButtonCount; ++i) {
 		if (switches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
-			onSwitchReleased(SWITCH_TWIN_MODE + i);
+			processSwitch(SWITCH_TWIN_MODE + i);
 		}
 	}
 	refreshLeds();
