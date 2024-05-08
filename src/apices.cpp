@@ -169,11 +169,11 @@ struct Apices : Module {
 		settings_.snap_mode = false;
 		std::fill(&settings_.pot_value[0], &settings_.pot_value[8], 0);
 
-		for (int i = 0; i < 2; i++) 
+		for (int i = 0; i < 2; i++)
 		{
 			memset(&processors[i], 0, sizeof(processors[i]));
 			processors[i].Init(i);
-		}	
+		}
 
 		cvDivider.setDivision(cvUpdateFrequency);
 
@@ -634,6 +634,8 @@ void Apices::onSwitchReleased(uint16_t id) {
 			case EDIT_MODE_SECOND:
 				params[PARAM_MODE].setValue(function_[1]);
 				break;
+			default:
+				break;
 			}
 
 			lockPots();
@@ -809,6 +811,8 @@ void Apices::refreshLeds() {
 		}
 		break;
 	}
+	default:
+		break;
 	}
 
 	lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((edit_mode_ == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
