@@ -848,7 +848,7 @@ void Apices::refreshLeds() {
 		}
 	}
 
-	if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION) {
+	if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION || processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION) {
 		uint8_t pattern = processors[0].number_station().digit()
 			^ processors[1].number_station().digit();
 		for (size_t i = 0; i < 4; ++i) {
