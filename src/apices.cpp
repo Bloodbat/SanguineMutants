@@ -27,7 +27,7 @@ enum Function {
 	FUNCTION_PULSE_SHAPER,
 	FUNCTION_PULSE_RANDOMIZER,
 	FUNCTION_FM_DRUM_GENERATOR,
-	FUNCTION_RADIO_STATION,
+	FUNCTION_NUMBER_STATION,
 	FUNCTION_LAST,
 	FUNCTION_FIRST_ALTERNATE_FUNCTION = FUNCTION_MINI_SEQUENCER
 };
@@ -274,7 +274,7 @@ struct Apices : Module {
 				oledText4 = "2. SD Var";
 				break;
 			}
-			case FUNCTION_RADIO_STATION: {
+			case FUNCTION_NUMBER_STATION: {
 				oledText1 = "1. Frequency";
 				oledText2 = "1. Var. Prob";
 				oledText3 = "2. frequency";
@@ -358,7 +358,7 @@ struct Apices : Module {
 				oledText4 = channelText + "Color";
 				break;
 			}
-			case FUNCTION_RADIO_STATION: {
+			case FUNCTION_NUMBER_STATION: {
 				oledText1 = channelText + "Frequency";
 				oledText2 = channelText + "Var. Prob";
 				oledText3 = channelText + "Noise";
@@ -737,7 +737,7 @@ static const std::vector<std::string> modeListChan1{
 	"PLS. SHAP*",
 	"PLS. RAND*",
 	"DRUM FM*",
-	"RADIO TOW&",
+	"NUMBER ST&",
 };
 
 void Apices::saveState() {
