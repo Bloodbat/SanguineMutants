@@ -726,19 +726,16 @@ void Apices::pollSwitches() {
 	refreshLeds();
 }
 
-static const std::string chan1Prefix = "1:";
-static const std::string chan2Prefix = "2:";
-
 static const std::vector<std::string> modeList{
 	"ENVELOPE",
 	"LFO",
 	"TAP LFO",
-	"DRUM GEN",
+	"DRUM GENERAT",
 	"SEQUENCER*",
-	"PLS. SHAP*",
-	"PLS. RAND*",
+	"PLS. SHAPE*",
+	"PLS. RANDOM*",
 	"DRUM FM*",
-	"NUMBER ST&",
+	"NUMBER STAT&",
 };
 
 void Apices::saveState() {
@@ -747,8 +744,8 @@ void Apices::saveState() {
 	settings.processorFunction[1] = processorFunction[1];
 	std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
 	settings.snap_mode = snapMode;
-	displayText1 = chan1Prefix + modeList[settings.processorFunction[0]];
-	displayText2 = chan2Prefix + modeList[settings.processorFunction[1]];
+	displayText1 = modeList[settings.processorFunction[0]];
+	displayText2 = modeList[settings.processorFunction[1]];
 }
 
 void Apices::refreshLeds() {
@@ -898,7 +895,7 @@ struct ApicesWidget : ModuleWidget {
 			module, Apices::PARAM_EDIT_MODE, Apices::LIGHT_SPLIT_MODE));
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<BlueLight>>>(mm2px(Vec(17.472, 54.112)),
 			module, Apices::PARAM_EXPERT_MODE, Apices::LIGHT_EXPERT_MODE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(4.933, 54.112)),
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(6.433, 54.112)),
 			module, Apices::PARAM_CHANNEL_SELECT, Apices::LIGHT_CHANNEL_SELECT));
 
 		addParam(createParamCentered<LEDBezel>(mm2px(Vec(11.595, 70.855)), module, Apices::PARAM_TRIGGER_1));
@@ -912,8 +909,8 @@ struct ApicesWidget : ModuleWidget {
 		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(83.215, 42.136)), module, Apices::LIGHT_FUNCTION_3));
 		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(98.965, 42.136)), module, Apices::LIGHT_FUNCTION_4));
 
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.633, 27.965)), module, Apices::LIGHT_CHANNEL1));
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(5.633, 40.557)), module, Apices::LIGHT_CHANNEL2));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.433, 27.965)), module, Apices::LIGHT_CHANNEL1));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.433, 40.557)), module, Apices::LIGHT_CHANNEL2));
 
 		addParam(createParamCentered<Rogan2PSRed>(mm2px(Vec(31.734, 63.829)), module, Apices::PARAM_KNOB_1));
 		addParam(createParamCentered<Rogan2PSRed>(mm2px(Vec(70.966, 63.829)), module, Apices::PARAM_KNOB_2));
