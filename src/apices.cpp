@@ -731,7 +731,7 @@ void Apices::pollSwitches() {
 static const std::string chan1Prefix = "1:";
 static const std::string chan2Prefix = "2:";
 
-static const std::vector<std::string> modeListChan1{
+static const std::vector<std::string> modeList{
 	"ENVELOPE",
 	"LFO",
 	"TAP LFO",
@@ -749,8 +749,8 @@ void Apices::saveState() {
 	settings.processorFunction[1] = processorFunction[1];
 	std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
 	settings.snap_mode = snapMode;
-	displayText1 = chan1Prefix + modeListChan1[settings.processorFunction[0]];
-	displayText2 = chan2Prefix + modeListChan1[settings.processorFunction[1]];
+	displayText1 = chan1Prefix + modeList[settings.processorFunction[0]];
+	displayText2 = chan2Prefix + modeList[settings.processorFunction[1]];
 }
 
 void Apices::refreshLeds() {
