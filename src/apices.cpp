@@ -28,6 +28,7 @@ enum ProcessorFunction {
 	FUNCTION_PULSE_RANDOMIZER,
 	FUNCTION_FM_DRUM_GENERATOR,
 	FUNCTION_NUMBER_STATION,
+	FUNCTION_BOUNCING_BALL,
 	FUNCTION_LAST,
 	FUNCTION_FIRST_ALTERNATE_FUNCTION = FUNCTION_MINI_SEQUENCER
 };
@@ -148,7 +149,7 @@ struct Apices : Module {
 
 		config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
 
-		configParam(PARAM_MODE, 0.0f, 8.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
+		configParam(PARAM_MODE, 0.0f, 9.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
 		configParam(PARAM_KNOB_1, 0.0f, 65535.0f, 32678.0f, "Knob 1", "", 0.f, 1.f / 65535.f);
@@ -276,8 +277,15 @@ struct Apices : Module {
 			case FUNCTION_NUMBER_STATION: {
 				oledText1 = "1. Frequency";
 				oledText2 = "1. Var. Prob";
-				oledText3 = "2. frequency";
+				oledText3 = "2. Frequency";
 				oledText4 = "2. Var. Prob";
+				break;
+			}
+			case FUNCTION_BOUNCING_BALL: {
+				oledText1 = "1. Gravity";
+				oledText2 = "1. Bounce";
+				oledText3 = "2. Gravity";
+				oledText4 = "2. Bounce";
 				break;
 			}
 			default: break;
@@ -362,6 +370,13 @@ struct Apices : Module {
 				oledText2 = channelText + "Var. Prob";
 				oledText3 = channelText + "Noise";
 				oledText4 = channelText + "Distortion";
+				break;
+			}
+			case FUNCTION_BOUNCING_BALL: {
+				oledText1 = channelText + "Gravity";
+				oledText2 = channelText + "Bounce";
+				oledText3 = channelText + "Amplitude";
+				oledText4 = channelText + "Velocity";
 				break;
 			}
 			default: break;
@@ -558,6 +573,7 @@ const peaks::ProcessorFunction Apices::processorFunctionTable[FUNCTION_LAST][2] 
 	{ peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
 	{ peaks::PROCESSOR_FUNCTION_FM_DRUM, peaks::PROCESSOR_FUNCTION_FM_DRUM },
 	{ peaks::PROCESSOR_FUNCTION_NUMBER_STATION, peaks::PROCESSOR_FUNCTION_NUMBER_STATION},
+	{ peaks::PROCESSOR_FUNCTION_BOUNCING_BALL, peaks::PROCESSOR_FUNCTION_BOUNCING_BALL}
 };
 
 
@@ -736,6 +752,7 @@ static const std::vector<std::string> modeList{
 	"PLS. RANDOM*",
 	"DRUM FM*",
 	"NUMBER STAT&",
+	"BOUNCE BALL@"
 };
 
 void Apices::saveState() {
@@ -857,6 +874,12 @@ void Apices::refreshLeds() {
 		}
 		b[0] = processors[0].number_station().gate() ? 255 : 0;
 		b[1] = processors[1].number_station().gate() ? 255 : 0;
+	}
+
+	if (processors[0].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL || processors[1].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL) {
+		for (size_t i = 0; i < 4; ++i) {
+			lights[LIGHT_FUNCTION_1 + i].value = 1.0f;
+		}
 	}
 
 	const float deltaTime = APP->engine->getSampleTime();
