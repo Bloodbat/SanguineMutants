@@ -244,7 +244,7 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 			if (getParamQuantity()->getValue() == 0) {
 				drawCircularHalo(args, box.size, haloColorOff, 175, 8.f);
 			}
-			else {
+			else if (getParamQuantity()->getValue() == 1) {
 				drawCircularHalo(args, box.size, haloColorOn, 175, 8.f);
 			}
 		}
