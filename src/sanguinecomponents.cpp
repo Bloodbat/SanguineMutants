@@ -33,9 +33,7 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 // Displays
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
-	// Background
-	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
-	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+	// Background		
 	nvgBeginPath(args.vg);
 	nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
 	nvgFillColor(args.vg, backgroundColor);
@@ -71,7 +69,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 					// TODO: Make sure we only display max. display chars.
 					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
 				}
-				drawRectHalo(args, box.size, textColor, 55, 0.f);
+				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
 	}
@@ -109,7 +107,7 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-				drawRectHalo(args, box.size, textColor, 55, 0.f);
+				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
 	}
