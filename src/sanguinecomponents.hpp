@@ -32,14 +32,17 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 // Displays
 
 struct SanguineBaseSegmentDisplay : TransparentWidget {
+	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
+	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+	NVGcolor textColor = nvgRGB(200, 0, 0);
+	unsigned char haloOpacity = 55;
 	void draw(const DrawArgs& args) override;
 };
 
 struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {
 	Module* module;
 	std::shared_ptr<Font> font = nullptr;
-	std::string* displayText = nullptr;
-	NVGcolor textColor = nvgRGB(200, 0, 0);
+	std::string* displayText = nullptr;	
 	SanguineAlphaDisplay();	
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
@@ -47,8 +50,7 @@ struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {
 struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
 	Module* module;
 	std::shared_ptr<Font> font = nullptr;
-	int* value = nullptr;
-	NVGcolor textColor = nvgRGB(200, 0, 0);
+	int* value = nullptr;	
 	SanguineLedNumberDisplay();	
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
