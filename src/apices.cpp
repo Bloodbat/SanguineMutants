@@ -222,7 +222,7 @@ struct Apices : Module {
 				oledText1 = "1. Attack";
 				oledText2 = "1. Decay";
 				oledText3 = "2. Attack";
-				oledText3 = "2. Decay";
+				oledText4 = "2. Decay";
 				break;
 			}
 			case FUNCTION_LFO: {
@@ -234,9 +234,9 @@ struct Apices : Module {
 			}
 			case FUNCTION_TAP_LFO: {
 				oledText1 = "1. Waveform";
-				oledText2 = "1. Wave. Var";
+				oledText2 = "1. Wave. Var.";
 				oledText3 = "2. Waveform";
-				oledText4 = "2. Wave. Var";
+				oledText4 = "2. Wave. Var.";
 				break;
 			}
 			case FUNCTION_DRUM_GENERATOR: {
@@ -261,17 +261,17 @@ struct Apices : Module {
 				break;
 			}
 			case FUNCTION_PULSE_RANDOMIZER: {
-				oledText1 = "1. Acc/rgn prob";
+				oledText1 = "1. Acc/Rgn. Prob";
 				oledText2 = "1. Delay";
-				oledText3 = "2. Acc/rgn prob";
+				oledText3 = "2. Acc/Rgn. Prob";
 				oledText4 = "2. Delay";
 				break;
 			}
 			case FUNCTION_FM_DRUM_GENERATOR: {
-				oledText1 = "1. BD Mrph";
-				oledText2 = "1. BD Var";
-				oledText3 = "2. SD Mrph";
-				oledText4 = "2. SD Var";
+				oledText1 = "1. BD Morph";
+				oledText2 = "1. BD Variation";
+				oledText3 = "2. SD Morph";
+				oledText4 = "2. SD Variation";
 				break;
 			}
 			case FUNCTION_NUMBER_STATION: {
@@ -331,9 +331,9 @@ struct Apices : Module {
 				break;
 			}
 			case FUNCTION_DRUM_GENERATOR: {
-				oledText1 = channelText + "Base freq";
+				oledText1 = channelText + "Base Freq";
 				oledText2 = channelText + "Freq. Mod";
-				oledText3 = channelText + "High freq.";
+				oledText3 = channelText + "High Freq.";
 				oledText4 = channelText + "Decay";
 				break;
 			}
@@ -352,22 +352,22 @@ struct Apices : Module {
 				break;
 			}
 			case FUNCTION_PULSE_RANDOMIZER: {
-				oledText1 = channelText + "Trg. Prob";
-				oledText2 = channelText + "Reg. Prob";
+				oledText1 = channelText + "Trg. Prob.";
+				oledText2 = channelText + "Regen Prob.";
 				oledText3 = channelText + "Delay time";
 				oledText4 = channelText + "Jitter";
 				break;
 			}
 			case FUNCTION_FM_DRUM_GENERATOR: {
 				oledText1 = channelText + "Frequency";
-				oledText2 = channelText + "FM intens.";
-				oledText3 = channelText + "Env decay";
+				oledText2 = channelText + "FM Intens";
+				oledText3 = channelText + "Env. Decay";
 				oledText4 = channelText + "Color";
 				break;
 			}
 			case FUNCTION_NUMBER_STATION: {
 				oledText1 = channelText + "Frequency";
-				oledText2 = channelText + "Var. Prob";
+				oledText2 = channelText + "Var. Prob.";
 				oledText3 = channelText + "Noise";
 				oledText4 = channelText + "Distortion";
 				break;
