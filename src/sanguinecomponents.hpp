@@ -32,36 +32,34 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 // Displays
 
 struct SanguineBaseSegmentDisplay : TransparentWidget {
+	std::shared_ptr<Font> font = nullptr;
 	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
 	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
 	NVGcolor textColor = nvgRGB(200, 0, 0);
+	uint32_t characterCount;
 	unsigned char haloOpacity = 55;
 	void draw(const DrawArgs& args) override;
 };
 
 struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {
 	Module* module;
-	std::shared_ptr<Font> font = nullptr;
-	std::string* displayText = nullptr;	
-	SanguineAlphaDisplay();	
+	std::string* displayText = nullptr;
+	SanguineAlphaDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
 	Module* module;
-	std::shared_ptr<Font> font = nullptr;
-	int* value = nullptr;	
-	SanguineLedNumberDisplay();	
+	int* value = nullptr;
+	SanguineLedNumberDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineMatrixDisplay :TransparentWidget {
+struct SanguineMatrixDisplay :SanguineBaseSegmentDisplay {
 	Module* module;
-	std::shared_ptr<Font> font = nullptr;
 	std::string* displayText = nullptr;
-	NVGcolor textColor = nvgRGB(200, 0, 0);
-	SanguineMatrixDisplay();
-	void draw(const DrawArgs& args) override;
+	unsigned char haloOpacity = 55;
+	SanguineMatrixDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
