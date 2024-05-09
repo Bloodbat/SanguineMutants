@@ -748,9 +748,9 @@ static const std::vector<std::string> modeList{
 	"TAP LFO",
 	"DRUM GENERAT",
 	"SEQUENCER*",
-	"PLS. SHAPE*",
-	"PLS. RANDOM*",
-	"DRUM FM*",
+	"TRG. SHAPE*",
+	"TRG. RANDOM*",
+	"DIGI DRUMS*",
 	"NUMBER STAT&",
 	"BOUNCE BALL@"
 };
