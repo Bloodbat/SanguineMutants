@@ -879,22 +879,38 @@ void Apices::refreshLeds() {
 		}
 	}
 
-	if (processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION || processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION) {
-		uint8_t pattern = processors[0].number_station().digit()
-			^ processors[1].number_station().digit();
-		for (size_t i = 0; i < 4; ++i) {
-			lights[LIGHT_FUNCTION_1 + i].value = (pattern & 1) ? 1.0f : 0.0f;
-			pattern = pattern >> 1;
+	bool channel1IsStation = processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+	bool channel2IsStation = processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+	if (channel1IsStation || channel2IsStation) {
+		if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
+			uint8_t pattern = processors[0].number_station().digit()
+				^ processors[1].number_station().digit();
+			for (size_t i = 0; i < 4; ++i) {
+				lights[LIGHT_FUNCTION_1 + i].value = (pattern & 1) ? 1.0f : 0.0f;
+				pattern = pattern >> 1;
+			}
 		}
-		b[0] = processors[0].number_station().gate() ? 255 : 0;
-		b[1] = processors[1].number_station().gate() ? 255 : 0;
+		// Hacky but animates the lights!
+		else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
+			int digit = processors[0].number_station().digit();
+			for (size_t i = 0; i < 4; i++) {
+				lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
+			}
+		}
+		// Ibid
+		else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
+			uint8_t digit = processors[1].number_station().digit();
+			for (size_t i = 0; i < 4; i++) {
+				lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
+			}
+		}
+		if (channel1IsStation) {
+			b[0] = processors[0].number_station().gate() ? 255 : 0;
+		}
+		if (channel2IsStation) {
+			b[1] = processors[1].number_station().gate() ? 255 : 0;
+		}
 	}
-
-	/*if (processors[0].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL || processors[1].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL) {
-		for (size_t i = 0; i < 4; ++i) {
-			lights[LIGHT_FUNCTION_1 + i].value = 1.0f;
-		}
-	}*/
 
 	const float deltaTime = APP->engine->getSampleTime();
 	lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
