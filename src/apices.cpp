@@ -830,14 +830,28 @@ void Apices::refreshLeds() {
 	lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
 	lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.0F : 0.F, sampleTime);
 
-	if ((getSystemTimeMs() & 256) && getProcessorFunction() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
-		for (size_t i = 0; i < 4; ++i) {
-			lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(0.0f, sampleTime);
+	if (getProcessorFunction() == FUNCTION_BOUNCING_BALL) {
+		lights[LIGHT_FUNCTION_1].setBrightnessSmooth(1.0f, sampleTime);
+		lights[LIGHT_FUNCTION_1 + 1].setBrightnessSmooth(0.f, sampleTime);
+		if (getSystemTimeMs() & 256) {
+			lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(0.f, sampleTime);
+		}
+		else {
+			lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(1.f, sampleTime);
 		}
 	}
 	else {
-		for (size_t i = 0; i < 4; ++i) {
-			lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((getProcessorFunction() & 3) == i) ? 1.0f : 0.0f, sampleTime);
+		if ((getSystemTimeMs() & 256) && getProcessorFunction() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
+			for (size_t i = 0; i < 4; ++i) {
+				lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(0.0f, sampleTime);
+			}
+		}
+		else {
+			for (size_t i = 0; i < 4; ++i) {
+				lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((getProcessorFunction() & 3) == i) ? 1.0f : 0.0f, sampleTime);
+			}
 		}
 	}
 
@@ -876,11 +890,11 @@ void Apices::refreshLeds() {
 		b[1] = processors[1].number_station().gate() ? 255 : 0;
 	}
 
-	if (processors[0].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL || processors[1].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL) {
+	/*if (processors[0].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL || processors[1].function() == peaks::PROCESSOR_FUNCTION_BOUNCING_BALL) {
 		for (size_t i = 0; i < 4; ++i) {
 			lights[LIGHT_FUNCTION_1 + i].value = 1.0f;
 		}
-	}
+	}*/
 
 	const float deltaTime = APP->engine->getSampleTime();
 	lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
