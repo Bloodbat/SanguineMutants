@@ -45,9 +45,10 @@ void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 	Widget::draw(args);
 }
 
-SanguineAlphaDisplay::SanguineAlphaDisplay() {
+SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
-	box.size = mm2px(Vec(100.8, 21.2));
+	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
+	characterCount = newCharacterCount;
 }
 
 void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -62,7 +63,10 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 				Vec textPos = Vec(9, 52);
 				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 				// Background of all segments
-				nvgText(args.vg, textPos.x, textPos.y, "~~~~~~~~", NULL);
+				std::string backgroundText = "";
+				for (uint32_t i = 0; i < characterCount; i++)
+					backgroundText += "~";
+				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
 				nvgFillColor(args.vg, textColor);
 				if (displayText && !(displayText->empty()))
 				{
@@ -76,17 +80,16 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineLedNumberDisplay::SanguineLedNumberDisplay() {
+SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
-	box.size = mm2px(Vec(15.5, 15));
+	box.size = mm2px(Vec(newCharacterCount * 16.975, 15));
+	characterCount = newCharacterCount;
 }
 
 void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		if (module && !module->isBypassed()) {
 			if (font) {
-				// TODO don't do all this if there's no value.
-
 				// Text					
 				nvgFontSize(args.vg, 33.95);
 				nvgFontFaceId(args.vg, font->handle);
@@ -95,7 +98,10 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 				Vec textPos = Vec(2, 36);
 				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 				// Background of all segments
-				nvgText(args.vg, textPos.x, textPos.y, "88", NULL);
+				std::string backgroundText = "";
+				for (uint32_t i = 0; i < characterCount; i++)
+					backgroundText += "8";
+				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
 				nvgFillColor(args.vg, textColor);
 
 				std::string displayValue = "";
@@ -172,25 +178,11 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineMatrixDisplay::SanguineMatrixDisplay()
+SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount)
 {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
-	box.size = mm2px(Vec(68.433, 10.16));
-}
-
-void SanguineMatrixDisplay::draw(const DrawArgs& args) {
-	// Background
-	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
-	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
-	nvgBeginPath(args.vg);
-	nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
-	nvgFillColor(args.vg, backgroundColor);
-	nvgFill(args.vg);
-	nvgStrokeWidth(args.vg, 1.0);
-	nvgStrokeColor(args.vg, borderColor);
-	nvgStroke(args.vg);
-
-	Widget::draw(args);
+	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
+	characterCount = newCharacterCount;
 }
 
 void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -206,14 +198,17 @@ void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
 				Vec textPos = Vec(5, 24);
 				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
 				// Background of all segments
-				nvgText(args.vg, textPos.x, textPos.y, "████████████", NULL);
+				std::string backgroundText = "";
+				for (uint32_t i = 0; i < characterCount; i++)
+					backgroundText += "█";
+				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
 				nvgFillColor(args.vg, textColor);
 				if (displayText && !(displayText->empty()))
 				{
 					// TODO make sure we only display max. display chars					
 					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
 				}
-				drawRectHalo(args, box.size, textColor, 55, 0.f);
+				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
 	}
