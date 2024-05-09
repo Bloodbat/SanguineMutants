@@ -82,7 +82,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
-	box.size = mm2px(Vec(newCharacterCount * 16.975, 15));
+	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
 	characterCount = newCharacterCount;
 }
 
