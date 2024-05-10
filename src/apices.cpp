@@ -927,15 +927,18 @@ struct ApicesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
+		FramebufferWidget* apicesFrambuffer = new FramebufferWidget();
+		addChild(apicesFrambuffer);
+
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12);
 		displayChannel1->box.pos = mm2px(Vec(18.616, 22.885));
 		displayChannel1->module = module;
-		addChild(displayChannel1);
+		apicesFrambuffer->addChild(displayChannel1);
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12);
 		displayChannel2->box.pos = mm2px(Vec(18.616, 35.477));
 		displayChannel2->module = module;
-		addChild(displayChannel2);
+		apicesFrambuffer->addChild(displayChannel2);
 
 		if (module) {
 			displayChannel1->displayText = &module->displayText1;
@@ -979,49 +982,49 @@ struct ApicesWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>((mm2px(Vec(10.375, 100.593))), module, Apices::GATE_2_INPUT));
 
 		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 100.846))), module, Apices::OUT_1_OUTPUT));
-		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 116.989))), module, Apices::OUT_2_OUTPUT));
+		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 116.989))), module, Apices::OUT_2_OUTPUT));	
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay();
 		oledDisplay1->box.pos = mm2px(Vec(22.115, 72.201));
 		oledDisplay1->module = module;
 		if (module)
 			oledDisplay1->oledText = &module->oledText1;
-		addChild(oledDisplay1);
+		apicesFrambuffer->addChild(oledDisplay1);
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay();
 		oledDisplay2->box.pos = mm2px(Vec(73.609, 72.201));
 		oledDisplay2->module = module;
 		if (module)
 			oledDisplay2->oledText = &module->oledText2;
-		addChild(oledDisplay2);
+		apicesFrambuffer->addChild(oledDisplay2);
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay();
 		oledDisplay3->box.pos = mm2px(Vec(22.115, 81.348));
 		oledDisplay3->module = module;
 		if (module)
 			oledDisplay3->oledText = &module->oledText3;
-		addChild(oledDisplay3);
+		apicesFrambuffer->addChild(oledDisplay3);
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay();
 		oledDisplay4->box.pos = mm2px(Vec(73.609, 81.348));
 		oledDisplay4->module = module;
 		if (module)
 			oledDisplay4->oledText = &module->oledText4;
-		addChild(oledDisplay4);
+		apicesFrambuffer->addChild(oledDisplay4);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = mm2px(Vec(53.01, 114.607));
 		mutantsLogo->box.size = Vec(36.06, 14.79);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		addChild(mutantsLogo);
+		apicesFrambuffer->addChild(mutantsLogo);
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
 		bloodLogo->box.pos = mm2px(Vec(44.219, 106.239));
 		bloodLogo->box.size = Vec(11.2, 23.27);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
-		addChild(bloodLogo);
+		apicesFrambuffer->addChild(bloodLogo);
 	}
 
 	void appendContextMenu(Menu* menu) override {
