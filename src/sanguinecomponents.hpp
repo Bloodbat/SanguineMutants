@@ -29,6 +29,10 @@ struct BefacoTinyKnobRed : BefacoTinyKnob {
 	BefacoTinyKnobRed();
 };
 
+struct BefacoTinyKnobBlack : BefacoTinyKnob {
+	BefacoTinyKnobBlack();
+};
+
 // Displays
 
 struct SanguineBaseSegmentDisplay : TransparentWidget {

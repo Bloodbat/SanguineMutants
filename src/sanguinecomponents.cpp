@@ -30,6 +30,11 @@ BefacoTinyKnobRed::BefacoTinyKnobRed() {
 	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BefacoTinyKnobRed_bg.svg")));
 }
 
+BefacoTinyKnobBlack::BefacoTinyKnobBlack() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BefacoTinyPointWhite.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BefacoTinyKnobBlack_bg.svg")));
+}
+
 // Displays
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
