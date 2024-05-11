@@ -42,32 +42,33 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
 	NVGcolor textColor = nvgRGB(200, 0, 0);
 	uint32_t characterCount;
+	union Values {
+		std::string* displayText = nullptr;
+		int* numberValue;
+	} values;
+
 	float fontSize;
 	unsigned char haloOpacity = 55;
 	void draw(const DrawArgs& args) override;
 };
 
-struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {	
-	std::string* displayText = nullptr;
+struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {		
 	SanguineAlphaDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {	
-	int* value = nullptr;
+struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {		
 	SanguineLedNumberDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {	
-	std::string* displayText = nullptr;
+struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {		
 	unsigned char haloOpacity = 55;
 	SanguineMatrixDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineTinyNumericDisplay : SanguineBaseSegmentDisplay {	
-	int* value = nullptr;
+struct SanguineTinyNumericDisplay : SanguineBaseSegmentDisplay {		
 	SanguineTinyNumericDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };

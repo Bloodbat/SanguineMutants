@@ -74,10 +74,10 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 					backgroundText += "~";
 				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
 				nvgFillColor(args.vg, textColor);
-				if (displayText && !(displayText->empty()))
+				if (values.displayText && !(values.displayText->empty()))
 				{
 					// TODO: Make sure we only display max. display chars.
-					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
+					nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
 				}
 				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
@@ -113,10 +113,10 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 				std::string displayValue = "";
 
-				if (value)
-					displayValue = std::to_string(*value);
+				if (values.numberValue)
+					displayValue = std::to_string(*values.numberValue);
 
-				if (*value < 10)
+				if (*values.numberValue < 10)
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
@@ -154,10 +154,10 @@ void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 				std::string displayValue = "";
 
-				if (value)
-					displayValue = std::to_string(*value);
+				if (values.numberValue)
+					displayValue = std::to_string(*values.numberValue);
 
-				if (*value < 10)
+				if (*values.numberValue < 10)
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
@@ -253,10 +253,10 @@ void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
 					backgroundText += "█";
 				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
 				nvgFillColor(args.vg, textColor);
-				if (displayText && !(displayText->empty()))
+				if (values.displayText && !(values.displayText->empty()))
 				{
 					// TODO make sure we only display max. display chars					
-					nvgText(args.vg, textPos.x, textPos.y, displayText->c_str(), NULL);
+					nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
 				}
 				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
