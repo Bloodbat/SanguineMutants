@@ -54,6 +54,7 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
 	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
 	characterCount = newCharacterCount;
+	fontSize = 40;
 }
 
 void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -61,7 +62,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 		if (module && !module->isBypassed()) {
 			if (font) {
 				// Text					
-				nvgFontSize(args.vg, 40);
+				nvgFontSize(args.vg, fontSize);
 				nvgFontFaceId(args.vg, font->handle);
 				nvgTextLetterSpacing(args.vg, 2.5);
 
@@ -89,6 +90,7 @@ SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
 	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
 	characterCount = newCharacterCount;
+	fontSize = 33.95;
 }
 
 void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -96,7 +98,7 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 		if (module && !module->isBypassed()) {
 			if (font) {
 				// Text					
-				nvgFontSize(args.vg, 33.95);
+				nvgFontSize(args.vg, fontSize);
 				nvgFontFaceId(args.vg, font->handle);
 				nvgTextLetterSpacing(args.vg, 2.5);
 
@@ -118,6 +120,48 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
+				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
+			}
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
+SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount) {
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
+	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));
+	characterCount = newCharacterCount;
+	fontSize = 21.4;
+};
+
+void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
+	if (layer == 1) {
+		if (module && !module->isBypassed()) {
+			if (font) {
+				// Text				
+				nvgFontSize(args.vg, fontSize);
+				nvgFontFaceId(args.vg, font->handle);
+				nvgTextLetterSpacing(args.vg, 2.5);
+
+				Vec textPos = Vec(5, 20);
+				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
+				// Background of all segments
+				std::string backgroundText = "";
+				for (uint32_t i = 0; i < characterCount; i++)
+					backgroundText += "8";
+				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
+				nvgFillColor(args.vg, textColor);
+
+				std::string displayValue = "";
+
+				if (value)
+					displayValue = std::to_string(*value);
+
+				if (*value < 10)
+					displayValue.insert(0, 1, '0');
+
+				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
+
 				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
@@ -188,6 +232,7 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount)
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
 	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
 	characterCount = newCharacterCount;
+	fontSize = 16.45;
 }
 
 void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -195,7 +240,7 @@ void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
 		if (module && !module->isBypassed()) {
 			if (font) {
 				// Text					
-				nvgFontSize(args.vg, 16.45);
+				nvgFontSize(args.vg, fontSize);
 				nvgFontFaceId(args.vg, font->handle);
 				nvgTextLetterSpacing(args.vg, 2);
 
