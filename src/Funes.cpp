@@ -591,7 +591,7 @@ struct FunesWidget : ModuleWidget {
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8);
 		alphaDisplay->box.pos = mm2px(Vec(8.674, 21.713));
 		alphaDisplay->module = module;
-		alphaDisplay->displayText = &module->displayText;
+		alphaDisplay->values.displayText = &module->displayText;
 		alphaDisplay->textColor = nvgRGB(200, 0, 0);
 		funesFrambuffer->addChild(alphaDisplay);
 

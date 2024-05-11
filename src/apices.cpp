@@ -947,8 +947,8 @@ struct ApicesWidget : ModuleWidget {
 		apicesFrambuffer->addChild(displayChannel2);
 
 		if (module) {
-			displayChannel1->displayText = &module->displayText1;
-			displayChannel2->displayText = &module->displayText2;
+			displayChannel1->values.displayText = &module->displayText1;
+			displayChannel2->values.displayText = &module->displayText2;
 		}
 
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(99.527, 34.261)), module, Apices::PARAM_MODE));
