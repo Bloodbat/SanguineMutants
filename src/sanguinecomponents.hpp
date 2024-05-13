@@ -33,6 +33,26 @@ struct BefacoTinyKnobBlack : BefacoTinyKnob {
 	BefacoTinyKnobBlack();
 };
 
+struct Sanguine1PSBlue : Rogan {
+	Sanguine1PSBlue();
+};
+
+struct Sanguine1PSGreen : Rogan {
+	Sanguine1PSGreen();
+};
+
+struct Sanguine1PSRed : Rogan {
+	Sanguine1PSRed();
+};
+
+struct Sanguine3PSGreen : Rogan {
+	Sanguine3PSGreen();
+};
+
+struct Sanguine3PSRed : Rogan {
+	Sanguine3PSRed();
+};
+
 // Displays
 
 struct SanguineBaseSegmentDisplay : TransparentWidget {

@@ -35,6 +35,36 @@ BefacoTinyKnobBlack::BefacoTinyKnobBlack() {
 	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BefacoTinyKnobBlack_bg.svg")));
 }
 
+Sanguine1PSBlue::Sanguine1PSBlue() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSBlue.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSBlue_fg.svg")));
+}
+
+Sanguine1PSGreen::Sanguine1PSGreen() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSGreen.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSGreen_fg.svg")));
+}
+
+Sanguine1PSRed::Sanguine1PSRed() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSRed.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSRed_fg.svg")));
+}
+
+Sanguine3PSGreen::Sanguine3PSGreen() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PSGreen.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PSGreen_fg.svg")));
+}
+
+Sanguine3PSRed::Sanguine3PSRed() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PSRed.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PSRed_fg.svg")));
+}
+
 // Displays
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
