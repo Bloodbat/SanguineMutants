@@ -9,4 +9,5 @@ void init(rack::Plugin* p) {
 	p->addModel(modelFunes);
 	p->addModel(modelMutantsBlank);
 	p->addModel(modelApices);
+	p->addModel(modelAleae);
 }
