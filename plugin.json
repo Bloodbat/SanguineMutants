@@ -33,7 +33,7 @@
     {
       "slug": "Sanguine-Apices",
       "name": "Sanguine Apices",
-      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",      
+      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",
       "description": "Based on Mutable Instruments Peaks",
       "tags": [
         "Drum",
@@ -43,6 +43,18 @@
         "Sequencer",
         "Hardware clone",
         "Dual"
+      ]
+    },
+    {
+      "slug": "Sanguine-Aleae",
+      "name": "Sanguine Aleae",
+      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",
+      "description": "Based on Mutable Instruments Branches",
+      "tags": [
+        "Random",
+        "Dual",
+        "Hardware clone",
+        "Polyphonic"
       ]
     }
   ]
