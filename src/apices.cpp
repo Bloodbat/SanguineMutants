@@ -658,7 +658,6 @@ void Apices::processSwitch(uint16_t id) {
 		}
 		break;
 	}
-
 	}
 }
 
@@ -988,7 +987,7 @@ struct ApicesWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>((mm2px(Vec(10.375, 100.593))), module, Apices::GATE_2_INPUT));
 
 		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 100.846))), module, Apices::OUT_1_OUTPUT));
-		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 116.989))), module, Apices::OUT_2_OUTPUT));	
+		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 116.989))), module, Apices::OUT_2_OUTPUT));
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay();
 		oledDisplay1->box.pos = mm2px(Vec(22.115, 72.201));
