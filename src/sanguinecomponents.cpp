@@ -53,6 +53,18 @@ Sanguine1PSRed::Sanguine1PSRed() {
 	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSRed_fg.svg")));
 }
 
+Sanguine2PSBlue::Sanguine2PSBlue() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PSBlue.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PSBlue_fg.svg")));
+}
+
+Sanguine2PSRed::Sanguine2PSRed() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PSRed.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PS_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PSRed_fg.svg")));
+}
+
 Sanguine3PSGreen::Sanguine3PSGreen() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PSGreen.svg")));
 	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PS_bg.svg")));

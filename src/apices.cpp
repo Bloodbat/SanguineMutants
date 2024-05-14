@@ -973,10 +973,10 @@ struct ApicesWidget : ModuleWidget {
 		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.113, 27.965)), module, Apices::LIGHT_CHANNEL1));
 		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.113, 40.557)), module, Apices::LIGHT_CHANNEL2));
 
-		addParam(createParamCentered<Rogan2PSRed>(mm2px(Vec(30.264, 62.728)), module, Apices::PARAM_KNOB_1));
-		addParam(createParamCentered<Rogan2PSRed>(mm2px(Vec(81.759, 62.728)), module, Apices::PARAM_KNOB_2));
-		addParam(createParamCentered<Rogan2PSBlue>(mm2px(Vec(30.264, 96.558)), module, Apices::PARAM_KNOB_3));
-		addParam(createParamCentered<Rogan2PSBlue>(mm2px(Vec(81.759, 96.558)), module, Apices::PARAM_KNOB_4));
+		addParam(createParamCentered<Sanguine2PSRed>(mm2px(Vec(30.264, 62.728)), module, Apices::PARAM_KNOB_1));
+		addParam(createParamCentered<Sanguine2PSRed>(mm2px(Vec(81.759, 62.728)), module, Apices::PARAM_KNOB_2));
+		addParam(createParamCentered<Sanguine2PSBlue>(mm2px(Vec(30.264, 96.558)), module, Apices::PARAM_KNOB_3));
+		addParam(createParamCentered<Sanguine2PSBlue>(mm2px(Vec(81.759, 96.558)), module, Apices::PARAM_KNOB_4));
 
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.987, 62.728)), module, Apices::LIGHT_KNOBS_MODE + 0 * 3));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(69.978, 62.728)), module, Apices::LIGHT_KNOBS_MODE + 1 * 3));
