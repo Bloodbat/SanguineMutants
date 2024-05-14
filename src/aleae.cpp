@@ -197,11 +197,9 @@ struct Aleae : Module {
 					float threshold = params[PARAM_THRESHOLD1 + i].getValue() + inputs[INPUT_P1 + i].getPolyVoltage(channel) / 10.f;
 					rollResults[i][channel] = (random::uniform() > threshold) ? ROLL_HEADS : ROLL_TAILS;
 					if (rollModes[i] == ROLL_TOGGLE) {
-						if (rollResults[i][channel] == ROLL_TAILS) {
-							rollResults[i][channel] = RollResults(lastRollResults[i][channel] ^ ROLL_TAILS);
-							lastRollResults[i][channel] = rollResults[i][channel];
-						}
+						rollResults[i][channel] = RollResults(lastRollResults[i][channel] ^ rollResults[i][channel]);
 					}
+					lastRollResults[i][channel] = rollResults[i][channel];
 				}
 
 				// Output gate logic								
