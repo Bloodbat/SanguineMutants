@@ -156,7 +156,7 @@ struct Aleae : Module {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int i = 0; i < 2; i++) {
 			configParam(PARAM_THRESHOLD1 + i, 0.0, 1.0, 0.5, string::f("Channel %d probability", i + 1), "%", 0, 100);
-			configButton<RollModeParam>(PARAM_ROLL_MODE1 + i, string::f("Channel %d roll mode", i + 1));
+			configButton<RollModeParam>(PARAM_ROLL_MODE1 + i, string::f("Channel %d coin mode", i + 1));
 			configButton<OutModeParam>(PARAM_OUT_MODE1 + i, string::f("Channel %d out mode", i + 1));
 			configInput(INPUT_IN1 + i, string::f("Channel %d", i + 1));
 			configInput(INPUT_P1 + i, string::f("Channel %d probability", i + 1));
