@@ -1,18 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Creator: CorelDRAW -->
-<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="3.7934mm" height="7.8724mm" version="1.1" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd"
-viewBox="0 0 60.87 126.33"
- xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
- <defs>
-   <linearGradient id="id0" gradientUnits="userSpaceOnUse" x1="30.44" y1="0" x2="30.44" y2="126.33">
-    <stop offset="0" stop-opacity="1" stop-color="#620000"/>
-    <stop offset="1" stop-opacity="1" stop-color="red"/>
-   </linearGradient>
- </defs>
- <g id="Lights">
-  <metadata id="CorelCorpID_0Corel-Layer"/>
-  <path id="Blood_x0020_Lit" fill="url(#id0)" d="M30.44 0c7.61,42.11 30.44,63.17 30.44,84.22 0,21.06 -7.61,42.11 -30.44,42.11 -22.83,0 -30.44,-21.06 -30.44,-42.11 0,-21.05 22.83,-42.11 30.44,-84.22z"/>
- </g>
-</svg>
+<svg clip-rule="evenodd" fill-rule="evenodd" height="7.8724mm" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 60.87 126.33" width="3.7934mm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><linearGradient id="a" gradientUnits="userSpaceOnUse" x1="30.44" x2="30.44" y1="0" y2="126.33"><stop offset="0" stop-color="#620000"/><stop offset="1" stop-color="#f00"/></linearGradient><path d="m30.44 0c7.61 42.11 30.44 63.17 30.44 84.22 0 21.06-7.61 42.11-30.44 42.11s-30.44-21.06-30.44-42.11 22.83-42.11 30.44-84.22z" fill="url(#a)"/></svg>
