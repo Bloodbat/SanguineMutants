@@ -45,6 +45,14 @@ struct Sanguine1PSRed : Rogan {
 	Sanguine1PSRed();
 };
 
+struct Sanguine2PSBlue : Rogan {
+	Sanguine2PSBlue();
+};
+
+struct Sanguine2PSRed : Rogan {
+	Sanguine2PSRed();
+};
+
 struct Sanguine3PSGreen : Rogan {
 	Sanguine3PSGreen();
 };

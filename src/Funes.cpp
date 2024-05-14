@@ -552,17 +552,17 @@ struct FunesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(133.8, 32.29)), module, Funes::PARAM_MODEL));
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(19.083, 67.293)), module, Funes::PARAM_FREQUENCY));
-		addParam(createParamCentered<Rogan3PSGreen>(mm2px(Vec(86.86, 67.293)), module, Funes::PARAM_HARMONICS));
-		addParam(createParamCentered<Rogan1PSRed>(mm2px(Vec(120.305, 55.102)), module, Funes::PARAM_TIMBRE));
-		addParam(createParamCentered<Rogan1PSGreen>(mm2px(Vec(120.305, 95.968)), module, Funes::PARAM_MORPH));
+		addParam(createParamCentered<Sanguine3PSRed>(mm2px(Vec(19.083, 67.293)), module, Funes::PARAM_FREQUENCY));
+		addParam(createParamCentered<Sanguine3PSGreen>(mm2px(Vec(86.86, 67.293)), module, Funes::PARAM_HARMONICS));
+		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(120.305, 55.102)), module, Funes::PARAM_TIMBRE));
+		addParam(createParamCentered<Sanguine1PSGreen>(mm2px(Vec(120.305, 95.968)), module, Funes::PARAM_MORPH));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 55.102)), module, Funes::PARAM_TIMBRE_CV));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 74.874)), module, Funes::PARAM_FREQUENCY_CV));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 95.96)), module, Funes::PARAM_MORPH_CV));
 
-		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::PARAM_LPG_COLOR));
-		addParam(createParamCentered<Rogan1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::PARAM_LPG_DECAY));
-		addParam(createParamCentered<Rogan3PSRed>(mm2px(Vec(52.962, 67.293)), module, Funes::PARAM_FREQUENCY_ROOT));
+		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(35.8, 89.868)), module, Funes::PARAM_LPG_COLOR));
+		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(69.552, 89.868)), module, Funes::PARAM_LPG_DECAY));
+		addParam(createParamCentered<Sanguine3PSRed>(mm2px(Vec(52.962, 67.293)), module, Funes::PARAM_FREQUENCY_ROOT));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 32.29)), module, Funes::INPUT_ENGINE));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 55.102)), module, Funes::INPUT_TIMBRE));
