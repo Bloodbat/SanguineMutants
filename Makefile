@@ -34,6 +34,12 @@ SOURCES += eurorack/tides2/poly_slope_generator.cc
 SOURCES += eurorack/tides2/ramp/ramp_extractor.cc
 SOURCES += eurorack/tides2/resources.cc
 
+SOURCES += eurorack/braids/macro_oscillator.cc
+SOURCES += eurorack/braids/analog_oscillator.cc
+SOURCES += eurorack/braids/digital_oscillator.cc
+SOURCES += eurorack/braids/resources.cc
+SOURCES += eurorack/braids/quantizer.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..

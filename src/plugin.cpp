@@ -10,4 +10,5 @@ void init(rack::Plugin* p) {
 	p->addModel(modelMutantsBlank);
 	p->addModel(modelApices);
 	p->addModel(modelAleae);
+	p->addModel(modelNodi);
 }
