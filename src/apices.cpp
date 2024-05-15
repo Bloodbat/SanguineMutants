@@ -51,6 +51,19 @@ static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
 
 static const uint8_t kButtonCount = 3;
 
+static const std::vector<std::string> modeList{
+	"ENVELOPE",
+	"LFO",
+	"TAP LFO",
+	"DRUM GENERAT",
+	"SEQUENCER*",
+	"TRG. SHAPE*",
+	"TRG. RANDOM*",
+	"DIGI DRUMS*",
+	"NUMBER STAT&",
+	"BOUNCE BALL@"
+};
+
 struct Apices : Module {
 	enum ParamIds {
 		PARAM_KNOB_1,
@@ -90,8 +103,6 @@ struct Apices : Module {
 		LIGHT_FUNCTION_4,
 		LIGHT_COUNT
 	};
-
-	static const peaks::ProcessorFunction processorFunctionTable[FUNCTION_LAST][2];
 
 	EditMode editMode = EDIT_MODE_TWIN;
 	ProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
@@ -145,6 +156,20 @@ struct Apices : Module {
 	std::string oledText3 = "";
 	std::string oledText4 = "";
 
+	const peaks::ProcessorFunction processorFunctionTable[FUNCTION_LAST][2] = {
+{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
+{ peaks::PROCESSOR_FUNCTION_LFO, peaks::PROCESSOR_FUNCTION_LFO },
+{ peaks::PROCESSOR_FUNCTION_TAP_LFO, peaks::PROCESSOR_FUNCTION_TAP_LFO },
+{ peaks::PROCESSOR_FUNCTION_BASS_DRUM, peaks::PROCESSOR_FUNCTION_SNARE_DRUM },
+
+{ peaks::PROCESSOR_FUNCTION_MINI_SEQUENCER, peaks::PROCESSOR_FUNCTION_MINI_SEQUENCER },
+{ peaks::PROCESSOR_FUNCTION_PULSE_SHAPER, peaks::PROCESSOR_FUNCTION_PULSE_SHAPER },
+{ peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
+{ peaks::PROCESSOR_FUNCTION_FM_DRUM, peaks::PROCESSOR_FUNCTION_FM_DRUM },
+{ peaks::PROCESSOR_FUNCTION_NUMBER_STATION, peaks::PROCESSOR_FUNCTION_NUMBER_STATION},
+{ peaks::PROCESSOR_FUNCTION_BOUNCING_BALL, peaks::PROCESSOR_FUNCTION_BOUNCING_BALL}
+	};
+
 	Apices() {
 
 		config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -177,6 +202,402 @@ struct Apices : Module {
 		clockDivider.setDivision(kClockUpdateFrequency);
 
 		init();
+	}
+
+	void process(const ProcessArgs& args) override {
+		// only update knobs / lights every 16 samples
+		if (clockDivider.process()) {
+			pollSwitches();
+			pollPots();
+			updateOleds();
+		}
+
+		ProcessorFunction CurrentFunction = getProcessorFunction();
+		if (params[PARAM_MODE].getValue() != CurrentFunction) {
+			CurrentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
+			setFunction(editMode - EDIT_MODE_FIRST, CurrentFunction);
+			saveState();
+		}
+
+		if (outputBuffer.empty()) {
+
+			while (renderBlock != ioBlock) {
+				processChannels(&block[renderBlock], kBlockSize);
+				renderBlock = (renderBlock + 1) % kNumBlocks;
+			}
+
+			uint32_t external_gate_inputs = 0;
+			external_gate_inputs |= (inputs[GATE_1_INPUT].getVoltage() ? 1 : 0);
+			external_gate_inputs |= (inputs[GATE_2_INPUT].getVoltage() ? 2 : 0);
+
+			uint32_t buttons = 0;
+			buttons |= (params[PARAM_TRIGGER_1].getValue() ? 1 : 0);
+			buttons |= (params[PARAM_TRIGGER_2].getValue() ? 2 : 0);
+
+			uint32_t gate_inputs = external_gate_inputs | buttons;
+
+			// Prepare sample rate conversion.
+			// Peaks is sampling at 48kHZ.
+			outputSrc.setRates(48000, args.sampleRate);
+			int inLen = kBlockSize;
+			int outLen = outputBuffer.capacity();
+			dsp::Frame<2> f[kBlockSize];
+
+			// Process an entire block of data from the IOBuffer.
+			for (size_t k = 0; k < kBlockSize; ++k) {
+
+				Slice slice = NextSlice(1);
+
+				for (size_t i = 0; i < kNumChannels; ++i) {
+					gate_flags[i] = peaks::ExtractGateFlags(
+						gate_flags[i],
+						gate_inputs & (1 << i));
+
+					f[k].samples[i] = slice.block->output[i][slice.frame_index];
+				}
+
+				// A hack to make channel 1 aware of what's going on in channel 2. Used to
+				// reset the sequencer.
+				slice.block->input[0][slice.frame_index] = gate_flags[0] | (gate_flags[1] << 4) | (buttons & 8 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
+
+				slice.block->input[1][slice.frame_index] = gate_flags[1] | (buttons & 2 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
+			}
+
+			outputSrc.process(f, &inLen, outputBuffer.endData(), &outLen);
+			outputBuffer.endIncr(outLen);
+		}
+
+		// Update outputs.
+		if (!outputBuffer.empty()) {
+			dsp::Frame<2> f = outputBuffer.shift();
+
+			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
+			// TODO Check the output values against an actual device.
+			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(f.samples[0]), 0.0f, 65535.f, -8.0f, 8.0f));
+			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(f.samples[1]), 0.0f, 65535.f, -8.0f, 8.0f));
+		}
+	}
+
+	void changeControlMode() {
+		uint16_t parameters[4];
+		for (int i = 0; i < 4; ++i) {
+			parameters[i] = adcValue[i];
+		}
+
+		if (editMode == EDIT_MODE_SPLIT) {
+			processors[0].CopyParameters(&parameters[0], 2);
+			processors[1].CopyParameters(&parameters[2], 2);
+			processors[0].set_control_mode(peaks::CONTROL_MODE_HALF);
+			processors[1].set_control_mode(peaks::CONTROL_MODE_HALF);
+		}
+		else if (editMode == EDIT_MODE_TWIN) {
+			processors[0].CopyParameters(&parameters[0], 4);
+			processors[1].CopyParameters(&parameters[0], 4);
+			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
+			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
+		}
+		else {
+			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
+			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
+		}
+	}
+
+	void setFunction(uint8_t index, ProcessorFunction f) {
+		if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
+			processorFunction[0] = processorFunction[1] = f;
+			processors[0].set_function(processorFunctionTable[f][0]);
+			processors[1].set_function(processorFunctionTable[f][1]);
+		}
+		else {
+			processorFunction[index] = f;
+			processors[index].set_function(processorFunctionTable[f][index]);
+		}
+	}
+
+	void processSwitch(uint16_t id) {
+		switch (id) {
+		case SWITCH_TWIN_MODE: {
+			if (editMode <= EDIT_MODE_SPLIT) {
+				editMode = static_cast<EditMode>(EDIT_MODE_SPLIT - editMode);
+			}
+			changeControlMode();
+			saveState();
+			break;
+		}
+
+		case SWITCH_EXPERT: {
+			editMode = static_cast<EditMode>((editMode + EDIT_MODE_FIRST) % EDIT_MODE_LAST);
+			processorFunction[0] = processorFunction[1];
+			processors[0].set_function(processorFunctionTable[processorFunction[0]][0]);
+			processors[1].set_function(processorFunctionTable[processorFunction[0]][1]);
+			lockPots();
+			changeControlMode();
+			saveState();
+			break;
+		}
+
+		case SWITCH_CHANNEL_SELECT: {
+			if (editMode >= EDIT_MODE_FIRST) {
+				editMode = static_cast<EditMode>(EDIT_MODE_SECOND - (editMode & 1));
+
+				switch (editMode)
+				{
+				case EDIT_MODE_FIRST:
+					params[PARAM_MODE].setValue(processorFunction[0]);
+					break;
+				case EDIT_MODE_SECOND:
+					params[PARAM_MODE].setValue(processorFunction[1]);
+					break;
+				default:
+					break;
+				}
+
+				lockPots();
+				changeControlMode();
+				saveState();
+			}
+			break;
+		}
+		}
+	}
+
+	void lockPots() {
+		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels], kAdcThresholdLocked);
+		std::fill(&snapped[0], &snapped[kNumAdcChannels], false);
+	}
+
+	void pollPots() {
+		for (uint8_t i = 0; i < kNumAdcChannels; ++i) {
+			adcLp[i] = (int32_t(params[PARAM_KNOB_1 + i].getValue()) + adcLp[i] * 7) >> 3;
+			int32_t value = adcLp[i];
+			int32_t current_value = adcValue[i];
+			if (value >= current_value + adcThreshold[i] || value <= current_value - adcThreshold[i] || !adcThreshold[i]) {
+				onPotChanged(i, value);
+				adcValue[i] = value;
+				adcThreshold[i] = kAdcThresholdUnlocked;
+			}
+		}
+	}
+
+	void onPotChanged(uint16_t id, uint16_t value) {
+		switch (editMode) {
+		case EDIT_MODE_TWIN:
+			processors[0].set_parameter(id, value);
+			processors[1].set_parameter(id, value);
+			potValue[id] = value >> 8;
+			break;
+
+		case EDIT_MODE_SPLIT:
+			if (id < 2) {
+				processors[0].set_parameter(id, value);
+			}
+			else {
+				processors[1].set_parameter(id - 2, value);
+			}
+			potValue[id] = value >> 8;
+			break;
+
+		case EDIT_MODE_FIRST:
+		case EDIT_MODE_SECOND: {
+			uint8_t index = id + (editMode - EDIT_MODE_FIRST) * 4;
+			peaks::Processors* p = &processors[editMode - EDIT_MODE_FIRST];
+
+			int16_t delta = static_cast<int16_t>(potValue[index]) -  static_cast<int16_t>(value >> 8);
+			if (delta < 0) {
+				delta = -delta;
+			}
+
+			if (!snapMode || snapped[id] || delta <= 2) {
+				p->set_parameter(id, value);
+				potValue[index] = value >> 8;
+				snapped[id] = true;
+			}
+			break;
+		}
+
+		case EDIT_MODE_LAST:
+			break;
+		}
+	}
+
+	long long getSystemTimeMs() {
+		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	}
+
+	void pollSwitches() {
+		for (uint8_t i = 0; i < kButtonCount; ++i) {
+			if (switches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
+				processSwitch(SWITCH_TWIN_MODE + i);
+			}
+		}
+		refreshLeds();
+	}
+
+	void saveState() {
+		settings.editMode = editMode;
+		settings.processorFunction[0] = processorFunction[0];
+		settings.processorFunction[1] = processorFunction[1];
+		std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
+		settings.snap_mode = snapMode;
+		displayText1 = modeList[settings.processorFunction[0]];
+		displayText2 = modeList[settings.processorFunction[1]];
+	}
+
+	void refreshLeds() {
+
+		// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
+		const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
+
+		uint8_t flash = (getSystemTimeMs() >> 7) & 7;
+		int currentLight;
+		switch (editMode) {
+		case EDIT_MODE_FIRST:
+			lights[LIGHT_CHANNEL1].setBrightnessSmooth((flash == 1) ? 1.0f : 0.0f, sampleTime);
+			lights[LIGHT_CHANNEL2].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
+			for (int i = 0; i < 4; i++) {
+				currentLight = LIGHT_KNOBS_MODE + i * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+			}
+			break;
+		case EDIT_MODE_SECOND:
+			lights[LIGHT_CHANNEL1].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.0f : 0.0f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(1.f, sampleTime);
+			for (int i = 0; i < 4; i++) {
+				currentLight = LIGHT_KNOBS_MODE + i * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+			}
+			break;
+		case EDIT_MODE_TWIN: {
+			lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
+			for (int i = 0; i < 4; i++) {
+				currentLight = LIGHT_KNOBS_MODE + i * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
+			}
+			break;
+		}
+		case EDIT_MODE_SPLIT: {
+			lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
+			for (int i = 0; i < 2; i++) {
+				currentLight = LIGHT_KNOBS_MODE + i * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+			}
+			for (int i = 2; i < 4; i++) {
+				currentLight = LIGHT_KNOBS_MODE + i * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
+		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.0F : 0.F, sampleTime);
+
+		if (getProcessorFunction() == FUNCTION_BOUNCING_BALL) {
+			lights[LIGHT_FUNCTION_1].setBrightnessSmooth(1.0f, sampleTime);
+			lights[LIGHT_FUNCTION_1 + 1].setBrightnessSmooth(0.f, sampleTime);
+			if (getSystemTimeMs() & 256) {
+				lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(0.f, sampleTime);
+			}
+			else {
+				lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(1.f, sampleTime);
+				lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(1.f, sampleTime);
+			}
+		}
+		else {
+			if ((getSystemTimeMs() & 256) && getProcessorFunction() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
+				for (size_t i = 0; i < 4; ++i) {
+					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(0.0f, sampleTime);
+				}
+			}
+			else {
+				for (size_t i = 0; i < 4; ++i) {
+					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((getProcessorFunction() & 3) == i) ? 1.0f : 0.0f, sampleTime);
+				}
+			}
+		}
+
+		uint8_t b[2];
+		for (uint8_t i = 0; i < 2; ++i) {
+			switch (processorFunction[i]) {
+			case FUNCTION_DRUM_GENERATOR:
+			case FUNCTION_FM_DRUM_GENERATOR:
+				b[i] = (int16_t)abs(brightness[i]) >> 8;
+				b[i] = b[i] >= 255 ? 255 : b[i];
+				break;
+			case FUNCTION_LFO:
+			case FUNCTION_TAP_LFO:
+			case FUNCTION_MINI_SEQUENCER: {
+				int32_t brightnessVal = int32_t(brightness[i]) * 409 >> 8;
+				brightnessVal += 32768;
+				brightnessVal >>= 8;
+				CONSTRAIN(brightnessVal, 0, 255);
+				b[i] = brightnessVal;
+				break;
+			}
+			default:
+				b[i] = brightness[i] >> 7;
+				break;
+			}
+		}
+
+		bool channel1IsStation = processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+		bool channel2IsStation = processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+		if (channel1IsStation || channel2IsStation) {
+			if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
+				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
+				for (size_t i = 0; i < 4; ++i) {
+					lights[LIGHT_FUNCTION_1 + i].value = (pattern & 1) ? 1.0f : 0.0f;
+					pattern = pattern >> 1;
+				}
+			}
+			// Hacky but animates the lights!
+			else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
+				int digit = processors[0].number_station().digit();
+				for (size_t i = 0; i < 4; i++) {
+					lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
+				}
+			}
+			// Ibid
+			else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
+				uint8_t digit = processors[1].number_station().digit();
+				for (size_t i = 0; i < 4; i++) {
+					lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
+				}
+			}
+			if (channel1IsStation) {
+				b[0] = processors[0].number_station().gate() ? 255 : 0;
+			}
+			if (channel2IsStation) {
+				b[1] = processors[1].number_station().gate() ? 255 : 0;
+			}
+		}
+
+		const float deltaTime = APP->engine->getSampleTime();
+		lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
+		lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(b[1]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
 	}
 
 	void onReset() override {
@@ -442,80 +863,6 @@ struct Apices : Module {
 		saveState();
 	}
 
-	void process(const ProcessArgs& args) override {
-		// only update knobs / lights every 16 samples
-		if (clockDivider.process()) {
-			pollSwitches();
-			pollPots();
-			updateOleds();
-		}
-
-		ProcessorFunction CurrentFunction = getProcessorFunction();
-		if (params[PARAM_MODE].getValue() != CurrentFunction) {
-			CurrentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
-			setFunction(editMode - EDIT_MODE_FIRST, CurrentFunction);
-			saveState();
-		}
-
-		if (outputBuffer.empty()) {
-
-			while (renderBlock != ioBlock) {
-				processChannels(&block[renderBlock], kBlockSize);
-				renderBlock = (renderBlock + 1) % kNumBlocks;
-			}
-
-			uint32_t external_gate_inputs = 0;
-			external_gate_inputs |= (inputs[GATE_1_INPUT].getVoltage() ? 1 : 0);
-			external_gate_inputs |= (inputs[GATE_2_INPUT].getVoltage() ? 2 : 0);
-
-			uint32_t buttons = 0;
-			buttons |= (params[PARAM_TRIGGER_1].getValue() ? 1 : 0);
-			buttons |= (params[PARAM_TRIGGER_2].getValue() ? 2 : 0);
-
-			uint32_t gate_inputs = external_gate_inputs | buttons;
-
-			// Prepare sample rate conversion.
-			// Peaks is sampling at 48kHZ.
-			outputSrc.setRates(48000, args.sampleRate);
-			int inLen = kBlockSize;
-			int outLen = outputBuffer.capacity();
-			dsp::Frame<2> f[kBlockSize];
-
-			// Process an entire block of data from the IOBuffer.
-			for (size_t k = 0; k < kBlockSize; ++k) {
-
-				Slice slice = NextSlice(1);
-
-				for (size_t i = 0; i < kNumChannels; ++i) {
-					gate_flags[i] = peaks::ExtractGateFlags(
-						gate_flags[i],
-						gate_inputs & (1 << i));
-
-					f[k].samples[i] = slice.block->output[i][slice.frame_index];
-				}
-
-				// A hack to make channel 1 aware of what's going on in channel 2. Used to
-				// reset the sequencer.
-				slice.block->input[0][slice.frame_index] = gate_flags[0] | (gate_flags[1] << 4) | (buttons & 8 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
-
-				slice.block->input[1][slice.frame_index] = gate_flags[1] | (buttons & 2 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
-			}
-
-			outputSrc.process(f, &inLen, outputBuffer.endData(), &outLen);
-			outputBuffer.endIncr(outLen);
-		}
-
-		// Update outputs.
-		if (!outputBuffer.empty()) {
-			dsp::Frame<2> f = outputBuffer.shift();
-
-			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
-			// TODO Check the output values against an actual device.
-			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(f.samples[0]), 0.0f, 65535.f, -8.0f, 8.0f));
-			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(f.samples[1]), 0.0f, 65535.f, -8.0f, 8.0f));
-		}
-	}
-
 	inline Slice NextSlice(size_t size) {
 		Slice s;
 		s.block = &block[ioBlock];
@@ -548,379 +895,7 @@ struct Apices : Module {
 			}
 		}
 	}
-
-	void changeControlMode();
-	void setFunction(uint8_t index, ProcessorFunction f);
-	void onPotChanged(uint16_t id, uint16_t value);
-	void processSwitch(uint16_t id);
-	void saveState();
-	void lockPots();
-	void pollSwitches();
-	void pollPots();
-	void refreshLeds();
-
-	long long getSystemTimeMs();
 };
-
-const peaks::ProcessorFunction Apices::processorFunctionTable[FUNCTION_LAST][2] = {
-	{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
-	{ peaks::PROCESSOR_FUNCTION_LFO, peaks::PROCESSOR_FUNCTION_LFO },
-	{ peaks::PROCESSOR_FUNCTION_TAP_LFO, peaks::PROCESSOR_FUNCTION_TAP_LFO },
-	{ peaks::PROCESSOR_FUNCTION_BASS_DRUM, peaks::PROCESSOR_FUNCTION_SNARE_DRUM },
-
-	{ peaks::PROCESSOR_FUNCTION_MINI_SEQUENCER, peaks::PROCESSOR_FUNCTION_MINI_SEQUENCER },
-	{ peaks::PROCESSOR_FUNCTION_PULSE_SHAPER, peaks::PROCESSOR_FUNCTION_PULSE_SHAPER },
-	{ peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
-	{ peaks::PROCESSOR_FUNCTION_FM_DRUM, peaks::PROCESSOR_FUNCTION_FM_DRUM },
-	{ peaks::PROCESSOR_FUNCTION_NUMBER_STATION, peaks::PROCESSOR_FUNCTION_NUMBER_STATION},
-	{ peaks::PROCESSOR_FUNCTION_BOUNCING_BALL, peaks::PROCESSOR_FUNCTION_BOUNCING_BALL}
-};
-
-
-void Apices::changeControlMode() {
-	uint16_t parameters[4];
-	for (int i = 0; i < 4; ++i) {
-		parameters[i] = adcValue[i];
-	}
-
-	if (editMode == EDIT_MODE_SPLIT) {
-		processors[0].CopyParameters(&parameters[0], 2);
-		processors[1].CopyParameters(&parameters[2], 2);
-		processors[0].set_control_mode(peaks::CONTROL_MODE_HALF);
-		processors[1].set_control_mode(peaks::CONTROL_MODE_HALF);
-	}
-	else if (editMode == EDIT_MODE_TWIN) {
-		processors[0].CopyParameters(&parameters[0], 4);
-		processors[1].CopyParameters(&parameters[0], 4);
-		processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
-		processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
-	}
-	else {
-		processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
-		processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
-	}
-}
-
-void Apices::setFunction(uint8_t index, ProcessorFunction f) {
-	if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
-		processorFunction[0] = processorFunction[1] = f;
-		processors[0].set_function(processorFunctionTable[f][0]);
-		processors[1].set_function(processorFunctionTable[f][1]);
-	}
-	else {
-		processorFunction[index] = f;
-		processors[index].set_function(processorFunctionTable[f][index]);
-	}
-}
-
-void Apices::processSwitch(uint16_t id) {
-	switch (id) {
-	case SWITCH_TWIN_MODE: {
-		if (editMode <= EDIT_MODE_SPLIT) {
-			editMode = static_cast<EditMode>(EDIT_MODE_SPLIT - editMode);
-		}
-		changeControlMode();
-		saveState();
-		break;
-	}
-
-	case SWITCH_EXPERT: {
-		editMode = static_cast<EditMode>(
-			(editMode + EDIT_MODE_FIRST) % EDIT_MODE_LAST);
-		processorFunction[0] = processorFunction[1];
-		processors[0].set_function(processorFunctionTable[processorFunction[0]][0]);
-		processors[1].set_function(processorFunctionTable[processorFunction[0]][1]);
-		lockPots();
-		changeControlMode();
-		saveState();
-		break;
-	}
-
-	case SWITCH_CHANNEL_SELECT: {
-		if (editMode >= EDIT_MODE_FIRST) {
-			editMode = static_cast<EditMode>(EDIT_MODE_SECOND - (editMode & 1));
-
-			switch (editMode)
-			{
-			case EDIT_MODE_FIRST:
-				params[PARAM_MODE].setValue(processorFunction[0]);
-				break;
-			case EDIT_MODE_SECOND:
-				params[PARAM_MODE].setValue(processorFunction[1]);
-				break;
-			default:
-				break;
-			}
-
-			lockPots();
-			changeControlMode();
-			saveState();
-		}
-		break;
-	}
-	}
-}
-
-void Apices::lockPots() {
-	std::fill(
-		&adcThreshold[0],
-		&adcThreshold[kNumAdcChannels],
-		kAdcThresholdLocked);
-	std::fill(&snapped[0], &snapped[kNumAdcChannels], false);
-}
-
-void Apices::pollPots() {
-	for (uint8_t i = 0; i < kNumAdcChannels; ++i) {
-		adcLp[i] = (int32_t(params[PARAM_KNOB_1 + i].getValue()) + adcLp[i] * 7) >> 3;
-		int32_t value = adcLp[i];
-		int32_t current_value = adcValue[i];
-		if (value >= current_value + adcThreshold[i] ||
-			value <= current_value - adcThreshold[i] ||
-			!adcThreshold[i]) {
-			onPotChanged(i, value);
-			adcValue[i] = value;
-			adcThreshold[i] = kAdcThresholdUnlocked;
-		}
-	}
-}
-
-void Apices::onPotChanged(uint16_t id, uint16_t value) {
-	switch (editMode) {
-	case EDIT_MODE_TWIN:
-		processors[0].set_parameter(id, value);
-		processors[1].set_parameter(id, value);
-		potValue[id] = value >> 8;
-		break;
-
-	case EDIT_MODE_SPLIT:
-		if (id < 2) {
-			processors[0].set_parameter(id, value);
-		}
-		else {
-			processors[1].set_parameter(id - 2, value);
-		}
-		potValue[id] = value >> 8;
-		break;
-
-	case EDIT_MODE_FIRST:
-	case EDIT_MODE_SECOND: {
-		uint8_t index = id + (editMode - EDIT_MODE_FIRST) * 4;
-		peaks::Processors* p = &processors[editMode - EDIT_MODE_FIRST];
-
-		int16_t delta = static_cast<int16_t>(potValue[index]) - \
-			static_cast<int16_t>(value >> 8);
-		if (delta < 0) {
-			delta = -delta;
-		}
-
-		if (!snapMode || snapped[id] || delta <= 2) {
-			p->set_parameter(id, value);
-			potValue[index] = value >> 8;
-			snapped[id] = true;
-		}
-		break;
-	}
-
-	case EDIT_MODE_LAST:
-		break;
-	}
-}
-
-long long Apices::getSystemTimeMs() {
-	return std::chrono::duration_cast<std::chrono::milliseconds>(
-		std::chrono::steady_clock::now().time_since_epoch()
-	).count();
-}
-
-void Apices::pollSwitches() {
-	for (uint8_t i = 0; i < kButtonCount; ++i) {
-		if (switches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
-			processSwitch(SWITCH_TWIN_MODE + i);
-		}
-	}
-	refreshLeds();
-}
-
-static const std::vector<std::string> modeList{
-	"ENVELOPE",
-	"LFO",
-	"TAP LFO",
-	"DRUM GENERAT",
-	"SEQUENCER*",
-	"TRG. SHAPE*",
-	"TRG. RANDOM*",
-	"DIGI DRUMS*",
-	"NUMBER STAT&",
-	"BOUNCE BALL@"
-};
-
-void Apices::saveState() {
-	settings.editMode = editMode;
-	settings.processorFunction[0] = processorFunction[0];
-	settings.processorFunction[1] = processorFunction[1];
-	std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
-	settings.snap_mode = snapMode;
-	displayText1 = modeList[settings.processorFunction[0]];
-	displayText2 = modeList[settings.processorFunction[1]];
-}
-
-void Apices::refreshLeds() {
-
-	// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
-	const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
-
-	uint8_t flash = (getSystemTimeMs() >> 7) & 7;
-	int currentLight;
-	switch (editMode) {
-	case EDIT_MODE_FIRST:
-		lights[LIGHT_CHANNEL1].setBrightnessSmooth((flash == 1) ? 1.0f : 0.0f, sampleTime);
-		lights[LIGHT_CHANNEL2].setBrightnessSmooth(0.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-		for (int i = 0; i < 4; i++) {
-			currentLight = LIGHT_KNOBS_MODE + i * 3;
-			lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
-			lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-		}
-		break;
-	case EDIT_MODE_SECOND:
-		lights[LIGHT_CHANNEL1].setBrightnessSmooth(0.f, sampleTime);
-		lights[LIGHT_CHANNEL2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.0f : 0.0f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(1.f, sampleTime);
-		for (int i = 0; i < 4; i++) {
-			currentLight = LIGHT_KNOBS_MODE + i * 3;
-			lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
-			lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-		}
-		break;
-	case EDIT_MODE_TWIN: {
-		lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
-		lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-		for (int i = 0; i < 4; i++) {
-			currentLight = LIGHT_KNOBS_MODE + i * 3;
-			lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
-		}
-		break;
-	}
-	case EDIT_MODE_SPLIT: {
-		lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
-		lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
-		lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-		for (int i = 0; i < 2; i++) {
-			currentLight = LIGHT_KNOBS_MODE + i * 3;
-			lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-		}
-		for (int i = 2; i < 4; i++) {
-			currentLight = LIGHT_KNOBS_MODE + i * 3;
-			lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
-		}
-		break;
-	}
-	default:
-		break;
-	}
-
-	lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
-	lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.0F : 0.F, sampleTime);
-
-	if (getProcessorFunction() == FUNCTION_BOUNCING_BALL) {
-		lights[LIGHT_FUNCTION_1].setBrightnessSmooth(1.0f, sampleTime);
-		lights[LIGHT_FUNCTION_1 + 1].setBrightnessSmooth(0.f, sampleTime);
-		if (getSystemTimeMs() & 256) {
-			lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(0.f, sampleTime);
-		}
-		else {
-			lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(1.f, sampleTime);
-			lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(1.f, sampleTime);
-		}
-	}
-	else {
-		if ((getSystemTimeMs() & 256) && getProcessorFunction() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
-			for (size_t i = 0; i < 4; ++i) {
-				lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(0.0f, sampleTime);
-			}
-		}
-		else {
-			for (size_t i = 0; i < 4; ++i) {
-				lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((getProcessorFunction() & 3) == i) ? 1.0f : 0.0f, sampleTime);
-			}
-		}
-	}
-
-	uint8_t b[2];
-	for (uint8_t i = 0; i < 2; ++i) {
-		switch (processorFunction[i]) {
-		case FUNCTION_DRUM_GENERATOR:
-		case FUNCTION_FM_DRUM_GENERATOR:
-			b[i] = (int16_t)abs(brightness[i]) >> 8;
-			b[i] = b[i] >= 255 ? 255 : b[i];
-			break;
-		case FUNCTION_LFO:
-		case FUNCTION_TAP_LFO:
-		case FUNCTION_MINI_SEQUENCER: {
-			int32_t brightnessVal = int32_t(brightness[i]) * 409 >> 8;
-			brightnessVal += 32768;
-			brightnessVal >>= 8;
-			CONSTRAIN(brightnessVal, 0, 255);
-			b[i] = brightnessVal;
-			break;
-		}
-		default:
-			b[i] = brightness[i] >> 7;
-			break;
-		}
-	}
-
-	bool channel1IsStation = processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
-	bool channel2IsStation = processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
-	if (channel1IsStation || channel2IsStation) {
-		if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
-			uint8_t pattern = processors[0].number_station().digit()
-				^ processors[1].number_station().digit();
-			for (size_t i = 0; i < 4; ++i) {
-				lights[LIGHT_FUNCTION_1 + i].value = (pattern & 1) ? 1.0f : 0.0f;
-				pattern = pattern >> 1;
-			}
-		}
-		// Hacky but animates the lights!
-		else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
-			int digit = processors[0].number_station().digit();
-			for (size_t i = 0; i < 4; i++) {
-				lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
-			}
-		}
-		// Ibid
-		else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
-			uint8_t digit = processors[1].number_station().digit();
-			for (size_t i = 0; i < 4; i++) {
-				lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
-			}
-		}
-		if (channel1IsStation) {
-			b[0] = processors[0].number_station().gate() ? 255 : 0;
-		}
-		if (channel2IsStation) {
-			b[1] = processors[1].number_station().gate() ? 255 : 0;
-		}
-	}
-
-	const float deltaTime = APP->engine->getSampleTime();
-	lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
-	lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(b[1]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
-}
 
 struct ApicesWidget : ModuleWidget {
 	ApicesWidget(Apices* module) {
