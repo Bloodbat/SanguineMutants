@@ -34,7 +34,7 @@
 // All prediction strategies are concurrently tested, and the output from the
 // best performing one is selected (à la early Scheirer/Goto beat trackers).
 
-#include "ramp_extractor.h"
+#include "tides2/ramp/ramp_extractor.h"
 
 #include <algorithm>
 
