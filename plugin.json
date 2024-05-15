@@ -56,6 +56,17 @@
         "Hardware clone",
         "Polyphonic"
       ]
+    },
+    {
+      "slug": "Sanguine-Nodi",
+      "name": "Sanguine Nodi",
+      "manualUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/doc/mutants_manual.pdf",
+      "description": "A macro oscillator based on Mutable Instruments Braids",
+      "tags": [
+        "VCO",
+        "Waveshaper",
+        "Hardware clone"
+      ]
     }
   ]
 }
