@@ -8,7 +8,6 @@
 #endif
 
 #include "plaits/dsp/voice.h"
-//#include "plaits/user_data_receiver.h"
 #include "plaits/user_data.h"
 
 #pragma GCC diagnostic pop
