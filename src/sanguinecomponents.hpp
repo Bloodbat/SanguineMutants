@@ -89,6 +89,7 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 
 	float fontSize;
 	unsigned char haloOpacity = 55;
+	SanguineBaseSegmentDisplay(uint32_t newCharacterCount);
 	void draw(const DrawArgs& args) override;
 };
 
