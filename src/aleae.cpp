@@ -314,5 +314,4 @@ struct AleaeWidget : ModuleWidget {
 	}
 };
 
-
 Model* modelAleae = createModel<Aleae, AleaeWidget>("Sanguine-Aleae");
