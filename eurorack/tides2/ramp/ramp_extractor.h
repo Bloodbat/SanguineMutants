@@ -40,7 +40,7 @@
 #include "stmlib/stmlib.h"
 #include "stmlib/utils/gate_flags.h"
 
-#include "ratio.h"
+#include "tides2/ramp/ratio.h"
 
 namespace tides2 {
 

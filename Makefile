@@ -31,7 +31,7 @@ SOURCES += eurorack/peaks/pulse_processor/pulse_randomizer.cc
 SOURCES += eurorack/peaks/number_station/number_station.cc
 
 SOURCES += eurorack/tides2/poly_slope_generator.cc
-SOURCES += eurorack/tides2/ramp_extractor.cc
+SOURCES += eurorack/tides2/ramp/ramp_extractor.cc
 SOURCES += eurorack/tides2/resources.cc
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
