@@ -121,10 +121,8 @@ struct Aleae : Module {
 						outMode = moduleAleae->outModes[1];
 						break;
 					}
-					{
 					default: {
 						break;
-					}
 					}
 					}
 
@@ -274,7 +272,6 @@ struct Aleae : Module {
 		}
 	}
 };
-
 
 struct AleaeWidget : ModuleWidget {
 	AleaeWidget(Aleae* module) {
