@@ -116,7 +116,7 @@ void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 
 SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
-	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));	
+	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
 	fontSize = 40;
 }
 
@@ -151,7 +151,7 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
-	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));	
+	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
 	fontSize = 33.95;
 }
 
@@ -189,9 +189,8 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount) {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
-	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));	
+SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount) : SanguineLedNumberDisplay(newCharacterCount) {
+	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));
 	fontSize = 21.4;
 };
 
@@ -291,7 +290,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount)
 {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
-	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));	
+	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
 	fontSize = 16.45;
 }
 

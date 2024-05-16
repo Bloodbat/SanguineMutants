@@ -93,23 +93,23 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 	void draw(const DrawArgs& args) override;
 };
 
-struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {		
+struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {
 	SanguineAlphaDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {		
+struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
 	SanguineLedNumberDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {		
+struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {
 	unsigned char haloOpacity = 55;
 	SanguineMatrixDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineTinyNumericDisplay : SanguineBaseSegmentDisplay {		
+struct SanguineTinyNumericDisplay : SanguineLedNumberDisplay {
 	SanguineTinyNumericDisplay(uint32_t newCharacterCount);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
