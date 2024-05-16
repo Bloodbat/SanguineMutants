@@ -60,7 +60,7 @@ struct Funes : Module {
 		PARAM_LPG_COLOR,
 		PARAM_LPG_DECAY,
 		PARAM_FREQUENCY_ROOT,
-		PARAM_COUNT
+		PARAMS_COUNT
 	};
 
 	enum InputIds {
@@ -72,16 +72,16 @@ struct Funes : Module {
 		INPUT_TRIGGER,
 		INPUT_LEVEL,
 		INPUT_NOTE,
-		INPUT_COUNT
+		INPUTS_COUNT
 	};
 	enum OutputIds {
 		OUTPUT_OUT,
 		OUTPUT_AUX,
-		OUTPUT_COUNT
+		OUTPUTS_COUNT
 	};
 	enum LightIds {
 		ENUMS(LIGHT_MODEL, 8 * 3),
-		LIGHT_COUNT
+		LIGHTS_COUNT
 	};
 
 	plaits::Voice voice[16];
@@ -94,13 +94,14 @@ struct Funes : Module {
 
 	dsp::SampleRateConverter<16 * 2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<16 * 2>, 256> outputBuffer;
-	bool lowCpu = false;
 
-	bool displayModulatedModel = true;
+	bool bLowCpu = false;
 
-	bool loading = false;
+	bool bDisplayModulatedModel = true;
 
-	bool notesModelSelection = false;
+	bool bLoading = false;
+
+	bool bNotesModelSelection = false;
 
 	int modelNum = 0;
 	std::string displayText = "";
@@ -111,7 +112,7 @@ struct Funes : Module {
 	dsp::ClockDivider clockDivider;
 
 	Funes() {
-		config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configParam(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODEL]->snapEnabled = true;
@@ -168,11 +169,11 @@ struct Funes : Module {
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 
-		json_object_set_new(rootJ, "lowCpu", json_boolean(lowCpu));
-		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(displayModulatedModel));
+		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
+		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
 		json_object_set_new(rootJ, "model", json_integer(patch.engine));
 		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
-		json_object_set_new(rootJ, "notesModelSelection", json_boolean(notesModelSelection));
+		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
 
 		const uint8_t* userDataBuffer = user_data.getBuffer();
 		if (userDataBuffer != nullptr) {
@@ -186,11 +187,11 @@ struct Funes : Module {
 	void dataFromJson(json_t* rootJ) override {
 		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
 		if (lowCpuJ)
-			lowCpu = json_boolean_value(lowCpuJ);
+			bLowCpu = json_boolean_value(lowCpuJ);
 
 		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
 		if (displayModulatedModelJ)
-			displayModulatedModel = json_boolean_value(displayModulatedModelJ);
+			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
 
 		json_t* modelJ = json_object_get(rootJ, "model");
 		if (modelJ) {
@@ -200,7 +201,7 @@ struct Funes : Module {
 
 		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
 		if (notesModelSelectionJ)
-			notesModelSelection = json_boolean_value(notesModelSelectionJ);
+			bNotesModelSelection = json_boolean_value(notesModelSelectionJ);
 
 		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
 		if (frequencyModeJ)
@@ -234,7 +235,7 @@ struct Funes : Module {
 			const int blockSize = 12;
 
 			// Switch models
-			if (notesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
+			if (bNotesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
 				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
 				if (currentModelVoltage != lastModelVoltage) {
 					lastModelVoltage = currentModelVoltage;
@@ -252,7 +253,7 @@ struct Funes : Module {
 
 			// Check if engine for first poly channel is different than "base" engine.
 			int activeEngine = voice[0].active_engine();
-			if (displayModulatedModel && (activeEngine != modelNum && activeEngine >= 0))
+			if (bDisplayModulatedModel && (activeEngine != modelNum && activeEngine >= 0))
 				modelNum = activeEngine;
 
 			// Update model text every 16 samples only.
@@ -341,14 +342,15 @@ struct Funes : Module {
 				lights[LIGHT_MODEL + currentLight + 2].setBrightness(brightnessBlue);
 			}
 
-			// Calculate pitch for lowCpu mode if needed
+			// Calculate pitch for low cpu mode if needed
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			if (lowCpu)
+			if (bLowCpu)
 				pitch += std::log2(48000.f * args.sampleTime);
+
 			// Update patch
 
 			// Similar implementation to original Plaits ui.cc code.
-			// TODO: check with lowCpu mode.
+			// TODO: check with low cpu mode.
 			if (frequencyMode == 0) {
 				patch.note = -48.37f + pitch * 15.f;
 			}
@@ -377,7 +379,7 @@ struct Funes : Module {
 			for (int c = 0; c < channels; c++) {
 				// Construct modulations
 				plaits::Modulations modulations;
-				if (!notesModelSelection)
+				if (!bNotesModelSelection)
 					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(c) / 5.f;
 				modulations.note = inputs[INPUT_NOTE].getVoltage(c) * 12.f;
 				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(c) * 6.f;
@@ -406,7 +408,7 @@ struct Funes : Module {
 			}
 
 			// Convert output
-			if (lowCpu) {
+			if (bLowCpu) {
 				int len = std::min((int)outputBuffer.capacity(), blockSize);
 				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
 				outputBuffer.endIncr(len);
@@ -444,8 +446,8 @@ struct Funes : Module {
 	}
 
 	void load(const std::string& path) {
-		loading = true;
-		DEFER({ loading = false; });
+		bLoading = true;
+		DEFER({ bLoading = false; });
 		// HACK Sleep 100us so DSP thread is likely to finish processing before we resize the vector
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 
@@ -484,14 +486,14 @@ struct Funes : Module {
 	}
 
 	void toggleModulatedDisplay() {
-		displayModulatedModel = !displayModulatedModel;
-		if (!displayModulatedModel)
+		bDisplayModulatedModel = !bDisplayModulatedModel;
+		if (!bDisplayModulatedModel)
 			this->modelNum = params[PARAM_MODEL].getValue();
 	}
 
 	void toggleNotesModelSelection() {
-		notesModelSelection = !notesModelSelection;
-		if (notesModelSelection)
+		bNotesModelSelection = !bNotesModelSelection;
+		if (bNotesModelSelection)
 			inputs[INPUT_ENGINE].setChannels(0);
 		// Try to wait for DSP to finish.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
@@ -614,7 +616,7 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->lowCpu));
+		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 
 		menu->addChild(new MenuSeparator);
 
@@ -671,11 +673,11 @@ struct FunesWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
-			[=]() {return module->displayModulatedModel; },
+			[=]() {return module->bDisplayModulatedModel; },
 			[=]() {module->toggleModulatedDisplay(); }));
 
 		menu->addChild(createCheckMenuItem("C0 model modulation (monophonic)", "",
-			[=]() {return module->notesModelSelection; },
+			[=]() {return module->bNotesModelSelection; },
 			[=]() {module->toggleNotesModelSelection(); }));
 	}
 };

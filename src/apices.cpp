@@ -76,17 +76,17 @@ struct Apices : Module {
 		PARAM_TRIGGER_1,
 		PARAM_TRIGGER_2,
 		PARAM_MODE,
-		PARAM_COUNT
+		PARAMS_COUNT
 	};
 	enum InputIds {
 		GATE_1_INPUT,
 		GATE_2_INPUT,
-		INPUT_COUNT
+		INPUTS_COUNT
 	};
 	enum OutputIds {
 		OUT_1_OUTPUT,
 		OUT_2_OUTPUT,
-		OUTPUT_COUNT
+		OUTPUTS_COUNT
 	};
 	enum LightIds {
 		LIGHT_TRIGGER_1,
@@ -101,7 +101,7 @@ struct Apices : Module {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
-		LIGHT_COUNT
+		LIGHTS_COUNT
 	};
 
 	EditMode editMode = EDIT_MODE_TWIN;
@@ -110,8 +110,8 @@ struct Apices : Module {
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	bool snapMode = false;
-	bool snapped[4] = { false, false, false, false };
+	bool bSnapMode = false;
+	bool bSnapped[4] = { false, false, false, false };
 
 	int32_t adcLp[kNumAdcChannels] = { 0, 0, 0, 0 };
 	int32_t adcValue[kNumAdcChannels] = { 0, 0, 0, 0 };
@@ -166,13 +166,14 @@ struct Apices : Module {
 { peaks::PROCESSOR_FUNCTION_PULSE_SHAPER, peaks::PROCESSOR_FUNCTION_PULSE_SHAPER },
 { peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
 { peaks::PROCESSOR_FUNCTION_FM_DRUM, peaks::PROCESSOR_FUNCTION_FM_DRUM },
+
 { peaks::PROCESSOR_FUNCTION_NUMBER_STATION, peaks::PROCESSOR_FUNCTION_NUMBER_STATION},
 { peaks::PROCESSOR_FUNCTION_BOUNCING_BALL, peaks::PROCESSOR_FUNCTION_BOUNCING_BALL}
 	};
 
 	Apices() {
 
-		config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configParam(PARAM_MODE, 0.0f, 9.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
@@ -363,7 +364,7 @@ struct Apices : Module {
 
 	void lockPots() {
 		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels], kAdcThresholdLocked);
-		std::fill(&snapped[0], &snapped[kNumAdcChannels], false);
+		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels], false);
 	}
 
 	void pollPots() {
@@ -402,15 +403,15 @@ struct Apices : Module {
 			uint8_t index = id + (editMode - EDIT_MODE_FIRST) * 4;
 			peaks::Processors* p = &processors[editMode - EDIT_MODE_FIRST];
 
-			int16_t delta = static_cast<int16_t>(potValue[index]) -  static_cast<int16_t>(value >> 8);
+			int16_t delta = static_cast<int16_t>(potValue[index]) - static_cast<int16_t>(value >> 8);
 			if (delta < 0) {
 				delta = -delta;
 			}
 
-			if (!snapMode || snapped[id] || delta <= 2) {
+			if (!bSnapMode || bSnapped[id] || delta <= 2) {
 				p->set_parameter(id, value);
 				potValue[index] = value >> 8;
-				snapped[id] = true;
+				bSnapped[id] = true;
 			}
 			break;
 		}
@@ -438,7 +439,7 @@ struct Apices : Module {
 		settings.processorFunction[0] = processorFunction[0];
 		settings.processorFunction[1] = processorFunction[1];
 		std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
-		settings.snap_mode = snapMode;
+		settings.snap_mode = bSnapMode;
 		displayText1 = modeList[settings.processorFunction[0]];
 		displayText2 = modeList[settings.processorFunction[1]];
 	}
@@ -610,7 +611,7 @@ struct Apices : Module {
 		std::fill(&adcLp[0], &adcLp[kNumAdcChannels], 0);
 		std::fill(&adcValue[0], &adcValue[kNumAdcChannels], 0);
 		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels], 0);
-		std::fill(&snapped[0], &snapped[kNumAdcChannels], false);
+		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels], false);
 
 		editMode = static_cast<EditMode>(settings.editMode);
 		processorFunction[0] = static_cast<ProcessorFunction>(settings.processorFunction[0]);
@@ -629,7 +630,7 @@ struct Apices : Module {
 			}
 		}
 
-		snapMode = settings.snap_mode;
+		bSnapMode = settings.snap_mode;
 
 		changeControlMode();
 		setFunction(0, processorFunction[0]);
@@ -1012,7 +1013,7 @@ struct ApicesWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 		Apices* peaks = dynamic_cast<Apices*>(this->module);
 
-		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &peaks->snapMode));
+		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &peaks->bSnapMode));
 	}
 
 };
