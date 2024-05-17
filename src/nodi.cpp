@@ -164,13 +164,6 @@ struct Nodi : Module {
 
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer;
 	dsp::SampleRateConverter<1> sampleRateConverter;
-	dsp::SchmittTrigger stDrift;
-	dsp::SchmittTrigger stFlat;
-	dsp::SchmittTrigger stMeta;
-	dsp::SchmittTrigger stMorse;
-	dsp::SchmittTrigger stSign;
-	dsp::SchmittTrigger stVCA;
-	dsp::SchmittTrigger stAutoTrigger;
 
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
@@ -582,34 +575,14 @@ struct Nodi : Module {
 
 	inline void pollSwitches() {
 		const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
-		// Handle switches
-		if (stMeta.process(params[PARAM_META].getValue())) {
-			settings.meta_modulation = !settings.meta_modulation;
-		}
-
-		if (stMorse.process(params[PARAM_MORSE].getValue())) {
-			bPaques = !bPaques;
-		}
-
-		if (stVCA.process(params[PARAM_VCA].getValue())) {
-			settings.ad_vca = !settings.ad_vca;
-		}
-
-		if (stDrift.process(params[PARAM_DRIFT].getValue())) {
-			settings.vco_drift = !settings.vco_drift;
-		}
-
-		if (stFlat.process(params[PARAM_FLAT].getValue())) {
-			settings.vco_flatten = !settings.vco_flatten;
-		}
-
-		if (stSign.process(params[PARAM_SIGN].getValue())) {
-			settings.signature = !settings.signature;
-		}
-
-		if (stAutoTrigger.process(params[PARAM_AUTO].getValue())) {
-			settings.auto_trig = !settings.auto_trig;
-		}
+		// Handle switches	
+		settings.meta_modulation = params[PARAM_META].getValue();
+		bPaques = params[PARAM_MORSE].getValue();
+		settings.ad_vca = params[PARAM_VCA].getValue();
+		settings.vco_drift = params[PARAM_DRIFT].getValue();
+		settings.vco_flatten = params[PARAM_FLAT].getValue();
+		settings.signature = params[PARAM_SIGN].getValue();
+		settings.auto_trig = params[PARAM_AUTO].getValue();
 
 		// Handle switch lights
 		lights[LIGHT_META].setBrightnessSmooth(settings.meta_modulation, sampleTime);
@@ -619,17 +592,6 @@ struct Nodi : Module {
 		lights[LIGHT_FLAT].setBrightnessSmooth(settings.vco_flatten, sampleTime);
 		lights[LIGHT_SIGN].setBrightnessSmooth(settings.signature, sampleTime);
 		lights[LIGHT_AUTO].setBrightnessSmooth(settings.auto_trig, sampleTime);
-	}
-
-	void onReset() override {
-		Module::onReset();
-		bPaques = false;
-		settings.meta_modulation = 0;
-		settings.ad_vca = 0;
-		settings.vco_drift = 0;
-		settings.vco_flatten = 0;
-		settings.signature = 0;
-		settings.auto_trig = 0;
 	}
 
 	json_t* dataToJson() override {
@@ -734,7 +696,7 @@ struct NodiWidget : ModuleWidget {
 		nodiDisplay->displayTimeout = &module->displayTimeout;
 		nodiFrambuffer->addChild(nodiDisplay);
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedLight>>>(mm2px(Vec(105.031, 20.996)), module, Nodi::PARAM_META, Nodi::LIGHT_META));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(mm2px(Vec(105.031, 20.996)), module, Nodi::PARAM_META, Nodi::LIGHT_META));
 
 		addParam(createParamCentered<Rogan6PSWhite>(mm2px(Vec(71.12, 67.247)), module, Nodi::PARAM_MODEL));
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(mm2px(Vec(71.12, 67.247)), module, Nodi::LIGHT_MODEL));
@@ -743,19 +705,19 @@ struct NodiWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(22.768, 36.606)), module, Nodi::PARAM_MODULATION));
 
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(51.46, 40.534)), module, Nodi::PARAM_COARSE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(71.12, 42.184)), module, Nodi::PARAM_MORSE, Nodi::LIGHT_MORSE));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(71.12, 42.184)), module, Nodi::PARAM_MORSE, Nodi::LIGHT_MORSE));
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(90.809, 40.534)), module, Nodi::PARAM_FINE));
 
 
 		addParam(createParamCentered<Sanguine1PSGreen>(mm2px(Vec(119.474, 36.606)), module, Nodi::PARAM_ATTACK));
 
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(23.804, 54.231)), module, Nodi::PARAM_AD_TIMBRE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenLight>>>(mm2px(Vec(119.4, 54.231)), module, Nodi::PARAM_VCA, Nodi::LIGHT_VCA));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(119.4, 54.231)), module, Nodi::PARAM_VCA, Nodi::LIGHT_VCA));
 
 		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(10.076, 67.247)), module, Nodi::PARAM_TIMBRE));
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(36.032, 67.247)), module, Nodi::PARAM_ROOT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<YellowLight>>>(mm2px(Vec(48.572, 80.197)), module, Nodi::PARAM_DRIFT, Nodi::LIGHT_DRIFT));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(93.673, 80.197)), module, Nodi::PARAM_FLAT, Nodi::LIGHT_FLAT));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(mm2px(Vec(48.572, 80.197)), module, Nodi::PARAM_DRIFT, Nodi::LIGHT_DRIFT));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(93.673, 80.197)), module, Nodi::PARAM_FLAT, Nodi::LIGHT_FLAT));
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(106.234, 67.247)), module, Nodi::PARAM_SCALE));
 		addParam(createParamCentered<Sanguine1PSGreen>(mm2px(Vec(132.166, 67.247)), module, Nodi::PARAM_DECAY));
 
@@ -766,7 +728,7 @@ struct NodiWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(22.768, 97.889)), module, Nodi::PARAM_COLOR));
 
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(51.457, 93.965)), module, Nodi::PARAM_PITCH_OCTAVE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<PurpleLight>>>(mm2px(Vec(71.12, 93.962)), module, Nodi::PARAM_SIGN, Nodi::LIGHT_SIGN));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<PurpleLight>>>(mm2px(Vec(71.12, 93.962)), module, Nodi::PARAM_SIGN, Nodi::LIGHT_SIGN));
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(90.806, 93.965)), module, Nodi::PARAM_PITCH_RANGE));
 
 		addParam(createParamCentered<Sanguine1PSOrange>(mm2px(Vec(119.474, 97.889)), module, Nodi::PARAM_FM));
@@ -775,7 +737,7 @@ struct NodiWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(8.222, 117.788)), module, Nodi::INPUT_PITCH));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(21.722, 117.788)), module, Nodi::INPUT_TRIGGER));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(35.151, 117.788)), module, Nodi::PARAM_TRIGGER_DELAY));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenLight>>>(mm2px(Vec(46.798, 117.788)), module, Nodi::PARAM_AUTO, Nodi::LIGHT_AUTO));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(46.798, 117.788)), module, Nodi::PARAM_AUTO, Nodi::LIGHT_AUTO));
 		addParam(createParamCentered<Sanguine1PSYellow>(mm2px(Vec(62.4, 113.511)), module, Nodi::PARAM_BITS));
 		addParam(createParamCentered<Sanguine1PSYellow>(mm2px(Vec(79.841, 113.511)), module, Nodi::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(133.968, 117.788)), module, Nodi::OUTPUT_OUT));
