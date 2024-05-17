@@ -178,7 +178,7 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 				if (values.numberValue)
 					displayValue = std::to_string(*values.numberValue);
 
-				if (*values.numberValue < 10)
+				if (values.numberValue && *values.numberValue < 10)
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
@@ -217,7 +217,7 @@ void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
 				if (values.numberValue)
 					displayValue = std::to_string(*values.numberValue);
 
-				if (*values.numberValue < 10)
+				if (values.numberValue && *values.numberValue < 10)
 					displayValue.insert(0, 1, '0');
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
