@@ -442,14 +442,14 @@ struct Nodi : Module {
 		// Handle model light
 		if (!bPaques) {
 			int currentModel = settings.shape;
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[currentModel].red, args.sampleRate);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[currentModel].green, args.sampleRate);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[currentModel].blue, args.sampleRate);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[currentModel].red, args.sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[currentModel].green, args.sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[currentModel].blue, args.sampleTime);
 		}
 		else {
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[47].red, args.sampleRate);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[47].green, args.sampleRate);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[47].blue, args.sampleRate);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[47].red, args.sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[47].green, args.sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[47].blue, args.sampleTime);
 		}
 
 		handleDisplay(args);
