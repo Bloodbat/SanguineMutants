@@ -1,6 +1,15 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 
+#define ROLL_DIRECT 0
+#define ROLL_TOGGLE 1
+
+#define OUT_MODE_TRIGGER 0
+#define OUT_MODE_LATCH 1
+
+#define	ROLL_HEADS 0
+#define ROLL_TAILS 1
+
 struct Aleae : Module {
 	enum ParamIds {
 		PARAM_THRESHOLD1,
@@ -32,30 +41,13 @@ struct Aleae : Module {
 		LIGHTS_COUNT
 	};
 
-	enum RollModes {
-		ROLL_DIRECT,
-		ROLL_TOGGLE
-	};
-
-	enum OutModes {
-		OUT_MODE_TRIGGER,
-		OUT_MODE_LATCH
-	};
-
-	enum RollResults {
-		ROLL_HEADS,
-		ROLL_TAILS
-	};
-
 	dsp::BooleanTrigger btGateTriggers[2][16];
-	dsp::SchmittTrigger stRollModeTriggers[2];
-	dsp::SchmittTrigger stOutModeTriggers[2];
 
-	RollResults rollResults[2][16] = {};
-	RollResults lastRollResults[2][16];
+	bool rollResults[2][16] = {};
+	bool lastRollResults[2][16];
 
-	RollModes rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
-	OutModes outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
+	bool rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
+	bool outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
 
 	struct RollModeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
@@ -65,7 +57,7 @@ struct Aleae : Module {
 				Aleae* moduleAleae = static_cast<Aleae*>(module);
 
 				if (paramId == PARAM_ROLL_MODE1 || paramId == PARAM_ROLL_MODE2) {
-					RollModes rollMode;
+					bool rollMode;
 					switch (paramId)
 					{
 					case PARAM_ROLL_MODE1: {
@@ -77,22 +69,16 @@ struct Aleae : Module {
 						break;
 					}
 					default:
+					{
 						break;
+					}
 					}
 
-					switch (rollMode) {
-					case ROLL_DIRECT: {
+					if (rollMode == ROLL_DIRECT) {
 						rollString = "Direct";
-						break;
 					}
-					case ROLL_TOGGLE: {
+					else {
 						rollString = "Toggle";
-						break;
-					}
-					default: {
-						rollString = "";
-						break;
-					}
 					}
 				}
 			}
@@ -111,7 +97,7 @@ struct Aleae : Module {
 				Aleae* moduleAleae = static_cast<Aleae*>(module);
 
 				if (paramId == PARAM_OUT_MODE1 || paramId == PARAM_OUT_MODE2) {
-					OutModes outMode;
+					bool outMode;
 					switch (paramId) {
 					case PARAM_OUT_MODE1: {
 						outMode = moduleAleae->outModes[0];
@@ -126,20 +112,11 @@ struct Aleae : Module {
 					}
 					}
 
-					switch (outMode)
-					{
-					case OUT_MODE_TRIGGER: {
+					if (outMode == OUT_MODE_TRIGGER) {
 						outModeString = "Trigger";
-						break;
 					}
-					case OUT_MODE_LATCH: {
+					else {
 						outModeString = "Latch";
-						break;
-					}
-					default: {
-						outModeString = "";
-						break;
-					}
 					}
 				}
 			}
@@ -175,13 +152,8 @@ struct Aleae : Module {
 				input = &inputs[INPUT_IN1 + 0];
 			int channelCount = std::max(input->getChannels(), 1);
 
-			if (stRollModeTriggers[i].process(params[PARAM_ROLL_MODE1 + i].getValue())) {
-				rollModes[i] = (RollModes)((rollModes[i] + 1) % 2);
-			}
-
-			if (stOutModeTriggers[i].process(params[PARAM_OUT_MODE1 + i].getValue())) {
-				outModes[i] = (OutModes)((outModes[i] + 1) % 2);
-			}
+			rollModes[i] = params[PARAM_ROLL_MODE1 + i].getValue();
+			outModes[i] = params[PARAM_OUT_MODE1 + i].getValue();
 
 			bool lightAActive = false;
 			bool lightBActive = false;
@@ -195,7 +167,7 @@ struct Aleae : Module {
 					float threshold = params[PARAM_THRESHOLD1 + i].getValue() + inputs[INPUT_P1 + i].getPolyVoltage(channel) / 10.f;
 					rollResults[i][channel] = (random::uniform() >= threshold) ? ROLL_HEADS : ROLL_TAILS;
 					if (rollModes[i] == ROLL_TOGGLE) {
-						rollResults[i][channel] = RollResults(lastRollResults[i][channel] ^ rollResults[i][channel]);
+						rollResults[i][channel] = lastRollResults[i][channel] ^ rollResults[i][channel];
 					}
 					lastRollResults[i][channel] = rollResults[i][channel];
 				}
@@ -225,7 +197,7 @@ struct Aleae : Module {
 			lights[currentLight + 0].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 1.f : 0.f, args.sampleTime);
 			lights[currentLight + 1].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.f : 1.f, args.sampleTime);
 
-			lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i] == OUT_MODE_LATCH ? 1.f : 0.f, args.sampleTime);
+			lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i], args.sampleTime);
 		}
 	}
 
@@ -245,8 +217,8 @@ struct Aleae : Module {
 		json_t* rollModesJ = json_array();
 		json_t* outModesJ = json_array();
 		for (int i = 0; i < 2; i++) {
-			json_array_insert_new(rollModesJ, i, json_integer(rollModes[i]));
-			json_array_insert_new(outModesJ, i, json_integer(outModes[i]));
+			json_array_insert_new(rollModesJ, i, json_boolean(rollModes[i]));
+			json_array_insert_new(outModesJ, i, json_boolean(outModes[i]));
 		}
 		json_object_set_new(rootJ, "rollModes", rollModesJ);
 		json_object_set_new(rootJ, "outModes", outModesJ);
@@ -259,7 +231,7 @@ struct Aleae : Module {
 			for (int i = 0; i < 2; i++) {
 				json_t* modeJ = json_array_get(rollModesJ, i);
 				if (modeJ)
-					rollModes[i] = (RollModes)(json_integer_value(modeJ));
+					rollModes[i] = json_boolean_value(modeJ);
 			}
 		}
 		json_t* outModesJ = json_object_get(rootJ, "outModes");
@@ -267,7 +239,7 @@ struct Aleae : Module {
 			for (int i = 0; i < 2; i++) {
 				json_t* modeJ = json_array_get(outModesJ, i);
 				if (modeJ)
-					outModes[i] = (OutModes)(json_integer_value(modeJ));
+					outModes[i] = (json_boolean_value(modeJ));
 			}
 		}
 	}
@@ -282,10 +254,10 @@ struct AleaeWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		// Switch #1
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(4.622, 16.723)), module,
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(4.622, 16.723)), module,
 			Aleae::PARAM_ROLL_MODE1, Aleae::LIGHTS_ROLL_MODE + 0 * 2));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(25.863, 16.723)), module,
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(25.863, 16.723)), module,
 			Aleae::PARAM_OUT_MODE1, Aleae::LIGHTS_OUT_MODE + 0));
 
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(15.24, 29.079)), module, Aleae::PARAM_THRESHOLD1));
@@ -296,10 +268,10 @@ struct AleaeWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(24.481, 59.959)), module, Aleae::OUTPUT_OUT1B));
 
 		// Switch #2
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(4.622, 74.653)), module,
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(4.622, 74.653)), module,
 			Aleae::PARAM_ROLL_MODE2, Aleae::LIGHTS_ROLL_MODE + 1 * 2));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(25.863, 74.653)), module,
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(25.863, 74.653)), module,
 			Aleae::PARAM_OUT_MODE2, Aleae::LIGHTS_OUT_MODE + 1));
 
 		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(15.24, 87.008)), module, Aleae::PARAM_THRESHOLD2));
