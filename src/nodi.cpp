@@ -702,7 +702,7 @@ struct NodiWidget : ModuleWidget {
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(mm2px(Vec(71.12, 67.247)), module, Nodi::LIGHT_MODEL));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(8.222, 36.606)), module, Nodi::INPUT_TIMBRE));
-		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(22.768, 36.606)), module, Nodi::PARAM_MODULATION));
+		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(22.768, 36.606)), module, Nodi::PARAM_TIMBRE));
 
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(51.46, 40.534)), module, Nodi::PARAM_COARSE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(71.12, 42.184)), module, Nodi::PARAM_MORSE, Nodi::LIGHT_MORSE));
@@ -714,7 +714,7 @@ struct NodiWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(23.804, 54.231)), module, Nodi::PARAM_AD_TIMBRE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(119.4, 54.231)), module, Nodi::PARAM_VCA, Nodi::LIGHT_VCA));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(10.076, 67.247)), module, Nodi::PARAM_TIMBRE));
+		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(10.076, 67.247)), module, Nodi::PARAM_MODULATION));
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(36.032, 67.247)), module, Nodi::PARAM_ROOT));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(mm2px(Vec(48.572, 80.197)), module, Nodi::PARAM_DRIFT, Nodi::LIGHT_DRIFT));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(mm2px(Vec(93.673, 80.197)), module, Nodi::PARAM_FLAT, Nodi::LIGHT_FLAT));
