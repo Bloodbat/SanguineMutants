@@ -49,90 +49,12 @@ struct Aleae : Module {
 	bool rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
 	bool outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
 
-	struct RollModeParam : ParamQuantity {
-		std::string getDisplayValueString() override {
-			// Convolution to avoid annoying warning.
-			std::string rollString = "";
-			if (module != nullptr) {
-				Aleae* moduleAleae = static_cast<Aleae*>(module);
-
-				if (paramId == PARAM_ROLL_MODE1 || paramId == PARAM_ROLL_MODE2) {
-					bool rollMode;
-					switch (paramId)
-					{
-					case PARAM_ROLL_MODE1: {
-						rollMode = moduleAleae->rollModes[0];
-						break;
-					}
-					case PARAM_ROLL_MODE2: {
-						rollMode = moduleAleae->rollModes[1];
-						break;
-					}
-					default:
-					{
-						break;
-					}
-					}
-
-					if (rollMode == ROLL_DIRECT) {
-						rollString = "Direct";
-					}
-					else {
-						rollString = "Toggle";
-					}
-				}
-			}
-			else {
-				rollString = "";
-			}
-			return rollString;
-		}
-	};
-
-	struct OutModeParam : ParamQuantity {
-		std::string getDisplayValueString() override {
-			// Convolution to avoid annoying warning.
-			std::string outModeString = "";
-			if (module != nullptr) {
-				Aleae* moduleAleae = static_cast<Aleae*>(module);
-
-				if (paramId == PARAM_OUT_MODE1 || paramId == PARAM_OUT_MODE2) {
-					bool outMode;
-					switch (paramId) {
-					case PARAM_OUT_MODE1: {
-						outMode = moduleAleae->outModes[0];
-						break;
-					}
-					case PARAM_OUT_MODE2: {
-						outMode = moduleAleae->outModes[1];
-						break;
-					}
-					default: {
-						break;
-					}
-					}
-
-					if (outMode == OUT_MODE_TRIGGER) {
-						outModeString = "Trigger";
-					}
-					else {
-						outModeString = "Latch";
-					}
-				}
-			}
-			else {
-				outModeString = "";
-			}
-			return outModeString;
-		}
-	};
-
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int i = 0; i < 2; i++) {
-			configParam(PARAM_THRESHOLD1 + i, 0.0, 1.0, 0.5, string::f("Channel %d probability", i + 1), "%", 0, 100);
-			configButton<RollModeParam>(PARAM_ROLL_MODE1 + i, string::f("Channel %d coin mode", i + 1));
-			configButton<OutModeParam>(PARAM_OUT_MODE1 + i, string::f("Channel %d out mode", i + 1));
+			configParam(PARAM_THRESHOLD1 + i, 0.f, 1.f, 0.5f, string::f("Channel %d probability", i + 1), "%", 0, 100);
+			configSwitch(PARAM_ROLL_MODE1 + i, 0.f, 1.f, 0.f,  string::f("Channel %d coin mode", i + 1), { "Direct", "Toggle" });
+			configSwitch(PARAM_OUT_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d out mode", i + 1), { "Trigger", "Latch" });
 			configInput(INPUT_IN1 + i, string::f("Channel %d", i + 1));
 			configInput(INPUT_P1 + i, string::f("Channel %d probability", i + 1));
 			configOutput(OUTPUT_OUT1A + i, string::f("Channel %d A", i + 1));
