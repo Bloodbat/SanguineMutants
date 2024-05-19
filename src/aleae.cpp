@@ -48,7 +48,7 @@ struct Aleae : Module {
 
 	bool rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
 	bool outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
-	bool outputsConnected[OUTPUTS_COUNT];
+	bool bOutputsConnected[OUTPUTS_COUNT];
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -67,10 +67,10 @@ struct Aleae : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		outputsConnected[0] = outputs[OUTPUT_OUT1A].isConnected();
-		outputsConnected[1] = outputs[OUTPUT_OUT2A].isConnected();
-		outputsConnected[2] = outputs[OUTPUT_OUT1B].isConnected();
-		outputsConnected[3] = outputs[OUTPUT_OUT2B].isConnected();
+		bOutputsConnected[0] = outputs[OUTPUT_OUT1A].isConnected();
+		bOutputsConnected[1] = outputs[OUTPUT_OUT2A].isConnected();
+		bOutputsConnected[2] = outputs[OUTPUT_OUT1B].isConnected();
+		bOutputsConnected[3] = outputs[OUTPUT_OUT2B].isConnected();
 
 		for (int i = 0; i < 2; i++) {
 			// Get input.
@@ -110,18 +110,18 @@ struct Aleae : Module {
 					lightBActive = true;				
 
 				// Set output gates
-				if (outputsConnected[0 + i]) {
+				if (bOutputsConnected[0 + i]) {
 					outputs[OUTPUT_OUT1A + i].setVoltage(gateAActive ? 10.f : 0.f, channel);
 				}
-				if (outputsConnected[2 + i]) {
+				if (bOutputsConnected[2 + i]) {
 					outputs[OUTPUT_OUT1B + i].setVoltage(gateBActive ? 10.f : 0.f, channel);
 				}
 			}
 
-			if (outputsConnected[0 + i]) {
+			if (bOutputsConnected[0 + i]) {
 				outputs[OUTPUT_OUT1A + i].setChannels(channelCount);
 			}
-			if (outputsConnected[2 + i]) {
+			if (bOutputsConnected[2 + i]) {
 				outputs[OUTPUT_OUT1B + i].setChannels(channelCount);
 			}
 
