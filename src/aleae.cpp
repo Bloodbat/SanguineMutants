@@ -48,12 +48,13 @@ struct Aleae : Module {
 
 	bool rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
 	bool outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
+	bool outputsConnected[OUTPUTS_COUNT];
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int i = 0; i < 2; i++) {
 			configParam(PARAM_THRESHOLD1 + i, 0.f, 1.f, 0.5f, string::f("Channel %d probability", i + 1), "%", 0, 100);
-			configSwitch(PARAM_ROLL_MODE1 + i, 0.f, 1.f, 0.f,  string::f("Channel %d coin mode", i + 1), { "Direct", "Toggle" });
+			configSwitch(PARAM_ROLL_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", i + 1), { "Direct", "Toggle" });
 			configSwitch(PARAM_OUT_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d out mode", i + 1), { "Trigger", "Latch" });
 			configInput(INPUT_IN1 + i, string::f("Channel %d", i + 1));
 			configInput(INPUT_P1 + i, string::f("Channel %d probability", i + 1));
@@ -66,6 +67,11 @@ struct Aleae : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		outputsConnected[0] = outputs[OUTPUT_OUT1A].isConnected();
+		outputsConnected[1] = outputs[OUTPUT_OUT2A].isConnected();
+		outputsConnected[2] = outputs[OUTPUT_OUT1B].isConnected();
+		outputsConnected[3] = outputs[OUTPUT_OUT2B].isConnected();
+
 		for (int i = 0; i < 2; i++) {
 			// Get input.
 			Input* input = &inputs[INPUT_IN1 + i];
@@ -101,15 +107,23 @@ struct Aleae : Module {
 				if (gateAActive)
 					lightAActive = true;
 				if (gateBActive)
-					lightBActive = true;
+					lightBActive = true;				
 
 				// Set output gates
-				outputs[OUTPUT_OUT1A + i].setVoltage(gateAActive ? 10.f : 0.f, channel);
-				outputs[OUTPUT_OUT1B + i].setVoltage(gateBActive ? 10.f : 0.f, channel);
+				if (outputsConnected[0 + i]) {
+					outputs[OUTPUT_OUT1A + i].setVoltage(gateAActive ? 10.f : 0.f, channel);
+				}
+				if (outputsConnected[2 + i]) {
+					outputs[OUTPUT_OUT1B + i].setVoltage(gateBActive ? 10.f : 0.f, channel);
+				}
 			}
 
-			outputs[OUTPUT_OUT1A + i].setChannels(channelCount);
-			outputs[OUTPUT_OUT1B + i].setChannels(channelCount);
+			if (outputsConnected[0 + i]) {
+				outputs[OUTPUT_OUT1A + i].setChannels(channelCount);
+			}
+			if (outputsConnected[2 + i]) {
+				outputs[OUTPUT_OUT1B + i].setChannels(channelCount);
+			}
 
 			int currentLight = LIGHTS_STATE + i * 2;
 			lights[currentLight + 1].setSmoothBrightness(lightAActive, args.sampleTime);
