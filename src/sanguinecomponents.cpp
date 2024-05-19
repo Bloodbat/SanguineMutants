@@ -175,6 +175,7 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 				std::string displayValue = "";
 
+				// TODO!!! FIX ME!!! USE A SINGLE COMPARISON HERE!
 				if (values.numberValue)
 					displayValue = std::to_string(*values.numberValue);
 
@@ -214,6 +215,7 @@ void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 				std::string displayValue = "";
 
+				// TODO!!! FIX ME!!! USE A SINGLE COMPARISON HERE!
 				if (values.numberValue)
 					displayValue = std::to_string(*values.numberValue);
 
@@ -343,6 +345,7 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 				return;
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 			rack::window::svgDraw(args.vg, svg->handle);
+			// TODO!!! Make this handle n frames!
 			if (getParamQuantity()->getValue() == 0) {
 				drawCircularHalo(args, box.size, haloColorOff, 175, 8.f);
 			}
@@ -352,6 +355,11 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 		}
 	}
 	Widget::drawLayer(args, layer);
+}
+
+SanguineBezel8mm::SanguineBezel8mm() {
+	momentary = true;
+	addFrame(Svg::load(asset::plugin(pluginInstance, "res/components/light_button_8mm.svg")));
 }
 
 // Decorations
