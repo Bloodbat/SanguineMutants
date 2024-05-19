@@ -20,3 +20,13 @@
 ### 2.1.0
 
 - Add Apices - Multifunction gap-filler.
+
+### 2.2.0
+
+- Add Aleae - Bernoulli gates.
+
+- Change knobs supplier.
+
+- Prettify manual.
+
+- Misc. small fixes and changes.
