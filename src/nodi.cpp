@@ -131,7 +131,7 @@ struct Nodi : Module {
 	braids::MacroOscillator osc;
 	braids::SettingsData settings;
 	braids::VcoJitterSource jitter_source;
-	braids::SignatureWaveshaper ws;
+	braids::SignatureWaveshaper waveShaper;
 	braids::Envelope envelope;
 	braids::Quantizer quantizer;
 
@@ -247,8 +247,8 @@ struct Nodi : Module {
 
 		memset(&jitter_source, 0, sizeof(jitter_source));
 		jitter_source.Init();
-		memset(&ws, 0, sizeof(ws));
-		ws.Init(0x0000);
+		memset(&waveShaper, 0, sizeof(waveShaper));
+		waveShaper.Init(0x0000);
 		memset(&settings, 0, sizeof(settings));
 
 		clockDivider.setDivision(kClockUpdateFrequency);
@@ -293,7 +293,7 @@ struct Nodi : Module {
 			quantizer.Configure(braids::scales[currentScale]);
 		}
 
-		// Render frames		
+		// Render frames
 		if (drbOutputBuffer.empty()) {
 			envelope.Update(settings.ad_attack * 8, settings.ad_decay * 8);
 			uint32_t adValue = envelope.Render();
@@ -396,7 +396,7 @@ struct Nodi : Module {
 				}
 				sample = sample * gainLp >> 16;
 				gainLp += (gain - gainLp) >> 4;
-				int16_t warped = ws.Transform(sample);
+				int16_t warped = waveShaper.Transform(sample);
 				renderBuffer[i] = stmlib::Mix(sample, warped, signature);
 			}
 
@@ -575,7 +575,7 @@ struct Nodi : Module {
 
 	inline void pollSwitches() {
 		const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
-		// Handle switches	
+		// Handle switches
 		settings.meta_modulation = params[PARAM_META].getValue();
 		bPaques = params[PARAM_MORSE].getValue();
 		settings.ad_vca = params[PARAM_VCA].getValue();
@@ -646,7 +646,7 @@ struct NodiDisplay : SanguineAlphaDisplay {
 		if (layer == 1) {
 			if (module && !module->isBypassed()) {
 				if (font) {
-					// Text					
+					// Text
 					nvgFontSize(args.vg, fontSize);
 					nvgFontFaceId(args.vg, font->handle);
 					nvgTextLetterSpacing(args.vg, 2.5);
