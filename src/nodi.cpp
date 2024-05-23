@@ -130,7 +130,7 @@ struct Nodi : Module {
 
 	braids::MacroOscillator osc;
 	braids::SettingsData settings;
-	braids::VcoJitterSource jitter_source;
+	braids::VcoJitterSource jitterSource;
 	braids::SignatureWaveshaper waveShaper;
 	braids::Envelope envelope;
 	braids::Quantizer quantizer;
@@ -245,8 +245,8 @@ struct Nodi : Module {
 		memset(&envelope, 0, sizeof(envelope));
 		envelope.Init();
 
-		memset(&jitter_source, 0, sizeof(jitter_source));
-		jitter_source.Init();
+		memset(&jitterSource, 0, sizeof(jitterSource));
+		jitterSource.Init();
 		memset(&waveShaper, 0, sizeof(waveShaper));
 		waveShaper.Init(0x0000);
 		memset(&settings, 0, sizeof(settings));
@@ -358,7 +358,7 @@ struct Nodi : Module {
 			}
 			previousPitch = pitch;
 
-			pitch += jitter_source.Render(settings.vco_drift);
+			pitch += jitterSource.Render(settings.vco_drift);
 			pitch += adValue * settings.ad_fm >> 7;
 
 			pitch = clamp(int(pitch), 0, 16383);
