@@ -13,3 +13,11 @@ An editor for some of the new firmware modes modes is available in this reposito
 ## Mutants Blank
 
 Put a goblin and the Mutants logo on your rack!
+
+## Apices
+
+Based on Mutable Instruments Peaks. It exposes every control and has access to the Bouncing Ball envelope, unavailable in unmodified hardware.
+
+## Aleae
+
+Based on Mutable Instruments Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
