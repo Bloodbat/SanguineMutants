@@ -16,7 +16,7 @@ static const std::string numberStrings[16] = {
 	"  12",
 	"  13",
 	"  14",
-	"  15" 
+	"  15"
 };
 
 static const std::string bitsStrings[7] = {
@@ -26,7 +26,7 @@ static const std::string bitsStrings[7] = {
 	"6BIT",
 	"8BIT",
 	"12B",
-	"16B " 
+	"16B "
 };
 
 static const std::string ratesStrings[7] = {
@@ -36,7 +36,7 @@ static const std::string ratesStrings[7] = {
 	"24K ",
 	"32K ",
 	"48K ",
-	"96K " 
+	"96K "
 };
 
 static const std::string quantizationStrings[49] = {
@@ -96,7 +96,7 @@ static const std::string pitchRangeStrings[5] = {
 	"FREE",
 	"XTND",
 	"440 ",
-	"LFO " 
+	"LFO "
 };
 
 static const std::string octaveStrings[5] = {
@@ -104,7 +104,7 @@ static const std::string octaveStrings[5] = {
 	"-1",
 	"0",
 	"1",
-	"2" 
+	"2"
 };
 
 static const std::string triggerDelayStrings[7] = {
@@ -114,7 +114,7 @@ static const std::string triggerDelayStrings[7] = {
 	"500u",
 	"1ms ",
 	"2ms ",
-	"4ms " 
+	"4ms "
 };
 
 static const std::string noteStrings[12] = {

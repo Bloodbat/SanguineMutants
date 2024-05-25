@@ -107,7 +107,7 @@ struct Aleae : Module {
 				if (gateAActive)
 					lightAActive = true;
 				if (gateBActive)
-					lightBActive = true;				
+					lightBActive = true;
 
 				// Set output gates
 				if (bOutputsConnected[0 + i]) {
