@@ -2,7 +2,6 @@ build
 dep
 dist
 /plugin.dll
-sources
 /SanguineMutants.vcxproj.user
 /SanguineMutants.sln
 /SanguineMutants.vcxproj
