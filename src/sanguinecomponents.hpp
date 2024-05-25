@@ -156,7 +156,7 @@ using PurpleLight = TPurpleLight<>;
 
 // Decorations
 
-struct SanguineShapedLight : widget::SvgWidget {
+struct SanguineShapedLight : SvgLight {
 	Module* module;
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;

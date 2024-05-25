@@ -370,11 +370,11 @@ void SanguineShapedLight::draw(const DrawArgs& args) {
 void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		//From SvgWidget::draw()
-		if (!svg)
+		if (!sw->svg)
 			return;
 		if (module && !module->isBypassed()) {
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
-			rack::window::svgDraw(args.vg, svg->handle);
+			rack::window::svgDraw(args.vg, sw->svg->handle);
 		}
 	}
 	Widget::drawLayer(args, layer);
