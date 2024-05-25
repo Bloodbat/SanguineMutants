@@ -744,17 +744,15 @@ struct NodiWidget : ModuleWidget {
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
 		bloodLogo->box.pos = mm2px(Vec(96.594, 106.386));
-		bloodLogo->wrap();
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
-		nodiFrambuffer->addChild(bloodLogo);
+		addChild(bloodLogo);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = mm2px(Vec(105.385, 114.755));
-		mutantsLogo->wrap();
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		nodiFrambuffer->addChild(mutantsLogo);
+		addChild(mutantsLogo);
 	}
 
 	void appendContextMenu(Menu* menu) override {

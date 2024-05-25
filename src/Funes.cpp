@@ -598,17 +598,15 @@ struct FunesWidget : ModuleWidget {
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = mm2px(Vec(83.49, 116.46));
-		mutantsLogo->box.size = Vec(36.06, 14.79);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		funesFrambuffer->addChild(mutantsLogo);
+		addChild(mutantsLogo);
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
 		bloodLogo->box.pos = mm2px(Vec(74.699, 108.091));
-		bloodLogo->box.size = Vec(11.2, 23.27);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
-		funesFrambuffer->addChild(bloodLogo);
+		addChild(bloodLogo);
 	}
 
 	void appendContextMenu(Menu* menu) override {
