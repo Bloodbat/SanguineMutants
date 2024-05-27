@@ -67,6 +67,16 @@
         "Waveshaper",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Contextus",
+      "name": "Sanguine Contextus",
+      "description": "A macro oscillator based on the Reinassance alternative firmware for Braids",
+      "tags": [
+        "VCO",
+        "Waveshaper",
+        "Hardware clone"
+      ]
     }
   ]
 }

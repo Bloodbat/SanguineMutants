@@ -9,6 +9,7 @@ extern Model* modelMutantsBlank;
 extern Model* modelApices;
 extern Model* modelAleae;
 extern Model* modelNodi;
+extern Model* modelContextus;
 
 template <typename Base>
 struct Rogan6PSLight : Base {

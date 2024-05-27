@@ -1,6 +1,7 @@
 FLAGS += \
 	-DTEST \
 	-I./eurorack \
+	-I./alt_firmware \
 	-Wno-unused-local-typedefs
 
 SOURCES += $(wildcard src/*.cpp)
@@ -39,6 +40,19 @@ SOURCES += eurorack/braids/analog_oscillator.cc
 SOURCES += eurorack/braids/digital_oscillator.cc
 SOURCES += eurorack/braids/resources.cc
 SOURCES += eurorack/braids/quantizer.cc
+
+SOURCES += alt_firmware/reinassance/reinassance_macro_oscillator.cc
+SOURCES += alt_firmware/reinassance/reinassance_analog_oscillator.cc
+SOURCES += alt_firmware/reinassance/reinassance_digital_oscillator.cc
+SOURCES += alt_firmware/reinassance/reinassance_resources.cc
+SOURCES += alt_firmware/reinassance/reinassance_quantizer.cc
+SOURCES += alt_firmware/reinassance/reinassance_stack.cc
+SOURCES += alt_firmware/reinassance/reinassance_harmonics.cc
+
+SOURCES += alt_firmware/reinassance/vocalist/vocalist.cc
+SOURCES += alt_firmware/reinassance/vocalist/sam.cc
+SOURCES += alt_firmware/reinassance/vocalist/wordlist.cc
+SOURCES += alt_firmware/reinassance/vocalist/rendertabs.cc
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
