@@ -21,3 +21,11 @@ Based on Mutable Instruments Peaks. It exposes every control and has access to t
 ## Aleae
 
 Based on Mutable Instruments Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
+
+## Nodi
+
+Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports.
+
+## Contextus
+
+Based on the Renaissance alternative firmware for Braids. Exposes every control.
