@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../reinassance_resources.h"
+#include "../renaissance_resources.h"
 #include "vocalist.h"
 #include "wordlist.h"
 
@@ -59,8 +59,8 @@ uint32_t ComputePhaseIncrement(int16_t midi_pitch) {
     ++num_shifts;
   }
   
-  uint32_t a = reinassance::lut_oscillator_increments[ref_pitch >> 4];
-  uint32_t b = reinassance::lut_oscillator_increments[(ref_pitch >> 4) + 1];
+  uint32_t a = renaissance::lut_oscillator_increments[ref_pitch >> 4];
+  uint32_t b = renaissance::lut_oscillator_increments[(ref_pitch >> 4) + 1];
   uint32_t phase_increment = a + \
       (static_cast<int32_t>(b - a) * (ref_pitch & 0xf) >> 4);
   phase_increment >>= num_shifts;

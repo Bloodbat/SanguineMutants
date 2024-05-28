@@ -26,14 +26,14 @@
 //
 // Oscillator - analog style waveforms.
 
-#include "reinassance/reinassance_analog_oscillator.h"
+#include "renaissance/renaissance_analog_oscillator.h"
 
 #include "stmlib/utils/dsp.h"
 
-#include "reinassance/reinassance_resources.h"
-#include "reinassance/reinassance_parameter_interpolation.h"
+#include "renaissance/renaissance_resources.h"
+#include "renaissance/renaissance_parameter_interpolation.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 
@@ -599,4 +599,4 @@ AnalogOscillator::RenderFn AnalogOscillator::fn_table_[] = {
   &AnalogOscillator::RenderBuzz,
 };
 
-}  // namespace reinassance
+}  // namespace renaissance

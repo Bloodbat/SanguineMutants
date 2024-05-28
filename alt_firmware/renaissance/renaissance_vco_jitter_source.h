@@ -33,11 +33,11 @@
 
 #include <cstring>
 
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_resources.h"
 #include "stmlib/utils/dsp.h"
 #include "stmlib/utils/random.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 
@@ -75,6 +75,6 @@ class VcoJitterSource {
   DISALLOW_COPY_AND_ASSIGN(VcoJitterSource);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

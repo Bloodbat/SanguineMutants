@@ -33,13 +33,13 @@
 
 #include <cstring>
 
-#include "reinassance/reinassance_analog_oscillator.h"
-#include "reinassance/reinassance_digital_oscillator.h"
-#include "reinassance/reinassance_resources.h"
-#include "reinassance/reinassance_settings.h"
-#include "reinassance/vocalist/vocalist.h"
+#include "renaissance/renaissance_analog_oscillator.h"
+#include "renaissance/renaissance_digital_oscillator.h"
+#include "renaissance/renaissance_resources.h"
+#include "renaissance/renaissance_settings.h"
+#include "renaissance/vocalist/vocalist.h"
 
-namespace reinassance {
+namespace renaissance {
 
 class MacroOscillator {
  public:
@@ -120,6 +120,6 @@ class MacroOscillator {
   DISALLOW_COPY_AND_ASSIGN(MacroOscillator);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

@@ -4,12 +4,12 @@
 #include "sanguinecomponents.hpp"
 #include "contextusconsts.hpp"
 
-#include "reinassance/reinassance_macro_oscillator.h"
-#include "reinassance/reinassance_signature_waveshaper.h"
-#include "reinassance/reinassance_vco_jitter_source.h"
-#include "reinassance/reinassance_envelope.h"
-#include "reinassance/reinassance_quantizer.h"
-#include "reinassance/reinassance_quantizer_scales.h"
+#include "renaissance/renaissance_macro_oscillator.h"
+#include "renaissance/renaissance_signature_waveshaper.h"
+#include "renaissance/renaissance_vco_jitter_source.h"
+#include "renaissance/renaissance_envelope.h"
+#include "renaissance/renaissance_quantizer.h"
+#include "renaissance/renaissance_quantizer_scales.h"
 
 struct Contextus : Module {
 	enum ParamIds {
@@ -136,12 +136,12 @@ struct Contextus : Module {
 	{0.9468f, 0.0532000000000003f, 0.9468f}
 	};
 
-	reinassance::MacroOscillator osc;
-	reinassance::SettingsData settings;
-	reinassance::VcoJitterSource jitterSource;
-	reinassance::SignatureWaveshaper waveShaper;
-	reinassance::Envelope envelope;
-	reinassance::Quantizer quantizer;
+	renaissance::MacroOscillator osc;
+	renaissance::SettingsData settings;
+	renaissance::VcoJitterSource jitterSource;
+	renaissance::SignatureWaveshaper waveShaper;
+	renaissance::Envelope envelope;
+	renaissance::Quantizer quantizer;
 
 	uint8_t currentScale = 0xff;
 
@@ -182,8 +182,8 @@ struct Contextus : Module {
 	bool bTriggerFlag;
 
 	// Display stuff
-	reinassance::SettingsData lastSettings;
-	reinassance::Setting lastSettingChanged;
+	renaissance::SettingsData lastSettings;
+	renaissance::Setting lastSettingChanged;
 
 	uint32_t displayTimeout = 0;
 
@@ -192,7 +192,7 @@ struct Contextus : Module {
 	Contextus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODEL, 0.f, reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", "", 0.f, 1.f);
+		configParam(PARAM_MODEL, 0.f, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", "", 0.f, 1.f);
 		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 		configParam(PARAM_MODULATION, -1.0, 1.0, 0.0, "Modulation");
 		configParam(PARAM_COARSE, -5.0, 3.0, -1.0, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
@@ -298,7 +298,7 @@ struct Contextus : Module {
 		// Quantizer
 		if (currentScale != settings.quantizer_scale) {
 			currentScale = settings.quantizer_scale;
-			quantizer.Configure(reinassance::scales[currentScale]);
+			quantizer.Configure(renaissance::scales[currentScale]);
 		}
 
 		// Render frames
@@ -311,12 +311,12 @@ struct Contextus : Module {
 			// Set model
 			int model = params[PARAM_MODEL].getValue();
 			if (settings.meta_modulation) {
-				model += roundf(fm / 10.0 * reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				model += roundf(fm / 10.0 * renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 			}
-			settings.shape = clamp(model, 0, reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+			settings.shape = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
 			// Setup oscillator from settings
-			osc.set_shape((reinassance::MacroOscillatorShape)settings.shape);
+			osc.set_shape((renaissance::MacroOscillatorShape)settings.shape);
 
 			// Set timbre/modulation
 			float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage() / 5.0;
@@ -338,12 +338,12 @@ struct Contextus : Module {
 			int32_t pitch = (pitchV * 12.0 + 60) * 128;
 
 			// pitch_range
-			if (settings.pitch_range == reinassance::PITCH_RANGE_EXTERNAL || settings.pitch_range == reinassance::PITCH_RANGE_LFO) {
+			if (settings.pitch_range == renaissance::PITCH_RANGE_EXTERNAL || settings.pitch_range == renaissance::PITCH_RANGE_LFO) {
 			}
-			else if (settings.pitch_range == reinassance::PITCH_RANGE_FREE) {
+			else if (settings.pitch_range == renaissance::PITCH_RANGE_FREE) {
 				pitch = pitch - 1638;
 			}
-			else if (settings.pitch_range == reinassance::PITCH_RANGE_440) {
+			else if (settings.pitch_range == renaissance::PITCH_RANGE_440) {
 				pitch = 69 << 7;
 			}
 			else { // PITCH_RANGE_EXTENDED
@@ -367,17 +367,17 @@ struct Contextus : Module {
 			pitch = clamp(int(pitch), 0, 16383);
 
 			if (settings.vco_flatten) {
-				pitch = reinassance::Interpolate88(reinassance::lut_vco_detune, pitch << 2);
+				pitch = renaissance::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
 			}
 
 			// Pitch transposition
-			int32_t t = settings.pitch_range == reinassance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
+			int32_t t = settings.pitch_range == renaissance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
 			t += (static_cast<int32_t>(settings.pitch_octave) - 2) * 12 * 128;
 			osc.set_pitch(pitch + t);
 
 			if (bTriggerFlag) {
 				osc.Strike();
-				envelope.Trigger(reinassance::ENV_SEGMENT_ATTACK);
+				envelope.Trigger(renaissance::ENV_SEGMENT_ATTACK);
 				bTriggerFlag = false;
 			}
 
@@ -447,94 +447,94 @@ struct Contextus : Module {
 	inline void handleDisplay(const ProcessArgs& args) {
 		// Display handling
 		// Display - return to model after 2s
-		if (lastSettingChanged == reinassance::SETTING_OSCILLATOR_SHAPE) {
+		if (lastSettingChanged == renaissance::SETTING_OSCILLATOR_SHAPE) {
 			displayText = modelInfos[settings.shape].code;
 		}
 		else {
 			int value;
 			switch (lastSettingChanged)
 			{
-			case reinassance::SETTING_META_MODULATION: {
+			case renaissance::SETTING_META_MODULATION: {
 				displayText = "META";
 				break;
 			}
-			case reinassance::SETTING_RESOLUTION: {
+			case renaissance::SETTING_RESOLUTION: {
 				value = settings.resolution;
 				displayText = bitsStrings[value];
 				break;
 			}
-			case reinassance::SETTING_SAMPLE_RATE: {
+			case renaissance::SETTING_SAMPLE_RATE: {
 				value = settings.sample_rate;
 				displayText = ratesStrings[value];
 				break;
 			}
-			case reinassance::SETTING_TRIG_SOURCE: {
+			case renaissance::SETTING_TRIG_SOURCE: {
 				displayText = "AUTO";
 				break;
 			}
-			case reinassance::SETTING_TRIG_DELAY: {
+			case renaissance::SETTING_TRIG_DELAY: {
 				value = settings.trig_delay;
 				displayText = triggerDelayStrings[value];
 				break;
 			}
-			case reinassance::SETTING_AD_ATTACK: {
+			case renaissance::SETTING_AD_ATTACK: {
 				value = settings.ad_attack;
 				displayText = numberStrings[value];
 				break;
 			}
-			case reinassance::SETTING_AD_DECAY: {
+			case renaissance::SETTING_AD_DECAY: {
 				value = settings.ad_decay;
 				displayText = numberStrings[value];
 				break;
 			}
-			case reinassance::SETTING_AD_FM: {
+			case renaissance::SETTING_AD_FM: {
 				value = settings.ad_fm;
 				displayText = numberStrings[value];
 				break;
 			}
-			case reinassance::SETTING_AD_TIMBRE: {
+			case renaissance::SETTING_AD_TIMBRE: {
 				value = settings.ad_timbre;
 				displayText = numberStrings[value];
 				break;
 			}
-			case reinassance::SETTING_AD_COLOR: {
+			case renaissance::SETTING_AD_COLOR: {
 				value = settings.ad_color;
 				displayText = numberStrings[value];
 				break;
 			}
-			case reinassance::SETTING_AD_VCA: {
+			case renaissance::SETTING_AD_VCA: {
 				displayText = "\\VCA";
 				break;
 			}
-			case reinassance::SETTING_PITCH_RANGE: {
+			case renaissance::SETTING_PITCH_RANGE: {
 				value = settings.pitch_range;
 				displayText = pitchRangeStrings[value];
 				break;
 			}
-			case reinassance::SETTING_PITCH_OCTAVE: {
+			case renaissance::SETTING_PITCH_OCTAVE: {
 				value = settings.pitch_octave;
 				displayText = octaveStrings[value];
 				break;
 			}
-			case reinassance::SETTING_QUANTIZER_SCALE: {
+			case renaissance::SETTING_QUANTIZER_SCALE: {
 				value = settings.quantizer_scale;
 				displayText = quantizationStrings[value];
 				break;
 			}
-			case reinassance::SETTING_QUANTIZER_ROOT: {
+			case renaissance::SETTING_QUANTIZER_ROOT: {
 				value = settings.quantizer_root;
 				displayText = noteStrings[value];
 				break;
 			}
-			case reinassance::SETTING_VCO_FLATTEN: {
+			case renaissance::SETTING_VCO_FLATTEN: {
 				displayText = "FLAT";
 				break;
 			}
-			case reinassance::SETTING_VCO_DRIFT: {
+			case renaissance::SETTING_VCO_DRIFT: {
 				displayText = "DRFT";
 				break;
 			}
-			case reinassance::SETTING_SIGNATURE: {
+			case renaissance::SETTING_SIGNATURE: {
 				displayText = "SIGN";
 				break;
 			}
@@ -547,7 +547,7 @@ struct Contextus : Module {
 		}
 
 		if (displayTimeout > 1.0 * args.sampleRate) {
-			lastSettingChanged = reinassance::SETTING_OSCILLATOR_SHAPE;
+			lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 			displayTimeout = 0;
 		}
 
@@ -556,7 +556,7 @@ struct Contextus : Module {
 		for (int i = 0; i < 20; i++) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
-				lastSettingChanged = static_cast<reinassance::Setting>(i);
+				lastSettingChanged = static_cast<renaissance::Setting>(i);
 				displayTimeout = 0;
 			}
 		}

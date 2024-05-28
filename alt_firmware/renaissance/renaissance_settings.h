@@ -30,9 +30,9 @@
 #define REINASSANCE_SETTINGS_H_
 
 #include "stmlib/stmlib.h"
-#include "reinassance/vocalist/wordlist.h"
+#include "renaissance/vocalist/wordlist.h"
 
-namespace reinassance {
+namespace renaissance {
 
 enum MacroOscillatorShape {
   MACRO_OSC_SHAPE_CSAW,
@@ -382,6 +382,6 @@ class Settings {
 
 extern Settings settings;
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

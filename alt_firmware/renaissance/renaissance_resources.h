@@ -38,7 +38,7 @@
 
 
 
-namespace reinassance {
+namespace renaissance {
 
 typedef uint8_t ResourceId;
 
@@ -195,6 +195,6 @@ extern const uint16_t chr_characters[];
 #define CHR_CHARACTERS 0
 #define CHR_CHARACTERS_SIZE 256
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

@@ -1,4 +1,4 @@
-#include "reinassance/reinassance_digital_oscillator.h"
+#include "renaissance/renaissance_digital_oscillator.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -6,10 +6,10 @@
 #include "stmlib/utils/dsp.h"
 #include "stmlib/utils/random.h"
 
-#include "reinassance/reinassance_parameter_interpolation.h"
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_parameter_interpolation.h"
+#include "renaissance/renaissance_resources.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 

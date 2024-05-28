@@ -30,9 +30,9 @@
 // make resources
 
 
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_resources.h"
 
-namespace reinassance {
+namespace renaissance {
 
 static const char str_dummy[] = "dummy";
 
@@ -11503,4 +11503,4 @@ const uint16_t* char_table[] = {
 };
 
 
-}  // namespace reinassance
+}  // namespace renaissance

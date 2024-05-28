@@ -31,10 +31,10 @@
 
 #include "stmlib/stmlib.h"
 
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_resources.h"
 #include "stmlib/utils/dsp.h"
 
-namespace reinassance {
+namespace renaissance {
 
 enum SvfMode {
   SVF_MODE_LP,
@@ -115,6 +115,6 @@ class Svf {
   DISALLOW_COPY_AND_ASSIGN(Svf);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

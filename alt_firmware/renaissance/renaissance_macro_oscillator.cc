@@ -26,17 +26,17 @@
 //
 // Macro-oscillator.
 
-#include "reinassance/reinassance_macro_oscillator.h"
+#include "renaissance/renaissance_macro_oscillator.h"
 
 #include <algorithm>
 
 #include "stmlib/utils/dsp.h"
 
-#include "reinassance/reinassance_parameter_interpolation.h"
-#include "reinassance/reinassance_resources.h"
-#include "reinassance/vocalist/wordlist.h"
+#include "renaissance/renaissance_parameter_interpolation.h"
+#include "renaissance/renaissance_resources.h"
+#include "renaissance/vocalist/wordlist.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 
@@ -452,4 +452,4 @@ MacroOscillator::RenderFn MacroOscillator::fn_table_[] = {
   // &MacroOscillator::RenderDigital
 };
 
-}  // namespace reinassance
+}  // namespace renaissance

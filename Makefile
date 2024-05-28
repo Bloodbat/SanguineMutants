@@ -41,18 +41,18 @@ SOURCES += eurorack/braids/digital_oscillator.cc
 SOURCES += eurorack/braids/resources.cc
 SOURCES += eurorack/braids/quantizer.cc
 
-SOURCES += alt_firmware/reinassance/reinassance_macro_oscillator.cc
-SOURCES += alt_firmware/reinassance/reinassance_analog_oscillator.cc
-SOURCES += alt_firmware/reinassance/reinassance_digital_oscillator.cc
-SOURCES += alt_firmware/reinassance/reinassance_resources.cc
-SOURCES += alt_firmware/reinassance/reinassance_quantizer.cc
-SOURCES += alt_firmware/reinassance/reinassance_stack.cc
-SOURCES += alt_firmware/reinassance/reinassance_harmonics.cc
+SOURCES += alt_firmware/renaissance/renaissance_macro_oscillator.cc
+SOURCES += alt_firmware/renaissance/renaissance_analog_oscillator.cc
+SOURCES += alt_firmware/renaissance/renaissance_digital_oscillator.cc
+SOURCES += alt_firmware/renaissance/renaissance_resources.cc
+SOURCES += alt_firmware/renaissance/renaissance_quantizer.cc
+SOURCES += alt_firmware/renaissance/renaissance_stack.cc
+SOURCES += alt_firmware/renaissance/renaissance_harmonics.cc
 
-SOURCES += alt_firmware/reinassance/vocalist/vocalist.cc
-SOURCES += alt_firmware/reinassance/vocalist/sam.cc
-SOURCES += alt_firmware/reinassance/vocalist/wordlist.cc
-SOURCES += alt_firmware/reinassance/vocalist/rendertabs.cc
+SOURCES += alt_firmware/renaissance/vocalist/vocalist.cc
+SOURCES += alt_firmware/renaissance/vocalist/sam.cc
+SOURCES += alt_firmware/renaissance/vocalist/wordlist.cc
+SOURCES += alt_firmware/renaissance/vocalist/rendertabs.cc
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 

@@ -26,15 +26,15 @@
 //
 // Settings
 
-#include "reinassance/reinassance_settings.h"
+#include "renaissance/renaissance_settings.h"
 
 #include <cstring>
 
 #include "stmlib/system/storage.h"
 #include "stmlib/utils/murmurhash3.h"
-#include "reinassance/vocalist/wordlist.h"
+#include "renaissance/vocalist/wordlist.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 
@@ -379,4 +379,4 @@ const Setting Settings::settings_order_[] = {
 /* extern */
 Settings settings;
 
-}  // namespace reinassance
+}  // namespace renaissance

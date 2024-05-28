@@ -26,12 +26,12 @@
 //
 // Note quantizer
 
-#include "reinassance/reinassance_quantizer.h"
+#include "renaissance/renaissance_quantizer.h"
 
 #include <algorithm>
 #include <cstdlib>
 
-namespace reinassance {
+namespace renaissance {
 
 void Quantizer::Init() {
   enabled_ = true;

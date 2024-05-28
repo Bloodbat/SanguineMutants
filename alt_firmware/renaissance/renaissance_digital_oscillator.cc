@@ -26,7 +26,7 @@
 //
 // Oscillator - digital style waveforms.
 
-#include "reinassance/reinassance_digital_oscillator.h"
+#include "renaissance/renaissance_digital_oscillator.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -34,11 +34,11 @@
 #include "stmlib/utils/dsp.h"
 #include "stmlib/utils/random.h"
 
-#include "reinassance/reinassance_parameter_interpolation.h"
-#include "reinassance/reinassance_resources.h"
-#include "reinassance_settings.h"
+#include "renaissance/renaissance_parameter_interpolation.h"
+#include "renaissance/renaissance_resources.h"
+#include "renaissance_settings.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 
@@ -2316,4 +2316,4 @@ DigitalOscillator::RenderFn DigitalOscillator::fn_table_[] = {
   // &DigitalOscillator::RenderYourAlgo,
 };
 
-}  // namespace reinassance
+}  // namespace renaissance

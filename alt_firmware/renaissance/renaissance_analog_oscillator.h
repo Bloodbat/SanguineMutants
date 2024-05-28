@@ -34,9 +34,9 @@
 #include <cstring>
 #include <cstdio>
 
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_resources.h"
 
-namespace reinassance {
+namespace renaissance {
 
 enum AnalogOscillatorShape {
   OSC_SHAPE_SAW,
@@ -157,6 +157,6 @@ class AnalogOscillator {
   DISALLOW_COPY_AND_ASSIGN(AnalogOscillator);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

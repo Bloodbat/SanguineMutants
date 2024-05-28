@@ -31,13 +31,13 @@
 
 #include "stmlib/stmlib.h"
 
-#include "reinassance/reinassance_excitation.h"
-#include "reinassance/reinassance_svf.h"
+#include "renaissance/renaissance_excitation.h"
+#include "renaissance/renaissance_svf.h"
 #include "vocalist/vocalist.h"
 
 #include <cstring>
 
-namespace reinassance {
+namespace renaissance {
 
 static const size_t kWGBridgeLength = 1024;
 static const size_t kWGNeckLength = 4096;
@@ -453,6 +453,6 @@ class DigitalOscillator {
   DISALLOW_COPY_AND_ASSIGN(DigitalOscillator);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

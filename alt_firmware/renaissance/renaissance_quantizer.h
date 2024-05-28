@@ -1,4 +1,4 @@
-// Copyright 2013 Emilie Gillet.
+// Copyright 2015 Emilie Gillet.
 //
 // Author: Emilie Gillet (emilie.o.gillet@gmail.com)
 //
@@ -24,65 +24,51 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Exponential decay excitation.
+// Note quantizer
 
-#ifndef REINASSANCE_EXCITATION_H_
-#define REINASSANCE_EXCITATION_H_
+#ifndef REINASSANCE_QUANTIZER_H_
+#define REINASSANCE_QUANTIZER_H_
 
 #include "stmlib/stmlib.h"
 
-namespace reinassance {
+namespace renaissance {
 
-class Excitation {
- public:
-  Excitation() { }
-  ~Excitation() { }
-
-  void Init() {
-    delay_ = 0;
-    decay_ = 4093;
-    counter_ = 0;
-    state_ = 0;
-  }
-
-  void set_delay(uint16_t delay) {
-    delay_ = delay;
-  }
-
-  void set_decay(uint16_t decay) {
-    decay_ = decay;
-  }
-
-  void Trigger(int32_t level) {
-    level_ = level;
-    counter_ = delay_ + 1;
-  }
-
-  bool done() {
-    return counter_ == 0;
-  }
-
-  inline int32_t Process() {
-    state_ = (state_ * decay_ >> 12);
-    if (counter_ > 0) {
-      --counter_;
-      if (counter_ == 0) {
-        state_ += level_ < 0 ? -level_ : level_;
-      }
-    }
-    return level_ < 0 ? -state_ : state_;
-  }
-
- private:
-  uint32_t delay_;
-  uint32_t decay_;
-  int32_t counter_;
-  int32_t state_;
-  int32_t level_;
-
-  DISALLOW_COPY_AND_ASSIGN(Excitation);
+struct Scale {
+  int16_t span;
+  size_t num_notes;
+  int16_t notes[16];
 };
 
-}  // namespace reinassance
+class Quantizer {
+ public:
+  Quantizer() { }
+  ~Quantizer() { }
+
+  void Init();
+
+  int32_t Process(int32_t pitch) {
+    return Process(pitch, 0);
+  }
+
+  int32_t Process(int32_t pitch, int32_t root);
+
+  void Configure(const Scale& scale) {
+    Configure(scale.notes, scale.span, scale.num_notes);
+  }
+
+  bool enabled_;
+  int16_t codebook_[128];
+  int32_t codeword_;
+  int32_t previous_boundary_;
+  int32_t next_boundary_;
+  int16_t index;
+
+private:
+  void Configure(const int16_t* notes, int16_t span, size_t num_notes);
+
+  DISALLOW_COPY_AND_ASSIGN(Quantizer);
+};
+
+}  // namespace renaissance
 
 #endif

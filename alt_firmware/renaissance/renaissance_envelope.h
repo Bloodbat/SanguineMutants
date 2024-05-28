@@ -29,9 +29,9 @@
 
 #include "stmlib/utils/dsp.h"
 
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_resources.h"
 
-namespace reinassance {
+namespace renaissance {
 
 using namespace stmlib;
 
@@ -107,6 +107,6 @@ class Envelope {
   DISALLOW_COPY_AND_ASSIGN(Envelope);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

@@ -33,9 +33,9 @@
 #include "stmlib/stmlib.h"
 #include "stmlib/utils/dsp.h"
 
-#include "reinassance/reinassance_resources.h"
+#include "renaissance/renaissance_resources.h"
 
-namespace reinassance {
+namespace renaissance {
 
 class SignatureWaveshaper {
  public:
@@ -91,6 +91,6 @@ private:
   DISALLOW_COPY_AND_ASSIGN(SignatureWaveshaper);
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif

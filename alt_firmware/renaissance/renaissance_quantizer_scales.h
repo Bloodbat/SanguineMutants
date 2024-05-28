@@ -29,9 +29,9 @@
 #ifndef REINASSANCE_QUANTIZER_SCALES_H_
 #define REINASSANCE_QUANTIZER_SCALES_H_
 
-#include "reinassance/reinassance_quantizer.h"
+#include "renaissance/renaissance_quantizer.h"
 
-namespace reinassance {
+namespace renaissance {
 
 const Scale scales[] = {
   // Off
@@ -134,6 +134,6 @@ const Scale scales[] = {
   { 12 << 7, 6, { 0, 376, 494, 637, 1132, 1275} },
 };
 
-}  // namespace reinassance
+}  // namespace renaissance
 
 #endif
