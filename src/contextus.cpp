@@ -34,7 +34,7 @@ struct Contextus : Module {
 		PARAM_SCALE,
 		PARAM_ROOT,
 
-		PARAM_META,		
+		PARAM_META,
 		PARAM_VCA,
 		PARAM_DRIFT,
 		PARAM_FLAT,
@@ -192,7 +192,8 @@ struct Contextus : Module {
 	Contextus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODEL, 0.f, 1.f, 0.f, "Model", "", 0.f, reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+		configParam(PARAM_MODEL, 0.f, reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", "", 0.f, 1.f);
+		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 		configParam(PARAM_MODULATION, -1.0, 1.0, 0.0, "Modulation");
 		configParam(PARAM_COARSE, -5.0, 3.0, -1.0, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
 		configParam(PARAM_FINE, -1.0, 1.0, 0.0, "Fine frequency", " semitones");
@@ -237,7 +238,7 @@ struct Contextus : Module {
 		configInput(INPUT_COLOR, "Color");
 		configOutput(OUTPUT_OUT, "Audio");
 
-		configButton(PARAM_META, "Toggle meta modulation");		
+		configButton(PARAM_META, "Toggle meta modulation");
 		configButton(PARAM_VCA, "Toggle AD VCA");
 		configButton(PARAM_DRIFT, "Toggle oscillator drift");
 		configButton(PARAM_FLAT, "Toggle lower and higher frequency detuning");
@@ -307,12 +308,12 @@ struct Contextus : Module {
 
 			float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage();
 
-			// Set shape			
-			int shape = roundf(params[PARAM_MODEL].getValue() * reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+			// Set model
+			int model = params[PARAM_MODEL].getValue();
 			if (settings.meta_modulation) {
-				shape += roundf(fm / 10.0 * reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				model += roundf(fm / 10.0 * reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 			}
-			settings.shape = clamp(shape, 0, reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+			settings.shape = clamp(model, 0, reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
 			// Setup oscillator from settings
 			osc.set_shape((reinassance::MacroOscillatorShape)settings.shape);
@@ -572,7 +573,7 @@ struct Contextus : Module {
 		settings.auto_trig = params[PARAM_AUTO].getValue();
 
 		// Handle switch lights
-		lights[LIGHT_META].setBrightnessSmooth(settings.meta_modulation, sampleTime);		
+		lights[LIGHT_META].setBrightnessSmooth(settings.meta_modulation, sampleTime);
 		lights[LIGHT_VCA].setBrightnessSmooth(settings.ad_vca, sampleTime);
 		lights[LIGHT_DRIFT].setBrightnessSmooth(settings.vco_drift, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(settings.vco_flatten, sampleTime);
@@ -690,7 +691,7 @@ struct ContextusWidget : ModuleWidget {
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(8.222, 36.606)), module, Contextus::INPUT_TIMBRE));
 		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(22.768, 36.606)), module, Contextus::PARAM_TIMBRE));
 
-		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(51.46, 40.534)), module, Contextus::PARAM_COARSE));		
+		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(51.46, 40.534)), module, Contextus::PARAM_COARSE));
 		addParam(createParamCentered<Sanguine1PSRed>(mm2px(Vec(90.809, 40.534)), module, Contextus::PARAM_FINE));
 
 

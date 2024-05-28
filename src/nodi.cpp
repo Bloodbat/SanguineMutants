@@ -185,7 +185,8 @@ struct Nodi : Module {
 	Nodi() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODEL, 0.f, 1.f, 0.f, "Model", "", 0.f, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+		configParam(PARAM_MODEL, 0.f, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", "", 0.f, 1.f, 1.f);
+		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 		configParam(PARAM_MODULATION, -1.0, 1.0, 0.0, "Modulation");
 		configParam(PARAM_COARSE, -5.0, 3.0, -1.0, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
 		configParam(PARAM_FINE, -1.0, 1.0, 0.0, "Fine frequency", " semitones");
@@ -300,13 +301,13 @@ struct Nodi : Module {
 
 			float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage();
 
-			// Set shape
+			// Set model
 			if (!bPaques) {
-				int shape = roundf(params[PARAM_MODEL].getValue() * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				int model = params[PARAM_MODEL].getValue();
 				if (settings.meta_modulation) {
-					shape += roundf(fm / 10.0 * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+					model += roundf(fm / 10.0 * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 				}
-				settings.shape = clamp(shape, 0, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				settings.shape = clamp(model, 0, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
 				// Setup oscillator from settings
 				osc.set_shape((braids::MacroOscillatorShape)settings.shape);
@@ -322,8 +323,8 @@ struct Nodi : Module {
 			timbre += adValue / 65535. * settings.ad_timbre / 16.;
 			modulation += adValue / 65535. * settings.ad_color / 16.;
 
-			int16_t param1 = rescale(clamp(timbre, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
-			int16_t param2 = rescale(clamp(modulation, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
+			int16_t param1 = math::rescale(clamp(timbre, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
+			int16_t param2 = math::rescale(clamp(modulation, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
 			osc.set_parameters(param1, param2);
 
 			// Set pitch
