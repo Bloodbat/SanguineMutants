@@ -629,10 +629,10 @@ struct Nodi : Module {
 	}
 
 	int getModelParam() {
-		return std::round(params[PARAM_MODEL].getValue() * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+		return params[PARAM_MODEL].getValue();
 	}
 	void setModelParam(int shape) {
-		params[PARAM_MODEL].setValue(shape / (float)braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+		params[PARAM_MODEL].setValue(shape);
 	}
 };
 
