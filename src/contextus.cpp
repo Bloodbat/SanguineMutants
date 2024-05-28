@@ -615,10 +615,10 @@ struct Contextus : Module {
 	}
 
 	int getModelParam() {
-		return std::round(params[PARAM_MODEL].getValue() * reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+		return params[PARAM_MODEL].getValue();
 	}
 	void setModelParam(int shape) {
-		params[PARAM_MODEL].setValue(shape / (float)reinassance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+		params[PARAM_MODEL].setValue(shape);
 	}
 };
 
@@ -747,7 +747,7 @@ struct ContextusWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> shapeLabels;
-		for (int i = 0; i < int(modelInfos.size() - 1); i++) {
+		for (int i = 0; i < int(modelInfos.size()); i++) {
 			shapeLabels.push_back(modelInfos[i].code + ": " + modelInfos[i].label);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", shapeLabels,
