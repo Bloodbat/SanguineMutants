@@ -35,6 +35,42 @@ BefacoTinyKnobBlack::BefacoTinyKnobBlack() {
 	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BefacoTinyKnobBlack_bg.svg")));
 }
 
+Sanguine1PBlue::Sanguine1PBlue() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PBlue.svg")));
+	bg->setSvg(Svg::load(asset::system("res/ComponentLibrary/Rogan1P_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PBlue_fg.svg")));
+}
+
+Sanguine1PGrayCap::Sanguine1PGrayCap() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PWhite.svg")));
+	bg->setSvg(Svg::load(asset::system("res/ComponentLibrary/Rogan1P_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PGrayCap_fg.svg")));
+}
+
+Sanguine1PGreen::Sanguine1PGreen() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PGreen.svg")));
+	bg->setSvg(Svg::load(asset::system("res/ComponentLibrary/Rogan1P_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PGreen_fg.svg")));
+}
+
+Sanguine1PPurple::Sanguine1PPurple() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PPurple.svg")));
+	bg->setSvg(Svg::load(asset::system("res/ComponentLibrary/Rogan1P_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PPurple_fg.svg")));
+}
+
+Sanguine1PRed::Sanguine1PRed() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PRed.svg")));
+	bg->setSvg(Svg::load(asset::system("res/ComponentLibrary/Rogan1P_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PRed_fg.svg")));
+}
+
+Sanguine1PYellow::Sanguine1PYellow() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PYellow.svg")));
+	bg->setSvg(Svg::load(asset::system("res/ComponentLibrary/Rogan1P_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PYellow_fg.svg")));
+}
+
 Sanguine1PSBlue::Sanguine1PSBlue() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSBlue.svg")));
 	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PS_bg.svg")));

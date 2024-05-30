@@ -33,6 +33,30 @@ struct BefacoTinyKnobBlack : BefacoTinyKnob {
 	BefacoTinyKnobBlack();
 };
 
+struct Sanguine1PBlue : Rogan {
+	Sanguine1PBlue();
+};
+
+struct Sanguine1PGrayCap : Rogan {
+	Sanguine1PGrayCap();
+};
+
+struct Sanguine1PGreen : Rogan {
+	Sanguine1PGreen();
+};
+
+struct Sanguine1PPurple : Rogan {
+	Sanguine1PPurple();
+};
+
+struct Sanguine1PRed : Rogan {
+	Sanguine1PRed();
+};
+
+struct Sanguine1PYellow : Rogan {
+	Sanguine1PYellow();
+};
+
 struct Sanguine1PSBlue : Rogan {
 	Sanguine1PSBlue();
 };
@@ -153,6 +177,15 @@ struct TPurpleLight : TBase {
 	}
 };
 using PurpleLight = TPurpleLight<>;
+
+// A light for displaying on top of a CKD6. Must add a color by subclassing or templating.
+template <typename TBase>
+struct CKD6Light : TBase {
+	CKD6Light() {
+		this->bgColor = color::BLACK_TRANSPARENT;
+		this->box.size = Vec(28 - 6, 28 - 6);
+	}
+};
 
 // Decorations
 
