@@ -128,7 +128,7 @@ struct Apices : Module {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	peaks::GateFlags gate_flags[2] = { 0, 0 };
+	peaks::GateFlags gateFlags[2] = { 0, 0 };
 
 	dsp::SampleRateConverter<2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
@@ -227,22 +227,22 @@ struct Apices : Module {
 				renderBlock = (renderBlock + 1) % kNumBlocks;
 			}
 
-			uint32_t external_gate_inputs = 0;
-			external_gate_inputs |= (inputs[GATE_1_INPUT].getVoltage() ? 1 : 0);
-			external_gate_inputs |= (inputs[GATE_2_INPUT].getVoltage() ? 2 : 0);
+			uint32_t gateTriggers = 0;
+			gateTriggers |= (inputs[GATE_1_INPUT].getVoltage() ? 1 : 0);
+			gateTriggers |= (inputs[GATE_2_INPUT].getVoltage() ? 2 : 0);
 
 			uint32_t buttons = 0;
 			buttons |= (params[PARAM_TRIGGER_1].getValue() ? 1 : 0);
 			buttons |= (params[PARAM_TRIGGER_2].getValue() ? 2 : 0);
 
-			uint32_t gate_inputs = external_gate_inputs | buttons;
+			uint32_t gateInputs = gateTriggers | buttons;
 
 			// Prepare sample rate conversion.
 			// Peaks is sampling at 48kHZ.
 			outputSrc.setRates(48000, args.sampleRate);
 			int inLen = kBlockSize;
 			int outLen = outputBuffer.capacity();
-			dsp::Frame<2> f[kBlockSize];
+			dsp::Frame<2> frame[kBlockSize];
 
 			// Process an entire block of data from the IOBuffer.
 			for (size_t k = 0; k < kBlockSize; ++k) {
@@ -250,32 +250,32 @@ struct Apices : Module {
 				Slice slice = NextSlice(1);
 
 				for (size_t i = 0; i < kNumChannels; ++i) {
-					gate_flags[i] = peaks::ExtractGateFlags(
-						gate_flags[i],
-						gate_inputs & (1 << i));
+					gateFlags[i] = peaks::ExtractGateFlags(
+						gateFlags[i],
+						gateInputs & (1 << i));
 
-					f[k].samples[i] = slice.block->output[i][slice.frame_index];
+					frame[k].samples[i] = slice.block->output[i][slice.frame_index];
 				}
 
 				// A hack to make channel 1 aware of what's going on in channel 2. Used to
 				// reset the sequencer.
-				slice.block->input[0][slice.frame_index] = gate_flags[0] | (gate_flags[1] << 4) | (buttons & 8 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
+				slice.block->input[0][slice.frame_index] = gateFlags[0] | (gateFlags[1] << 4) | (buttons & 8 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
 
-				slice.block->input[1][slice.frame_index] = gate_flags[1] | (buttons & 2 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
+				slice.block->input[1][slice.frame_index] = gateFlags[1] | (buttons & 2 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
 			}
 
-			outputSrc.process(f, &inLen, outputBuffer.endData(), &outLen);
+			outputSrc.process(frame, &inLen, outputBuffer.endData(), &outLen);
 			outputBuffer.endIncr(outLen);
 		}
 
 		// Update outputs.
 		if (!outputBuffer.empty()) {
-			dsp::Frame<2> f = outputBuffer.shift();
+			dsp::Frame<2> frame = outputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
 			// TODO Check the output values against an actual device.
-			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(f.samples[0]), 0.0f, 65535.f, -8.0f, 8.0f));
-			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(f.samples[1]), 0.0f, 65535.f, -8.0f, 8.0f));
+			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.0f, 65535.f, -8.0f, 8.0f));
+			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.0f, 65535.f, -8.0f, 8.0f));
 		}
 	}
 
@@ -540,13 +540,13 @@ struct Apices : Module {
 			}
 		}
 
-		uint8_t b[2];
+		uint8_t buttonBrightness[2];
 		for (uint8_t i = 0; i < 2; ++i) {
 			switch (processorFunction[i]) {
 			case FUNCTION_DRUM_GENERATOR:
 			case FUNCTION_FM_DRUM_GENERATOR:
-				b[i] = int16_t(abs(brightness[i]) >> 8);
-				b[i] = b[i] >= 255 ? 255 : b[i];
+				buttonBrightness[i] = int16_t(abs(brightness[i]) >> 8);
+				buttonBrightness[i] = buttonBrightness[i] >= 255 ? 255 : buttonBrightness[i];
 				break;
 			case FUNCTION_LFO:
 			case FUNCTION_TAP_LFO:
@@ -555,11 +555,11 @@ struct Apices : Module {
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
 				CONSTRAIN(brightnessVal, 0, 255);
-				b[i] = brightnessVal;
+				buttonBrightness[i] = brightnessVal;
 				break;
 			}
 			default:
-				b[i] = brightness[i] >> 7;
+				buttonBrightness[i] = brightness[i] >> 7;
 				break;
 			}
 		}
@@ -578,26 +578,26 @@ struct Apices : Module {
 			else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
 				int digit = processors[0].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth((i & digit) ? 1.0f : 0.0f, sampleTime);
+					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.0f : 0.0f);
 				}
 			}
 			// Ibid
 			else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth((i & digit) ? 1.0f : 0.0f, sampleTime);
+					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.0f : 0.0f);
 				}
 			}
 			if (channel1IsStation) {
-				b[0] = processors[0].number_station().gate() ? 255 : 0;
+				buttonBrightness[0] = processors[0].number_station().gate() ? 255 : 0;
 			}
 			if (channel2IsStation) {
-				b[1] = processors[1].number_station().gate() ? 255 : 0;
+				buttonBrightness[1] = processors[1].number_station().gate() ? 255 : 0;
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), args.sampleTime);
-		lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(b[1]), 0.0f, 255.0f, 0.0f, 1.0f), args.sampleTime);
+		lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(buttonBrightness[0]), 0.0f, 255.0f, 0.0f, 1.0f), args.sampleTime);
+		lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(buttonBrightness[1]), 0.0f, 255.0f, 0.0f, 1.0f), args.sampleTime);
 	}
 
 	void onReset() override {
