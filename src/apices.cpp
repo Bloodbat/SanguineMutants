@@ -208,7 +208,7 @@ struct Apices : Module {
 	void process(const ProcessArgs& args) override {
 		// only update knobs / lights every 16 samples
 		if (clockDivider.process()) {
-			pollSwitches();
+			pollSwitches(args);
 			pollPots();
 			updateOleds();
 		}
@@ -425,13 +425,13 @@ struct Apices : Module {
 		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	}
 
-	void pollSwitches() {
+	void pollSwitches(const ProcessArgs& args) {
 		for (uint8_t i = 0; i < kButtonCount; ++i) {
 			if (switches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
 				processSwitch(SWITCH_TWIN_MODE + i);
 			}
 		}
-		refreshLeds();
+		refreshLeds(args);
 	}
 
 	void saveState() {
@@ -444,10 +444,10 @@ struct Apices : Module {
 		displayText2 = modeList[settings.processorFunction[1]];
 	}
 
-	void refreshLeds() {
+	void refreshLeds(const ProcessArgs& args) {
 
 		// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
-		const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
+		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
 
 		uint8_t flash = (getSystemTimeMs() >> 7) & 7;
 		int currentLight;
@@ -545,7 +545,7 @@ struct Apices : Module {
 			switch (processorFunction[i]) {
 			case FUNCTION_DRUM_GENERATOR:
 			case FUNCTION_FM_DRUM_GENERATOR:
-				b[i] = (int16_t)abs(brightness[i]) >> 8;
+				b[i] = int16_t(abs(brightness[i]) >> 8);
 				b[i] = b[i] >= 255 ? 255 : b[i];
 				break;
 			case FUNCTION_LFO:
@@ -570,7 +570,7 @@ struct Apices : Module {
 			if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].value = (pattern & 1) ? 1.0f : 0.0f;
+					lights[LIGHT_FUNCTION_1 + i].setBrightness((pattern & 1) ? 1.0f : 0.0f);
 					pattern = pattern >> 1;
 				}
 			}
@@ -578,14 +578,14 @@ struct Apices : Module {
 			else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
 				int digit = processors[0].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
-					lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
+					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth((i & digit) ? 1.0f : 0.0f, sampleTime);
 				}
 			}
 			// Ibid
 			else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
-					lights[LIGHT_FUNCTION_1 + i].value = (i & digit) ? 1.0f : 0.0f;
+					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth((i & digit) ? 1.0f : 0.0f, sampleTime);
 				}
 			}
 			if (channel1IsStation) {
@@ -596,9 +596,8 @@ struct Apices : Module {
 			}
 		}
 
-		const float deltaTime = APP->engine->getSampleTime();
-		lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
-		lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(b[1]), 0.0f, 255.0f, 0.0f, 1.0f), deltaTime);
+		lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(b[0]), 0.0f, 255.0f, 0.0f, 1.0f), args.sampleTime);
+		lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(b[1]), 0.0f, 255.0f, 0.0f, 1.0f), args.sampleTime);
 	}
 
 	void onReset() override {
