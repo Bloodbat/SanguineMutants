@@ -596,8 +596,8 @@ struct Apices : Module {
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setSmoothBrightness(rescale(static_cast<float>(buttonBrightness[0]), 0.0f, 255.0f, 0.0f, 1.0f), sampleTime);
-		lights[LIGHT_TRIGGER_2].setSmoothBrightness(rescale(static_cast<float>(buttonBrightness[1]), 0.0f, 255.0f, 0.0f, 1.0f), sampleTime);
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.0f, 255.0f, 0.0f, 1.0f), sampleTime);
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.0f, 255.0f, 0.0f, 1.0f), sampleTime);
 	}
 
 	void onReset() override {
