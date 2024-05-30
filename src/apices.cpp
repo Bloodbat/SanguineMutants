@@ -934,11 +934,11 @@ struct ApicesWidget : ModuleWidget {
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(10.375, 34.272)),
 			module, Apices::PARAM_CHANNEL_SELECT, Apices::LIGHT_CHANNEL_SELECT));
 
-		addParam(createParamCentered<PB61303>(mm2px(Vec(10.375, 69.669)), module, Apices::PARAM_TRIGGER_1));
-		addParam(createParamCentered<PB61303>(mm2px(Vec(10.375, 115.9)), module, Apices::PARAM_TRIGGER_2));
+		addParam(createParamCentered<CKD6>(mm2px(Vec(10.375, 69.669)), module, Apices::PARAM_TRIGGER_1));
+		addParam(createParamCentered<CKD6>(mm2px(Vec(10.375, 115.9)), module, Apices::PARAM_TRIGGER_2));
 
-		addChild(createLightCentered<PB61303Light<RedLight>>(mm2px(Vec(10.375, 69.669)), module, Apices::LIGHT_TRIGGER_1));
-		addChild(createLightCentered<PB61303Light<BlueLight>>(mm2px(Vec(10.375, 115.9)), module, Apices::LIGHT_TRIGGER_2));
+		addChild(createLightCentered<CKD6Light<RedLight>>(mm2px(Vec(10.375, 69.669)), module, Apices::LIGHT_TRIGGER_1));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(10.375, 115.9)), module, Apices::LIGHT_TRIGGER_2));
 
 		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(91.652, 25.986)), module, Apices::LIGHT_FUNCTION_1));
 		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(107.402, 25.986)), module, Apices::LIGHT_FUNCTION_2));
