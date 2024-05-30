@@ -429,7 +429,7 @@ struct Nodi : Module {
 		}
 
 		if (clockDivider.process()) {
-			pollSwitches();
+			pollSwitches(args);
 		}
 
 
@@ -574,8 +574,8 @@ struct Nodi : Module {
 		}
 	}
 
-	inline void pollSwitches() {
-		const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
+	inline void pollSwitches(const ProcessArgs& args) {
+		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
 		// Handle switches
 		settings.meta_modulation = params[PARAM_META].getValue();
 		bPaques = params[PARAM_MORSE].getValue();

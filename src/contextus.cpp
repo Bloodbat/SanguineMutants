@@ -431,7 +431,7 @@ struct Contextus : Module {
 		}
 
 		if (clockDivider.process()) {
-			pollSwitches();
+			pollSwitches(args);
 		}
 
 
@@ -562,8 +562,8 @@ struct Contextus : Module {
 		}
 	}
 
-	inline void pollSwitches() {
-		const float sampleTime = APP->engine->getSampleTime() * kClockUpdateFrequency;
+	inline void pollSwitches(const ProcessArgs& args) {
+		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
 		// Handle switches
 		settings.meta_modulation = params[PARAM_META].getValue();
 		settings.ad_vca = params[PARAM_VCA].getValue();
