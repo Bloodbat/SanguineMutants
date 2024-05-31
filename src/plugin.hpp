@@ -10,6 +10,7 @@ extern Model* modelApices;
 extern Model* modelAleae;
 extern Model* modelNodi;
 extern Model* modelContextus;
+extern Model* modelNebulae;
 
 template <typename Base>
 struct Rogan6PSLight : Base {

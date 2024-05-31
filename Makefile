@@ -54,6 +54,14 @@ SOURCES += alt_firmware/renaissance/vocalist/sam.cc
 SOURCES += alt_firmware/renaissance/vocalist/wordlist.cc
 SOURCES += alt_firmware/renaissance/vocalist/rendertabs.cc
 
+SOURCES += eurorack/clouds/dsp/correlator.cc
+SOURCES += eurorack/clouds/dsp/granular_processor.cc
+SOURCES += eurorack/clouds/dsp/mu_law.cc
+SOURCES += eurorack/clouds/dsp/pvoc/frame_transformation.cc
+SOURCES += eurorack/clouds/dsp/pvoc/phase_vocoder.cc
+SOURCES += eurorack/clouds/dsp/pvoc/stft.cc
+SOURCES += eurorack/clouds/resources.cc 
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..
