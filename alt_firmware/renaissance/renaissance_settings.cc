@@ -62,7 +62,7 @@ const SettingsData kInitSettings = {
   0,  // AD->FM
   0,  // AD->COLOR
   0,  // AD->VCA
-  //0,  // Invert Encoder
+  0,  // Invert Encoder
   0,  // Quantizer root
 
   50,

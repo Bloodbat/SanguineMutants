@@ -274,7 +274,7 @@ struct Contextus : Module {
 		settings.ad_timbre = params[PARAM_AD_TIMBRE].getValue();
 		settings.ad_fm = params[PARAM_AD_MODULATION].getValue();
 		settings.ad_color = params[PARAM_AD_COLOR].getValue();
-		//settings.invert_encoder = false;
+		settings.invert_encoder = false;
 
 		// Trigger
 		bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
@@ -546,14 +546,14 @@ struct Contextus : Module {
 			displayTimeout++;
 		}
 
-		if (displayTimeout > 1.0 * args.sampleRate) {
+		if (displayTimeout > args.sampleRate) {
 			lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 			displayTimeout = 0;
 		}
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
 		uint8_t* arraySettings = &settings.shape;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i <= renaissance::SETTING_LAST_EDITABLE_SETTING; i++) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
 				lastSettingChanged = static_cast<renaissance::Setting>(i);

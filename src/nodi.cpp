@@ -558,14 +558,14 @@ struct Nodi : Module {
 			displayTimeout++;
 		}
 
-		if (displayTimeout > 1.0 * args.sampleRate) {
+		if (displayTimeout > args.sampleRate) {
 			lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
 			displayTimeout = 0;
 		}
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
 		uint8_t* arraySettings = &settings.shape;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i <= braids::SETTING_LAST_EDITABLE_SETTING; i++) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
 				lastSettingChanged = static_cast<braids::Setting>(i);
