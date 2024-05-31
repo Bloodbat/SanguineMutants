@@ -274,7 +274,7 @@ struct Contextus : Module {
 		settings.ad_timbre = params[PARAM_AD_TIMBRE].getValue();
 		settings.ad_fm = params[PARAM_AD_MODULATION].getValue();
 		settings.ad_color = params[PARAM_AD_COLOR].getValue();
-		settings.invert_encoder = false;
+		//settings.invert_encoder = false;
 
 		// Trigger
 		bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;

@@ -62,7 +62,7 @@ const SettingsData kInitSettings = {
   0,  // AD->FM
   0,  // AD->COLOR
   0,  // AD->VCA
-  0,  // Invert Encoder
+  //0,  // Invert Encoder
   0,  // Quantizer root
 
   50,
@@ -370,7 +370,7 @@ const Setting Settings::settings_order_[] = {
   SETTING_VCO_DRIFT,
   SETTING_SIGNATURE,
   SETTING_BRIGHTNESS,
-  SETTING_ENCODER_DIRECTION,
+  //SETTING_ENCODER_DIRECTION,
   SETTING_CALIBRATION,
   SETTING_CV_TESTER,
   SETTING_VERSION,
