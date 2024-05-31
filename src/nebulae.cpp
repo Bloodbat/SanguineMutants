@@ -22,7 +22,6 @@ struct ModeDisplay {
 };
 
 static const std::vector<ModeDisplay> modeDisplays{
-	// TODO!! Check these against the final OLEDs: they may run off.
 	{"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger"},
 	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",            "Pitch",     "Time"},
 	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",            "Pitch",     "Time"},
@@ -52,6 +51,7 @@ struct Nebulae : Module {
 		PARAM_REVERB,
 		PARAM_HI_FI,
 		PARAM_STEREO,
+		PARAM_LEDS_MODE,
 		PARAMS_COUNT
 	};
 	enum InputIds {
@@ -77,8 +77,8 @@ struct Nebulae : Module {
 	};
 	enum LightIds {
 		LIGHT_FREEZE,
-		ENUMS(LIGHT_MIX, 2),
-		ENUMS(LIGHT_PAN, 2),
+		ENUMS(LIGHT_BLEND, 2),
+		ENUMS(LIGHT_SPREAD, 2),
 		ENUMS(LIGHT_FEEDBACK, 2),
 		ENUMS(LIGHT_REVERB, 2),
 		ENUMS(LIGHT_POSITION_CV, 2),
@@ -89,6 +89,16 @@ struct Nebulae : Module {
 		LIGHT_STEREO,
 		LIGHTS_COUNT
 	};
+
+	enum LedModes {
+		LEDS_INPUT,
+		LEDS_OUTPUT,
+		LEDS_PARAMETERS,
+		LED_MODES_COUNT,
+		LEDS_MOMENTARY
+	} ledMode = LEDS_INPUT;
+
+	LedModes lastLedMode = LEDS_INPUT;
 
 	std::string modeText = modeList[0];
 	std::string freezeText = modeDisplays[0].freezeLabel;
@@ -105,15 +115,23 @@ struct Nebulae : Module {
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightDivider;
+	dsp::BooleanTrigger btLedsMode;
 
 	clouds::PlaybackMode playbackMode = clouds::PLAYBACK_MODE_GRANULAR;
 	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
 
 	float freezeLight = 0.0;
 
+	float lastBlend;
+	float lastSpread;
+	float lastFeedback;
+	float lastReverb;
+
 	const int kClockDivider = 512;
 	int buffersize = 1;
 	int currentbuffersize = 1;
+
+	uint32_t displayTimeout = 0;
 
 	bool frozen = false;
 	bool triggered = false;
@@ -129,14 +147,10 @@ struct Nebulae : Module {
 		configInput(INPUT_FREEZE, "Freeze");
 		configParam(PARAM_FREEZE, 0.f, 1.f, 0.f, "Freeze");
 
+		configButton(PARAM_LEDS_MODE, "Switch LED display value");
+
 		configParam(PARAM_MODE, 0.f, 3.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
-
-		// TODO: Can we change tooltips on the fly? YES!!
-		// This is IMPORTANT!!!
-		/*
-		paramQuantities[PARAM_SIZE]->name = "Poop";
-		*/
 
 		configParam(PARAM_POSITION, 0.0, 1.0, 0.5, "Grain position");
 		configInput(INPUT_POSITION, "Grain position CV");
@@ -181,6 +195,11 @@ struct Nebulae : Module {
 		configBypass(INPUT_LEFT, OUTPUT_LEFT);
 		configBypass(INPUT_RIGHT, OUTPUT_RIGHT);
 
+		lastBlend = 0.5f;
+		lastSpread = 0.5f;
+		lastFeedback = 0.5;
+		lastReverb = 0.5;
+
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;
 		block_mem = new uint8_t[memLen]();
@@ -204,116 +223,138 @@ struct Nebulae : Module {
 		dsp::Frame<2> outputFrame;
 
 		// Get input
-		if (inputs[INPUT_LEFT].isConnected() || inputs[INPUT_RIGHT].isConnected()) {
+		if (!inputBuffer.full()) {
+			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltage() * params[PARAM_IN_GAIN].getValue() / 5.0;
+			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage() * params[PARAM_IN_GAIN].getValue() / 5.0 : inputFrame.samples[0];
+			inputBuffer.push(inputFrame);
+		}
 
-			if (!inputBuffer.full()) {
-				inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltage() * params[PARAM_IN_GAIN].getValue() / 5.0;
-				inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage() * params[PARAM_IN_GAIN].getValue() / 5.0 : inputFrame.samples[0];
-				inputBuffer.push(inputFrame);
+		// Trigger
+		if (inputs[INPUT_TRIGGER].getVoltage() >= 1.0) {
+			triggered = true;
+		}
+
+		// Render frames
+		if (outputBuffer.empty()) {
+			clouds::ShortFrame input[32] = {};
+			// Convert input buffer
+			{
+				inputSrc.setRates(args.sampleRate, 32000);
+				dsp::Frame<2> inputFrames[32];
+				int inLen = inputBuffer.size();
+				int outLen = 32;
+				inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
+				inputBuffer.startIncr(inLen);
+
+				// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
+				for (int i = 0; i < outLen; i++) {
+					input[i].l = clamp(inputFrames[i].samples[0] * 32767.0, -32768, 32767);
+					input[i].r = clamp(inputFrames[i].samples[1] * 32767.0, -32768, 32767);
+				}
+			}
+			if (currentbuffersize != buffersize) {
+				// Re-init cloudsProcessor with new size.
+				delete cloudsProcessor;
+				delete[] block_mem;
+				int memLen = 118784 * buffersize;
+				const int ccmLen = 65536 - 128;
+				block_mem = new uint8_t[memLen]();
+				cloudsProcessor = new clouds::GranularProcessor();
+				memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
+				cloudsProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+				currentbuffersize = buffersize;
 			}
 
-			// Trigger
-			if (inputs[INPUT_TRIGGER].getVoltage() >= 1.0) {
-				triggered = true;
+			// Set up cloudsProcessor
+			cloudsProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
+			cloudsProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
+			cloudsProcessor->set_playback_mode(playbackMode);
+			cloudsProcessor->Prepare();
+
+			clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
+			cloudsParameters->trigger = triggered;
+			cloudsParameters->gate = triggered;
+			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || params[PARAM_FREEZE].getValue());
+			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
+			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
+			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.0, -48.0f, 48.0f);
+			cloudsParameters->density = clamp(params[PARAM_DENSITY].getValue() + inputs[INPUT_DENSITY].getVoltage() / 5.0, 0.0f, 1.0f);
+			cloudsParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + inputs[INPUT_TEXTURE].getVoltage() / 5.0, 0.0f, 1.0f);
+			float blend = clamp(params[PARAM_BLEND].getValue() + inputs[INPUT_BLEND].getVoltage() / 5.0, 0.0f, 1.0f);
+			cloudsParameters->dry_wet = blend;
+			cloudsParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + inputs[INPUT_SPREAD].getVoltage() / 5.0, 0.0f, 1.0f);
+			cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + inputs[INPUT_FEEDBACK].getVoltage() / 5.0, 0.0f, 1.0f);
+			cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + inputs[INPUT_REVERB].getVoltage() / 5.0, 0.0f, 1.0f);
+
+			clouds::ShortFrame output[32];
+			cloudsProcessor->Process(input, output, 32);
+
+			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 1.0 : 0.0, args.sampleTime);
+
+			// Convert output buffer
+			{
+				dsp::Frame<2> outputFrames[32];
+				for (int i = 0; i < 32; i++) {
+					outputFrames[i].samples[0] = output[i].l / 32768.0;
+					outputFrames[i].samples[1] = output[i].r / 32768.0;
+				}
+
+				outputSrc.setRates(32000, args.sampleRate);
+				int inLen = 32;
+				int outLen = outputBuffer.capacity();
+				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
+				outputBuffer.endIncr(outLen);
 			}
 
-			// Render frames
-			if (outputBuffer.empty()) {
-				clouds::ShortFrame input[32] = {};
-				// Convert input buffer
-				{
-					inputSrc.setRates(args.sampleRate, 32000);
-					dsp::Frame<2> inputFrames[32];
-					int inLen = inputBuffer.size();
-					int outLen = 32;
-					inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
-					inputBuffer.startIncr(inLen);
+			triggered = false;
+		}
 
-					// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
-					for (int i = 0; i < outLen; i++) {
-						input[i].l = clamp(inputFrames[i].samples[0] * 32767.0, -32768, 32767);
-						input[i].r = clamp(inputFrames[i].samples[1] * 32767.0, -32768, 32767);
-					}
-				}
-				if (currentbuffersize != buffersize) {
-					// Re-init cloudsProcessor with new size.
-					delete cloudsProcessor;
-					delete[] block_mem;
-					int memLen = 118784 * buffersize;
-					const int ccmLen = 65536 - 128;
-					block_mem = new uint8_t[memLen]();
-					cloudsProcessor = new clouds::GranularProcessor();
-					memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-					cloudsProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
-					currentbuffersize = buffersize;
-				}
-
-				// Set up cloudsProcessor
-				cloudsProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
-				cloudsProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
-				// TODO Support the other modes
-				cloudsProcessor->set_playback_mode(playbackMode);
-				cloudsProcessor->Prepare();
-
-				clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
-				cloudsParameters->trigger = triggered;
-				cloudsParameters->gate = triggered;
-				cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || params[PARAM_FREEZE].getValue());
-				cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
-				cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
-				cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.0, -48.0f, 48.0f);
-				cloudsParameters->density = clamp(params[PARAM_DENSITY].getValue() + inputs[INPUT_DENSITY].getVoltage() / 5.0, 0.0f, 1.0f);
-				cloudsParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + inputs[INPUT_TEXTURE].getVoltage() / 5.0, 0.0f, 1.0f);
-				float blend = clamp(params[PARAM_BLEND].getValue() + inputs[INPUT_BLEND].getVoltage() / 5.0, 0.0f, 1.0f);
-				cloudsParameters->dry_wet = blend;
-				cloudsParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + inputs[INPUT_SPREAD].getVoltage() / 5.0, 0.0f, 1.0f);
-				cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + inputs[INPUT_FEEDBACK].getVoltage() / 5.0, 0.0f, 1.0f);
-				cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + inputs[INPUT_REVERB].getVoltage() / 5.0, 0.0f, 1.0f);
-
-				clouds::ShortFrame output[32];
-				cloudsProcessor->Process(input, output, 32);
-
-				lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 1.0 : 0.0, args.sampleTime);
-
-				// Convert output buffer
-				{
-					dsp::Frame<2> outputFrames[32];
-					for (int i = 0; i < 32; i++) {
-						outputFrames[i].samples[0] = output[i].l / 32768.0;
-						outputFrames[i].samples[1] = output[i].r / 32768.0;
-					}
-
-					outputSrc.setRates(32000, args.sampleRate);
-					int inLen = 32;
-					int outLen = outputBuffer.capacity();
-					outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
-					outputBuffer.endIncr(outLen);
-				}
-
-				triggered = false;
+		// Set output			
+		if (!outputBuffer.empty()) {
+			outputFrame = outputBuffer.shift();
+			if (outputs[OUTPUT_LEFT].isConnected()) {
+				outputs[OUTPUT_LEFT].setVoltage(5.0 * outputFrame.samples[0]);
 			}
-
-			// Set output			
-			if (!outputBuffer.empty()) {
-				outputFrame = outputBuffer.shift();
-				if (outputs[OUTPUT_LEFT].isConnected()) {
-					outputs[OUTPUT_LEFT].setVoltage(5.0 * outputFrame.samples[0]);
-				}
-				if (outputs[OUTPUT_RIGHT].isConnected()) {
-					outputs[OUTPUT_RIGHT].setVoltage(5.0 * outputFrame.samples[1]);
-				}
+			if (outputs[OUTPUT_RIGHT].isConnected()) {
+				outputs[OUTPUT_RIGHT].setVoltage(5.0 * outputFrame.samples[1]);
 			}
 		}
 
 		// Lights
 		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
 
-		// Show output when frozen.
-		dsp::Frame<2> lightFrame = cloudsParameters->freeze ? outputFrame : inputFrame;
+		dsp::Frame<2> lightFrame;
+
+		switch (ledMode)
+		{
+		case LEDS_OUTPUT: {
+			lightFrame = outputFrame;
+			break;
+		}
+		default: {
+			lightFrame = inputFrame;
+			break;
+		}
+		}
 
 		vuMeter.process(args.sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
 		lights[LIGHT_FREEZE].setBrightness(cloudsParameters->freeze ? 0.75 : 0.0);
+
+		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
+			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
+			ledMode = LEDS_MOMENTARY;
+			displayTimeout++;
+		}
+
+		if (displayTimeout > args.sampleRate) {
+			ledMode = lastLedMode;
+			displayTimeout = 0;
+			lastBlend = params[PARAM_BLEND].getValue();
+			lastSpread = params[PARAM_SPREAD].getValue();
+			lastFeedback = params[PARAM_FEEDBACK].getValue();
+			lastReverb = params[PARAM_REVERB].getValue();
+		}
 
 		if (lightDivider.process()) { // Expensive, so call this infrequently
 			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
@@ -352,17 +393,48 @@ struct Nebulae : Module {
 				lastPlaybackMode = playbackMode;
 			}
 
-			const float sampleTime = args.sampleTime * kClockDivider;
+			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
+				ledMode = LedModes((ledMode + 1) % LED_MODES_COUNT);
+				lastLedMode = ledMode;
+				displayTimeout = 0;
+				lastBlend = params[PARAM_BLEND].getValue();
+				lastSpread = params[PARAM_SPREAD].getValue();
+				lastFeedback = params[PARAM_FEEDBACK].getValue();
+				lastReverb = params[PARAM_REVERB].getValue();
+			}
 
 			// These could probably do with base colored lights: they are never colorfully changed.
-			lights[LIGHT_MIX].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
-			lights[LIGHT_MIX + 1].setBrightness(0.0);
-			lights[LIGHT_PAN].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
-			lights[LIGHT_PAN + 1].setBrightness(0.0);
-			lights[LIGHT_FEEDBACK].setBrightness(vuMeter.getBrightness(-12.f, -6.f));
-			lights[LIGHT_FEEDBACK + 1].setBrightness(vuMeter.getBrightness(-12.f, -6.f));
-			lights[LIGHT_REVERB].setBrightness(0.0);
-			lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
+			switch (ledMode)
+			{
+			case LEDS_INPUT:
+			case LEDS_OUTPUT: {
+				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
+				lights[LIGHT_BLEND + 1].setBrightness(0.f);
+				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
+				lights[LIGHT_SPREAD + 1].setBrightness(0.f);
+				lights[LIGHT_FEEDBACK].setBrightness(vuMeter.getBrightness(-12.f, -6.f));
+				lights[LIGHT_FEEDBACK + 1].setBrightness(vuMeter.getBrightness(-12.f, -6.f));
+				lights[LIGHT_REVERB].setBrightness(0.f);
+				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
+				break;
+			}
+			case LEDS_PARAMETERS:
+			case LEDS_MOMENTARY: {
+				float value;
+				int currentLight;
+
+				for (int i = 0; i < 4; i++) {
+					value = params[PARAM_BLEND + i].getValue();
+					currentLight = LIGHT_BLEND + i * 2;
+					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
+					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
+				}
+				break;
+			}
+			default: {
+				break;
+			}
+			}
 
 			lights[LIGHT_POSITION_CV + 0].setBrightness(math::rescale(inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f));
 			lights[LIGHT_POSITION_CV + 1].setBrightness(math::rescale(-inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f));
@@ -375,6 +447,8 @@ struct Nebulae : Module {
 
 			lights[LIGHT_TEXTURE_CV + 0].setBrightness(math::rescale(inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f));
 			lights[LIGHT_TEXTURE_CV + 1].setBrightness(math::rescale(-inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f));
+
+			const float sampleTime = args.sampleTime * kClockDivider;
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 1.f : 0.f, sampleTime);
@@ -406,10 +480,12 @@ struct NebulaeWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Nebulae::LIGHT_MIX));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Nebulae::LIGHT_PAN));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Nebulae::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Nebulae::LIGHT_SPREAD));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Nebulae::LIGHT_FEEDBACK));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Nebulae::LIGHT_REVERB));
+
+		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Nebulae::PARAM_LEDS_MODE));
 
 		FramebufferWidget* nebulaeFramebuffer = new FramebufferWidget();
 		addChild(nebulaeFramebuffer);
