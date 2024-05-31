@@ -567,15 +567,15 @@ struct NebulaeWidget : ModuleWidget {
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 78.013)), module, Nebulae::INPUT_SPREAD));
 
-		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(86.118, 93.205)), module, Nebulae::PARAM_SPREAD));
+		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(86.118, 96.727)), module, Nebulae::PARAM_SPREAD));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 78.013)), module, Nebulae::INPUT_FEEDBACK));
 
-		addParam(createParamCentered<Sanguine1PPurple>(mm2px(Vec(105.638, 93.205)), module, Nebulae::PARAM_FEEDBACK));
+		addParam(createParamCentered<Sanguine1PPurple>(mm2px(Vec(105.638, 96.727)), module, Nebulae::PARAM_FEEDBACK));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 78.013)), module, Nebulae::INPUT_REVERB));
 
-		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(125.214, 93.205)), module, Nebulae::PARAM_REVERB));
+		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(125.214, 96.727)), module, Nebulae::PARAM_REVERB));
 
 		addParam(createParamCentered<Rogan1PWhite>(mm2px(Vec(14.603, 97.272)), module, Nebulae::PARAM_IN_GAIN));
 
