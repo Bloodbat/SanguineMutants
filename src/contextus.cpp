@@ -5,9 +5,9 @@
 #include "contextusconsts.hpp"
 
 #include "renaissance/renaissance_macro_oscillator.h"
-#include "renaissance/renaissance_signature_waveshaper.h"
-#include "renaissance/renaissance_vco_jitter_source.h"
-#include "renaissance/renaissance_envelope.h"
+#include "braids/signature_waveshaper.h"
+#include "braids/vco_jitter_source.h"
+#include "braids/envelope.h"
 #include "renaissance/renaissance_quantizer.h"
 #include "renaissance/renaissance_quantizer_scales.h"
 
@@ -138,9 +138,9 @@ struct Contextus : Module {
 
 	renaissance::MacroOscillator osc;
 	renaissance::SettingsData settings;
-	renaissance::VcoJitterSource jitterSource;
-	renaissance::SignatureWaveshaper waveShaper;
-	renaissance::Envelope envelope;
+	braids::VcoJitterSource jitterSource;
+	braids::SignatureWaveshaper waveShaper;
+	braids::Envelope envelope;
 	renaissance::Quantizer quantizer;
 
 	uint8_t currentScale = 0xff;
@@ -367,7 +367,7 @@ struct Contextus : Module {
 			pitch = clamp(int(pitch), 0, 16383);
 
 			if (settings.vco_flatten) {
-				pitch = renaissance::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
+				pitch = braids::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
 			}
 
 			// Pitch transposition
@@ -377,7 +377,7 @@ struct Contextus : Module {
 
 			if (bTriggerFlag) {
 				osc.Strike();
-				envelope.Trigger(renaissance::ENV_SEGMENT_ATTACK);
+				envelope.Trigger(braids::ENV_SEGMENT_ATTACK);
 				bTriggerFlag = false;
 			}
 

@@ -32,7 +32,7 @@
 
 #include "stmlib/utils/dsp.h"
 
-#include "renaissance/renaissance_parameter_interpolation.h"
+#include "braids/parameter_interpolation.h"
 #include "renaissance/renaissance_resources.h"
 #include "renaissance/vocalist/wordlist.h"
 
@@ -53,7 +53,7 @@ void MacroOscillator::RenderCSaw(
     int16_t* buffer,
     size_t size) {
   analog_oscillator_[0].set_pitch(pitch_);
-  analog_oscillator_[0].set_shape(OSC_SHAPE_CSAW);
+  analog_oscillator_[0].set_shape(braids::OSC_SHAPE_CSAW);
   analog_oscillator_[0].set_parameter(parameter_[0]);
   analog_oscillator_[0].set_aux_parameter(parameter_[1]);
   analog_oscillator_[0].Render(sync, buffer, NULL, size);
@@ -75,20 +75,20 @@ void MacroOscillator::RenderMorph(
   if (parameter_[0] <= 10922) {
     analog_oscillator_[0].set_parameter(0);
     analog_oscillator_[1].set_parameter(0);
-    analog_oscillator_[0].set_shape(OSC_SHAPE_TRIANGLE);
-    analog_oscillator_[1].set_shape(OSC_SHAPE_SAW);
+    analog_oscillator_[0].set_shape(braids::OSC_SHAPE_TRIANGLE);
+    analog_oscillator_[1].set_shape(braids::OSC_SHAPE_SAW);
     balance = parameter_[0] * 6;
   } else if (parameter_[0] <= 21845) {
     analog_oscillator_[0].set_parameter(0);
     analog_oscillator_[1].set_parameter(0);
-    analog_oscillator_[0].set_shape(OSC_SHAPE_SQUARE);
-    analog_oscillator_[1].set_shape(OSC_SHAPE_SAW);
+    analog_oscillator_[0].set_shape(braids::OSC_SHAPE_SQUARE);
+    analog_oscillator_[1].set_shape(braids::OSC_SHAPE_SAW);
     balance = 65535 - (parameter_[0] - 10923) * 6;
   } else {
     analog_oscillator_[0].set_parameter((parameter_[0] - 21846) * 3);
     analog_oscillator_[1].set_parameter(0);
-    analog_oscillator_[0].set_shape(OSC_SHAPE_SQUARE);
-    analog_oscillator_[1].set_shape(OSC_SHAPE_SINE);
+    analog_oscillator_[0].set_shape(braids::OSC_SHAPE_SQUARE);
+    analog_oscillator_[1].set_shape(braids::OSC_SHAPE_SINE);
     balance = 0;
   }
 
@@ -136,8 +136,8 @@ void MacroOscillator::RenderSawSquare(
   analog_oscillator_[0].set_pitch(pitch_);
   analog_oscillator_[1].set_pitch(pitch_);
 
-  analog_oscillator_[0].set_shape(OSC_SHAPE_VARIABLE_SAW);
-  analog_oscillator_[1].set_shape(OSC_SHAPE_SQUARE);
+  analog_oscillator_[0].set_shape(braids::OSC_SHAPE_VARIABLE_SAW);
+  analog_oscillator_[1].set_shape(braids::OSC_SHAPE_SQUARE);
 
   int16_t* saw_buffer = buffer;
   int16_t* square_buffer = temp_buffer_;
@@ -182,19 +182,19 @@ void MacroOscillator::RenderTriple(
     const uint8_t* sync,
     int16_t* buffer,
     size_t size) {
-  AnalogOscillatorShape base_shape;
+    braids::AnalogOscillatorShape base_shape;
   switch (shape_) {
     case MACRO_OSC_SHAPE_TRIPLE_SAW:
-      base_shape = OSC_SHAPE_SAW;
+      base_shape = braids::OSC_SHAPE_SAW;
       break;
     case MACRO_OSC_SHAPE_TRIPLE_TRIANGLE:
-      base_shape = OSC_SHAPE_TRIANGLE;
+      base_shape = braids::OSC_SHAPE_TRIANGLE;
       break;
     case MACRO_OSC_SHAPE_TRIPLE_SQUARE:
-      base_shape = OSC_SHAPE_SQUARE;
+      base_shape = braids::OSC_SHAPE_SQUARE;
       break;
     default:
-      base_shape = OSC_SHAPE_SINE;
+      base_shape = braids::OSC_SHAPE_SINE;
       break;
   }
 
@@ -230,14 +230,14 @@ void MacroOscillator::RenderSub(
     const uint8_t* sync,
     int16_t* buffer,
     size_t size) {
-  AnalogOscillatorShape base_shape = shape_ == MACRO_OSC_SHAPE_SQUARE_SUB ?
-      OSC_SHAPE_SQUARE : OSC_SHAPE_VARIABLE_SAW;
+    braids::AnalogOscillatorShape base_shape = shape_ == MACRO_OSC_SHAPE_SQUARE_SUB ?
+        braids::OSC_SHAPE_SQUARE : braids::OSC_SHAPE_VARIABLE_SAW;
   analog_oscillator_[0].set_parameter(parameter_[0]);
   analog_oscillator_[0].set_shape(base_shape);
   analog_oscillator_[0].set_pitch(pitch_);
 
   analog_oscillator_[1].set_parameter(0);
-  analog_oscillator_[1].set_shape(OSC_SHAPE_SQUARE);
+  analog_oscillator_[1].set_shape(braids::OSC_SHAPE_SQUARE);
   int16_t octave = parameter_[1] < 16384 ? (24 << 7) : (12 << 7);
   analog_oscillator_[1].set_pitch(pitch_ - octave);
 
@@ -263,8 +263,8 @@ void MacroOscillator::RenderDualSync(
     const uint8_t* sync,
     int16_t* buffer,
     size_t size) {
-  AnalogOscillatorShape base_shape = shape_ == MACRO_OSC_SHAPE_SQUARE_SYNC ?
-      OSC_SHAPE_SQUARE : OSC_SHAPE_SAW;
+    braids::AnalogOscillatorShape base_shape = shape_ == MACRO_OSC_SHAPE_SQUARE_SYNC ?
+        braids::OSC_SHAPE_SQUARE : braids::OSC_SHAPE_SAW;
   analog_oscillator_[0].set_parameter(0);
   analog_oscillator_[0].set_shape(base_shape);
   analog_oscillator_[0].set_pitch(pitch_);
@@ -309,8 +309,8 @@ void MacroOscillator::RenderSineTriangle(
   analog_oscillator_[0].set_pitch(pitch_);
   analog_oscillator_[1].set_pitch(pitch_);
 
-  analog_oscillator_[0].set_shape(OSC_SHAPE_SINE_FOLD);
-  analog_oscillator_[1].set_shape(OSC_SHAPE_TRIANGLE_FOLD);
+  analog_oscillator_[0].set_shape(braids::OSC_SHAPE_SINE_FOLD);
+  analog_oscillator_[1].set_shape(braids::OSC_SHAPE_TRIANGLE_FOLD);
 
   analog_oscillator_[0].Render(sync, buffer, NULL, size);
   analog_oscillator_[1].Render(sync, temp_buffer_, NULL, size);
@@ -336,11 +336,11 @@ void MacroOscillator::RenderBuzz(
     int16_t* buffer,
     size_t size) {
   analog_oscillator_[0].set_parameter(parameter_[0]);
-  analog_oscillator_[0].set_shape(OSC_SHAPE_BUZZ);
+  analog_oscillator_[0].set_shape(braids::OSC_SHAPE_BUZZ);
   analog_oscillator_[0].set_pitch(pitch_);
 
   analog_oscillator_[1].set_parameter(parameter_[0]);
-  analog_oscillator_[1].set_shape(OSC_SHAPE_BUZZ);
+  analog_oscillator_[1].set_shape(braids::OSC_SHAPE_BUZZ);
   analog_oscillator_[1].set_pitch(pitch_ + (parameter_[1] >> 8));
 
   analog_oscillator_[0].Render(sync, buffer, NULL, size);
@@ -371,7 +371,7 @@ void MacroOscillator::RenderSawComb(
   size_t size) {
   analog_oscillator_[0].set_parameter(0);
   analog_oscillator_[0].set_pitch(pitch_);
-  analog_oscillator_[0].set_shape(OSC_SHAPE_SAW);
+  analog_oscillator_[0].set_shape(braids::OSC_SHAPE_SAW);
   analog_oscillator_[0].Render(sync, buffer, NULL, size);
 
   digital_oscillator_.set_parameters(parameter_[0], parameter_[1]);

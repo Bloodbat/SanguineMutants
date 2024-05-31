@@ -42,7 +42,6 @@ SOURCES += eurorack/braids/resources.cc
 SOURCES += eurorack/braids/quantizer.cc
 
 SOURCES += alt_firmware/renaissance/renaissance_macro_oscillator.cc
-SOURCES += alt_firmware/renaissance/renaissance_analog_oscillator.cc
 SOURCES += alt_firmware/renaissance/renaissance_digital_oscillator.cc
 SOURCES += alt_firmware/renaissance/renaissance_resources.cc
 SOURCES += alt_firmware/renaissance/renaissance_quantizer.cc

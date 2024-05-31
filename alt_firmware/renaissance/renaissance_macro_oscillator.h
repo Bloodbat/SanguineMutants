@@ -33,7 +33,7 @@
 
 #include <cstring>
 
-#include "renaissance/renaissance_analog_oscillator.h"
+#include "braids/analog_oscillator.h"
 #include "renaissance/renaissance_digital_oscillator.h"
 #include "renaissance/renaissance_resources.h"
 #include "renaissance/renaissance_settings.h"
@@ -102,7 +102,7 @@ class MacroOscillator {
   void RenderSawComb(const uint8_t*, int16_t*, size_t);
   void RenderTriple(const uint8_t*, int16_t*, size_t);
 
-  void ConfigureTriple(AnalogOscillatorShape shape);
+  void ConfigureTriple(braids::AnalogOscillatorShape shape);
 
   int16_t parameter_[2];
   int16_t previous_parameter_[2];
@@ -111,7 +111,7 @@ class MacroOscillator {
   int16_t temp_buffer_[24];
   int32_t lp_state_;
 
-  AnalogOscillator analog_oscillator_[3];
+  braids::AnalogOscillator analog_oscillator_[3];
   DigitalOscillator digital_oscillator_;
 
   MacroOscillatorShape shape_;

@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-#include "renaissance/renaissance_excitation.h"
+#include "braids/excitation.h"
 #include "renaissance/renaissance_svf.h"
 #include "vocalist/vocalist.h"
 
@@ -428,7 +428,7 @@ class DigitalOscillator {
   DigitalOscillatorShape previous_shape_;
   DigitalOscillatorState state_;
 
-  Excitation pulse_[4];
+  braids::Excitation pulse_[4];
   Svf svf_[3];
 
   union {

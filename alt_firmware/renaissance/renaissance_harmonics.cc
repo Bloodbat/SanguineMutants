@@ -6,7 +6,7 @@
 #include "stmlib/utils/dsp.h"
 #include "stmlib/utils/random.h"
 
-#include "renaissance/renaissance_parameter_interpolation.h"
+#include "braids/parameter_interpolation.h"
 #include "renaissance/renaissance_resources.h"
 
 namespace renaissance {
