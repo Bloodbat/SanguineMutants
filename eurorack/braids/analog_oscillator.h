@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ class AnalogOscillator {
 
   AnalogOscillator() { }
   ~AnalogOscillator() { }
-  
+
   inline void Init() {
     phase_ = 0;
     phase_increment_ = 1;
@@ -77,11 +77,11 @@ class AnalogOscillator {
     pitch_ = 60 << 7;
     next_sample_ = 0;
   }
-  
+
   inline void set_shape(AnalogOscillatorShape shape) {
     shape_ = shape;
   }
-  
+
   inline void set_pitch(int16_t pitch) {
     pitch_ = pitch;
   }
@@ -93,11 +93,11 @@ class AnalogOscillator {
   inline void set_aux_parameter(int16_t parameter) {
     aux_parameter_ = parameter;
   }
-  
+
   inline uint32_t phase_increment() const {
     return phase_increment_;
   }
-  
+
   inline void Reset() {
     phase_ = -phase_increment_;
   }
@@ -107,7 +107,7 @@ class AnalogOscillator {
       int16_t* buffer,
       uint8_t* sync_out,
       size_t size);
-  
+
  private:
   void RenderSquare(const uint8_t*, int16_t*, uint8_t*, size_t);
   void RenderSaw(const uint8_t*, int16_t*, uint8_t*, size_t);
@@ -118,16 +118,16 @@ class AnalogOscillator {
   void RenderTriangleFold(const uint8_t*, int16_t*, uint8_t*, size_t);
   void RenderSineFold(const uint8_t*, int16_t*, uint8_t*, size_t);
   void RenderBuzz(const uint8_t*, int16_t*, uint8_t*, size_t);
-  
+
   uint32_t ComputePhaseIncrement(int16_t midi_pitch);
-  
+
   inline int32_t ThisBlepSample(uint32_t t) {
     if (t > 65535) {
       t = 65535;
     }
     return t * t >> 18;
   }
-  
+
   inline int32_t NextBlepSample(uint32_t t) {
     if (t > 65535) {
       t = 65535;
@@ -135,7 +135,7 @@ class AnalogOscillator {
     t = 65535 - t;
     return -static_cast<int32_t>(t * t >> 18);
   }
-   
+
   uint32_t phase_;
   uint32_t phase_increment_;
   uint32_t previous_phase_increment_;
@@ -146,14 +146,14 @@ class AnalogOscillator {
   int16_t aux_parameter_;
   int16_t discontinuity_depth_;
   int16_t pitch_;
-  
+
   int32_t next_sample_;
-  
+
   AnalogOscillatorShape shape_;
   AnalogOscillatorShape previous_shape_;
-  
+
   static RenderFn fn_table_[];
-  
+
   DISALLOW_COPY_AND_ASSIGN(AnalogOscillator);
 };
 

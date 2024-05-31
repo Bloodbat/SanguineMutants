@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -65,7 +65,7 @@ enum DigitalOscillatorShape {
   OSC_SHAPE_VOSIM,
   OSC_SHAPE_VOWEL,
   OSC_SHAPE_VOWEL_FOF,
-  
+
   OSC_SHAPE_HARMONICS,
 
   OSC_SHAPE_FM,
@@ -78,17 +78,17 @@ enum DigitalOscillatorShape {
   OSC_SHAPE_KICK,
   OSC_SHAPE_HAT,
   OSC_SHAPE_SNARE,
-  
+
   OSC_SHAPE_PLUCKED,
   OSC_SHAPE_BOWED,
   OSC_SHAPE_BLOWN,
   OSC_SHAPE_FLUTED,
-  
+
   OSC_SHAPE_WAVETABLES,
   OSC_SHAPE_WAVE_MAP,
   OSC_SHAPE_WAVE_LINE,
   OSC_SHAPE_WAVE_PARAPHONIC,
-  
+
   OSC_SHAPE_FILTERED_NOISE,
   OSC_SHAPE_TWIN_PEAKS_NOISE,
   OSC_SHAPE_CLOCKED_NOISE,
@@ -242,7 +242,7 @@ class DigitalOscillator {
 
   DigitalOscillator() { }
   ~DigitalOscillator() { }
-  
+
   inline void Init() {
     memset(&state_, 0, sizeof(state_));
     pulse_[0].Init();
@@ -256,11 +256,11 @@ class DigitalOscillator {
     strike_ = true;
     init_ = true;
   }
-  
+
   inline void set_shape(DigitalOscillatorShape shape) {
     shape_ = shape;
   }
-  
+
   inline void set_pitch(int16_t pitch) {
     // Smooth HF noise when the pitch CV is noisy.
     if (pitch_ > (90 << 7) && pitch > (90 << 7)) {
@@ -276,17 +276,17 @@ class DigitalOscillator {
     parameter_[0] = parameter_1;
     parameter_[1] = parameter_2;
   }
-  
+
   inline uint32_t phase_increment() const {
     return phase_increment_;
   }
-  
+
   inline void Strike() {
     strike_ = true;
   }
 
   void Render(const uint8_t* sync, int16_t* buffer, size_t size);
-  
+
  private:
   void RenderTripleRingMod(const uint8_t*, int16_t*, size_t);
   void RenderSawSwarm(const uint8_t*, int16_t*, size_t);
@@ -303,7 +303,7 @@ class DigitalOscillator {
   void RenderFm(const uint8_t*, int16_t*, size_t);
   void RenderFeedbackFm(const uint8_t*, int16_t*, size_t);
   void RenderChaoticFeedbackFm(const uint8_t*, int16_t*, size_t);
-  
+
   void RenderStruckBell(const uint8_t*, int16_t*, size_t);
   void RenderStruckDrum(const uint8_t*, int16_t*, size_t);
   void RenderPlucked(const uint8_t*, int16_t*, size_t);
@@ -315,21 +315,21 @@ class DigitalOscillator {
   void RenderWaveMap(const uint8_t*, int16_t*, size_t);
   void RenderWaveLine(const uint8_t*, int16_t*, size_t);
   void RenderWaveParaphonic(const uint8_t*, int16_t*, size_t);
-  
+
   void RenderTwinPeaksNoise(const uint8_t*, int16_t*, size_t);
   void RenderFilteredNoise(const uint8_t*, int16_t*, size_t);
   void RenderClockedNoise(const uint8_t*, int16_t*, size_t);
   void RenderGranularCloud(const uint8_t*, int16_t*, size_t);
   void RenderParticleNoise(const uint8_t*, int16_t*, size_t);
-  
+
   void RenderDigitalModulation(const uint8_t*, int16_t*, size_t);
   void RenderKick(const uint8_t*, int16_t*, size_t);
   void RenderSnare(const uint8_t*, int16_t*, size_t);
   void RenderCymbal(const uint8_t*, int16_t*, size_t);
   void RenderQuestionMark(const uint8_t*, int16_t*, size_t);
-  
+
   // void RenderYourAlgo(const uint8_t*, int16_t*, size_t);
-  
+
   uint32_t ComputePhaseIncrement(int16_t midi_pitch);
   uint32_t ComputeDelay(int16_t midi_pitch);
   int16_t InterpolateFormantParameter(
@@ -337,7 +337,7 @@ class DigitalOscillator {
       int16_t x,
       int16_t y,
       uint8_t formant);
-   
+
   uint32_t phase_;
   uint32_t phase_increment_;
   uint32_t delay_;
@@ -346,19 +346,19 @@ class DigitalOscillator {
   int16_t previous_parameter_[2];
   int32_t smoothed_parameter_;
   int16_t pitch_;
-  
+
   uint8_t active_voice_;
-  
+
   bool init_;
   bool strike_;
 
   DigitalOscillatorShape shape_;
   DigitalOscillatorShape previous_shape_;
   DigitalOscillatorState state_;
-  
+
   Excitation pulse_[4];
   Svf svf_[3];
-  
+
   union {
     int16_t comb[kCombDelayLength];
     int16_t ks[1025 * 4];
@@ -372,9 +372,9 @@ class DigitalOscillator {
       int8_t bore[kWGFBoreLength];
     } fluted;
   } delay_lines_;
-  
+
   static RenderFn fn_table_[];
-  
+
   DISALLOW_COPY_AND_ASSIGN(DigitalOscillator);
 };
 

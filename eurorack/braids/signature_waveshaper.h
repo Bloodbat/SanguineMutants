@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -41,11 +41,11 @@ class SignatureWaveshaper {
  public:
   SignatureWaveshaper() { }
   ~SignatureWaveshaper() { }
-  
+
   inline void Init(uint32_t seed) {
     int32_t skew = seed & 15;
     seed >>= 4;
-    
+
     int32_t sigmoid_strength = seed & 31;
     seed >>= 5;
 
@@ -58,12 +58,12 @@ class SignatureWaveshaper {
     bumplets_width += 1;
     bumplets_width <<= 7;
     bumplets_width *= bumplets_width;
-    
+
     for (int i = 0; i < 256; ++i) {
       int16_t x = (i - 128) << 8;
       int16_t x_skew = i * i - 32768;
       x = stmlib::Mix(x, x_skew, skew << 11);
-      
+
       int16_t sigmoid = x * (8192 + (sigmoid_strength << 10)) / \
           (8192 + (sigmoid_strength * abs(x) >> 5));
       int16_t bumplets = wav_sine[(i * bumplets_frequency) & 255];
@@ -73,11 +73,11 @@ class SignatureWaveshaper {
     }
     transfer_[256] = transfer_[255];
   }
-  
+
   inline int32_t transfer(uint16_t i) {
     return transfer_[i];
   }
-  
+
   inline int32_t Transform(int16_t sample) {
     uint16_t i = sample + 32768;
     int32_t a = transfer_[i >> 8];
@@ -87,7 +87,7 @@ class SignatureWaveshaper {
 
  private:
   int32_t transfer_[257];
-   
+
   DISALLOW_COPY_AND_ASSIGN(SignatureWaveshaper);
 };
 

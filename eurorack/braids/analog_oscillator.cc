@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -47,16 +47,16 @@ uint32_t AnalogOscillator::ComputePhaseIncrement(int16_t midi_pitch) {
   if (midi_pitch >= kHighestNote) {
     midi_pitch = kHighestNote - 1;
   }
-  
+
   int32_t ref_pitch = midi_pitch;
   ref_pitch -= kPitchTableStart;
-  
+
   size_t num_shifts = 0;
   while (ref_pitch < 0) {
     ref_pitch += kOctave;
     ++num_shifts;
   }
-  
+
   uint32_t a = lut_oscillator_increments[ref_pitch >> 4];
   uint32_t b = lut_oscillator_increments[(ref_pitch >> 4) + 1];
   uint32_t phase_increment = a + \
@@ -71,20 +71,20 @@ void AnalogOscillator::Render(
     uint8_t* sync_out,
     size_t size) {
   RenderFn fn = fn_table_[shape_];
-  
+
   if (shape_ != previous_shape_) {
     Init();
     previous_shape_ = shape_;
   }
-  
+
   phase_increment_ = ComputePhaseIncrement(pitch_);
-  
+
   if (pitch_ > kHighestNote) {
     pitch_ = kHighestNote;
   } else if (pitch_ < 0) {
     pitch_ = 0;
   }
-  
+
   (this->*fn)(sync_in, buffer, sync_out, size);
 }
 
@@ -105,7 +105,7 @@ void AnalogOscillator::RenderCSaw(
     if (pw < 8 * phase_increment) {
       pw = 8 * phase_increment;
     }
-    
+
     int32_t this_sample = next_sample;
     next_sample = 0;
 
@@ -141,7 +141,7 @@ void AnalogOscillator::RenderCSaw(
         *sync_out++ = 0;
       }
     }
-    
+
     while (transition_during_reset || !sync_reset) {
       if (!high_) {
         if (phase_ < pw) {
@@ -194,20 +194,20 @@ void AnalogOscillator::RenderSquare(
   if (parameter_ > 32000) {
     parameter_ = 32000;
   }
-  
+
   int32_t next_sample = next_sample_;
   while (size--) {
     bool sync_reset = false;
     bool self_reset = false;
     bool transition_during_reset = false;
     uint32_t reset_time = 0;
-    
+
     INTERPOLATE_PHASE_INCREMENT
     uint32_t pw = static_cast<uint32_t>(32768 - parameter_) << 16;
-    
+
     int32_t this_sample = next_sample;
     next_sample = 0;
-    
+
     if (*sync_in) {
       // sync_in contain the fractional reset time.
       reset_time = static_cast<uint32_t>(*sync_in - 1) << 9;
@@ -223,12 +223,12 @@ void AnalogOscillator::RenderSquare(
       }
     }
     sync_in++;
-    
+
     phase_ += phase_increment;
     if (phase_ < phase_increment) {
       self_reset = true;
     }
-    
+
     if (sync_out) {
       if (phase_ < phase_increment) {
         *sync_out++ = phase_ / (phase_increment >> 7) + 1;
@@ -236,7 +236,7 @@ void AnalogOscillator::RenderSquare(
         *sync_out++ = 0;
       }
     }
-    
+
     while (transition_during_reset || !sync_reset) {
       if (!high_) {
         if (phase_ < pw) {
@@ -258,12 +258,12 @@ void AnalogOscillator::RenderSquare(
         high_ = false;
       }
     }
-    
+
     if (sync_reset) {
       phase_ = reset_time * (phase_increment >> 16);
       high_ = false;
     }
-    
+
     next_sample += phase_ < pw ? 0 : 32767;
     *buffer++ = (this_sample - 16384) << 1;
   }
@@ -283,7 +283,7 @@ void AnalogOscillator::RenderSaw(
     bool self_reset = false;
     bool transition_during_reset = false;
     uint32_t reset_time = 0;
-    
+
     INTERPOLATE_PHASE_INCREMENT
     int32_t this_sample = next_sample;
     next_sample = 0;
@@ -326,7 +326,7 @@ void AnalogOscillator::RenderSaw(
       phase_ = reset_time * (phase_increment >> 16);
       high_ = false;
     }
-    
+
     next_sample += phase_ >> 17;
     *buffer++ = (this_sample - 16384) << 1;
   }
@@ -412,7 +412,7 @@ void AnalogOscillator::RenderVariableSaw(
       phase_ = reset_time * (phase_increment >> 16);
       high_ = false;
     }
-    
+
     next_sample += phase_ >> 18;
     next_sample += (phase_ - pw) >> 18;
     *buffer++ = (this_sample - 16384) << 1;
@@ -430,20 +430,20 @@ void AnalogOscillator::RenderTriangle(
   uint32_t phase = phase_;
   while (size--) {
     INTERPOLATE_PHASE_INCREMENT
-    
+
     int16_t triangle;
     uint16_t phase_16;
-    
+
     if (*sync_in++) {
       phase = 0;
     }
-    
+
     phase += phase_increment >> 1;
     phase_16 = phase >> 16;
     triangle = (phase_16 << 1) ^ (phase_16 & 0x8000 ? 0xffff : 0x0000);
     triangle += 32768;
     *buffer = triangle >> 1;
-    
+
     phase += phase_increment >> 1;
     phase_16 = phase >> 16;
     triangle = (phase_16 << 1) ^ (phase_16 & 0x8000 ? 0xffff : 0x0000);
@@ -479,22 +479,22 @@ void AnalogOscillator::RenderTriangleFold(
     uint8_t* sync_out,
     size_t size) {
   uint32_t phase = phase_;
-  
+
   BEGIN_INTERPOLATE_PHASE_INCREMENT
   BEGIN_INTERPOLATE_PARAMETER
-  
+
   while (size--) {
     INTERPOLATE_PARAMETER
     INTERPOLATE_PHASE_INCREMENT
-    
+
     uint16_t phase_16;
     int16_t triangle;
     int16_t gain = 2048 + (parameter * 30720 >> 15);
-    
+
     if (*sync_in++) {
       phase = 0;
     }
-    
+
     // 2x oversampled WF.
     phase += phase_increment >> 1;
     phase_16 = phase >> 16;
@@ -503,7 +503,7 @@ void AnalogOscillator::RenderTriangleFold(
     triangle = triangle * gain >> 15;
     triangle = Interpolate88(ws_tri_fold, triangle + 32768);
     *buffer = triangle >> 1;
-    
+
     phase += phase_increment >> 1;
     phase_16 = phase >> 16;
     triangle = (phase_16 << 1) ^ (phase_16 & 0x8000 ? 0xffff : 0x0000);
@@ -512,10 +512,10 @@ void AnalogOscillator::RenderTriangleFold(
     triangle = Interpolate88(ws_tri_fold, triangle + 32768);
     *buffer++ += triangle >> 1;
   }
-  
+
   END_INTERPOLATE_PARAMETER
   END_INTERPOLATE_PHASE_INCREMENT
-    
+
   phase_ = phase;
 }
 
@@ -525,38 +525,38 @@ void AnalogOscillator::RenderSineFold(
     uint8_t* sync_out,
     size_t size) {
   uint32_t phase = phase_;
-  
+
   BEGIN_INTERPOLATE_PHASE_INCREMENT
   BEGIN_INTERPOLATE_PARAMETER
-  
+
   while (size--) {
     INTERPOLATE_PARAMETER
     INTERPOLATE_PHASE_INCREMENT
-    
+
     int16_t sine;
     int16_t gain = 2048 + (parameter * 30720 >> 15);
-    
+
     if (*sync_in++) {
       phase = 0;
     }
-    
+
     // 2x oversampled WF.
     phase += phase_increment >> 1;
     sine = Interpolate824(wav_sine, phase);
     sine = sine * gain >> 15;
     sine = Interpolate88(ws_sine_fold, sine + 32768);
     *buffer = sine >> 1;
-    
+
     phase += phase_increment >> 1;
     sine = Interpolate824(wav_sine, phase);
     sine = sine * gain >> 15;
     sine = Interpolate88(ws_sine_fold, sine + 32768);
     *buffer++ += sine >> 1;
   }
-  
+
   END_INTERPOLATE_PARAMETER
   END_INTERPOLATE_PHASE_INCREMENT
-  
+
   phase_ = phase;
 }
 

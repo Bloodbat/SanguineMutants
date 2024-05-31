@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -39,14 +39,14 @@
 #include "braids/settings.h"
 
 namespace braids {
-  
+
 class MacroOscillator {
  public:
   typedef void (MacroOscillator::*RenderFn)(const uint8_t*, int16_t*, size_t);
 
   MacroOscillator() { }
   ~MacroOscillator() { }
-  
+
   inline void Init() {
     analog_oscillator_[0].Init();
     analog_oscillator_[1].Init();
@@ -56,7 +56,7 @@ class MacroOscillator {
     previous_parameter_[0] = 0;
     previous_parameter_[1] = 0;
   }
-  
+
   inline void set_shape(MacroOscillatorShape shape) {
     if (shape != shape_) {
       Strike();
@@ -76,13 +76,13 @@ class MacroOscillator {
     parameter_[0] = parameter_1;
     parameter_[1] = parameter_2;
   }
-  
+
   inline void Strike() {
     digital_oscillator_.Strike();
   }
-  
+
   void Render(const uint8_t* sync_buffer, int16_t* buffer, size_t size);
-  
+
  private:
   void RenderCSaw(const uint8_t*, int16_t*, size_t);
   void RenderMorph(const uint8_t*, int16_t*, size_t);
@@ -102,13 +102,13 @@ class MacroOscillator {
   uint8_t sync_buffer_[24];
   int16_t temp_buffer_[24];
   int32_t lp_state_;
-  
+
   AnalogOscillator analog_oscillator_[3];
   DigitalOscillator digital_oscillator_;
-  
+
   MacroOscillatorShape shape_;
   static RenderFn fn_table_[];
-  
+
   DISALLOW_COPY_AND_ASSIGN(MacroOscillator);
 };
 

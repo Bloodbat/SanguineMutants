@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ enum MacroOscillatorShape {
   MACRO_OSC_SHAPE_SAW_SQUARE,
   MACRO_OSC_SHAPE_SINE_TRIANGLE,
   MACRO_OSC_SHAPE_BUZZ,
-  
+
   MACRO_OSC_SHAPE_SQUARE_SUB,
   MACRO_OSC_SHAPE_SAW_SUB,
   MACRO_OSC_SHAPE_SQUARE_SYNC,
@@ -60,7 +60,7 @@ enum MacroOscillatorShape {
   MACRO_OSC_SHAPE_VOSIM,
   MACRO_OSC_SHAPE_VOWEL,
   MACRO_OSC_SHAPE_VOWEL_FOF,
-  
+
   MACRO_OSC_SHAPE_HARMONICS,
 
   MACRO_OSC_SHAPE_FM,
@@ -87,7 +87,7 @@ enum MacroOscillatorShape {
   MACRO_OSC_SHAPE_CLOCKED_NOISE,
   MACRO_OSC_SHAPE_GRANULAR_CLOUD,
   MACRO_OSC_SHAPE_PARTICLE_NOISE,
-  
+
   MACRO_OSC_SHAPE_DIGITAL_MODULATION,
 
   MACRO_OSC_SHAPE_QUESTION_MARK,
@@ -148,7 +148,7 @@ enum Setting {
   SETTING_AD_VCA,
   SETTING_QUANTIZER_ROOT,
   SETTING_LAST_EDITABLE_SETTING = SETTING_QUANTIZER_ROOT,
-  
+
   // Not settings per-se, but used for menu display!
   SETTING_CALIBRATION,
   SETTING_CV_TESTER,
@@ -178,14 +178,14 @@ struct SettingsData {
   uint8_t ad_color;
   uint8_t ad_vca;
   uint8_t quantizer_root;
-  
+
   int32_t pitch_cv_offset;
   int32_t pitch_cv_scale;
   int32_t fm_cv_offset;
-  
+
   int16_t parameter_cv_offset[2];
   uint16_t parameter_cv_scale[2];
-  
+
   char marquee_text[55];
   char magic_byte;
 };
@@ -195,7 +195,7 @@ struct SettingMetadata {
   uint8_t max_value;
   const char name[5];
   const char* const* strings;
-  
+
   int16_t Clip(int16_t value) const {
     if (value > max_value) {
       value = max_value;
@@ -210,34 +210,34 @@ class Settings {
  public:
   Settings() { }
   ~Settings() { }
-  
+
   void Init();
   void Save();
   void Reset();
-  
+
   void SetValue(Setting setting, uint8_t value) {
     uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(&data_));
     data[setting] = value;
   }
-  
+
   uint8_t GetValue(Setting setting) const {
     const uint8_t* data = static_cast<const uint8_t*>(
         static_cast<const void*>(&data_));
     return data[setting];
   }
-  
+
   inline MacroOscillatorShape shape() const {
     return static_cast<MacroOscillatorShape>(data_.shape);
   }
-  
+
   inline Resolution resolution() const {
     return static_cast<Resolution>(data_.resolution);
   }
-  
+
   inline SampleRate sample_rate() const {
     return static_cast<SampleRate>(data_.sample_rate);
   }
-  
+
   inline bool vco_flatten() const {
     return data_.vco_flatten;
   }
@@ -253,26 +253,26 @@ class Settings {
   inline bool meta_modulation() const {
     return data_.meta_modulation;
   }
-  
+
   inline uint8_t trig_delay() const {
     return data_.trig_delay;
   }
-  
+
   inline int32_t quantizer_root() const {
     return data_.quantizer_root;
   }
-  
+
   inline const char* marquee_text() const {
     return data_.marquee_text;
   }
-  
+
   inline char* mutable_marquee_text() {
     return data_.marquee_text;
   }
-  
+
   inline const SettingsData& data() const { return data_; }
   inline SettingsData* mutable_data() { return &data_; }
-  
+
   void Calibrate(
       int32_t adc_code_c2,
       int32_t adc_code_c4,
@@ -284,11 +284,11 @@ class Settings {
     if (adc_code_c4 != adc_code_c2) {
       int32_t scale = (24 * 128 * 4096L) / (adc_code_c4 - adc_code_c2);
       data_.pitch_cv_scale = scale;
-      data_.pitch_cv_offset = (60 << 7) - 
+      data_.pitch_cv_offset = (60 << 7) -
           (scale * ((adc_code_c2 + adc_code_c4) >> 1) >> 12);
       data_.fm_cv_offset = adc_code_fm;
     }
-    
+
     // int32_t min_code[2] = { adc_code_p0_min, adc_code_p1_min };
     // int32_t max_code[2] = { adc_code_p0_max, adc_code_p1_max };
     //
@@ -303,7 +303,7 @@ class Settings {
     // }
     Save();
   }
-  
+
   inline int32_t adc_to_pitch(int32_t pitch_adc_code) const {
     if (data_.pitch_range == PITCH_RANGE_EXTERNAL ||
         data_.pitch_range == PITCH_RANGE_LFO) {
@@ -321,13 +321,13 @@ class Settings {
     }
     return pitch_adc_code;
   }
-  
+
   inline int32_t pitch_transposition() const {
     int32_t t = data_.pitch_range == PITCH_RANGE_LFO ? int32_t(-36 * 128) : 0;
     t += (static_cast<int32_t>(data_.pitch_octave) - 2) * 12 * 128;
     return t;
   }
-  
+
   inline int32_t adc_to_fm(int32_t fm_adc_code) const {
     fm_adc_code -= data_.fm_cv_offset;
     fm_adc_code = fm_adc_code * 7680 >> 12;
@@ -336,7 +336,7 @@ class Settings {
     }
     return fm_adc_code;
   }
-  
+
   inline int32_t adc_to_parameter(int index, int32_t adc_code) const {
     int32_t scale = static_cast<int32_t>(data_.parameter_cv_scale[index]);
     int32_t offset = static_cast<int32_t>(data_.parameter_cv_offset[index]);
@@ -346,7 +346,7 @@ class Settings {
   inline bool paques() const {
     return paques_;
   }
-  
+
   static const SettingMetadata& metadata(Setting setting) {
     return metadata_[setting];
   }
@@ -354,15 +354,15 @@ class Settings {
   static const Setting& setting_at_index(int16_t index) {
     return settings_order_[index];
   }
-  
+
  private:
   void CheckPaques();
 
   SettingsData data_;
-  
+
   uint16_t version_token_;
   bool paques_;
-  
+
   static const SettingMetadata metadata_[SETTING_LAST];
   static const Setting settings_order_[SETTING_LAST];
 

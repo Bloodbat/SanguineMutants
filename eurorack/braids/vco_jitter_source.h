@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -45,14 +45,14 @@ class VcoJitterSource {
  public:
   VcoJitterSource() { }
   ~VcoJitterSource() { }
-  
+
   inline void Init() {
     external_temperature_ = 0;
     room_temperature_ = 0;
     phase_ = 0;
     phase_step_ = 0;
   }
-  
+
   inline int16_t Render(int32_t intensity) {
     // External temperature change, with 1-order filtering.
     uint16_t external_temperature_toss = Random::GetWord();
@@ -65,13 +65,13 @@ class VcoJitterSource {
     int32_t pitch_noise = room_temperature_ * intensity >> 19;
     return pitch_noise;
   }
-  
+
  private:
   uint32_t phase_step_;
   uint32_t phase_;
   int32_t external_temperature_;
   int32_t room_temperature_;
-   
+
   DISALLOW_COPY_AND_ASSIGN(VcoJitterSource);
 };
 

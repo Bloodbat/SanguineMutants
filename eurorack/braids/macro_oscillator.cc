@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 #include "braids/resources.h"
 
 namespace braids {
-  
+
 using namespace stmlib;
 
 void MacroOscillator::Render(
@@ -69,7 +69,7 @@ void MacroOscillator::RenderMorph(
     size_t size) {
   analog_oscillator_[0].set_pitch(pitch_);
   analog_oscillator_[1].set_pitch(pitch_);
-  
+
   uint16_t balance;
   if (parameter_[0] <= 10922) {
     analog_oscillator_[0].set_parameter(0);
@@ -90,12 +90,12 @@ void MacroOscillator::RenderMorph(
     analog_oscillator_[1].set_shape(OSC_SHAPE_SINE);
     balance = 0;
   }
-  
+
   int16_t* shape_1 = buffer;
   int16_t* shape_2 = temp_buffer_;
   analog_oscillator_[0].Render(sync, shape_1, NULL, size);
   analog_oscillator_[1].Render(sync, shape_2, NULL, size);
-  
+
   int32_t lp_cutoff = pitch_ - (parameter_[1] >> 1) + 128 * 128;
   if (lp_cutoff < 0) {
     lp_cutoff = 0;
@@ -117,7 +117,7 @@ void MacroOscillator::RenderMorph(
     lp_state += (shifted_sample - lp_state) * f >> 15;
     CLIP(lp_state)
     shifted_sample = lp_state + 32768;
-  
+
     int16_t fuzzed = Interpolate88(ws_violent_overdrive, shifted_sample);
     *buffer++ = Mix(sample, fuzzed, fuzz_amount);
   }
@@ -135,13 +135,13 @@ void MacroOscillator::RenderSawSquare(
 
   analog_oscillator_[0].set_shape(OSC_SHAPE_VARIABLE_SAW);
   analog_oscillator_[1].set_shape(OSC_SHAPE_SQUARE);
-  
+
   int16_t* saw_buffer = buffer;
   int16_t* square_buffer = temp_buffer_;
-  
+
   analog_oscillator_[0].Render(sync, saw_buffer, NULL, size);
   analog_oscillator_[1].Render(sync, square_buffer, NULL, size);
-  
+
   BEGIN_INTERPOLATE_PARAMETER_1
   while (size--) {
     INTERPOLATE_PARAMETER_1
@@ -194,7 +194,7 @@ void MacroOscillator::RenderTriple(
       base_shape = OSC_SHAPE_SINE;
       break;
   }
-  
+
   analog_oscillator_[0].set_parameter(0);
   analog_oscillator_[1].set_parameter(0);
   analog_oscillator_[2].set_parameter(0);
@@ -238,7 +238,7 @@ void MacroOscillator::RenderSub(
 
   analog_oscillator_[0].Render(sync, buffer, NULL, size);
   analog_oscillator_[1].Render(sync, temp_buffer_, NULL, size);
-  
+
   BEGIN_INTERPOLATE_PARAMETER_1
 
   int16_t* temp_buffer = temp_buffer_;
@@ -250,7 +250,7 @@ void MacroOscillator::RenderSub(
     buffer++;
     temp_buffer++;
   }
-  
+
   END_INTERPOLATE_PARAMETER_1
 }
 
@@ -270,19 +270,19 @@ void MacroOscillator::RenderDualSync(
 
   analog_oscillator_[0].Render(sync, buffer, sync_buffer_, size);
   analog_oscillator_[1].Render(sync_buffer_, temp_buffer_, NULL, size);
-  
+
   BEGIN_INTERPOLATE_PARAMETER_1
 
   int16_t* temp_buffer = temp_buffer_;
   while (size--) {
     INTERPOLATE_PARAMETER_1
     uint16_t balance = parameter_1 << 1;
-    
+
     *buffer = (Mix(*buffer, *temp_buffer, balance) >> 2) * 3;
     buffer++;
     temp_buffer++;
   }
-  
+
   END_INTERPOLATE_PARAMETER_1
 }
 
@@ -296,14 +296,14 @@ void MacroOscillator::RenderSineTriangle(
   if (attenuation_sine < 0) attenuation_sine = 0;
   if (attenuation_tri > 32767) attenuation_tri = 32767;
   if (attenuation_sine > 32767) attenuation_sine = 32767;
-  
+
   int32_t timbre = parameter_[0];
 
   analog_oscillator_[0].set_parameter(timbre * attenuation_sine >> 15);
   analog_oscillator_[1].set_parameter(timbre * attenuation_tri >> 15);
   analog_oscillator_[0].set_pitch(pitch_);
   analog_oscillator_[1].set_pitch(pitch_);
-  
+
   analog_oscillator_[0].set_shape(OSC_SHAPE_SINE_FOLD);
   analog_oscillator_[1].set_shape(OSC_SHAPE_TRIANGLE_FOLD);
 
@@ -311,18 +311,18 @@ void MacroOscillator::RenderSineTriangle(
   analog_oscillator_[1].Render(sync, temp_buffer_, NULL, size);
 
   int16_t* temp_buffer = temp_buffer_;
-  
+
   BEGIN_INTERPOLATE_PARAMETER_1
-  
+
   while (size--) {
     INTERPOLATE_PARAMETER_1
     uint16_t balance = parameter_1 << 1;
-    
+
     *buffer = Mix(*buffer, *temp_buffer, balance);
     buffer++;
     temp_buffer++;
   }
-  
+
   END_INTERPOLATE_PARAMETER_1
 }
 
@@ -368,7 +368,7 @@ void MacroOscillator::RenderSawComb(
   analog_oscillator_[0].set_pitch(pitch_);
   analog_oscillator_[0].set_shape(OSC_SHAPE_SAW);
   analog_oscillator_[0].Render(sync, buffer, NULL, size);
-  
+
   digital_oscillator_.set_parameters(parameter_[0], parameter_[1]);
   digital_oscillator_.set_pitch(pitch_);
   digital_oscillator_.set_shape(OSC_SHAPE_COMB_FILTER);

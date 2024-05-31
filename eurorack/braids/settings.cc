@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -39,22 +39,22 @@ using namespace stmlib;
 
 const SettingsData kInitSettings = {
   MACRO_OSC_SHAPE_CSAW,
-  
+
   RESOLUTION_16_BIT,
   SAMPLE_RATE_96K,
-  
+
   0,  // AD->timbre
   false,  // Trig source
   1,  // Trig delay
   false,  // Meta modulation
-  
+
   PITCH_RANGE_EXTERNAL,
   2,
   0,  // Quantizer is off
   false,
   false,
   false,
-  
+
   2,  // Brightness
   0,  // AD attack
   5,  // AD decay
@@ -62,11 +62,11 @@ const SettingsData kInitSettings = {
   0,  // AD->COLOR
   0,  // AD->VCA
   0,  // Quantizer root
-  
+
   50,
   15401,
   2048,
-  
+
   { 0, 0 },
   { 32768, 32768 },
   "GREETINGS FROM MUTABLE INSTRUMENTS *EDIT ME*",
@@ -202,7 +202,7 @@ const char* const bits_values[] = {
     "8BIT",
     "12B",
     "16B " };
-    
+
 const char* const rates_values[] = {
     "4KHZ",
     "8KHZ",
@@ -211,7 +211,7 @@ const char* const rates_values[] = {
     "32K ",
     "48K ",
     "96K " };
-    
+
 const char* const quantization_values[] = {
     "OFF ",
     "SEMI",

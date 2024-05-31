@@ -1,7 +1,7 @@
 Braids
 ==
 > Braids is a voltage-controlled monophonic digital sound source.
-> 
+>
 > [more info](http://mutable-instruments.net/modules/braids)
 
 
