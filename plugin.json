@@ -83,6 +83,16 @@
         "Reverb",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Etesia",
+      "name": "Sanguine Etesia",
+      "description": "A texture synthesizer based on the Clouds Parasite",
+      "tags": [
+        "Granular",
+        "Reverb",
+        "Hardware clone"
+      ]
     }
   ]
 }

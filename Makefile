@@ -61,6 +61,14 @@ SOURCES += eurorack/clouds/dsp/pvoc/phase_vocoder.cc
 SOURCES += eurorack/clouds/dsp/pvoc/stft.cc
 SOURCES += eurorack/clouds/resources.cc 
 
+SOURCES += alt_firmware/clouds_parasite/dsp/etesia_granular_processor.cc
+SOURCES += alt_firmware/clouds_parasite/etesia_resources.cc
+SOURCES += alt_firmware/clouds_parasite/dsp/etesia_correlator.cc
+SOURCES += alt_firmware/clouds_parasite/dsp/etesia_mu_law.cc
+SOURCES += alt_firmware/clouds_parasite/dsp/pvoc/etesia_frame_transformation.cc
+SOURCES += alt_firmware/clouds_parasite/dsp/pvoc/etesia_phase_vocoder.cc
+SOURCES += alt_firmware/clouds_parasite/dsp/pvoc/etesia_stft.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..

@@ -1,12 +1,14 @@
-﻿#include "plugin.hpp"
+#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
-#include "clouds/dsp/granular_processor.h"
+#include "clouds_parasite/dsp/etesia_granular_processor.h"
 
 static const std::vector<std::string> modeList{
 	"GRANULAR",
 	"STRETCH",
 	"LOOPING DLY",
-	"SPECTRAL"
+	"SPECTRAL",
+	"OLIVERB",
+	"RESONESTOR"
 };
 
 static const std::string cvSuffix = " CV";
@@ -21,20 +23,29 @@ struct ModeDisplay {
 	std::string labelTexture;
 	std::string labelPitch;
 	std::string labelTrigger;
+	// Labels for parasite.
+	std::string labelBlend;
+	std::string labelSpread;
+	std::string labelFeeback;
+	std::string labelReverb;
 };
 
 static const std::vector<ModeDisplay> modeDisplays{
-	{"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger"},
-	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",            "Pitch",     "Time"},
-	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",            "Pitch",     "Time"},
-	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",       "Quantize / Parts", "Transpose", "Glitch"}
+	{"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",       "Quantize / Parts", "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Freeze",  "Pre-delay",    "Decay",            "Size",             "LP<damp>HP",       "Pitch",     "Clock",   "Dry/Wet",    "Diffusion", "Mod. Speed", "Mod. Amount"},
+	{"Voice",   "Timbre",       "Decay",            "Chord",            "LP<filter>BP",     "Pitch",     "Trigger", "Distortion", "Stereo",    "Harmonics",  "Scatter"}
 };
 
 static const std::vector<ModeDisplay> modeTooltips{
-	{"Freeze",  "Position",     "Density",          "Size",               "Texture",          "Pitch",     "Trigger"},
-	{"Stutter", "Scrub",        "Diffusion",        "Overlap",            "LP/HP",            "Pitch",     "Time"},
-	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duration", "LP/HP",            "Pitch",     "Time"},
-	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch"}
+	{"Freeze",  "Position",     "Density",            "Size",               "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",         "Reverb"},
+	{"Stutter", "Scrub",        "Diffusion",          "Overlap",            "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
+	{"Stutter", "Time / Start", "Diffusion",          "Overlap / Duration", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
+	{"Freeze",  "Buffer",       "FFT Update / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",         "Reverb"},
+	{"Freeze",  "Pre-delay",    "Decay",              "Size",               "LP<damp>HP",       "Pitch",     "Clock",   "Dry/Wet",    "Diffusion", "Modulation speed", "Modulation amount"},
+	{"Voice",   "Timbre",       "Decay",              "Chord",              "LP<filter>BP",     "Pitch",     "Trigger", "Distortion", "Stereo",    "Harmonics",        "Scatter"}
 };
 
 static const std::vector<std::string> buttonTexts{
@@ -45,7 +56,7 @@ static const std::vector<std::string> buttonTexts{
 	"Momentary"
 };
 
-struct Nebulae : Module {
+struct Etesia : Module {
 	enum ParamIds {
 		PARAM_MODE,
 		PARAM_FREEZE,
@@ -62,6 +73,7 @@ struct Nebulae : Module {
 		PARAM_HI_FI,
 		PARAM_STEREO,
 		PARAM_LEDS_MODE,
+		PARAM_REVERSE,
 		PARAMS_COUNT
 	};
 	enum InputIds {
@@ -97,6 +109,7 @@ struct Nebulae : Module {
 		ENUMS(LIGHT_TEXTURE_CV, 2),
 		LIGHT_HI_FI,
 		LIGHT_STEREO,
+		LIGHT_REVERSE,
 		LIGHTS_COUNT
 	};
 
@@ -118,6 +131,10 @@ struct Nebulae : Module {
 	std::string textTexture = modeDisplays[0].labelTexture;
 	std::string textPitch = modeDisplays[0].labelPitch;
 	std::string textTrigger = modeDisplays[0].labelTrigger;
+	std::string textBlend = modeDisplays[0].labelBlend;
+	std::string textSpread = modeDisplays[0].labelSpread;
+	std::string textFeedback = modeDisplays[0].labelFeeback;
+	std::string textReverb = modeDisplays[0].labelReverb;
 
 	dsp::SampleRateConverter<2> inputSrc;
 	dsp::SampleRateConverter<2> outputSrc;
@@ -127,8 +144,8 @@ struct Nebulae : Module {
 	dsp::ClockDivider lightDivider;
 	dsp::BooleanTrigger btLedsMode;
 
-	clouds::PlaybackMode playbackMode = clouds::PLAYBACK_MODE_GRANULAR;
-	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
+	etesia::PlaybackMode playbackMode = etesia::PLAYBACK_MODE_GRANULAR;
+	etesia::PlaybackMode lastPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
 
 	float freezeLight = 0.0;
 
@@ -148,17 +165,19 @@ struct Nebulae : Module {
 	uint8_t* block_mem;
 	uint8_t* block_ccm;
 
-	clouds::GranularProcessor* cloudsProcessor;
+	etesia::GranularProcessor* etesiaProcessor;
 
-	Nebulae() {
+	Etesia() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configInput(INPUT_FREEZE, "Freeze");
 		configParam(PARAM_FREEZE, 0.f, 1.f, 0.f, "Freeze");
 
+		configParam(PARAM_REVERSE, 0.f, 1.f, 0.f, "Reverse");
+
 		configButton(PARAM_LEDS_MODE, "LED display value: ");
 
-		configParam(PARAM_MODE, 0.f, 3.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
+		configParam(PARAM_MODE, 0.f, 5.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
 		configParam(PARAM_POSITION, 0.0, 1.0, 0.5, "Grain position");
@@ -214,16 +233,16 @@ struct Nebulae : Module {
 		const int ccmLen = 65536 - 128;
 		block_mem = new uint8_t[memLen]();
 		block_ccm = new uint8_t[ccmLen]();
-		cloudsProcessor = new clouds::GranularProcessor();
-		memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
+		etesiaProcessor = new etesia::GranularProcessor();
+		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
 
 		lightDivider.setDivision(kClockDivider);
 
-		cloudsProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+		etesiaProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
 	}
 
-	~Nebulae() {
-		delete cloudsProcessor;
+	~Etesia() {
+		delete etesiaProcessor;
 		delete[] block_mem;
 		delete[] block_ccm;
 	}
@@ -246,7 +265,7 @@ struct Nebulae : Module {
 
 		// Render frames
 		if (outputBuffer.empty()) {
-			clouds::ShortFrame input[32] = {};
+			etesia::ShortFrame input[32] = {};
 			// Convert input buffer
 			{
 				inputSrc.setRates(args.sampleRate, 32000);
@@ -263,43 +282,44 @@ struct Nebulae : Module {
 				}
 			}
 			if (currentbuffersize != buffersize) {
-				// Re-init cloudsProcessor with new size.
-				delete cloudsProcessor;
+				// Re-init etesiaProcessor with new size.
+				delete etesiaProcessor;
 				delete[] block_mem;
 				int memLen = 118784 * buffersize;
 				const int ccmLen = 65536 - 128;
 				block_mem = new uint8_t[memLen]();
-				cloudsProcessor = new clouds::GranularProcessor();
-				memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-				cloudsProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+				etesiaProcessor = new etesia::GranularProcessor();
+				memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
+				etesiaProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
 				currentbuffersize = buffersize;
 			}
 
-			// Set up cloudsProcessor
-			cloudsProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
-			cloudsProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
-			cloudsProcessor->set_playback_mode(playbackMode);
-			cloudsProcessor->Prepare();
+			// Set up etesiaProcessor
+			etesiaProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
+			etesiaProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
+			etesiaProcessor->set_playback_mode(playbackMode);
+			etesiaProcessor->Prepare();
 
-			clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
-			cloudsParameters->trigger = triggered;
-			cloudsParameters->gate = triggered;
-			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || params[PARAM_FREEZE].getValue());
-			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
-			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
-			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.0, -48.0f, 48.0f);
-			cloudsParameters->density = clamp(params[PARAM_DENSITY].getValue() + inputs[INPUT_DENSITY].getVoltage() / 5.0, 0.0f, 1.0f);
-			cloudsParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + inputs[INPUT_TEXTURE].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
+			etesiaParameters->trigger = triggered;
+			etesiaParameters->gate = triggered;
+			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || params[PARAM_FREEZE].getValue());
+			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.0, -48.0f, 48.0f);
+			etesiaParameters->density = clamp(params[PARAM_DENSITY].getValue() + inputs[INPUT_DENSITY].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + inputs[INPUT_TEXTURE].getVoltage() / 5.0, 0.0f, 1.0f);
 			float blend = clamp(params[PARAM_BLEND].getValue() + inputs[INPUT_BLEND].getVoltage() / 5.0, 0.0f, 1.0f);
-			cloudsParameters->dry_wet = blend;
-			cloudsParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + inputs[INPUT_SPREAD].getVoltage() / 5.0, 0.0f, 1.0f);
-			cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + inputs[INPUT_FEEDBACK].getVoltage() / 5.0, 0.0f, 1.0f);
-			cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + inputs[INPUT_REVERB].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->dry_wet = blend;
+			etesiaParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + inputs[INPUT_SPREAD].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + inputs[INPUT_FEEDBACK].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->reverb = clamp(params[PARAM_REVERB].getValue() + inputs[INPUT_REVERB].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->granular.reverse = params[PARAM_REVERSE].getValue();
 
-			clouds::ShortFrame output[32];
-			cloudsProcessor->Process(input, output, 32);
+			etesia::ShortFrame output[32];
+			etesiaProcessor->Process(input, output, 32);
 
-			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 1.0 : 0.0, args.sampleTime);
+			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters->freeze ? 1.0 : 0.0, args.sampleTime);
 
 			// Convert output buffer
 			{
@@ -331,7 +351,7 @@ struct Nebulae : Module {
 		}
 
 		// Lights
-		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
+		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 
 		dsp::Frame<2> lightFrame;
 
@@ -349,7 +369,9 @@ struct Nebulae : Module {
 
 		vuMeter.process(args.sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-		lights[LIGHT_FREEZE].setBrightness(cloudsParameters->freeze ? 0.75 : 0.0);
+		lights[LIGHT_FREEZE].setBrightness(etesiaParameters->freeze ? 0.75 : 0.0);
+
+		lights[LIGHT_REVERSE].setBrightness(etesiaParameters->granular.reverse ? 0.75 : 0.0);
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
@@ -367,7 +389,7 @@ struct Nebulae : Module {
 		}
 
 		if (lightDivider.process()) { // Expensive, so call this infrequently
-			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
+			playbackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
 				textMode = modeList[playbackMode];
@@ -379,6 +401,11 @@ struct Nebulae : Module {
 				textTexture = modeDisplays[playbackMode].labelTexture;
 				textPitch = modeDisplays[playbackMode].labelPitch;
 				textTrigger = modeDisplays[playbackMode].labelTrigger;
+				// Parasite
+				textBlend = modeDisplays[playbackMode].labelBlend;
+				textSpread = modeDisplays[playbackMode].labelSpread;
+				textFeedback = modeDisplays[playbackMode].labelFeeback;
+				textReverb = modeDisplays[playbackMode].labelReverb;
 
 				paramQuantities[PARAM_FREEZE]->name = modeTooltips[playbackMode].labelFreeze;
 				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + cvSuffix;
@@ -399,6 +426,19 @@ struct Nebulae : Module {
 				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + cvSuffix;
 
 				inputInfos[INPUT_TRIGGER]->name = modeTooltips[playbackMode].labelTrigger;
+
+				// Parasite
+				paramQuantities[PARAM_BLEND]->name = modeTooltips[playbackMode].labelBlend;
+				inputInfos[INPUT_BLEND]->name = modeTooltips[playbackMode].labelBlend + cvSuffix;
+
+				paramQuantities[PARAM_SPREAD]->name = modeTooltips[playbackMode].labelSpread;
+				inputInfos[INPUT_SPREAD]->name = modeTooltips[playbackMode].labelSpread + cvSuffix;
+
+				paramQuantities[PARAM_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback;
+				inputInfos[INPUT_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback + cvSuffix;
+
+				paramQuantities[PARAM_REVERB]->name = modeTooltips[playbackMode].labelReverb;
+				inputInfos[INPUT_REVERB]->name = modeTooltips[playbackMode].labelReverb + cvSuffix;
 
 				lastPlaybackMode = playbackMode;
 			}
@@ -482,10 +522,10 @@ struct Nebulae : Module {
 	}
 };
 
-struct NebulaeWidget : ModuleWidget {
-	NebulaeWidget(Nebulae* module) {
+struct EtesiaWidget : ModuleWidget {
+	EtesiaWidget(Etesia* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/nebulae_faceplate.svg")));
+		setPanel(Svg::load(asset::plugin(pluginInstance, "res/etesia_faceplate.svg")));
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -500,102 +540,128 @@ struct NebulaeWidget : ModuleWidget {
 		displayFreeze->module = module;
 		nebulaeFramebuffer->addChild(displayFreeze);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(7.677, 25.607)), module, Nebulae::INPUT_FREEZE));
-		CKD6* freezeButton = createParamCentered<CKD6>(mm2px(Vec(21.529, 25.607)), module, Nebulae::PARAM_FREEZE);
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(7.677, 25.607)), module, Etesia::INPUT_FREEZE));
+		CKD6* freezeButton = createParamCentered<CKD6>(mm2px(Vec(21.529, 25.607)), module, Etesia::PARAM_FREEZE);
 		freezeButton->latch = true;
 		freezeButton->momentary = false;
 		addParam(freezeButton);
-		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(21.529, 25.607)), module, Nebulae::LIGHT_FREEZE));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(21.529, 25.607)), module, Etesia::LIGHT_FREEZE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Nebulae::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Nebulae::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Nebulae::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Nebulae::LIGHT_REVERB));
+		CKD6* reverseButton = createParamCentered<CKD6>(mm2px(Vec(37.35, 25.607)), module, Etesia::PARAM_REVERSE);
+		reverseButton->latch = true;
+		reverseButton->momentary = false;
+		addParam(reverseButton);
+		addChild(createLightCentered<CKD6Light<WhiteLight>>(mm2px(Vec(37.35, 25.607)), module, Etesia::LIGHT_REVERSE));
 
-		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Nebulae::PARAM_LEDS_MODE));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Etesia::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Etesia::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Etesia::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Etesia::LIGHT_REVERB));
+
+		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Etesia::PARAM_LEDS_MODE));
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
 		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
 		displayModel->module = module;
 		nebulaeFramebuffer->addChild(displayModel);
 
-		addParam(createParamCentered<Sanguine1PGrayCap>(mm2px(Vec(129.805, 25.227)), module, Nebulae::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1PGrayCap>(mm2px(Vec(129.805, 25.227)), module, Etesia::PARAM_MODE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(11.763, 50.173)), module, Nebulae::PARAM_POSITION, Nebulae::LIGHT_POSITION_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(11.763, 50.173)), module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay;
 		displayPosition->box.pos = mm2px(Vec(3.614, 65.457));
 		displayPosition->module = module;
 		nebulaeFramebuffer->addChild(displayPosition);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(11.763, 76.776)), module, Nebulae::INPUT_POSITION));
+		addInput(createInputCentered<BananutBlack>(mm2px(Vec(11.763, 76.776)), module, Etesia::INPUT_POSITION));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(29.722, 50.173)), module, Nebulae::PARAM_DENSITY, Nebulae::LIGHT_DENSITY_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(29.722, 50.173)), module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay;
 		displayDensity->box.pos = mm2px(Vec(21.573, 65.457));
 		displayDensity->module = module;
 		nebulaeFramebuffer->addChild(displayDensity);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(29.722, 76.776)), module, Nebulae::INPUT_DENSITY));
+		addInput(createInputCentered<BananutBlack>(mm2px(Vec(29.722, 76.776)), module, Etesia::INPUT_DENSITY));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(47.682, 50.173)), module, Nebulae::PARAM_SIZE, Nebulae::LIGHT_SIZE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(47.682, 50.173)), module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay;
 		displaySize->box.pos = mm2px(Vec(39.533, 65.457));
 		displaySize->module = module;
 		nebulaeFramebuffer->addChild(displaySize);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(47.682, 76.776)), module, Nebulae::INPUT_SIZE));
+		addInput(createInputCentered<BananutBlack>(mm2px(Vec(47.682, 76.776)), module, Etesia::INPUT_SIZE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(65.644, 50.173)), module, Nebulae::PARAM_TEXTURE, Nebulae::LIGHT_TEXTURE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(65.644, 50.173)), module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay;
 		displayTexture->box.pos = mm2px(Vec(57.495, 65.457));
 		displayTexture->module = module;
 		nebulaeFramebuffer->addChild(displayTexture);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(65.644, 76.776)), module, Nebulae::INPUT_TEXTURE));
+		addInput(createInputCentered<BananutBlack>(mm2px(Vec(65.644, 76.776)), module, Etesia::INPUT_TEXTURE));
 
-		addParam(createParamCentered<Sanguine1PRed>(mm2px(Vec(105.638, 41.169)), module, Nebulae::PARAM_PITCH));
+		addParam(createParamCentered<Sanguine1PRed>(mm2px(Vec(105.638, 41.169)), module, Etesia::PARAM_PITCH));
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay;
 		displayPitch->box.pos = mm2px(Vec(97.489, 48.465));
 		displayPitch->module = module;
 		nebulaeFramebuffer->addChild(displayPitch);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 59.887)), module, Nebulae::INPUT_PITCH));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 59.887)), module, Etesia::INPUT_PITCH));
 
-		addParam(createParamCentered<Sanguine1PGreen>(mm2px(Vec(86.118, 41.169)), module, Nebulae::PARAM_BLEND));
+		addParam(createParamCentered<Sanguine1PGreen>(mm2px(Vec(86.118, 41.169)), module, Etesia::PARAM_BLEND));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 59.887)), module, Nebulae::INPUT_BLEND));
+		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay;
+		displayBlend->box.pos = mm2px(Vec(77.969, 48.465));
+		displayBlend->module = module;
+		nebulaeFramebuffer->addChild(displayBlend);
+
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 59.887)), module, Etesia::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay;
 		displayTrigger->box.pos = mm2px(Vec(117.065, 48.465));
 		displayTrigger->module = module;
 		nebulaeFramebuffer->addChild(displayTrigger);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 59.887)), module, Nebulae::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 59.887)), module, Etesia::INPUT_TRIGGER));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 78.013)), module, Nebulae::INPUT_SPREAD));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 78.013)), module, Etesia::INPUT_SPREAD));
 
-		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(86.118, 96.727)), module, Nebulae::PARAM_SPREAD));
+		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay;
+		displaySpread->box.pos = mm2px(Vec(77.969, 84.0));
+		displaySpread->module = module;
+		nebulaeFramebuffer->addChild(displaySpread);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 78.013)), module, Nebulae::INPUT_FEEDBACK));
+		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(86.118, 96.727)), module, Etesia::PARAM_SPREAD));
 
-		addParam(createParamCentered<Sanguine1PPurple>(mm2px(Vec(105.638, 96.727)), module, Nebulae::PARAM_FEEDBACK));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 78.013)), module, Etesia::INPUT_FEEDBACK));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 78.013)), module, Nebulae::INPUT_REVERB));
+		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay;
+		displayFeedback->box.pos = mm2px(Vec(97.489, 84.0));
+		displayFeedback->module = module;
+		nebulaeFramebuffer->addChild(displayFeedback);
 
-		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(125.214, 96.727)), module, Nebulae::PARAM_REVERB));
+		addParam(createParamCentered<Sanguine1PPurple>(mm2px(Vec(105.638, 96.727)), module, Etesia::PARAM_FEEDBACK));
 
-		addParam(createParamCentered<Rogan1PWhite>(mm2px(Vec(14.603, 97.272)), module, Nebulae::PARAM_IN_GAIN));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 78.013)), module, Etesia::INPUT_REVERB));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(31.438, 97.272)), module, Nebulae::PARAM_HI_FI, Nebulae::LIGHT_HI_FI));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(mm2px(Vec(56.63, 97.272)), module, Nebulae::PARAM_STEREO, Nebulae::LIGHT_STEREO));
+		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay;
+		displayReverb->box.pos = mm2px(Vec(117.065, 84.0));
+		displayReverb->module = module;
+		nebulaeFramebuffer->addChild(displayReverb);
 
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(7.677, 116.972)), module, Nebulae::INPUT_LEFT));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(21.529, 116.972)), module, Nebulae::INPUT_RIGHT));
+		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(125.214, 96.727)), module, Etesia::PARAM_REVERB));
+
+		addParam(createParamCentered<Rogan1PWhite>(mm2px(Vec(14.603, 97.272)), module, Etesia::PARAM_IN_GAIN));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(31.438, 97.272)), module, Etesia::PARAM_HI_FI, Etesia::LIGHT_HI_FI));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(mm2px(Vec(56.63, 97.272)), module, Etesia::PARAM_STEREO, Etesia::LIGHT_STEREO));
+
+		addInput(createInputCentered<BananutGreen>(mm2px(Vec(7.677, 116.972)), module, Etesia::INPUT_LEFT));
+		addInput(createInputCentered<BananutGreen>(mm2px(Vec(21.529, 116.972)), module, Etesia::INPUT_RIGHT));
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
 		bloodLogo->box.pos = mm2px(Vec(56.919, 106.223));
@@ -609,8 +675,8 @@ struct NebulaeWidget : ModuleWidget {
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		addChild(mutantsLogo);
 
-		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(115.161, 116.972)), module, Nebulae::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(129.013, 116.972)), module, Nebulae::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(115.161, 116.972)), module, Etesia::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(129.013, 116.972)), module, Etesia::OUTPUT_RIGHT));
 
 		if (module) {
 			displayModel->values.displayText = &module->textMode;
@@ -622,8 +688,12 @@ struct NebulaeWidget : ModuleWidget {
 			displayTexture->oledText = &module->textTexture;
 			displayPitch->oledText = &module->textPitch;
 			displayTrigger->oledText = &module->textTrigger;
+			displayBlend->oledText = &module->textBlend;
+			displaySpread->oledText = &module->textSpread;
+			displayFeedback->oledText = &module->textFeedback;
+			displayReverb->oledText = &module->textReverb;
 		}
 	};
 };
 
-Model* modelNebulae = createModel<Nebulae, NebulaeWidget>("Sanguine-Nebulae");
+Model* modelEtesia = createModel<Etesia, EtesiaWidget>("Sanguine-Etesia");
