@@ -12,13 +12,13 @@ static const std::vector<std::string> modeList{
 static const std::string cvSuffix = " CV";
 
 struct ModeDisplay {
-	std::string freezeLabel;
-	std::string positionLabel;
-	std::string densityLabel;
-	std::string sizeLabel;
-	std::string textureLabel;
-	std::string pitchLabel;
-	std::string triggerLabel;
+	std::string labelFreeze;
+	std::string labelPosition;
+	std::string labelDensity;
+	std::string labelSize;
+	std::string labelTexture;
+	std::string labelPitch;
+	std::string labelTrigger;
 };
 
 static const std::vector<ModeDisplay> modeDisplays{
@@ -100,14 +100,14 @@ struct Nebulae : Module {
 
 	LedModes lastLedMode = LEDS_INPUT;
 
-	std::string modeText = modeList[0];
-	std::string freezeText = modeDisplays[0].freezeLabel;
-	std::string positionText = modeDisplays[0].positionLabel;
-	std::string densityText = modeDisplays[0].densityLabel;
-	std::string sizeText = modeDisplays[0].sizeLabel;
-	std::string textureText = modeDisplays[0].textureLabel;
-	std::string pitchText = modeDisplays[0].pitchLabel;
-	std::string triggerText = modeDisplays[0].triggerLabel;
+	std::string textMode = modeList[0];
+	std::string textFreeze = modeDisplays[0].labelFreeze;
+	std::string textPosition = modeDisplays[0].labelPosition;
+	std::string textDensity = modeDisplays[0].labelDensity;
+	std::string textSize = modeDisplays[0].labelSize;
+	std::string textTexture = modeDisplays[0].labelTexture;
+	std::string textPitch = modeDisplays[0].labelPitch;
+	std::string textTrigger = modeDisplays[0].labelTrigger;
 
 	dsp::SampleRateConverter<2> inputSrc;
 	dsp::SampleRateConverter<2> outputSrc;
@@ -360,35 +360,35 @@ struct Nebulae : Module {
 			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
-				modeText = modeList[playbackMode];
+				textMode = modeList[playbackMode];
 
-				freezeText = modeDisplays[playbackMode].freezeLabel;
-				positionText = modeDisplays[playbackMode].positionLabel;
-				densityText = modeDisplays[playbackMode].densityLabel;
-				sizeText = modeDisplays[playbackMode].sizeLabel;
-				textureText = modeDisplays[playbackMode].textureLabel;
-				pitchText = modeDisplays[playbackMode].pitchLabel;
-				triggerText = modeDisplays[playbackMode].triggerLabel;
+				textFreeze = modeDisplays[playbackMode].labelFreeze;
+				textPosition = modeDisplays[playbackMode].labelPosition;
+				textDensity = modeDisplays[playbackMode].labelDensity;
+				textSize = modeDisplays[playbackMode].labelSize;
+				textTexture = modeDisplays[playbackMode].labelTexture;
+				textPitch = modeDisplays[playbackMode].labelPitch;
+				textTrigger = modeDisplays[playbackMode].labelTrigger;
 
-				paramQuantities[PARAM_FREEZE]->name = modeTooltips[playbackMode].freezeLabel;
-				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].freezeLabel + cvSuffix;
+				paramQuantities[PARAM_FREEZE]->name = modeTooltips[playbackMode].labelFreeze;
+				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + cvSuffix;
 
-				paramQuantities[PARAM_POSITION]->name = modeTooltips[playbackMode].positionLabel;
-				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].positionLabel + cvSuffix;
+				paramQuantities[PARAM_POSITION]->name = modeTooltips[playbackMode].labelPosition;
+				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].labelPosition + cvSuffix;
 
-				paramQuantities[PARAM_DENSITY]->name = modeTooltips[playbackMode].densityLabel;
-				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].densityLabel + cvSuffix;
+				paramQuantities[PARAM_DENSITY]->name = modeTooltips[playbackMode].labelDensity;
+				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].labelDensity + cvSuffix;
 
-				paramQuantities[PARAM_SIZE]->name = modeTooltips[playbackMode].sizeLabel;
-				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].sizeLabel + cvSuffix;
+				paramQuantities[PARAM_SIZE]->name = modeTooltips[playbackMode].labelSize;
+				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].labelSize + cvSuffix;
 
-				paramQuantities[PARAM_TEXTURE]->name = modeTooltips[playbackMode].textureLabel;
-				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].textureLabel + cvSuffix;
+				paramQuantities[PARAM_TEXTURE]->name = modeTooltips[playbackMode].labelTexture;
+				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].labelTexture + cvSuffix;
 
-				paramQuantities[PARAM_PITCH]->name = modeTooltips[playbackMode].pitchLabel;
-				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].pitchLabel + cvSuffix;
+				paramQuantities[PARAM_PITCH]->name = modeTooltips[playbackMode].labelPitch;
+				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + cvSuffix;
 
-				inputInfos[INPUT_TRIGGER]->name = modeTooltips[playbackMode].triggerLabel;
+				inputInfos[INPUT_TRIGGER]->name = modeTooltips[playbackMode].labelTrigger;
 
 				lastPlaybackMode = playbackMode;
 			}
@@ -480,13 +480,6 @@ struct NebulaeWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Nebulae::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Nebulae::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Nebulae::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Nebulae::LIGHT_REVERB));
-
-		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Nebulae::PARAM_LEDS_MODE));
-
 		FramebufferWidget* nebulaeFramebuffer = new FramebufferWidget();
 		addChild(nebulaeFramebuffer);
 
@@ -495,17 +488,24 @@ struct NebulaeWidget : ModuleWidget {
 		displayFreeze->module = module;
 		nebulaeFramebuffer->addChild(displayFreeze);
 
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
-		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
-		displayModel->module = module;
-		nebulaeFramebuffer->addChild(displayModel);
-
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(7.677, 25.607)), module, Nebulae::INPUT_FREEZE));
 		CKD6* freezeButton = createParamCentered<CKD6>(mm2px(Vec(21.529, 25.607)), module, Nebulae::PARAM_FREEZE);
 		freezeButton->latch = true;
 		freezeButton->momentary = false;
 		addParam(freezeButton);
 		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(21.529, 25.607)), module, Nebulae::LIGHT_FREEZE));
+
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Nebulae::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Nebulae::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Nebulae::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Nebulae::LIGHT_REVERB));
+
+		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Nebulae::PARAM_LEDS_MODE));
+
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
+		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
+		displayModel->module = module;
+		nebulaeFramebuffer->addChild(displayModel);
 
 		addParam(createParamCentered<Sanguine1PGrayCap>(mm2px(Vec(129.805, 25.227)), module, Nebulae::PARAM_MODE));
 
@@ -601,15 +601,15 @@ struct NebulaeWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(129.013, 116.972)), module, Nebulae::OUTPUT_RIGHT));
 
 		if (module) {
-			displayModel->values.displayText = &module->modeText;
+			displayModel->values.displayText = &module->textMode;
 
-			displayFreeze->oledText = &module->freezeText;
-			displayPosition->oledText = &module->positionText;
-			displayDensity->oledText = &module->densityText;
-			displaySize->oledText = &module->sizeText;
-			displayTexture->oledText = &module->textureText;
-			displayPitch->oledText = &module->pitchText;
-			displayTrigger->oledText = &module->triggerText;
+			displayFreeze->oledText = &module->textFreeze;
+			displayPosition->oledText = &module->textPosition;
+			displayDensity->oledText = &module->textDensity;
+			displaySize->oledText = &module->textSize;
+			displayTexture->oledText = &module->textTexture;
+			displayPitch->oledText = &module->textPitch;
+			displayTrigger->oledText = &module->textTrigger;
 		}
 	};
 };
