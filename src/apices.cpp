@@ -1008,9 +1008,9 @@ struct ApicesWidget : ModuleWidget {
 	void appendContextMenu(Menu* menu) override {
 
 		menu->addChild(new MenuSeparator);
-		Apices* peaks = dynamic_cast<Apices*>(this->module);
+		Apices* apices = dynamic_cast<Apices*>(this->module);
 
-		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &peaks->bSnapMode));
+		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &apices->bSnapMode));
 	}
 
 };
