@@ -64,6 +64,25 @@ static const std::vector<std::string> modeList{
 	"BOUNCE BALL@"
 };
 
+enum LightModes {
+	LIGHT_OFF,
+	LIGHT_ON,
+	LIGHT_BLINK
+};
+
+static const LightModes lightStates[10][4]{
+	{ LIGHT_ON,  LIGHT_OFF, LIGHT_OFF, LIGHT_OFF }, // Envelope
+	{ LIGHT_OFF, LIGHT_ON, LIGHT_OFF, LIGHT_OFF }, // LFO
+	{ LIGHT_OFF, LIGHT_OFF, LIGHT_ON, LIGHT_OFF }, // TAP LFO
+	{ LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_ON }, // DRUM GENERAT
+	{ LIGHT_BLINK, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF }, // SEQUENCER
+	{ LIGHT_OFF, LIGHT_BLINK, LIGHT_OFF, LIGHT_OFF }, // TRG. SHAPE*
+	{ LIGHT_OFF, LIGHT_OFF, LIGHT_BLINK, LIGHT_OFF }, // TRG. RANDOM*
+	{ LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_BLINK }, // DIGI DRUMS*
+	{ LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF }, // NUMBER STAT&
+	{ LIGHT_ON, LIGHT_OFF, LIGHT_BLINK, LIGHT_BLINK } // BOUNCE BALL@
+};
+
 struct Apices : Module {
 	enum ParamIds {
 		PARAM_KNOB_1,
@@ -213,10 +232,10 @@ struct Apices : Module {
 			updateOleds();
 		}
 
-		ProcessorFunction CurrentFunction = getProcessorFunction();
-		if (params[PARAM_MODE].getValue() != CurrentFunction) {
-			CurrentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
-			setFunction(editMode - EDIT_MODE_FIRST, CurrentFunction);
+		ProcessorFunction currentFunction = getProcessorFunction();
+		if (params[PARAM_MODE].getValue() != currentFunction) {
+			currentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
+			setFunction(editMode - EDIT_MODE_FIRST, currentFunction);
 			saveState();
 		}
 
@@ -515,28 +534,30 @@ struct Apices : Module {
 		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
 		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.0F : 0.F, sampleTime);
 
-		if (getProcessorFunction() == FUNCTION_BOUNCING_BALL) {
-			lights[LIGHT_FUNCTION_1].setBrightnessSmooth(1.0f, sampleTime);
-			lights[LIGHT_FUNCTION_1 + 1].setBrightnessSmooth(0.f, sampleTime);
-			if (getSystemTimeMs() & 256) {
-				lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(0.f, sampleTime);
+		ProcessorFunction currentProcessorFunction = getProcessorFunction();
+		for (int i = 0; i < 4; i++) {
+			currentLight = LIGHT_FUNCTION_1 + i;
+			switch (lightStates[currentProcessorFunction][i]) {
+			case LIGHT_ON: {
+				lights[currentLight].setBrightnessSmooth(1.0f, sampleTime);
+				break;
 			}
-			else {
-				lights[LIGHT_FUNCTION_1 + 2].setBrightnessSmooth(1.f, sampleTime);
-				lights[LIGHT_FUNCTION_1 + 3].setBrightnessSmooth(1.f, sampleTime);
+			case LIGHT_OFF: {
+				lights[currentLight].setBrightnessSmooth(0.0f, sampleTime);
+				break;
 			}
-		}
-		else {
-			if ((getSystemTimeMs() & 256) && getProcessorFunction() >= FUNCTION_FIRST_ALTERNATE_FUNCTION) {
-				for (size_t i = 0; i < 4; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(0.0f, sampleTime);
+			case LIGHT_BLINK: {
+				if (getSystemTimeMs() & 256) {
+					lights[currentLight].setBrightnessSmooth(0.0f, sampleTime);
 				}
-			}
-			else {
-				for (size_t i = 0; i < 4; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightnessSmooth(((getProcessorFunction() & 3) == i) ? 1.0f : 0.0f, sampleTime);
+				else {
+					lights[currentLight].setBrightnessSmooth(1.0f, sampleTime);
 				}
+				break;
+			}
+			default: {
+				break;
+			}
 			}
 		}
 
