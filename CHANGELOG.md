@@ -30,3 +30,27 @@
 - Prettify manual.
 
 - Misc. small fixes and changes.
+
+### 2.3.0
+
+- Move manuals to their own repository.
+
+- Add Nodi: based on MI's Braids.
+
+- Add Contextus: based on the Renaissance firmware for Braids.
+
+- Add Nebulae: based on Clouds and Southpole's Smoke, inspired by the Monsoon variant.
+
+- Add Etesia: based on the Clouds Parasite firmware.
+
+- Add Mortuus: based on the Dead Man's Catch firmware for Peaks.
+
+- Make Clouds based modules lights behave a little closer to their hardware counterparts.
+
+- Fix: SVG light behavior.
+
+- Change: Apices buttons (for the last time).
+
+- Fix: Apices button lights.
+
+- Fix: Apices trigger detection.

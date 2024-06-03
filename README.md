@@ -29,3 +29,15 @@ Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every con
 ## Contextus
 
 Based on the Renaissance alternative firmware for Braids. Exposes every control.
+
+## Nebulae
+
+Based on Mutable Instruments' Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control. Lights behave closer to hardware version.
+
+## Etesia
+
+Based on the Parasite firmware for Clouds and Southpole's Smoke Parasite. Exposes every control.
+
+## Mortuus
+
+Based on the Dead Man's Catch firmware for Peaks.
