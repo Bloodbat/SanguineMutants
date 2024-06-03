@@ -93,6 +93,20 @@
         "Reverb",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Mortuus",
+      "name": "Sanguine Mortuus",
+      "description": "Based on the Dead Man's Catch alternative firmware for Peaks'",
+      "tags": [
+        "Drum",
+        "Envelope generator",
+        "Oscillator",
+        "LFO",
+        "Sequencer",
+        "Hardware clone",
+        "Dual"
+      ]
     }
   ]
 }

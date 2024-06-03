@@ -12,3 +12,4 @@ extern Model* modelNodi;
 extern Model* modelContextus;
 extern Model* modelNebulae;
 extern Model* modelEtesia;
+extern Model* modelMortuus;

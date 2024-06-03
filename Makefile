@@ -69,6 +69,19 @@ SOURCES += alt_firmware/clouds_parasite/dsp/pvoc/etesia_frame_transformation.cc
 SOURCES += alt_firmware/clouds_parasite/dsp/pvoc/etesia_phase_vocoder.cc
 SOURCES += alt_firmware/clouds_parasite/dsp/pvoc/etesia_stft.cc
 
+SOURCES += alt_firmware/deadman/deadman_processors.cc
+SOURCES += alt_firmware/deadman/deadman_resources.cc
+SOURCES += alt_firmware/deadman/drums/deadman_bass_drum.cc
+SOURCES += alt_firmware/deadman/drums/deadman_fm_drum.cc
+SOURCES += alt_firmware/deadman/drums/deadman_high_hat.cc
+SOURCES += alt_firmware/deadman/drums/deadman_snare_drum.cc
+SOURCES += alt_firmware/deadman/modulations/deadman_lfo.cc
+SOURCES += alt_firmware/deadman/modulations/deadman_multistage_envelope.cc
+SOURCES += alt_firmware/deadman/pulse_processor/deadman_pulse_shaper.cc
+SOURCES += alt_firmware/deadman/pulse_processor/deadman_pulse_randomizer.cc
+SOURCES += alt_firmware/deadman/number_station/deadman_number_station.cc
+SOURCES += alt_firmware/deadman/number_station/deadman_bytebeats.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..

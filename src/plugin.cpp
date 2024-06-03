@@ -14,4 +14,5 @@ void init(rack::Plugin* p) {
 	p->addModel(modelContextus);
 	p->addModel(modelNebulae);
 	p->addModel(modelEtesia);
+	p->addModel(modelMortuus);
 }
