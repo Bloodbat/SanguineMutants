@@ -48,7 +48,7 @@ static const uint8_t kNumAdcChannels = 4;
 static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
 static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
 
-static const uint8_t kButtonCount = 3;
+static const uint8_t kButtonCount = 2;
 
 static const std::vector<std::string> modeList{
 	"ENVELOPE",
