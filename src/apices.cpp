@@ -29,7 +29,7 @@ enum ProcessorFunction {
 	FUNCTION_FM_DRUM_GENERATOR,
 	FUNCTION_NUMBER_STATION,
 	FUNCTION_BOUNCING_BALL,
-	FUNCTION_LAST	
+	FUNCTION_LAST
 };
 
 struct Settings {
@@ -61,6 +61,39 @@ static const std::vector<std::string> modeList{
 	"DIGI DRUMS*",
 	"NUMBER STAT&",
 	"BOUNCE BALL@"
+};
+
+struct KnobLabels {
+	std::string knob1;
+	std::string knob2;
+	std::string knob3;
+	std::string knob4;
+};
+
+static const std::vector<KnobLabels> knobLabelsSplitMode{
+	{ "1. Attack", "1. Decay", "2. Attack",  "2. Decay" },
+	{ "1. Frequency", "1. Waveform", "2. Frequency", "2. Waveform" },
+	{ "1. Waveform", "1. Wave. Var.", "2. Waveform", "2. Wave. Var." },
+	{ "1. BD Tone", "1. BD Decay", "2. SD Tone", "2. SD Snappy" },
+	{ "1. Step 1", "1. Step 2", "2. Step 1", "2. Step 2" },
+	{ "1. Delay", "1. Repeats #", "2. Delay", "2. Repeats #" },
+	{ "1. Acc/Rgn. Prob", "1. Delay", "2. Acc/Rgn. Prob", "2. Delay" },
+	{ "1. BD Morph", "1. BD Variation", "2. SD Morph", "2. SD Variation" },
+	{ "1. Frequency", "1. Var. Prob", "2. Frequency", "2. Var. Prob" },
+	{ "1. Gravity", "1. Bounce", "2. Gravity", "2. Bounce" }
+};
+
+static const std::vector<KnobLabels> knobLabelsTwinMode{
+	{ "Attack", "Decay", "Sustain", "Release" },
+	{ "Frequency", "Waveform", "Wave. Var", "Phase" },
+	{ "Amplitude", "Waveform", "Wave. Var", "Phase" },
+	{ "Base Freq", "Freq. Mod", "High Freq.", "Decay" },
+	{ "Step 1", "Step 2", "Step 3", "Step 4" },
+	{ "Pre-delay", "Gate time", "Delay", "Repeats #" },
+	{ "Trg. Prob.", "Regen Prob.", "Delay time", "Jitter" },
+	{ "Frequency", "FM Intens", "Env. Decay", "Color" },
+	{ "Frequency", "Var. Prob.", "Noise", "Distortion" },
+	{ "Gravity", "Bounce", "Amplitude", "Velocity" }
 };
 
 enum LightModes {
@@ -658,79 +691,10 @@ struct Apices : Module {
 
 	void updateOleds() {
 		if (editMode == EDIT_MODE_SPLIT) {
-			switch (processorFunction[0]) {
-			case FUNCTION_ENVELOPE: {
-				oledText1 = "1. Attack";
-				oledText2 = "1. Decay";
-				oledText3 = "2. Attack";
-				oledText4 = "2. Decay";
-				break;
-			}
-			case FUNCTION_LFO: {
-				oledText1 = "1. Frequency";
-				oledText2 = "1. Waveform";
-				oledText3 = "2. Frequency";
-				oledText4 = "2. Waveform";
-				break;
-			}
-			case FUNCTION_TAP_LFO: {
-				oledText1 = "1. Waveform";
-				oledText2 = "1. Wave. Var.";
-				oledText3 = "2. Waveform";
-				oledText4 = "2. Wave. Var.";
-				break;
-			}
-			case FUNCTION_DRUM_GENERATOR: {
-				oledText1 = "1. BD Tone";
-				oledText2 = "1. BD Decay";
-				oledText3 = "2. SD Tone";
-				oledText4 = "2. SD Snappy";
-				break;
-			}
-			case FUNCTION_MINI_SEQUENCER: {
-				oledText1 = "1. Step 1";
-				oledText2 = "1. Step 2";
-				oledText3 = "2. Step 1";
-				oledText4 = "2. Step 2";
-				break;
-			}
-			case FUNCTION_PULSE_SHAPER: {
-				oledText1 = "1. Delay";
-				oledText2 = "1. Repeats #";
-				oledText3 = "2. Delay";
-				oledText4 = "2. Repeats #";
-				break;
-			}
-			case FUNCTION_PULSE_RANDOMIZER: {
-				oledText1 = "1. Acc/Rgn. Prob";
-				oledText2 = "1. Delay";
-				oledText3 = "2. Acc/Rgn. Prob";
-				oledText4 = "2. Delay";
-				break;
-			}
-			case FUNCTION_FM_DRUM_GENERATOR: {
-				oledText1 = "1. BD Morph";
-				oledText2 = "1. BD Variation";
-				oledText3 = "2. SD Morph";
-				oledText4 = "2. SD Variation";
-				break;
-			}
-			case FUNCTION_NUMBER_STATION: {
-				oledText1 = "1. Frequency";
-				oledText2 = "1. Var. Prob";
-				oledText3 = "2. Frequency";
-				oledText4 = "2. Var. Prob";
-				break;
-			}
-			case FUNCTION_BOUNCING_BALL: {
-				oledText1 = "1. Gravity";
-				oledText2 = "1. Bounce";
-				oledText3 = "2. Gravity";
-				oledText4 = "2. Bounce";
-				break;
-			}
-			default: break;
-			}
+			oledText1 = knobLabelsSplitMode[processorFunction[0]].knob1;
+			oledText2 = knobLabelsSplitMode[processorFunction[0]].knob2;
+			oledText3 = knobLabelsSplitMode[processorFunction[0]].knob3;
+			oledText4 = knobLabelsSplitMode[processorFunction[0]].knob4;
 		}
 		else {
 
@@ -749,79 +713,10 @@ struct Apices : Module {
 
 			std::string channelText = (editMode == EDIT_MODE_TWIN) ? "1&2. " : string::f("%d. ", editMode - EDIT_MODE_FIRST + 1);
 
-			switch (currentFunction) {
-			case FUNCTION_ENVELOPE: {
-				oledText1 = channelText + "Attack";
-				oledText2 = channelText + "Decay";
-				oledText3 = channelText + "Sustain";
-				oledText4 = channelText + "Release";
-				break;
-			}
-			case FUNCTION_LFO: {
-				oledText1 = channelText + "Frequency";
-				oledText2 = channelText + "Waveform";
-				oledText3 = channelText + "Wave. Var";
-				oledText4 = channelText + "Phase";
-				break;
-			}
-			case FUNCTION_TAP_LFO: {
-				oledText1 = channelText + "Amplitude";
-				oledText2 = channelText + "Waveform";
-				oledText3 = channelText + "Wave. Var";
-				oledText4 = channelText + "Phase";
-				break;
-			}
-			case FUNCTION_DRUM_GENERATOR: {
-				oledText1 = channelText + "Base Freq";
-				oledText2 = channelText + "Freq. Mod";
-				oledText3 = channelText + "High Freq.";
-				oledText4 = channelText + "Decay";
-				break;
-			}
-			case FUNCTION_MINI_SEQUENCER: {
-				oledText1 = channelText + "Step 1";
-				oledText2 = channelText + "Step 2";
-				oledText3 = channelText + "Step 3";
-				oledText4 = channelText + "Step 4";
-				break;
-			}
-			case FUNCTION_PULSE_SHAPER: {
-				oledText1 = channelText + "Pre-delay";
-				oledText2 = channelText + "Gate time";
-				oledText3 = channelText + "Delay";
-				oledText4 = channelText + "Repeats #";
-				break;
-			}
-			case FUNCTION_PULSE_RANDOMIZER: {
-				oledText1 = channelText + "Trg. Prob.";
-				oledText2 = channelText + "Regen Prob.";
-				oledText3 = channelText + "Delay time";
-				oledText4 = channelText + "Jitter";
-				break;
-			}
-			case FUNCTION_FM_DRUM_GENERATOR: {
-				oledText1 = channelText + "Frequency";
-				oledText2 = channelText + "FM Intens";
-				oledText3 = channelText + "Env. Decay";
-				oledText4 = channelText + "Color";
-				break;
-			}
-			case FUNCTION_NUMBER_STATION: {
-				oledText1 = channelText + "Frequency";
-				oledText2 = channelText + "Var. Prob.";
-				oledText3 = channelText + "Noise";
-				oledText4 = channelText + "Distortion";
-				break;
-			}
-			case FUNCTION_BOUNCING_BALL: {
-				oledText1 = channelText + "Gravity";
-				oledText2 = channelText + "Bounce";
-				oledText3 = channelText + "Amplitude";
-				oledText4 = channelText + "Velocity";
-				break;
-			}
-			default: break;
-			}
+			oledText1 = channelText + knobLabelsTwinMode[currentFunction].knob1;
+			oledText2 = channelText + knobLabelsTwinMode[currentFunction].knob2;
+			oledText3 = channelText + knobLabelsTwinMode[currentFunction].knob3;
+			oledText4 = channelText + knobLabelsTwinMode[currentFunction].knob4;
 		}
 
 	}
