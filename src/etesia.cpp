@@ -2,13 +2,18 @@
 #include "sanguinecomponents.hpp"
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
 
-static const std::vector<std::string> modeList{
-	"GRANULAR",
-	"STRETCH",
-	"LOOPING DLY",
-	"SPECTRAL",
-	"OLIVERB",
-	"RESONESTOR"
+struct ModeInfo {
+	std::string display;
+	std::string menuLabel;
+};
+
+static const std::vector<ModeInfo> modeList{
+	{ "GRANULAR", "Granular mode" },
+	{ "STRETCH", "Pitch shifter/time stretcher" },
+	{ "LOOPING DLY", "Looping delay" },
+	{ "SPECTRAL", "Spectral madness" },
+	{ "OLIVERB", "Oliverb" },
+	{ "RESONESTOR", "Resonestor" }
 };
 
 static const std::string cvSuffix = " CV";
@@ -123,7 +128,7 @@ struct Etesia : Module {
 
 	LedModes lastLedMode = LEDS_INPUT;
 
-	std::string textMode = modeList[0];
+	std::string textMode = modeList[0].display;
 	std::string textFreeze = modeDisplays[0].labelFreeze;
 	std::string textPosition = modeDisplays[0].labelPosition;
 	std::string textDensity = modeDisplays[0].labelDensity;
@@ -392,7 +397,7 @@ struct Etesia : Module {
 			playbackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
-				textMode = modeList[playbackMode];
+				textMode = modeList[playbackMode].display;
 
 				textFreeze = modeDisplays[playbackMode].labelFreeze;
 				textPosition = modeDisplays[playbackMode].labelPosition;
@@ -519,6 +524,13 @@ struct Etesia : Module {
 		if (buffersizeJ) {
 			buffersize = json_integer_value(buffersizeJ);
 		}
+	}
+
+	int getModeParam() {
+		return params[PARAM_MODE].getValue();
+	}
+	void setModeParam(int mode) {
+		params[PARAM_MODE].setValue(mode);
 	}
 };
 
@@ -693,7 +705,22 @@ struct EtesiaWidget : ModuleWidget {
 			displayFeedback->oledText = &module->textFeedback;
 			displayReverb->oledText = &module->textReverb;
 		}
-	};
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		Etesia* module = dynamic_cast<Etesia*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+
+		std::vector<std::string> modelLabels;
+		for (int i = 0; i < int(modeList.size()); i++) {
+			modelLabels.push_back(modeList[i].display + ": " + modeList[i].menuLabel);
+		}
+		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
+			[=]() {return module->getModeParam(); },
+			[=](int i) {module->setModeParam(i); }
+		));
+	}
 };
 
 Model* modelEtesia = createModel<Etesia, EtesiaWidget>("Sanguine-Etesia");
