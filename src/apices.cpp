@@ -48,7 +48,7 @@ static const uint8_t kNumAdcChannels = 4;
 static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
 static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
 
-static const uint8_t kButtonCount = 2;
+static const uint8_t kButtonCount = 3;
 
 static const std::vector<std::string> modeList{
 	"ENVELOPE",
@@ -173,7 +173,7 @@ struct Apices : Module {
 	int16_t output[kBlockSize] = {};
 	int16_t brightness[kNumChannels] = { 0, 0 };
 
-	dsp::SchmittTrigger switches[kButtonCount];
+	dsp::SchmittTrigger stSwitches[kButtonCount];
 
 	// update descriptions/oleds every 16 samples
 	static const int kClockUpdateFrequency = 16;
@@ -478,7 +478,7 @@ struct Apices : Module {
 
 	void pollSwitches(const ProcessArgs& args) {
 		for (uint8_t i = 0; i < kButtonCount; ++i) {
-			if (switches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
+			if (stSwitches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
 				processSwitch(SWITCH_TWIN_MODE + i);
 			}
 		}
