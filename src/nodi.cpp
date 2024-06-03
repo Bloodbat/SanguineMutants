@@ -770,6 +770,8 @@ struct NodiWidget : ModuleWidget {
 			[=](int i) {module->setModelParam(i); }
 		));
 
+		menu->addChild(new MenuSeparator);
+
 		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 	}
 };
