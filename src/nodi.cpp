@@ -761,11 +761,11 @@ struct NodiWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		std::vector<std::string> shapeLabels;
+		std::vector<std::string> modelLabels;
 		for (int i = 0; i < int(modelInfos.size() - 1); i++) {
-			shapeLabels.push_back(modelInfos[i].code + ": " + modelInfos[i].label);
+			modelLabels.push_back(modelInfos[i].code + ": " + modelInfos[i].label);
 		}
-		menu->addChild(createIndexSubmenuItem("Model", shapeLabels,
+		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
 			[=](int i) {module->setModelParam(i); }
 		));
