@@ -29,8 +29,7 @@ enum ProcessorFunction {
 	FUNCTION_FM_DRUM_GENERATOR,
 	FUNCTION_NUMBER_STATION,
 	FUNCTION_BOUNCING_BALL,
-	FUNCTION_LAST,
-	FUNCTION_FIRST_ALTERNATE_FUNCTION = FUNCTION_MINI_SEQUENCER
+	FUNCTION_LAST	
 };
 
 struct Settings {
@@ -70,7 +69,7 @@ enum LightModes {
 	LIGHT_BLINK
 };
 
-static const LightModes lightStates[10][4]{
+static const LightModes lightStates[FUNCTION_LAST][4]{
 	{ LIGHT_ON,  LIGHT_OFF, LIGHT_OFF, LIGHT_OFF }, // Envelope
 	{ LIGHT_OFF, LIGHT_ON, LIGHT_OFF, LIGHT_OFF }, // LFO
 	{ LIGHT_OFF, LIGHT_OFF, LIGHT_ON, LIGHT_OFF }, // TAP LFO
