@@ -1,4 +1,4 @@
-﻿#include "plugin.hpp"
+#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "clouds/dsp/granular_processor.h"
 
