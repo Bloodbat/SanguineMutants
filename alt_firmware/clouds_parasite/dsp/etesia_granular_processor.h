@@ -74,10 +74,10 @@ namespace etesia {
 		void* data;
 	};
 
-	class GranularProcessor {
+	class EtesiaGranularProcessor {
 	public:
-		GranularProcessor() { }
-		~GranularProcessor() { }
+		EtesiaGranularProcessor() { }
+		~EtesiaGranularProcessor() { }
 
 		void Init(
 			void* large_buffer,
@@ -216,7 +216,7 @@ namespace etesia {
 
 		PersistentState persistent_state_;
 
-		DISALLOW_COPY_AND_ASSIGN(GranularProcessor);
+		DISALLOW_COPY_AND_ASSIGN(EtesiaGranularProcessor);
 	};
 
 }  // namespace etesia

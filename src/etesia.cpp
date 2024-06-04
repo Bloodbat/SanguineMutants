@@ -2,12 +2,12 @@
 #include "sanguinecomponents.hpp"
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
 
-struct ModeInfo {
+struct EtesiaModeInfo {
 	std::string display;
 	std::string menuLabel;
 };
 
-static const std::vector<ModeInfo> modeList{
+static const std::vector<EtesiaModeInfo> modeList{
 	{ "GRANULAR", "Granular mode" },
 	{ "STRETCH", "Pitch shifter/time stretcher" },
 	{ "LOOPING DLY", "Looping delay" },
@@ -20,7 +20,7 @@ static const std::string cvSuffix = " CV";
 
 static const std::string ledButtonPrefix = "LED display value: ";
 
-struct ModeDisplay {
+struct EtesiaModeDisplay {
 	std::string labelFreeze;
 	std::string labelPosition;
 	std::string labelDensity;
@@ -35,7 +35,7 @@ struct ModeDisplay {
 	std::string labelReverb;
 };
 
-static const std::vector<ModeDisplay> modeDisplays{
+static const std::vector<EtesiaModeDisplay> modeDisplays{
 	{"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
 	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
 	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
@@ -44,7 +44,7 @@ static const std::vector<ModeDisplay> modeDisplays{
 	{"Voice",   "Timbre",       "Decay",            "Chord",            "LP<filter>BP",     "Pitch",     "Trigger", "Distortion", "Stereo",    "Harmonics",  "Scatter"}
 };
 
-static const std::vector<ModeDisplay> modeTooltips{
+static const std::vector<EtesiaModeDisplay> modeTooltips{
 	{"Freeze",  "Position",     "Density",            "Size",               "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",         "Reverb"},
 	{"Stutter", "Scrub",        "Diffusion",          "Overlap",            "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
 	{"Stutter", "Time / Start", "Diffusion",          "Overlap / Duration", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
@@ -170,7 +170,7 @@ struct Etesia : Module {
 	uint8_t* block_mem;
 	uint8_t* block_ccm;
 
-	etesia::GranularProcessor* etesiaProcessor;
+	etesia::EtesiaGranularProcessor* etesiaProcessor;
 
 	Etesia() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -180,7 +180,7 @@ struct Etesia : Module {
 
 		configParam(PARAM_REVERSE, 0.f, 1.f, 0.f, "Reverse");
 
-		configButton(PARAM_LEDS_MODE, "LED display value: ");
+		configButton(PARAM_LEDS_MODE, "LED display value: Input");
 
 		configParam(PARAM_MODE, 0.f, 5.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
@@ -232,13 +232,12 @@ struct Etesia : Module {
 		lastSpread = 0.5f;
 		lastFeedback = 0.5;
 		lastReverb = 0.5;
-		paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + buttonTexts[ledMode];
 
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;
 		block_mem = new uint8_t[memLen]();
 		block_ccm = new uint8_t[ccmLen]();
-		etesiaProcessor = new etesia::GranularProcessor();
+		etesiaProcessor = new etesia::EtesiaGranularProcessor();
 		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
 
 		lightDivider.setDivision(kClockDivider);
@@ -293,7 +292,7 @@ struct Etesia : Module {
 				int memLen = 118784 * buffersize;
 				const int ccmLen = 65536 - 128;
 				block_mem = new uint8_t[memLen]();
-				etesiaProcessor = new etesia::GranularProcessor();
+				etesiaProcessor = new etesia::EtesiaGranularProcessor();
 				memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
 				etesiaProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
 				currentbuffersize = buffersize;

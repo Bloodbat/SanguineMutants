@@ -161,7 +161,7 @@ struct Nebulae : Module {
 		configInput(INPUT_FREEZE, "Freeze");
 		configParam(PARAM_FREEZE, 0.f, 1.f, 0.f, "Freeze");
 
-		configButton(PARAM_LEDS_MODE, "LED display value: ");
+		configButton(PARAM_LEDS_MODE, "LED display value: Input");
 
 		configParam(PARAM_MODE, 0.f, 3.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
@@ -213,7 +213,6 @@ struct Nebulae : Module {
 		lastSpread = 0.5f;
 		lastFeedback = 0.5;
 		lastReverb = 0.5;
-		paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + buttonTexts[ledMode];
 
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;

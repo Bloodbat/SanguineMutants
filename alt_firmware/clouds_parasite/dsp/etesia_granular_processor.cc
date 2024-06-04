@@ -40,7 +40,7 @@ namespace etesia {
 	using namespace std;
 	using namespace stmlib;
 
-	void GranularProcessor::Init(
+	void EtesiaGranularProcessor::Init(
 		void* large_buffer, size_t large_buffer_size,
 		void* small_buffer, size_t small_buffer_size) {
 		buffer_[0] = large_buffer;
@@ -62,7 +62,7 @@ namespace etesia {
 		dry_wet_ = 0.0f;
 	}
 
-	void GranularProcessor::ResetFilters() {
+	void EtesiaGranularProcessor::ResetFilters() {
 		for (int32_t i = 0; i < 2; ++i) {
 			fb_filter_[i].Init();
 			lp_filter_[i].Init();
@@ -70,7 +70,7 @@ namespace etesia {
 		}
 	}
 
-	void GranularProcessor::ProcessGranular(FloatFrame* input, FloatFrame* output, size_t size) {
+	void EtesiaGranularProcessor::ProcessGranular(FloatFrame* input, FloatFrame* output, size_t size) {
 		// At the exception of the spectral mode, all modes require the incoming
 		// audio signal to be written to the recording buffer.
 		if (playback_mode_ != PLAYBACK_MODE_SPECTRAL &&
@@ -280,7 +280,7 @@ namespace etesia {
 		}
 	}
 
-	void GranularProcessor::Process(
+	void EtesiaGranularProcessor::Process(
 		ShortFrame* input,
 		ShortFrame* output,
 		size_t size) {
@@ -444,7 +444,7 @@ namespace etesia {
 		// TOC
 	}
 
-	void GranularProcessor::PreparePersistentData() {
+	void EtesiaGranularProcessor::PreparePersistentData() {
 		persistent_state_.write_head[0] = low_fidelity_ ?
 			buffer_8_[0].head() : buffer_16_[0].head();
 		persistent_state_.write_head[1] = low_fidelity_ ?
@@ -453,7 +453,7 @@ namespace etesia {
 		persistent_state_.spectral = playback_mode() == PLAYBACK_MODE_SPECTRAL;
 	}
 
-	void GranularProcessor::GetPersistentData(
+	void EtesiaGranularProcessor::GetPersistentData(
 		PersistentBlock* block, size_t* num_blocks) {
 		PersistentBlock* first_block = block;
 
@@ -472,7 +472,7 @@ namespace etesia {
 		*num_blocks = block - first_block;
 	}
 
-	bool GranularProcessor::LoadPersistentData(const uint32_t* data) {
+	bool EtesiaGranularProcessor::LoadPersistentData(const uint32_t* data) {
 		// Force a silent output while the swapping of buffers takes place.
 		silence_ = true;
 
@@ -526,7 +526,7 @@ namespace etesia {
 		return true;
 	}
 
-	void GranularProcessor::Prepare() {
+	void EtesiaGranularProcessor::Prepare() {
 		bool playback_mode_changed = previous_playback_mode_ != playback_mode_;
 		bool benign_change = previous_playback_mode_ != PLAYBACK_MODE_SPECTRAL
 			&& playback_mode_ != PLAYBACK_MODE_SPECTRAL
