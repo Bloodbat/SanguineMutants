@@ -367,24 +367,23 @@ SanguineLightUpSwitch::SanguineLightUpSwitch() {
 	shadow->opacity = 0.0;
 	sw->wrap();
 	box.size = sw->box.size;
-	haloColorOn = nvgRGB(0xAA, 0xAA, 0xAA);
-	haloColorOff = nvgRGB(0x10, 0x10, 0x10);
+}
+
+void SanguineLightUpSwitch::addHalo(NVGcolor haloColor) {
+	halos.push_back(haloColor);
 }
 
 void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		if (module && !module->isBypassed()) {
-			std::shared_ptr<window::Svg> svg = frames[static_cast<int>(getParamQuantity()->getValue())];
+			uint32_t frameNum = getParamQuantity()->getValue();
+			std::shared_ptr<window::Svg> svg = frames[static_cast<int>(frameNum)];
 			if (!svg)
 				return;
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 			rack::window::svgDraw(args.vg, svg->handle);
-			// TODO!!! Make this handle n frames!
-			if (getParamQuantity()->getValue() == 0) {
-				drawCircularHalo(args, box.size, haloColorOff, 175, 8.f);
-			}
-			else if (getParamQuantity()->getValue() == 1) {
-				drawCircularHalo(args, box.size, haloColorOn, 175, 8.f);
+			if (frameNum < halos.size()) {
+				drawCircularHalo(args, box.size, halos[frameNum], 175, 8.f);
 			}
 		}
 	}

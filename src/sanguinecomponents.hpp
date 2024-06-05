@@ -151,9 +151,9 @@ struct Sanguine96x32OLEDDisplay : TransparentWidget {
 // Switches
 
 struct SanguineLightUpSwitch : app::SvgSwitch {
-	NVGcolor haloColorOn = nvgRGB(0, 100, 0);
-	NVGcolor haloColorOff = nvgRGB(100, 0, 0);
+	std::vector<NVGcolor> halos;
 	SanguineLightUpSwitch();
+	void addHalo(NVGcolor haloColor);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
