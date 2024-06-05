@@ -43,6 +43,7 @@ enum ProcessorFunction {
 	FUNCTION_RANDOM_VARYING_WAVE_LFO,
 	FUNCTION_PHASE_LOCKED_OSCILLATOR,
 	FUNCTION_RANDOM_HI_HAT,
+	FUNCTION_CYMBAL,
 	FUNCTION_LAST
 };
 
@@ -87,6 +88,7 @@ static const std::vector<std::string> mortuusModeList{
 	"TURING#",
 	"BYTE BEATS#",
 	"DIGI DRUMS*",
+	"CYMBAL#",
 	"RANDOM DRUM#",
 	"RAND. HIHAT#",
 	"NUMBER STAT&"
@@ -121,6 +123,7 @@ static const std::vector<KnobLabels> mortuusKnobLabelsSplitMode{
 	{ "1. Probability", "1. Span", "2. Probability", "2. Span" },
 	{ "1. Pitch", "1. Parameter 0", "2. Pitch", "2. Parameter 0" },
 	{ "1. BD Morph", "1. BD Variation", "2. SD Morph", "2. SD Variation" },
+	{ "1. Crossfade", "1. Decay", "2. Crossfade", "2. Decay" },
 	{ "1. BD Pitch", "1. BD Tone/Decay", "2. SD Pitch", "2. SD Decay/Snap" },
 	{ "1. Pitch", "1. Tone", "2. Pitch", "2. Decay" },
 	{ "1. Frequency", "1. Var. Prob", "2. Frequency", "2. Var. Prob" }
@@ -148,6 +151,7 @@ static const std::vector<KnobLabels> mortuusKnobLabelsTwinMode{
 	{ "Probability", "Span", "Length", "Clock Div." },
 	{ "Pitch", "Parameter 0", "Parameter 1", "Equation" },
 	{ "Frequency", "FM Intens", "Env. Decay", "Color" },
+	{ "Pitch", "Clip", "Crossfade", "Decay" },
 	{ "Pitch", "Tone/Decay", "Rand. Pitch", "Rand. Hit" },
 	{ "Pitch", "Decay", "Rand. Pitch", "Rand. Decay"},
 	{ "Frequency", "Var. Prob.", "Noise", "Distortion" }
@@ -181,8 +185,9 @@ static const LightModes lightStates[FUNCTION_LAST][4]{
 	{ LIGHT_BLINK, LIGHT_OFF, LIGHT_ON, LIGHT_BLINK }, // TURING#
 	{ LIGHT_BLINK, LIGHT_BLINK, LIGHT_ON, LIGHT_BLINK }, // BYTE BEATS#
 	{ LIGHT_BLINK, LIGHT_OFF, LIGHT_OFF, LIGHT_ON }, // DIGI DRUMS*
-	{ LIGHT_OFF, LIGHT_OFF, LIGHT_BLINK, LIGHT_ON }, // RANDOM DRUM#
-	{ LIGHT_OFF, LIGHT_BLINK, LIGHT_OFF, LIGHT_ON }, // RAND. HIHAT#
+	{ LIGHT_OFF, LIGHT_BLINK, LIGHT_OFF, LIGHT_ON }, // CYMBAL#
+	{ LIGHT_BLINK, LIGHT_BLINK, LIGHT_OFF, LIGHT_ON }, // RANDOM DRUM#
+	{ LIGHT_OFF, LIGHT_OFF, LIGHT_BLINK, LIGHT_ON }, // RAND. HIHAT#
 	{ LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF } // NUMBER STAT&
 };
 
@@ -301,6 +306,7 @@ struct Mortuus : Module {
 		{ deadman::PROCESSOR_FUNCTION_TURING_MACHINE, deadman::PROCESSOR_FUNCTION_TURING_MACHINE },
 		{ deadman::PROCESSOR_FUNCTION_BYTEBEATS, deadman::PROCESSOR_FUNCTION_BYTEBEATS },
 		{ deadman::PROCESSOR_FUNCTION_FM_DRUM, deadman::PROCESSOR_FUNCTION_FM_DRUM },
+		{ deadman::PROCESSOR_FUNCTION_CYMBAL, deadman::PROCESSOR_FUNCTION_CYMBAL },
 		{ deadman::PROCESSOR_FUNCTION_RANDOMISED_BASS_DRUM, deadman::PROCESSOR_FUNCTION_RANDOMISED_SNARE_DRUM },
 		{ deadman::PROCESSOR_FUNCTION_HIGH_HAT, deadman::PROCESSOR_FUNCTION_HIGH_HAT },
 		{ deadman::PROCESSOR_FUNCTION_NUMBER_STATION, deadman::PROCESSOR_FUNCTION_NUMBER_STATION}

@@ -51,6 +51,7 @@ namespace deadman {
 		  REGISTER_PROCESSOR(BassDrum)
 		  REGISTER_PROCESSOR(SnareDrum)
 		  REGISTER_PROCESSOR(HighHat)
+		  REGISTER_PROCESSOR(Cymbal)
 		  REGISTER_PROCESSOR(FmDrum)
 		  REGISTER_PROCESSOR(PulseShaper)
 		  REGISTER_PROCESSOR(PulseRandomizer)
@@ -82,6 +83,7 @@ namespace deadman {
 		snare_drum_.Init();
 		high_hat_.Init();
 		high_hat_.set_open(index == 1);
+		cymbal_.Init();
 		fm_drum_.Init();
 		fm_drum_.set_sd_range(index == 1);
 		bouncing_ball_.Init();

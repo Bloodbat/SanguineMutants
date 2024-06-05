@@ -39,6 +39,7 @@
 #include "deadman/drums/deadman_fm_drum.h"
 #include "deadman/drums/deadman_snare_drum.h"
 #include "deadman/drums/deadman_high_hat.h"
+#include "deadman/drums/deadman_cymbal.h"
 #include "deadman/modulations/deadman_bouncing_ball.h"
 #include "deadman/modulations/deadman_lfo.h"
 #include "deadman/modulations/deadman_mini_sequencer.h"
@@ -53,35 +54,36 @@
 
 namespace deadman {
 
-enum ProcessorFunction {
-  PROCESSOR_FUNCTION_ENVELOPE, // Done
-  PROCESSOR_FUNCTION_LFO, // Done
-  PROCESSOR_FUNCTION_TAP_LFO, //Done
-  PROCESSOR_FUNCTION_BASS_DRUM, // Done
-  PROCESSOR_FUNCTION_SNARE_DRUM, // Done
-  PROCESSOR_FUNCTION_HIGH_HAT, // Done
-  PROCESSOR_FUNCTION_FM_DRUM, // Done
-  PROCESSOR_FUNCTION_PULSE_SHAPER, // Done
-  PROCESSOR_FUNCTION_PULSE_RANDOMIZER, // Done
-  PROCESSOR_FUNCTION_MINI_SEQUENCER, // Done
-  PROCESSOR_FUNCTION_NUMBER_STATION, // Done
-  PROCESSOR_FUNCTION_BYTEBEATS, // Done
-  PROCESSOR_FUNCTION_DUAL_ATTACK_ENVELOPE, // Done
-  PROCESSOR_FUNCTION_REPEATING_ATTACK_ENVELOPE, // Done
-  PROCESSOR_FUNCTION_LOOPING_ENVELOPE, // Done
-  PROCESSOR_FUNCTION_RANDOMISED_ENVELOPE, // Done
-  PROCESSOR_FUNCTION_BOUNCING_BALL, // Done
-  PROCESSOR_FUNCTION_RANDOMISED_BASS_DRUM, // Done
-  PROCESSOR_FUNCTION_RANDOMISED_SNARE_DRUM, // Done
-  PROCESSOR_FUNCTION_TURING_MACHINE, // Done
-  PROCESSOR_FUNCTION_MOD_SEQUENCER, // Done
-  PROCESSOR_FUNCTION_FMLFO, // Done
-  PROCESSOR_FUNCTION_RFMLFO, // Done
-  PROCESSOR_FUNCTION_WSMLFO, // Done
-  PROCESSOR_FUNCTION_RWSMLFO, // Done
-  PROCESSOR_FUNCTION_PLO, // Done (but broken!)
-  PROCESSOR_FUNCTION_LAST
-};
+	enum ProcessorFunction {
+		PROCESSOR_FUNCTION_ENVELOPE, // Done
+		PROCESSOR_FUNCTION_LFO, // Done
+		PROCESSOR_FUNCTION_TAP_LFO, //Done
+		PROCESSOR_FUNCTION_BASS_DRUM, // Done
+		PROCESSOR_FUNCTION_SNARE_DRUM, // Done
+		PROCESSOR_FUNCTION_HIGH_HAT, // Done
+		PROCESSOR_FUNCTION_CYMBAL, //Done
+		PROCESSOR_FUNCTION_FM_DRUM, // Done
+		PROCESSOR_FUNCTION_PULSE_SHAPER, // Done
+		PROCESSOR_FUNCTION_PULSE_RANDOMIZER, // Done
+		PROCESSOR_FUNCTION_MINI_SEQUENCER, // Done
+		PROCESSOR_FUNCTION_NUMBER_STATION, // Done
+		PROCESSOR_FUNCTION_BYTEBEATS, // Done
+		PROCESSOR_FUNCTION_DUAL_ATTACK_ENVELOPE, // Done
+		PROCESSOR_FUNCTION_REPEATING_ATTACK_ENVELOPE, // Done
+		PROCESSOR_FUNCTION_LOOPING_ENVELOPE, // Done
+		PROCESSOR_FUNCTION_RANDOMISED_ENVELOPE, // Done
+		PROCESSOR_FUNCTION_BOUNCING_BALL, // Done
+		PROCESSOR_FUNCTION_RANDOMISED_BASS_DRUM, // Done
+		PROCESSOR_FUNCTION_RANDOMISED_SNARE_DRUM, // Done
+		PROCESSOR_FUNCTION_TURING_MACHINE, // Done
+		PROCESSOR_FUNCTION_MOD_SEQUENCER, // Done
+		PROCESSOR_FUNCTION_FMLFO, // Done
+		PROCESSOR_FUNCTION_RFMLFO, // Done
+		PROCESSOR_FUNCTION_WSMLFO, // Done
+		PROCESSOR_FUNCTION_RWSMLFO, // Done
+		PROCESSOR_FUNCTION_PLO, // Done (but broken!)
+		PROCESSOR_FUNCTION_LAST
+	};
 
 #define DECLARE_PROCESSOR(ClassName, variable) \
   void ClassName ## Init() { \
@@ -95,99 +97,99 @@ enum ProcessorFunction {
   } \
   ClassName variable;
 
-class Processors {
- public:
-  Processors() { }
-  ~Processors() { }
+	class Processors {
+	public:
+		Processors() { }
+		~Processors() { }
 
-  void Init(uint8_t index);
+		void Init(uint8_t index);
 
-  typedef void (Processors::*InitFn)();
-  typedef void (Processors::*ProcessFn)(const GateFlags*, int16_t*, size_t);
-  typedef void (Processors::*ConfigureFn)(uint16_t*, ControlMode);
+		typedef void (Processors::* InitFn)();
+		typedef void (Processors::* ProcessFn)(const GateFlags*, int16_t*, size_t);
+		typedef void (Processors::* ConfigureFn)(uint16_t*, ControlMode);
 
-  struct ProcessorCallbacks {
-    InitFn init_fn;
-    ProcessFn process_fn;
-    ConfigureFn configure_fn;
-  };
+		struct ProcessorCallbacks {
+			InitFn init_fn;
+			ProcessFn process_fn;
+			ConfigureFn configure_fn;
+		};
 
-  inline void set_control_mode(ControlMode control_mode) {
-    control_mode_ = control_mode;
-    Configure();
-  }
+		inline void set_control_mode(ControlMode control_mode) {
+			control_mode_ = control_mode;
+			Configure();
+		}
 
-  inline void set_parameter(uint8_t index, uint16_t parameter) {
-    parameter_[index] = parameter;
-    Configure();
-  }
+		inline void set_parameter(uint8_t index, uint16_t parameter) {
+			parameter_[index] = parameter;
+			Configure();
+		}
 
-  inline void CopyParameters(uint16_t* parameters, uint16_t size) {
-    std::copy(&parameters[0], &parameters[size], &parameter_[0]);
-  }
+		inline void CopyParameters(uint16_t* parameters, uint16_t size) {
+			std::copy(&parameters[0], &parameters[size], &parameter_[0]);
+		}
 
-  inline void set_function(ProcessorFunction function) {
-    function_ = function;
-    lfo_.set_sync(function == PROCESSOR_FUNCTION_TAP_LFO);
-    fmlfo_.set_mod_type(function == PROCESSOR_FUNCTION_RFMLFO);
-    wsmlfo_.set_mod_type(function == PROCESSOR_FUNCTION_RWSMLFO);
-    plo_.set_sync(function == PROCESSOR_FUNCTION_PLO);
-    callbacks_ = callbacks_table_[function];
-    if (function != PROCESSOR_FUNCTION_TAP_LFO and
-        function != PROCESSOR_FUNCTION_PLO) {
-      (this->*callbacks_.init_fn)();
-    }
-    Configure();
-  }
+		inline void set_function(ProcessorFunction function) {
+			function_ = function;
+			lfo_.set_sync(function == PROCESSOR_FUNCTION_TAP_LFO);
+			fmlfo_.set_mod_type(function == PROCESSOR_FUNCTION_RFMLFO);
+			wsmlfo_.set_mod_type(function == PROCESSOR_FUNCTION_RWSMLFO);
+			plo_.set_sync(function == PROCESSOR_FUNCTION_PLO);
+			callbacks_ = callbacks_table_[function];
+			if (function != PROCESSOR_FUNCTION_TAP_LFO and function != PROCESSOR_FUNCTION_PLO) {
+				(this->*callbacks_.init_fn)();
+			}
+			Configure();
+		}
 
-  inline ProcessorFunction function() const { return function_; }
+		inline ProcessorFunction function() const { return function_; }
 
-  inline void Process(const GateFlags* gate_flags, int16_t* output, size_t size) {
-    (this->*callbacks_.process_fn)(gate_flags, output, size);
-  }
+		inline void Process(const GateFlags* gate_flags, int16_t* output, size_t size) {
+			(this->*callbacks_.process_fn)(gate_flags, output, size);
+		}
 
-  inline const NumberStation& number_station() const { return number_station_; }
+		inline const NumberStation& number_station() const { return number_station_; }
 
- private:
-  void Configure() {
-    (this->*callbacks_.configure_fn)(&parameter_[0], control_mode_);
-  }
+	private:
+		void Configure() {
+			(this->*callbacks_.configure_fn)(&parameter_[0], control_mode_);
+		}
 
-  ControlMode control_mode_;
-  ProcessorFunction function_;
-  uint16_t parameter_[4];
+		ControlMode control_mode_;
+		ProcessorFunction function_;
+		uint16_t parameter_[4];
 
-  ProcessorCallbacks callbacks_;
-  static const ProcessorCallbacks callbacks_table_[PROCESSOR_FUNCTION_LAST];
+		ProcessorCallbacks callbacks_;
+		static const ProcessorCallbacks callbacks_table_[PROCESSOR_FUNCTION_LAST];
 
-  DECLARE_PROCESSOR(MultistageEnvelope, envelope_);
-  DECLARE_PROCESSOR(Lfo, lfo_);
-  DECLARE_PROCESSOR(BassDrum, bass_drum_);
-  DECLARE_PROCESSOR(SnareDrum, snare_drum_);
-  DECLARE_PROCESSOR(HighHat, high_hat_);
-  DECLARE_PROCESSOR(FmDrum, fm_drum_);
-  DECLARE_PROCESSOR(PulseShaper, pulse_shaper_);
-  DECLARE_PROCESSOR(PulseRandomizer, pulse_randomizer_);
-  DECLARE_PROCESSOR(BouncingBall, bouncing_ball_);
-  DECLARE_PROCESSOR(MiniSequencer, mini_sequencer_);
-  DECLARE_PROCESSOR(NumberStation, number_station_);
-  DECLARE_PROCESSOR(ByteBeats, bytebeats_);
-  DECLARE_PROCESSOR(DualAttackEnvelope, dual_attack_envelope_);
-  DECLARE_PROCESSOR(LoopingEnvelope, looping_envelope_);
-  DECLARE_PROCESSOR(RepeatingAttackEnvelope, repeating_attack_envelope_);
-  DECLARE_PROCESSOR(RandomisedEnvelope, randomised_envelope_);
-  DECLARE_PROCESSOR(RandomisedBassDrum, randomised_bass_drum_);
-  DECLARE_PROCESSOR(RandomisedSnareDrum, randomised_snare_drum_);
-  DECLARE_PROCESSOR(TuringMachine, turing_machine_);
-  DECLARE_PROCESSOR(ModSequencer, mod_sequencer_);
-  DECLARE_PROCESSOR(FmLfo, fmlfo_);
-  DECLARE_PROCESSOR(WsmLfo, wsmlfo_);
-  DECLARE_PROCESSOR(Plo, plo_);
+		DECLARE_PROCESSOR(MultistageEnvelope, envelope_);
+		DECLARE_PROCESSOR(Lfo, lfo_);
+		DECLARE_PROCESSOR(BassDrum, bass_drum_);
+		DECLARE_PROCESSOR(SnareDrum, snare_drum_);
+		DECLARE_PROCESSOR(HighHat, high_hat_);
+		DECLARE_PROCESSOR(Cymbal, cymbal_);
+		DECLARE_PROCESSOR(FmDrum, fm_drum_);
+		DECLARE_PROCESSOR(PulseShaper, pulse_shaper_);
+		DECLARE_PROCESSOR(PulseRandomizer, pulse_randomizer_);
+		DECLARE_PROCESSOR(BouncingBall, bouncing_ball_);
+		DECLARE_PROCESSOR(MiniSequencer, mini_sequencer_);
+		DECLARE_PROCESSOR(NumberStation, number_station_);
+		DECLARE_PROCESSOR(ByteBeats, bytebeats_);
+		DECLARE_PROCESSOR(DualAttackEnvelope, dual_attack_envelope_);
+		DECLARE_PROCESSOR(LoopingEnvelope, looping_envelope_);
+		DECLARE_PROCESSOR(RepeatingAttackEnvelope, repeating_attack_envelope_);
+		DECLARE_PROCESSOR(RandomisedEnvelope, randomised_envelope_);
+		DECLARE_PROCESSOR(RandomisedBassDrum, randomised_bass_drum_);
+		DECLARE_PROCESSOR(RandomisedSnareDrum, randomised_snare_drum_);
+		DECLARE_PROCESSOR(TuringMachine, turing_machine_);
+		DECLARE_PROCESSOR(ModSequencer, mod_sequencer_);
+		DECLARE_PROCESSOR(FmLfo, fmlfo_);
+		DECLARE_PROCESSOR(WsmLfo, wsmlfo_);
+		DECLARE_PROCESSOR(Plo, plo_);
 
-  DISALLOW_COPY_AND_ASSIGN(Processors);
-};
+		DISALLOW_COPY_AND_ASSIGN(Processors);
+	};
 
-extern Processors processors[2];
+	extern Processors processors[2];
 
 }  // namespace deadman
 

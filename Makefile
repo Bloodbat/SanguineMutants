@@ -81,6 +81,7 @@ SOURCES += alt_firmware/deadman/pulse_processor/deadman_pulse_shaper.cc
 SOURCES += alt_firmware/deadman/pulse_processor/deadman_pulse_randomizer.cc
 SOURCES += alt_firmware/deadman/number_station/deadman_number_station.cc
 SOURCES += alt_firmware/deadman/number_station/deadman_bytebeats.cc
+SOURCES += alt_firmware/deadman/drums/deadman_cymbal.cc
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
