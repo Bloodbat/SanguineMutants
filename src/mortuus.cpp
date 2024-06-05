@@ -65,7 +65,7 @@ static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
 static const uint8_t kButtonCount = 3;
 static const uint8_t kInputCount = 2;
 
-static const std::vector<std::string> modeList{
+static const std::vector<std::string> mortuusModeList{
 	"ENVELOPE",
 	"LFO",
 	"TAP LFO",
@@ -99,7 +99,7 @@ struct KnobLabels {
 	std::string knob4;
 };
 
-static const std::vector<KnobLabels> knobLabelsSplitMode{
+static const std::vector<KnobLabels> mortuusKnobLabelsSplitMode{
 	{ "1. Attack", "1. Decay", "2. Attack",  "2. Decay" },
 	{ "1. Frequency", "1. Waveform", "2. Frequency", "2. Waveform" },
 	{ "1. Waveform", "1. Wave. Var.", "2. Waveform", "2. Wave. Var." },
@@ -126,7 +126,7 @@ static const std::vector<KnobLabels> knobLabelsSplitMode{
 	{ "1. Frequency", "1. Var. Prob", "2. Frequency", "2. Var. Prob" }
 };
 
-static const std::vector<KnobLabels> knobLabelsTwinMode{
+static const std::vector<KnobLabels> mortuusKnobLabelsTwinMode{
 	{ "Attack", "Decay", "Sustain", "Release" },
 	{ "Frequency", "Waveform", "Wave. Var", "Phase" },
 	{ "Amplitude", "Waveform", "Wave. Var", "Phase" },
@@ -574,8 +574,8 @@ struct Mortuus : Module {
 		settings.processorFunction[1] = processorFunction[1];
 		std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
 		settings.snap_mode = bSnapMode;
-		displayText1 = modeList[settings.processorFunction[0]];
-		displayText2 = modeList[settings.processorFunction[1]];
+		displayText1 = mortuusModeList[settings.processorFunction[0]];
+		displayText2 = mortuusModeList[settings.processorFunction[1]];
 	}
 
 	void refreshLeds(const ProcessArgs& args) {
@@ -790,10 +790,10 @@ struct Mortuus : Module {
 
 	void updateOleds() {
 		if (editMode == EDIT_MODE_SPLIT) {
-			oledText1 = knobLabelsSplitMode[processorFunction[0]].knob1;
-			oledText2 = knobLabelsSplitMode[processorFunction[0]].knob2;
-			oledText3 = knobLabelsSplitMode[processorFunction[0]].knob3;
-			oledText4 = knobLabelsSplitMode[processorFunction[0]].knob4;
+			oledText1 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob1;
+			oledText2 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob2;
+			oledText3 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob3;
+			oledText4 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob4;
 		}
 		else {
 
@@ -812,10 +812,10 @@ struct Mortuus : Module {
 
 			std::string channelText = (editMode == EDIT_MODE_TWIN) ? "1&2. " : string::f("%d. ", editMode - EDIT_MODE_FIRST + 1);
 
-			oledText1 = channelText + knobLabelsTwinMode[currentFunction].knob1;
-			oledText2 = channelText + knobLabelsTwinMode[currentFunction].knob2;
-			oledText3 = channelText + knobLabelsTwinMode[currentFunction].knob3;
-			oledText4 = channelText + knobLabelsTwinMode[currentFunction].knob4;
+			oledText1 = channelText + mortuusKnobLabelsTwinMode[currentFunction].knob1;
+			oledText2 = channelText + mortuusKnobLabelsTwinMode[currentFunction].knob2;
+			oledText3 = channelText + mortuusKnobLabelsTwinMode[currentFunction].knob3;
+			oledText4 = channelText + mortuusKnobLabelsTwinMode[currentFunction].knob4;
 		}
 
 	}
