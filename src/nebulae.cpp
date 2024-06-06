@@ -507,7 +507,7 @@ struct NebulaeWidget : ModuleWidget {
 		addChild(nebulaeFramebuffer);
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay;
-		displayFreeze->box.pos = mm2px(Vec(3.677, 13.711));
+		displayFreeze->box.pos = mm2px(Vec(6.804, 13.711));
 		displayFreeze->module = module;
 		nebulaeFramebuffer->addChild(displayFreeze);
 
