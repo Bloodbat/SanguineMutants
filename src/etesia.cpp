@@ -543,13 +543,13 @@ struct EtesiaWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		FramebufferWidget* nebulaeFramebuffer = new FramebufferWidget();
-		addChild(nebulaeFramebuffer);
+		FramebufferWidget* etesiaFramebuffer = new FramebufferWidget();
+		addChild(etesiaFramebuffer);
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay;
-		displayFreeze->box.pos = mm2px(Vec(3.677, 13.711));
+		displayFreeze->box.pos = mm2px(Vec(6.804, 13.711));
 		displayFreeze->module = module;
-		nebulaeFramebuffer->addChild(displayFreeze);
+		etesiaFramebuffer->addChild(displayFreeze);
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(7.677, 25.607)), module, Etesia::INPUT_FREEZE));
 		CKD6* freezeButton = createParamCentered<CKD6>(mm2px(Vec(21.529, 25.607)), module, Etesia::PARAM_FREEZE);
@@ -574,7 +574,7 @@ struct EtesiaWidget : ModuleWidget {
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
 		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
 		displayModel->module = module;
-		nebulaeFramebuffer->addChild(displayModel);
+		etesiaFramebuffer->addChild(displayModel);
 
 		addParam(createParamCentered<Sanguine1PGrayCap>(mm2px(Vec(129.805, 25.227)), module, Etesia::PARAM_MODE));
 
@@ -583,7 +583,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay;
 		displayPosition->box.pos = mm2px(Vec(3.614, 65.457));
 		displayPosition->module = module;
-		nebulaeFramebuffer->addChild(displayPosition);
+		etesiaFramebuffer->addChild(displayPosition);
 
 		addInput(createInputCentered<BananutBlack>(mm2px(Vec(11.763, 76.776)), module, Etesia::INPUT_POSITION));
 
@@ -592,7 +592,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay;
 		displayDensity->box.pos = mm2px(Vec(21.573, 65.457));
 		displayDensity->module = module;
-		nebulaeFramebuffer->addChild(displayDensity);
+		etesiaFramebuffer->addChild(displayDensity);
 
 		addInput(createInputCentered<BananutBlack>(mm2px(Vec(29.722, 76.776)), module, Etesia::INPUT_DENSITY));
 
@@ -601,7 +601,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay;
 		displaySize->box.pos = mm2px(Vec(39.533, 65.457));
 		displaySize->module = module;
-		nebulaeFramebuffer->addChild(displaySize);
+		etesiaFramebuffer->addChild(displaySize);
 
 		addInput(createInputCentered<BananutBlack>(mm2px(Vec(47.682, 76.776)), module, Etesia::INPUT_SIZE));
 
@@ -610,7 +610,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay;
 		displayTexture->box.pos = mm2px(Vec(57.495, 65.457));
 		displayTexture->module = module;
-		nebulaeFramebuffer->addChild(displayTexture);
+		etesiaFramebuffer->addChild(displayTexture);
 
 		addInput(createInputCentered<BananutBlack>(mm2px(Vec(65.644, 76.776)), module, Etesia::INPUT_TEXTURE));
 
@@ -619,7 +619,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay;
 		displayPitch->box.pos = mm2px(Vec(97.489, 48.465));
 		displayPitch->module = module;
-		nebulaeFramebuffer->addChild(displayPitch);
+		etesiaFramebuffer->addChild(displayPitch);
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 59.887)), module, Etesia::INPUT_PITCH));
 
@@ -628,14 +628,14 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay;
 		displayBlend->box.pos = mm2px(Vec(77.969, 48.465));
 		displayBlend->module = module;
-		nebulaeFramebuffer->addChild(displayBlend);
+		etesiaFramebuffer->addChild(displayBlend);
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 59.887)), module, Etesia::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay;
 		displayTrigger->box.pos = mm2px(Vec(117.065, 48.465));
 		displayTrigger->module = module;
-		nebulaeFramebuffer->addChild(displayTrigger);
+		etesiaFramebuffer->addChild(displayTrigger);
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 59.887)), module, Etesia::INPUT_TRIGGER));
 
@@ -644,7 +644,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay;
 		displaySpread->box.pos = mm2px(Vec(77.969, 84.0));
 		displaySpread->module = module;
-		nebulaeFramebuffer->addChild(displaySpread);
+		etesiaFramebuffer->addChild(displaySpread);
 
 		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(86.118, 96.727)), module, Etesia::PARAM_SPREAD));
 
@@ -653,7 +653,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay;
 		displayFeedback->box.pos = mm2px(Vec(97.489, 84.0));
 		displayFeedback->module = module;
-		nebulaeFramebuffer->addChild(displayFeedback);
+		etesiaFramebuffer->addChild(displayFeedback);
 
 		addParam(createParamCentered<Sanguine1PPurple>(mm2px(Vec(105.638, 96.727)), module, Etesia::PARAM_FEEDBACK));
 
@@ -662,7 +662,7 @@ struct EtesiaWidget : ModuleWidget {
 		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay;
 		displayReverb->box.pos = mm2px(Vec(117.065, 84.0));
 		displayReverb->module = module;
-		nebulaeFramebuffer->addChild(displayReverb);
+		etesiaFramebuffer->addChild(displayReverb);
 
 		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(125.214, 96.727)), module, Etesia::PARAM_REVERB));
 
