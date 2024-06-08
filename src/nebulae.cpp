@@ -46,7 +46,6 @@ static const std::vector<std::string> buttonTexts{
 	"Input",
 	"Output",
 	"Blends",
-	"",
 	"Momentary"
 };
 
@@ -109,7 +108,6 @@ struct Nebulae : Module {
 		LEDS_INPUT,
 		LEDS_OUTPUT,
 		LEDS_PARAMETERS,
-		LED_MODES_COUNT,
 		LEDS_MOMENTARY
 	} ledMode = LEDS_INPUT;
 
@@ -148,6 +146,8 @@ struct Nebulae : Module {
 
 	uint32_t displayTimeout = 0;
 
+	bool lastFrozen = false;
+	bool displaySwitched = false;
 	bool triggered = false;
 
 	uint8_t* block_mem;
@@ -285,10 +285,13 @@ struct Nebulae : Module {
 			cloudsProcessor->set_playback_mode(playbackMode);
 			cloudsProcessor->Prepare();
 
+			bool frozen = params[PARAM_FREEZE].getValue();
+
 			clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
 			cloudsParameters->trigger = triggered;
 			cloudsParameters->gate = triggered;
-			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || params[PARAM_FREEZE].getValue());
+			// TODO: use schmidt trigger to get freeze value.
+			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
 			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
 			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
 			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.0, -48.0f, 48.0f);
@@ -302,6 +305,24 @@ struct Nebulae : Module {
 
 			clouds::ShortFrame output[32];
 			cloudsProcessor->Process(input, output, 32);
+
+			if (frozen && !lastFrozen) {
+				lastFrozen = true;
+				if (!displaySwitched) {
+					ledMode = LEDS_OUTPUT;
+					lastLedMode = LEDS_OUTPUT;
+				}
+			}
+			else if (!frozen && lastFrozen) {
+				lastFrozen = false;
+				if (!displaySwitched) {
+					ledMode = LEDS_INPUT;
+					lastLedMode = LEDS_INPUT;
+				}
+				else {
+					displaySwitched = false;
+				}
+			}
 
 			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 1.0 : 0.0, args.sampleTime);
 
@@ -353,7 +374,7 @@ struct Nebulae : Module {
 
 		vuMeter.process(args.sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-		lights[LIGHT_FREEZE].setBrightness(cloudsParameters->freeze ? 0.75 : 0.0);
+		lights[LIGHT_FREEZE].setBrightness(cloudsParameters->freeze ? 0.75f : 0.0f);
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
@@ -408,7 +429,7 @@ struct Nebulae : Module {
 			}
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = LedModes((ledMode + 1) % LED_MODES_COUNT);
+				ledMode = LedModes((ledMode + 1) % 3);
 				lastLedMode = ledMode;
 				displayTimeout = 0;
 				lastBlend = params[PARAM_BLEND].getValue();
@@ -417,6 +438,13 @@ struct Nebulae : Module {
 				lastReverb = params[PARAM_REVERB].getValue();
 
 				paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + buttonTexts[ledMode];
+
+				if (lastFrozen) {
+					displaySwitched = true;
+				}
+				else {
+					displaySwitched = false;
+				}
 			}
 
 			// These could probably do with base colored lights: they are never colorfully changed.
@@ -445,9 +473,6 @@ struct Nebulae : Module {
 					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
 					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
-				break;
-			}
-			default: {
 				break;
 			}
 			}
