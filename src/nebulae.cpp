@@ -244,9 +244,7 @@ struct Nebulae : Module {
 		}
 
 		// Trigger
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 1.0) {
-			triggered = true;
-		}
+		triggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
 
 		// Render frames
 		if (outputBuffer.empty()) {
@@ -290,7 +288,6 @@ struct Nebulae : Module {
 			clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
 			cloudsParameters->trigger = triggered;
 			cloudsParameters->gate = triggered;
-			// TODO: use schmidt trigger to get freeze value.
 			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
 			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
 			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);

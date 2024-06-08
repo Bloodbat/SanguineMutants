@@ -263,9 +263,7 @@ struct Etesia : Module {
 		}
 
 		// Trigger
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 1.0) {
-			triggered = true;
-		}
+		triggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
 
 		// Render frames
 		if (outputBuffer.empty()) {
@@ -303,13 +301,12 @@ struct Etesia : Module {
 			etesiaProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
 			etesiaProcessor->set_playback_mode(playbackMode);
 			etesiaProcessor->Prepare();
-			
+
 			bool frozen = params[PARAM_FREEZE].getValue();
 
 			etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 			etesiaParameters->trigger = triggered;
 			etesiaParameters->gate = triggered;
-			// TODO: use schmidt trigger to get freeze value.
 			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
 			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
 			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
@@ -325,7 +322,7 @@ struct Etesia : Module {
 
 			etesia::ShortFrame output[32];
 			etesiaProcessor->Process(input, output, 32);
-			
+
 			if (frozen && !lastFrozen) {
 				lastFrozen = true;
 				if (!displaySwitched) {
@@ -478,7 +475,7 @@ struct Etesia : Module {
 				lastReverb = params[PARAM_REVERB].getValue();
 
 				paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + etesiaButtonTexts[ledMode];
-				
+
 				if (lastFrozen) {
 					displaySwitched = true;
 				}
