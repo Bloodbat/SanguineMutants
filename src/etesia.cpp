@@ -36,10 +36,10 @@ struct EtesiaModeDisplay {
 };
 
 static const std::vector<EtesiaModeDisplay> modeDisplays{
-	{"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",       "Quantize / Parts", "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Freeze",  "Position",     "Density",          "Size",             "Texture",           "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",             "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",             "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
+	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",       "Quantize / Parts",  "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",   "Reverb"},
 	{"Freeze",  "Pre-delay",    "Decay",            "Size",             "Dampen LP-V Λ-HP",  "Pitch",     "Clock",   "Dry/Wet",    "Diffusion", "Mod. Speed", "Mod. Amount"},
 	{"Voice",   "Timbre",       "Decay",            "Chord",            "Filter LP-V Λ-BP",  "Pitch",     "Burst",   "Distortion", "Stereo",    "Harmonics",  "Scatter"}
 };
