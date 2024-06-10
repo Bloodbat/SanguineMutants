@@ -13,3 +13,4 @@ extern Model* modelContextus;
 extern Model* modelNebulae;
 extern Model* modelEtesia;
 extern Model* modelMortuus;
+extern Model* modelFluctus;
