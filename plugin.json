@@ -107,6 +107,16 @@
         "Hardware clone",
         "Dual"
       ]
+    },
+    {
+      "slug": "Sanguine-Fluctus",
+      "name": "Sanguine Etesia",
+      "description": "A texture synthesizer based on the Kammerl Beat-Repeat firmware",
+      "tags": [
+        "Granular",
+        "Reverb",
+        "Hardware clone"
+      ]
     }
   ]
 }

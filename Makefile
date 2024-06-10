@@ -83,6 +83,15 @@ SOURCES += alt_firmware/deadman/number_station/deadman_number_station.cc
 SOURCES += alt_firmware/deadman/number_station/deadman_bytebeats.cc
 SOURCES += alt_firmware/deadman/drums/deadman_cymbal.cc
 
+SOURCES += alt_firmware/fluctus/dsp/fluctus_granular_processor.cc
+SOURCES += alt_firmware/fluctus/fluctus_resources.cc
+SOURCES += alt_firmware/fluctus/dsp/fluctus_correlator.cc
+SOURCES += alt_firmware/fluctus/dsp/fluctus_mu_law.cc
+SOURCES += alt_firmware/fluctus/dsp/pvoc/fluctus_spectral_clouds_transformation.cc
+SOURCES += alt_firmware/fluctus/dsp/pvoc/fluctus_phase_vocoder.cc
+SOURCES += alt_firmware/fluctus/dsp/pvoc/fluctus_stft.cc
+SOURCES += alt_firmware/fluctus/dsp/fluctus_kammerl_player.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..
