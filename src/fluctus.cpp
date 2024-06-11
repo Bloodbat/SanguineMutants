@@ -11,7 +11,7 @@ static const std::vector<FluctusModeInfo> modeList{
 	{ "GRANULAR", "Granular mode" },
 	{ "STRETCH", "Pitch shifter/time stretcher" },
 	{ "LOOPING DLY", "Looping delay" },
-	{ "SPCT. CLOUD", "Spectral clouds" },
+	{ "SPCT. CLOUDS", "Spectral clouds" },
 	{ "BEAT-REPEAT", "Beat-repeat " },
 };
 
