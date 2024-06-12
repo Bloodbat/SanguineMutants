@@ -11,6 +11,8 @@
 #include "renaissance/renaissance_quantizer.h"
 #include "renaissance/renaissance_quantizer_scales.h"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 struct Contextus : Module {
 	enum ParamIds {
 		PARAM_FINE,

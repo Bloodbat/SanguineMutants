@@ -2,6 +2,8 @@
 #include "sanguinecomponents.hpp"
 #include "clouds/dsp/granular_processor.h"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 struct ModeInfo {
 	std::string display;
 	std::string menuLabel;

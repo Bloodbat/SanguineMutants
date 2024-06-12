@@ -2,6 +2,8 @@
 #include "sanguinecomponents.hpp"
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 struct EtesiaModeInfo {
 	std::string display;
 	std::string menuLabel;

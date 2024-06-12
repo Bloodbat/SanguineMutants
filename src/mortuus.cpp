@@ -2,6 +2,8 @@
 #include "deadman/deadman_processors.h"
 #include "sanguinecomponents.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 enum SwitchIndex {
 	SWITCH_TWIN_MODE,
 	SWITCH_EXPERT,

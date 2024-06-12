@@ -2,6 +2,8 @@
 #include "warps/dsp/modulator.h"
 #include "sanguinecomponents.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 static const uint8_t paletteAlgorithm[10][3] = {
   { 0, 192, 64 },
   { 64, 255, 0 },

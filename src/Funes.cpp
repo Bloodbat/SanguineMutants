@@ -1,6 +1,8 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 #pragma GCC diagnostic push
 
 #ifndef __clang__
