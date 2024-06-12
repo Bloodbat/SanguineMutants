@@ -11,6 +11,8 @@
 #include "braids/quantizer.h"
 #include "braids/quantizer_scales.h"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 struct Nodi : Module {
 	enum ParamIds {
 		PARAM_FINE,

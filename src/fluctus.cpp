@@ -2,6 +2,8 @@
 #include "sanguinecomponents.hpp"
 #include "fluctus/dsp/fluctus_granular_processor.h"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 struct FluctusModeInfo {
 	std::string display;
 	std::string menuLabel;
