@@ -14,3 +14,4 @@ extern Model* modelNebulae;
 extern Model* modelEtesia;
 extern Model* modelMortuus;
 extern Model* modelFluctus;
+extern Model* modelIncurvationes;

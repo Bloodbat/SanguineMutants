@@ -11,6 +11,10 @@ struct BananutBlack : app::SvgPort {
 	BananutBlack();
 };
 
+struct BananutBlue : app::SvgPort {
+	BananutBlue();
+};
+
 struct BananutGreen : app::SvgPort {
 	BananutGreen();
 };
@@ -21,6 +25,10 @@ struct BananutPurple : app::SvgPort {
 
 struct BananutRed : app::SvgPort {
 	BananutRed();
+};
+
+struct BananutYellow : app::SvgPort {
+	BananutYellow();
 };
 
 // Knobs
