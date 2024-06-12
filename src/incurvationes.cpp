@@ -101,8 +101,7 @@ struct Incurvationes : Module {
 		warpsModulator.Init(96000.0f);
 	}
 
-	void process(const ProcessArgs& args) override {
-		// State trigger		
+	void process(const ProcessArgs& args) override {		
 		warpsParameters->carrier_shape = params[PARAM_CARRIER].getValue();
 		bEasterEggEnabled = params[PARAM_EASTER_EGG].getValue();
 
