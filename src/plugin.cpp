@@ -16,4 +16,5 @@ void init(rack::Plugin* p) {
 	p->addModel(modelEtesia);
 	p->addModel(modelMortuus);
 	p->addModel(modelFluctus);
+	p->addModel(modelIncurvationes);
 }

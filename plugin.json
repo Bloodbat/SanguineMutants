@@ -117,6 +117,16 @@
         "Reverb",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Incurvationes",
+      "name": "Sanguine Incurvationes",
+      "description": "A meta modulator based on Mutable Instruments Warps",
+      "tags": [
+        "Ring modulator",
+        "Waveshaper",
+        "Hardware clone"
+      ]
     }
   ]
 }
