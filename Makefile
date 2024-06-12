@@ -98,6 +98,12 @@ SOURCES += eurorack/warps/dsp/vocoder.cc
 SOURCES += eurorack/warps/dsp/filter_bank.cc
 SOURCES += eurorack/warps/resources.cc
 
+SOURCES += alt_firmware/distortiones/dsp/distortiones_modulator.cc
+SOURCES += alt_firmware/distortiones/dsp/distortiones_oscillator.cc
+SOURCES += alt_firmware/distortiones/dsp/distortiones_vocoder.cc
+SOURCES += alt_firmware/distortiones/dsp/distortiones_filter_bank.cc
+SOURCES += alt_firmware/distortiones/distortiones_resources.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..
