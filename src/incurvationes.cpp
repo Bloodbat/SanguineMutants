@@ -119,7 +119,11 @@ struct Incurvationes : Module {
 
 			warpsParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() + inputs[INPUT_LEVEL1].getVoltage() / 5.0f, 0.0f, 1.0f);
 			warpsParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() + inputs[INPUT_LEVEL2].getVoltage() / 5.0f, 0.0f, 1.0f);
-			warpsParameters->modulation_algorithm = clamp(params[PARAM_ALGORITHM].getValue() / 8.0f + inputs[INPUT_ALGORITHM].getVoltage() / 5.0f, 0.0f, 1.0f);
+
+			float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.0f;
+			float algorithmCv = inputs[INPUT_ALGORITHM].getVoltage() / 5.0f;
+
+			warpsParameters->modulation_algorithm = clamp(algorithmValue + algorithmCv, 0.0f, 1.0f);
 
 			const uint8_t(*palette)[3];
 			float zone;
@@ -142,8 +146,8 @@ struct Incurvationes : Module {
 
 			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + inputs[INPUT_TIMBRE].getVoltage() / 5.0f, 0.0f, 1.0f);
 
-			warpsParameters->frequency_shift_pot = params[PARAM_ALGORITHM].getValue() / 8.0;
-			warpsParameters->frequency_shift_cv = clamp(inputs[INPUT_ALGORITHM].getVoltage() / 5.0f, -1.0f, 1.0f);
+			warpsParameters->frequency_shift_pot = algorithmValue;
+			warpsParameters->frequency_shift_cv = clamp(algorithmCv, -1.0f, 1.0f);
 			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
 			warpsParameters->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0 * inputs[INPUT_LEVEL1].getNormalVoltage(2.0) + 12.0;
 			warpsParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
