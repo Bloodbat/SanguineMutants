@@ -92,6 +92,12 @@ SOURCES += alt_firmware/fluctus/dsp/pvoc/fluctus_phase_vocoder.cc
 SOURCES += alt_firmware/fluctus/dsp/pvoc/fluctus_stft.cc
 SOURCES += alt_firmware/fluctus/dsp/fluctus_kammerl_player.cc
 
+SOURCES += eurorack/warps/dsp/modulator.cc
+SOURCES += eurorack/warps/dsp/oscillator.cc
+SOURCES += eurorack/warps/dsp/vocoder.cc
+SOURCES += eurorack/warps/dsp/filter_bank.cc
+SOURCES += eurorack/warps/resources.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..

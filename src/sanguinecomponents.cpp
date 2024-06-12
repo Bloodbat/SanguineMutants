@@ -11,6 +11,10 @@ BananutBlack::BananutBlack() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
 }
 
+BananutBlue::BananutBlue() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlue.svg")));
+}
+
 BananutGreen::BananutGreen() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutGreen.svg")));
 }
@@ -21,6 +25,10 @@ BananutPurple::BananutPurple() {
 
 BananutRed::BananutRed() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
+}
+
+BananutYellow::BananutYellow() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutYellow.svg")));
 }
 
 // Knobs
