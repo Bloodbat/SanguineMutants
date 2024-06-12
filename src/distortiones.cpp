@@ -1,21 +1,9 @@
 #include "plugin.hpp"
 #include "distortiones/dsp/distortiones_modulator.h"
 #include "sanguinecomponents.hpp"
+#include "warpiespals.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
-
-static const uint8_t distortionesPalette[10][3] = {
-  { 0, 192, 64 },
-  { 64, 255, 0 },
-  { 255, 255, 0 },
-  { 255, 64, 0 },
-  { 255, 0, 0 },
-  { 255, 0, 64 },
-  { 255, 0, 255 },
-  { 0, 0, 255 },
-  { 0, 255, 192 },
-  { 0, 255, 192 }
-};
 
 static const uint8_t distortionesPaletteFeatureMode[10][3] = {
    { 255, 64, 0 },
@@ -28,19 +16,6 @@ static const uint8_t distortionesPaletteFeatureMode[10][3] = {
    { 255, 0, 255 },
    { 0, 255, 192 },
    { 255, 0, 0 }
-};
-
-static const uint8_t distortionesPaletteFreqShift[10][3] = {
-  { 0, 0, 64 },
-  { 0, 0, 255 },
-  { 0, 255, 192 },
-  { 0, 192, 64 },
-  { 64, 255, 0 },
-  { 255, 255, 0 },
-  { 255, 192, 0 },
-  { 255, 64, 0 },
-  { 255, 0, 0 },
-  { 255, 0, 0 }
 };
 
 struct Distortiones : Module {
@@ -188,10 +163,10 @@ struct Distortiones : Module {
 				const uint8_t(*palette)[3];
 				float zone;
 				if (featureMode != distortiones::FEATURE_MODE_META) {
-					palette = distortionesPaletteFreqShift;
+					palette = paletteWarpsFreqsShift;
 				}
 				else {
-					palette = distortionesPalette;
+					palette = paletteWarpsDefault;
 				}
 
 				zone = 8.0f * distortionesParameters->modulation_algorithm;
