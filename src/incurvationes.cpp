@@ -1,34 +1,9 @@
 #include "plugin.hpp"
 #include "warps/dsp/modulator.h"
 #include "sanguinecomponents.hpp"
+#include "warpiespals.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
-
-static const uint8_t paletteAlgorithm[10][3] = {
-  { 0, 192, 64 },
-  { 64, 255, 0 },
-  { 255, 255, 0 },
-  { 255, 64, 0 },
-  { 255, 0, 0 },
-  { 255, 0, 64 },
-  { 255, 0, 255 },
-  { 0, 0, 255 },
-  { 0, 255, 192 },
-  { 0, 255, 192 },
-};
-
-static const uint8_t paletteEasterEgg[10][3] = {
-  { 0, 0, 64 },
-  { 0, 0, 255 },
-  { 0, 255, 192 },
-  { 0, 192, 64 },
-  { 64, 255, 0 },
-  { 255, 255, 0 },
-  { 255, 192, 0 },
-  { 255, 64, 0 },
-  { 255, 0, 0 },
-  { 255, 0, 0 },
-};
 
 struct Incurvationes : Module {
 	enum ParamIds {
@@ -128,11 +103,11 @@ struct Incurvationes : Module {
 			float zone;
 			if (!bEasterEggEnabled) {
 				zone = 8.0f * warpsParameters->modulation_algorithm;
-				palette = paletteAlgorithm;
+				palette = paletteWarpsDefault;
 			}
 			else {
 				zone = 8.0f * warpsParameters->phase_shift;
-				palette = paletteEasterEgg;
+				palette = paletteWarpsFreqsShift;
 			}
 
 			MAKE_INTEGRAL_FRACTIONAL(zone);
