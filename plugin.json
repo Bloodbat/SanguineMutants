@@ -127,6 +127,17 @@
         "Waveshaper",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Distortiones",
+      "name": "Sanguine Distortiones",
+      "description": "A doctored meta modulator based on the Parasite alternative firmware for Warps",
+      "tags": [
+        "Ring modulator",
+        "Waveshaper",
+        "Effect",
+        "Hardware clone"
+      ]
     }
   ]
 }
