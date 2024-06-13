@@ -104,6 +104,12 @@ SOURCES += alt_firmware/distortiones/dsp/distortiones_vocoder.cc
 SOURCES += alt_firmware/distortiones/dsp/distortiones_filter_bank.cc
 SOURCES += alt_firmware/distortiones/distortiones_resources.cc
 
+SOURCES += alt_firmware/mutuus/dsp/mutuus_modulator.cc
+SOURCES += alt_firmware/mutuus/dsp/mutuus_oscillator.cc
+SOURCES += alt_firmware/mutuus/dsp/mutuus_vocoder.cc
+SOURCES += alt_firmware/mutuus/dsp/mutuus_filter_bank.cc
+SOURCES += alt_firmware/mutuus/mutuus_resources.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..
