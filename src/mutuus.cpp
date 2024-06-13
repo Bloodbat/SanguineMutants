@@ -121,14 +121,18 @@ struct Mutuus : Module {
 		if (++frame >= 60) {
 			frame = 0;
 
-			mutuusParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() + inputs[INPUT_LEVEL1].getVoltage() / 5.0f, 0.0f, 1.0f);
-			mutuusParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() + inputs[INPUT_LEVEL2].getVoltage() / 5.0f, 0.0f, 1.0f);
+			// From cv_scaler.cc and a PR by Brian Head to AI's repository.
+			float level1Cv = inputs[INPUT_LEVEL1].getNormalVoltage(5.f) / 5.f;
+			float level2Cv = inputs[INPUT_LEVEL2].getNormalVoltage(5.f) / 5.f;
 
-			mutuusParameters->raw_level_cv[0] = clamp(inputs[INPUT_LEVEL1].getVoltage() / 5.0f, 0.6f, 1.0f);
-			mutuusParameters->raw_level_cv[1] = clamp(inputs[INPUT_LEVEL2].getVoltage() / 5.0f, 0.6f, 1.0f);
+			mutuusParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * level1Cv, 0.f, 1.f);
+			mutuusParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * level2Cv, 0.f, 1.f);
 
-			mutuusParameters->raw_level[0] = clamp(params[PARAM_LEVEL1].getValue(), 0.0f, 1.0f);
-			mutuusParameters->raw_level[1] = clamp(params[PARAM_LEVEL2].getValue(), 0.0f, 1.0f);
+			mutuusParameters->raw_level_cv[0] = clamp(level1Cv, 0.f, 1.f);
+			mutuusParameters->raw_level_cv[1] = clamp(level2Cv, 0.f, 1.f);
+
+			mutuusParameters->raw_level[0] = mutuusParameters->channel_drive[0];
+			mutuusParameters->raw_level[1] = mutuusParameters->channel_drive[1];
 
 			mutuusParameters->raw_level_pot[0] = clamp(params[PARAM_LEVEL1].getValue(), 0.0f, 1.0f);
 			mutuusParameters->raw_level_pot[1] = clamp(params[PARAM_LEVEL2].getValue(), 0.0f, 1.0f);
@@ -143,7 +147,7 @@ struct Mutuus : Module {
 				{
 				case mutuus::FEATURE_MODE_DELAY: {
 					mutuusParameters->modulation_algorithm = clamp(algorithmValue + algorithmCV, 0.0f, 1.0f);
-					mutuusParameters->raw_algorithm = clamp(algorithmValue, 0.f, 1.f);
+					mutuusParameters->raw_algorithm = mutuusParameters->modulation_algorithm;
 					mutuusParameters->raw_algorithm_cv = clamp(algorithmCV, -1.0f, 1.0f);
 					break;
 				}
