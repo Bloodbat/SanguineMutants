@@ -138,6 +138,18 @@
         "Effect",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Mutuus",
+      "name": "Sanguine Mutuus",
+      "description": "An experimental meta modulator based on the Symbiote alternative firmware for Warps",
+      "tags": [
+        "Ring modulator",
+        "Waveshaper",
+        "Effect",
+        "Reverb",
+        "Hardware clone"
+      ]
     }
   ]
 }
