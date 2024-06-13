@@ -57,6 +57,8 @@ struct Mutuus : Module {
 	Mutuus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
+		configButton(PARAM_STEREO, "Dual filter stereo");
+
 		configButton(PARAM_MODE_SWITCH, "Mode select");
 
 		configParam(PARAM_ALGORITHM, 0.0, 8.0, 0.0, "Algorithm");
