@@ -40,7 +40,7 @@ struct Incurvationes : Module {
 	int frame = 0;
 	warps::Modulator warpsModulator;
 	warps::ShortFrame inputFrames[60] = {};
-	warps::ShortFrame outputFrames[60] = {};	
+	warps::ShortFrame outputFrames[60] = {};
 
 	bool bEasterEggEnabled = false;
 
@@ -76,7 +76,7 @@ struct Incurvationes : Module {
 		warpsModulator.Init(96000.0f);
 	}
 
-	void process(const ProcessArgs& args) override {		
+	void process(const ProcessArgs& args) override {
 		warpsParameters->carrier_shape = params[PARAM_CARRIER].getValue();
 		bEasterEggEnabled = params[PARAM_EASTER_EGG].getValue();
 
@@ -91,8 +91,9 @@ struct Incurvationes : Module {
 		if (++frame >= 60) {
 			frame = 0;
 
-			warpsParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() + inputs[INPUT_LEVEL1].getVoltage() / 5.0f, 0.0f, 1.0f);
-			warpsParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() + inputs[INPUT_LEVEL2].getVoltage() / 5.0f, 0.0f, 1.0f);
+			// From cv_scaler.cc and a PR by Brian Head to AI's repository.
+			warpsParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * inputs[INPUT_LEVEL1].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
+			warpsParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * inputs[INPUT_LEVEL2].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
 
 			float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.0f;
 			float algorithmCv = inputs[INPUT_ALGORITHM].getVoltage() / 5.0f;

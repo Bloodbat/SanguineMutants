@@ -114,11 +114,12 @@ struct Distortiones : Module {
 		if (++frame >= 60) {
 			frame = 0;
 
-			distortionesParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() + inputs[INPUT_LEVEL1].getVoltage() / 5.0f, 0.0f, 1.0f);
-			distortionesParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() + inputs[INPUT_LEVEL2].getVoltage() / 5.0f, 0.0f, 1.0f);
+			// From cv_scaler.cc and a PR by Brian Head to AI's repository.
+			distortionesParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * inputs[INPUT_LEVEL1].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
+			distortionesParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * inputs[INPUT_LEVEL2].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
 
-			distortionesParameters->raw_level[0] = clamp(params[PARAM_LEVEL1].getValue(), 0.0f, 1.0f);
-			distortionesParameters->raw_level[1] = clamp(params[PARAM_LEVEL2].getValue(), 0.0f, 1.0f);
+			distortionesParameters->raw_level[0] = distortionesParameters->channel_drive[0];
+			distortionesParameters->raw_level[1] = distortionesParameters->channel_drive[1];
 
 			if (!bModeSwitchEnabled) {
 				lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
