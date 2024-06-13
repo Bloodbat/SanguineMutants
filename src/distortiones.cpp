@@ -5,19 +5,6 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-static const uint8_t distortionesPaletteFeatureMode[10][3] = {
-   { 255, 64, 0 },
-   { 0, 192, 64 },
-   { 255, 0, 64 },
-   { 0, 255, 192 },
-   { 64, 255, 0 },
-   { 0, 0, 255 },
-   { 255, 255, 0 },
-   { 255, 0, 255 },
-   { 0, 255, 192 },
-   { 255, 0, 0 }
-};
-
 struct Distortiones : Module {
 	enum ParamIds {
 		PARAM_ALGORITHM,
@@ -195,7 +182,7 @@ struct Distortiones : Module {
 			uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
 			for (int i = 0; i < 3; i++) {
-				lights[LIGHT_ALGORITHM + i].setBrightness(((distortionesPaletteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
 			}
 		}
 

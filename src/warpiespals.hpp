@@ -25,3 +25,16 @@ static const uint8_t paletteWarpsFreqsShift[10][3] = {
   { 255, 0, 0 },
   { 255, 0, 0 },
 };
+
+static const uint8_t paletteWarpsParasiteFeatureMode[10][3] = {
+   { 255, 64, 0 },
+   { 0, 192, 64 },
+   { 255, 0, 64 },
+   { 0, 255, 192 },
+   { 64, 255, 0 },
+   { 0, 0, 255 },
+   { 255, 255, 0 },
+   { 255, 0, 255 },
+   { 0, 255, 192 },
+   { 255, 0, 0 }
+};
