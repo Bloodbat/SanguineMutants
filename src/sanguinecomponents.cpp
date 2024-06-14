@@ -599,6 +599,22 @@ void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
+SanguineMonoInputLight::SanguineMonoInputLight() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/in_mono_light.svg")));
+}
+
+SanguineMonoOutputLight::SanguineMonoOutputLight() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/out_mono_light.svg")));
+}
+
+SanguinePolyInputLight::SanguinePolyInputLight() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/in_light.svg")));
+}
+
+SanguinePolyOutputLight::SanguinePolyOutputLight() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/out_light.svg")));
+}
+
 // Drawing utils
 
 void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor)
