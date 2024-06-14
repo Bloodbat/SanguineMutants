@@ -110,13 +110,22 @@ struct Distortiones : Module {
 
 		lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
 
+		simd::float_4 f4Voltages;
+
 		// Buffer loop
 		if (++frame >= 60) {
 			frame = 0;
 
-			// From cv_scaler.cc and a PR by Brian Head to AI's repository.
-			distortionesParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * inputs[INPUT_LEVEL1].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
-			distortionesParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * inputs[INPUT_LEVEL2].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
+			// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
+			f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f);
+			f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f);
+			f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage();
+			f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage();
+
+			f4Voltages /= 5.f;
+
+			distortionesParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
+			distortionesParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
 
 			distortionesParameters->raw_level[0] = distortionesParameters->channel_drive[0];
 			distortionesParameters->raw_level[1] = distortionesParameters->channel_drive[1];
@@ -125,14 +134,13 @@ struct Distortiones : Module {
 				lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
 
 				float algorithmValue = lastAlgorithmValue / 8.0;
-				float algorithmCV = inputs[INPUT_ALGORITHM].getVoltage() / 5.0f;
 
 				switch (featureMode)
 				{
 				case distortiones::FEATURE_MODE_DELAY: {
-					distortionesParameters->modulation_algorithm = clamp(algorithmValue + algorithmCV, 0.0f, 1.0f);
+					distortionesParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
 					distortionesParameters->raw_algorithm = distortionesParameters->modulation_algorithm;
-					distortionesParameters->raw_algorithm_cv = clamp(algorithmCV, -1.0f, 1.0f);
+					distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
 					break;
 				}
 				default: {
@@ -140,9 +148,9 @@ struct Distortiones : Module {
 					val = stmlib::Interpolate(distortiones::lut_pot_curve, val, 512.0f);
 					distortionesParameters->raw_algorithm_pot = val;
 
-					distortionesParameters->raw_algorithm_cv = clamp(algorithmCV, -1.0f, 1.0f);
+					distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
 
-					distortionesParameters->modulation_algorithm = clamp(algorithmValue + algorithmCV, 0.0f, 1.0f);
+					distortionesParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
 					distortionesParameters->raw_algorithm = distortionesParameters->modulation_algorithm;
 					break;
 				}
@@ -167,7 +175,7 @@ struct Distortiones : Module {
 				}
 			}
 
-			distortionesParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + inputs[INPUT_TIMBRE].getVoltage() / 5.0f, 0.0f, 1.0f);
+			distortionesParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
 
 			distortionesParameters->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0 * inputs[INPUT_LEVEL1].getNormalVoltage(2.0) + 12.0;
 			distortionesParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
@@ -187,10 +195,25 @@ struct Distortiones : Module {
 			}
 		}
 
-		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
-		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
-		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 0x8000 * 5.0);
-		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 0x8000 * 5.0);
+		simd::float_4 f4Inputs;
+
+		f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
+		f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
+
+		f4Inputs = f4Inputs / 16.f * 0x8000;
+		f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+
+		inputFrames[frame].l = f4Inputs[0];
+		inputFrames[frame].r = f4Inputs[1];
+
+		simd::float_4 f4Outputs;
+		f4Outputs[0] = outputFrames[frame].l;
+		f4Outputs[1] = outputFrames[frame].r;
+
+		f4Outputs = f4Outputs / 0x8000 * 5.f;
+
+		outputs[OUTPUT_MODULATOR].setVoltage(f4Outputs[0]);
+		outputs[OUTPUT_AUX].setVoltage(f4Outputs[1]);
 	}
 
 	long long getSystemTimeMs() {

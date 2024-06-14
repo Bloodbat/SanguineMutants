@@ -87,16 +87,25 @@ struct Incurvationes : Module {
 
 		lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? 1.f : 0.f);
 
+		simd::float_4 f4Voltages;
+
 		// Buffer loop
 		if (++frame >= 60) {
 			frame = 0;
 
-			// From cv_scaler.cc and a PR by Brian Head to AI's repository.
-			warpsParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * inputs[INPUT_LEVEL1].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
-			warpsParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * inputs[INPUT_LEVEL2].getNormalVoltage(5.f) / 5.f, 0.f, 1.f);
+			// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
+			f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f);
+			f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f);
+			f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage();
+			f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage();
+
+			f4Voltages /= 5.f;
+
+			warpsParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
+			warpsParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
 
 			float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.0f;
-			float algorithmCv = inputs[INPUT_ALGORITHM].getVoltage() / 5.0f;
+			float algorithmCv = f4Voltages[2];
 
 			warpsParameters->modulation_algorithm = clamp(algorithmValue + algorithmCv, 0.0f, 1.0f);
 
@@ -119,7 +128,7 @@ struct Incurvationes : Module {
 				lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.0f);
 			}
 
-			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + inputs[INPUT_TIMBRE].getVoltage() / 5.0f, 0.0f, 1.0f);
+			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
 
 			warpsParameters->frequency_shift_pot = algorithmValue;
 			warpsParameters->frequency_shift_cv = clamp(algorithmCv, -1.0f, 1.0f);
@@ -130,10 +139,25 @@ struct Incurvationes : Module {
 			warpsModulator.Process(inputFrames, outputFrames, 60);
 		}
 
-		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
-		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
-		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 0x8000 * 5.0);
-		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 0x8000 * 5.0);
+		simd::float_4 f4Inputs;
+
+		f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
+		f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
+
+		f4Inputs = f4Inputs / 16.f * 0x8000;
+		f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+
+		inputFrames[frame].l = f4Inputs[0];
+		inputFrames[frame].r = f4Inputs[1];
+
+		simd::float_4 f4Outputs;
+		f4Outputs[0] = outputFrames[frame].l;
+		f4Outputs[1] = outputFrames[frame].r;
+
+		f4Outputs = f4Outputs / 0x8000 * 5.f;
+
+		outputs[OUTPUT_MODULATOR].setVoltage(f4Outputs[0]);
+		outputs[OUTPUT_AUX].setVoltage(f4Outputs[1]);
 	}
 };
 
