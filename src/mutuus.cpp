@@ -116,6 +116,20 @@ struct Mutuus : Module {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
+		if (bModeSwitchEnabled) {
+			featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+			mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
+
+			if (lightDivider.process()) {
+				int8_t ramp = getSystemTimeMs() >> 127;
+				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
+
+				for (int i = 0; i < 3; i++) {
+					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				}
+			}
+		}
+
 		lights[LIGHT_CARRIER + 0].value = (mutuusParameters->carrier_shape == 1 || mutuusParameters->carrier_shape == 2) ? 1.0 : 0.0;
 		lights[LIGHT_CARRIER + 1].value = (mutuusParameters->carrier_shape == 2 || mutuusParameters->carrier_shape == 3) ? 1.0 : 0.0;
 
@@ -204,20 +218,6 @@ struct Mutuus : Module {
 			mutuusParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
 
 			mutuusModulator.Process(inputFrames, outputFrames, 60);
-		}
-
-		if (bModeSwitchEnabled) {
-			featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-			mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
-
-			if (lightDivider.process()) {
-				int8_t ramp = getSystemTimeMs() >> 127;
-				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
-
-				for (int i = 0; i < 3; i++) {
-					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
-				}
-			}
 		}
 
 		simd::float_4 f4Inputs;

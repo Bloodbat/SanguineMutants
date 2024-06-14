@@ -110,6 +110,20 @@ struct Distortiones : Module {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
+		if (bModeSwitchEnabled) {
+			featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+			distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
+
+			if (lightDivider.process()) {
+				int8_t ramp = getSystemTimeMs() >> 127;
+				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
+
+				for (int i = 0; i < 3; i++) {
+					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				}
+			}
+		}
+
 		lights[LIGHT_CARRIER + 0].value = (distortionesParameters->carrier_shape == 1 || distortionesParameters->carrier_shape == 2) ? 1.0 : 0.0;
 		lights[LIGHT_CARRIER + 1].value = (distortionesParameters->carrier_shape == 2 || distortionesParameters->carrier_shape == 3) ? 1.0 : 0.0;
 
@@ -186,20 +200,6 @@ struct Distortiones : Module {
 			distortionesParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
 
 			distortionesModulator.Process(inputFrames, outputFrames, 60);
-		}
-
-		if (bModeSwitchEnabled) {
-			featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-			distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
-
-			if (lightDivider.process()) {
-				int8_t ramp = getSystemTimeMs() >> 127;
-				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
-
-				for (int i = 0; i < 3; i++) {
-					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
-				}
-			}
 		}
 
 		simd::float_4 f4Inputs;
