@@ -38,7 +38,11 @@ struct Distortiones : Module {
 
 	int featureMode;
 	int frame = 0;
+
+	const int kLightFrequency = 128;
+
 	dsp::BooleanTrigger btModeSwitch;
+	dsp::ClockDivider lightDivider;
 	distortiones::DistortionesModulator distortionesModulator;
 	distortiones::ShortFrame inputFrames[60] = {};
 	distortiones::ShortFrame outputFrames[60] = {};
@@ -80,6 +84,7 @@ struct Distortiones : Module {
 		distortionesModulator.Init(96000.0f);
 
 		featureMode = distortiones::FEATURE_MODE_META;
+		lightDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -187,11 +192,13 @@ struct Distortiones : Module {
 			featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
 			distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
 
-			int8_t ramp = getSystemTimeMs() >> 127;
-			uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
+			if (lightDivider.process()) {
+				int8_t ramp = getSystemTimeMs() >> 127;
+				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
-			for (int i = 0; i < 3; i++) {
-				lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				for (int i = 0; i < 3; i++) {
+					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				}
 			}
 		}
 
