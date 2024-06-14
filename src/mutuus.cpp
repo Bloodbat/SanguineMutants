@@ -116,13 +116,14 @@ struct Mutuus : Module {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
+		bool isLightsTurn = lightDivider.process();
+
 		if (bModeSwitchEnabled) {
 			featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
 			mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
 
-			if (lightDivider.process()) {
-				const float sampleTime = kLightFrequency * args.sampleTime;
-
+			if (isLightsTurn) {
+				float sampleTime = kLightFrequency * args.sampleTime;
 				int8_t ramp = getSystemTimeMs() >> 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
@@ -132,13 +133,15 @@ struct Mutuus : Module {
 			}
 		}
 
-		lights[LIGHT_CARRIER + 0].value = (mutuusParameters->carrier_shape == 1 || mutuusParameters->carrier_shape == 2) ? 1.0 : 0.0;
-		lights[LIGHT_CARRIER + 1].value = (mutuusParameters->carrier_shape == 2 || mutuusParameters->carrier_shape == 3) ? 1.0 : 0.0;
+		if (isLightsTurn) {
+			lights[LIGHT_CARRIER + 0].value = (mutuusParameters->carrier_shape == 1 || mutuusParameters->carrier_shape == 2) ? 1.0 : 0.0;
+			lights[LIGHT_CARRIER + 1].value = (mutuusParameters->carrier_shape == 2 || mutuusParameters->carrier_shape == 3) ? 1.0 : 0.0;
 
-		lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
+			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
 
-		mutuusModulator.set_alt_feature_mode(bool(params[PARAM_STEREO].getValue()));
-		lights[LIGHT_STEREO].setBrightness(mutuusModulator.alt_feature_mode() ? 1.f : 0.f);
+			mutuusModulator.set_alt_feature_mode(bool(params[PARAM_STEREO].getValue()));
+			lights[LIGHT_STEREO].setBrightness(mutuusModulator.alt_feature_mode() ? 1.f : 0.f);
+		}
 
 		simd::float_4 f4Voltages;
 
@@ -192,22 +195,24 @@ struct Mutuus : Module {
 				}
 				}
 
-				const uint8_t(*palette)[3];
-				float zone;
-				if (featureMode != mutuus::FEATURE_MODE_META) {
-					palette = paletteWarpsFreqsShift;
-				}
-				else {
-					palette = paletteWarpsDefault;
-				}
+				if (isLightsTurn) {
+					const uint8_t(*palette)[3];
+					float zone;
+					if (featureMode != mutuus::FEATURE_MODE_META) {
+						palette = paletteWarpsFreqsShift;
+					}
+					else {
+						palette = paletteWarpsDefault;
+					}
 
-				zone = 8.0f * mutuusParameters->modulation_algorithm;
-				MAKE_INTEGRAL_FRACTIONAL(zone);
-				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-				for (int i = 0; i < 3; i++) {
-					int a = palette[zone_integral][i];
-					int b = palette[zone_integral + 1][i];
-					lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+					zone = 8.0f * mutuusParameters->modulation_algorithm;
+					MAKE_INTEGRAL_FRACTIONAL(zone);
+					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+					for (int i = 0; i < 3; i++) {
+						int a = palette[zone_integral][i];
+						int b = palette[zone_integral + 1][i];
+						lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+					}
 				}
 			}
 
@@ -222,22 +227,28 @@ struct Mutuus : Module {
 			mutuusModulator.Process(inputFrames, outputFrames, 60);
 		}
 
-		simd::float_4 f4Inputs;
+		simd::float_4 f4Inputs = { 0.f, 0.f, 0.f, 0.f };
 
-		f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
-		f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
+		if (inputs[INPUT_CARRIER].isConnected() || inputs[INPUT_MODULATOR].isConnected()) {
 
-		f4Inputs = f4Inputs / 16.f * 0x8000;
-		f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+			f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
+			f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
+
+			f4Inputs = f4Inputs / 16.f * 0x8000;
+			f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+		}
 
 		inputFrames[frame].l = f4Inputs[0];
 		inputFrames[frame].r = f4Inputs[1];
 
-		simd::float_4 f4Outputs;
-		f4Outputs[0] = outputFrames[frame].l;
-		f4Outputs[1] = outputFrames[frame].r;
+		simd::float_4 f4Outputs = { 0.f, 0.f, 0.f, 0.f };
 
-		f4Outputs = f4Outputs / 0x8000 * 5.f;
+		if (outputs[OUTPUT_MODULATOR].isConnected() || outputs[OUTPUT_AUX].isConnected()) {
+			f4Outputs[0] = outputFrames[frame].l;
+			f4Outputs[1] = outputFrames[frame].r;
+
+			f4Outputs = f4Outputs / 0x8000 * 5.f;
+		}
 
 		outputs[OUTPUT_MODULATOR].setVoltage(f4Outputs[0]);
 		outputs[OUTPUT_AUX].setVoltage(f4Outputs[1]);
