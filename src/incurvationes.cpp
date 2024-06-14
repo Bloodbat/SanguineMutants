@@ -38,11 +38,15 @@ struct Incurvationes : Module {
 
 
 	int frame = 0;
+	const int kLightFrequency = 128;
+
 	warps::Modulator warpsModulator;
 	warps::ShortFrame inputFrames[60] = {};
 	warps::ShortFrame outputFrames[60] = {};
 
 	bool bEasterEggEnabled = false;
+
+	dsp::ClockDivider lightDivider;
 
 	warps::Parameters* warpsParameters = warpsModulator.mutable_parameters();
 
@@ -74,6 +78,8 @@ struct Incurvationes : Module {
 
 		memset(&warpsModulator, 0, sizeof(warpsModulator));
 		warpsModulator.Init(96000.0f);
+
+		lightDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -82,10 +88,14 @@ struct Incurvationes : Module {
 
 		warpsModulator.set_easter_egg(bEasterEggEnabled);
 
-		lights[LIGHT_CARRIER + 0].value = (warpsParameters->carrier_shape == 1 || warpsParameters->carrier_shape == 2) ? 1.0 : 0.0;
-		lights[LIGHT_CARRIER + 1].value = (warpsParameters->carrier_shape == 2 || warpsParameters->carrier_shape == 3) ? 1.0 : 0.0;
+		bool isLightsTurn = lightDivider.process();
 
-		lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? 1.f : 0.f);
+		if (isLightsTurn) {
+			lights[LIGHT_CARRIER + 0].value = (warpsParameters->carrier_shape == 1 || warpsParameters->carrier_shape == 2) ? 1.0 : 0.0;
+			lights[LIGHT_CARRIER + 1].value = (warpsParameters->carrier_shape == 2 || warpsParameters->carrier_shape == 3) ? 1.0 : 0.0;
+
+			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? 1.f : 0.f);
+		}
 
 		simd::float_4 f4Voltages;
 
@@ -109,23 +119,25 @@ struct Incurvationes : Module {
 
 			warpsParameters->modulation_algorithm = clamp(algorithmValue + algorithmCv, 0.0f, 1.0f);
 
-			const uint8_t(*palette)[3];
-			float zone;
-			if (!bEasterEggEnabled) {
-				zone = 8.0f * warpsParameters->modulation_algorithm;
-				palette = paletteWarpsDefault;
-			}
-			else {
-				zone = 8.0f * warpsParameters->phase_shift;
-				palette = paletteWarpsFreqsShift;
-			}
+			if (isLightsTurn) {
+				const uint8_t(*palette)[3];
+				float zone;
+				if (!bEasterEggEnabled) {
+					zone = 8.0f * warpsParameters->modulation_algorithm;
+					palette = paletteWarpsDefault;
+				}
+				else {
+					zone = 8.0f * warpsParameters->phase_shift;
+					palette = paletteWarpsFreqsShift;
+				}
 
-			MAKE_INTEGRAL_FRACTIONAL(zone);
-			int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-			for (int i = 0; i < 3; i++) {
-				int a = palette[zone_integral][i];
-				int b = palette[zone_integral + 1][i];
-				lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.0f);
+				MAKE_INTEGRAL_FRACTIONAL(zone);
+				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+				for (int i = 0; i < 3; i++) {
+					int a = palette[zone_integral][i];
+					int b = palette[zone_integral + 1][i];
+					lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.0f);
+				}
 			}
 
 			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
@@ -139,22 +151,27 @@ struct Incurvationes : Module {
 			warpsModulator.Process(inputFrames, outputFrames, 60);
 		}
 
-		simd::float_4 f4Inputs;
+		simd::float_4 f4Inputs = { 0.f, 0.f, 0.f, 0.f };
 
-		f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
-		f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
+		if (inputs[INPUT_CARRIER].isConnected() || inputs[INPUT_MODULATOR].isConnected()) {
+			f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
+			f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
 
-		f4Inputs = f4Inputs / 16.f * 0x8000;
-		f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+			f4Inputs = f4Inputs / 16.f * 0x8000;
+			f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+		}
 
 		inputFrames[frame].l = f4Inputs[0];
 		inputFrames[frame].r = f4Inputs[1];
 
-		simd::float_4 f4Outputs;
-		f4Outputs[0] = outputFrames[frame].l;
-		f4Outputs[1] = outputFrames[frame].r;
+		simd::float_4 f4Outputs = { 0.f, 0.f, 0.f, 0.f };
 
-		f4Outputs = f4Outputs / 0x8000 * 5.f;
+		if (outputs[OUTPUT_MODULATOR].isConnected() || outputs[OUTPUT_AUX].isConnected()) {
+			f4Outputs[0] = outputFrames[frame].l;
+			f4Outputs[1] = outputFrames[frame].r;
+
+			f4Outputs = f4Outputs / 0x8000 * 5.f;
+		}
 
 		outputs[OUTPUT_MODULATOR].setVoltage(f4Outputs[0]);
 		outputs[OUTPUT_AUX].setVoltage(f4Outputs[1]);
