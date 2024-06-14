@@ -121,11 +121,13 @@ struct Mutuus : Module {
 			mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
 
 			if (lightDivider.process()) {
+				const float sampleTime = kLightFrequency * args.sampleTime;
+
 				int8_t ramp = getSystemTimeMs() >> 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
 				for (int i = 0; i < 3; i++) {
-					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+					lights[LIGHT_ALGORITHM + i].setBrightnessSmooth(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
 		}
