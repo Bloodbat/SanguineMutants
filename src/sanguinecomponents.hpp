@@ -230,6 +230,22 @@ struct SanguineShapedLight : SvgLight {
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
+struct SanguineMonoInputLight : SanguineShapedLight {
+	SanguineMonoInputLight();
+};
+
+struct SanguineMonoOutputLight : SanguineShapedLight {
+	SanguineMonoOutputLight();
+};
+
+struct SanguinePolyInputLight : SanguineShapedLight {
+	SanguinePolyInputLight();
+};
+
+struct SanguinePolyOutputLight : SanguineShapedLight {
+	SanguinePolyOutputLight();
+};
+
 // Drawing utils
 void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor);
 void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX);
