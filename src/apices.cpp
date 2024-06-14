@@ -583,12 +583,7 @@ struct Apices : Module {
 				break;
 			}
 			case LIGHT_BLINK: {
-				if (getSystemTimeMs() & 256) {
-					lights[currentLight].setBrightnessSmooth(0.0f, sampleTime);
-				}
-				else {
-					lights[currentLight].setBrightnessSmooth(1.0f, sampleTime);
-				}
+				lights[currentLight].setBrightnessSmooth(getSystemTimeMs() & 256 ? 0.0f : 1.f, sampleTime);				
 				break;
 			}
 			default: {
