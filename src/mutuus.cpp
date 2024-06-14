@@ -40,7 +40,11 @@ struct Mutuus : Module {
 
 	int featureMode;
 	int frame = 0;
+
+	const int kLightFrequency = 128;
+
 	dsp::BooleanTrigger btModeSwitch;
+	dsp::ClockDivider lightDivider;
 	mutuus::MutuusModulator mutuusModulator;
 	mutuus::ShortFrame inputFrames[60] = {};
 	mutuus::ShortFrame outputFrames[60] = {};
@@ -86,6 +90,7 @@ struct Mutuus : Module {
 		mutuusModulator.Init(96000.0f, reverbBuffer);
 
 		featureMode = mutuus::FEATURE_MODE_META;
+		lightDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -205,11 +210,13 @@ struct Mutuus : Module {
 			featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
 			mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
 
-			int8_t ramp = getSystemTimeMs() >> 127;
-			uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
+			if (lightDivider.process()) {
+				int8_t ramp = getSystemTimeMs() >> 127;
+				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
-			for (int i = 0; i < 3; i++) {
-				lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				for (int i = 0; i < 3; i++) {
+					lights[LIGHT_ALGORITHM + i].setBrightness(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f);
+				}
 			}
 		}
 
