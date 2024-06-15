@@ -88,6 +88,8 @@ struct Distortiones : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		distortionesParameters->carrier_shape = params[PARAM_CARRIER].getValue();
 
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
@@ -134,7 +136,7 @@ struct Distortiones : Module {
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
 		}
 
-		simd::float_4 f4Voltages;
+		float_4 f4Voltages;
 
 		// Buffer loop
 		if (++frame >= 60) {
@@ -209,20 +211,20 @@ struct Distortiones : Module {
 			distortionesModulator.Process(inputFrames, outputFrames, 60);
 		}
 
-		simd::float_4 f4Inputs = { 0.f, 0.f, 0.f, 0.f };
+		float_4 f4Inputs = { 0.f, 0.f, 0.f, 0.f };
 
 		if (inputs[INPUT_CARRIER].isConnected() || inputs[INPUT_MODULATOR].isConnected()) {
 			f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
 			f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
 
 			f4Inputs = f4Inputs / 16.f * 0x8000;
-			f4Inputs = simd::clamp(f4Inputs, -0x8000, 0x7fff);
+			f4Inputs = clamp(f4Inputs, -0x8000, 0x7fff);
 		}
 
 		inputFrames[frame].l = f4Inputs[0];
 		inputFrames[frame].r = f4Inputs[1];
 
-		simd::float_4 f4Outputs = { 0.f, 0.f, 0.f, 0.f };
+		float_4 f4Outputs = { 0.f, 0.f, 0.f, 0.f };
 
 		if (outputs[OUTPUT_MODULATOR].isConnected() || outputs[OUTPUT_AUX].isConnected()) {
 			f4Outputs[0] = outputFrames[frame].l;
