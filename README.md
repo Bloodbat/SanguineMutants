@@ -41,3 +41,23 @@ Based on the Parasite firmware for Clouds and Southpole's Smoke Parasite. Expose
 ## Mortuus
 
 Based on the Dead Man's Catch firmware for Peaks.
+
+## Fluctus
+
+Based on the Kammerl Beat-Repeat firmware for Clouds.
+
+## Incurvationes
+
+Based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
+
+## Distortiones
+
+Based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
+
+## Mutuus
+
+Based on the Symbiote firmware for Warps.
+
+## Explorator
+
+Based on MI's Kinks and Links; combined in a single module. The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
