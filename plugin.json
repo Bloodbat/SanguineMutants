@@ -150,6 +150,20 @@
         "Reverb",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Explorator",
+      "name": "Sanguine Explorator",
+      "description": "A fully polyphonic multiple, mixer, noise source, sample and hold, inverter, rectifier and logic unit, based on Mutable Instruments Links and Kinks",
+      "tags": [
+        "Multiple",
+        "Mixer",
+        "Hardware clone",
+        "Polyphonic",
+        "Utility",
+        "Sample and hold",
+        "Noise"        
+      ]
     }
   ]
 }
