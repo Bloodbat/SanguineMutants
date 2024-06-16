@@ -211,30 +211,10 @@ struct Distortiones : Module {
 			distortionesModulator.Process(inputFrames, outputFrames, 60);
 		}
 
-		float_4 f4Inputs = { 0.f, 0.f, 0.f, 0.f };
-
-		if (inputs[INPUT_CARRIER].isConnected() || inputs[INPUT_MODULATOR].isConnected()) {
-			f4Inputs[0] = inputs[INPUT_CARRIER].getVoltage();
-			f4Inputs[1] = inputs[INPUT_MODULATOR].getVoltage();
-
-			f4Inputs = f4Inputs / 16.f * 0x8000;
-			f4Inputs = clamp(f4Inputs, -0x8000, 0x7fff);
-		}
-
-		inputFrames[frame].l = f4Inputs[0];
-		inputFrames[frame].r = f4Inputs[1];
-
-		float_4 f4Outputs = { 0.f, 0.f, 0.f, 0.f };
-
-		if (outputs[OUTPUT_MODULATOR].isConnected() || outputs[OUTPUT_AUX].isConnected()) {
-			f4Outputs[0] = outputFrames[frame].l;
-			f4Outputs[1] = outputFrames[frame].r;
-
-			f4Outputs = f4Outputs / 0x8000 * 5.f;
-		}
-
-		outputs[OUTPUT_MODULATOR].setVoltage(f4Outputs[0]);
-		outputs[OUTPUT_AUX].setVoltage(f4Outputs[1]);
+		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
+		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
+		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 0x8000 * 5.0);
+		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 0x8000 * 5.0);
 	}
 
 	long long getSystemTimeMs() {
@@ -254,7 +234,6 @@ struct Distortiones : Module {
 		}
 	}
 };
-
 
 struct DistortionesWidget : ModuleWidget {
 	DistortionesWidget(Distortiones* module) {
@@ -290,6 +269,5 @@ struct DistortionesWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(42.896, 112.172)), module, Distortiones::OUTPUT_AUX));
 	}
 };
-
 
 Model* modelDistortiones = createModel<Distortiones, DistortionesWidget>("Sanguine-Distortiones");
