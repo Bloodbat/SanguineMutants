@@ -17,3 +17,4 @@ extern Model* modelFluctus;
 extern Model* modelIncurvationes;
 extern Model* modelDistortiones;
 extern Model* modelMutuus;
+extern Model* modelExplorator;
