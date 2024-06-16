@@ -235,6 +235,18 @@ struct Distortiones : Module {
 	}
 };
 
+static const std::string distortionesModelLabels[9] = {
+	"Binaural doppler panner",
+	"Wave folder",
+	"Chebyschev wave shaper",
+	"Frequency shifter",
+	"Dual bit mangler",
+	"Comparator with Chebyschev waveshaper",
+	"Vocoder",
+	"Variable-rate delay",
+	"Meta mode",
+};
+
 struct DistortionesWidget : ModuleWidget {
 	DistortionesWidget(Distortiones* module) {
 		setModule(module);
@@ -267,6 +279,21 @@ struct DistortionesWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(18.777, 112.172)), module, Distortiones::INPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(32.044, 112.172)), module, Distortiones::OUTPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(42.896, 112.172)), module, Distortiones::OUTPUT_AUX));
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		Distortiones* module = dynamic_cast<Distortiones*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
+			for (int i = 0; i < 9; i++) {
+				menu->addChild(createCheckMenuItem(distortionesModelLabels[i], "",
+					[=]() {return module->featureMode == i; },
+					[=]() {module->featureMode = i; }
+				));
+			}
+			}));
 	}
 };
 

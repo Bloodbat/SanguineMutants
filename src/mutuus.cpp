@@ -253,6 +253,18 @@ struct Mutuus : Module {
 	}
 };
 
+static const std::string mutuusModelLabels[9] = {
+	"Dual state variable filter",
+	"Ladder filter",
+	"Reverbs",
+	"Frequency shifter",
+	"Bit crusher",
+	"Chebyschev wave shaper",
+	"Doppler panner",
+	"Delay",
+	"Meta mode",
+};
+
 struct MutuusWidget : ModuleWidget {
 	MutuusWidget(Mutuus* module) {
 		setModule(module);
@@ -287,6 +299,21 @@ struct MutuusWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(18.777, 112.172)), module, Mutuus::INPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(32.044, 112.172)), module, Mutuus::OUTPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(42.896, 112.172)), module, Mutuus::OUTPUT_AUX));
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		Mutuus* module = dynamic_cast<Mutuus*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
+			for (int i = 0; i < 9; i++) {
+				menu->addChild(createCheckMenuItem(mutuusModelLabels[i], "",
+					[=]() {return module->featureMode == i; },
+					[=]() {module->featureMode = i; }
+				));
+			}
+			}));
 	}
 };
 
