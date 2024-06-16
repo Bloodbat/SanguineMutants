@@ -54,3 +54,17 @@
 - Fix: Apices button lights.
 
 - Fix: Apices trigger detection.
+
+### 2.4.0
+
+- Add: Fluctus: based on the Kammerl Beat-Repeat firmware for Clouds.
+
+- Add: Incurvationes: based on MI's Warps it has proper knob lights colors and enables access to the Frequency shifter "Easter egg".
+
+- Add: Distortiones: based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
+
+- Add: Mutuus: based on the Symbiote firmware for Warps.
+
+- Add: Explorator: based on MI's Kinks and Links; combined in a single module. The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
+
+- Change: different alternative firmwares use different face plate colors.
