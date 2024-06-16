@@ -356,19 +356,24 @@ struct Explorator : Module {
 			lights[LIGHT_SH + 2].setBrightnessSmooth(0.f, sampleTime);
 
 			if (lastSampleAndHoldChannels > 0) {
-				float voltageSampleAndHold = clamp(outputs[OUTPUT_SH_VOLTAGE].getVoltageSum(), -10.f, 10.f);
+				float sampleAndHoldVoltageSum = 0;
+				for (int i = 0; i < lastSampleAndHoldChannels; i++) {
+					sampleAndHoldVoltageSum += voltagesSampleAndHold[i];
+				}
+
+				sampleAndHoldVoltageSum = clamp(sampleAndHoldVoltageSum, -10.f, 10.f);
 
 				if (channels3to1 == 1) {
-					lights[LIGHT_SH + 0].setBrightnessSmooth(math::rescale(-voltageSampleAndHold, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_SH + 1].setBrightnessSmooth(math::rescale(voltageSampleAndHold, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_SH + 2].setBrightnessSmooth(0.0f, voltageSampleAndHold);
+					lights[LIGHT_SH + 0].setBrightnessSmooth(math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+					lights[LIGHT_SH + 1].setBrightnessSmooth(math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+					lights[LIGHT_SH + 2].setBrightnessSmooth(0.0f, sampleAndHoldVoltageSum);
 				}
 				else {
-					float redValue = math::rescale(-voltageSampleAndHold, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(voltageSampleAndHold, 0.f, 10.f, 0.f, 1.f);
+					float redValue = math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f);
+					float greenValue = math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f);
 					lights[LIGHT_SH + 0].setBrightnessSmooth(redValue, sampleTime);
 					lights[LIGHT_SH + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_SH + 2].setBrightnessSmooth(voltageSampleAndHold < 0 ? redValue : greenValue, sampleTime);
+					lights[LIGHT_SH + 2].setBrightnessSmooth(sampleAndHoldVoltageSum < 0 ? redValue : greenValue, sampleTime);
 				}
 			}
 
