@@ -88,7 +88,7 @@ struct Explorator : Module {
 		configOutput(OUTPUT_SH_NOISE, "Noise");
 		configOutput(OUTPUT_SH_VOLTAGE, "Sample and hold voltage");
 
-		configButton(PARAM_HARDWARE, "Hardware behavior");
+		configButton(PARAM_HARDWARE, "3:1 hardware behavior (averager)");
 
 		lightDivider.setDivision(kLightFrequency);
 	}
