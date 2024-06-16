@@ -216,9 +216,7 @@ struct Explorator : Module {
 		}
 
 		if (outputs[OUTPUT_SH_VOLTAGE].isConnected() && lastSampleAndHoldChannels > 0) {
-			for (int channel = 0; channel < lastSampleAndHoldChannels; channel++) {
-				outputs[OUTPUT_SH_VOLTAGE].setVoltage(voltagesSampleAndHold[channel], channel);
-			}
+			outputs[OUTPUT_SH_VOLTAGE].writeVoltages(voltagesSampleAndHold);
 		}
 
 		if (noiseConnected) {
