@@ -20,4 +20,5 @@ void init(rack::Plugin* p) {
 	p->addModel(modelDistortiones);
 	p->addModel(modelMutuus);
 	p->addModel(modelExplorator);
+	p->addModel(modelMarmora);
 }
