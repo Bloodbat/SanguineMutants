@@ -68,3 +68,5 @@
 - Add: Explorator: based on MI's Kinks and Links; combined in a single module. The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
 
 - Change: different alternative firmwares use different face plate colors.
+
+- Fix: Apices and Mortuus have more respect for CV triggers.
