@@ -162,7 +162,16 @@
         "Polyphonic",
         "Utility",
         "Sample and hold",
-        "Noise"        
+        "Noise"
+      ]
+    },
+    {
+      "slug": "Sanguine-Marmora",
+      "name": "Sanguine Marmora",
+      "description": "Based on Mutable Instruments Marbles",      
+      "tags": [
+        "Random",
+        "Hardware clone"
       ]
     }
   ]

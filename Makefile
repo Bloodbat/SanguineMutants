@@ -110,6 +110,14 @@ SOURCES += alt_firmware/mutuus/dsp/mutuus_vocoder.cc
 SOURCES += alt_firmware/mutuus/dsp/mutuus_filter_bank.cc
 SOURCES += alt_firmware/mutuus/mutuus_resources.cc
 
+SOURCES += eurorack/marbles/random/t_generator.cc
+SOURCES += eurorack/marbles/random/x_y_generator.cc
+SOURCES += eurorack/marbles/random/output_channel.cc
+SOURCES += eurorack/marbles/random/lag_processor.cc
+SOURCES += eurorack/marbles/random/quantizer.cc
+SOURCES += eurorack/marbles/ramp/ramp_extractor.cc
+SOURCES += eurorack/marbles/resources.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..
