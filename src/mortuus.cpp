@@ -252,7 +252,6 @@ struct Mortuus : Module {
 	int16_t brightness[kNumChannels] = { 0, 0 };
 
 	dsp::SchmittTrigger stSwitches[kButtonCount];
-	dsp::SchmittTrigger stInputTriggers[kInputCount];
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kClockUpdateFrequency = 16;
@@ -372,8 +371,8 @@ struct Mortuus : Module {
 
 			// TODO! More PLO testing!
 			uint32_t gateTriggers = 0;
-			gateTriggers |= (stInputTriggers[0].process(inputs[GATE_1_INPUT].getVoltage()) ? 1 : 0);
-			gateTriggers |= (stInputTriggers[1].process(inputs[GATE_2_INPUT].getVoltage()) ? 2 : 0);
+			gateTriggers |= inputs[GATE_1_INPUT].getVoltage() > 0.1 ? 1 : 0;
+			gateTriggers |= inputs[GATE_2_INPUT].getVoltage() > 0.1 ? 2 : 0;
 
 			uint32_t buttons = 0;
 			buttons |= (params[PARAM_TRIGGER_1].getValue() ? 1 : 0);
