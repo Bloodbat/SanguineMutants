@@ -11,9 +11,7 @@ static const int BLOCK_SIZE = 5;
 static const int MAX_T_MODES = 7;
 static const int MAX_SCALES = 6;
 
-// TODO!!! Save custom scales
-
-static const marbles::Scale preset_scales[6] = {
+static const marbles::Scale preset_scales[MAX_SCALES] = {
 	// C major
 	{
 		1.0f,
@@ -311,6 +309,11 @@ struct Marmora : Module {
 		LIGHTS_COUNT
 	};
 
+	struct MarmoraScale {
+		bool dirty;
+		marbles::Scale scale;
+	};
+
 	marbles::RandomGenerator randomGenerator;
 	marbles::RandomStream randomStream;
 	marbles::TGenerator tGenerator;
@@ -318,13 +321,12 @@ struct Marmora : Module {
 	marbles::NoteFilter noteFilter;
 	marbles::ScaleRecorder scaleRecorder;
 
-	marbles::Scale customScale;
-
 	bool bDejaVuTEnabled;
 	bool bDejaVuXEnabled;
 	bool bXClockSourceExternal = false;
 	bool bTReset;
 	bool bXReset;
+	bool bModuleAdded = false;
 
 	bool bScaleEditMode = false;
 	bool bNoteGate = false;
@@ -353,6 +355,9 @@ struct Marmora : Module {
 	bool gates[BLOCK_SIZE * 2] = {};
 	float voltages[BLOCK_SIZE * 4] = {};
 	int blockIndex = 0;
+
+	// Storage
+	MarmoraScale marmoraScales[MAX_SCALES];
 
 	Marmora() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -411,6 +416,18 @@ struct Marmora : Module {
 		randomStream.Init(&randomGenerator);
 		noteFilter.Init();
 		scaleRecorder.Init();
+
+		for (int i = 0; i < MAX_SCALES; i++) {
+			marmoraScales[i].dirty = false;
+			marmoraScales[i].scale.Init();
+			marmoraScales[i].scale.num_degrees = preset_scales[i].num_degrees;
+			marmoraScales[i].scale.base_interval = preset_scales[i].base_interval;
+			for (int j = 0; j < preset_scales[i].num_degrees; j++) {
+				marmoraScales[i].scale.degree[j].voltage = preset_scales[i].degree[j].voltage;
+				marmoraScales[i].scale.degree[j].weight = preset_scales[i].degree[j].weight;
+			}
+		}
+
 		onSampleRateChange();
 		onReset();
 	}
@@ -656,8 +673,9 @@ struct Marmora : Module {
 			x.control_mode = marbles::ControlMode(params[PARAM_X_MODE].getValue());
 			x.voltage_range = marbles::VoltageRange(params[PARAM_X_RANGE].getValue());
 			// TODO Fix the scaling
+			//  I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong: custom scales seem to behave nicely when NOT doing that...) -Bat
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
-			// TODO WTF is u? (A leftover from marbles.cc -Ed.)
+			// TODO WTF is u? (A leftover from marbles.cc -Bat Ed.)
 			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
 			x.register_mode = params[PARAM_EXTERNAL].getValue();
 			x.register_value = u;
@@ -733,16 +751,44 @@ struct Marmora : Module {
 		xyGenerator.Init(&randomStream, sampleRate);
 
 		// Set scales
-		for (int i = 0; i < 6; i++) {
-			xyGenerator.LoadScale(i, preset_scales[i]);
+		if (!bModuleAdded) {
+			for (int i = 0; i < MAX_SCALES; i++) {
+				xyGenerator.LoadScale(i, preset_scales[i]);
+			}
+			bModuleAdded = true;
+		}
+		else {
+			for (int i = 0; i < MAX_SCALES; i++) {
+				xyGenerator.LoadScale(i, marmoraScales[i].scale);
+			}
 		}
 	}
 
-	// TODO!!! Save and load custom scales.
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
+
+		for (int scale = 0; scale < MAX_SCALES; scale++) {
+			if (marmoraScales[scale].dirty) {
+				json_t* scaleDataVoltagesJ = json_array();
+				json_t* scaleDataWeightsJ = json_array();
+
+				std::string scaleHeader = string::f("userScale%d", scale);
+				std::string scaleBaseInterval = scaleHeader + "Interval";
+				std::string scaleDegrees = scaleHeader + "Degrees";
+				std::string scaleDataVoltages = scaleHeader + "DataVoltages";
+				std::string scaleDataWeights = scaleHeader + "DataWeights";
+				json_object_set_new(rootJ, scaleBaseInterval.c_str(), json_real(marmoraScales[scale].scale.base_interval));
+				json_object_set_new(rootJ, scaleDegrees.c_str(), json_integer(marmoraScales[scale].scale.num_degrees));
+				for (int degree = 0; degree < marmoraScales[scale].scale.num_degrees; degree++) {
+					json_array_insert_new(scaleDataVoltagesJ, degree, json_real(marmoraScales[scale].scale.degree[degree].voltage));
+					json_array_insert_new(scaleDataWeightsJ, degree, json_integer(marmoraScales[scale].scale.degree[degree].weight));
+				}
+				json_object_set_new(rootJ, scaleDataVoltages.c_str(), scaleDataVoltagesJ);
+				json_object_set_new(rootJ, scaleDataWeights.c_str(), scaleDataWeightsJ);
+			}
+		}
 
 		return rootJ;
 	}
@@ -751,13 +797,92 @@ struct Marmora : Module {
 		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
 		if (y_divider_indexJ)
 			yDividerIndex = json_integer_value(y_divider_indexJ);
+
+		int dirtyScalesCount = 0;
+
+		for (int scale = 0; scale < MAX_SCALES; scale++) {
+			bool scaleOk = true;
+
+			std::string scaleHeader = string::f("userScale%d", scale);
+			std::string scaleBaseInterval = scaleHeader + "Interval";
+
+			json_t* scaleBaseIntervalJ = json_object_get(rootJ, scaleBaseInterval.c_str());
+			if (scaleBaseIntervalJ) {
+				std::string scaleDegrees = scaleHeader + "Degrees";
+				std::string scaleDataVoltages = scaleHeader + "DataVoltages";
+				std::string scaleDataWeights = scaleHeader + "DataWeights";
+				marbles::Scale customScale;
+
+				customScale.Init();
+
+				customScale.base_interval = json_number_value(scaleBaseIntervalJ);
+
+				json_t* scaleDegreesJ = json_object_get(rootJ, scaleDegrees.c_str());
+				if (scaleDegreesJ) {
+					customScale.num_degrees = json_integer_value(scaleDegreesJ);
+
+					json_t* scaleDataVoltagesJ = json_object_get(rootJ, scaleDataVoltages.c_str());
+					json_t* scaleDataWeightsJ = json_object_get(rootJ, scaleDataWeights.c_str());
+
+					if (scaleDataVoltagesJ && scaleDataWeightsJ) {
+						for (int degree = 0; degree < customScale.num_degrees; degree++) {
+							json_t* voltageJ = json_array_get(scaleDataVoltagesJ, degree);
+							json_t* weightJ = json_array_get(scaleDataWeightsJ, degree);
+							if (voltageJ && weightJ) {
+								customScale.degree[degree].voltage = json_number_value(voltageJ);
+								customScale.degree[degree].weight = json_integer_value(weightJ);
+							}
+							else {
+								scaleOk = false;
+							}
+						}
+					}
+					else {
+						scaleOk = false;
+					}
+				}
+				else {
+					scaleOk = false;
+				}
+				if (scaleOk) {
+					marmoraScales[scale].scale.base_interval = customScale.base_interval;
+					marmoraScales[scale].scale.num_degrees = customScale.num_degrees;
+
+					for (int degree = 0; degree < customScale.num_degrees; degree++) {
+						marmoraScales[scale].scale.degree[degree].voltage = customScale.degree[degree].voltage;
+						marmoraScales[scale].scale.degree[degree].weight = customScale.degree[degree].weight;
+					}
+
+					marmoraScales[scale].dirty = true;
+					dirtyScalesCount++;
+				}
+			} // if (scaleBaseIntervalJ) {
+		} // for
+		if (dirtyScalesCount > 0) {
+			for (int scale = 0; scale < MAX_SCALES; scale++) {
+				if (marmoraScales[scale].dirty) {
+					xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
+				}
+			}
+		}
 	}
 
 	void toggleScaleEdit() {
 		if (bScaleEditMode) {
+			marbles::Scale customScale;
 			bool success = scaleRecorder.ExtractScale(&customScale);
 			if (success) {
-				xyGenerator.LoadScale(params[PARAM_SCALE].getValue(), customScale);
+				int currentScale = params[PARAM_SCALE].getValue();
+				marmoraScales[currentScale].scale.Init();
+				marmoraScales[currentScale].scale.base_interval = customScale.base_interval;
+				marmoraScales[currentScale].scale.num_degrees = customScale.num_degrees;
+				for (int degree = 0; degree < customScale.num_degrees; degree++) {
+					marmoraScales[currentScale].scale.degree[degree].voltage = customScale.degree[degree].voltage;
+					marmoraScales[currentScale].scale.degree[degree].weight = customScale.degree[degree].weight;
+				}
+
+				xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
+				marmoraScales[currentScale].dirty = true;
 			}
 		}
 		else {
@@ -768,7 +893,18 @@ struct Marmora : Module {
 	}
 
 	void resetScale() {
-		xyGenerator.LoadScale(params[PARAM_SCALE].getValue(), preset_scales[int(params[PARAM_SCALE].getValue())]);
+		int currentScale = params[PARAM_SCALE].getValue();
+
+		marmoraScales[currentScale].scale.base_interval = preset_scales[currentScale].base_interval;
+		marmoraScales[currentScale].scale.num_degrees = preset_scales[currentScale].num_degrees;
+
+		for (int degree = 0; degree < preset_scales[currentScale].num_degrees; degree++) {
+			marmoraScales[currentScale].scale.degree[degree].voltage = preset_scales[currentScale].degree[degree].voltage;
+			marmoraScales[currentScale].scale.degree[degree].weight = preset_scales[currentScale].degree[degree].weight;
+		}
+
+		marmoraScales[currentScale].dirty = false;
+		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 	}
 };
 
