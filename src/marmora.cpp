@@ -188,6 +188,55 @@ enum DejaVuLockModes {
 	DEJA_VU_SUPER_LOCK
 };
 
+static const std::vector<std::string> marmoraTModeLabels = {
+	"Complementary Bernoulli",
+	"Clusters",
+	"Drums",
+	"Independent Bernoulli",
+	"Divider",
+	"Three states",
+	"Markov"
+};
+
+static const std::vector<std::string> marmoraTRangeLabels = {
+	"1/4x",
+	"1x",
+	"4x"
+};
+
+static const std::vector<std::string> marmoraXModeLabels = {
+	"Identical",
+	"Bump",
+	"Tilt"
+};
+
+static const std::vector<std::string> marmoraXRangeLabels = {
+	"Narrow",
+	"Positive",
+	"Full"
+};
+
+static const std::vector<std::string> marmoraScaleLabels = {
+	"Major",
+	"Minor",
+	"Pentatonic",
+	"Gamelan (Pelog)",
+	"Raag Bhairav That",
+	"Raag Shri",
+};
+
+static const std::vector<std::string> marmoraInternalClockLabels = {
+	"T₁ → X₁, T₂ → X₂, T₃ → X₃",
+	"T₁ → X₁, X₂, X₃",
+	"T₂ → X₁, X₂, X₃",
+	"T₃ → X₁, X₂, X₃",
+};
+
+static const std::vector<std::string> marmoraLockLabels = {
+	"Unlocked",
+	"Locked"
+};
+
 struct Marmora : Module {
 	enum ParamIds {
 		PARAM_DEJA_VU_T,
@@ -212,7 +261,7 @@ struct Marmora : Module {
 		PARAM_GATE_BIAS,
 		PARAM_GATE_JITTER,
 		PARAM_SCALE,
-		PARAM_CLOCK_SOURCE,
+		PARAM_INTERNAL_X_CLOCK_SOURCE,
 		PARAM_T_SUPER_LOCK,
 		PARAM_X_SUPER_LOCK,
 		PARAMS_COUNT
@@ -257,7 +306,7 @@ struct Marmora : Module {
 		ENUMS(LIGHT_X2, 2),
 		ENUMS(LIGHT_X3, 2),
 		ENUMS(LIGHT_SCALE, 2),
-		ENUMS(LIGHT_CLOCK_SOURCE, 3),
+		ENUMS(LIGHT_INTERNAL_CLOCK_SOURCE, 3),
 		LIGHTS_COUNT
 	};
 
@@ -305,23 +354,20 @@ struct Marmora : Module {
 		configParam(PARAM_DEJA_VU, 0.0, 1.0, 0.5, "Deja vu probability");
 		configParam(PARAM_T_RATE, -1.0, 1.0, 0.0, "Clock rate");
 		configParam(PARAM_X_SPREAD, 0.0, 1.0, 0.5, "Probability distribution");
-		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "T mode",
-			{ "Complementary Bernoulli", "Clusters", "Drums", "Independent Bernoulli", "Divider", "Three states", "Markov" });
-		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", { "Identical", "Bump", "Tilt" });
+		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "T mode", marmoraTModeLabels);
+		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmoraXModeLabels);
 		configParam(PARAM_DEJA_VU_LENGTH, 0.0, 1.0, 1.0, "Loop length");
 		configParam(PARAM_T_BIAS, 0.0, 1.0, 0.5, "Gate bias");
 		configParam(PARAM_X_BIAS, 0.0, 1.0, 0.5, "Distribution bias");
-		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "Clock range mode", { "1/4x", "1x", "4x", });
-		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "Output voltage range mode", { "Narrow", "Positive", "Full" });
+		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "Clock range mode", marmoraTRangeLabels);
+		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "Output voltage range mode", marmoraXRangeLabels);
 		configButton(PARAM_EXTERNAL, "External processing mode");
 		configParam(PARAM_T_JITTER, 0.0, 1.0, 0.0, "Randomness amount");
 		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "Smoothness");
-		configSwitch(PARAM_SCALE, 0.f, 5.f, 0.f, "Scale",
-			{ "Major", "Minor", "Pentatonic", "Gamelan (Pelog)", "Raag Bhairav That", "Raag Shri" });
-		configSwitch(PARAM_CLOCK_SOURCE, 0.f, 3.f, 0.f, "Internal X clock source",
-			{ "T₁ → X₁, T₂ → X₂, T₃ → X₃", "T₁ → X₁, X₂, X₃", "T₂ → X₁, X₂, X₃", "T₃ → X₁, X₂, X₃" });
-		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t Super lock", { "Unlocked", "Locked" });
-		configSwitch(PARAM_X_SUPER_LOCK, 0.f, 1.f, 0.f, "X Super lock", { "Unlocked", "Locked" });
+		configSwitch(PARAM_SCALE, 0.f, 5.f, 0.f, "Scale", marmoraScaleLabels);
+		configSwitch(PARAM_INTERNAL_X_CLOCK_SOURCE, 0.f, 3.f, 0.f, "Internal X clock source", marmoraInternalClockLabels);
+		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t Super lock", marmoraLockLabels);
+		configSwitch(PARAM_X_SUPER_LOCK, 0.f, 1.f, 0.f, "X Super lock", marmoraLockLabels);
 
 		configInput(INPUT_T_BIAS, "T bias");
 		configInput(INPUT_X_BIAS, "X bias");
@@ -388,7 +434,7 @@ struct Marmora : Module {
 		dejaVuXEnabled = params[PARAM_DEJA_VU_X].getValue();
 
 		xScale = params[PARAM_SCALE].getValue();
-		xClockSourceInternal = params[PARAM_CLOCK_SOURCE].getValue();
+		xClockSourceInternal = params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue();
 		xClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
 
 		tReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage());
@@ -475,14 +521,14 @@ struct Marmora : Module {
 			lights[LIGHT_Y + 1].setBrightnessSmooth(math::rescale(-voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f), sampleTime);
 
 			if (!xClockSourceExternal) {
-				lights[LIGHT_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
-				lights[LIGHT_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
-				lights[LIGHT_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
+				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
+				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
+				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
 			}
 			else {
-				lights[LIGHT_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 		}
 	}
@@ -666,7 +712,6 @@ struct Marmora : Module {
 	}
 };
 
-
 struct MarmoraWidget : ModuleWidget {
 	MarmoraWidget(Marmora* module) {
 		setModule(module);
@@ -753,7 +798,7 @@ struct MarmoraWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(95.69, 90.444)), module, Marmora::PARAM_Y_STEPS));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedGreenBlueLight>>>(mm2px(Vec(117.418, 93.182)),
-			module, Marmora::PARAM_CLOCK_SOURCE, Marmora::LIGHT_CLOCK_SOURCE));
+			module, Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE, Marmora::LIGHT_INTERNAL_CLOCK_SOURCE));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(132.562, 88.407)), module, Marmora::INPUT_X_BIAS));
 
@@ -796,6 +841,66 @@ struct MarmoraWidget : ModuleWidget {
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		addChild(mutantsLogo);
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		Marmora* module = dynamic_cast<Marmora*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("T mode", "", [=](Menu* menu) {
+			for (int i = 0; i < 7; i++) {
+				menu->addChild(createCheckMenuItem(marmoraTModeLabels[i], "",
+					[=]() {return module->params[Marmora::PARAM_T_MODE].getValue() == i; },
+					[=]() {module->params[Marmora::PARAM_T_MODE].setValue(i); }
+				));
+			}
+			}));
+
+		menu->addChild(createSubmenuItem("T range", "", [=](Menu* menu) {
+			for (int i = 0; i < 3; i++) {
+				menu->addChild(createCheckMenuItem(marmoraTRangeLabels[i], "",
+					[=]() {return module->params[Marmora::PARAM_T_RANGE].getValue() == i; },
+					[=]() {module->params[Marmora::PARAM_T_RANGE].setValue(i); }
+				));
+			}
+			}));
+
+		menu->addChild(createSubmenuItem("X mode", "", [=](Menu* menu) {
+			for (int i = 0; i < 3; i++) {
+				menu->addChild(createCheckMenuItem(marmoraXModeLabels[i], "",
+					[=]() {return module->params[Marmora::PARAM_X_MODE].getValue() == i; },
+					[=]() {module->params[Marmora::PARAM_X_MODE].setValue(i); }
+				));
+			}
+			}));
+
+		menu->addChild(createSubmenuItem("X range", "", [=](Menu* menu) {
+			for (int i = 0; i < 3; i++) {
+				menu->addChild(createCheckMenuItem(marmoraXRangeLabels[i], "",
+					[=]() {return module->params[Marmora::PARAM_X_RANGE].getValue() == i; },
+					[=]() {module->params[Marmora::PARAM_X_RANGE].setValue(i); }
+				));
+			}
+			}));
+
+		menu->addChild(createSubmenuItem("Scale", "", [=](Menu* menu) {
+			for (int i = 0; i < 6; i++) {
+				menu->addChild(createCheckMenuItem(marmoraScaleLabels[i], "",
+					[=]() {return module->params[Marmora::PARAM_SCALE].getValue() == i; },
+					[=]() {module->params[Marmora::PARAM_SCALE].setValue(i); }
+				));
+			}
+			}));
+
+		menu->addChild(createSubmenuItem("Internal X clock source", "", [=](Menu* menu) {
+			for (int i = 0; i < 4; i++) {
+				menu->addChild(createCheckMenuItem(marmoraInternalClockLabels[i], "",
+					[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue() == i; },
+					[=]() {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
+				));
+			}
+			}));
 	}
 };
 
