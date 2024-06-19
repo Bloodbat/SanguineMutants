@@ -749,7 +749,8 @@ struct Marmora : Module {
 		if (!bModuleAdded) {
 			for (int i = 0; i < MAX_SCALES; i++) {
 				xyGenerator.LoadScale(i, preset_scales[i]);
-
+				copyScale(preset_scales[i], marmoraScales[i].scale);
+				marmoraScales[i].dirty = false;
 			}
 			bModuleAdded = true;
 		}
