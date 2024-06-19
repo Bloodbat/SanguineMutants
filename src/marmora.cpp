@@ -5,12 +5,13 @@
 #include "marbles/random/t_generator.h"
 #include "marbles/random/x_y_generator.h"
 #include "marbles/note_filter.h"
+#include "marbles/scale_recorder.h"
 
 static const int BLOCK_SIZE = 5;
 static const int MAX_T_MODES = 7;
 static const int MAX_SCALES = 6;
 
-// TODO!!! Scale recorder?
+// TODO!!! Save custom scales
 
 static const marbles::Scale preset_scales[6] = {
 	// C major
@@ -297,7 +298,7 @@ struct Marmora : Module {
 		ENUMS(LIGHT_X_MODE, 2),
 		ENUMS(LIGHT_T_RANGE, 2),
 		ENUMS(LIGHT_X_RANGE, 2),
-		LIGHT_EXTERNAL,
+		ENUMS(LIGHT_EXTERNAL, 2),
 		ENUMS(LIGHT_T1, 2),
 		ENUMS(LIGHT_T2, 2),
 		ENUMS(LIGHT_T3, 2),
@@ -315,12 +316,19 @@ struct Marmora : Module {
 	marbles::TGenerator tGenerator;
 	marbles::XYGenerator xyGenerator;
 	marbles::NoteFilter noteFilter;
+	marbles::ScaleRecorder scaleRecorder;
+
+	marbles::Scale customScale;
 
 	bool dejaVuTEnabled;
 	bool dejaVuXEnabled;
 	bool xClockSourceExternal = false;
 	bool tReset;
 	bool xReset;
+
+	bool bScaleEditMode = false;
+	bool bNoteGate = false;
+	bool bLastGate = false;
 
 	DejaVuLockModes dejaVuLockModeT = DEJA_VU_LOCK_ON;
 	DejaVuLockModes dejaVuLockModeX = DEJA_VU_LOCK_ON;
@@ -402,6 +410,7 @@ struct Marmora : Module {
 		randomGenerator.Init(1);
 		randomStream.Init(&randomGenerator);
 		noteFilter.Init();
+		scaleRecorder.Init();
 		onSampleRateChange();
 		onReset();
 	}
@@ -494,7 +503,14 @@ struct Marmora : Module {
 			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1);
 			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2);
 
-			lights[LIGHT_EXTERNAL].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue(), sampleTime);
+			if (!bScaleEditMode) {
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue(), sampleTime);
+				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue(), sampleTime);
+			}
+			else {
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(1.f, sampleTime);
+				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
+			}
 
 			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime);
 			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime);
@@ -635,51 +651,76 @@ struct Marmora : Module {
 			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
 		}
 
-		marbles::GroupSettings x;
-		x.control_mode = marbles::ControlMode(params[PARAM_X_MODE].getValue());
-		x.voltage_range = marbles::VoltageRange(params[PARAM_X_RANGE].getValue());
-		// TODO Fix the scaling
-		float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
-		// TODO WTF is u? (A leftover from marbles.cc -Ed.)
-		float u = noteFilter.Process(0.5f * (noteCV + 1.f));
-		x.register_mode = params[PARAM_EXTERNAL].getValue();
-		x.register_value = u;
+		if (!bScaleEditMode) {
+			marbles::GroupSettings x;
+			x.control_mode = marbles::ControlMode(params[PARAM_X_MODE].getValue());
+			x.voltage_range = marbles::VoltageRange(params[PARAM_X_RANGE].getValue());
+			// TODO Fix the scaling
+			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+			// TODO WTF is u? (A leftover from marbles.cc -Ed.)
+			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
+			x.register_mode = params[PARAM_EXTERNAL].getValue();
+			x.register_value = u;
 
-		float xSpread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
-		x.spread = xSpread;
-		float xBias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
-		x.bias = xBias;
-		float xSteps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
-		x.steps = xSteps;
-		if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK) {
-			x.deja_vu = dejaVuXEnabled ? dejaVu : 0.f;
+			float xSpread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
+			x.spread = xSpread;
+			float xBias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
+			x.bias = xBias;
+			float xSteps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
+			x.steps = xSteps;
+			if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK) {
+				x.deja_vu = dejaVuXEnabled ? dejaVu : 0.f;
+			}
+			else {
+				x.deja_vu = 0.5f;
+			}
+			x.length = dejaVuLength;
+			x.ratio.p = 1;
+			x.ratio.q = 1;
+			x.scale_index = xScale;
+
+			marbles::GroupSettings y;
+			y.control_mode = marbles::CONTROL_MODE_IDENTICAL;
+			y.voltage_range = marbles::VOLTAGE_RANGE_FULL;
+			y.register_mode = false;
+			y.register_value = 0.0f;
+			y.spread = params[PARAM_Y_SPREAD].getValue();
+			y.bias = params[PARAM_Y_BIAS].getValue();
+			y.steps = params[PARAM_Y_STEPS].getValue();
+			y.deja_vu = 0.0f;
+			y.length = 1;
+
+			unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(y_divider_ratios);
+			if (index < LENGTHOF(y_divider_ratios))
+				yDividerIndex = index;
+			y.ratio = y_divider_ratios[yDividerIndex];
+			y.scale_index = xScale;
+
+			xyGenerator.Process(xClockSource, x, y, &xReset, xyClocks, ramps, voltages, BLOCK_SIZE);
 		}
 		else {
-			x.deja_vu = 0.5f;
+			/* Was
+			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+			*/
+			float noteCV = (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
+			float voltage = (u - 0.5f) * 10.0f;
+			if (inputs[INPUT_X_CLOCK].getVoltage() >= 0.5f) {
+				if (!bLastGate) {
+					scaleRecorder.NewNote(voltage);
+					bLastGate = true;
+				}
+				else {
+					scaleRecorder.UpdateVoltage(voltage);
+				}
+			}
+			else {
+				if (bLastGate) {
+					scaleRecorder.AcceptNote();
+					bLastGate = false;
+				}
+			}
 		}
-		x.length = dejaVuLength;
-		x.ratio.p = 1;
-		x.ratio.q = 1;
-		x.scale_index = xScale;
-
-		marbles::GroupSettings y;
-		y.control_mode = marbles::CONTROL_MODE_IDENTICAL;
-		y.voltage_range = marbles::VOLTAGE_RANGE_FULL;
-		y.register_mode = false;
-		y.register_value = 0.0f;
-		y.spread = params[PARAM_Y_SPREAD].getValue();
-		y.bias = params[PARAM_Y_BIAS].getValue();
-		y.steps = params[PARAM_Y_STEPS].getValue();
-		y.deja_vu = 0.0f;
-		y.length = 1;
-
-		unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(y_divider_ratios);
-		if (index < LENGTHOF(y_divider_ratios))
-			yDividerIndex = index;
-		y.ratio = y_divider_ratios[yDividerIndex];
-		y.scale_index = xScale;
-
-		xyGenerator.Process(xClockSource, x, y, &xReset, xyClocks, ramps, voltages, BLOCK_SIZE);
 	}
 
 	void onReset() override {
@@ -697,6 +738,7 @@ struct Marmora : Module {
 		}
 	}
 
+	// TODO!!! Save and load custom scales.
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 
@@ -709,6 +751,23 @@ struct Marmora : Module {
 		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
 		if (y_divider_indexJ)
 			yDividerIndex = json_integer_value(y_divider_indexJ);
+	}
+
+	void toggleScaleEdit() {
+		if (bScaleEditMode) {
+			bool success = scaleRecorder.ExtractScale(&customScale);
+			if (success) {
+				xyGenerator.LoadScale(params[PARAM_SCALE].getValue(), customScale);
+			}
+		}
+		else {
+			scaleRecorder.Clear();
+		}
+		bScaleEditMode = !bScaleEditMode;
+	}
+
+	void resetScale() {
+		xyGenerator.LoadScale(params[PARAM_SCALE].getValue(), preset_scales[int(params[PARAM_SCALE].getValue())]);
 	}
 };
 
@@ -781,7 +840,8 @@ struct MarmoraWidget : ModuleWidget {
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(24.818, 93.182)),
 			module, Marmora::PARAM_SCALE, Marmora::LIGHT_SCALE));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(mm2px(Vec(132.561, 51.792)), module, Marmora::PARAM_EXTERNAL, Marmora::LIGHT_EXTERNAL));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(132.561, 51.792)),
+			module, Marmora::PARAM_EXTERNAL, Marmora::LIGHT_EXTERNAL));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(102.275, 75.619)), module, Marmora::INPUT_X_STEPS));
 
@@ -901,6 +961,14 @@ struct MarmoraWidget : ModuleWidget {
 				));
 			}
 			}));
+
+		menu->addChild(createCheckMenuItem("Scale edit mode", "",
+			[=]() {return module->bScaleEditMode; },
+			[=]() {module->toggleScaleEdit(); }));
+
+		menu->addChild(createMenuItem("Reset current scale", "",
+			[=]() {module->resetScale(); }
+		));
 	}
 };
 
