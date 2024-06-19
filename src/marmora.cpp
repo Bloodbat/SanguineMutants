@@ -702,7 +702,7 @@ struct Marmora : Module {
 			/* Was
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
 			*/
-			float noteCV = (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+			float noteCV = (inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
 			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
 			float voltage = (u - 0.5f) * 10.0f;
 			if (inputs[INPUT_X_CLOCK].getVoltage() >= 0.5f) {
