@@ -420,12 +420,7 @@ struct Marmora : Module {
 		for (int i = 0; i < MAX_SCALES; i++) {
 			marmoraScales[i].dirty = false;
 			marmoraScales[i].scale.Init();
-			marmoraScales[i].scale.num_degrees = preset_scales[i].num_degrees;
-			marmoraScales[i].scale.base_interval = preset_scales[i].base_interval;
-			for (int j = 0; j < preset_scales[i].num_degrees; j++) {
-				marmoraScales[i].scale.degree[j].voltage = preset_scales[i].degree[j].voltage;
-				marmoraScales[i].scale.degree[j].weight = preset_scales[i].degree[j].weight;
-			}
+			copyScale(preset_scales[i], marmoraScales[i].scale);
 		}
 
 		onSampleRateChange();
@@ -754,6 +749,7 @@ struct Marmora : Module {
 		if (!bModuleAdded) {
 			for (int i = 0; i < MAX_SCALES; i++) {
 				xyGenerator.LoadScale(i, preset_scales[i]);
+
 			}
 			bModuleAdded = true;
 		}
@@ -845,14 +841,7 @@ struct Marmora : Module {
 					scaleOk = false;
 				}
 				if (scaleOk) {
-					marmoraScales[scale].scale.base_interval = customScale.base_interval;
-					marmoraScales[scale].scale.num_degrees = customScale.num_degrees;
-
-					for (int degree = 0; degree < customScale.num_degrees; degree++) {
-						marmoraScales[scale].scale.degree[degree].voltage = customScale.degree[degree].voltage;
-						marmoraScales[scale].scale.degree[degree].weight = customScale.degree[degree].weight;
-					}
-
+					copyScale(customScale, marmoraScales[scale].scale);
 					marmoraScales[scale].dirty = true;
 					dirtyScalesCount++;
 				}
@@ -874,13 +863,7 @@ struct Marmora : Module {
 			if (success) {
 				int currentScale = params[PARAM_SCALE].getValue();
 				marmoraScales[currentScale].scale.Init();
-				marmoraScales[currentScale].scale.base_interval = customScale.base_interval;
-				marmoraScales[currentScale].scale.num_degrees = customScale.num_degrees;
-				for (int degree = 0; degree < customScale.num_degrees; degree++) {
-					marmoraScales[currentScale].scale.degree[degree].voltage = customScale.degree[degree].voltage;
-					marmoraScales[currentScale].scale.degree[degree].weight = customScale.degree[degree].weight;
-				}
-
+				copyScale(customScale, marmoraScales[currentScale].scale);
 				xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 				marmoraScales[currentScale].dirty = true;
 			}
@@ -895,16 +878,19 @@ struct Marmora : Module {
 	void resetScale() {
 		int currentScale = params[PARAM_SCALE].getValue();
 
-		marmoraScales[currentScale].scale.base_interval = preset_scales[currentScale].base_interval;
-		marmoraScales[currentScale].scale.num_degrees = preset_scales[currentScale].num_degrees;
-
-		for (int degree = 0; degree < preset_scales[currentScale].num_degrees; degree++) {
-			marmoraScales[currentScale].scale.degree[degree].voltage = preset_scales[currentScale].degree[degree].voltage;
-			marmoraScales[currentScale].scale.degree[degree].weight = preset_scales[currentScale].degree[degree].weight;
-		}
-
+		copyScale(preset_scales[currentScale], marmoraScales[currentScale].scale);
 		marmoraScales[currentScale].dirty = false;
 		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
+	}
+
+	void copyScale(const marbles::Scale source, marbles::Scale& destination) {
+		destination.base_interval = source.base_interval;
+		destination.num_degrees = source.num_degrees;
+
+		for (int degree = 0; degree < source.num_degrees; degree++) {
+			destination.degree[degree].voltage = source.degree[degree].voltage;
+			destination.degree[degree].weight = source.degree[degree].weight;
+		}
 	}
 };
 
