@@ -762,6 +762,7 @@ struct Marmora : Module {
 		}
 		else {
 			scaleRecorder.Clear();
+			bLastGate = false;
 		}
 		bScaleEditMode = !bScaleEditMode;
 	}
