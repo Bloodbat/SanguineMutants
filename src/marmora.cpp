@@ -320,11 +320,11 @@ struct Marmora : Module {
 
 	marbles::Scale customScale;
 
-	bool dejaVuTEnabled;
-	bool dejaVuXEnabled;
-	bool xClockSourceExternal = false;
-	bool tReset;
-	bool xReset;
+	bool bDejaVuTEnabled;
+	bool bDejaVuXEnabled;
+	bool bXClockSourceExternal = false;
+	bool bTReset;
+	bool bXReset;
 
 	bool bScaleEditMode = false;
 	bool bNoteGate = false;
@@ -439,18 +439,18 @@ struct Marmora : Module {
 			dejaVuLockModeX = DEJA_VU_LOCK_ON;
 		}
 
-		dejaVuTEnabled = params[PARAM_DEJA_VU_T].getValue();
-		dejaVuXEnabled = params[PARAM_DEJA_VU_X].getValue();
+		bDejaVuTEnabled = params[PARAM_DEJA_VU_T].getValue();
+		bDejaVuXEnabled = params[PARAM_DEJA_VU_X].getValue();
 
 		xScale = params[PARAM_SCALE].getValue();
 		xClockSourceInternal = params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue();
-		xClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
+		bXClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
 
-		tReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage());
-		xReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage());
+		bTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage());
+		bXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage());
 
-		if (!xClockSourceExternal) {
-			xReset |= tReset;
+		if (!bXClockSourceExternal) {
+			bXReset |= bTReset;
 		}
 
 		// Process block
@@ -473,14 +473,14 @@ struct Marmora : Module {
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightDivider * args.sampleTime;
 
-			if (dejaVuTEnabled || dejaVuLockModeT == DEJA_VU_SUPER_LOCK) {
+			if (bDejaVuTEnabled || dejaVuLockModeT == DEJA_VU_SUPER_LOCK) {
 				drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime);
 			}
 			else {
 				lights[LIGHT_DEJA_VU_T].setBrightnessSmooth(0.f, sampleTime);
 			}
 
-			if (dejaVuXEnabled || dejaVuLockModeX == DEJA_VU_SUPER_LOCK) {
+			if (bDejaVuXEnabled || dejaVuLockModeX == DEJA_VU_SUPER_LOCK) {
 				drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime);
 			}
 			else {
@@ -536,7 +536,7 @@ struct Marmora : Module {
 			lights[LIGHT_Y + 0].setBrightnessSmooth(math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f), sampleTime);
 			lights[LIGHT_Y + 1].setBrightnessSmooth(math::rescale(-voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f), sampleTime);
 
-			if (!xClockSourceExternal) {
+			if (!bXClockSourceExternal) {
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
@@ -634,7 +634,7 @@ struct Marmora : Module {
 		float tJitter = clamp(params[PARAM_T_JITTER].getValue() + inputs[INPUT_T_JITTER].getVoltage() / 5.f, 0.f, 1.f);
 		tGenerator.set_jitter(tJitter);
 		if (dejaVuLockModeT != DEJA_VU_SUPER_LOCK) {
-			tGenerator.set_deja_vu(dejaVuTEnabled ? dejaVu : 0.f);
+			tGenerator.set_deja_vu(bDejaVuTEnabled ? dejaVu : 0.f);
 		}
 		else {
 			tGenerator.set_deja_vu(0.5f);
@@ -643,11 +643,11 @@ struct Marmora : Module {
 		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
 		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
 
-		tGenerator.Process(tExternalClock, &tReset, tClocks, ramps, gates, BLOCK_SIZE);
+		tGenerator.Process(tExternalClock, &bTReset, tClocks, ramps, gates, BLOCK_SIZE);
 
 		// Set up XYGenerator
 		marbles::ClockSource xClockSource = marbles::ClockSource(xClockSourceInternal);
-		if (xClockSourceExternal) {
+		if (bXClockSourceExternal) {
 			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
 		}
 
@@ -669,7 +669,7 @@ struct Marmora : Module {
 			float xSteps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
 			x.steps = xSteps;
 			if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK) {
-				x.deja_vu = dejaVuXEnabled ? dejaVu : 0.f;
+				x.deja_vu = bDejaVuXEnabled ? dejaVu : 0.f;
 			}
 			else {
 				x.deja_vu = 0.5f;
@@ -696,7 +696,7 @@ struct Marmora : Module {
 			y.ratio = y_divider_ratios[yDividerIndex];
 			y.scale_index = xScale;
 
-			xyGenerator.Process(xClockSource, x, y, &xReset, xyClocks, ramps, voltages, BLOCK_SIZE);
+			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, BLOCK_SIZE);
 		}
 		else {
 			/* Was
