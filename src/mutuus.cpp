@@ -310,7 +310,7 @@ struct MutuusWidget : ModuleWidget {
 			for (int i = 0; i < 9; i++) {
 				menu->addChild(createCheckMenuItem(mutuusModelLabels[i], "",
 					[=]() {return module->featureMode == i; },
-					[=]() {module->featureMode = i; }
+					[=]() {module->mutuusModulator.set_feature_mode(mutuus::FeatureMode(i)); }
 				));
 			}
 			}));
