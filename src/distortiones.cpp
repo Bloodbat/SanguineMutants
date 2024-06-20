@@ -233,6 +233,11 @@ struct Distortiones : Module {
 			featureMode = distortionesModulator.feature_mode();
 		}
 	}
+
+	void setFeatureMode(int modeNumber) {
+		featureMode = modeNumber;
+		distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
+	}
 };
 
 static const std::string distortionesModelLabels[9] = {
@@ -290,7 +295,7 @@ struct DistortionesWidget : ModuleWidget {
 			for (int i = 0; i < 9; i++) {
 				menu->addChild(createCheckMenuItem(distortionesModelLabels[i], "",
 					[=]() {return module->featureMode == i; },
-					[=]() {module->featureMode = i; }
+					[=]() {module->setFeatureMode(i); }
 				));
 			}
 			}));
