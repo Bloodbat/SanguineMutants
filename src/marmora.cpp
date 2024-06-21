@@ -364,19 +364,19 @@ struct Marmora : Module {
 
 		configButton(PARAM_DEJA_VU_T, "T deja vu");
 		configButton(PARAM_DEJA_VU_X, "X deja vu");
-		configParam(PARAM_DEJA_VU, 0.0, 1.0, 0.5, "Deja vu probability");
+		configParam(PARAM_DEJA_VU, 0.0, 1.0, 0.5, "Deja vu probability", "%", 0.f, 100.f);
 		configParam(PARAM_T_RATE, -1.0, 1.0, 0.0, "Clock rate");
-		configParam(PARAM_X_SPREAD, 0.0, 1.0, 0.5, "Probability distribution");
+		configParam(PARAM_X_SPREAD, 0.0, 1.0, 0.5, "Probability distribution", "%", 0.f, 100.f);
 		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "T mode", marmoraTModeLabels);
 		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmoraXModeLabels);
-		configParam(PARAM_DEJA_VU_LENGTH, 0.0, 1.0, 1.0, "Loop length");
-		configParam(PARAM_T_BIAS, 0.0, 1.0, 0.5, "Gate bias");
-		configParam(PARAM_X_BIAS, 0.0, 1.0, 0.5, "Distribution bias");
+		configParam(PARAM_DEJA_VU_LENGTH, 0.0, 1.0, 1.0, "Loop length", "", 0.f, 100.f);
+		configParam(PARAM_T_BIAS, 0.0, 1.0, 0.5, "Gate bias", "%", 0.f, 100.f);
+		configParam(PARAM_X_BIAS, 0.0, 1.0, 0.5, "Distribution bias", "%", 0.f, 100.f);
 		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "Clock range mode", marmoraTRangeLabels);
 		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "Output voltage range mode", marmoraXRangeLabels);
 		configButton(PARAM_EXTERNAL, "External processing mode");
-		configParam(PARAM_T_JITTER, 0.0, 1.0, 0.0, "Randomness amount");
-		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "Smoothness");
+		configParam(PARAM_T_JITTER, 0.0, 1.0, 0.0, "Randomness amount", "%", 0.f, 100.f);
+		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "Smoothness", "%", 0.f, 100.f);
 		configSwitch(PARAM_SCALE, 0.f, 5.f, 0.f, "Scale", marmoraScaleLabels);
 		configSwitch(PARAM_INTERNAL_X_CLOCK_SOURCE, 0.f, 3.f, 0.f, "Internal X clock source", marmoraInternalClockLabels);
 		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t Super lock", marmoraLockLabels);
@@ -403,12 +403,12 @@ struct Marmora : Module {
 		configOutput(OUTPUT_X3, "X₃");
 
 		configParam(PARAM_Y_RATE, 0.0, 1.0, 4.5 / LENGTHOF(y_divider_ratios), "Clock divide");
-		configParam(PARAM_Y_SPREAD, 0.0, 1.0, 0.5, "Probability distribution");
-		configParam(PARAM_Y_BIAS, 0.0, 1.0, 0.5, "Voltage offset");
-		configParam(PARAM_Y_STEPS, 0.0, 1.0, 0.0, "Smoothness");
+		configParam(PARAM_Y_SPREAD, 0.0, 1.0, 0.5, "Probability distribution", "%", 0.f, 100.f);
+		configParam(PARAM_Y_BIAS, 0.0, 1.0, 0.5, "Voltage offset", "%", 0.f, 100.f);
+		configParam(PARAM_Y_STEPS, 0.0, 1.0, 0.0, "Smoothness", "%", 0.f, 100.f);
 
-		configParam(PARAM_GATE_BIAS, 0.0, 1.0, 0.5, "Gate length");
-		configParam(PARAM_GATE_JITTER, 0.0, 1.0, 0.0, "Gate length randomness");
+		configParam(PARAM_GATE_BIAS, 0.0, 1.0, 0.5, "Gate length", "%", 0.f, 100.f);
+		configParam(PARAM_GATE_JITTER, 0.0, 1.0, 0.0, "Gate length randomness", "%", 0.f, 100.f);
 
 		lightsDivider.setDivision(kLightDivider);
 
