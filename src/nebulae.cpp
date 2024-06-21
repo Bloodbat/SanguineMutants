@@ -168,36 +168,36 @@ struct Nebulae : Module {
 		configParam(PARAM_MODE, 0.f, 3.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
-		configParam(PARAM_POSITION, 0.0, 1.0, 0.5, "Grain position");
+		configParam(PARAM_POSITION, 0.0, 1.0, 0.5, "Grain position", "%", 0.f, 100.f);
 		configInput(INPUT_POSITION, "Grain position CV");
 
-		configParam(PARAM_DENSITY, 0.0, 1.0, 0.5, "Grain density");
+		configParam(PARAM_DENSITY, 0.0, 1.0, 0.5, "Grain density", "%", 0.f, 100.f);
 		configInput(INPUT_DENSITY, "Grain density CV");
 
-		configParam(PARAM_SIZE, 0.0, 1.0, 0.5, "Grain size");
+		configParam(PARAM_SIZE, 0.0, 1.0, 0.5, "Grain size", "%", 0.f, 100.f);
 		configInput(INPUT_SIZE, "Grain size CV");
 
-		configParam(PARAM_TEXTURE, 0.0, 1.0, 0.5, "Grain texture");
+		configParam(PARAM_TEXTURE, 0.0, 1.0, 0.5, "Grain texture", "%", 0.f, 100.f);
 		configInput(INPUT_TEXTURE, "Grain texture CV");
 
 		configParam(PARAM_PITCH, -2.0, 2.0, 0.0, "Grain pitch");
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
 
-		configParam(PARAM_BLEND, 0.0, 1.0, 0.5, "Dry/wet");
+		configParam(PARAM_BLEND, 0.0, 1.0, 0.5, "Dry/wet", "%", 0.f, 100.f);
 		configInput(INPUT_BLEND, "Dry/wet CV");
 
 		configInput(INPUT_TRIGGER, "Trigger");
 
 		configInput(INPUT_SPREAD, "Spread CV");
-		configParam(PARAM_SPREAD, 0.f, 1.f, 0.5f, "Spread");
+		configParam(PARAM_SPREAD, 0.f, 1.f, 0.5f, "Spread", "%", 0.f, 100.f);
 
 		configInput(INPUT_FEEDBACK, "Feedback CV");
-		configParam(PARAM_FEEDBACK, 0.f, 1.f, 0.5f, "Feedback");
+		configParam(PARAM_FEEDBACK, 0.f, 1.f, 0.5f, "Feedback", "%", 0.f, 100.f);
 
 		configInput(INPUT_REVERB, "Reverb CV");
-		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb");
+		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb", "%", 0.f, 100.f);
 
-		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain");
+		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain", "%", 0.f, 100.f);
 
 		configInput(INPUT_LEFT, "Left");
 		configInput(INPUT_RIGHT, "Right");
