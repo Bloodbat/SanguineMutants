@@ -232,10 +232,10 @@ struct Apices : Module {
 		configParam(PARAM_MODE, 0.0f, 9.0f, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
-		configParam(PARAM_KNOB_1, 0.0f, 65535.0f, 32678.0f, "Knob 1", "", 0.f, 1.f / 65535.f);
-		configParam(PARAM_KNOB_2, 0.0f, 65535.0f, 32678.0f, "Knob 2", "", 0.f, 1.f / 65535.f);
-		configParam(PARAM_KNOB_3, 0.0f, 65535.0f, 32678.0f, "Knob 3", "", 0.f, 1.f / 65535.f);
-		configParam(PARAM_KNOB_4, 0.0f, 65535.0f, 32678.0f, "Knob 4", "", 0.f, 1.f / 65535.f);
+		configParam(PARAM_KNOB_1, 0.0f, 65535.0f, 32678.0f, "Knob 1", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_2, 0.0f, 65535.0f, 32678.0f, "Knob 2", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_3, 0.0f, 65535.0f, 32678.0f, "Knob 3", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_4, 0.0f, 65535.0f, 32678.0f, "Knob 4", "", 0.f, (1.f / 65535.f) * 100);
 		configButton(PARAM_EDIT_MODE, "Toggle split mode");
 		configButton(PARAM_CHANNEL_SELECT, "Expert mode channel select");
 		configButton(PARAM_EXPERT_MODE, "Toggle expert mode");
@@ -771,7 +771,7 @@ struct Apices : Module {
 			}
 		}
 
-		// Update module internal state from settings.
+		// Update module internal state from settings.		
 		init();
 		saveState();
 	}
