@@ -139,7 +139,7 @@ struct Explorator : Module {
 		if (inputs[INPUT_2_TO_2_A].isConnected() || inputs[INPUT_2_TO_2_B].isConnected()) {
 			float_4 voltages2to2;
 			for (int channel = 0; channel < channels2to2; channel += 4) {
-				voltages2to2 = clamp(inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel) + inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel), -10.f, 10.f);
+				voltages2to2 = inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel) + inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel);
 				outputs[OUTPUT_2_TO_2_A].setVoltageSimd(voltages2to2, channel);
 				outputs[OUTPUT_2_TO_2_B].setVoltageSimd(voltages2to2, channel);
 			}
@@ -176,8 +176,6 @@ struct Explorator : Module {
 				if (attenuate3to1) {
 					voltages3to1 /= 3;
 				}
-
-				voltages3to1 = clamp(voltages3to1, -10.f, 10.f);
 
 				outputs[OUTPUT_3_TO_1].setVoltageSimd(voltages3to1, channel);
 			}
