@@ -118,6 +118,13 @@ SOURCES += eurorack/marbles/random/quantizer.cc
 SOURCES += eurorack/marbles/ramp/ramp_extractor.cc
 SOURCES += eurorack/marbles/resources.cc
 
+SOURCES += eurorack/rings/dsp/fm_voice.cc
+SOURCES += eurorack/rings/dsp/part.cc
+SOURCES += eurorack/rings/dsp/string_synth_part.cc
+SOURCES += eurorack/rings/dsp/string.cc
+SOURCES += eurorack/rings/dsp/resonator.cc
+SOURCES += eurorack/rings/resources.cc
+
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..

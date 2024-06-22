@@ -168,9 +168,18 @@
     {
       "slug": "Sanguine-Marmora",
       "name": "Sanguine Marmora",
-      "description": "Based on Mutable Instruments Marbles",      
+      "description": "Based on Mutable Instruments Marbles",
       "tags": [
         "Random",
+        "Hardware clone"
+      ]
+    },
+    {
+      "slug": "Sanguine-Anuli",
+      "name": "Sanguine Anuli",
+      "description": "Based on Mutable Instruments Rings",
+      "tags": [
+        "Physical modeling",
         "Hardware clone"
       ]
     }
