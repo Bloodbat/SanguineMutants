@@ -19,3 +19,4 @@ extern Model* modelDistortiones;
 extern Model* modelMutuus;
 extern Model* modelExplorator;
 extern Model* modelMarmora;
+extern Model* modelAnuli;
