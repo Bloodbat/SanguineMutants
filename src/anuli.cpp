@@ -211,41 +211,41 @@ struct Anuli : Module {
 				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue()) * inputs[INPUT_POSITION_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
 
 				// Performance
-				rings::PerformanceState performance_state;
-				performance_state.note = 12.0 * inputs[INPUT_PITCH].getNormalVoltage(1 / 12.0, channel);
+				rings::PerformanceState performanceState;
+				performanceState.note = 12.0 * inputs[INPUT_PITCH].getNormalVoltage(1 / 12.0, channel);
 				float transpose = params[PARAM_FREQUENCY].getValue();
 				// Quantize transpose if pitch input is connected
 				if (inputs[INPUT_PITCH].isConnected()) {
 					transpose = roundf(transpose);
 				}
-				performance_state.tonic = 12.0 + clamp(transpose, 0.0f, 60.0f);
-				performance_state.fm = clamp(48.0 * 3.3 * dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue()) * inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.0, channel) / 5.0, -48.0f, 48.0f);
+				performanceState.tonic = 12.0 + clamp(transpose, 0.0f, 60.0f);
+				performanceState.fm = clamp(48.0 * 3.3 * dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue()) * inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.0, channel) / 5.0, -48.0f, 48.0f);
 
-				performance_state.internal_exciter = !inputs[INPUT_IN].isConnected();
-				performance_state.internal_strum = !inputs[INPUT_STRUM].isConnected();
-				performance_state.internal_note = !inputs[INPUT_PITCH].isConnected();
+				performanceState.internal_exciter = !inputs[INPUT_IN].isConnected();
+				performanceState.internal_strum = !inputs[INPUT_STRUM].isConnected();
+				performanceState.internal_note = !inputs[INPUT_PITCH].isConnected();
 
 				// TODO
 				// "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
-				performance_state.strum = bStrum[channel] && !bLastStrum[channel];
+				performanceState.strum = bStrum[channel] && !bLastStrum[channel];
 				bLastStrum[channel] = bStrum[channel];
 				bStrum[channel] = false;
 				if (channel == 0) {
-					setStrummingFlag(performance_state.strum);
+					setStrummingFlag(performanceState.strum);
 				}
 
-				performance_state.chord = clamp(int(roundf(structure * (rings::kNumChords - 1))), 0, rings::kNumChords - 1);
+				performanceState.chord = clamp(int(roundf(structure * (rings::kNumChords - 1))), 0, rings::kNumChords - 1);
 
 				// Process audio
 				float out[24];
 				float aux[24];
 				if (bEasterEgg) {
-					strummer[channel].Process(NULL, 24, &performance_state);
-					stringSynth[channel].Process(performance_state, patch, in, out, aux, 24);
+					strummer[channel].Process(NULL, 24, &performanceState);
+					stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
 				}
 				else {
-					strummer[channel].Process(in, 24, &performance_state);
-					part[channel].Process(performance_state, patch, in, out, aux, 24);
+					strummer[channel].Process(in, 24, &performanceState);
+					part[channel].Process(performanceState, patch, in, out, aux, 24);
 				}
 
 				// Convert output buffer
