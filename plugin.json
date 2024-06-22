@@ -177,9 +177,10 @@
     {
       "slug": "Sanguine-Anuli",
       "name": "Sanguine Anuli",
-      "description": "Based on Mutable Instruments Rings",
+      "description": "Based on Mutable Instruments Rings, Anuli is a polyphonic resonator",
       "tags": [
         "Physical modeling",
+        "Polyphonic",
         "Hardware clone"
       ]
     }
