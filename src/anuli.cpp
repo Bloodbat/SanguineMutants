@@ -42,6 +42,7 @@ struct Anuli : Module {
 		PARAM_FX,
 		PARAMS_COUNT
 	};
+
 	enum InputIds {
 		INPUT_BRIGHTNESS_CV,
 		INPUT_FREQUENCY_CV,
@@ -54,11 +55,13 @@ struct Anuli : Module {
 		INPUT_IN,
 		INPUTS_COUNT
 	};
+
 	enum OutputIds {
 		OUTPUT_ODD,
 		OUTPUT_EVEN,
 		OUTPUTS_COUNT
 	};
+
 	enum LightIds {
 		ENUMS(LIGHT_POLYPHONY, 2),
 		ENUMS(LIGHT_RESONATOR, 3),
