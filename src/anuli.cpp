@@ -72,12 +72,12 @@ struct Anuli : Module {
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 	dsp::ClockDivider clockDivider;
 
-	uint16_t reverb_buffer[32768] = {};
+	uint16_t reverbBuffer[32768] = {};
 	rings::Part part;
-	rings::StringSynthPart string_synth;
+	rings::StringSynthPart stringSynth;
 	rings::Strummer strummer;
-	bool strum = false;
-	bool lastStrum = false;
+	bool bStrum = false;
+	bool bLastStrum = false;
 
 	int polyphonyMode = 1;
 	int strummingFlagCounter;
@@ -129,8 +129,8 @@ struct Anuli : Module {
 		configBypass(INPUT_IN, OUTPUT_EVEN);
 
 		strummer.Init(0.01, 44100.0 / 24);
-		part.Init(reverb_buffer);
-		string_synth.Init(reverb_buffer);
+		part.Init(reverbBuffer);
+		stringSynth.Init(reverbBuffer);
 
 		clockDivider.setDivision(kDividerFrequency);
 	}
@@ -145,8 +145,8 @@ struct Anuli : Module {
 			inputBuffer.push(f);
 		}
 
-		if (!strum) {
-			strum = inputs[INPUT_STRUM].getVoltage() >= 1.0;
+		if (!bStrum) {
+			bStrum = inputs[INPUT_STRUM].getVoltage() >= 1.0;
 		}
 
 		const float sampleTime = kDividerFrequency * args.sampleTime;
@@ -185,7 +185,7 @@ struct Anuli : Module {
 				part.set_polyphony(polyphonyMode);
 			// Model
 			if (easterEgg)
-				string_synth.set_fx(rings::FxType(fxModel));
+				stringSynth.set_fx(rings::FxType(fxModel));
 			else
 				part.set_model(resonatorModel);
 
@@ -214,9 +214,9 @@ struct Anuli : Module {
 
 			// TODO
 			// "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
-			performance_state.strum = strum && !lastStrum;
-			lastStrum = strum;
-			strum = false;
+			performance_state.strum = bStrum && !bLastStrum;
+			bLastStrum = bStrum;
+			bStrum = false;
 			setStrummingFlag(performance_state.strum);
 
 			performance_state.chord = clamp((int)roundf(structure * (rings::kNumChords - 1)), 0, rings::kNumChords - 1);
@@ -226,7 +226,7 @@ struct Anuli : Module {
 			float aux[24];
 			if (easterEgg) {
 				strummer.Process(NULL, 24, &performance_state);
-				string_synth.Process(performance_state, patch, in, out, aux, 24);
+				stringSynth.Process(performance_state, patch, in, out, aux, 24);
 			}
 			else {
 				strummer.Process(in, 24, &performance_state);
