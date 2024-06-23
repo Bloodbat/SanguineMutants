@@ -813,7 +813,9 @@ struct Apices : Module {
 struct ApicesWidget : ModuleWidget {
 	ApicesWidget(Apices* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/apices_faceplate.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_22hp_purple.svg", "res/apices_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

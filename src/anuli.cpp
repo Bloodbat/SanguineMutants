@@ -364,7 +364,9 @@ struct Anuli : Module {
 struct AnuliWidget : ModuleWidget {
 	AnuliWidget(Anuli* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/anuli_faceplate.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_21hp_purple.svg", "res/anuli_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
