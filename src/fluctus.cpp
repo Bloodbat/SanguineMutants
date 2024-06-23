@@ -118,7 +118,9 @@ struct Fluctus : Module {
 		LEDS_INPUT,
 		LEDS_OUTPUT,
 		LEDS_PARAMETERS,
-		LEDS_MOMENTARY
+		LEDS_MOMENTARY,
+		LEDS_QUALITY_MOMENTARY,
+		LEDS_MODE_MOMENTARY
 	} ledMode = LEDS_INPUT;
 
 	LedModes lastLedMode = LEDS_INPUT;
@@ -146,6 +148,7 @@ struct Fluctus : Module {
 
 	fluctus::PlaybackMode playbackMode = fluctus::PLAYBACK_MODE_GRANULAR;
 	fluctus::PlaybackMode lastPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
+	fluctus::PlaybackMode lastLEDPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
 
 	float freezeLight = 0.0;
 
@@ -153,6 +156,9 @@ struct Fluctus : Module {
 	float lastSpread;
 	float lastFeedback;
 	float lastReverb;
+
+	int lastHiFi;
+	int lastStereo;
 
 	const int kClockDivider = 512;
 	int buffersize = 1;
@@ -228,6 +234,9 @@ struct Fluctus : Module {
 		lastFeedback = 0.5;
 		lastReverb = 0.5;
 
+		lastHiFi = 1;
+		lastStereo = 1;
+
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;
 		block_mem = new uint8_t[memLen]();
@@ -291,10 +300,10 @@ struct Fluctus : Module {
 				currentbuffersize = buffersize;
 			}
 
-			// Set up fluctusProcessor
+			// Set up Fluctus processor
+			fluctusProcessor->set_playback_mode(playbackMode);
 			fluctusProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
 			fluctusProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
-			fluctusProcessor->set_playback_mode(playbackMode);
 			fluctusProcessor->Prepare();
 
 			bool frozen = params[PARAM_FREEZE].getValue();
@@ -398,13 +407,28 @@ struct Fluctus : Module {
 			displayTimeout++;
 		}
 
-		if (displayTimeout > args.sampleRate) {
+		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
+			ledMode = LEDS_QUALITY_MOMENTARY;
+			displayTimeout++;
+		}
+
+		if (playbackMode != lastLEDPlaybackMode) {
+			ledMode = LEDS_MODE_MOMENTARY;
+			displayTimeout++;
+		}
+
+		if (displayTimeout > args.sampleRate * 2) {
 			ledMode = lastLedMode;
 			displayTimeout = 0;
 			lastBlend = params[PARAM_BLEND].getValue();
 			lastSpread = params[PARAM_SPREAD].getValue();
 			lastFeedback = params[PARAM_FEEDBACK].getValue();
 			lastReverb = params[PARAM_REVERB].getValue();
+
+			lastHiFi = params[PARAM_HI_FI].getValue();
+			lastStereo = params[PARAM_STEREO].getValue();
+
+			lastLEDPlaybackMode = playbackMode;
 		}
 
 		if (lightDivider.process()) { // Expensive, so call this infrequently
@@ -471,6 +495,11 @@ struct Fluctus : Module {
 				lastFeedback = params[PARAM_FEEDBACK].getValue();
 				lastReverb = params[PARAM_REVERB].getValue();
 
+				lastHiFi = params[PARAM_HI_FI].getValue();
+				lastStereo = params[PARAM_STEREO].getValue();
+
+				lastLEDPlaybackMode = playbackMode;
+
 				paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + etesiaButtonTexts[ledMode];
 
 				if (lastFrozen) {
@@ -507,6 +536,30 @@ struct Fluctus : Module {
 					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
 					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
+				break;
+			}
+			case LEDS_QUALITY_MOMENTARY: {
+				lights[LIGHT_BLEND].setBrightness(0.f);
+				lights[LIGHT_BLEND + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
+				lights[LIGHT_SPREAD].setBrightness(0.f);
+				lights[LIGHT_SPREAD + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK].setBrightness(0.f);
+				lights[LIGHT_FEEDBACK + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
+				lights[LIGHT_REVERB].setBrightness(0.f);
+				lights[LIGHT_REVERB + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
+				break;
+			}
+
+			case LEDS_MODE_MOMENTARY: {
+				lights[LIGHT_BLEND].setBrightness(playbackMode == 0 || playbackMode > 2 ? 1.f : 0.f);
+				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == 0 || playbackMode > 2 ? 1.f : 0.f);
+				lights[LIGHT_SPREAD].setBrightness(playbackMode == 1 || playbackMode > 2 ? 1.f : 0.f);
+				lights[LIGHT_SPREAD + 1].setBrightness(playbackMode == 1 || playbackMode > 2 ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK].setBrightness(playbackMode >= 2 ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK + 1].setBrightness(playbackMode >= 2 ? 1.f : 0.f);
+				lights[LIGHT_REVERB].setBrightness(playbackMode == 4 ? 1.f : 0.f);
+				lights[LIGHT_REVERB + 1].setBrightness(playbackMode == 4 ? 1.f : 0.f);
+
 				break;
 			}
 			}
