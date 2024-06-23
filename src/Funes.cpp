@@ -579,14 +579,14 @@ struct FunesWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(147.979, 116.972)), module, Funes::OUTPUT_OUT));
 		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(161.831, 116.972)), module, Funes::OUTPUT_AUX));
 
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.489, 14.71)), module, Funes::LIGHT_MODEL + 0 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(46.489, 14.71)), module, Funes::LIGHT_MODEL + 1 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(51.489, 14.71)), module, Funes::LIGHT_MODEL + 2 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(56.489, 14.71)), module, Funes::LIGHT_MODEL + 3 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(61.489, 14.71)), module, Funes::LIGHT_MODEL + 4 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(66.489, 14.71)), module, Funes::LIGHT_MODEL + 5 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(71.489, 14.71)), module, Funes::LIGHT_MODEL + 6 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(76.489, 14.71)), module, Funes::LIGHT_MODEL + 7 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.489, 14.41)), module, Funes::LIGHT_MODEL + 0 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(46.489, 14.41)), module, Funes::LIGHT_MODEL + 1 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(51.489, 14.41)), module, Funes::LIGHT_MODEL + 2 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(56.489, 14.41)), module, Funes::LIGHT_MODEL + 3 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(61.489, 14.41)), module, Funes::LIGHT_MODEL + 4 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(66.489, 14.41)), module, Funes::LIGHT_MODEL + 5 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(71.489, 14.41)), module, Funes::LIGHT_MODEL + 6 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(76.489, 14.41)), module, Funes::LIGHT_MODEL + 7 * 3));
 
 		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
 		addChild(funesFrambuffer);
