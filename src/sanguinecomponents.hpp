@@ -246,6 +246,12 @@ struct SanguinePolyOutputLight : SanguineShapedLight {
 	SanguinePolyOutputLight();
 };
 
+// Panels
+struct SanguinePanel : SvgPanel {	
+	widget::SvgWidget* foreground;
+	SanguinePanel(Plugin* pluginInstance, std::string newBackground, std::string newForeground);
+};
+
 // Drawing utils
 void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor);
 void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX);
