@@ -430,6 +430,15 @@ struct Nodi : Module {
 			outputs[OUTPUT_OUT].setVoltage(5.0 * f.samples[0]);
 		}
 
+		// Handle switches
+		settings.meta_modulation = params[PARAM_META].getValue();
+		bPaques = params[PARAM_MORSE].getValue();
+		settings.ad_vca = params[PARAM_VCA].getValue();
+		settings.vco_drift = params[PARAM_DRIFT].getValue();
+		settings.vco_flatten = params[PARAM_FLAT].getValue();
+		settings.signature = params[PARAM_SIGN].getValue();
+		settings.auto_trig = params[PARAM_AUTO].getValue();
+
 		if (clockDivider.process()) {
 			pollSwitches(args);
 		}
@@ -578,14 +587,6 @@ struct Nodi : Module {
 
 	inline void pollSwitches(const ProcessArgs& args) {
 		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
-		// Handle switches
-		settings.meta_modulation = params[PARAM_META].getValue();
-		bPaques = params[PARAM_MORSE].getValue();
-		settings.ad_vca = params[PARAM_VCA].getValue();
-		settings.vco_drift = params[PARAM_DRIFT].getValue();
-		settings.vco_flatten = params[PARAM_FLAT].getValue();
-		settings.signature = params[PARAM_SIGN].getValue();
-		settings.auto_trig = params[PARAM_AUTO].getValue();
 
 		// Handle switch lights
 		lights[LIGHT_META].setBrightnessSmooth(settings.meta_modulation, sampleTime);
@@ -599,13 +600,6 @@ struct Nodi : Module {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
-		json_t* settingsJ = json_array();
-		uint8_t* arraySettings = &settings.shape;
-		for (int i = 0; i < 20; i++) {
-			json_t* settingJ = json_integer(arraySettings[i]);
-			json_array_insert_new(settingsJ, i, settingJ);
-		}
-		json_object_set_new(rootJ, "settings", settingsJ);
 
 		json_t* lowCpuJ = json_boolean(bLowCpu);
 		json_object_set_new(rootJ, "bLowCpu", lowCpuJ);
@@ -614,16 +608,6 @@ struct Nodi : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
-		json_t* settingsJ = json_object_get(rootJ, "settings");
-		if (settingsJ) {
-			uint8_t* arraySettings = &settings.shape;
-			for (int i = 0; i < 20; i++) {
-				json_t* settingJ = json_array_get(settingsJ, i);
-				if (settingJ)
-					arraySettings[i] = json_integer_value(settingJ);
-			}
-		}
-
 		json_t* lowCpuJ = json_object_get(rootJ, "bLowCpu");
 		if (lowCpuJ) {
 			bLowCpu = json_boolean_value(lowCpuJ);
