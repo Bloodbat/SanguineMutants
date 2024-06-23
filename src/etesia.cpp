@@ -641,12 +641,12 @@ struct EtesiaWidget : ModuleWidget {
 		addParam(reverseButton);
 		addChild(createLightCentered<CKD6Light<WhiteLight>>(mm2px(Vec(37.35, 25.607)), module, Etesia::LIGHT_REVERSE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Etesia::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Etesia::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Etesia::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Etesia::LIGHT_REVERB));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 12.851)), module, Etesia::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 12.851)), module, Etesia::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 12.851)), module, Etesia::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 12.851)), module, Etesia::LIGHT_REVERB));
 
-		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Etesia::PARAM_LEDS_MODE));
+		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 12.851)), module, Etesia::PARAM_LEDS_MODE));
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
 		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
