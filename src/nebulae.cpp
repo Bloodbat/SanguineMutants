@@ -593,12 +593,12 @@ struct NebulaeWidget : ModuleWidget {
 		addParam(freezeButton);
 		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(21.529, 25.607)), module, Nebulae::LIGHT_FREEZE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 14.97)), module, Nebulae::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 14.97)), module, Nebulae::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 14.97)), module, Nebulae::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 14.97)), module, Nebulae::LIGHT_REVERB));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 12.851)), module, Nebulae::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 12.851)), module, Nebulae::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 12.851)), module, Nebulae::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 12.851)), module, Nebulae::LIGHT_REVERB));
 
-		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 14.97)), module, Nebulae::PARAM_LEDS_MODE));
+		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 12.851)), module, Nebulae::PARAM_LEDS_MODE));
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
 		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
