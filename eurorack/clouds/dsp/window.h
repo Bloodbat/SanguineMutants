@@ -39,85 +39,85 @@
 
 namespace clouds {
 
-enum WindowFlags {
-  WINDOW_FLAGS_HALF_DONE = 1,
-  WINDOW_FLAGS_REGENERATED = 2,
-  WINDOW_FLAGS_DONE = 4
-};
+	enum WindowFlags {
+		WINDOW_FLAGS_HALF_DONE = 1,
+		WINDOW_FLAGS_REGENERATED = 2,
+		WINDOW_FLAGS_DONE = 4
+	};
 
-class Window {
- public:
-  Window() { }
-  ~Window() { }
-  
-  void Init() {
-    done_ = true;
-    regenerated_ = false;
-    half_ = false;
-  }
-  
-  void Start(
-      int32_t buffer_size,
-      int32_t start,
-      int32_t width,
-      int32_t phase_increment) {
-    first_sample_ = (start + buffer_size) % buffer_size;
-    phase_increment_ = phase_increment;
-    phase_ = 0;
-    done_ = false;
-    regenerated_ = false;
-    done_ = false;
-    envelope_phase_increment_ = 2.0f / static_cast<float>(width);
-  }
-  
-  template<Resolution resolution>
-  inline void OverlapAdd(
-      const AudioBuffer<resolution>* buffer,
-      float* samples,
-      int32_t channels) {
-    if (done_) {
-      return;
-    }
-    int32_t phase_integral = phase_ >> 16;
-    int32_t phase_fractional = phase_ & 0xffff;
-    int32_t sample_index = first_sample_ + phase_integral;
-    
-    float envelope_phase = phase_integral * envelope_phase_increment_;
-    done_ = envelope_phase >= 2.0f;
-    half_ = envelope_phase >= 1.0f;
-    float gain = envelope_phase >= 1.0f
-        ? 2.0f - envelope_phase
-        : envelope_phase;
-    
-    float l = buffer[0].ReadHermite(sample_index, phase_fractional) * gain;
-    if (channels == 1) {
-      *samples++ += l;
-      *samples++ += l;
-    } else if (channels == 2) {
-      float r = buffer[1].ReadHermite(sample_index, phase_fractional) * gain;
-      *samples++ += l;
-      *samples++ += r;
-    }
-    phase_ += phase_increment_;
-  }
-  
-  inline bool done() { return done_; }
-  inline bool needs_regeneration() { return half_ && !regenerated_; }
-  inline void MarkAsRegenerated() { regenerated_ = true; }
-  
- private:
-  Window* next_;
-  int32_t first_sample_;
-  int32_t phase_;
-  int32_t phase_increment_;
-  float envelope_phase_increment_;
-  
-  bool done_;
-  bool half_;
-  bool regenerated_;
-  
-  DISALLOW_COPY_AND_ASSIGN(Window);
-};
+	class Window {
+	public:
+		Window() { }
+		~Window() { }
+
+		void Init() {
+			done_ = true;
+			regenerated_ = false;
+			half_ = false;
+		}
+
+		void Start(
+			int32_t buffer_size,
+			int32_t start,
+			int32_t width,
+			int32_t phase_increment) {
+			first_sample_ = (start + buffer_size) % buffer_size;
+			phase_increment_ = phase_increment;
+			phase_ = 0;
+			regenerated_ = false;
+			done_ = false;
+			envelope_phase_increment_ = 2.0f / static_cast<float>(width);
+		}
+
+		template<Resolution resolution>
+		inline void OverlapAdd(
+			const AudioBuffer<resolution>* buffer,
+			float* samples,
+			int32_t channels) {
+			if (done_) {
+				return;
+			}
+			int32_t phase_integral = phase_ >> 16;
+			int32_t phase_fractional = phase_ & 0xffff;
+			int32_t sample_index = first_sample_ + phase_integral;
+
+			float envelope_phase = phase_integral * envelope_phase_increment_;
+			done_ = envelope_phase >= 2.0f;
+			half_ = envelope_phase >= 1.0f;
+			float gain = envelope_phase >= 1.0f
+				? 2.0f - envelope_phase
+				: envelope_phase;
+
+			float l = buffer[0].ReadHermite(sample_index, phase_fractional) * gain;
+			if (channels == 1) {
+				*samples++ += l;
+				*samples++ += l;
+			}
+			else if (channels == 2) {
+				float r = buffer[1].ReadHermite(sample_index, phase_fractional) * gain;
+				*samples++ += l;
+				*samples++ += r;
+			}
+			phase_ += phase_increment_;
+		}
+
+		inline bool done() { return done_; }
+		inline bool needs_regeneration() { return half_ && !regenerated_; }
+		inline void MarkAsRegenerated() { regenerated_ = true; }
+
+	private:
+		Window* next_;
+		int32_t first_sample_;
+		int32_t phase_;
+		int32_t phase_increment_;
+		float envelope_phase_increment_;
+
+		bool done_;
+		bool half_;
+		bool regenerated_;
+
+		DISALLOW_COPY_AND_ASSIGN(Window);
+	};
 
 }  // namespace clouds
 
