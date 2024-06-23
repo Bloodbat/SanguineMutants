@@ -898,7 +898,9 @@ struct Marmora : Module {
 struct MarmoraWidget : ModuleWidget {
 	MarmoraWidget(Marmora* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/marmora_faceplate.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_28hp_purple.svg", "res/marmora_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

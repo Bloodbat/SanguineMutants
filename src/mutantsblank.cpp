@@ -8,7 +8,9 @@ struct MutantsBlank : Module {
 struct MutantsBlankWidget : ModuleWidget {
 	MutantsBlankWidget(MutantsBlank* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/mutants_blank.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_10hp_purple.svg", "res/mutants_blank.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
