@@ -615,6 +615,16 @@ SanguinePolyOutputLight::SanguinePolyOutputLight() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/out_light.svg")));
 }
 
+// Panels
+
+SanguinePanel::SanguinePanel(Plugin* pluginInstance, std::string newBackground, std::string newForeground) {
+	setBackground(Svg::load(asset::plugin(pluginInstance, newBackground)));
+
+	SvgWidget* foreground = new SvgWidget();
+	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForeground)));
+	fb->addChild(foreground);
+}
+
 // Drawing utils
 
 void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor)
