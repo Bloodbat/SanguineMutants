@@ -184,7 +184,8 @@ struct Aleae : Module {
 struct AleaeWidget : ModuleWidget {
 	AleaeWidget(Aleae* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/aleae_faceplate.svg")));
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_6hp_purple.svg", "res/aleae_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));

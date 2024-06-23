@@ -384,7 +384,9 @@ struct Explorator : Module {
 struct ExploratorWidget : ModuleWidget {
 	ExploratorWidget(Explorator* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/explorator_faceplate.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_10hp_purple.svg", "res/explorator_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

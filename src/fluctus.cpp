@@ -608,7 +608,9 @@ struct Fluctus : Module {
 struct FluctusWidget : ModuleWidget {
 	FluctusWidget(Fluctus* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/fluctus_faceplate.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_27hp_green.svg", "res/fluctus_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

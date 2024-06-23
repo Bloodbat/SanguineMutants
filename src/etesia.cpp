@@ -613,7 +613,9 @@ struct Etesia : Module {
 struct EtesiaWidget : ModuleWidget {
 	EtesiaWidget(Etesia* module) {
 		setModule(module);
-		setPanel(Svg::load(asset::plugin(pluginInstance, "res/etesia_faceplate.svg")));
+
+		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_27hp_red.svg", "res/etesia_faceplate.svg");
+		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
