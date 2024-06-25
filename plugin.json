@@ -183,6 +183,16 @@
         "Polyphonic",
         "Hardware clone"
       ]
+    },
+    {
+      "slug": "Sanguine-Velamina",
+      "name": "Sanguine Velamina",
+      "description": "A voltage controller amplifier based on the revised Mutable Instruments Veils",
+      "tags": [
+        "Mixer",
+        "Polyphonic",
+        "Voltage-controlled amplifier"
+      ]
     }
   ]
 }
