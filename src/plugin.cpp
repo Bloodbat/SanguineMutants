@@ -22,4 +22,5 @@ void init(rack::Plugin* p) {
 	p->addModel(modelExplorator);
 	p->addModel(modelMarmora);
 	p->addModel(modelAnuli);
+	p->addModel(modelVelamina);
 }
