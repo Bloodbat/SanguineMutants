@@ -163,6 +163,7 @@ struct Velamina : Module {
 						for (int channel = 0; channel < 4; channel++) {
 							voltageSum += portVoltages[i][offset][channel];
 						}
+						voltageSum = voltageSum / channelCount;
 					}
 					float redValue = rescale(-voltageSum, 0.f, 5.f, 0.f, 1.f);
 					float greenValue = rescale(voltageSum, 0.f, 5.f, 0.f, 1.f);
