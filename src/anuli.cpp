@@ -5,12 +5,12 @@
 #include "rings/dsp/string_synth_part.h"
 
 static const std::vector<std::string> anuliModeLabels = {
-	"Modal.Res",
-	"Symp.Strings",
-	"M.In.string",
+	"Modal. Reso",
+	"Sym. Strings",
+	"M. I. String",
 	"FM voice",
-	"Q.Sym.Str.",
-	"Rev.String",
+	"Q. Sym. Str.",
+	"Rev. String",
 	"Disas. Peace"
 };
 
