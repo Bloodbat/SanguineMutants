@@ -134,12 +134,12 @@ struct Velamina : Module {
 
 				outVoltages[currentChannel] += voltages;
 
+				float_4 above10 = outVoltages[currentChannel] > 10.f;
+				outVoltages[currentChannel] = simd::ifelse(above10, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
 				portVoltages[i][currentChannel] = outVoltages[currentChannel];
 
 
 				if (outputs[OUTPUT_1 + i].isConnected()) {
-					float_4 above10 = outVoltages[currentChannel] > 10.f;
-					outVoltages[currentChannel] = simd::ifelse(above10, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
 					outputs[OUTPUT_1 + i].setVoltageSimd(outVoltages[currentChannel], channel);
 					outVoltages[currentChannel] = 0.f;
 				}
@@ -154,8 +154,8 @@ struct Velamina : Module {
 				if (channelCount < 2) {
 					voltageSum = voltageSum += portVoltages[i][0][0];
 
-					lights[currentLight + 0].setBrightnessSmooth(rescale(-voltageSum, 0.f, 5.f, 0.f, 1.f), sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(rescale(voltageSum, 0.f, 5.f, 0.f, 1.f), sampleTime);
+					lights[currentLight + 0].setBrightnessSmooth(rescale(-voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(rescale(voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 				}
 				else {
@@ -163,10 +163,12 @@ struct Velamina : Module {
 						for (int channel = 0; channel < 4; channel++) {
 							voltageSum += portVoltages[i][offset][channel];
 						}
-						voltageSum = voltageSum / channelCount;
 					}
-					float redValue = rescale(-voltageSum, 0.f, 5.f, 0.f, 1.f);
-					float greenValue = rescale(voltageSum, 0.f, 5.f, 0.f, 1.f);
+
+					voltageSum = voltageSum / channelCount;
+
+					float redValue = rescale(-voltageSum, 0.f, 10.f, 0.f, 1.f);
+					float greenValue = rescale(voltageSum, 0.f, 10.f, 0.f, 1.f);
 					lights[currentLight + 0].setBrightnessSmooth(redValue, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(greenValue, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(voltageSum < 0 ? redValue : greenValue, sampleTime);
