@@ -238,7 +238,7 @@ struct Explorator : Module {
 			lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(0.f, sampleTime);
 
 			if (channels1to3 > 0) {
-				float voltage1to3Sum = inputs[INPUT_1_TO_3].getVoltageSum();
+				float voltage1to3Sum = inputs[INPUT_1_TO_3].getVoltageSum() / channels1to3;
 
 				if (channels1to3 == 1) {
 					lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(math::rescale(-voltage1to3Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
@@ -260,7 +260,7 @@ struct Explorator : Module {
 			lights[LIGHT_SIGN + 2].setBrightnessSmooth(0.f, sampleTime);
 
 			if (channelsSign > 0) {
-				float voltageSignSum = inputs[INPUT_SIGN].getVoltageSum();
+				float voltageSignSum = inputs[INPUT_SIGN].getVoltageSum() / channelsSign;
 
 				if (channels1to3 == 1) {
 					lights[LIGHT_SIGN + 0].setBrightnessSmooth(math::rescale(-voltageSignSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
@@ -282,7 +282,7 @@ struct Explorator : Module {
 			lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(0.f, sampleTime);
 
 			if (channels2to2 > 0) {
-				float voltageBSum = clamp(inputs[INPUT_2_TO_2_A].getVoltageSum() + inputs[INPUT_2_TO_2_B].getVoltageSum(), -10.f, 10.f);
+				float voltageBSum = (clamp(inputs[INPUT_2_TO_2_A].getVoltageSum() + inputs[INPUT_2_TO_2_B].getVoltageSum(), -10.f, 10.f)) / channels2to2;
 
 				if (channels2to2 == 1) {
 					lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(math::rescale(-voltageBSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
@@ -304,7 +304,7 @@ struct Explorator : Module {
 			lights[LIGHT_LOGIC + 2].setBrightnessSmooth(0.f, sampleTime);
 
 			if (channelsLogic > 0) {
-				float voltageLogicSum = clamp(inputs[INPUT_LOGIC_A].getVoltageSum() + inputs[INPUT_LOGIC_B].getVoltageSum(), -10.f, 10.f);
+				float voltageLogicSum = (clamp(inputs[INPUT_LOGIC_A].getVoltageSum() + inputs[INPUT_LOGIC_B].getVoltageSum(), -10.f, 10.f)) / channelsLogic;
 
 				if (channelsLogic == 1) {
 					lights[LIGHT_LOGIC + 0].setBrightnessSmooth(math::rescale(-voltageLogicSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
@@ -334,6 +334,8 @@ struct Explorator : Module {
 					voltage3to1Out = clamp((inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum()) / 3, -10.f, 10.f);
 				}
 
+				voltage3to1Out = voltage3to1Out / channels3to1;
+
 				if (channels3to1 == 1) {
 					lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(math::rescale(-voltage3to1Out, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(math::rescale(voltage3to1Out, 0.f, 10.f, 0.f, 1.f), sampleTime);
@@ -359,9 +361,9 @@ struct Explorator : Module {
 					sampleAndHoldVoltageSum += voltagesSampleAndHold[i];
 				}
 
-				sampleAndHoldVoltageSum = clamp(sampleAndHoldVoltageSum, -10.f, 10.f);
+				sampleAndHoldVoltageSum = (clamp(sampleAndHoldVoltageSum, -10.f, 10.f)) / lastSampleAndHoldChannels;
 
-				if (channels3to1 == 1) {
+				if (lastSampleAndHoldChannels == 1) {
 					lights[LIGHT_SH + 0].setBrightnessSmooth(math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[LIGHT_SH + 1].setBrightnessSmooth(math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[LIGHT_SH + 2].setBrightnessSmooth(0.0f, sampleAndHoldVoltageSum);
