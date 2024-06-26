@@ -13,7 +13,7 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-static const std::vector<ModelInfo> nodiModelInfos = {
+static const std::vector<NodiModelInfo> nodiModelInfos = {
 	{"CSAW", "Quirky sawtooth"},
 	{"/\\-_", "Triangle to saw"},
 	{"//-_", "Sawtooth wave with dephasing"},
