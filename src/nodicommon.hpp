@@ -5,12 +5,6 @@ struct NodiModelInfo {
 	std::string label;
 };
 
-struct RGBColor {
-	float red;
-	float green;
-	float blue;
-};
-
 static const uint16_t nodiBitReductionMasks[7] = {
 	0xc000,
 	0xe000,
