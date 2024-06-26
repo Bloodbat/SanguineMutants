@@ -425,16 +425,6 @@ struct Funes : Module {
 				user_data.setBuffer(userDataBuffer);
 			}
 		}
-
-		// Legacy <=1.0.2
-		json_t* lpgColorJ = json_object_get(rootJ, "lpgColor");
-		if (lpgColorJ)
-			params[PARAM_LPG_COLOR].setValue(json_number_value(lpgColorJ));
-
-		// Legacy <=1.0.2
-		json_t* decayJ = json_object_get(rootJ, "decay");
-		if (decayJ)
-			params[PARAM_LPG_DECAY].setValue(json_number_value(decayJ));
 	}
 
 	void reset() {
