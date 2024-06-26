@@ -147,38 +147,6 @@ struct Aleae : Module {
 			}
 		}
 	}
-
-	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
-		json_t* rollModesJ = json_array();
-		json_t* outModesJ = json_array();
-		for (int i = 0; i < 2; i++) {
-			json_array_insert_new(rollModesJ, i, json_boolean(rollModes[i]));
-			json_array_insert_new(outModesJ, i, json_boolean(outModes[i]));
-		}
-		json_object_set_new(rootJ, "rollModes", rollModesJ);
-		json_object_set_new(rootJ, "outModes", outModesJ);
-		return rootJ;
-	}
-
-	void dataFromJson(json_t* rootJ) override {
-		json_t* rollModesJ = json_object_get(rootJ, "rollModes");
-		if (rollModesJ) {
-			for (int i = 0; i < 2; i++) {
-				json_t* modeJ = json_array_get(rollModesJ, i);
-				if (modeJ)
-					rollModes[i] = json_boolean_value(modeJ);
-			}
-		}
-		json_t* outModesJ = json_object_get(rootJ, "outModes");
-		if (outModesJ) {
-			for (int i = 0; i < 2; i++) {
-				json_t* modeJ = json_array_get(outModesJ, i);
-				if (modeJ)
-					outModes[i] = (json_boolean_value(modeJ));
-			}
-		}
-	}
 };
 
 struct AleaeWidget : ModuleWidget {
