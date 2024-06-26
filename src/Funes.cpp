@@ -187,20 +187,80 @@ struct Funes : Module {
 				displayText = modelsList[modelNum];
 			}
 
-			// Model lights
-			// Pulse light at 2 Hz
-			triPhase += 2.f * args.sampleTime * blockSize;
-			if (triPhase >= 1.f)
-				triPhase -= 1.f;
-			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
+			// Calculate pitch for low cpu mode if needed
+			float pitch = params[PARAM_FREQUENCY].getValue();
+			if (bLowCpu)
+				pitch += std::log2(48000.f * args.sampleTime);
 
-			// Get the active engines of all voice channels.
+			// Update patch
+
+			// Similar implementation to original Plaits ui.cc code.
+			// TODO: check with low cpu mode.
+			if (frequencyMode == 0) {
+				patch.note = -48.37f + pitch * 15.f;
+			}
+			else if (frequencyMode == 9) {
+				float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
+				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
+			}
+			else if (frequencyMode == 10) {
+				patch.note = 60.f + pitch * 12.f;
+			}
+			else {
+				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
+			}
+
+			patch.harmonics = params[PARAM_HARMONICS].getValue();
+			patch.timbre = params[PARAM_TIMBRE].getValue();
+			patch.morph = params[PARAM_MORPH].getValue();
+			patch.lpg_colour = params[PARAM_LPG_COLOR].getValue();
+			patch.decay = params[PARAM_LPG_DECAY].getValue();
+			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
+			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
+			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
+
 			bool activeLights[24] = {};
+
 			bool pulse = false;
-			int currentLight;
-			int clampedEngine;
-			for (int c = 0; c < channels; c++) {
-				int activeEngine = voice[c].active_engine();
+
+			// Render output buffer for each voice
+			dsp::Frame<16 * 2> outputFrames[blockSize];
+			for (int channel = 0; channel < channels; channel++) {
+				// Construct modulations
+				plaits::Modulations modulations;
+				if (!bNotesModelSelection) {
+					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
+				}
+				modulations.note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
+				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
+				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f;
+				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(channel) / 8.f;
+				modulations.morph = inputs[INPUT_MORPH].getPolyVoltage(channel) / 8.f;
+				// Triggers at around 0.7 V
+				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(channel) / 3.f;
+				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
+
+				modulations.frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
+				modulations.timbre_patched = inputs[INPUT_TIMBRE].isConnected();
+				modulations.morph_patched = inputs[INPUT_MORPH].isConnected();
+				modulations.trigger_patched = inputs[INPUT_TRIGGER].isConnected();
+				modulations.level_patched = inputs[INPUT_LEVEL].isConnected();
+
+				// Render frames
+				plaits::Voice::Frame output[blockSize];
+				voice[channel].Render(patch, modulations, output, blockSize);
+
+				// Convert output to frames
+				for (int i = 0; i < blockSize; i++) {
+					outputFrames[i].samples[channel * 2 + 0] = output[i].out / 32768.f;
+					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
+				}
+
+				// Model lights	
+				// Get the active engines for currnet channel.
+				int currentLight;
+				int clampedEngine;
+				int activeEngine = voice[channel].active_engine();
 				clampedEngine = (activeEngine % 8) * 3;
 
 				bool noiseModels = activeEngine & 0x10;
@@ -227,8 +287,29 @@ struct Funes : Module {
 					pulse = true;
 			}
 
+			// Convert output
+			if (bLowCpu) {
+				int len = std::min((int)outputBuffer.capacity(), blockSize);
+				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
+				outputBuffer.endIncr(len);
+			}
+			else {
+				outputSrc.setRates(48000, int(args.sampleRate));
+				int inLen = blockSize;
+				int outLen = outputBuffer.capacity();
+				outputSrc.setChannels(channels * 2);
+				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
+				outputBuffer.endIncr(outLen);
+			}
+
+			// Pulse light at 2 Hz
+			triPhase += 2.f * args.sampleTime * blockSize;
+			if (triPhase >= 1.f)
+				triPhase -= 1.f;
+			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
+
 			// Set model lights.
-			clampedEngine = patch.engine % 8;
+			int clampedEngine = patch.engine % 8;
 			for (int i = 0; i < 8; i++) {
 				int currentLight = i * 3;
 				float brightnessRed = activeLights[currentLight];
@@ -266,87 +347,6 @@ struct Funes : Module {
 				lights[LIGHT_MODEL + currentLight].setBrightness(brightnessRed);
 				lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessGreen);
 				lights[LIGHT_MODEL + currentLight + 2].setBrightness(brightnessBlue);
-			}
-
-			// Calculate pitch for low cpu mode if needed
-			float pitch = params[PARAM_FREQUENCY].getValue();
-			if (bLowCpu)
-				pitch += std::log2(48000.f * args.sampleTime);
-
-			// Update patch
-
-			// Similar implementation to original Plaits ui.cc code.
-			// TODO: check with low cpu mode.
-			if (frequencyMode == 0) {
-				patch.note = -48.37f + pitch * 15.f;
-			}
-			else if (frequencyMode == 9) {
-				float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
-				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
-			}
-			else if (frequencyMode == 10) {
-				patch.note = 60.f + pitch * 12.f;
-			}
-			else {
-				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
-			}
-
-			patch.harmonics = params[PARAM_HARMONICS].getValue();
-			patch.timbre = params[PARAM_TIMBRE].getValue();
-			patch.morph = params[PARAM_MORPH].getValue();
-			patch.lpg_colour = params[PARAM_LPG_COLOR].getValue();
-			patch.decay = params[PARAM_LPG_DECAY].getValue();
-			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
-			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
-			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
-
-			// Render output buffer for each voice
-			dsp::Frame<16 * 2> outputFrames[blockSize];
-			for (int channel = 0; channel < channels; channel++) {
-				// Construct modulations
-				plaits::Modulations modulations;
-				if (!bNotesModelSelection) {
-					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
-				}
-				modulations.note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
-				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
-				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f;
-				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(channel) / 8.f;
-				modulations.morph = inputs[INPUT_MORPH].getPolyVoltage(channel) / 8.f;
-				// Triggers at around 0.7 V
-				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(channel) / 3.f;
-				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
-
-				modulations.frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
-				modulations.timbre_patched = inputs[INPUT_TIMBRE].isConnected();
-				modulations.morph_patched = inputs[INPUT_MORPH].isConnected();
-				modulations.trigger_patched = inputs[INPUT_TRIGGER].isConnected();
-				modulations.level_patched = inputs[INPUT_LEVEL].isConnected();
-
-				// Render frames
-				plaits::Voice::Frame output[blockSize];
-				voice[channel].Render(patch, modulations, output, blockSize);
-
-				// Convert output to frames
-				for (int i = 0; i < blockSize; i++) {
-					outputFrames[i].samples[channel * 2 + 0] = output[i].out / 32768.f;
-					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
-				}
-			}
-
-			// Convert output
-			if (bLowCpu) {
-				int len = std::min((int)outputBuffer.capacity(), blockSize);
-				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
-				outputBuffer.endIncr(len);
-			}
-			else {
-				outputSrc.setRates(48000, int(args.sampleRate));
-				int inLen = blockSize;
-				int outLen = outputBuffer.capacity();
-				outputSrc.setChannels(channels * 2);
-				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
-				outputBuffer.endIncr(outLen);
 			}
 		}
 
