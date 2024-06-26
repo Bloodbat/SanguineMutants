@@ -13,7 +13,7 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-static const std::vector<ModelInfo> contextusModelInfos = {
+static const std::vector<NodiModelInfo> contextusModelInfos = {
 	{"CSAW", "Quirky sawtooth"},
 	{"/\\-_", "Triangle to saw"},
 	{"//-_", "Sawtooth wave with dephasing"},
