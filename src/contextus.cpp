@@ -2,7 +2,7 @@
 
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
-#include "contextusconsts.hpp"
+#include "nodicommon.hpp"
 
 #include "renaissance/renaissance_macro_oscillator.h"
 #include "braids/signature_waveshaper.h"
@@ -12,6 +12,126 @@
 #include "renaissance/renaissance_quantizer_scales.h"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+static const std::vector<ModelInfo> contextusModelInfos = {
+	{"CSAW", "Quirky sawtooth"},
+	{"/\\-_", "Triangle to saw"},
+	{"//-_", "Sawtooth wave with dephasing"},
+	{"FOLD", "Wavefolded sine/triangle"},
+	{"uuuu", "Buzz"},
+	{"SUB-", "Square sub"},
+	{"SUB/", "Saw sub"},
+	{"SYN-", "Square sync"},
+	{"SYN/", "Saw sync"},
+	{"//x3", "Triple saw"},
+	{"-_x3", "Triple square"},
+	{"/\\x3", "Triple triangle"},
+	{"SIx3", "Triple sine"},
+	{"RING", "Triple ring mod"},
+	{"\\\\CH", "Saw diatonic chords"},
+	{"-_CH", "Square diatonic chords"},
+	{"/\\CH", "Triangle diatonic chords"},
+	{"SICH", "Sine diatonic chords"},
+	{"WTCH", "Wavetable diatonic chords"},
+	{"\\\\x6", "Saw chord stack"},
+	{"-_x6", "Square chord stack"},
+	{"/\\x6", "Triangle chord stack"},
+	{"SIx6", "Sine chord stack"},
+	{"WTx6", "Wavetable chord stack"},
+	{"////", "Saw swarm"},
+	{"//uu", "Saw comb"},
+	{"TOY*", "Circuit-bent toy"},
+	{"ZLPF", "Low-pass filtered waveform"},
+	{"ZPKF", "Peak filtered waveform"},
+	{"ZBPF", "Band-pass filtered waveform"},
+	{"ZHPF", "High-pass filtered waveform"},
+	{"VOSM", "VOSIM formant"},
+	{"VOWL", "Speech synthesis"},
+	{"VFOF", "FOF speech synthesis"},
+	{"HARM", "12 sine harmonics"},
+	{"FM  ", "2-operator phase-modulation"},
+	{"FBFM", "2-operator phase-modulation with feedback"},
+	{"WTFM", "2-operator phase-modulation with chaotic feedback"},
+	{"PLUK", "Plucked string"},
+	{"BOWD", "Bowed string"},
+	{"BLOW", "Blown reed"},
+	{"FLUT", "Flute"},
+	{"BELL", "Bell"},
+	{"DRUM", "Drum"},
+	{"KICK", "Kick drum circuit simulation"},
+	{"CYMB", "Cymbal"},
+	{"SNAR", "Snare"},
+	{"WTBL", "Wavetable"},
+	{"WMAP", "2D wavetable"},
+	{"WLIN", "1D wavetable"},
+	{"SAM1", "Software Automated Mouth 1"},
+	{"SAM2", "Software Automated Mouth 2"},
+	{"NOIS", "Filtered noise"},
+	{"TWNQ", "Twin peaks noise"},
+	{"CLKN", "Clocked noise"},
+	{"CLOU", "Granular cloud"},
+	{"PRTC", "Particle noise"},
+};
+
+static const RGBColor contextusLightColors[57]{
+{1.f, 0.f, 0.f},
+{0.9474f, 0.f, 0.0526f},
+{0.8948f, 0.f, 0.1052f},
+{0.8422f, 0.f, 0.1578f},
+{0.7896f, 0.f, 0.2104f},
+{0.737f, 0.f, 0.263f},
+{0.6844f, 0.f, 0.3156f},
+{0.6318f, 0.f, 0.3682f},
+{0.5792f, 0.f, 0.4208f},
+{0.5266f, 0.f, 0.4734f},
+{0.474f, 0.f, 0.526f},
+{0.4214f, 0.f, 0.5786f},
+{0.3688f, 0.f, 0.6312f},
+{0.3162f, 0.f, 0.6838f},
+{0.2636f, 0.f, 0.7364f},
+{0.211f, 0.f, 0.789f},
+{0.1584f, 0.f, 0.8416f},
+{0.1058f, 0.f, 0.8942f},
+{0.0532000000000003f, 0.f, 0.9468f},
+{0.f, 0.f, 1.f},
+{0.f, 0.0526f, 0.9474f},
+{0.f, 0.1052f, 0.8948f},
+{0.f, 0.1578f, 0.8422f},
+{0.f, 0.2104f, 0.7896f},
+{0.f, 0.263f, 0.737f},
+{0.f, 0.3156f, 0.6844f},
+{0.f, 0.3682f, 0.6318f},
+{0.f, 0.4208f, 0.5792f},
+{0.f, 0.4734f, 0.5266f},
+{0.f, 0.526f, 0.474f},
+{0.f, 0.5786f, 0.4214f},
+{0.f, 0.6312f, 0.3688f},
+{0.f, 0.6838f, 0.3162f},
+{0.f, 0.7364f, 0.2636f},
+{0.f, 0.789f, 0.211f},
+{0.f, 0.8416f, 0.1584f},
+{0.f, 0.8942f, 0.1058f},
+{0.f, 0.9468f, 0.0532000000000003f},
+{0.f, 1.f, 0.f},
+{0.0526f, 0.9474f, 0.0526f},
+{0.1052f, 0.8948f, 0.1052f},
+{0.1578f, 0.8422f, 0.1578f},
+{0.2104f, 0.7896f, 0.2104f},
+{0.263f, 0.737f, 0.263f},
+{0.3156f, 0.6844f, 0.3156f},
+{0.3682f, 0.6318f, 0.3682f},
+{0.4208f, 0.5792f, 0.4208f},
+{0.4734f, 0.5266f, 0.4734f},
+{0.526f, 0.474f, 0.526f},
+{0.5786f, 0.4214f, 0.5786f},
+{0.6312f, 0.3688f, 0.6312f},
+{0.6838f, 0.3162f, 0.6838f},
+{0.7364f, 0.2636f, 0.7364f},
+{0.789f, 0.211f, 0.789f},
+{0.8416f, 0.1584f, 0.8416f},
+{0.8942f, 0.1058f, 0.8942f},
+{0.9468f, 0.0532000000000003f, 0.9468f}
+};
 
 struct Contextus : Module {
 	enum ParamIds {
@@ -72,72 +192,6 @@ struct Contextus : Module {
 		LIGHTS_COUNT
 	};
 
-	struct RGBColor {
-		float red;
-		float green;
-		float blue;
-	};
-
-	const RGBColor lightColors[57]{
-	{1.f, 0.f, 0.f},
-	{0.9474f, 0.f, 0.0526f},
-	{0.8948f, 0.f, 0.1052f},
-	{0.8422f, 0.f, 0.1578f},
-	{0.7896f, 0.f, 0.2104f},
-	{0.737f, 0.f, 0.263f},
-	{0.6844f, 0.f, 0.3156f},
-	{0.6318f, 0.f, 0.3682f},
-	{0.5792f, 0.f, 0.4208f},
-	{0.5266f, 0.f, 0.4734f},
-	{0.474f, 0.f, 0.526f},
-	{0.4214f, 0.f, 0.5786f},
-	{0.3688f, 0.f, 0.6312f},
-	{0.3162f, 0.f, 0.6838f},
-	{0.2636f, 0.f, 0.7364f},
-	{0.211f, 0.f, 0.789f},
-	{0.1584f, 0.f, 0.8416f},
-	{0.1058f, 0.f, 0.8942f},
-	{0.0532000000000003f, 0.f, 0.9468f},
-	{0.f, 0.f, 1.f},
-	{0.f, 0.0526f, 0.9474f},
-	{0.f, 0.1052f, 0.8948f},
-	{0.f, 0.1578f, 0.8422f},
-	{0.f, 0.2104f, 0.7896f},
-	{0.f, 0.263f, 0.737f},
-	{0.f, 0.3156f, 0.6844f},
-	{0.f, 0.3682f, 0.6318f},
-	{0.f, 0.4208f, 0.5792f},
-	{0.f, 0.4734f, 0.5266f},
-	{0.f, 0.526f, 0.474f},
-	{0.f, 0.5786f, 0.4214f},
-	{0.f, 0.6312f, 0.3688f},
-	{0.f, 0.6838f, 0.3162f},
-	{0.f, 0.7364f, 0.2636f},
-	{0.f, 0.789f, 0.211f},
-	{0.f, 0.8416f, 0.1584f},
-	{0.f, 0.8942f, 0.1058f},
-	{0.f, 0.9468f, 0.0532000000000003f},
-	{0.f, 1.f, 0.f},
-	{0.0526f, 0.9474f, 0.0526f},
-	{0.1052f, 0.8948f, 0.1052f},
-	{0.1578f, 0.8422f, 0.1578f},
-	{0.2104f, 0.7896f, 0.2104f},
-	{0.263f, 0.737f, 0.263f},
-	{0.3156f, 0.6844f, 0.3156f},
-	{0.3682f, 0.6318f, 0.3682f},
-	{0.4208f, 0.5792f, 0.4208f},
-	{0.4734f, 0.5266f, 0.4734f},
-	{0.526f, 0.474f, 0.526f},
-	{0.5786f, 0.4214f, 0.5786f},
-	{0.6312f, 0.3688f, 0.6312f},
-	{0.6838f, 0.3162f, 0.6838f},
-	{0.7364f, 0.2636f, 0.7364f},
-	{0.789f, 0.211f, 0.789f},
-	{0.8416f, 0.1584f, 0.8416f},
-	{0.8942f, 0.1058f, 0.8942f},
-	{0.9468f, 0.0532000000000003f, 0.9468f}
-	};
-
 	renaissance::MacroOscillator osc;
 	renaissance::SettingsData settings;
 	braids::VcoJitterSource jitterSource;
@@ -151,26 +205,6 @@ struct Contextus : Module {
 
 	uint16_t gainLp;
 	uint16_t triggerDelay;
-
-	const uint16_t bitReductionMasks[7] = {
-		0xc000,
-		0xe000,
-		0xf000,
-		0xf800,
-		0xff00,
-		0xfff0,
-		0xffff
-	};
-
-	const uint16_t decimationFactors[7] = {
-		24,
-		12,
-		6,
-		4,
-		3,
-		2,
-		1
-	};
 
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer;
 	dsp::SampleRateConverter<1> sampleRateConverter;
@@ -391,8 +425,8 @@ struct Contextus : Module {
 
 			// Signature waveshaping, decimation, and bit reduction
 			int16_t sample = 0;
-			size_t decimationFactor = decimationFactors[settings.sample_rate];
-			uint16_t bitMask = bitReductionMasks[settings.resolution];
+			size_t decimationFactor = nodiDecimationFactors[settings.sample_rate];
+			uint16_t bitMask = nodiBitReductionMasks[settings.resolution];
 			int32_t gain = settings.ad_vca > 0 ? adValue : 65535;
 			uint16_t signature = settings.signature * settings.signature * 4095;
 			for (size_t i = 0; i < 24; i++) {
@@ -446,9 +480,9 @@ struct Contextus : Module {
 
 		// Handle model light		
 		int currentModel = settings.shape;
-		lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[currentModel].red, args.sampleTime);
-		lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[currentModel].green, args.sampleTime);
-		lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[currentModel].blue, args.sampleTime);
+		lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, args.sampleTime);
+		lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, args.sampleTime);
+		lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, args.sampleTime);
 
 		handleDisplay(args);
 	}
@@ -457,94 +491,94 @@ struct Contextus : Module {
 		// Display handling
 		// Display - return to model after 2s
 		if (lastSettingChanged == renaissance::SETTING_OSCILLATOR_SHAPE) {
-			displayText = modelInfos[settings.shape].code;
+			displayText = contextusModelInfos[settings.shape].code;
 		}
 		else {
 			int value;
 			switch (lastSettingChanged)
 			{
 			case renaissance::SETTING_META_MODULATION: {
-				displayText = "META";
+				displayText = nodiMetaLabel;
 				break;
 			}
 			case renaissance::SETTING_RESOLUTION: {
 				value = settings.resolution;
-				displayText = bitsStrings[value];
+				displayText = nodiBitsStrings[value];
 				break;
 			}
 			case renaissance::SETTING_SAMPLE_RATE: {
 				value = settings.sample_rate;
-				displayText = ratesStrings[value];
+				displayText = nodiRatesStrings[value];
 				break;
 			}
 			case renaissance::SETTING_TRIG_SOURCE: {
-				displayText = "AUTO";
+				displayText = nodiAutoLabel;
 				break;
 			}
 			case renaissance::SETTING_TRIG_DELAY: {
 				value = settings.trig_delay;
-				displayText = triggerDelayStrings[value];
+				displayText = nodiTriggerDelayStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_ATTACK: {
 				value = settings.ad_attack;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_DECAY: {
 				value = settings.ad_decay;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_FM: {
 				value = settings.ad_fm;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_TIMBRE: {
 				value = settings.ad_timbre;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_COLOR: {
 				value = settings.ad_color;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_VCA: {
-				displayText = "\\VCA";
+				displayText = nodiVCALabel;
 				break;
 			}
 			case renaissance::SETTING_PITCH_RANGE: {
 				value = settings.pitch_range;
-				displayText = pitchRangeStrings[value];
+				displayText = nodiPitchRangeStrings[value];
 				break;
 			}
 			case renaissance::SETTING_PITCH_OCTAVE: {
 				value = settings.pitch_octave;
-				displayText = octaveStrings[value];
+				displayText = nodiOctaveStrings[value];
 				break;
 			}
 			case renaissance::SETTING_QUANTIZER_SCALE: {
 				value = settings.quantizer_scale;
-				displayText = quantizationStrings[value];
+				displayText = nodiQuantizationStrings[value];
 				break;
 			}
 			case renaissance::SETTING_QUANTIZER_ROOT: {
 				value = settings.quantizer_root;
-				displayText = noteStrings[value];
+				displayText = nodiNoteStrings[value];
 				break;
 			}
 			case renaissance::SETTING_VCO_FLATTEN: {
-				displayText = "FLAT";
+				displayText = nodiFlatLabel;
 				break;
 			}
 			case renaissance::SETTING_VCO_DRIFT: {
-				displayText = "DRFT";
+				displayText = nodiDriftLabel;
 				break;
 			}
 			case renaissance::SETTING_SIGNATURE: {
-				displayText = "SIGN";
+				displayText = nodiSignLabel;
 				break;
 			}
 			default: {
@@ -733,8 +767,8 @@ struct ContextusWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(modelInfos.size()); i++) {
-			modelLabels.push_back(modelInfos[i].code + ": " + modelInfos[i].label);
+		for (int i = 0; i < int(contextusModelInfos.size()); i++) {
+			modelLabels.push_back(contextusModelInfos[i].code + ": " + contextusModelInfos[i].label);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
