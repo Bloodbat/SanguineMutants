@@ -114,8 +114,12 @@ struct Velamina : Module {
 
 				outVoltages[currentChannel] += voltages;
 
-				float_4 above10 = outVoltages[currentChannel] > 10.f;
-				outVoltages[currentChannel] = simd::ifelse(above10, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
+				float_4 isAbove10 = outVoltages[currentChannel] > 10.f;
+				float_4 isBelow10 = outVoltages[currentChannel] < -10.f;
+
+				float_4 wantSaturator = isAbove10 | isBelow10;			
+				
+				outVoltages[currentChannel] = simd::ifelse(wantSaturator, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
 				portVoltages[i][currentChannel] = outVoltages[currentChannel];
 
 
