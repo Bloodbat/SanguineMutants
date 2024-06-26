@@ -49,6 +49,20 @@ static const std::string modelsList[24] = {
   "HI-HAT",
 };
 
+static const std::vector<std::string> frequencyModes = {
+	"LFO mode",
+	"C0 +/- 7 semitones",
+	"C1 +/- 7 semitones",
+	"C2 +/- 7 semitones",
+	"C3 +/- 7 semitones",
+	"C4 +/- 7 semitones",
+	"C5 +/- 7 semitones",
+	"C6 +/- 7 semitones",
+	"C7 +/- 7 semitones",
+	"Octaves",
+	"C0 to C8"
+};
+
 struct Funes : Module {
 	enum ParamIds {
 		PARAM_MODEL,
@@ -62,6 +76,7 @@ struct Funes : Module {
 		PARAM_LPG_COLOR,
 		PARAM_LPG_DECAY,
 		PARAM_FREQUENCY_ROOT,
+		PARAM_FREQ_MODE,
 		PARAMS_COUNT
 	};
 
@@ -129,6 +144,8 @@ struct Funes : Module {
 		configParam(PARAM_TIMBRE_CV, -1.0, 1.0, 0.0, "Timbre CV");
 		configParam(PARAM_FREQUENCY_CV, -1.0, 1.0, 0.0, "Frequency CV");
 		configParam(PARAM_MORPH_CV, -1.0, 1.0, 0.0, "Morph CV");
+		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", frequencyModes);
+		paramQuantities[PARAM_FREQ_MODE]->snapEnabled = true;
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
@@ -182,9 +199,11 @@ struct Funes : Module {
 			if (bDisplayModulatedModel && (activeEngine != modelNum && activeEngine >= 0))
 				modelNum = activeEngine;
 
-			// Update model text every 16 samples only.
+			// Update model text and frequency mode every 16 samples only.
 			if (clockDivider.process()) {
 				displayText = modelsList[modelNum];
+
+				frequencyMode = params[PARAM_FREQ_MODE].getValue();
 			}
 
 			// Calculate pitch for low cpu mode if needed
@@ -414,7 +433,7 @@ struct Funes : Module {
 
 		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
 		if (frequencyModeJ)
-			frequencyMode = json_integer_value(frequencyModeJ);
+			setFrequencyMode(json_integer_value(frequencyModeJ));
 
 		json_t* userDataJ = json_object_get(rootJ, "userData");
 		if (userDataJ) {
@@ -489,6 +508,11 @@ struct Funes : Module {
 		// Try to wait for DSP to finish.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 	}
+
+	void setFrequencyMode(int freqModeNum) {
+		frequencyMode = freqModeNum;
+		params[PARAM_FREQ_MODE].setValue(freqModeNum);
+	}
 };
 
 static const std::string modelLabels[24] = {
@@ -518,20 +542,6 @@ static const std::string modelLabels[24] = {
 	"Analog hi-hat",
 };
 
-static const std::string frequencyModes[11] = {
-	"LFO mode",
-	"C0 +/- 7 semitones",
-	"C1 +/- 7 semitones",
-	"C2 +/- 7 semitones",
-	"C3 +/- 7 semitones",
-	"C4 +/- 7 semitones",
-	"C5 +/- 7 semitones",
-	"C6 +/- 7 semitones",
-	"C7 +/- 7 semitones",
-	"Octaves",
-	"C0 to C8",
-};
-
 struct FunesWidget : ModuleWidget {
 
 	FunesWidget(Funes* module) {
@@ -554,15 +564,16 @@ struct FunesWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 74.878)), module, Funes::PARAM_FREQUENCY_CV));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(142.556, 95.964)), module, Funes::PARAM_MORPH_CV));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(35.8, 89.884)), module, Funes::PARAM_LPG_COLOR));
-		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(69.552, 89.884)), module, Funes::PARAM_LPG_DECAY));
+		addParam(createParamCentered<Sanguine1PSPurple>(mm2px(Vec(19.083, 89.884)), module, Funes::PARAM_FREQ_MODE));
+		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(52.962, 89.884)), module, Funes::PARAM_LPG_COLOR));
+		addParam(createParamCentered<Sanguine1PSBlue>(mm2px(Vec(86.86, 89.884)), module, Funes::PARAM_LPG_DECAY));
 		addParam(createParamCentered<Sanguine3PSRed>(mm2px(Vec(52.962, 67.293)), module, Funes::PARAM_FREQUENCY_ROOT));
 
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 32.306)), module, Funes::INPUT_ENGINE));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 55.118)), module, Funes::INPUT_TIMBRE));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 74.89)), module, Funes::INPUT_FREQUENCY));
 		addInput(createInputCentered<BananutPurple>(mm2px(Vec(161.831, 95.976)), module, Funes::INPUT_MORPH));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(97.154, 89.884)), module, Funes::INPUT_HARMONICS));
+		addInput(createInputCentered<BananutPurple>(mm2px(Vec(120.305, 74.878)), module, Funes::INPUT_HARMONICS));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(14.378, 116.972)), module, Funes::INPUT_TRIGGER));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(27.855, 116.972)), module, Funes::INPUT_LEVEL));
 		addInput(createInputCentered<BananutGreen>(mm2px(Vec(41.331, 116.972)), module, Funes::INPUT_NOTE));
@@ -615,7 +626,7 @@ struct FunesWidget : ModuleWidget {
 			for (int i = 0; i < 11; i++) {
 				menu->addChild(createCheckMenuItem(frequencyModes[i], "",
 					[=]() {return module->frequencyMode == i; },
-					[=]() {module->frequencyMode = i; }
+					[=]() {module->setFrequencyMode(i); }
 				));
 			}
 			}));
