@@ -305,8 +305,9 @@ struct Funes : Module {
 			for (int channel = 0; channel < channels; channel++) {
 				// Construct modulations
 				plaits::Modulations modulations;
-				if (!bNotesModelSelection)
+				if (!bNotesModelSelection) {
 					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
+				}
 				modulations.note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
 				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
 				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f;
