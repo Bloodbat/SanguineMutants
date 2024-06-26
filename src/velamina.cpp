@@ -96,7 +96,7 @@ struct Velamina : Module {
 				if (inputs[INPUT_CV_1 + i].isConnected()) {
 					linear[currentChannel] = inputs[INPUT_CV_1 + i].getNormalVoltageSimd<float_4>(5.f, channel) / 5.f;
 					linear[currentChannel] = simd::clamp(linear[currentChannel], 0.f, 2.f);
-					const float base = 200.f;
+					const float_4 base = 200.f;
 					exponential[currentChannel] = simd::rescale(simd::pow(base, linear[currentChannel] / 2.f), 1.f, base, 0.f, 10.f);
 					modulationCV[currentChannel] = simd::crossfade(exponential[currentChannel], linear[currentChannel], params[PARAM_RESPONSE_1 + i].getValue());
 
