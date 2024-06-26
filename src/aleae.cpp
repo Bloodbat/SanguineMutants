@@ -140,8 +140,8 @@ struct Aleae : Module {
 
 	void onReset() override {
 		for (int i = 0; i < 2; i++) {
-			outModes[i] = OUT_MODE_TRIGGER;
-			rollModes[i] = ROLL_DIRECT;
+			params[PARAM_ROLL_MODE1 + i].setValue(0);
+			params[PARAM_OUT_MODE1 + i].setValue(0);
 			for (int j = 0; j < 16; j++) {
 				lastRollResults[i][j] = ROLL_HEADS;
 			}
