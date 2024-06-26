@@ -1,40 +1,17 @@
 ﻿#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
+#include "cloudycommon.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-struct EtesiaModeInfo {
-	std::string display;
-	std::string menuLabel;
-};
-
-static const std::vector<EtesiaModeInfo> modeList{
+static const std::vector<NebulaeModeInfo> modeList{
 	{ "GRANULAR", "Granular mode" },
 	{ "STRETCH", "Pitch shifter/time stretcher" },
 	{ "LOOPING DLY", "Looping delay" },
 	{ "SPECTRAL", "Spectral madness" },
 	{ "OLIVERB", "Oliverb" },
 	{ "RESONESTOR", "Resonestor" }
-};
-
-static const std::string cvSuffix = " CV";
-
-static const std::string ledButtonPrefix = "LED display value: ";
-
-struct EtesiaModeDisplay {
-	std::string labelFreeze;
-	std::string labelPosition;
-	std::string labelDensity;
-	std::string labelSize;
-	std::string labelTexture;
-	std::string labelPitch;
-	std::string labelTrigger;
-	// Labels for parasite.
-	std::string labelBlend;
-	std::string labelSpread;
-	std::string labelFeeback;
-	std::string labelReverb;
 };
 
 static const std::vector<EtesiaModeDisplay> modeDisplays{
@@ -53,13 +30,6 @@ static const std::vector<EtesiaModeDisplay> modeTooltips{
 	{"Freeze",  "Buffer",       "FFT Update / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",         "Reverb"},
 	{"Freeze",  "Pre-delay",    "Decay",              "Size",               "Dampening",        "Pitch",     "Clock",   "Dry/Wet",    "Diffusion", "Modulation speed", "Modulation amount"},
 	{"Voice",   "Timbre",       "Decay",              "Chord",              "Filter",           "Pitch",     "Burst",   "Distortion", "Stereo",    "Harmonics",        "Scatter"}
-};
-
-static const std::vector<std::string> etesiaButtonTexts{
-	"Input",
-	"Output",
-	"Blends",
-	"Momentary"
 };
 
 struct Etesia : Module {
@@ -456,37 +426,37 @@ struct Etesia : Module {
 				textReverb = modeDisplays[playbackMode].labelReverb;
 
 				paramQuantities[PARAM_FREEZE]->name = modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + cvSuffix;
+				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_POSITION]->name = modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].labelPosition + cvSuffix;
+				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].labelPosition + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_DENSITY]->name = modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].labelDensity + cvSuffix;
+				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].labelDensity + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_SIZE]->name = modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].labelSize + cvSuffix;
+				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].labelSize + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_TEXTURE]->name = modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].labelTexture + cvSuffix;
+				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].labelTexture + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_PITCH]->name = modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + cvSuffix;
+				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + nebulaeCVSuffix;
 
 				inputInfos[INPUT_TRIGGER]->name = modeTooltips[playbackMode].labelTrigger;
 
 				// Parasite
 				paramQuantities[PARAM_BLEND]->name = modeTooltips[playbackMode].labelBlend;
-				inputInfos[INPUT_BLEND]->name = modeTooltips[playbackMode].labelBlend + cvSuffix;
+				inputInfos[INPUT_BLEND]->name = modeTooltips[playbackMode].labelBlend + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_SPREAD]->name = modeTooltips[playbackMode].labelSpread;
-				inputInfos[INPUT_SPREAD]->name = modeTooltips[playbackMode].labelSpread + cvSuffix;
+				inputInfos[INPUT_SPREAD]->name = modeTooltips[playbackMode].labelSpread + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback;
-				inputInfos[INPUT_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback + cvSuffix;
+				inputInfos[INPUT_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_REVERB]->name = modeTooltips[playbackMode].labelReverb;
-				inputInfos[INPUT_REVERB]->name = modeTooltips[playbackMode].labelReverb + cvSuffix;
+				inputInfos[INPUT_REVERB]->name = modeTooltips[playbackMode].labelReverb + nebulaeCVSuffix;
 
 				lastPlaybackMode = playbackMode;
 			}
@@ -505,7 +475,7 @@ struct Etesia : Module {
 
 				lastLEDPlaybackMode = playbackMode;
 
-				paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + etesiaButtonTexts[ledMode];
+				paramQuantities[PARAM_LEDS_MODE]->name = nebulaeLedButtonPrefix + nebulaeButtonTexts[ledMode];
 
 				if (lastFrozen) {
 					displaySwitched = true;

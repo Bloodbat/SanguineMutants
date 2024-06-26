@@ -1,24 +1,16 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "clouds/dsp/granular_processor.h"
+#include "cloudycommon.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-struct ModeInfo {
-	std::string display;
-	std::string menuLabel;
-};
-
-static const std::vector<ModeInfo> modeList{
+static const std::vector<NebulaeModeInfo> modeList{
 	{ "GRANULAR", "Granular mode" },
 	{ "STRETCH", "Pitch shifter/time stretcher" },
 	{ "LOOPING DLY", "Looping delay" },
 	{ "SPECTRAL", "Spectral madness" }
 };
-
-static const std::string cvSuffix = " CV";
-
-static const std::string ledButtonPrefix = "LED display value: ";
 
 struct ModeDisplay {
 	std::string labelFreeze;
@@ -42,13 +34,6 @@ static const std::vector<ModeDisplay> modeTooltips{
 	{"Stutter", "Scrub",        "Diffusion",        "Overlap",            "LP/HP",            "Pitch",     "Time"},
 	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duration", "LP/HP",            "Pitch",     "Time"},
 	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch"}
-};
-
-static const std::vector<std::string> buttonTexts{
-	"Input",
-	"Output",
-	"Blends",
-	"Momentary"
 };
 
 struct Nebulae : Module {
@@ -429,22 +414,22 @@ struct Nebulae : Module {
 				textTrigger = modeDisplays[playbackMode].labelTrigger;
 
 				paramQuantities[PARAM_FREEZE]->name = modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + cvSuffix;
+				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_POSITION]->name = modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].labelPosition + cvSuffix;
+				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].labelPosition + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_DENSITY]->name = modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].labelDensity + cvSuffix;
+				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].labelDensity + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_SIZE]->name = modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].labelSize + cvSuffix;
+				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].labelSize + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_TEXTURE]->name = modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].labelTexture + cvSuffix;
+				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].labelTexture + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_PITCH]->name = modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + cvSuffix;
+				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + nebulaeCVSuffix;
 
 				inputInfos[INPUT_TRIGGER]->name = modeTooltips[playbackMode].labelTrigger;
 
@@ -465,7 +450,7 @@ struct Nebulae : Module {
 
 				lastLEDPlaybackMode = playbackMode;
 
-				paramQuantities[PARAM_LEDS_MODE]->name = ledButtonPrefix + buttonTexts[ledMode];
+				paramQuantities[PARAM_LEDS_MODE]->name = nebulaeLedButtonPrefix + nebulaeButtonTexts[ledMode];
 
 				if (lastFrozen) {
 					displaySwitched = true;
