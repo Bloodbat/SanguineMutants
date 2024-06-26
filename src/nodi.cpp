@@ -2,7 +2,7 @@
 
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
-#include "nodiconsts.hpp"
+#include "nodicommon.hpp"
 
 #include "braids/macro_oscillator.h"
 #include "braids/signature_waveshaper.h"
@@ -12,6 +12,108 @@
 #include "braids/quantizer_scales.h"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+static const std::vector<ModelInfo> nodiModelInfos = {
+	{"CSAW", "Quirky sawtooth"},
+	{"/\\-_", "Triangle to saw"},
+	{"//-_", "Sawtooth wave with dephasing"},
+	{"FOLD", "Wavefolded sine/triangle"},
+	{"uuuu", "Buzz"},
+	{"SUB-", "Square sub"},
+	{"SUB/", "Saw sub"},
+	{"SYN-", "Square sync"},
+	{"SYN/", "Saw sync"},
+	{"//x3", "Triple saw"},
+	{"-_x3", "Triple square"},
+	{"/\\x3", "Triple triangle"},
+	{"SIx3", "Triple sine"},
+	{"RING", "Triple ring mod"},
+	{"////", "Saw swarm"},
+	{"//uu", "Saw comb"},
+	{"TOY*", "Circuit-bent toy"},
+	{"ZLPF", "Low-pass filtered waveform"},
+	{"ZPKF", "Peak filtered waveform"},
+	{"ZBPF", "Band-pass filtered waveform"},
+	{"ZHPF", "High-pass filtered waveform"},
+	{"VOSM", "VOSIM formant"},
+	{"VOWL", "Speech synthesis"},
+	{"VFOF", "FOF speech synthesis"},
+	{"HARM", "12 sine harmonics"},
+	{"FM  ", "2-operator phase-modulation"},
+	{"FBFM", "2-operator phase-modulation with feedback"},
+	{"WTFM", "2-operator phase-modulation with chaotic feedback"},
+	{"PLUK", "Plucked string"},
+	{"BOWD", "Bowed string"},
+	{"BLOW", "Blown reed"},
+	{"FLUT", "Flute"},
+	{"BELL", "Bell"},
+	{"DRUM", "Drum"},
+	{"KICK", "Kick drum circuit simulation"},
+	{"CYMB", "Cymbal"},
+	{"SNAR", "Snare"},
+	{"WTBL", "Wavetable"},
+	{"WMAP", "2D wavetable"},
+	{"WLIN", "1D wavetable"},
+	{"WTx4", "4-voice paraphonic 1D wavetable"},
+	{"NOIS", "Filtered noise"},
+	{"TWNQ", "Twin peaks noise"},
+	{"CLKN", "Clocked noise"},
+	{"CLOU", "Granular cloud"},
+	{"PRTC", "Particle noise"},
+	{"QPSK", "Digital modulation"},
+	{"  49", "Paques morse code"}, // "Paques"
+};
+
+static const RGBColor nodiLightColors[48]{
+{1.f, 0.f, 0.f},
+{0.9375f, 0.f, 0.0625f},
+{0.875f, 0.f, 0.125f},
+{0.8125f, 0.f, 0.1875f},
+{0.75f, 0.f, 0.25f},
+{0.6875f, 0.f, 0.3125f},
+{0.625f, 0.f, 0.375f},
+{0.5625f, 0.f, 0.4375f},
+{0.5f, 0.f, 0.5f},
+{0.4375f, 0.f, 0.5625f},
+{0.375f, 0.f, 0.625f},
+{0.3125f, 0.f, 0.6875f},
+{0.25f, 0.f, 0.75f},
+{0.1875f, 0.f, 0.8125f},
+{0.125f, 0.f, 0.875f},
+{0.0625f, 0.f, 0.9375f},
+{0.f, 0.f, 1.f},
+{0.f, 0.125f, 0.875f},
+{0.f, 0.1875f, 0.8125f},
+{0.f, 0.25f, 0.75f},
+{0.f, 0.3125f, 0.6875f},
+{0.f, 0.375f, 0.625f},
+{0.f, 0.4375f, 0.5625f},
+{0.f, 0.5f, 0.5f},
+{0.f, 0.5625f, 0.4375f},
+{0.f, 0.625f, 0.375f},
+{0.f, 0.6875f, 0.3125f},
+{0.f, 0.75f, 0.25f},
+{0.f, 0.8125f, 0.1875f},
+{0.f, 0.875f, 0.125f},
+{0.f, 0.9375f, 0.0625f},
+{0.f,1.f, 0.f},
+{0.0625f, 0.9375f, 0.f},
+{0.125f, 0.875f, 0.f},
+{0.1875f, 0.8125f, 0.f},
+{0.25f, 0.75f, 0.f},
+{0.3125f, 0.6875f, 0.f},
+{0.375f, 0.625f, 0.f},
+{0.4375f, 0.5625f, 0.f},
+{0.5f, 0.5f, 0.f},
+{0.5625f, 0.4375f, 0.f},
+{0.625f, 0.375f, 0.f},
+{0.6875f, 0.3125f, 0.f},
+{0.75f, 0.25f, 0.f},
+{0.8125f, 0.1875f, 0.f},
+{0.875f, 0.125f, 0.f},
+{0.9375f, 0.0625f, 0.f},
+{1.f, 1.f, 1.f}
+};
 
 struct Nodi : Module {
 	enum ParamIds {
@@ -73,63 +175,6 @@ struct Nodi : Module {
 		LIGHTS_COUNT
 	};
 
-	struct RGBColor {
-		float red;
-		float green;
-		float blue;
-	};
-
-	const RGBColor lightColors[48]{
-	{1.f, 0.f, 0.f},
-	{0.9375f, 0.f, 0.0625f},
-	{0.875f, 0.f, 0.125f},
-	{0.8125f, 0.f, 0.1875f},
-	{0.75f, 0.f, 0.25f},
-	{0.6875f, 0.f, 0.3125f},
-	{0.625f, 0.f, 0.375f},
-	{0.5625f, 0.f, 0.4375f},
-	{0.5f, 0.f, 0.5f},
-	{0.4375f, 0.f, 0.5625f},
-	{0.375f, 0.f, 0.625f},
-	{0.3125f, 0.f, 0.6875f},
-	{0.25f, 0.f, 0.75f},
-	{0.1875f, 0.f, 0.8125f},
-	{0.125f, 0.f, 0.875f},
-	{0.0625f, 0.f, 0.9375f},
-	{0.f, 0.f, 1.f},
-	{0.f, 0.125f, 0.875f},
-	{0.f, 0.1875f, 0.8125f},
-	{0.f, 0.25f, 0.75f},
-	{0.f, 0.3125f, 0.6875f},
-	{0.f, 0.375f, 0.625f},
-	{0.f, 0.4375f, 0.5625f},
-	{0.f, 0.5f, 0.5f},
-	{0.f, 0.5625f, 0.4375f},
-	{0.f, 0.625f, 0.375f},
-	{0.f, 0.6875f, 0.3125f},
-	{0.f, 0.75f, 0.25f},
-	{0.f, 0.8125f, 0.1875f},
-	{0.f, 0.875f, 0.125f},
-	{0.f, 0.9375f, 0.0625f},
-	{0.f,1.f, 0.f},
-	{0.0625f, 0.9375f, 0.f},
-	{0.125f, 0.875f, 0.f},
-	{0.1875f, 0.8125f, 0.f},
-	{0.25f, 0.75f, 0.f},
-	{0.3125f, 0.6875f, 0.f},
-	{0.375f, 0.625f, 0.f},
-	{0.4375f, 0.5625f, 0.f},
-	{0.5f, 0.5f, 0.f},
-	{0.5625f, 0.4375f, 0.f},
-	{0.625f, 0.375f, 0.f},
-	{0.6875f, 0.3125f, 0.f},
-	{0.75f, 0.25f, 0.f},
-	{0.8125f, 0.1875f, 0.f},
-	{0.875f, 0.125f, 0.f},
-	{0.9375f, 0.0625f, 0.f},
-	{1.f, 1.f, 1.f}
-	};
-
 	braids::MacroOscillator osc;
 	braids::SettingsData settings;
 	braids::VcoJitterSource jitterSource;
@@ -143,26 +188,6 @@ struct Nodi : Module {
 
 	uint16_t gainLp;
 	uint16_t triggerDelay;
-
-	const uint16_t bitReductionMasks[7] = {
-		0xc000,
-		0xe000,
-		0xf000,
-		0xf800,
-		0xff00,
-		0xfff0,
-		0xffff
-	};
-
-	const uint16_t decimationFactors[7] = {
-		24,
-		12,
-		6,
-		4,
-		3,
-		2,
-		1
-	};
 
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer;
 	dsp::SampleRateConverter<1> sampleRateConverter;
@@ -389,8 +414,8 @@ struct Nodi : Module {
 
 			// Signature waveshaping, decimation, and bit reduction
 			int16_t sample = 0;
-			size_t decimationFactor = decimationFactors[settings.sample_rate];
-			uint16_t bitMask = bitReductionMasks[settings.resolution];
+			size_t decimationFactor = nodiDecimationFactors[settings.sample_rate];
+			uint16_t bitMask = nodiBitReductionMasks[settings.resolution];
 			int32_t gain = settings.ad_vca > 0 ? adValue : 65535;
 			uint16_t signature = settings.signature * settings.signature * 4095;
 			for (size_t i = 0; i < 24; i++) {
@@ -447,14 +472,14 @@ struct Nodi : Module {
 		// Handle model light
 		if (!bPaques) {
 			int currentModel = settings.shape;
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[currentModel].red, args.sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[currentModel].green, args.sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[currentModel].blue, args.sampleTime);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodiLightColors[currentModel].red, args.sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodiLightColors[currentModel].green, args.sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodiLightColors[currentModel].blue, args.sampleTime);
 		}
 		else {
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(lightColors[47].red, args.sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(lightColors[47].green, args.sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(lightColors[47].blue, args.sampleTime);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodiLightColors[47].red, args.sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodiLightColors[47].green, args.sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodiLightColors[47].blue, args.sampleTime);
 		}
 
 		handleDisplay(args);
@@ -466,11 +491,11 @@ struct Nodi : Module {
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
 			if (!bPaques)
 			{
-				displayText = modelInfos[settings.shape].code;
+				displayText = nodiModelInfos[settings.shape].code;
 			}
 			else
 			{
-				displayText = modelInfos[47].code;
+				displayText = nodiModelInfos[47].code;
 			}
 		}
 		else {
@@ -478,87 +503,87 @@ struct Nodi : Module {
 			switch (lastSettingChanged)
 			{
 			case braids::SETTING_META_MODULATION: {
-				displayText = "META";
+				displayText = nodiMetaLabel;
 				break;
 			}
 			case braids::SETTING_RESOLUTION: {
 				value = settings.resolution;
-				displayText = bitsStrings[value];
+				displayText = nodiBitsStrings[value];
 				break;
 			}
 			case braids::SETTING_SAMPLE_RATE: {
 				value = settings.sample_rate;
-				displayText = ratesStrings[value];
+				displayText = nodiRatesStrings[value];
 				break;
 			}
 			case braids::SETTING_TRIG_SOURCE: {
-				displayText = "AUTO";
+				displayText = nodiAutoLabel;
 				break;
 			}
 			case braids::SETTING_TRIG_DELAY: {
 				value = settings.trig_delay;
-				displayText = triggerDelayStrings[value];
+				displayText = nodiTriggerDelayStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_ATTACK: {
 				value = settings.ad_attack;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_DECAY: {
 				value = settings.ad_decay;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_FM: {
 				value = settings.ad_fm;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_TIMBRE: {
 				value = settings.ad_timbre;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_COLOR: {
 				value = settings.ad_color;
-				displayText = numberStrings[value];
+				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_VCA: {
-				displayText = "\\VCA";
+				displayText = nodiVCALabel;
 				break;
 			}
 			case braids::SETTING_PITCH_RANGE: {
 				value = settings.pitch_range;
-				displayText = pitchRangeStrings[value];
+				displayText = nodiPitchRangeStrings[value];
 				break;
 			}
 			case braids::SETTING_PITCH_OCTAVE: {
 				value = settings.pitch_octave;
-				displayText = octaveStrings[value];
+				displayText = nodiOctaveStrings[value];
 				break;
 			}
 			case braids::SETTING_QUANTIZER_SCALE: {
 				value = settings.quantizer_scale;
-				displayText = quantizationStrings[value];
+				displayText = nodiQuantizationStrings[value];
 				break;
 			}
 			case braids::SETTING_QUANTIZER_ROOT: {
 				value = settings.quantizer_root;
-				displayText = noteStrings[value];
+				displayText = nodiNoteStrings[value];
 				break;
 			}
 			case braids::SETTING_VCO_FLATTEN: {
-				displayText = "FLAT";
+				displayText = nodiFlatLabel;
 				break;
 			}
 			case braids::SETTING_VCO_DRIFT: {
-				displayText = "DRFT";
+				displayText = nodiDriftLabel;
 				break;
 			}
 			case braids::SETTING_SIGNATURE: {
-				displayText = "SIGN";
+				displayText = nodiSignLabel;
 				break;
 			}
 			default: {
@@ -750,8 +775,8 @@ struct NodiWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(modelInfos.size() - 1); i++) {
-			modelLabels.push_back(modelInfos[i].code + ": " + modelInfos[i].label);
+		for (int i = 0; i < int(nodiModelInfos.size() - 1); i++) {
+			modelLabels.push_back(nodiModelInfos[i].code + ": " + nodiModelInfos[i].label);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
