@@ -168,13 +168,7 @@ static const LightModes scaleLights[MAX_SCALES][2]{
 	{ LIGHT_OFF, LIGHT_BLINK_FAST } // Raag Shri	
 };
 
-struct RGBColor {
-	float red;
-	float green;
-	float blue;
-};
-
-static const RGBColor paletteMarmoraClockSource[4]{
+static const RGBLightColor paletteMarmoraClockSource[4]{
 	{ 0.f, 0.f, 1.f },
 	{ 0.f, 1.f, 0.f },
 	{ 1.f, 1.f, 0.f },

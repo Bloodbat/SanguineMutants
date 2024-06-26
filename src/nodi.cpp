@@ -64,7 +64,7 @@ static const std::vector<NodiModelInfo> nodiModelInfos = {
 	{"  49", "Paques morse code"}, // "Paques"
 };
 
-static const RGBColor nodiLightColors[48]{
+static const RGBLightColor nodiLightColors[48]{
 {1.f, 0.f, 0.f},
 {0.9375f, 0.f, 0.0625f},
 {0.875f, 0.f, 0.125f},

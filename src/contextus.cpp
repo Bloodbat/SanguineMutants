@@ -73,7 +73,7 @@ static const std::vector<NodiModelInfo> contextusModelInfos = {
 	{"PRTC", "Particle noise"},
 };
 
-static const RGBColor contextusLightColors[57]{
+static const RGBLightColor contextusLightColors[57]{
 {1.f, 0.f, 0.f},
 {0.9474f, 0.f, 0.0526f},
 {0.8948f, 0.f, 0.1052f},
