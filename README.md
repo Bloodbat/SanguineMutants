@@ -61,3 +61,15 @@ Based on the Symbiote firmware for Warps.
 ## Explorator
 
 Based on MI's Kinks and Links; combined in a single module. The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
+
+## Marmora
+
+Based on MI's Marbles, it exposes every control and adds missing features like user defined scales; super lock; t and X reset; restores missing light animations and showing polarity in the output port LEDs.
+
+## Anuli
+
+Based on MI's Rings, it restores missing light animations; the "3" polyphony mode... and is completely polyphonic.
+
+## Velamina
+
+My attempt at recreating MI's Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
