@@ -1,6 +1,6 @@
 #pragma once
 
-struct ModelInfo {
+struct NodiModelInfo {
 	std::string code;
 	std::string label;
 };
