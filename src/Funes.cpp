@@ -22,7 +22,7 @@
 static const char WAVE_FILTERS[] = "BIN (*.bin):bin, BIN";
 static std::string waveDir;
 
-static const std::string modelsList[24] = {
+static const std::string funesDisplayLabels[24] = {
   "FLTRWAVE",
   "PHASDIST",
   "6 OP.FM1",
@@ -61,6 +61,33 @@ static const std::vector<std::string> frequencyModes = {
 	"C7 +/- 7 semitones",
 	"Octaves",
 	"C0 to C8"
+};
+
+static const std::vector<std::string> modelLabels = {
+	"Classic waveshapes with filter",
+	"Phase distortion",
+	"6-operator FM 1",
+	"6-operator FM 2",
+	"6-operator FM 3",
+	"Wave terrain synthesis",
+	"String machine",
+	"Chiptune",
+	"Pair of classic waveforms",
+	"Waveshaping oscillator",
+	"Two operator FM",
+	"Granular formant oscillator",
+	"Harmonic oscillator",
+	"Wavetable oscillator",
+	"Chords",
+	"Vowel and speech synthesis",
+	"Granular cloud",
+	"Filtered noise",
+	"Particle noise",
+	"Inharmonic string modeling",
+	"Modal resonator",
+	"Analog bass drum",
+	"Analog snare drum",
+	"Analog hi-hat"
 };
 
 struct Funes : Module {
@@ -131,7 +158,7 @@ struct Funes : Module {
 	Funes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", "", 0.0f, 1.0f, 1.0f);
+		configSwitch(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", modelLabels);
 		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 
 		configParam(PARAM_FREQUENCY, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
@@ -201,7 +228,7 @@ struct Funes : Module {
 
 			// Update model text and frequency mode every 16 samples only.
 			if (clockDivider.process()) {
-				displayText = modelsList[modelNum];
+				displayText = funesDisplayLabels[modelNum];
 
 				frequencyMode = params[PARAM_FREQ_MODE].getValue();
 			}
@@ -513,33 +540,6 @@ struct Funes : Module {
 		frequencyMode = freqModeNum;
 		params[PARAM_FREQ_MODE].setValue(freqModeNum);
 	}
-};
-
-static const std::string modelLabels[24] = {
-	"Classic waveshapes with filter",
-	"Phase distortion",
-	"6-operator FM 1",
-	"6-operator FM 2",
-	"6-operator FM 3",
-	"Wave terrain synthesis",
-	"String machine",
-	"Chiptune",
-	"Pair of classic waveforms",
-	"Waveshaping oscillator",
-	"Two operator FM",
-	"Granular formant oscillator",
-	"Harmonic oscillator",
-	"Wavetable oscillator",
-	"Chords",
-	"Vowel and speech synthesis",
-	"Granular cloud",
-	"Filtered noise",
-	"Particle noise",
-	"Inharmonic string modeling",
-	"Modal resonator",
-	"Analog bass drum",
-	"Analog snare drum",
-	"Analog hi-hat",
 };
 
 struct FunesWidget : ModuleWidget {
