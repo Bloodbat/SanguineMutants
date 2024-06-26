@@ -233,148 +233,145 @@ struct Explorator : Module {
 			const float sampleTime = args.sampleTime * kLightFrequency;
 
 			// 1:3
-			lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_1_TO_3 + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(0.f, sampleTime);
+			float voltage1to3Sum = 0;
 
-			if (channels1to3 > 0) {
-				float voltage1to3Sum = inputs[INPUT_1_TO_3].getVoltageSum() / channels1to3;
-
-				if (channels1to3 == 1) {
-					lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(math::rescale(-voltage1to3Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_1_TO_3 + 1].setBrightnessSmooth(math::rescale(voltage1to3Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(0.0f, sampleTime);
+			if (channels1to3 < 2) {
+				if (channels1to3 > 0) {
+					voltage1to3Sum = clamp(inputs[INPUT_1_TO_3].getVoltage(), -10.f, 10.f);
 				}
-				else {
-					float redValue = math::rescale(-voltage1to3Sum, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(voltage1to3Sum, 0.f, 10.f, 0.f, 1.f);
-					lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(redValue, sampleTime);
-					lights[LIGHT_1_TO_3 + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(voltage1to3Sum < 0 ? redValue : greenValue, sampleTime);
-				}
+				lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(math::rescale(-voltage1to3Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_1_TO_3 + 1].setBrightnessSmooth(math::rescale(voltage1to3Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(0.0f, sampleTime);
+			}
+			else {
+				voltage1to3Sum = clamp(inputs[INPUT_1_TO_3].getVoltageSum() / channels1to3, -10.f, 10.f);
+				float redValue = math::rescale(-voltage1to3Sum, 0.f, 10.f, 0.f, 1.f);
+				float greenValue = math::rescale(voltage1to3Sum, 0.f, 10.f, 0.f, 1.f);
+				lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(redValue, sampleTime);
+				lights[LIGHT_1_TO_3 + 1].setBrightnessSmooth(greenValue, sampleTime);
+				lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(voltage1to3Sum < 0 ? redValue : greenValue, sampleTime);
 			}
 
 			// Sign
-			lights[LIGHT_SIGN + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_SIGN + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_SIGN + 2].setBrightnessSmooth(0.f, sampleTime);
+			float voltageSignSum = 0;
 
-			if (channelsSign > 0) {
-				float voltageSignSum = inputs[INPUT_SIGN].getVoltageSum() / channelsSign;
-
-				if (channels1to3 == 1) {
-					lights[LIGHT_SIGN + 0].setBrightnessSmooth(math::rescale(-voltageSignSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_SIGN + 1].setBrightnessSmooth(math::rescale(voltageSignSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_SIGN + 2].setBrightnessSmooth(0.0f, sampleTime);
+			if (channelsSign < 2) {
+				if (channelsSign > 0) {
+					voltageSignSum = clamp(inputs[INPUT_SIGN].getVoltage(), -10.f, 10.f);
 				}
-				else {
-					float redValue = math::rescale(-voltageSignSum, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(voltageSignSum, 0.f, 10.f, 0.f, 1.f);
-					lights[LIGHT_SIGN + 0].setBrightnessSmooth(redValue, sampleTime);
-					lights[LIGHT_SIGN + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_SIGN + 2].setBrightnessSmooth(voltageSignSum < 0 ? redValue : greenValue, sampleTime);
-				}
+				lights[LIGHT_SIGN + 0].setBrightnessSmooth(math::rescale(-voltageSignSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_SIGN + 1].setBrightnessSmooth(math::rescale(voltageSignSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_SIGN + 2].setBrightnessSmooth(0.0f, sampleTime);
+			}
+			else {
+				voltageSignSum = clamp(inputs[INPUT_SIGN].getVoltageSum() / channelsSign, -10.f, 10.f);
+				float redValue = math::rescale(-voltageSignSum, 0.f, 10.f, 0.f, 1.f);
+				float greenValue = math::rescale(voltageSignSum, 0.f, 10.f, 0.f, 1.f);
+				lights[LIGHT_SIGN + 0].setBrightnessSmooth(redValue, sampleTime);
+				lights[LIGHT_SIGN + 1].setBrightnessSmooth(greenValue, sampleTime);
+				lights[LIGHT_SIGN + 2].setBrightnessSmooth(voltageSignSum < 0 ? redValue : greenValue, sampleTime);
 			}
 
 			// 2:2
-			lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_2_TO_2 + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(0.f, sampleTime);
+			float voltage2to2Sum = 0;
 
-			if (channels2to2 > 0) {
-				float voltageBSum = (clamp(inputs[INPUT_2_TO_2_A].getVoltageSum() + inputs[INPUT_2_TO_2_B].getVoltageSum(), -10.f, 10.f)) / channels2to2;
-
-				if (channels2to2 == 1) {
-					lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(math::rescale(-voltageBSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_2_TO_2 + 1].setBrightnessSmooth(math::rescale(voltageBSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(0.0f, sampleTime);
+			if (channels2to2 < 2) {
+				if (channels2to2 > 0) {
+					voltage2to2Sum = clamp(inputs[INPUT_2_TO_2_A].getVoltage() + inputs[INPUT_2_TO_2_B].getVoltage(), -10.f, 10.f);
 				}
-				else {
-					float redValue = math::rescale(-voltageBSum, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(voltageBSum, 0.f, 10.f, 0.f, 1.f);
-					lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(redValue, sampleTime);
-					lights[LIGHT_2_TO_2 + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(voltageBSum < 0 ? redValue : greenValue, sampleTime);
-				}
+				lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(math::rescale(-voltage2to2Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_2_TO_2 + 1].setBrightnessSmooth(math::rescale(voltage2to2Sum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(0.0f, sampleTime);
+			}
+			else {
+				voltage2to2Sum = (clamp((inputs[INPUT_2_TO_2_A].getVoltageSum() + inputs[INPUT_2_TO_2_B].getVoltageSum()) / channels2to2, -10.f, 10.f));
+				float redValue = math::rescale(-voltage2to2Sum, 0.f, 10.f, 0.f, 1.f);
+				float greenValue = math::rescale(voltage2to2Sum, 0.f, 10.f, 0.f, 1.f);
+				lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(redValue, sampleTime);
+				lights[LIGHT_2_TO_2 + 1].setBrightnessSmooth(greenValue, sampleTime);
+				lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(voltage2to2Sum < 0 ? redValue : greenValue, sampleTime);
 			}
 
-			// Logic
-			lights[LIGHT_LOGIC + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_LOGIC + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_LOGIC + 2].setBrightnessSmooth(0.f, sampleTime);
+			// Logic			
+			float voltageLogicSum = 0;
 
-			if (channelsLogic > 0) {
-				float voltageLogicSum = (clamp(inputs[INPUT_LOGIC_A].getVoltageSum() + inputs[INPUT_LOGIC_B].getVoltageSum(), -10.f, 10.f)) / channelsLogic;
-
-				if (channelsLogic == 1) {
-					lights[LIGHT_LOGIC + 0].setBrightnessSmooth(math::rescale(-voltageLogicSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_LOGIC + 1].setBrightnessSmooth(math::rescale(voltageLogicSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_LOGIC + 2].setBrightnessSmooth(0.0f, sampleTime);
+			if (channelsLogic < 2) {
+				if (channelsLogic > 0) {
+					voltageLogicSum = clamp(inputs[INPUT_LOGIC_A].getVoltage() + inputs[INPUT_LOGIC_B].getVoltage(), -10.f, 10.f);
 				}
-				else {
-					float redValue = math::rescale(-voltageLogicSum, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(voltageLogicSum, 0.f, 10.f, 0.f, 1.f);
-					lights[LIGHT_LOGIC + 0].setBrightnessSmooth(redValue, sampleTime);
-					lights[LIGHT_LOGIC + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_LOGIC + 2].setBrightnessSmooth(voltageLogicSum < 0 ? redValue : greenValue, sampleTime);
-				}
+				lights[LIGHT_LOGIC + 0].setBrightnessSmooth(math::rescale(-voltageLogicSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_LOGIC + 1].setBrightnessSmooth(math::rescale(voltageLogicSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_LOGIC + 2].setBrightnessSmooth(0.0f, sampleTime);
+			}
+			else {
+				voltageLogicSum = clamp((inputs[INPUT_LOGIC_A].getVoltageSum() + inputs[INPUT_LOGIC_B].getVoltageSum()) / channelsLogic, -10.f, 10.f);
+				float redValue = math::rescale(-voltageLogicSum, 0.f, 10.f, 0.f, 1.f);
+				float greenValue = math::rescale(voltageLogicSum, 0.f, 10.f, 0.f, 1.f);
+				lights[LIGHT_LOGIC + 0].setBrightnessSmooth(redValue, sampleTime);
+				lights[LIGHT_LOGIC + 1].setBrightnessSmooth(greenValue, sampleTime);
+				lights[LIGHT_LOGIC + 2].setBrightnessSmooth(voltageLogicSum < 0 ? redValue : greenValue, sampleTime);
 			}
 
 			// 3:1
-			lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(0.f, sampleTime);
+			float voltage3to1Out = 0;
 
-			if (channels3to1 > 0) {
-				float voltage3to1Out;
+			if (channels3to1 < 2) {
+				if (channels3to1 > 0) {
+					if (!attenuate3to1) {
+						voltage3to1Out = clamp(inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() + inputs[INPUT_3_TO_1_C].getVoltage(), -10.f, 10.f);
+					}
+					else {
+						voltage3to1Out = clamp((inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() + inputs[INPUT_3_TO_1_C].getVoltage()) / 3, -10.f, 10.f);
+					}
+				}
+
+				lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(math::rescale(-voltage3to1Out, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(math::rescale(voltage3to1Out, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(0.0f, sampleTime);
+			}
+			else {
 				if (!attenuate3to1) {
-					voltage3to1Out = clamp(inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum(), -10.f, 10.f);
+					voltage3to1Out = inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum();
 				}
 				else {
-					voltage3to1Out = clamp((inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum()) / 3, -10.f, 10.f);
+					voltage3to1Out = (inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum()) / 3;
 				}
 
-				voltage3to1Out = voltage3to1Out / channels3to1;
+				voltage3to1Out = clamp(voltage3to1Out / channels3to1, -10.f, 10.f);
 
-				if (channels3to1 == 1) {
-					lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(math::rescale(-voltage3to1Out, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(math::rescale(voltage3to1Out, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(0.0f, sampleTime);
-				}
-				else {
-					float redValue = math::rescale(-voltage3to1Out, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(voltage3to1Out, 0.f, 10.f, 0.f, 1.f);
-					lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(redValue, sampleTime);
-					lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(voltage3to1Out < 0 ? redValue : greenValue, sampleTime);
-				}
+				float redValue = math::rescale(-voltage3to1Out, 0.f, 10.f, 0.f, 1.f);
+				float greenValue = math::rescale(voltage3to1Out, 0.f, 10.f, 0.f, 1.f);
+				lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(redValue, sampleTime);
+				lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(greenValue, sampleTime);
+				lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(voltage3to1Out < 0 ? redValue : greenValue, sampleTime);
 			}
 
 			// Sample and hold
-			lights[LIGHT_SH + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_SH + 1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_SH + 2].setBrightnessSmooth(0.f, sampleTime);
+			float sampleAndHoldVoltageSum = 0;
 
-			if (lastSampleAndHoldChannels > 0) {
-				float sampleAndHoldVoltageSum = 0;
+			if (lastSampleAndHoldChannels < 2) {
+				if (lastSampleAndHoldChannels > 0) {
+					sampleAndHoldVoltageSum = voltagesSampleAndHold[0];
+				}
+
+				sampleAndHoldVoltageSum = clamp(sampleAndHoldVoltageSum, -10.f, 10.f);
+
+				lights[LIGHT_SH + 0].setBrightnessSmooth(math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_SH + 1].setBrightnessSmooth(math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
+				lights[LIGHT_SH + 2].setBrightnessSmooth(0.0f, sampleAndHoldVoltageSum);
+			}
+			else {
 				for (int i = 0; i < lastSampleAndHoldChannels; i++) {
 					sampleAndHoldVoltageSum += voltagesSampleAndHold[i];
 				}
 
-				sampleAndHoldVoltageSum = (clamp(sampleAndHoldVoltageSum, -10.f, 10.f)) / lastSampleAndHoldChannels;
+				sampleAndHoldVoltageSum = clamp(sampleAndHoldVoltageSum / lastSampleAndHoldChannels, -10.f, 10.f);
 
-				if (lastSampleAndHoldChannels == 1) {
-					lights[LIGHT_SH + 0].setBrightnessSmooth(math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_SH + 1].setBrightnessSmooth(math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
-					lights[LIGHT_SH + 2].setBrightnessSmooth(0.0f, sampleAndHoldVoltageSum);
-				}
-				else {
-					float redValue = math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f);
-					float greenValue = math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f);
-					lights[LIGHT_SH + 0].setBrightnessSmooth(redValue, sampleTime);
-					lights[LIGHT_SH + 1].setBrightnessSmooth(greenValue, sampleTime);
-					lights[LIGHT_SH + 2].setBrightnessSmooth(sampleAndHoldVoltageSum < 0 ? redValue : greenValue, sampleTime);
-				}
+				float redValue = math::rescale(-sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f);
+				float greenValue = math::rescale(sampleAndHoldVoltageSum, 0.f, 10.f, 0.f, 1.f);
+				lights[LIGHT_SH + 0].setBrightnessSmooth(redValue, sampleTime);
+				lights[LIGHT_SH + 1].setBrightnessSmooth(greenValue, sampleTime);
+				lights[LIGHT_SH + 2].setBrightnessSmooth(sampleAndHoldVoltageSum < 0 ? redValue : greenValue, sampleTime);
 			}
 
 			lights[LIGHT_HARDWARE].setBrightnessSmooth(attenuate3to1, sampleTime);
