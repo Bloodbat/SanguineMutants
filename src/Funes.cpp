@@ -154,82 +154,6 @@ struct Funes : Module {
 		onReset();
 	}
 
-	void onReset() override {
-		patch.engine = 8;
-		setEngine(8);
-		patch.lpg_colour = 0.5f;
-		patch.decay = 0.5f;
-	}
-
-	void onRandomize() override {
-		int newEngine;
-		newEngine = random::u32() % 24;
-		patch.engine = newEngine;
-		setEngine(newEngine);
-	}
-
-	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
-
-		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
-		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
-		json_object_set_new(rootJ, "model", json_integer(patch.engine));
-		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
-		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
-
-		const uint8_t* userDataBuffer = user_data.getBuffer();
-		if (userDataBuffer != nullptr) {
-			std::string userDataString = rack::string::toBase64(userDataBuffer, plaits::UserData::MAX_USER_DATA_SIZE);
-			json_object_set_new(rootJ, "userData", json_string(userDataString.c_str()));
-		}
-
-		return rootJ;
-	}
-
-	void dataFromJson(json_t* rootJ) override {
-		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
-		if (lowCpuJ)
-			bLowCpu = json_boolean_value(lowCpuJ);
-
-		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
-		if (displayModulatedModelJ)
-			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
-
-		json_t* modelJ = json_object_get(rootJ, "model");
-		if (modelJ) {
-			patch.engine = json_integer_value(modelJ);
-			modelNum = patch.engine;
-		}
-
-		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
-		if (notesModelSelectionJ)
-			bNotesModelSelection = json_boolean_value(notesModelSelectionJ);
-
-		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
-		if (frequencyModeJ)
-			frequencyMode = json_integer_value(frequencyModeJ);
-
-		json_t* userDataJ = json_object_get(rootJ, "userData");
-		if (userDataJ) {
-			std::string userDataString = json_string_value(userDataJ);
-			const std::vector<uint8_t> userDataVector = rack::string::fromBase64(userDataString);
-			if (userDataVector.size() > 0) {
-				const uint8_t* userDataBuffer = &userDataVector[0];
-				user_data.setBuffer(userDataBuffer);
-			}
-		}
-
-		// Legacy <=1.0.2
-		json_t* lpgColorJ = json_object_get(rootJ, "lpgColor");
-		if (lpgColorJ)
-			params[PARAM_LPG_COLOR].setValue(json_number_value(lpgColorJ));
-
-		// Legacy <=1.0.2
-		json_t* decayJ = json_object_get(rootJ, "decay");
-		if (decayJ)
-			params[PARAM_LPG_DECAY].setValue(json_number_value(decayJ));
-	}
-
 	void process(const ProcessArgs& args) override {
 		int channels = std::max(inputs[INPUT_NOTE].getChannels(), 1);
 
@@ -378,19 +302,19 @@ struct Funes : Module {
 
 			// Render output buffer for each voice
 			dsp::Frame<16 * 2> outputFrames[blockSize];
-			for (int c = 0; c < channels; c++) {
+			for (int channel = 0; channel < channels; channel++) {
 				// Construct modulations
 				plaits::Modulations modulations;
 				if (!bNotesModelSelection)
-					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(c) / 5.f;
-				modulations.note = inputs[INPUT_NOTE].getVoltage(c) * 12.f;
-				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(c) * 6.f;
-				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(c) / 5.f;
-				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(c) / 8.f;
-				modulations.morph = inputs[INPUT_MORPH].getPolyVoltage(c) / 8.f;
+					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
+				modulations.note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
+				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
+				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f;
+				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(channel) / 8.f;
+				modulations.morph = inputs[INPUT_MORPH].getPolyVoltage(channel) / 8.f;
 				// Triggers at around 0.7 V
-				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(c) / 3.f;
-				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(c) / 8.f;
+				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(channel) / 3.f;
+				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
 
 				modulations.frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
 				modulations.timbre_patched = inputs[INPUT_TIMBRE].isConnected();
@@ -400,12 +324,12 @@ struct Funes : Module {
 
 				// Render frames
 				plaits::Voice::Frame output[blockSize];
-				voice[c].Render(patch, modulations, output, blockSize);
+				voice[channel].Render(patch, modulations, output, blockSize);
 
 				// Convert output to frames
 				for (int i = 0; i < blockSize; i++) {
-					outputFrames[i].samples[c * 2 + 0] = output[i].out / 32768.f;
-					outputFrames[i].samples[c * 2 + 1] = output[i].aux / 32768.f;
+					outputFrames[i].samples[channel * 2 + 0] = output[i].out / 32768.f;
+					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
 				}
 			}
 
@@ -416,7 +340,7 @@ struct Funes : Module {
 				outputBuffer.endIncr(len);
 			}
 			else {
-				outputSrc.setRates(48000, (int)args.sampleRate);
+				outputSrc.setRates(48000, int(args.sampleRate));
 				int inLen = blockSize;
 				int outLen = outputBuffer.capacity();
 				outputSrc.setChannels(channels * 2);
@@ -436,6 +360,82 @@ struct Funes : Module {
 		}
 		outputs[OUTPUT_OUT].setChannels(channels);
 		outputs[OUTPUT_AUX].setChannels(channels);
+	}
+
+	void onReset() override {
+		patch.engine = 8;
+		setEngine(8);
+		patch.lpg_colour = 0.5f;
+		patch.decay = 0.5f;
+	}
+
+	void onRandomize() override {
+		int newEngine;
+		newEngine = random::u32() % 24;
+		patch.engine = newEngine;
+		setEngine(newEngine);
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+
+		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
+		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
+		json_object_set_new(rootJ, "model", json_integer(patch.engine));
+		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
+		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
+
+		const uint8_t* userDataBuffer = user_data.getBuffer();
+		if (userDataBuffer != nullptr) {
+			std::string userDataString = rack::string::toBase64(userDataBuffer, plaits::UserData::MAX_USER_DATA_SIZE);
+			json_object_set_new(rootJ, "userData", json_string(userDataString.c_str()));
+		}
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
+		if (lowCpuJ)
+			bLowCpu = json_boolean_value(lowCpuJ);
+
+		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
+		if (displayModulatedModelJ)
+			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
+
+		json_t* modelJ = json_object_get(rootJ, "model");
+		if (modelJ) {
+			patch.engine = json_integer_value(modelJ);
+			modelNum = patch.engine;
+		}
+
+		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
+		if (notesModelSelectionJ)
+			bNotesModelSelection = json_boolean_value(notesModelSelectionJ);
+
+		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
+		if (frequencyModeJ)
+			frequencyMode = json_integer_value(frequencyModeJ);
+
+		json_t* userDataJ = json_object_get(rootJ, "userData");
+		if (userDataJ) {
+			std::string userDataString = json_string_value(userDataJ);
+			const std::vector<uint8_t> userDataVector = rack::string::fromBase64(userDataString);
+			if (userDataVector.size() > 0) {
+				const uint8_t* userDataBuffer = &userDataVector[0];
+				user_data.setBuffer(userDataBuffer);
+			}
+		}
+
+		// Legacy <=1.0.2
+		json_t* lpgColorJ = json_object_get(rootJ, "lpgColor");
+		if (lpgColorJ)
+			params[PARAM_LPG_COLOR].setValue(json_number_value(lpgColorJ));
+
+		// Legacy <=1.0.2
+		json_t* decayJ = json_object_get(rootJ, "decay");
+		if (decayJ)
+			params[PARAM_LPG_DECAY].setValue(json_number_value(decayJ));
 	}
 
 	void reset() {
