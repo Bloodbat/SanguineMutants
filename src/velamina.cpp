@@ -152,7 +152,11 @@ struct Velamina : Module {
 				float voltageSum = 0.f;
 
 				if (channelCount < 2) {
-					voltageSum = voltageSum += portVoltages[i][0][0];
+					if (channelCount > 0) {
+						voltageSum = voltageSum = portVoltages[i][0][0];
+
+						voltageSum = clamp(voltageSum, -10.f, 10.f);
+					}
 
 					lights[currentLight + 0].setBrightnessSmooth(rescale(-voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(rescale(voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
@@ -166,6 +170,8 @@ struct Velamina : Module {
 					}
 
 					voltageSum = voltageSum / channelCount;
+
+					voltageSum = clamp(voltageSum, -10.f, 10.f);
 
 					float redValue = rescale(-voltageSum, 0.f, 10.f, 0.f, 1.f);
 					float greenValue = rescale(voltageSum, 0.f, 10.f, 0.f, 1.f);
