@@ -83,6 +83,8 @@
 
 - Add: more hardware-like LEDs for Nebulae and its descendants.
 
+- Add: more hardware-like LEDs for Funes.
+
 - Fix: Aleae reset.
 
 - Add: Frequency mode (range) to Funes faceplate.
