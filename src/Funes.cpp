@@ -507,7 +507,6 @@ struct Funes : Module {
 	}
 
 	void onReset() override {
-		patch.engine = 8;
 		setEngine(8);
 		patch.lpg_colour = 0.5f;
 		patch.decay = 0.5f;
@@ -516,7 +515,6 @@ struct Funes : Module {
 	void onRandomize() override {
 		int newEngine;
 		newEngine = random::u32() % 24;
-		patch.engine = newEngine;
 		setEngine(newEngine);
 	}
 
@@ -616,9 +614,10 @@ struct Funes : Module {
 		load(path);
 	}
 
-	void setEngine(int modelNum) {
-		params[PARAM_MODEL].setValue(modelNum);
-		this->modelNum = modelNum;
+	void setEngine(int newModelNum) {
+		params[PARAM_MODEL].setValue(newModelNum);
+		modelNum = newModelNum;
+		patch.engine = newModelNum;
 	}
 
 	void toggleModulatedDisplay() {
@@ -748,9 +747,8 @@ struct FunesWidget : ModuleWidget {
 		menu->addChild(createSubmenuItem("Pitched models", "", [=](Menu* menu) {
 			for (int i = 8; i < 16; i++) {
 				menu->addChild(createCheckMenuItem(modelLabels[i], "",
-					[=]() {return module->patch.engine == i; },
-					[=]() {module->patch.engine = i;
-				module->setEngine(i); }
+					[=]() { return module->patch.engine == i; },
+					[=]() {	module->setEngine(i); }
 				));
 			}
 			}));
@@ -758,9 +756,8 @@ struct FunesWidget : ModuleWidget {
 		menu->addChild(createSubmenuItem("Noise/percussive models", "", [=](Menu* menu) {
 			for (int i = 16; i < 24; i++) {
 				menu->addChild(createCheckMenuItem(modelLabels[i], "",
-					[=]() {return module->patch.engine == i; },
-					[=]() {module->patch.engine = i;
-				module->setEngine(i); }
+					[=]() { return module->patch.engine == i; },
+					[=]() { module->setEngine(i); }
 				));
 			}
 			}));
@@ -768,9 +765,8 @@ struct FunesWidget : ModuleWidget {
 		menu->addChild(createSubmenuItem("New synthesis models", "", [=](Menu* menu) {
 			for (int i = 0; i < 8; i++) {
 				menu->addChild(createCheckMenuItem(modelLabels[i], "",
-					[=]() {return module->patch.engine == i; },
-					[=]() {module->patch.engine = i;
-				module->setEngine(i); }
+					[=]() { return module->patch.engine == i; },
+					[=]() {	module->setEngine(i); }
 				));
 			}
 			}));
