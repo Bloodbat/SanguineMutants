@@ -523,7 +523,6 @@ struct Funes : Module {
 
 		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
 		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
-		json_object_set_new(rootJ, "model", json_integer(patch.engine));
 		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
 		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
 
@@ -544,12 +543,6 @@ struct Funes : Module {
 		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
 		if (displayModulatedModelJ)
 			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
-
-		json_t* modelJ = json_object_get(rootJ, "model");
-		if (modelJ) {
-			patch.engine = json_integer_value(modelJ);
-			modelNum = patch.engine;
-		}
 
 		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
 		if (notesModelSelectionJ)
