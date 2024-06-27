@@ -459,8 +459,6 @@ struct AnuliWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createMenuLabel("Mode"));
-
 		static const std::vector<std::string> modelLabels = {
 			"Modal resonator",
 			"Sympathetic strings",
@@ -471,23 +469,25 @@ struct AnuliWidget : ModuleWidget {
 			"Disastrous Peace"
 		};
 
-		for (int i = 0; i < 7; i++) {
-			menu->addChild(createCheckMenuItem(modelLabels[i], "",
-				[=]() {return module->params[Anuli::PARAM_MODE].getValue() == i; },
-				[=]() {module->setMode(i); }
-			));
-		}
+		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
+			for (int i = 0; i < 7; i++) {
+				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+					[=]() { return module->params[Anuli::PARAM_MODE].getValue() == i; },
+					[=]() { module->setMode(i); }
+				));
+			}
+			}));
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createMenuLabel("Disastrous peace FX"));
-
-		for (int i = 0; i < 6; i++) {
-			menu->addChild(createCheckMenuItem(anuliFxLabels[i], "",
-				[=]() {return module->params[Anuli::PARAM_FX].getValue() == i; },
-				[=]() {module->params[Anuli::PARAM_FX].setValue(i); }
-			));
-		}
+		menu->addChild(createSubmenuItem("Disastrous Peace FX", "", [=](Menu* menu) {
+			for (int i = 0; i < 6; i++) {
+				menu->addChild(createCheckMenuItem(anuliFxLabels[i], "",
+					[=]() { return module->params[Anuli::PARAM_FX].getValue() == i; },
+					[=]() { module->params[Anuli::PARAM_FX].setValue(i); }
+				));
+			}
+			}));
 	}
 };
 
