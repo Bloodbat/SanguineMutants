@@ -570,7 +570,7 @@ struct Funes : Module {
 		}
 	}
 
-	void reset() {
+	void customDataReset() {
 		bool success = user_data.Save(nullptr, patch.engine);
 		if (success) {
 			for (int c = 0; c < 16; c++) {
@@ -579,7 +579,7 @@ struct Funes : Module {
 		}
 	}
 
-	void load(const std::string& path) {
+	void customDataLoad(const std::string& path) {
 		bLoading = true;
 		DEFER({ bLoading = false; });
 		// HACK Sleep 100us so DSP thread is likely to finish processing before we resize the vector
@@ -600,7 +600,7 @@ struct Funes : Module {
 		}
 	}
 
-	void loadDialog() {
+	void customDataShowLoadDialog() {
 		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
 		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
 		if (!pathC) {
@@ -611,7 +611,7 @@ struct Funes : Module {
 		std::free(pathC);
 
 		waveDir = system::getDirectory(path);
-		load(path);
+		customDataLoad(path);
 	}
 
 	void setEngine(int newModelNum) {
@@ -735,11 +735,11 @@ struct FunesWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createMenuItem("Reset custom data for current engine", "",
-			[=]() {module->reset(); }
+			[=]() {module->customDataReset(); }
 		));
 
 		menu->addChild(createMenuItem("Load custom data for current engine", "",
-			[=]() {module->loadDialog(); }
+			[=]() {module->customDataShowLoadDialog(); }
 		));
 
 		menu->addChild(new MenuSeparator);
