@@ -128,12 +128,26 @@ struct Funes : Module {
 		LIGHTS_COUNT
 	};
 
+	enum LEDsMode {
+		LEDNormal,
+		LEDLPG,
+		LEDOctave
+	};
+
 	plaits::Voice voice[16];
 	plaits::Patch patch = {};
 	plaits::UserData user_data;
 	char shared_buffer[16][16384] = {};
+
 	float triPhase = 0.f;
+	float lastLPGColor = 0.5f;
+	float lastLPGDecay = 0.5f;
+
 	int frequencyMode = 10;
+	int lastFrequencyMode = 10;
+	int modelNum = 0;
+
+	uint32_t displayTimeout = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
 	dsp::SampleRateConverter<16 * 2> outputSrc;
@@ -147,7 +161,8 @@ struct Funes : Module {
 
 	bool bNotesModelSelection = false;
 
-	int modelNum = 0;
+	LEDsMode ledsMode = LEDNormal;
+
 	std::string displayText = "";
 
 	float lastModelVoltage = 0.f;
@@ -217,6 +232,11 @@ struct Funes : Module {
 				}
 			}
 			else if (params[PARAM_MODEL].getValue() != patch.engine) {
+				ledsMode = LEDNormal;
+				displayTimeout = 0;
+				lastLPGColor = params[PARAM_LPG_COLOR].getValue();
+				lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
+				lastFrequencyMode = params[PARAM_FREQ_MODE].getValue();
 				patch.engine = params[PARAM_MODEL].getValue();
 				modelNum = patch.engine;
 			}
@@ -231,6 +251,11 @@ struct Funes : Module {
 				displayText = funesDisplayLabels[modelNum];
 
 				frequencyMode = params[PARAM_FREQ_MODE].getValue();
+
+				if (frequencyMode != lastFrequencyMode) {
+					ledsMode = LEDOctave;
+					displayTimeout--;
+				}
 			}
 
 			// Calculate pitch for low cpu mode if needed
@@ -264,6 +289,11 @@ struct Funes : Module {
 			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
 			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
+
+			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
+				ledsMode = LEDLPG;
+				displayTimeout--;
+			}
 
 			bool activeLights[16] = {};
 
@@ -302,35 +332,37 @@ struct Funes : Module {
 					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
 				}
 
-				// Model lights	
-				// Get the active engines for currnet channel.
-				int currentLight;
-				int clampedEngine;
-				int activeEngine = voice[channel].active_engine();
-				clampedEngine = (activeEngine % 8) * 2;
+				if (ledsMode == LEDNormal) {
+					// Model lights	
+					// Get the active engines for currnet channel.
+					int currentLight;
+					int clampedEngine;
+					int activeEngine = voice[channel].active_engine();
+					clampedEngine = (activeEngine % 8) * 2;
 
-				bool noiseModels = activeEngine & 0x10;
-				bool pitchedModels = activeEngine & 0x08;
+					bool noiseModels = activeEngine & 0x10;
+					bool pitchedModels = activeEngine & 0x08;
 
-				if (noiseModels) {
-					currentLight = clampedEngine + 1;
-					activeLights[currentLight] = true;
-				}
-				else if (pitchedModels) {
-					currentLight = clampedEngine;
-					activeLights[currentLight] = true;
-				}
-				else
-				{
-					currentLight = clampedEngine;
-					activeLights[currentLight] = true;
-					currentLight = clampedEngine + 1;
-					activeLights[currentLight] = true;
-				}
+					if (noiseModels) {
+						currentLight = clampedEngine + 1;
+						activeLights[currentLight] = true;
+					}
+					else if (pitchedModels) {
+						currentLight = clampedEngine;
+						activeLights[currentLight] = true;
+					}
+					else
+					{
+						currentLight = clampedEngine;
+						activeLights[currentLight] = true;
+						currentLight = clampedEngine + 1;
+						activeLights[currentLight] = true;
+					}
 
-				// Pulse the light if at least one voice is using a different engine.
-				if (activeEngine != patch.engine)
-					pulse = true;
+					// Pulse the light if at least one voice is using a different engine.
+					if (activeEngine != patch.engine)
+						pulse = true;
+				}
 			}
 
 			// Convert output
@@ -350,48 +382,115 @@ struct Funes : Module {
 
 			// Pulse light at 2 Hz
 			triPhase += 2.f * args.sampleTime * blockSize;
-			if (triPhase >= 1.f)
+			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
+			}
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
-			// Set model lights.
-			int clampedEngine = patch.engine % 8;
-			for (int i = 0; i < 8; i++) {
-				int currentLight = i * 2;
-				float brightnessRed = activeLights[currentLight + 1];
-				float brightnessGreen = activeLights[currentLight];
+			switch (ledsMode)
+			{
+			case LEDNormal: {
+				// Set model lights.
+				int clampedEngine = patch.engine % 8;
+				for (int i = 0; i < 8; i++) {
+					int currentLight = i * 2;
+					float brightnessRed = activeLights[currentLight + 1];
+					float brightnessGreen = activeLights[currentLight];
 
-				if (pulse && clampedEngine == i) {
-					switch (patch.engine) {
-					case 0:
-					case 1:
-					case 2:
-					case 3:
-					case 4:
-					case 5:
-					case 6:
-					case 7:
-						brightnessRed = tri;
-						brightnessGreen = tri;
-						break;
-					case 8:
-					case 9:
-					case 10:
-					case 11:
-					case 12:
-					case 13:
-					case 14:
-					case 15:
-						brightnessGreen = tri;
-						break;
-					default:
-						brightnessRed = tri;
+					if (pulse && clampedEngine == i) {
+						switch (patch.engine) {
+						case 0:
+						case 1:
+						case 2:
+						case 3:
+						case 4:
+						case 5:
+						case 6:
+						case 7:
+							brightnessRed = tri;
+							brightnessGreen = tri;
+							break;
+						case 8:
+						case 9:
+						case 10:
+						case 11:
+						case 12:
+						case 13:
+						case 14:
+						case 15:
+							brightnessGreen = tri;
+							break;
+						default:
+							brightnessRed = tri;
+						}
 					}
+					// Lights are GreenRed and need a signal on each pin.
+					lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
+					lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessRed);
 				}
-				// Lights are GreenRed and need a signal on each pin.
-				lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
-				lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessRed);
+				break;
 			}
+			case LEDLPG: {
+				for (int parameter = 0; parameter < 2; parameter++) {
+					float value = parameter == 0 ? params[PARAM_LPG_COLOR].getValue() : params[PARAM_LPG_DECAY].getValue();
+					value *= 100;
+					int startLight = (parameter * 4 + 3) * 2;
+					startLight = LIGHT_MODEL + startLight;
+
+					float rescaledLight;
+					rescaledLight = math::rescale(value, 0.f, 25.f, 0.f, 1.f);
+					lights[startLight + 0].setBrightness(value <= 25.f || value >= 25.f ? rescaledLight : 0.f);
+					lights[startLight + 1].setBrightness(value <= 25.f || value >= 25.f ? rescaledLight : 0.f);
+					startLight -= 2;
+					rescaledLight = math::rescale(value, 25.1f, 50.f, 0.f, 1.f);
+					lights[startLight + 0].setBrightness(value >= 25.1f ? rescaledLight : 0.f);
+					lights[startLight + 1].setBrightness(value >= 25.1f ? rescaledLight : 0.f);
+					startLight -= 2;
+					rescaledLight = math::rescale(value, 50.1f, 75.f, 0.f, 1.f);
+					lights[startLight + 0].setBrightness(value >= 75.1f ? rescaledLight : 0.f);
+					lights[startLight + 1].setBrightness(value >= 75.1f ? rescaledLight : 0.f);
+					startLight -= 2;
+					rescaledLight = math::rescale(value, 75.1f, 100.f, 0.f, 1.f);
+					lights[startLight + 0].setBrightness(value >= 75.1f ? rescaledLight : 0.f);
+					lights[startLight + 1].setBrightness(value >= 75.1f ? rescaledLight : 0.f);
+				}
+				break;
+			}
+			case LEDOctave: {
+				int octave = params[PARAM_FREQ_MODE].getValue();
+				for (int i = 0; i < 8; i++) {
+					float ledValue = 0.f;
+					int triangle = tri;
+
+					if (octave == 0) {
+						ledValue = i == (triangle >> 1) ? 0.f : 1.f;
+					}
+					else if (octave == 10) {
+						ledValue = 1.f;
+					}
+					else if (octave == 9) {
+						ledValue = (i & 1) == ((triangle >> 3) & 1) ? 0.f : 1.f;
+					}
+					else {
+						ledValue = (octave - 1) == i ? 1.f : 0.f;
+					}
+					lights[(LIGHT_MODEL + 7 * 2) - i * 2 + 0].setBrightness(ledValue);
+					lights[(LIGHT_MODEL + 7 * 2) - i * 2 + 1].setBrightness(ledValue);
+				}
+				break;
+			}
+			}
+		}
+
+		if (ledsMode != LEDNormal) {
+			displayTimeout++;
+		}
+		if (displayTimeout > args.sampleRate * 3) {
+			ledsMode = LEDNormal;
+			displayTimeout = 0;
+			lastLPGColor = params[PARAM_LPG_COLOR].getValue();
+			lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
+			lastFrequencyMode = params[PARAM_FREQ_MODE].getValue();
 		}
 
 		// Set output
