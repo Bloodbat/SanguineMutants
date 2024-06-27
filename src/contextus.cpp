@@ -777,7 +777,10 @@ struct ContextusWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+		menu->addChild(createCheckMenuItem("Low CPU (disable resampling)", "",
+			[=]() {return module->bLowCpu; },
+			[=]() {module->bLowCpu = !module->bLowCpu; }
+		));
 	}
 };
 
