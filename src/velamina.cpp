@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinedsp.hpp"
+#include "sanguinehelpers.hpp"
 using simd::float_4;
 
 struct Velamina : Module {
@@ -186,40 +187,48 @@ struct VelaminaWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(8.326, 19.457)), module, Velamina::PARAM_RESPONSE_1));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(19.82, 19.457)), module, Velamina::PARAM_RESPONSE_2));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(31.323, 19.457)), module, Velamina::PARAM_RESPONSE_3));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(42.837, 19.457)), module, Velamina::PARAM_RESPONSE_4));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(8.326, 19.457), module, Velamina::PARAM_RESPONSE_1));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(19.82, 19.457), module, Velamina::PARAM_RESPONSE_2));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(31.323, 19.457), module, Velamina::PARAM_RESPONSE_3));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(42.837, 19.457), module, Velamina::PARAM_RESPONSE_4));
 
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(8.326, 31.814)), module, Velamina::PARAM_OFFSET_1));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(19.82, 31.814)), module, Velamina::PARAM_OFFSET_2));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(31.323, 31.814)), module, Velamina::PARAM_OFFSET_3));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(42.837, 31.814)), module, Velamina::PARAM_OFFSET_4));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(8.326, 31.814), module, Velamina::PARAM_OFFSET_1));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(19.82, 31.814), module, Velamina::PARAM_OFFSET_2));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(31.323, 31.814), module, Velamina::PARAM_OFFSET_3));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(42.837, 31.814), module, Velamina::PARAM_OFFSET_4));
 
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(mm2px(Vec(8.326, 52.697)), module, Velamina::PARAM_GAIN_1, Velamina::LIGHT_GAIN_1));
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(mm2px(Vec(19.82, 52.697)), module, Velamina::PARAM_GAIN_2, Velamina::LIGHT_GAIN_2));
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(mm2px(Vec(31.323, 52.697)), module, Velamina::PARAM_GAIN_3, Velamina::LIGHT_GAIN_3));
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(mm2px(Vec(42.837, 52.697)), module, Velamina::PARAM_GAIN_4, Velamina::LIGHT_GAIN_4));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(8.326, 52.697),
+			module, Velamina::PARAM_GAIN_1, Velamina::LIGHT_GAIN_1));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(19.82, 52.697),
+			module, Velamina::PARAM_GAIN_2, Velamina::LIGHT_GAIN_2));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(31.323, 52.697),
+			module, Velamina::PARAM_GAIN_3, Velamina::LIGHT_GAIN_3));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(42.837, 52.697),
+			module, Velamina::PARAM_GAIN_4, Velamina::LIGHT_GAIN_4));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(8.326, 80.55)), module, Velamina::INPUT_CV_1));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(19.82, 80.55)), module, Velamina::INPUT_CV_2));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(31.323, 80.55)), module, Velamina::INPUT_CV_3));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(42.837, 80.55)), module, Velamina::INPUT_CV_4));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.326, 80.55), module, Velamina::INPUT_CV_1));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(19.82, 80.55), module, Velamina::INPUT_CV_2));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(31.323, 80.55), module, Velamina::INPUT_CV_3));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(42.837, 80.55), module, Velamina::INPUT_CV_4));
 
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(8.326, 96.59)), module, Velamina::INPUT_IN_1));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(19.82, 96.59)), module, Velamina::INPUT_IN_2));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(31.323, 96.59)), module, Velamina::INPUT_IN_3));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(42.837, 96.59)), module, Velamina::INPUT_IN_4));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(8.326, 96.59), module, Velamina::INPUT_IN_1));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(19.82, 96.59), module, Velamina::INPUT_IN_2));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(31.323, 96.59), module, Velamina::INPUT_IN_3));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(42.837, 96.59), module, Velamina::INPUT_IN_4));
 
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.626, 105.454)), module, Velamina::LIGHT_OUT_1));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.142, 105.454)), module, Velamina::LIGHT_OUT_2));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.649, 105.454)), module, Velamina::LIGHT_OUT_3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(39.145, 105.454)), module, Velamina::LIGHT_OUT_4));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(4.626, 105.454),
+			module, Velamina::LIGHT_OUT_1));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.142, 105.454),
+			module, Velamina::LIGHT_OUT_2));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(27.649, 105.454),
+			module, Velamina::LIGHT_OUT_3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(39.145, 105.454),
+			module, Velamina::LIGHT_OUT_4));
 
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(8.326, 112.956)), module, Velamina::OUTPUT_1));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(19.82, 112.956)), module, Velamina::OUTPUT_2));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(31.323, 112.956)), module, Velamina::OUTPUT_3));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(42.837, 112.956)), module, Velamina::OUTPUT_4));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(8.326, 112.956), module, Velamina::OUTPUT_1));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(19.82, 112.956), module, Velamina::OUTPUT_2));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(31.323, 112.956), module, Velamina::OUTPUT_3));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.837, 112.956), module, Velamina::OUTPUT_4));
 	}
 };
 

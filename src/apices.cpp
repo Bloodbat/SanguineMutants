@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "peaks/processors.h"
 #include "sanguinecomponents.hpp"
+#include "sanguinehelpers.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -826,12 +827,12 @@ struct ApicesWidget : ModuleWidget {
 		addChild(apicesFrambuffer);
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12);
-		displayChannel1->box.pos = mm2px(Vec(18.616, 22.885));
+		displayChannel1->box.pos = millimetersToPixelsVec(18.616, 22.885);
 		displayChannel1->module = module;
 		apicesFrambuffer->addChild(displayChannel1);
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12);
-		displayChannel2->box.pos = mm2px(Vec(18.616, 35.477));
+		displayChannel2->box.pos = millimetersToPixelsVec(18.616, 35.477);
 		displayChannel2->module = module;
 		apicesFrambuffer->addChild(displayChannel2);
 
@@ -840,81 +841,81 @@ struct ApicesWidget : ModuleWidget {
 			displayChannel2->values.displayText = &module->displayText2;
 		}
 
-		addParam(createParamCentered<Rogan2SGray>(mm2px(Vec(99.527, 34.261)), module, Apices::PARAM_MODE));
+		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(99.527, 34.261), module, Apices::PARAM_MODE));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedLight>>>(mm2px(Vec(56.011, 79.582)),
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(56.011, 79.582),
 			module, Apices::PARAM_EDIT_MODE, Apices::LIGHT_SPLIT_MODE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<BlueLight>>>(mm2px(Vec(10.375, 50.212)),
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<BlueLight>>>(millimetersToPixelsVec(10.375, 50.212),
 			module, Apices::PARAM_EXPERT_MODE, Apices::LIGHT_EXPERT_MODE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(10.375, 34.272)),
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(10.375, 34.272),
 			module, Apices::PARAM_CHANNEL_SELECT, Apices::LIGHT_CHANNEL_SELECT));
 
-		addParam(createParamCentered<CKD6>(mm2px(Vec(10.375, 69.669)), module, Apices::PARAM_TRIGGER_1));
-		addParam(createParamCentered<CKD6>(mm2px(Vec(10.375, 115.9)), module, Apices::PARAM_TRIGGER_2));
+		addParam(createParamCentered<CKD6>(millimetersToPixelsVec(10.375, 69.669), module, Apices::PARAM_TRIGGER_1));
+		addParam(createParamCentered<CKD6>(millimetersToPixelsVec(10.375, 115.9), module, Apices::PARAM_TRIGGER_2));
 
-		addChild(createLightCentered<CKD6Light<RedLight>>(mm2px(Vec(10.375, 69.669)), module, Apices::LIGHT_TRIGGER_1));
-		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(10.375, 115.9)), module, Apices::LIGHT_TRIGGER_2));
+		addChild(createLightCentered<CKD6Light<RedLight>>(millimetersToPixelsVec(10.375, 69.669), module, Apices::LIGHT_TRIGGER_1));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(10.375, 115.9), module, Apices::LIGHT_TRIGGER_2));
 
-		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(91.652, 25.986)), module, Apices::LIGHT_FUNCTION_1));
-		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(107.402, 25.986)), module, Apices::LIGHT_FUNCTION_2));
-		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(91.652, 42.136)), module, Apices::LIGHT_FUNCTION_3));
-		addChild(createLightCentered<SmallLight<OrangeLight>>(mm2px(Vec(107.402, 42.136)), module, Apices::LIGHT_FUNCTION_4));
+		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(91.652, 25.986), module, Apices::LIGHT_FUNCTION_1));
+		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(107.402, 25.986), module, Apices::LIGHT_FUNCTION_2));
+		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(91.652, 42.136), module, Apices::LIGHT_FUNCTION_3));
+		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(107.402, 42.136), module, Apices::LIGHT_FUNCTION_4));
 
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.113, 27.965)), module, Apices::LIGHT_CHANNEL1));
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.113, 40.557)), module, Apices::LIGHT_CHANNEL2));
+		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(16.113, 27.965), module, Apices::LIGHT_CHANNEL1));
+		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(16.113, 40.557), module, Apices::LIGHT_CHANNEL2));
 
-		addParam(createParamCentered<Sanguine2PSRed>(mm2px(Vec(30.264, 62.728)), module, Apices::PARAM_KNOB_1));
-		addParam(createParamCentered<Sanguine2PSRed>(mm2px(Vec(81.759, 62.728)), module, Apices::PARAM_KNOB_2));
-		addParam(createParamCentered<Sanguine2PSBlue>(mm2px(Vec(30.264, 96.558)), module, Apices::PARAM_KNOB_3));
-		addParam(createParamCentered<Sanguine2PSBlue>(mm2px(Vec(81.759, 96.558)), module, Apices::PARAM_KNOB_4));
+		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(30.264, 62.728), module, Apices::PARAM_KNOB_1));
+		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(81.759, 62.728), module, Apices::PARAM_KNOB_2));
+		addParam(createParamCentered<Sanguine2PSBlue>(millimetersToPixelsVec(30.264, 96.558), module, Apices::PARAM_KNOB_3));
+		addParam(createParamCentered<Sanguine2PSBlue>(millimetersToPixelsVec(81.759, 96.558), module, Apices::PARAM_KNOB_4));
 
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.987, 62.728)), module, Apices::LIGHT_KNOBS_MODE + 0 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(69.978, 62.728)), module, Apices::LIGHT_KNOBS_MODE + 1 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(41.987, 96.558)), module, Apices::LIGHT_KNOBS_MODE + 2 * 3));
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(mm2px(Vec(69.978, 96.558)), module, Apices::LIGHT_KNOBS_MODE + 3 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(41.987, 62.728), module, Apices::LIGHT_KNOBS_MODE + 0 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(69.978, 62.728), module, Apices::LIGHT_KNOBS_MODE + 1 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(41.987, 96.558), module, Apices::LIGHT_KNOBS_MODE + 2 * 3));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(69.978, 96.558), module, Apices::LIGHT_KNOBS_MODE + 3 * 3));
 
-		addInput(createInputCentered<BananutGreen>((mm2px(Vec(10.375, 84.976))), module, Apices::GATE_1_INPUT));
-		addInput(createInputCentered<BananutGreen>((mm2px(Vec(10.375, 100.593))), module, Apices::GATE_2_INPUT));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(10.375, 84.976), module, Apices::GATE_1_INPUT));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(10.375, 100.593), module, Apices::GATE_2_INPUT));
 
-		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 100.846))), module, Apices::OUT_1_OUTPUT));
-		addOutput(createOutputCentered<BananutRed>((mm2px(Vec(101.388, 116.989))), module, Apices::OUT_2_OUTPUT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 100.846), module, Apices::OUT_1_OUTPUT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Apices::OUT_2_OUTPUT));
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay();
-		oledDisplay1->box.pos = mm2px(Vec(22.115, 72.201));
+		oledDisplay1->box.pos = millimetersToPixelsVec(22.115, 72.201);
 		oledDisplay1->module = module;
 		if (module)
 			oledDisplay1->oledText = &module->oledText1;
 		apicesFrambuffer->addChild(oledDisplay1);
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay();
-		oledDisplay2->box.pos = mm2px(Vec(73.609, 72.201));
+		oledDisplay2->box.pos = millimetersToPixelsVec(73.609, 72.201);
 		oledDisplay2->module = module;
 		if (module)
 			oledDisplay2->oledText = &module->oledText2;
 		apicesFrambuffer->addChild(oledDisplay2);
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay();
-		oledDisplay3->box.pos = mm2px(Vec(22.115, 81.348));
+		oledDisplay3->box.pos = millimetersToPixelsVec(22.115, 81.348);
 		oledDisplay3->module = module;
 		if (module)
 			oledDisplay3->oledText = &module->oledText3;
 		apicesFrambuffer->addChild(oledDisplay3);
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay();
-		oledDisplay4->box.pos = mm2px(Vec(73.609, 81.348));
+		oledDisplay4->box.pos = millimetersToPixelsVec(73.609, 81.348);
 		oledDisplay4->module = module;
 		if (module)
 			oledDisplay4->oledText = &module->oledText4;
 		apicesFrambuffer->addChild(oledDisplay4);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = mm2px(Vec(53.01, 114.607));
+		mutantsLogo->box.pos = millimetersToPixelsVec(53.01, 114.607);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		addChild(mutantsLogo);
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = mm2px(Vec(44.219, 106.239));
+		bloodLogo->box.pos = millimetersToPixelsVec(44.219, 106.239);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
 		addChild(bloodLogo);

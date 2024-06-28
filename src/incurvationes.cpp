@@ -2,6 +2,7 @@
 #include "warps/dsp/modulator.h"
 #include "sanguinecomponents.hpp"
 #include "warpiespals.hpp"
+#include "sanguinehelpers.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -172,28 +173,29 @@ struct IncurvationesWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(mm2px(Vec(45.963, 12.897)), module,
-			Incurvationes::PARAM_EASTER_EGG, Incurvationes::LIGHT_EASTER_EGG));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(45.963, 12.897),
+			module, Incurvationes::PARAM_EASTER_EGG, Incurvationes::LIGHT_EASTER_EGG));
 
-		addParam(createParamCentered<Rogan6PSWhite>(mm2px(Vec(25.4, 37.486)), module, Incurvationes::PARAM_ALGORITHM));
-		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(mm2px(Vec(25.4, 37.486)), module, Incurvationes::LIGHT_ALGORITHM));
-		addParam(createParamCentered<Rogan1PWhite>(mm2px(Vec(42.388, 79.669)), module, Incurvationes::PARAM_TIMBRE));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(16.906, 63.862)), module,
-			Incurvationes::PARAM_CARRIER, Incurvationes::LIGHT_CARRIER));
+		addParam(createParamCentered<Rogan6PSWhite>(millimetersToPixelsVec(25.4, 37.486), module, Incurvationes::PARAM_ALGORITHM));
+		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(25.4, 37.486),
+			module, Incurvationes::LIGHT_ALGORITHM));
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(42.388, 79.669), module, Incurvationes::PARAM_TIMBRE));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(16.906, 63.862),
+			module, Incurvationes::PARAM_CARRIER, Incurvationes::LIGHT_CARRIER));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(33.894, 63.862)), module, Incurvationes::INPUT_ALGORITHM));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.894, 63.862), module, Incurvationes::INPUT_ALGORITHM));
 
-		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(8.412, 79.451)), module, Incurvationes::PARAM_LEVEL1));
-		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(25.4, 79.451)), module, Incurvationes::PARAM_LEVEL2));
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Incurvationes::PARAM_LEVEL1));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Incurvationes::PARAM_LEVEL2));
 
-		addInput(createInputCentered<BananutYellow>(mm2px(Vec(8.412, 96.146)), module, Incurvationes::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBlue>(mm2px(Vec(25.4, 96.146)), module, Incurvationes::INPUT_LEVEL2));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(42.388, 96.146)), module, Incurvationes::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutYellow>(millimetersToPixelsVec(8.412, 96.146), module, Incurvationes::INPUT_LEVEL1));
+		addInput(createInputCentered<BananutBlue>(millimetersToPixelsVec(25.4, 96.146), module, Incurvationes::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(42.388, 96.146), module, Incurvationes::INPUT_TIMBRE));
 
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(7.925, 112.172)), module, Incurvationes::INPUT_CARRIER));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(18.777, 112.172)), module, Incurvationes::INPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(32.044, 112.172)), module, Incurvationes::OUTPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(42.896, 112.172)), module, Incurvationes::OUTPUT_AUX));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.925, 112.172), module, Incurvationes::INPUT_CARRIER));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.777, 112.172), module, Incurvationes::INPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(32.044, 112.172), module, Incurvationes::OUTPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.896, 112.172), module, Incurvationes::OUTPUT_AUX));
 	}
 };
 
