@@ -108,19 +108,22 @@ struct Velamina : Module {
 
 				if (inputs[INPUT_IN_1 + i].isConnected()) {
 					inVoltages[currentChannel] = inputs[INPUT_IN_1 + i].getVoltageSimd<float_4>(channel);
+
+					float_4 voltages = gain[currentChannel] * inVoltages[currentChannel];
+
+					outVoltages[currentChannel] += voltages;
+
+					float_4 isAbove10 = outVoltages[currentChannel] > 10.f;
+					float_4 isBelow10 = outVoltages[currentChannel] < -10.f;
+
+					float_4 wantSaturator = isAbove10 | isBelow10;
+
+					outVoltages[currentChannel] = simd::ifelse(wantSaturator, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
+					portVoltages[i][currentChannel] = outVoltages[currentChannel];
 				}
-
-				float_4 voltages = gain[currentChannel] * inVoltages[currentChannel];
-
-				outVoltages[currentChannel] += voltages;
-
-				float_4 isAbove10 = outVoltages[currentChannel] > 10.f;
-				float_4 isBelow10 = outVoltages[currentChannel] < -10.f;
-
-				float_4 wantSaturator = isAbove10 | isBelow10;			
-				
-				outVoltages[currentChannel] = simd::ifelse(wantSaturator, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
-				portVoltages[i][currentChannel] = outVoltages[currentChannel];
+				else {
+					portVoltages[i][currentChannel] = outVoltages[currentChannel];
+				}
 
 
 				if (outputs[OUTPUT_1 + i].isConnected()) {
