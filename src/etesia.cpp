@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
 #include "cloudycommon.hpp"
+#include "sanguinehelpers.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -596,147 +597,149 @@ struct EtesiaWidget : ModuleWidget {
 		addChild(etesiaFramebuffer);
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay;
-		displayFreeze->box.pos = mm2px(Vec(6.804, 13.711));
+		displayFreeze->box.pos = millimetersToPixelsVec(6.804, 13.711);
 		displayFreeze->module = module;
 		etesiaFramebuffer->addChild(displayFreeze);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(7.677, 25.607)), module, Etesia::INPUT_FREEZE));
-		CKD6* freezeButton = createParamCentered<CKD6>(mm2px(Vec(21.529, 25.607)), module, Etesia::PARAM_FREEZE);
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Etesia::INPUT_FREEZE));
+		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Etesia::PARAM_FREEZE);
 		freezeButton->latch = true;
 		freezeButton->momentary = false;
 		addParam(freezeButton);
-		addChild(createLightCentered<CKD6Light<BlueLight>>(mm2px(Vec(21.529, 25.607)), module, Etesia::LIGHT_FREEZE));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(21.529, 25.607), module, Etesia::LIGHT_FREEZE));
 
-		CKD6* reverseButton = createParamCentered<CKD6>(mm2px(Vec(37.35, 25.607)), module, Etesia::PARAM_REVERSE);
+		CKD6* reverseButton = createParamCentered<CKD6>(millimetersToPixelsVec(37.35, 25.607), module, Etesia::PARAM_REVERSE);
 		reverseButton->latch = true;
 		reverseButton->momentary = false;
 		addParam(reverseButton);
-		addChild(createLightCentered<CKD6Light<WhiteLight>>(mm2px(Vec(37.35, 25.607)), module, Etesia::LIGHT_REVERSE));
+		addChild(createLightCentered<CKD6Light<WhiteLight>>(millimetersToPixelsVec(37.35, 25.607), module, Etesia::LIGHT_REVERSE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(79.173, 12.851)), module, Etesia::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(85.911, 12.851)), module, Etesia::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(92.649, 12.851)), module, Etesia::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(mm2px(Vec(99.386, 12.851)), module, Etesia::LIGHT_REVERB));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.173, 12.851), module, Etesia::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(85.911, 12.851), module, Etesia::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(92.649, 12.851), module, Etesia::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(99.386, 12.851), module, Etesia::LIGHT_REVERB));
 
-		addParam(createParamCentered<TL1105>(mm2px(Vec(107.606, 12.851)), module, Etesia::PARAM_LEDS_MODE));
+		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(107.606, 12.851), module, Etesia::PARAM_LEDS_MODE));
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
-		displayModel->box.pos = mm2px(Vec(50.963, 20.147));
+		displayModel->box.pos = millimetersToPixelsVec(50.963, 20.147);
 		displayModel->module = module;
 		etesiaFramebuffer->addChild(displayModel);
 
-		addParam(createParamCentered<Sanguine1PGrayCap>(mm2px(Vec(129.805, 25.227)), module, Etesia::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Etesia::PARAM_MODE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(11.763, 50.173)), module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173), module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay;
-		displayPosition->box.pos = mm2px(Vec(3.614, 65.457));
+		displayPosition->box.pos = millimetersToPixelsVec(3.614, 65.457);
 		displayPosition->module = module;
 		etesiaFramebuffer->addChild(displayPosition);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(11.763, 76.776)), module, Etesia::INPUT_POSITION));
+		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Etesia::INPUT_POSITION));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(29.722, 50.173)), module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 50.173), module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay;
-		displayDensity->box.pos = mm2px(Vec(21.573, 65.457));
+		displayDensity->box.pos = millimetersToPixelsVec(21.573, 65.457);
 		displayDensity->module = module;
 		etesiaFramebuffer->addChild(displayDensity);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(29.722, 76.776)), module, Etesia::INPUT_DENSITY));
+		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Etesia::INPUT_DENSITY));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(47.682, 50.173)), module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173), module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay;
-		displaySize->box.pos = mm2px(Vec(39.533, 65.457));
+		displaySize->box.pos = millimetersToPixelsVec(39.533, 65.457);
 		displaySize->module = module;
 		etesiaFramebuffer->addChild(displaySize);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(47.682, 76.776)), module, Etesia::INPUT_SIZE));
+		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Etesia::INPUT_SIZE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(mm2px(Vec(65.644, 50.173)), module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 50.173), module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay;
-		displayTexture->box.pos = mm2px(Vec(57.495, 65.457));
+		displayTexture->box.pos = millimetersToPixelsVec(57.495, 65.457);
 		displayTexture->module = module;
 		etesiaFramebuffer->addChild(displayTexture);
 
-		addInput(createInputCentered<BananutBlack>(mm2px(Vec(65.644, 76.776)), module, Etesia::INPUT_TEXTURE));
+		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Etesia::INPUT_TEXTURE));
 
-		addParam(createParamCentered<Sanguine1PRed>(mm2px(Vec(105.638, 41.169)), module, Etesia::PARAM_PITCH));
+		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Etesia::PARAM_PITCH));
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay;
-		displayPitch->box.pos = mm2px(Vec(97.489, 48.465));
+		displayPitch->box.pos = millimetersToPixelsVec(97.489, 48.465);
 		displayPitch->module = module;
 		etesiaFramebuffer->addChild(displayPitch);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 59.887)), module, Etesia::INPUT_PITCH));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Etesia::INPUT_PITCH));
 
-		addParam(createParamCentered<Sanguine1PGreen>(mm2px(Vec(86.118, 41.169)), module, Etesia::PARAM_BLEND));
+		addParam(createParamCentered<Sanguine1PGreen>(millimetersToPixelsVec(86.118, 41.169), module, Etesia::PARAM_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay;
-		displayBlend->box.pos = mm2px(Vec(77.969, 48.465));
+		displayBlend->box.pos = millimetersToPixelsVec(77.969, 48.465);
 		displayBlend->module = module;
 		etesiaFramebuffer->addChild(displayBlend);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 59.887)), module, Etesia::INPUT_BLEND));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Etesia::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay;
-		displayTrigger->box.pos = mm2px(Vec(117.065, 48.465));
+		displayTrigger->box.pos = millimetersToPixelsVec(117.065, 48.465);
 		displayTrigger->module = module;
 		etesiaFramebuffer->addChild(displayTrigger);
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 59.887)), module, Etesia::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Etesia::INPUT_TRIGGER));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(86.118, 78.013)), module, Etesia::INPUT_SPREAD));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 78.013), module, Etesia::INPUT_SPREAD));
 
 		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay;
-		displaySpread->box.pos = mm2px(Vec(77.969, 84.0));
+		displaySpread->box.pos = millimetersToPixelsVec(77.969, 84.0);
 		displaySpread->module = module;
 		etesiaFramebuffer->addChild(displaySpread);
 
-		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(86.118, 96.727)), module, Etesia::PARAM_SPREAD));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Etesia::PARAM_SPREAD));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(105.638, 78.013)), module, Etesia::INPUT_FEEDBACK));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 78.013), module, Etesia::INPUT_FEEDBACK));
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay;
-		displayFeedback->box.pos = mm2px(Vec(97.489, 84.0));
+		displayFeedback->box.pos = millimetersToPixelsVec(97.489, 84.0);
 		displayFeedback->module = module;
 		etesiaFramebuffer->addChild(displayFeedback);
 
-		addParam(createParamCentered<Sanguine1PPurple>(mm2px(Vec(105.638, 96.727)), module, Etesia::PARAM_FEEDBACK));
+		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Etesia::PARAM_FEEDBACK));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(125.214, 78.013)), module, Etesia::INPUT_REVERB));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 78.013), module, Etesia::INPUT_REVERB));
 
 		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay;
-		displayReverb->box.pos = mm2px(Vec(117.065, 84.0));
+		displayReverb->box.pos = millimetersToPixelsVec(117.065, 84.0);
 		displayReverb->module = module;
 		etesiaFramebuffer->addChild(displayReverb);
 
-		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(125.214, 96.727)), module, Etesia::PARAM_REVERB));
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Etesia::PARAM_REVERB));
 
-		addParam(createParamCentered<Rogan1PWhite>(mm2px(Vec(14.603, 97.272)), module, Etesia::PARAM_IN_GAIN));
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(14.603, 97.272), module, Etesia::PARAM_IN_GAIN));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(mm2px(Vec(31.438, 97.272)), module, Etesia::PARAM_HI_FI, Etesia::LIGHT_HI_FI));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(mm2px(Vec(56.63, 97.272)), module, Etesia::PARAM_STEREO, Etesia::LIGHT_STEREO));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(31.438, 97.272),
+			module, Etesia::PARAM_HI_FI, Etesia::LIGHT_HI_FI));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(56.63, 97.272),
+			module, Etesia::PARAM_STEREO, Etesia::LIGHT_STEREO));
 
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(7.677, 116.972)), module, Etesia::INPUT_LEFT));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(21.529, 116.972)), module, Etesia::INPUT_RIGHT));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Etesia::INPUT_RIGHT));
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = mm2px(Vec(56.919, 106.223));
+		bloodLogo->box.pos = millimetersToPixelsVec(56.919, 106.223);
 		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
 		addChild(bloodLogo);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = mm2px(Vec(65.71, 114.592));
+		mutantsLogo->box.pos = millimetersToPixelsVec(65.71, 114.592);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
 		addChild(mutantsLogo);
 
-		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(115.161, 116.972)), module, Etesia::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutGreen>(mm2px(Vec(129.013, 116.972)), module, Etesia::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(129.013, 116.972), module, Etesia::OUTPUT_RIGHT));
 
 		if (module) {
 			displayModel->values.displayText = &module->textMode;

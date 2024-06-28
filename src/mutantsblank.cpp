@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
+#include "sanguinehelpers.hpp"
 
 struct MutantsBlank : Module {
 
@@ -18,19 +19,19 @@ struct MutantsBlankWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		SanguineShapedLight* mutantsLight = new SanguineShapedLight();
-		mutantsLight->box.pos = mm2px(Vec(5.432, 43.423));
+		mutantsLight->box.pos = millimetersToPixelsVec(5.432, 43.423);
 		mutantsLight->module = module;
 		mutantsLight->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy_blank.svg")));
 		addChild(mutantsLight);
 
 		SanguineShapedLight* bloodLight = new SanguineShapedLight();
-		bloodLight->box.pos = mm2px(Vec(4.468, 107.571));
+		bloodLight->box.pos = millimetersToPixelsVec(4.468, 107.571);
 		bloodLight->module = module;
 		bloodLight->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy_blank.svg")));
 		addChild(bloodLight);
 
 		SanguineShapedLight* sanguineLogo = new SanguineShapedLight();
-		sanguineLogo->box.pos = mm2px(Vec(11.597, 104.861));
+		sanguineLogo->box.pos = millimetersToPixelsVec(11.597, 104.861);
 		sanguineLogo->module = module;
 		sanguineLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/sanguine_lit_blank.svg")));
 		addChild(sanguineLogo);

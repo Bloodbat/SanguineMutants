@@ -2,6 +2,7 @@
 #include "mutuus/dsp/mutuus_modulator.h"
 #include "sanguinecomponents.hpp"
 #include "warpiespals.hpp"
+#include "sanguinehelpers.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -281,30 +282,31 @@ struct MutuusWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(mm2px(Vec(4.836, 16.119)), module, Mutuus::PARAM_STEREO, Mutuus::LIGHT_STEREO));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(millimetersToPixelsVec(4.836, 16.119),
+			module, Mutuus::PARAM_STEREO, Mutuus::LIGHT_STEREO));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedLight>>>(mm2px(Vec(45.963, 16.119)), module,
-			Mutuus::PARAM_MODE_SWITCH, Mutuus::LIGHT_MODE_SWITCH));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(45.963, 16.119),
+			module, Mutuus::PARAM_MODE_SWITCH, Mutuus::LIGHT_MODE_SWITCH));
 
-		addParam(createParamCentered<Rogan6PSWhite>(mm2px(Vec(25.4, 37.486)), module, Mutuus::PARAM_ALGORITHM));
-		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(mm2px(Vec(25.4, 37.486)), module, Mutuus::LIGHT_ALGORITHM));
-		addParam(createParamCentered<Rogan1PWhite>(mm2px(Vec(42.388, 79.669)), module, Mutuus::PARAM_TIMBRE));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(mm2px(Vec(16.906, 63.862)), module,
-			Mutuus::PARAM_CARRIER, Mutuus::LIGHT_CARRIER));
+		addParam(createParamCentered<Rogan6PSWhite>(millimetersToPixelsVec(25.4, 37.486), module, Mutuus::PARAM_ALGORITHM));
+		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(25.4, 37.486), module, Mutuus::LIGHT_ALGORITHM));
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(42.388, 79.669), module, Mutuus::PARAM_TIMBRE));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(16.906, 63.862),
+			module, Mutuus::PARAM_CARRIER, Mutuus::LIGHT_CARRIER));
 
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(33.894, 63.862)), module, Mutuus::INPUT_ALGORITHM));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.894, 63.862), module, Mutuus::INPUT_ALGORITHM));
 
-		addParam(createParamCentered<Sanguine1PYellow>(mm2px(Vec(8.412, 79.451)), module, Mutuus::PARAM_LEVEL1));
-		addParam(createParamCentered<Sanguine1PBlue>(mm2px(Vec(25.4, 79.451)), module, Mutuus::PARAM_LEVEL2));
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Mutuus::PARAM_LEVEL1));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Mutuus::PARAM_LEVEL2));
 
-		addInput(createInputCentered<BananutYellow>(mm2px(Vec(8.412, 96.146)), module, Mutuus::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBlue>(mm2px(Vec(25.4, 96.146)), module, Mutuus::INPUT_LEVEL2));
-		addInput(createInputCentered<BananutPurple>(mm2px(Vec(42.388, 96.146)), module, Mutuus::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutYellow>(millimetersToPixelsVec(8.412, 96.146), module, Mutuus::INPUT_LEVEL1));
+		addInput(createInputCentered<BananutBlue>(millimetersToPixelsVec(25.4, 96.146), module, Mutuus::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(42.388, 96.146), module, Mutuus::INPUT_TIMBRE));
 
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(7.925, 112.172)), module, Mutuus::INPUT_CARRIER));
-		addInput(createInputCentered<BananutGreen>(mm2px(Vec(18.777, 112.172)), module, Mutuus::INPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(32.044, 112.172)), module, Mutuus::OUTPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(mm2px(Vec(42.896, 112.172)), module, Mutuus::OUTPUT_AUX));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.925, 112.172), module, Mutuus::INPUT_CARRIER));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.777, 112.172), module, Mutuus::INPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(32.044, 112.172), module, Mutuus::OUTPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.896, 112.172), module, Mutuus::OUTPUT_AUX));
 	}
 
 	void appendContextMenu(Menu* menu) override {
