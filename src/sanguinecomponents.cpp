@@ -159,6 +159,54 @@ void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 	Widget::draw(args);
 }
 
+void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
+	if (layer == 1) {
+		if (module && !module->isBypassed()) {
+			if (font) {
+				// Text				
+				nvgFontSize(args.vg, fontSize);
+				nvgFontFaceId(args.vg, font->handle);
+				nvgTextLetterSpacing(args.vg, kerning);
+
+				Vec textPos = textMargin;
+				nvgFillColor(args.vg, nvgTransRGBA(textColor, backgroundCharAlpha));
+				// Background of all characters
+				std::string backgroundText = "";
+				for (uint32_t i = 0; i < characterCount; i++)
+					backgroundText += backgroundCharacter;
+				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
+				nvgFillColor(args.vg, textColor);
+
+				std::string displayValue = "";
+
+				// TODO!!! Ensure we draw only characterCount chars.
+				switch (displayType)
+				{
+				case DISPLAY_NUMERIC: {
+					if (values.numberValue) {
+						displayValue = std::to_string(*values.numberValue);
+						if (*values.numberValue < 10 && leadingZero)
+							displayValue.insert(0, 1, '0');
+					}
+					break;
+				}
+				case DISPLAY_STRING: {
+					displayValue = *values.displayText;
+					break;
+				}
+				}
+
+				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
+
+				if (drawHalo) {
+					drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
+				}
+			}
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
 SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
@@ -172,35 +220,10 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* t
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
-}
 
-void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
-	if (layer == 1) {
-		if (module && !module->isBypassed()) {
-			if (font) {
-				// Text					
-				nvgFontSize(args.vg, fontSize);
-				nvgFontFaceId(args.vg, font->handle);
-				nvgTextLetterSpacing(args.vg, 2.5);
-
-				Vec textPos = Vec(9, 52);
-				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-				// Background of all segments
-				std::string backgroundText = "";
-				for (uint32_t i = 0; i < characterCount; i++)
-					backgroundText += "~";
-				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
-				nvgFillColor(args.vg, textColor);
-				if (values.displayText && !(values.displayText->empty()))
-				{
-					// TODO: Make sure we only display max. display chars.
-					nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
-				}
-				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
-			}
-		}
-	}
-	Widget::drawLayer(args, layer);
+	backgroundCharacter = '~';
+	textMargin = Vec(9.f, 52.f);
+	kerning = 2.5f;
 }
 
 SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
@@ -216,100 +239,12 @@ SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, M
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
-}
 
-void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
-	if (layer == 1) {
-		if (module && !module->isBypassed()) {
-			if (font) {
-				// Text					
-				nvgFontSize(args.vg, fontSize);
-				nvgFontFaceId(args.vg, font->handle);
-				nvgTextLetterSpacing(args.vg, 2.5);
+	backgroundCharacter = '8';
+	textMargin = Vec(2.f, 36.f);
+	kerning = 2.5f;
 
-				Vec textPos = Vec(2, 36);
-				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-				// Background of all segments
-				std::string backgroundText = "";
-				for (uint32_t i = 0; i < characterCount; i++)
-					backgroundText += "8";
-				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
-				nvgFillColor(args.vg, textColor);
-
-				std::string displayValue = "";
-
-				if (values.numberValue) {
-					displayValue = std::to_string(*values.numberValue);
-					if (*values.numberValue < 10)
-						displayValue.insert(0, 1, '0');
-				}
-
-				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
-			}
-		}
-	}
-	Widget::drawLayer(args, layer);
-}
-
-SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
-	SanguineLedNumberDisplay(newCharacterCount, theModule, X, Y, createCentered) {
 	displayType = DISPLAY_NUMERIC;
-	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));
-	fontSize = 21.4;
-
-	if (createCentered) {
-		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
-	{
-		box.pos = mm2px(Vec(X, Y));
-	}
-};
-
-void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
-	if (layer == 1) {
-		if (module && !module->isBypassed()) {
-			if (font) {
-				// Text				
-				nvgFontSize(args.vg, fontSize);
-				nvgFontFaceId(args.vg, font->handle);
-				nvgTextLetterSpacing(args.vg, 2.5);
-
-				Vec textPos = Vec(5, 20);
-				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-				// Background of all segments
-				std::string backgroundText = "";
-				for (uint32_t i = 0; i < characterCount; i++)
-					backgroundText += "8";
-				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
-				nvgFillColor(args.vg, textColor);
-
-				std::string displayValue = "";
-
-				switch (displayType)
-				{
-				case DISPLAY_NUMERIC: {
-					if (values.numberValue) {
-						displayValue = std::to_string(*values.numberValue);
-						if (*values.numberValue < 10)
-							displayValue.insert(0, 1, '0');
-					}
-					break;
-				}
-				case DISPLAY_STRING: {
-					displayValue = *values.displayText;
-					break;
-				}
-				}
-
-				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-
-				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
-			}
-		}
-	}
-	Widget::drawLayer(args, layer);
 }
 
 SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
@@ -326,37 +261,30 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module*
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
+
+	backgroundCharacter = "\u2588";
+	textMargin = Vec(5, 24);
+	kerning = 2.f;
 }
 
-void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
-	if (layer == 1) {
-		if (module && !module->isBypassed()) {
-			if (font) {
-				// Text					
-				nvgFontSize(args.vg, fontSize);
-				nvgFontFaceId(args.vg, font->handle);
-				nvgTextLetterSpacing(args.vg, 2);
+SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineLedNumberDisplay(newCharacterCount, theModule, X, Y, createCentered) {
+	displayType = DISPLAY_NUMERIC;
+	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));
+	fontSize = 21.4;
 
-				// Verify this!
-				Vec textPos = Vec(5, 24);
-				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-				// Background of all segments
-				std::string backgroundText = "";
-				for (uint32_t i = 0; i < characterCount; i++)
-					backgroundText += "█";
-				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
-				nvgFillColor(args.vg, textColor);
-				if (values.displayText && !(values.displayText->empty()))
-				{
-					// TODO make sure we only display max. display chars					
-					nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
-				}
-				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
-			}
-		}
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
 	}
-	Widget::drawLayer(args, layer);
-}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
+
+	backgroundCharacter = '8';
+	textMargin = Vec(5, 20);
+	kerning = 2.5f;
+};
 
 Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
