@@ -176,7 +176,7 @@ struct VelaminaWidget : ModuleWidget {
 	VelaminaWidget(Velamina* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_10hp_purple.svg", "res/velamina_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_purple.svg", "res/velamina_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

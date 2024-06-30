@@ -153,7 +153,7 @@ struct Aleae : Module {
 struct AleaeWidget : ModuleWidget {
 	AleaeWidget(Aleae* module) {
 		setModule(module);
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_6hp_purple.svg", "res/aleae_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_6hp_purple.svg", "res/aleae_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

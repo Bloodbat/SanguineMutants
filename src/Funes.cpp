@@ -639,7 +639,7 @@ struct FunesWidget : ModuleWidget {
 	FunesWidget(Funes* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_34hp_purple.svg", "res/funes_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_34hp_purple.svg", "res/funes_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -692,17 +692,11 @@ struct FunesWidget : ModuleWidget {
 			alphaDisplay->values.displayText = &module->displayText;
 		}
 
-		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = millimetersToPixelsVec(83.49, 116.46);
-		mutantsLogo->module = module;
-		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		addChild(mutantsLogo);
-
-		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = millimetersToPixelsVec(74.699, 108.091);
-		bloodLogo->module = module;
-		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 76.596, 112.027);
 		addChild(bloodLogo);
+
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 89.597, 118.96);
+		addChild(mutantsLogo);
 	}
 
 	void appendContextMenu(Menu* menu) override {
