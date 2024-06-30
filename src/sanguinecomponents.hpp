@@ -158,7 +158,7 @@ struct Sanguine96x32OLEDDisplay : TransparentWidget {
 	std::shared_ptr<Font> font = nullptr;
 	std::string* oledText = nullptr;
 	NVGcolor textColor = nvgRGB(254, 254, 254);
-	Sanguine96x32OLEDDisplay();
+	Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered = true);
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
