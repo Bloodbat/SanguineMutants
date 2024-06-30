@@ -592,7 +592,7 @@ SanguinePolyOutputLight::SanguinePolyOutputLight() {
 
 // Panels
 
-SanguinePanel::SanguinePanel(Plugin* pluginInstance, std::string newBackground, std::string newForeground) {
+SanguinePanel::SanguinePanel(Plugin* pluginInstance, const std::string newBackground, const std::string newForeground) {
 	setBackground(Svg::load(asset::plugin(pluginInstance, newBackground)));
 
 	SvgWidget* foreground = new SvgWidget();

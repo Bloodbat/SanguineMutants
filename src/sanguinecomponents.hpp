@@ -254,7 +254,7 @@ struct SanguinePolyOutputLight : SanguineShapedLight {
 // Panels
 struct SanguinePanel : SvgPanel {
 	widget::SvgWidget* foreground;
-	SanguinePanel(Plugin* pluginInstance, std::string newBackground, std::string newForeground);
+	SanguinePanel(Plugin* pluginInstance, const std::string newBackground, const std::string newForeground);
 };
 
 // Drawing utils
