@@ -274,7 +274,7 @@ static const std::string mutuusModelLabels[9] = {
 struct MutuusWidget : ModuleWidget {
 	MutuusWidget(Mutuus* module) {
 		setModule(module);
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_10hp_green.svg", "res/mutuus_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_green.svg", "res/mutuus_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

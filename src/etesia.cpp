@@ -585,7 +585,7 @@ struct EtesiaWidget : ModuleWidget {
 	EtesiaWidget(Etesia* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_27hp_red.svg", "res/etesia_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_27hp_red.svg", "res/etesia_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -702,16 +702,10 @@ struct EtesiaWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Etesia::INPUT_RIGHT));
 
-		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = millimetersToPixelsVec(56.919, 106.223);
-		bloodLogo->module = module;
-		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
 		addChild(bloodLogo);
 
-		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = millimetersToPixelsVec(65.71, 114.592);
-		mutantsLogo->module = module;
-		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
 
 		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));

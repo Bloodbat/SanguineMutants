@@ -894,7 +894,7 @@ struct MarmoraWidget : ModuleWidget {
 	MarmoraWidget(Marmora* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_28hp_purple.svg", "res/marmora_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_purple.svg", "res/marmora_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -1011,16 +1011,10 @@ struct MarmoraWidget : ModuleWidget {
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(55.45, 73.437), module, Marmora::INPUT_T_RESET));
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(86.79, 73.437), module, Marmora::INPUT_X_RESET));
 
-		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = millimetersToPixelsVec(59.459, 85.882);
-		bloodLogo->module = module;
-		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 61.356, 89.818);
 		addChild(bloodLogo);
 
-		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = millimetersToPixelsVec(68.25, 94.25);
-		mutantsLogo->module = module;
-		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 74.358, 96.751);
 		addChild(mutantsLogo);
 	}
 

@@ -918,7 +918,7 @@ struct MortuusWidget : ModuleWidget {
 	MortuusWidget(Mortuus* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_22hp_red.svg", "res/mortuus_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_22hp_red.svg", "res/mortuus_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -1003,17 +1003,11 @@ struct MortuusWidget : ModuleWidget {
 		if (module)
 			oledDisplay4->oledText = &module->oledText4;
 
-		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = millimetersToPixelsVec(53.01, 114.607);
-		mutantsLogo->module = module;
-		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		addChild(mutantsLogo);
-
-		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = millimetersToPixelsVec(44.219, 106.239);
-		bloodLogo->module = module;
-		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
+
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
+		addChild(mutantsLogo);
 	}
 
 	void appendContextMenu(Menu* menu) override {
