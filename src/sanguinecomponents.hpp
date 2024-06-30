@@ -256,6 +256,10 @@ struct SanguineBloodLogoLight : SanguineShapedLight {
 	SanguineBloodLogoLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
+struct SanguineMonstersLogoLight : SanguineShapedLight {
+	SanguineMonstersLogoLight(Module* theModule, const float X, const float Y, bool createCentered = true);
+};
+
 struct SanguineMutantsLogoLight : SanguineShapedLight {
 	SanguineMutantsLogoLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };

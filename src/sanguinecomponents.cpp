@@ -607,6 +607,10 @@ SanguineBloodLogoLight::SanguineBloodLogoLight(Module* theModule, const float X,
 	SanguineShapedLight(theModule, "res/blood_glowy.svg", X, Y, createCentered) {
 }
 
+SanguineMonstersLogoLight::SanguineMonstersLogoLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/monsters_lit.svg", X, Y, createCentered) {
+}
+
 SanguineMutantsLogoLight::SanguineMutantsLogoLight(Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineShapedLight(theModule, "res/mutants_glowy.svg", X, Y, createCentered) {
 }
