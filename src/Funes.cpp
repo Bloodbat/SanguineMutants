@@ -685,12 +685,12 @@ struct FunesWidget : ModuleWidget {
 		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
 		addChild(funesFrambuffer);
 
-		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8);
-		alphaDisplay->box.pos = millimetersToPixelsVec(8.674, 21.713);
-		alphaDisplay->module = module;
-		alphaDisplay->values.displayText = &module->displayText;
-		alphaDisplay->textColor = nvgRGB(200, 0, 0);
+		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 59.074, 32.314);
 		funesFrambuffer->addChild(alphaDisplay);
+
+		if (module) {
+			alphaDisplay->values.displayText = &module->displayText;
+		}
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = millimetersToPixelsVec(83.49, 116.46);
