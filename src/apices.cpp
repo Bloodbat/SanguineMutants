@@ -876,33 +876,30 @@ struct ApicesWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 100.846), module, Apices::OUT_1_OUTPUT));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Apices::OUT_2_OUTPUT));
 
-		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay();
-		oledDisplay1->box.pos = millimetersToPixelsVec(22.115, 72.201);
-		oledDisplay1->module = module;
-		if (module)
-			oledDisplay1->oledText = &module->oledText1;
+		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		apicesFrambuffer->addChild(oledDisplay1);
 
-		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay();
-		oledDisplay2->box.pos = millimetersToPixelsVec(73.609, 72.201);
-		oledDisplay2->module = module;
 		if (module)
-			oledDisplay2->oledText = &module->oledText2;
+			oledDisplay1->oledText = &module->oledText1;
+
+
+		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
 		apicesFrambuffer->addChild(oledDisplay2);
 
-		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay();
-		oledDisplay3->box.pos = millimetersToPixelsVec(22.115, 81.348);
-		oledDisplay3->module = module;
 		if (module)
-			oledDisplay3->oledText = &module->oledText3;
+			oledDisplay2->oledText = &module->oledText2;
+
+		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
 		apicesFrambuffer->addChild(oledDisplay3);
 
-		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay();
-		oledDisplay4->box.pos = millimetersToPixelsVec(73.609, 81.348);
-		oledDisplay4->module = module;
+		if (module)
+			oledDisplay3->oledText = &module->oledText3;
+
+		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
+		apicesFrambuffer->addChild(oledDisplay4);
+
 		if (module)
 			oledDisplay4->oledText = &module->oledText4;
-		apicesFrambuffer->addChild(oledDisplay4);
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
 		mutantsLogo->box.pos = millimetersToPixelsVec(53.01, 114.607);

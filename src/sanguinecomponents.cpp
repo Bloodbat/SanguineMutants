@@ -358,9 +358,19 @@ void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay() {
+Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
 	box.size = mm2px(Vec(16.298, 5.418));
+
+	module = theModule;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
 }
 
 void Sanguine96x32OLEDDisplay::draw(const DrawArgs& args) {
