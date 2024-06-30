@@ -127,30 +127,34 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 
 	float fontSize;
 	unsigned char haloOpacity = 55;
+	unsigned char backgroundCharAlpha = 16;
 	DisplayType displayType = DISPLAY_STRING;
+	std::string backgroundCharacter = " ";
+	math::Vec textMargin = { 2.f, 2.f };
+	float kerning = 2.f;
+	bool leadingZero = true;
+	bool drawHalo = true;
+
 	SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule);
 	void draw(const DrawArgs& args) override;
+	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {
 	SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
-	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
 	SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
-	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {
 	unsigned char haloOpacity = 55;
 	SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
-	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineTinyNumericDisplay : SanguineLedNumberDisplay {
 	SanguineTinyNumericDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
-	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct Sanguine96x32OLEDDisplay : TransparentWidget {
