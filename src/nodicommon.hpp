@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sanguinecomponents.hpp"
+
 struct NodiModelInfo {
 	std::string code;
 	std::string label;
@@ -163,3 +165,11 @@ static const std::string nodiVCALabel = "\\VCA";
 static const std::string nodiFlatLabel = "FLAT";
 static const std::string nodiDriftLabel = "DRFT";
 static const std::string nodiSignLabel = "SIGN";
+
+struct NodiDisplay : SanguineAlphaDisplay {
+	uint32_t* displayTimeout = nullptr;
+
+	NodiDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
+
+	void drawLayer(const DrawArgs& args, int layer) override;
+};

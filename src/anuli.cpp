@@ -379,9 +379,7 @@ struct AnuliWidget : ModuleWidget {
 		FramebufferWidget* anuliFrambuffer = new FramebufferWidget();
 		addChild(anuliFrambuffer);
 
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
-		displayModel->module = module;
-		displayModel->box.pos = centerWidgetInMillimeters(displayModel, 47.368f, 22.087f);
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 47.368f, 22.087f);		
 		anuliFrambuffer->addChild(displayModel);
 
 		if (module) {
@@ -409,9 +407,7 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 42.833), module, Anuli::PARAM_STRUCTURE_MOD));
 
-		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2);
-		displayPolyphony->module = module;
-		displayPolyphony->box.pos = centerWidgetInMillimeters(displayPolyphony, 49.592, 61.388);
+		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 49.592, 61.388);		
 		anuliFrambuffer->addChild(displayPolyphony);
 
 		if (module)

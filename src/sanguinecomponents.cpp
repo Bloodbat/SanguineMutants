@@ -141,8 +141,9 @@ Sanguine3PSRed::Sanguine3PSRed() {
 
 // Displays
 
-SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCount) {
+SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule) {
 	characterCount = newCharacterCount;
+	module = theModule;
 }
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
@@ -158,10 +159,19 @@ void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 	Widget::draw(args);
 }
 
-SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount) {
+SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
 	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
 	fontSize = 40;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
 }
 
 void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -193,10 +203,19 @@ void SanguineAlphaDisplay::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount) {
+SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
 	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
 	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
 	fontSize = 33.95;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
 }
 
 void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -233,10 +252,19 @@ void SanguineLedNumberDisplay::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount) : SanguineLedNumberDisplay(newCharacterCount) {
+SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineLedNumberDisplay(newCharacterCount, theModule, X, Y, createCentered) {
 	displayType = DISPLAY_NUMERIC;
 	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));
 	fontSize = 21.4;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
 };
 
 void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
@@ -277,6 +305,52 @@ void SanguineTinyNumericDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
 
+				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
+			}
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
+SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineBaseSegmentDisplay(newCharacterCount, theModule)
+{
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
+	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
+	fontSize = 16.45;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
+}
+
+void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
+	if (layer == 1) {
+		if (module && !module->isBypassed()) {
+			if (font) {
+				// Text					
+				nvgFontSize(args.vg, fontSize);
+				nvgFontFaceId(args.vg, font->handle);
+				nvgTextLetterSpacing(args.vg, 2);
+
+				// Verify this!
+				Vec textPos = Vec(5, 24);
+				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
+				// Background of all segments
+				std::string backgroundText = "";
+				for (uint32_t i = 0; i < characterCount; i++)
+					backgroundText += "█";
+				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
+				nvgFillColor(args.vg, textColor);
+				if (values.displayText && !(values.displayText->empty()))
+				{
+					// TODO make sure we only display max. display chars					
+					nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
+				}
 				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
@@ -336,43 +410,6 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 					}
 					//drawRectHalo(args, box.size, textColor, 55, 0.f);					
 				}
-			}
-		}
-	}
-	Widget::drawLayer(args, layer);
-}
-
-SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount) : SanguineBaseSegmentDisplay(newCharacterCount)
-{
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
-	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
-	fontSize = 16.45;
-}
-
-void SanguineMatrixDisplay::drawLayer(const DrawArgs& args, int layer) {
-	if (layer == 1) {
-		if (module && !module->isBypassed()) {
-			if (font) {
-				// Text					
-				nvgFontSize(args.vg, fontSize);
-				nvgFontFaceId(args.vg, font->handle);
-				nvgTextLetterSpacing(args.vg, 2);
-
-				// Verify this!
-				Vec textPos = Vec(5, 24);
-				nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-				// Background of all segments
-				std::string backgroundText = "";
-				for (uint32_t i = 0; i < characterCount; i++)
-					backgroundText += "█";
-				nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
-				nvgFillColor(args.vg, textColor);
-				if (values.displayText && !(values.displayText->empty()))
-				{
-					// TODO make sure we only display max. display chars					
-					nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
-				}
-				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
 	}
@@ -627,8 +664,7 @@ SanguinePanel::SanguinePanel(Plugin* pluginInstance, std::string newBackground, 
 
 // Drawing utils
 
-void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor)
-{
+void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor) {
 	// Adapted from LightWidget
 	// Don't draw halo if rendering in a framebuffer, e.g. screenshots or Module Browser
 	if (args.fb)
@@ -655,8 +691,7 @@ void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloCo
 	nvgFill(args.vg);
 }
 
-void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX)
-{
+void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX) {
 	// Adapted from MindMeld & LightWidget.
 	if (args.fb)
 		return;

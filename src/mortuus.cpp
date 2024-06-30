@@ -929,14 +929,10 @@ struct MortuusWidget : ModuleWidget {
 		FramebufferWidget* apicesFrambuffer = new FramebufferWidget();
 		addChild(apicesFrambuffer);
 
-		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12);
-		displayChannel1->box.pos = millimetersToPixelsVec(18.616, 22.885);
-		displayChannel1->module = module;
+		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFrambuffer->addChild(displayChannel1);
 
-		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12);
-		displayChannel2->box.pos = millimetersToPixelsVec(18.616, 35.477);
-		displayChannel2->module = module;
+		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
 		apicesFrambuffer->addChild(displayChannel2);
 
 		if (module) {

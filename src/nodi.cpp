@@ -649,47 +649,6 @@ struct Nodi : Module {
 	}
 };
 
-struct NodiDisplay : SanguineAlphaDisplay {
-	NodiDisplay(uint32_t newCharacterCount) : SanguineAlphaDisplay(newCharacterCount) {
-
-	}
-
-	uint32_t* displayTimeout = nullptr;
-
-	void drawLayer(const DrawArgs& args, int layer) override {
-		if (layer == 1) {
-			if (module && !module->isBypassed()) {
-				if (font) {
-					// Text
-					nvgFontSize(args.vg, fontSize);
-					nvgFontFaceId(args.vg, font->handle);
-					nvgTextLetterSpacing(args.vg, 2.5);
-
-					Vec textPos = Vec(9, 52);
-					nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));
-					// Background of all segments
-					std::string backgroundText = "";
-					for (uint32_t i = 0; i < characterCount; i++)
-						backgroundText += "~";
-					nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
-
-					// Blink effect
-					if (!(displayTimeout && *displayTimeout & 0x1000)) {
-						nvgFillColor(args.vg, textColor);
-						if (values.displayText && !(values.displayText->empty()))
-						{
-							// TODO: Make sure we only display max. display chars.
-							nvgText(args.vg, textPos.x, textPos.y, values.displayText->c_str(), NULL);
-						}
-					}
-					drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
-				}
-			}
-		}
-		Widget::drawLayer(args, layer);
-	}
-};
-
 struct NodiWidget : ModuleWidget {
 	NodiWidget(Nodi* module) {
 		setModule(module);
@@ -705,12 +664,13 @@ struct NodiWidget : ModuleWidget {
 		FramebufferWidget* nodiFrambuffer = new FramebufferWidget();
 		addChild(nodiFrambuffer);
 
-		NodiDisplay* nodiDisplay = new NodiDisplay(4);
-		nodiDisplay->box.pos = millimetersToPixelsVec(45.92, 10.396);
-		nodiDisplay->module = module;
-		nodiDisplay->values.displayText = &module->displayText;
-		nodiDisplay->displayTimeout = &module->displayTimeout;
+		NodiDisplay* nodiDisplay = new NodiDisplay(4, module, 71.12, 20.996);
 		nodiFrambuffer->addChild(nodiDisplay);
+
+		if (module) {
+			nodiDisplay->values.displayText = &module->displayText;
+			nodiDisplay->displayTimeout = &module->displayTimeout;
+		}
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(105.031, 20.996),
 			module, Nodi::PARAM_META, Nodi::LIGHT_META));
