@@ -366,7 +366,7 @@ struct AnuliWidget : ModuleWidget {
 	AnuliWidget(Anuli* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_21hp_purple.svg", "res/anuli_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_21hp_purple.svg", "res/anuli_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -379,7 +379,7 @@ struct AnuliWidget : ModuleWidget {
 		FramebufferWidget* anuliFrambuffer = new FramebufferWidget();
 		addChild(anuliFrambuffer);
 
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 47.368f, 22.087f);		
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 47.368f, 22.087f);
 		anuliFrambuffer->addChild(displayModel);
 
 		if (module) {
@@ -407,7 +407,7 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 42.833), module, Anuli::PARAM_STRUCTURE_MOD));
 
-		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 49.592, 61.388);		
+		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 49.592, 61.388);
 		anuliFrambuffer->addChild(displayPolyphony);
 
 		if (module)
@@ -419,10 +419,7 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(18.415, 81.324), module, Anuli::PARAM_BRIGHTNESS_MOD));
 
-		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
-		bloodLogo->module = module;
-		bloodLogo->box.pos = centerWidgetInMillimeters(bloodLogo, 53.34, 72.329);
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 53.34, 72.329);
 		addChild(bloodLogo);
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 81.324), module, Anuli::PARAM_POSITION_MOD));
@@ -435,10 +432,7 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
 
-		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->module = module;
-		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
-		mutantsLogo->box.pos = centerWidgetInMillimeters(mutantsLogo, 94.721, 99.605);
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 94.721, 99.605);
 		addChild(mutantsLogo);
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(53.34, 112.736), module, Anuli::INPUT_DAMPING_CV));

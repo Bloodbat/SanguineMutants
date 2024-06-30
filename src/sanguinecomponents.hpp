@@ -231,30 +231,39 @@ struct Rogan6PSLight : Base {
 
 struct SanguineShapedLight : SvgLight {
 	Module* module;
+	SanguineShapedLight(Module* theModule, const std::string shapeFileName, const float X, const float Y, bool createCentered = true);
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineMonoInputLight : SanguineShapedLight {
-	SanguineMonoInputLight();
+	SanguineMonoInputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
 struct SanguineMonoOutputLight : SanguineShapedLight {
-	SanguineMonoOutputLight();
+	SanguineMonoOutputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
 struct SanguinePolyInputLight : SanguineShapedLight {
-	SanguinePolyInputLight();
+	SanguinePolyInputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
 struct SanguinePolyOutputLight : SanguineShapedLight {
-	SanguinePolyOutputLight();
+	SanguinePolyOutputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
+};
+
+struct SanguineBloodLogoLight : SanguineShapedLight {
+	SanguineBloodLogoLight(Module* theModule, const float X, const float Y, bool createCentered = true);
+};
+
+struct SanguineMutantsLogoLight : SanguineShapedLight {
+	SanguineMutantsLogoLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
 // Panels
 struct SanguinePanel : SvgPanel {
-	widget::SvgWidget* foreground;
-	SanguinePanel(Plugin* pluginInstance, const std::string newBackground, const std::string newForeground);
+	widget::SvgWidget* foreground;	
+	SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName);
 };
 
 // Drawing utils

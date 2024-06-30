@@ -165,7 +165,7 @@ struct IncurvationesWidget : ModuleWidget {
 	IncurvationesWidget(Incurvationes* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_10hp_purple.svg", "res/incurvationes_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_purple.svg", "res/incurvationes_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

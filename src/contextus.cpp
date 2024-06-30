@@ -646,7 +646,7 @@ struct ContextusWidget : ModuleWidget {
 	ContextusWidget(Contextus* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel(pluginInstance, "res/backplate_28hp_red.svg", "res/contextus_faceplate.svg");
+		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_red.svg", "res/contextus_faceplate.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -715,16 +715,10 @@ struct ContextusWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(79.841, 113.511), module, Contextus::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(133.968, 117.788), module, Contextus::OUTPUT_OUT));
 
-		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = millimetersToPixelsVec(96.594, 106.386);
-		bloodLogo->module = module;
-		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 110.323);
 		addChild(bloodLogo);
 
-		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = millimetersToPixelsVec(105.385, 114.755);
-		mutantsLogo->module = module;
-		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 117.256);
 		addChild(mutantsLogo);
 	}
 

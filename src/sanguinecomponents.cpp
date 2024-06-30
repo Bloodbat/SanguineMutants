@@ -556,6 +556,19 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 }
 
 // Decorations
+SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string shapeFileName, const float X, const float Y, bool createCentered) {
+	module = theModule;
+
+	setSvg(Svg::load(asset::plugin(pluginInstance, shapeFileName)));
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
+}
 
 void SanguineShapedLight::draw(const DrawArgs& args) {
 	// Do not call Widget::draw: it draws on the wrong layer.	
@@ -574,29 +587,37 @@ void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineMonoInputLight::SanguineMonoInputLight() {
-	setSvg(Svg::load(asset::plugin(pluginInstance, "res/in_mono_light.svg")));
+SanguineMonoInputLight::SanguineMonoInputLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/in_mono_light.svg", X, Y, createCentered) {
 }
 
-SanguineMonoOutputLight::SanguineMonoOutputLight() {
-	setSvg(Svg::load(asset::plugin(pluginInstance, "res/out_mono_light.svg")));
+SanguineMonoOutputLight::SanguineMonoOutputLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/out_mono_light.svg", X, Y, createCentered) {
 }
 
-SanguinePolyInputLight::SanguinePolyInputLight() {
-	setSvg(Svg::load(asset::plugin(pluginInstance, "res/in_light.svg")));
+SanguinePolyInputLight::SanguinePolyInputLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/in_light.svg", X, Y, createCentered) {
 }
 
-SanguinePolyOutputLight::SanguinePolyOutputLight() {
-	setSvg(Svg::load(asset::plugin(pluginInstance, "res/out_light.svg")));
+SanguinePolyOutputLight::SanguinePolyOutputLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/out_light.svg", X, Y, createCentered) {
+}
+
+SanguineBloodLogoLight::SanguineBloodLogoLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/blood_glowy.svg", X, Y, createCentered) {
+}
+
+SanguineMutantsLogoLight::SanguineMutantsLogoLight(Module* theModule, const float X, const float Y, bool createCentered) :
+	SanguineShapedLight(theModule, "res/mutants_glowy.svg", X, Y, createCentered) {
 }
 
 // Panels
 
-SanguinePanel::SanguinePanel(Plugin* pluginInstance, const std::string newBackground, const std::string newForeground) {
-	setBackground(Svg::load(asset::plugin(pluginInstance, newBackground)));
+SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName) {
+	setBackground(Svg::load(asset::plugin(pluginInstance, newBackgroundFileName)));
 
 	SvgWidget* foreground = new SvgWidget();
-	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForeground)));
+	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForegroundFileName)));
 	fb->addChild(foreground);
 }
 
