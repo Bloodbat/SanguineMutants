@@ -621,9 +621,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(107.606, 12.851), module, Etesia::PARAM_LEDS_MODE));
 
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
-		displayModel->box.pos = millimetersToPixelsVec(50.963, 20.147);
-		displayModel->module = module;
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);		
 		etesiaFramebuffer->addChild(displayModel);
 
 		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Etesia::PARAM_MODE));

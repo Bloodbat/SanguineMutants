@@ -2,6 +2,7 @@
 
 #include "rack.hpp"
 #include <color.hpp>
+#include "sanguinehelpers.hpp"
 
 using namespace rack;
 
@@ -127,28 +128,28 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 	float fontSize;
 	unsigned char haloOpacity = 55;
 	DisplayType displayType = DISPLAY_STRING;
-	SanguineBaseSegmentDisplay(uint32_t newCharacterCount);
+	SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule);
 	void draw(const DrawArgs& args) override;
 };
 
 struct SanguineAlphaDisplay : SanguineBaseSegmentDisplay {
-	SanguineAlphaDisplay(uint32_t newCharacterCount);
+	SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
-	SanguineLedNumberDisplay(uint32_t newCharacterCount);
+	SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {
 	unsigned char haloOpacity = 55;
-	SanguineMatrixDisplay(uint32_t newCharacterCount);
+	SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineTinyNumericDisplay : SanguineLedNumberDisplay {
-	SanguineTinyNumericDisplay(uint32_t newCharacterCount);
+	SanguineTinyNumericDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
