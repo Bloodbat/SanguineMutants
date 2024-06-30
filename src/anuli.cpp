@@ -380,8 +380,8 @@ struct AnuliWidget : ModuleWidget {
 		addChild(anuliFrambuffer);
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12);
-		displayModel->box.pos = millimetersToPixelsVec(13.151, 17.007);
 		displayModel->module = module;
+		displayModel->box.pos = centerWidgetInMillimeters(displayModel, 47.368f, 22.087f);
 		anuliFrambuffer->addChild(displayModel);
 
 		if (module) {
@@ -410,8 +410,8 @@ struct AnuliWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 42.833), module, Anuli::PARAM_STRUCTURE_MOD));
 
 		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2);
-		displayPolyphony->box.pos = millimetersToPixelsVec(43.142, 57.388);
 		displayPolyphony->module = module;
+		displayPolyphony->box.pos = centerWidgetInMillimeters(displayPolyphony, 49.592, 61.388);
 		anuliFrambuffer->addChild(displayPolyphony);
 
 		if (module)
@@ -424,9 +424,9 @@ struct AnuliWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(18.415, 81.324), module, Anuli::PARAM_BRIGHTNESS_MOD));
 
 		SanguineShapedLight* bloodLogo = new SanguineShapedLight();
-		bloodLogo->box.pos = millimetersToPixelsVec(51.443, 68.393);
-		bloodLogo->module = module;
 		bloodLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/blood_glowy.svg")));
+		bloodLogo->module = module;
+		bloodLogo->box.pos = centerWidgetInMillimeters(bloodLogo, 53.34, 72.329);
 		addChild(bloodLogo);
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 81.324), module, Anuli::PARAM_POSITION_MOD));
@@ -440,9 +440,9 @@ struct AnuliWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
 
 		SanguineShapedLight* mutantsLogo = new SanguineShapedLight();
-		mutantsLogo->box.pos = millimetersToPixelsVec(88.614, 97.105);
 		mutantsLogo->module = module;
 		mutantsLogo->setSvg(Svg::load(asset::plugin(pluginInstance, "res/mutants_glowy.svg")));
+		mutantsLogo->box.pos = centerWidgetInMillimeters(mutantsLogo, 94.721, 99.605);
 		addChild(mutantsLogo);
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(53.34, 112.736), module, Anuli::INPUT_DAMPING_CV));
