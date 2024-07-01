@@ -39,10 +39,10 @@ struct Velamina : Module {
 		OUTPUTS_COUNT
 	};
 	enum LightIds {
-		LIGHT_GAIN_1,
-		LIGHT_GAIN_2,
-		LIGHT_GAIN_3,
-		LIGHT_GAIN_4,
+		ENUMS(LIGHT_GAIN_1, 2),
+		ENUMS(LIGHT_GAIN_2, 2),
+		ENUMS(LIGHT_GAIN_3, 2),
+		ENUMS(LIGHT_GAIN_4, 2),
 		ENUMS(LIGHT_OUT_1, 3),
 		ENUMS(LIGHT_OUT_2, 3),
 		ENUMS(LIGHT_OUT_3, 3),
@@ -131,6 +131,7 @@ struct Velamina : Module {
 			if (bIsLightsTurn) {
 				int currentLight = LIGHT_OUT_1 + i * 3;
 				float voltageSum = 0.f;
+				float gainSum = 0.f;
 
 				if (channelCount < 2) {
 					if (channelCount > 0) {
@@ -142,15 +143,20 @@ struct Velamina : Module {
 					lights[currentLight + 0].setBrightnessSmooth(rescale(-voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(rescale(voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+
+					lights[(LIGHT_GAIN_1 + i * 2) + 0].setBrightnessSmooth(0.f, sampleTime);
+					lights[(LIGHT_GAIN_1 + i * 2) + 1].setBrightnessSmooth(rescale(gain[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				}
 				else {
 					for (int offset = 0; offset < 4; offset++) {
 						for (int channel = 0; channel < 4; channel++) {
 							voltageSum += portVoltages[i][offset][channel];
+							gainSum += gain[offset][channel];
 						}
 					}
 
 					voltageSum = voltageSum / channelCount;
+					gainSum = gainSum / channelCount;
 
 					voltageSum = clamp(voltageSum, -10.f, 10.f);
 
@@ -159,9 +165,11 @@ struct Velamina : Module {
 					lights[currentLight + 0].setBrightnessSmooth(redValue, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(greenValue, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(voltageSum < 0 ? redValue : greenValue, sampleTime);
-				}
 
-				lights[LIGHT_GAIN_1 + i].setBrightnessSmooth(rescale(gain[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
+					float rescaledLight = rescale(clamp(gainSum, 0.f, 5.f), 0.f, 5.f, 0.f, 5.f);
+					lights[(LIGHT_GAIN_1 + i * 2) + 0].setBrightnessSmooth(rescaledLight, sampleTime);
+					lights[(LIGHT_GAIN_1 + i * 2) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
+				}
 			}
 		}
 	}
@@ -190,13 +198,13 @@ struct VelaminaWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(31.323, 31.814), module, Velamina::PARAM_OFFSET_3));
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(42.837, 31.814), module, Velamina::PARAM_OFFSET_4));
 
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(8.326, 52.697),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(8.326, 52.697),
 			module, Velamina::PARAM_GAIN_1, Velamina::LIGHT_GAIN_1));
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(19.82, 52.697),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(19.82, 52.697),
 			module, Velamina::PARAM_GAIN_2, Velamina::LIGHT_GAIN_2));
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(31.323, 52.697),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(31.323, 52.697),
 			module, Velamina::PARAM_GAIN_3, Velamina::LIGHT_GAIN_3));
-		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(42.837, 52.697),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(42.837, 52.697),
 			module, Velamina::PARAM_GAIN_4, Velamina::LIGHT_GAIN_4));
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.326, 80.55), module, Velamina::INPUT_CV_1));
