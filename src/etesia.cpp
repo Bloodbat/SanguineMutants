@@ -137,14 +137,14 @@ struct Etesia : Module {
 	int lastStereo;
 
 	const int kClockDivider = 512;
-	int buffersize = 1;
-	int currentbuffersize = 1;
+	int bufferSize = 1;
+	int currentBufferSize = 1;
 
 	uint32_t displayTimeout = 0;
 
-	bool lastFrozen = false;
-	bool displaySwitched = false;
-	bool triggered = false;
+	bool bLastFrozen = false;
+	bool bDisplaySwitched = false;
+	bool bTriggered = false;
 
 	uint8_t* block_mem;
 	uint8_t* block_ccm;
@@ -245,7 +245,7 @@ struct Etesia : Module {
 		}
 
 		// Trigger
-		triggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
+		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
 
 		// Render frames
 		if (outputBuffer.empty()) {
@@ -265,30 +265,30 @@ struct Etesia : Module {
 					input[i].r = clamp(inputFrames[i].samples[1] * 32767.0, -32768, 32767);
 				}
 			}
-			if (currentbuffersize != buffersize) {
+			if (currentBufferSize != bufferSize) {
 				// Re-init etesiaProcessor with new size.
 				delete etesiaProcessor;
 				delete[] block_mem;
-				int memLen = 118784 * buffersize;
+				int memLen = 118784 * bufferSize;
 				const int ccmLen = 65536 - 128;
 				block_mem = new uint8_t[memLen]();
 				etesiaProcessor = new etesia::EtesiaGranularProcessor();
 				memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
 				etesiaProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
-				currentbuffersize = buffersize;
+				currentBufferSize = bufferSize;
 			}
 
 			// Set up Etesia processor
 			etesiaProcessor->set_playback_mode(playbackMode);
-			etesiaProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
-			etesiaProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
+			etesiaProcessor->set_num_channels(bool(params[PARAM_STEREO].getValue()) ? 2 : 1);
+			etesiaProcessor->set_low_fidelity(!bool(params[PARAM_HI_FI].getValue()));
 			etesiaProcessor->Prepare();
 
 			bool frozen = params[PARAM_FREEZE].getValue();
 
 			etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
-			etesiaParameters->trigger = triggered;
-			etesiaParameters->gate = triggered;
+			etesiaParameters->trigger = bTriggered;
+			etesiaParameters->gate = bTriggered;
 			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
 			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
 			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
@@ -305,21 +305,21 @@ struct Etesia : Module {
 			etesia::ShortFrame output[32];
 			etesiaProcessor->Process(input, output, 32);
 
-			if (frozen && !lastFrozen) {
-				lastFrozen = true;
-				if (!displaySwitched) {
+			if (frozen && !bLastFrozen) {
+				bLastFrozen = true;
+				if (!bDisplaySwitched) {
 					ledMode = LEDS_OUTPUT;
 					lastLedMode = LEDS_OUTPUT;
 				}
 			}
-			else if (!frozen && lastFrozen) {
-				lastFrozen = false;
-				if (!displaySwitched) {
+			else if (!frozen && bLastFrozen) {
+				bLastFrozen = false;
+				if (!bDisplaySwitched) {
 					ledMode = LEDS_INPUT;
 					lastLedMode = LEDS_INPUT;
 				}
 				else {
-					displaySwitched = false;
+					bDisplaySwitched = false;
 				}
 			}
 
@@ -340,7 +340,7 @@ struct Etesia : Module {
 				outputBuffer.endIncr(outLen);
 			}
 
-			triggered = false;
+			bTriggered = false;
 		}
 
 		// Set output			
@@ -478,11 +478,11 @@ struct Etesia : Module {
 
 				paramQuantities[PARAM_LEDS_MODE]->name = nebulaeLedButtonPrefix + nebulaeButtonTexts[ledMode];
 
-				if (lastFrozen) {
-					displaySwitched = true;
+				if (bLastFrozen) {
+					bDisplaySwitched = true;
 				}
 				else {
-					displaySwitched = false;
+					bDisplaySwitched = false;
 				}
 			}
 
@@ -562,14 +562,14 @@ struct Etesia : Module {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
-		json_object_set_new(rootJ, "buffersize", json_integer(buffersize));
+		json_object_set_new(rootJ, "buffersize", json_integer(bufferSize));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		json_t* buffersizeJ = json_object_get(rootJ, "buffersize");
 		if (buffersizeJ) {
-			buffersize = json_integer_value(buffersizeJ);
+			bufferSize = json_integer_value(buffersizeJ);
 		}
 	}
 
