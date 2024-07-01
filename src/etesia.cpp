@@ -146,8 +146,8 @@ struct Etesia : Module {
 	bool bDisplaySwitched = false;
 	bool bTriggered = false;
 
-	uint8_t* block_mem;
-	uint8_t* block_ccm;
+	uint8_t* bufferLarge;
+	uint8_t* bufferSmall;
 
 	etesia::EtesiaGranularProcessor* etesiaProcessor;
 
@@ -217,20 +217,20 @@ struct Etesia : Module {
 
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;
-		block_mem = new uint8_t[memLen]();
-		block_ccm = new uint8_t[ccmLen]();
+		bufferLarge = new uint8_t[memLen]();
+		bufferSmall = new uint8_t[ccmLen]();
 		etesiaProcessor = new etesia::EtesiaGranularProcessor();
 		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
 
 		lightDivider.setDivision(kClockDivider);
 
-		etesiaProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+		etesiaProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Etesia() {
 		delete etesiaProcessor;
-		delete[] block_mem;
-		delete[] block_ccm;
+		delete[] bufferLarge;
+		delete[] bufferSmall;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -268,13 +268,13 @@ struct Etesia : Module {
 			if (currentBufferSize != bufferSize) {
 				// Re-init etesiaProcessor with new size.
 				delete etesiaProcessor;
-				delete[] block_mem;
+				delete[] bufferLarge;
 				int memLen = 118784 * bufferSize;
 				const int ccmLen = 65536 - 128;
-				block_mem = new uint8_t[memLen]();
+				bufferLarge = new uint8_t[memLen]();
 				etesiaProcessor = new etesia::EtesiaGranularProcessor();
 				memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
-				etesiaProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+				etesiaProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 				currentBufferSize = bufferSize;
 			}
 

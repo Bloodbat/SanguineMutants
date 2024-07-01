@@ -141,8 +141,8 @@ struct Fluctus : Module {
 	bool bDisplaySwitched = false;
 	bool bTriggered = false;
 
-	uint8_t* block_mem;
-	uint8_t* block_ccm;
+	uint8_t* bufferLarge;
+	uint8_t* bufferSmall;
 
 	fluctus::FluctusGranularProcessor* fluctusProcessor;
 
@@ -210,20 +210,20 @@ struct Fluctus : Module {
 
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;
-		block_mem = new uint8_t[memLen]();
-		block_ccm = new uint8_t[ccmLen]();
+		bufferLarge = new uint8_t[memLen]();
+		bufferSmall = new uint8_t[ccmLen]();
 		fluctusProcessor = new fluctus::FluctusGranularProcessor();
 		memset(fluctusProcessor, 0, sizeof(*fluctusProcessor));
 
 		lightDivider.setDivision(kClockDivider);
 
-		fluctusProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+		fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Fluctus() {
 		delete fluctusProcessor;
-		delete[] block_mem;
-		delete[] block_ccm;
+		delete[] bufferLarge;
+		delete[] bufferSmall;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -261,13 +261,13 @@ struct Fluctus : Module {
 			if (currentBufferSize != bufferSize) {
 				// Re-init fluctusProcessor with new size.
 				delete fluctusProcessor;
-				delete[] block_mem;
+				delete[] bufferLarge;
 				int memLen = 118784 * bufferSize;
 				const int ccmLen = 65536 - 128;
-				block_mem = new uint8_t[memLen]();
+				bufferLarge = new uint8_t[memLen]();
 				fluctusProcessor = new fluctus::FluctusGranularProcessor();
 				memset(fluctusProcessor, 0, sizeof(*fluctusProcessor));
-				fluctusProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+				fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 				currentBufferSize = bufferSize;
 			}
 
