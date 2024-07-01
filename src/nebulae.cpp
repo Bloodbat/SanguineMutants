@@ -276,8 +276,8 @@ struct Nebulae : Module {
 
 			// Set up Clouds processor			
 			cloudsProcessor->set_playback_mode(playbackMode);
-			cloudsProcessor->set_num_channels(params[PARAM_STEREO].getValue() ? 2 : 1);
-			cloudsProcessor->set_low_fidelity(!(params[PARAM_HI_FI].getValue()));
+			cloudsProcessor->set_num_channels(bool(params[PARAM_STEREO].getValue()) ? 2 : 1);
+			cloudsProcessor->set_low_fidelity(!bool(params[PARAM_HI_FI].getValue()));
 			cloudsProcessor->Prepare();
 
 			bool frozen = params[PARAM_FREEZE].getValue();
