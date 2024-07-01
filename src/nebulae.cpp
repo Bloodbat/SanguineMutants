@@ -144,8 +144,8 @@ struct Nebulae : Module {
 	bool bDisplaySwitched = false;
 	bool bTriggered = false;
 
-	uint8_t* block_mem;
-	uint8_t* block_ccm;
+	uint8_t* bufferLarge;
+	uint8_t* bufferSmall;
 
 	clouds::GranularProcessor* cloudsProcessor;
 
@@ -213,20 +213,20 @@ struct Nebulae : Module {
 
 		const int memLen = 118784;
 		const int ccmLen = 65536 - 128;
-		block_mem = new uint8_t[memLen]();
-		block_ccm = new uint8_t[ccmLen]();
+		bufferLarge = new uint8_t[memLen]();
+		bufferSmall = new uint8_t[ccmLen]();
 		cloudsProcessor = new clouds::GranularProcessor();
 		memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
 
 		lightDivider.setDivision(kClockDivider);
 
-		cloudsProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+		cloudsProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Nebulae() {
 		delete cloudsProcessor;
-		delete[] block_mem;
-		delete[] block_ccm;
+		delete[] bufferLarge;
+		delete[] bufferSmall;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -264,13 +264,13 @@ struct Nebulae : Module {
 			if (currentBufferSize != bufferSize) {
 				// Re-init cloudsProcessor with new size.
 				delete cloudsProcessor;
-				delete[] block_mem;
+				delete[] bufferLarge;
 				int memLen = 118784 * bufferSize;
 				const int ccmLen = 65536 - 128;
-				block_mem = new uint8_t[memLen]();
+				bufferLarge = new uint8_t[memLen]();
 				cloudsProcessor = new clouds::GranularProcessor();
 				memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-				cloudsProcessor->Init(block_mem, memLen, block_ccm, ccmLen);
+				cloudsProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 				currentBufferSize = bufferSize;
 			}
 
