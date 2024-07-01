@@ -60,7 +60,7 @@ struct Velamina : Module {
 
 		for (int i = 0; i < 4; i++) {
 			configParam(PARAM_GAIN_1 + i, 0.f, 1.f, 0.f, string::f("Channel %d gain", i + 1), "%", 0, 100);
-			configParam(PARAM_RESPONSE_1 + i, 0.f, 1.f, 0.f, string::f("Channel %d response", i + 1));
+			configParam(PARAM_RESPONSE_1 + i, 0.f, 1.f, 1.f, string::f("Channel %d response (Exponential <-> Linear)", i + 1));
 			configParam(PARAM_OFFSET_1 + i, 0.f, 5.f, 0.f, string::f("Channel %d CV offset", i + 1), "V");
 			configInput(INPUT_IN_1 + i, string::f("Channel %d", i + 1));
 			configInput(INPUT_CV_1 + i, string::f("Channel %d CV", i + 1));
@@ -85,23 +85,16 @@ struct Velamina : Module {
 		for (int i = 0; i < 4; i++) {
 			outputs[OUTPUT_1 + i].setChannels(channelCount);
 
-			float_4 linear[4] = {};
-			float_4 exponential[4] = {};
-			float_4 modulationCV[4] = {};
 			float_4 gain[4] = {};
 			float_4 inVoltages[4] = {};
 
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				uint8_t currentChannel = channel >> 2;
-
 				if (inputs[INPUT_CV_1 + i].isConnected()) {
-					linear[currentChannel] = inputs[INPUT_CV_1 + i].getNormalVoltageSimd<float_4>(5.f, channel) / 5.f;
-					linear[currentChannel] = simd::clamp(linear[currentChannel], 0.f, 2.f);
-					const float_4 base = 200.f;
-					exponential[currentChannel] = simd::rescale(simd::pow(base, linear[currentChannel] / 2.f), 1.f, base, 0.f, 10.f);
-					modulationCV[currentChannel] = simd::crossfade(exponential[currentChannel], linear[currentChannel], params[PARAM_RESPONSE_1 + i].getValue());
-
-					gain[currentChannel] = modulationCV[currentChannel] * params[PARAM_GAIN_1 + i].getValue() + params[PARAM_OFFSET_1 + i].getValue();
+					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
+					gain[currentChannel] = simd::fmax((inputs[INPUT_CV_1 + i].getVoltageSimd<float_4>(channel) * params[PARAM_GAIN_1 + i].getValue() +
+						params[PARAM_OFFSET_1 + i].getValue()) / 5.f, 0.f);
+					gain[currentChannel] = gain[currentChannel] * (1 / (0.1f + 0.9f * params[PARAM_RESPONSE_1 + i].getValue()));
 				}
 				else {
 					gain[currentChannel] = params[PARAM_GAIN_1 + i].getValue() + params[PARAM_OFFSET_1 + i].getValue();
