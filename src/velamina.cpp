@@ -73,9 +73,14 @@ struct Velamina : Module {
 	void process(const ProcessArgs& args) override {
 		float_4 outVoltages[4] = {};
 		float_4 portVoltages[4][4] = {};
+		float sampleTime;
 		int channelCount = 1;
 
 		bool bIsLightsTurn = lightsDivider.process();
+
+		if (bIsLightsTurn) {
+			sampleTime = kLightsDivider * args.sampleTime;
+		}
 
 		if (inputs[INPUT_IN_1].isConnected() || inputs[INPUT_IN_2].isConnected() || inputs[INPUT_IN_3].isConnected() || inputs[INPUT_IN_4].isConnected()) {
 			channelCount = std::max(std::max(std::max(inputs[INPUT_IN_1].getChannels(), inputs[INPUT_IN_2].getChannels()),
@@ -124,8 +129,6 @@ struct Velamina : Module {
 			}
 
 			if (bIsLightsTurn) {
-				const float sampleTime = kLightsDivider * args.sampleTime;
-
 				int currentLight = LIGHT_OUT_1 + i * 3;
 				float voltageSum = 0.f;
 
