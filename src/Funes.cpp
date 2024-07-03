@@ -316,8 +316,8 @@ struct Funes : Module {
 				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(channel) / 8.f;
 				modulations.morph_patched = inputs[INPUT_MORPH].isConnected();
 				modulations.morph = inputs[INPUT_MORPH].getPolyVoltage(channel) / 8.f;
-				// Triggers at around 0.7 V
 				modulations.trigger_patched = inputs[INPUT_TRIGGER].isConnected();
+				// Triggers at around 0.7 V
 				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(channel) / 3.f;
 				modulations.level_patched = inputs[INPUT_LEVEL].isConnected();
 				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
