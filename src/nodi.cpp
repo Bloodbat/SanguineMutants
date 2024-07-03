@@ -317,6 +317,15 @@ struct Nodi : Module {
 			}
 		}
 
+		// Handle switches
+		settings.meta_modulation = params[PARAM_META].getValue();
+		bPaques = params[PARAM_MORSE].getValue();
+		settings.ad_vca = params[PARAM_VCA].getValue();
+		settings.vco_drift = params[PARAM_DRIFT].getValue();
+		settings.vco_flatten = params[PARAM_FLAT].getValue();
+		settings.signature = params[PARAM_SIGN].getValue();
+		settings.auto_trig = params[PARAM_AUTO].getValue();
+
 		// Quantizer
 		if (currentScale != settings.quantizer_scale) {
 			currentScale = settings.quantizer_scale;
@@ -456,15 +465,6 @@ struct Nodi : Module {
 			dsp::Frame<1> f = drbOutputBuffer.shift();
 			outputs[OUTPUT_OUT].setVoltage(5.0 * f.samples[0]);
 		}
-
-		// Handle switches
-		settings.meta_modulation = params[PARAM_META].getValue();
-		bPaques = params[PARAM_MORSE].getValue();
-		settings.ad_vca = params[PARAM_VCA].getValue();
-		settings.vco_drift = params[PARAM_DRIFT].getValue();
-		settings.vco_flatten = params[PARAM_FLAT].getValue();
-		settings.signature = params[PARAM_SIGN].getValue();
-		settings.auto_trig = params[PARAM_AUTO].getValue();
 
 		if (clockDivider.process()) {
 			pollSwitches(args);
