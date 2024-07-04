@@ -1,5 +1,7 @@
 # Sanguine Modules Mutants
 
+A module collection based on Mutable Instruments and their variants.
+
 ## Modules
 
 ![alt text](pics/mutants_modules.png)
