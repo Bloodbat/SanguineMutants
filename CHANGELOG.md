@@ -1,94 +1,168 @@
-### 2.0.0
-- First release.
+# 2.4.0
 
-### 2.0.1
+## New Modules
 
-- Add: Mutants blank.
+### Fluctus
 
-- Funes visual tweaks.
+Based on the Kammerl Beat-Repeat firmware for Clouds.
 
-- Add: missing blinking orange lights when modulating New Synthesis models.
+### Incurvationes
 
-- Add: optionally display modulated model for first polyphonic channel (from suggestions).
+Based on MI's Warps, it has proper knob lights colors and enables access to the Frequency shifter "Easter egg".
 
-- Add: modulate model using C0-B1 (from suggestions).
+### Distortiones
 
-- Add: manual.
+Based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
 
-- Misc. tweaks and fixes.
+### Mutuus
 
-### 2.1.0
+Based on the Symbiote firmware for Warps, it includes the improvements in Incurvationes and Distortiones.
 
-- Add Apices - Multifunction gap-filler.
+### Explorator
 
-### 2.2.0
+Based on MI's Kinks and Links, they are combined in a single module.
 
-- Add Aleae - Bernoulli gates.
+The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
 
-- Change knobs supplier.
+### Marmora
 
-- Prettify manual.
+Based on MI's Marbles, it exposes every control and adds missing features like user defined scales; super lock; t and X reset; restores missing light animations and showing polarity in the output port LEDs.
 
-- Misc. small fixes and changes.
+### Anuli
 
-### 2.3.0
+Based on MI's Rings, it restores missing light animations; the "3" polyphony mode... and is completely polyphonic.
 
-- Move manuals to their own repository.
+### Velamina
 
-- Add Nodi: based on MI's Braids.
+My attempt at recreating Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
 
-- Add Contextus: based on the Renaissance firmware for Braids.
+## Additions
 
-- Add Nebulae: based on Clouds and Southpole's Smoke, inspired by the Monsoon variant.
+- More hardware-like LEDs for Nebulae and its descendants.
 
-- Add Etesia: based on the Clouds Parasite firmware.
+- More hardware-like LEDs for Funes.
 
-- Add Mortuus: based on the Dead Man's Catch firmware for Peaks.
+- Frequency mode (range) to Funes faceplate.
+
+## Changes
+
+- Different alternative firmwares use different face plate colors.
+
+- Restore LED markers for some modules.
+
+- Mode tooltips to Funes select knob.
+
+- Improve changelog layout.
+
+## Fixes
+
+- Aleae reset.
+
+- Apices and Mortuus handle CV triggers better.
+
+- Apices and Mortuus: Tap LFO.
+
+- Mortuus: P.L.O.
+
+- Nebualae time stretcher.
+
+- Renaissance spelling.
+
+
+# 2.3.0
+
+## New Modules
+
+### Nodi
+
+Based on MI's Braids.
+
+### Contextus
+
+Based on the Renaissance firmware for Braids.
+
+### Nebulae
+
+Based on Clouds and Southpole's Smoke, inspired by the Monsoon variant.
+
+### Etesia
+
+Based on the Clouds Parasite firmware.
+
+### Mortuus
+
+Based on the Dead Man's Catch firmware for Peaks.
+
+## Additions
 
 - Make Clouds based modules lights behave a little closer to their hardware counterparts.
 
-- Fix: SVG light behavior.
+## Changes
 
-- Change: Apices buttons (for the last time).
+- Move manuals to their own repository.
 
-- Fix: Apices button lights.
+- Apices buttons (for the last time).
 
-- Fix: Apices trigger detection.
+## Fixes
 
-### 2.4.0
+- SVG light behavior.
 
-- Add: Fluctus: based on the Kammerl Beat-Repeat firmware for Clouds.
+- Apices button lights.
 
-- Add: Incurvationes: based on MI's Warps it has proper knob lights colors and enables access to the Frequency shifter "Easter egg".
+- Apices trigger detection.
 
-- Add: Distortiones: based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
 
-- Add: Mutuus: based on the Symbiote firmware for Warps.
+# 2.2.0
 
-- Add: Explorator: based on MI's Kinks and Links; combined in a single module. The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
+## New Modules
 
-- Add: Marmora: based on MI's Marbles, it exposes every control and adds missing features like user defined scales; super lock; t and X reset; restores missing light animations and showing polarity in the output port LEDs.
+### Aleae - Bernoulli gates.
 
-- Add: Anuli: based on MI's Rings, it restores missing light animations; the "3" polyphony mode... and is completely polyphonic.
+## Changes
 
-- Add: Velamina: my attempt at recreating Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
+- Knobs supplier.
 
-- Add: more hardware-like LEDs for Nebulae and its descendants.
+- Prettify manual.
 
-- Add: more hardware-like LEDs for Funes.
+## Fixes
 
-- Add: Frequency mode (range) to Funes faceplate.
+- Misc. small fixes and changes.
 
-- Change: different alternative firmwares use different face plate colors.
 
-- Change: restore LED markers for some modules.
+# 2.1.0
 
-- Add: mode tooltips to Funes select knob.
+## New Modules
 
-- Fix: Aleae reset.
+### Apices
 
-- Fix: Apices and Mortuus have more respect for CV triggers.
+Based in MI's Peaks.
 
-- Fix: Nebualae time stretcher.
 
-- Fix: Renaissance spelling.
+# 2.0.1
+
+## New Modules
+
+### Mutants blank.
+
+## Additions
+
+- Missing blinking orange lights when modulating New Synthesis models in Funes.
+
+- Optionally display modulated model for first polyphonic channel (from suggestions).
+
+- Modulate model using C0-B1 (from suggestions).
+
+- Manual.
+
+## Changes
+
+- Funes visual tweaks.
+
+## Fixes
+
+- Misc. tweaks and fixes.
+
+
+# 2.0.0
+
+First release.
