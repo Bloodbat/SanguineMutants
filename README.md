@@ -2,6 +2,8 @@
 
 A module collection based on Mutable Instruments and their variants.
 
+You can find the Mutants manual [here](https://raw.githubusercontent.com/Bloodbat/SanguineModulesManuals/main/mutants_manual.pdf)
+
 ## Modules
 
 ![alt text](pics/mutants_modules.png)
