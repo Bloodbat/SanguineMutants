@@ -71,22 +71,24 @@
 
 - Add: Anuli: based on MI's Rings, it restores missing light animations; the "3" polyphony mode... and is completely polyphonic.
 
--Add: Velamina: my attempt at recreating Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
-
-- Change: different alternative firmwares use different face plate colors.
-
-- Fix: Apices and Mortuus have more respect for CV triggers.
-
-- Change: restore LED markers for some modules.
-
-- Fix: Nebualae time stretcher.
+- Add: Velamina: my attempt at recreating Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
 
 - Add: more hardware-like LEDs for Nebulae and its descendants.
 
 - Add: more hardware-like LEDs for Funes.
 
-- Fix: Aleae reset.
-
 - Add: Frequency mode (range) to Funes faceplate.
 
+- Change: different alternative firmwares use different face plate colors.
+
+- Change: restore LED markers for some modules.
+
 - Add: mode tooltips to Funes select knob.
+
+- Fix: Aleae reset.
+
+- Fix: Apices and Mortuus have more respect for CV triggers.
+
+- Fix: Nebualae time stretcher.
+
+- Fix: Renaissance spelling.
