@@ -66,13 +66,13 @@ Put a goblin and the Mutants logo on your rack!
 
 Based on the Symbiote firmware for Warps.
 
-## Nodi
-
-Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports.
-
 ## Nebulae
 
 Based on Mutable Instruments' Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control. Lights behave closer to hardware version.
+
+## Nodi
+
+Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports.
 
 ## Velamina
 
