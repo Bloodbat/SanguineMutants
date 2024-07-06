@@ -44,6 +44,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Frequency mode (range) to Funes faceplate.
 
+- Make Nodi and Contextus polyphonic.
+
 ## Changes
 
 - Different alternative firmwares use different face plate colors.
