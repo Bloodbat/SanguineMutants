@@ -191,33 +191,45 @@ struct Contextus : Module {
 		LIGHT_FLAT,
 		LIGHT_SIGN,
 		LIGHT_AUTO,
+		ENUMS(LIGHT_CHANNEL_MODEL, 16 * 3),
 		LIGHTS_COUNT
 	};
 
-	renaissance::MacroOscillator osc;
-	renaissance::SettingsData settings;
-	braids::VcoJitterSource jitterSource;
-	braids::SignatureWaveshaper waveShaper;
-	braids::Envelope envelope;
-	renaissance::Quantizer quantizer;
+	renaissance::MacroOscillator osc[PORT_MAX_CHANNELS];
+	renaissance::SettingsData settings[PORT_MAX_CHANNELS];
+	braids::VcoJitterSource jitterSource[PORT_MAX_CHANNELS];
+	braids::SignatureWaveshaper waveShaper[PORT_MAX_CHANNELS];
+	braids::Envelope envelope[PORT_MAX_CHANNELS];
+	renaissance::Quantizer quantizer[PORT_MAX_CHANNELS];
 
-	uint8_t currentScale = 0xff;
+	uint8_t currentScale[PORT_MAX_CHANNELS];
 
-	int16_t previousPitch = 0;
+	int16_t previousPitch[PORT_MAX_CHANNELS];
 
-	uint16_t gainLp;
-	uint16_t triggerDelay;
+	uint16_t gainLp[PORT_MAX_CHANNELS];
+	uint16_t triggerDelay[PORT_MAX_CHANNELS];
 
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer;
-	dsp::SampleRateConverter<1> sampleRateConverter;
+	int channelCount;
+
+	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
 
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	bool bFlagTriggerDetected;
-	bool bLastTrig = false;
+	bool bFlagTriggerDetected[PORT_MAX_CHANNELS];
+	bool bLastTrig[PORT_MAX_CHANNELS];
+	bool bTriggerFlag[PORT_MAX_CHANNELS];
+
+	bool bAutoTrigger = false;
+	bool bDritfEnabled = false;
+	bool bFlattenEnabled = false;
+	bool bMetaModulation = false;
+	bool bPaques = false;
+	bool bSignatureEnabled = false;
+	bool bVCAEnabled = false;
+
 	bool bLowCpu = false;
-	bool bTriggerFlag;
 
 	// Display stuff
 	renaissance::SettingsData lastSettings;
@@ -283,208 +295,247 @@ struct Contextus : Module {
 		configButton(PARAM_SIGN, "Toggle output imperfections");
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
-		memset(&osc, 0, sizeof(osc));
-		osc.Init();
-		memset(&quantizer, 0, sizeof(quantizer));
-		quantizer.Init();
-		memset(&envelope, 0, sizeof(envelope));
-		envelope.Init();
+		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
+			memset(&osc[i], 0, sizeof(renaissance::MacroOscillator));
+			osc[i].Init();
+			memset(&quantizer[i], 0, sizeof(renaissance::Quantizer));
+			quantizer[i].Init();
+			memset(&envelope[i], 0, sizeof(braids::Envelope));
+			envelope[i].Init();
 
-		memset(&jitterSource, 0, sizeof(jitterSource));
-		jitterSource.Init();
-		memset(&waveShaper, 0, sizeof(waveShaper));
-		waveShaper.Init(0x0000);
-		memset(&settings, 0, sizeof(settings));
+			memset(&jitterSource[i], 0, sizeof(braids::VcoJitterSource));
+			jitterSource[i].Init();
+			memset(&waveShaper[i], 0, sizeof(braids::SignatureWaveshaper));
+			waveShaper[i].Init(0x0000);
+			memset(&settings[i], 0, sizeof(renaissance::SettingsData));
+
+			bLastTrig[i] = false;
+
+			currentScale[i] = 0xff;
+
+			previousPitch[i] = 0;
+		}
 
 		clockDivider.setDivision(kClockUpdateFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
-		settings.quantizer_scale = params[PARAM_SCALE].getValue();
-		settings.quantizer_root = params[PARAM_ROOT].getValue();
-		settings.pitch_range = params[PARAM_PITCH_RANGE].getValue();
-		settings.pitch_octave = params[PARAM_PITCH_OCTAVE].getValue();
-		settings.trig_delay = params[PARAM_TRIGGER_DELAY].getValue();
-		settings.sample_rate = params[PARAM_RATE].getValue();
-		settings.resolution = params[PARAM_BITS].getValue();
-		settings.ad_attack = params[PARAM_ATTACK].getValue();
-		settings.ad_decay = params[PARAM_DECAY].getValue();
-		settings.ad_timbre = params[PARAM_AD_TIMBRE].getValue();
-		settings.ad_fm = params[PARAM_AD_MODULATION].getValue();
-		settings.ad_color = params[PARAM_AD_COLOR].getValue();
-		settings.invert_encoder = false;
+		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
-		// Trigger
-		bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
-		if (!bLastTrig && bTriggerInput) {
-			bFlagTriggerDetected = bTriggerInput;
-		}
-		bLastTrig = bTriggerInput;
+		bMetaModulation = params[PARAM_META].getValue();
+		bVCAEnabled = params[PARAM_VCA].getValue();
+		bDritfEnabled = params[PARAM_DRIFT].getValue();
+		bFlattenEnabled = params[PARAM_FLAT].getValue();
+		bSignatureEnabled = params[PARAM_SIGN].getValue();
+		bAutoTrigger = params[PARAM_AUTO].getValue();
 
-		if (bFlagTriggerDetected) {
-			triggerDelay = settings.trig_delay ? (1 << settings.trig_delay) : 0;
-			++triggerDelay;
-			bFlagTriggerDetected = false;
-		}
-		if (triggerDelay) {
-			--triggerDelay;
-			if (triggerDelay == 0) {
-				bTriggerFlag = true;
+		outputs[OUTPUT_OUT].setChannels(channelCount);
+
+		for (int channel = 0; channel < channelCount; channel++) {
+			settings[channel].quantizer_scale = params[PARAM_SCALE].getValue();
+			settings[channel].quantizer_root = params[PARAM_ROOT].getValue();
+			settings[channel].pitch_range = params[PARAM_PITCH_RANGE].getValue();
+			settings[channel].pitch_octave = params[PARAM_PITCH_OCTAVE].getValue();
+			settings[channel].trig_delay = params[PARAM_TRIGGER_DELAY].getValue();
+			settings[channel].sample_rate = params[PARAM_RATE].getValue();
+			settings[channel].resolution = params[PARAM_BITS].getValue();
+			settings[channel].ad_attack = params[PARAM_ATTACK].getValue();
+			settings[channel].ad_decay = params[PARAM_DECAY].getValue();
+			settings[channel].ad_timbre = params[PARAM_AD_TIMBRE].getValue();
+			settings[channel].ad_fm = params[PARAM_AD_MODULATION].getValue();
+			settings[channel].ad_color = params[PARAM_AD_COLOR].getValue();
+			settings[channel].invert_encoder = false;
+
+			// Trigger
+			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.0;
+			if (!bLastTrig[channel] && bTriggerInput) {
+				bFlagTriggerDetected[channel] = bTriggerInput;
 			}
-		}
+			bLastTrig[channel] = bTriggerInput;
 
-		settings.meta_modulation = params[PARAM_META].getValue();
-		settings.ad_vca = params[PARAM_VCA].getValue();
-		settings.vco_drift = params[PARAM_DRIFT].getValue();
-		settings.vco_flatten = params[PARAM_FLAT].getValue();
-		settings.signature = params[PARAM_SIGN].getValue();
-		settings.auto_trig = params[PARAM_AUTO].getValue();
-
-		// Quantizer
-		if (currentScale != settings.quantizer_scale) {
-			currentScale = settings.quantizer_scale;
-			quantizer.Configure(renaissance::scales[currentScale]);
-		}
-
-		// Render frames
-		if (drbOutputBuffer.empty()) {
-			envelope.Update(settings.ad_attack * 8, settings.ad_decay * 8);
-			uint32_t adValue = envelope.Render();
-
-			float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage();
-
-			// Set model
-			int model = params[PARAM_MODEL].getValue();
-			if (settings.meta_modulation) {
-				model += roundf(fm / 10.0 * renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+			if (bFlagTriggerDetected[channel]) {
+				triggerDelay[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
+				++triggerDelay[channel];
+				bFlagTriggerDetected[channel] = false;
 			}
-			settings.shape = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
-
-			// Setup oscillator from settings
-			osc.set_shape((renaissance::MacroOscillatorShape)settings.shape);
-
-			// Set timbre/modulation
-			float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage() / 5.0;
-			float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage() / 5.0;
-
-			timbre += adValue / 65535. * settings.ad_timbre / 16.;
-			modulation += adValue / 65535. * settings.ad_color / 16.;
-
-			int16_t param1 = math::rescale(clamp(timbre, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
-			int16_t param2 = math::rescale(clamp(modulation, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
-			osc.set_parameters(param1, param2);
-
-			// Set pitch
-			float pitchV = inputs[INPUT_PITCH].getVoltage() + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.0;
-			if (!settings.meta_modulation)
-				pitchV += fm;
-			if (bLowCpu)
-				pitchV += log2f(96000.0 / args.sampleRate);
-			int32_t pitch = (pitchV * 12.0 + 60) * 128;
-
-			// pitch_range
-			if (settings.pitch_range == renaissance::PITCH_RANGE_EXTERNAL || settings.pitch_range == renaissance::PITCH_RANGE_LFO) {
-			}
-			else if (settings.pitch_range == renaissance::PITCH_RANGE_FREE) {
-				pitch = pitch - 1638;
-			}
-			else if (settings.pitch_range == renaissance::PITCH_RANGE_440) {
-				pitch = 69 << 7;
-			}
-			else { // PITCH_RANGE_EXTENDED
-				pitch -= 60 << 7;
-				pitch = (pitch - 1638) * 9 >> 1;
-				pitch += 60 << 7;
-			}
-
-			pitch = quantizer.Process(pitch, (60 + settings.quantizer_root) << 7);
-
-			// Check if the pitch has changed to cause an auto-retrigger
-			int32_t pitch_delta = pitch - previousPitch;
-			if (settings.auto_trig && (pitch_delta >= 0x40 || -pitch_delta >= 0x40)) {
-				bFlagTriggerDetected = true;
-			}
-			previousPitch = pitch;
-
-			pitch += jitterSource.Render(settings.vco_drift);
-			pitch += adValue * settings.ad_fm >> 7;
-
-			pitch = clamp(int(pitch), 0, 16383);
-
-			if (settings.vco_flatten) {
-				pitch = braids::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
-			}
-
-			// Pitch transposition
-			int32_t t = settings.pitch_range == renaissance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
-			t += (static_cast<int32_t>(settings.pitch_octave) - 2) * 12 * 128;
-			osc.set_pitch(pitch + t);
-
-			if (bTriggerFlag) {
-				osc.Strike();
-				envelope.Trigger(braids::ENV_SEGMENT_ATTACK);
-				bTriggerFlag = false;
-			}
-
-			// TODO: add a sync input buffer (must be sample rate converted)
-			uint8_t syncBuffer[24] = {};
-
-			int16_t renderBuffer[24];
-			osc.Render(syncBuffer, renderBuffer, 24);
-
-			// Signature waveshaping, decimation, and bit reduction
-			int16_t sample = 0;
-			size_t decimationFactor = nodiDecimationFactors[settings.sample_rate];
-			uint16_t bitMask = nodiBitReductionMasks[settings.resolution];
-			int32_t gain = settings.ad_vca > 0 ? adValue : 65535;
-			uint16_t signature = settings.signature * settings.signature * 4095;
-			for (size_t i = 0; i < 24; i++) {
-				if ((i % decimationFactor) == 0) {
-					sample = renderBuffer[i] & bitMask;
-				}
-				sample = sample * gainLp >> 16;
-				gainLp += (gain - gainLp) >> 4;
-				int16_t warped = waveShaper.Transform(sample);
-				renderBuffer[i] = stmlib::Mix(sample, warped, signature);
-			}
-
-			if (bLowCpu) {
-				for (int i = 0; i < 24; i++) {
-					dsp::Frame<1> f;
-					f.samples[0] = renderBuffer[i] / 32768.0;
-					drbOutputBuffer.push(f);
+			if (triggerDelay[channel]) {
+				--triggerDelay[channel];
+				if (triggerDelay[channel] == 0) {
+					bTriggerFlag[channel] = true;
 				}
 			}
-			else {
-				// Sample rate convert
-				dsp::Frame<1> in[24];
-				for (int i = 0; i < 24; i++) {
-					in[i].samples[0] = renderBuffer[i] / 32768.0;
-				}
-				sampleRateConverter.setRates(96000, args.sampleRate);
 
-				int inLen = 24;
-				int outLen = drbOutputBuffer.capacity();
-				sampleRateConverter.process(in, &inLen, drbOutputBuffer.endData(), &outLen);
-				drbOutputBuffer.endIncr(outLen);
+			// Handle switches
+			settings[channel].meta_modulation = bMetaModulation;
+			settings[channel].ad_vca = bVCAEnabled;
+			settings[channel].vco_drift = bDritfEnabled;
+			settings[channel].vco_flatten = bFlattenEnabled;
+			settings[channel].signature = bSignatureEnabled;
+			settings[channel].auto_trig = bAutoTrigger;
+
+			// Quantizer
+			if (currentScale[channel] != settings[channel].quantizer_scale) {
+				currentScale[channel] = settings[channel].quantizer_scale;
+				quantizer[channel].Configure(renaissance::scales[currentScale[channel]]);
 			}
-		}
-		// Output
-		if (!drbOutputBuffer.empty()) {
-			dsp::Frame<1> f = drbOutputBuffer.shift();
-			outputs[OUTPUT_OUT].setVoltage(5.0 * f.samples[0]);
-		}
+
+			// Render frames
+			if (drbOutputBuffer[channel].empty()) {
+				envelope[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
+				uint32_t adValue = envelope[channel].Render();
+
+				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
+
+				// Set model
+				int model = params[PARAM_MODEL].getValue();
+				if (settings[channel].meta_modulation) {
+					model += roundf(fm / 10.0 * renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				}
+				settings[channel].shape = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+
+				// Setup oscillator from settings
+				osc[channel].set_shape(renaissance::MacroOscillatorShape(settings[channel].shape));
+
+				// Set timbre/modulation
+				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.0;
+				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.0;
+
+				timbre += adValue / 65535. * settings[channel].ad_timbre / 16.;
+				modulation += adValue / 65535. * settings[channel].ad_color / 16.;
+
+				int16_t param1 = math::rescale(clamp(timbre, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
+				int16_t param2 = math::rescale(clamp(modulation, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
+				osc[channel].set_parameters(param1, param2);
+
+				// Set pitch
+				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.0;
+				if (!settings[channel].meta_modulation)
+					pitchV += fm;
+				if (bLowCpu)
+					pitchV += log2f(96000.0 / args.sampleRate);
+				int32_t pitch = (pitchV * 12.0 + 60) * 128;
+
+				// pitch_range
+				if (settings[channel].pitch_range == renaissance::PITCH_RANGE_EXTERNAL || settings[channel].pitch_range == renaissance::PITCH_RANGE_LFO) {
+				}
+				else if (settings[channel].pitch_range == renaissance::PITCH_RANGE_FREE) {
+					pitch = pitch - 1638;
+				}
+				else if (settings[channel].pitch_range == renaissance::PITCH_RANGE_440) {
+					pitch = 69 << 7;
+				}
+				else { // PITCH_RANGE_EXTENDED
+					pitch -= 60 << 7;
+					pitch = (pitch - 1638) * 9 >> 1;
+					pitch += 60 << 7;
+				}
+
+				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
+
+				// Check if the pitch has changed to cause an auto-retrigger
+				int32_t pitch_delta = pitch - previousPitch[channel];
+				if (settings[channel].auto_trig && (pitch_delta >= 0x40 || -pitch_delta >= 0x40)) {
+					bFlagTriggerDetected[channel] = true;
+				}
+				previousPitch[channel] = pitch;
+
+				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
+				pitch += adValue * settings[channel].ad_fm >> 7;
+
+				pitch = clamp(int(pitch), 0, 16383);
+
+				if (settings[channel].vco_flatten) {
+					pitch = braids::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
+				}
+
+				// Pitch transposition
+				int32_t t = settings[channel].pitch_range == renaissance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
+				t += (static_cast<int32_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
+				osc[channel].set_pitch(pitch + t);
+
+				if (bTriggerFlag[channel]) {
+					osc[channel].Strike();
+					envelope[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
+					bTriggerFlag[channel] = false;
+				}
+
+				// TODO: add a sync input buffer (must be sample rate converted)
+				uint8_t syncBuffer[24] = {};
+
+				int16_t renderBuffer[24];
+				osc[channel].Render(syncBuffer, renderBuffer, 24);
+
+				// Signature waveshaping, decimation, and bit reduction
+				int16_t sample = 0;
+				size_t decimationFactor = nodiDecimationFactors[settings[channel].sample_rate];
+				uint16_t bitMask = nodiBitReductionMasks[settings[channel].resolution];
+				int32_t gain = settings[channel].ad_vca > 0 ? adValue : 65535;
+				uint16_t signature = settings[channel].signature * settings[channel].signature * 4095;
+				for (size_t i = 0; i < 24; i++) {
+					if ((i % decimationFactor) == 0) {
+						sample = renderBuffer[i] & bitMask;
+					}
+					sample = sample * gainLp[channel] >> 16;
+					gainLp[channel] += (gain - gainLp[channel]) >> 4;
+					int16_t warped = waveShaper[channel].Transform(sample);
+					renderBuffer[i] = stmlib::Mix(sample, warped, signature);
+				}
+
+				if (bLowCpu) {
+					for (int i = 0; i < 24; i++) {
+						dsp::Frame<1> f;
+						f.samples[0] = renderBuffer[i] / 32768.0;
+						drbOutputBuffer[channel].push(f);
+					}
+				}
+				else {
+					// Sample rate convert
+					dsp::Frame<1> in[24];
+					for (int i = 0; i < 24; i++) {
+						in[i].samples[0] = renderBuffer[i] / 32768.0;
+					}
+					sampleRateConverter[channel].setRates(96000, args.sampleRate);
+
+					int inLen = 24;
+					int outLen = drbOutputBuffer[channel].capacity();
+					sampleRateConverter[channel].process(in, &inLen, drbOutputBuffer[channel].endData(), &outLen);
+					drbOutputBuffer[channel].endIncr(outLen);
+				}
+			}
+
+			// Output
+			if (!drbOutputBuffer[channel].empty()) {
+				dsp::Frame<1> f = drbOutputBuffer[channel].shift();
+				outputs[OUTPUT_OUT].setVoltage(5.0 * f.samples[0], channel);
+			}
+		} // Channels						
 
 		if (clockDivider.process()) {
-			pollSwitches(args);
+			const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+
+			pollSwitches(sampleTime);
+
+			// Handle model light		
+			int currentModel = settings[0].shape;
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, args.sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, args.sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, args.sampleTime);
+
+			for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
+				int currentLight = LIGHT_CHANNEL_MODEL + i * 3;
+				int currentModel = settings[i].shape;
+				if (i < channelCount) {
+					lights[currentLight + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, sampleTime);
+				}
+				else {
+					lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+				}
+			}
 		}
-
-
-		// Handle model light		
-		int currentModel = settings.shape;
-		lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, args.sampleTime);
-		lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, args.sampleTime);
-		lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, args.sampleTime);
 
 		handleDisplay(args);
 	}
@@ -493,7 +544,7 @@ struct Contextus : Module {
 		// Display handling
 		// Display - return to model after 2s
 		if (lastSettingChanged == renaissance::SETTING_OSCILLATOR_SHAPE) {
-			displayText = contextusModelInfos[settings.shape].code;
+			displayText = contextusModelInfos[settings[0].shape].code;
 		}
 		else {
 			int value;
@@ -504,12 +555,12 @@ struct Contextus : Module {
 				break;
 			}
 			case renaissance::SETTING_RESOLUTION: {
-				value = settings.resolution;
+				value = settings[0].resolution;
 				displayText = nodiBitsStrings[value];
 				break;
 			}
 			case renaissance::SETTING_SAMPLE_RATE: {
-				value = settings.sample_rate;
+				value = settings[0].sample_rate;
 				displayText = nodiRatesStrings[value];
 				break;
 			}
@@ -518,32 +569,32 @@ struct Contextus : Module {
 				break;
 			}
 			case renaissance::SETTING_TRIG_DELAY: {
-				value = settings.trig_delay;
+				value = settings[0].trig_delay;
 				displayText = nodiTriggerDelayStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_ATTACK: {
-				value = settings.ad_attack;
+				value = settings[0].ad_attack;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_DECAY: {
-				value = settings.ad_decay;
+				value = settings[0].ad_decay;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_FM: {
-				value = settings.ad_fm;
+				value = settings[0].ad_fm;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_TIMBRE: {
-				value = settings.ad_timbre;
+				value = settings[0].ad_timbre;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_COLOR: {
-				value = settings.ad_color;
+				value = settings[0].ad_color;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
@@ -552,22 +603,22 @@ struct Contextus : Module {
 				break;
 			}
 			case renaissance::SETTING_PITCH_RANGE: {
-				value = settings.pitch_range;
+				value = settings[0].pitch_range;
 				displayText = nodiPitchRangeStrings[value];
 				break;
 			}
 			case renaissance::SETTING_PITCH_OCTAVE: {
-				value = settings.pitch_octave;
+				value = settings[0].pitch_octave;
 				displayText = nodiOctaveStrings[value];
 				break;
 			}
 			case renaissance::SETTING_QUANTIZER_SCALE: {
-				value = settings.quantizer_scale;
+				value = settings[0].quantizer_scale;
 				displayText = nodiQuantizationStrings[value];
 				break;
 			}
 			case renaissance::SETTING_QUANTIZER_ROOT: {
-				value = settings.quantizer_root;
+				value = settings[0].quantizer_root;
 				displayText = nodiNoteStrings[value];
 				break;
 			}
@@ -597,7 +648,7 @@ struct Contextus : Module {
 		}
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
-		uint8_t* arraySettings = &settings.shape;
+		uint8_t* arraySettings = &settings[0].shape;
 		for (int i = 0; i <= renaissance::SETTING_LAST_EDITABLE_SETTING; i++) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
@@ -607,15 +658,14 @@ struct Contextus : Module {
 		}
 	}
 
-	inline void pollSwitches(const ProcessArgs& args) {
-		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+	inline void pollSwitches(const float sampleTime) {
 		// Handle switch lights
-		lights[LIGHT_META].setBrightnessSmooth(settings.meta_modulation, sampleTime);
-		lights[LIGHT_VCA].setBrightnessSmooth(settings.ad_vca, sampleTime);
-		lights[LIGHT_DRIFT].setBrightnessSmooth(settings.vco_drift, sampleTime);
-		lights[LIGHT_FLAT].setBrightnessSmooth(settings.vco_flatten, sampleTime);
-		lights[LIGHT_SIGN].setBrightnessSmooth(settings.signature, sampleTime);
-		lights[LIGHT_AUTO].setBrightnessSmooth(settings.auto_trig, sampleTime);
+		lights[LIGHT_META].setBrightnessSmooth(bMetaModulation, sampleTime);
+		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled, sampleTime);
+		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled, sampleTime);
+		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled, sampleTime);
+		lights[LIGHT_SIGN].setBrightnessSmooth(bSignatureEnabled, sampleTime);
+		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger, sampleTime);
 	}
 
 	json_t* dataToJson() override {
@@ -656,6 +706,22 @@ struct ContextusWidget : ModuleWidget {
 
 		FramebufferWidget* nodiFrambuffer = new FramebufferWidget();
 		addChild(nodiFrambuffer);
+
+		const float lightXBase = 5.256f;
+		const float lightXDelta = 4.0f;
+
+		float currentX = lightXBase;
+		for (int i = 0; i < 8; i++) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 20.308), module, Contextus::LIGHT_CHANNEL_MODEL + i * 3));
+			currentX += lightXDelta;
+		}
+
+		currentX = lightXBase;
+		const int offset = 8;
+		for (int i = 0; i < 8; i++) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, (Contextus::LIGHT_CHANNEL_MODEL + i + offset) * 3));
+			currentX += lightXDelta;
+		}
 
 		NodiDisplay* nodiDisplay = new NodiDisplay(4, module, 71.12, 20.996);
 		nodiFrambuffer->addChild(nodiDisplay);
