@@ -517,9 +517,9 @@ struct Contextus : Module {
 
 			// Handle model light		
 			int currentModel = settings[0].shape;
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, args.sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, args.sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, args.sampleTime);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, sampleTime);
 
 			for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
 				int currentLight = LIGHT_CHANNEL_MODEL + i * 3;
