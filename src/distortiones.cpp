@@ -121,7 +121,7 @@ struct Distortiones : Module {
 
 			if (isLightsTurn) {
 				const float sampleTime = kLightFrequency * args.sampleTime;
-				int8_t ramp = getSystemTimeMs() >> 127;
+				int8_t ramp = getSystemTimeMs() & 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
 				for (int i = 0; i < 3; i++) {
