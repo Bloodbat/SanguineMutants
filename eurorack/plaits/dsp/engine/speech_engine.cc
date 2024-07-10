@@ -121,7 +121,7 @@ void SpeechEngine::Render(
     const bool replay_prosody = word_bank >= 0 && \
         !(parameters.trigger & TRIGGER_UNPATCHED);
     
-    *already_enveloped = replay_prosody;
+    *already_enveloped = !replay_prosody & TRIGGER_UNPATCHED;
     
     lpc_speech_synth_controller_.Render(
         parameters.trigger & TRIGGER_UNPATCHED,
