@@ -145,8 +145,8 @@ struct Incurvationes : Module {
 			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
 			warpsParameters->frequency_shift_pot = algorithmValue;
-			/* Compromise: prevent crashing when modulating frequency shift and keep negative and possitve offsets
-			   was warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -0.99f, 0.99f); */
+			/* Compromise: prevent crash when modulating frequency shift and keep negative and possitve offsets.
+			   Was warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f); */
 			warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -0.99f, 0.99f);
 			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
 
