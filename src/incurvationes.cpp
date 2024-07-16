@@ -149,7 +149,7 @@ struct Incurvationes : Module {
 			// TODO: This crashes randomly when negative voltages are applied... OOB sin LUTs or something wrong with MI's interpolator?
 			//       Can't get it to crash consistently. Distortiones doesn't have this problem.
 			warpsParameters->frequency_shift_cv = clamp(algorithmCv, -1.0f, 1.0f);
-			warpsParameters->phase_shift = clamp(algorithmValue + warpsParameters->frequency_shift_cv, 0.f, 1.f);
+			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
 			warpsParameters->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0 * inputs[INPUT_LEVEL1].getNormalVoltage(2.0) + 12.0;
 			warpsParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
 
