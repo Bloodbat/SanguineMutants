@@ -162,26 +162,14 @@ struct Distortiones : Module {
 
 				float algorithmValue = lastAlgorithmValue / 8.0;
 
-				switch (featureMode)
-				{
-				case distortiones::FEATURE_MODE_DELAY: {
-					distortionesParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
-					distortionesParameters->raw_algorithm = distortionesParameters->modulation_algorithm;
-					distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
-					break;
-				}
-				default: {
-					float val = clamp(lastAlgorithmValue, 0.0f, 1.0f);
-					val = stmlib::Interpolate(distortiones::lut_pot_curve, val, 512.0f);
-					distortionesParameters->raw_algorithm_pot = val;
+				float val = clamp(lastAlgorithmValue, 0.0f, 1.0f);
+				val = stmlib::Interpolate(distortiones::lut_pot_curve, val, 512.0f);
+				distortionesParameters->raw_algorithm_pot = val;
 
-					distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
+				distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
 
-					distortionesParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
-					distortionesParameters->raw_algorithm = distortionesParameters->modulation_algorithm;
-					break;
-				}
-				}
+				distortionesParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
+				distortionesParameters->raw_algorithm = distortionesParameters->modulation_algorithm;
 
 				if (isLightsTurn) {
 					const uint8_t(*palette)[3];
