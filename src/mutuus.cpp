@@ -177,26 +177,14 @@ struct Mutuus : Module {
 
 				float algorithmValue = lastAlgorithmValue / 8.0;
 
-				switch (featureMode)
-				{
-				case mutuus::FEATURE_MODE_DELAY: {
-					mutuusParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
-					mutuusParameters->raw_algorithm = mutuusParameters->modulation_algorithm;
-					mutuusParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
-					break;
-				}
-				default: {
-					float val = clamp(lastAlgorithmValue, 0.0f, 1.0f);
-					val = stmlib::Interpolate(mutuus::lut_pot_curve, val, 512.0f);
-					mutuusParameters->raw_algorithm_pot = val;
+				float val = clamp(lastAlgorithmValue, 0.0f, 1.0f);
+				val = stmlib::Interpolate(mutuus::lut_pot_curve, val, 512.0f);
+				mutuusParameters->raw_algorithm_pot = val;
 
-					mutuusParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
+				mutuusParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
 
-					mutuusParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
-					mutuusParameters->raw_algorithm = mutuusParameters->modulation_algorithm;
-					break;
-				}
-				}
+				mutuusParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
+				mutuusParameters->raw_algorithm = mutuusParameters->modulation_algorithm;
 
 				if (isLightsTurn) {
 					const uint8_t(*palette)[3];
