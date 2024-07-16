@@ -117,10 +117,9 @@ struct Incurvationes : Module {
 			warpsParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
 			warpsParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
 
-			float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.0f;
-			float algorithmCv = f4Voltages[2];
+			float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.f;
 
-			warpsParameters->modulation_algorithm = clamp(algorithmValue + algorithmCv, 0.0f, 1.0f);
+			warpsParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
 
 			if (isLightsTurn) {
 				const uint8_t(*palette)[3];
@@ -143,15 +142,16 @@ struct Incurvationes : Module {
 				}
 			}
 
-			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
+			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
 			warpsParameters->frequency_shift_pot = algorithmValue;
-			// TODO: This crashes randomly when negative voltages are applied... OOB sin LUTs or something wrong with MI's interpolator?
-			//       Division over zero? Can't get it to crash consistently. Distortiones doesn't have this problem.
-			warpsParameters->frequency_shift_cv = clamp(algorithmCv, -1.0f, 1.0f);
+			/* Compromise: prevent crashing when modulating frequency shift and keep negative and possitve offsets
+			   was warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -0.99f, 0.99f); */
+			warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -0.99f, 0.99f);
 			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
-			warpsParameters->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0 * inputs[INPUT_LEVEL1].getNormalVoltage(2.0) + 12.0;
-			warpsParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
+
+			warpsParameters->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f * inputs[INPUT_LEVEL1].getNormalVoltage(2.f) + 12.f;
+			warpsParameters->note += log2f(96000.f * args.sampleTime) * 12.f;
 
 			warpsModulator.Process(inputFrames, outputFrames, 60);
 		}
