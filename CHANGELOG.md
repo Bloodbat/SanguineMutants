@@ -46,11 +46,11 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Make Nodi and Contextus polyphonic.
 
+- LED markers for some modules.
+
 ## Changes
 
 - Different alternative firmwares use different face plate colors.
-
-- Restore LED markers for some modules.
 
 - Mode tooltips to Funes select knob.
 
@@ -66,9 +66,11 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Mortuus: P.L.O.
 
-- Nebualae time stretcher.
+- Nebulae time stretcher.
 
 - Renaissance spelling.
+
+- Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
 
 
 # 2.3.0
