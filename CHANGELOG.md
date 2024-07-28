@@ -54,8 +54,6 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Mode tooltips to Funes select knob.
 
-- Improve changelog layout.
-
 ## Fixes
 
 - Aleae reset.
@@ -71,6 +69,17 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 - Renaissance spelling.
 
 - Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
+
+
+# 2.3.1
+
+## Changes
+
+- Changelog organization.
+
+## Fixes
+
+- Contextus crashing Rack.
 
 
 # 2.3.0
