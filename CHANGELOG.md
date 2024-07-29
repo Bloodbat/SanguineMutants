@@ -67,7 +67,7 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 ## Fixes
 
-- Apices and Mortuus handle CV triggers better.
+- Better CV trigger handling in Apices and Mortuus.
 
 - Apices and Mortuus: Tap LFO.
 
