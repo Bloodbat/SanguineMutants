@@ -735,6 +735,7 @@ struct NodiWidget : ModuleWidget {
 
 		NodiDisplay* nodiDisplay = new NodiDisplay(4, module, 71.12, 20.996);
 		nodiFrambuffer->addChild(nodiDisplay);
+		nodiDisplay->fallbackString = nodiModelInfos[0].code;
 
 		if (module) {
 			nodiDisplay->values.displayText = &module->displayText;

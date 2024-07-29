@@ -931,9 +931,11 @@ struct MortuusWidget : ModuleWidget {
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFrambuffer->addChild(displayChannel1);
+		displayChannel1->fallbackString = mortuusModeList[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
 		apicesFrambuffer->addChild(displayChannel2);
+		displayChannel2->fallbackString = mortuusModeList[0];
 
 		if (module) {
 			displayChannel1->values.displayText = &module->displayText1;
