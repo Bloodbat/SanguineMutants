@@ -22,7 +22,7 @@ Based on Mutable Instruments Peaks. It exposes every control and has access to t
 
 ## Contextus
 
-Based on the Renaissance alternative firmware for Braids. Exposes every control.
+Based on the Renaissance alternative firmware for Braids. Exposes every control and is fully polyphonic.
 
 ## Distortiones
 
@@ -72,7 +72,7 @@ Based on Mutable Instruments' Clouds and Southpole's Smoke; inspired by the Mons
 
 ## Nodi
 
-Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports.
+Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports, and is fully polyphonic.
 
 ## Velamina
 
