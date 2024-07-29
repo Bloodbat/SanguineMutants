@@ -598,6 +598,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
 		etesiaFramebuffer->addChild(displayFreeze);
+		displayFreeze->fallbackString = modeDisplays[0].labelFreeze;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Etesia::INPUT_FREEZE));
 		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Etesia::PARAM_FREEZE);
@@ -629,6 +630,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		etesiaFramebuffer->addChild(displayPosition);
+		displayPosition->fallbackString = modeDisplays[0].labelPosition;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Etesia::INPUT_POSITION));
 
@@ -636,6 +638,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		etesiaFramebuffer->addChild(displayDensity);
+		displayDensity->fallbackString = modeDisplays[0].labelDensity;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Etesia::INPUT_DENSITY));
 
@@ -643,6 +646,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		etesiaFramebuffer->addChild(displaySize);
+		displaySize->fallbackString = modeDisplays[0].labelSize;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Etesia::INPUT_SIZE));
 
@@ -650,6 +654,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		etesiaFramebuffer->addChild(displayTexture);
+		displayTexture->fallbackString = modeDisplays[0].labelTexture;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Etesia::INPUT_TEXTURE));
 
@@ -657,6 +662,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
 		etesiaFramebuffer->addChild(displayPitch);
+		displayPitch->fallbackString = modeDisplays[0].labelPitch;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Etesia::INPUT_PITCH));
 
@@ -664,11 +670,13 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay(module, 86.118, 51.174);
 		etesiaFramebuffer->addChild(displayBlend);
+		displayBlend->fallbackString = modeDisplays[0].labelBlend;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Etesia::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
 		etesiaFramebuffer->addChild(displayTrigger);
+		displayTrigger->fallbackString = modeDisplays[0].labelTrigger;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Etesia::INPUT_TRIGGER));
 
@@ -676,6 +684,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay(module, 86.118, 86.709);
 		etesiaFramebuffer->addChild(displaySpread);
+		displaySpread->fallbackString = modeDisplays[0].labelSpread;
 
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Etesia::PARAM_SPREAD));
 
@@ -683,6 +692,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
 		etesiaFramebuffer->addChild(displayFeedback);
+		displayFeedback->fallbackString = modeDisplays[0].labelFeeback;
 
 		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Etesia::PARAM_FEEDBACK));
 
@@ -690,6 +700,7 @@ struct EtesiaWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay(module, 125.214, 86.709);
 		etesiaFramebuffer->addChild(displayReverb);
+		displayReverb->fallbackString = modeDisplays[0].labelReverb;
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Etesia::PARAM_REVERB));
 

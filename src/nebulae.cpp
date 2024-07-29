@@ -571,6 +571,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
 		nebulaeFramebuffer->addChild(displayFreeze);
+		displayFreeze->fallbackString = modeDisplays[0].labelFreeze;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Nebulae::INPUT_FREEZE));
 		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Nebulae::PARAM_FREEZE);
@@ -597,6 +598,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		nebulaeFramebuffer->addChild(displayPosition);
+		displayPosition->fallbackString = modeDisplays[0].labelPosition;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Nebulae::INPUT_POSITION));
 
@@ -605,6 +607,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		nebulaeFramebuffer->addChild(displayDensity);
+		displayDensity->fallbackString = modeDisplays[0].labelDensity;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Nebulae::INPUT_DENSITY));
 
@@ -613,6 +616,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		nebulaeFramebuffer->addChild(displaySize);
+		displaySize->fallbackString = modeDisplays[0].labelSize;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Nebulae::INPUT_SIZE));
 
@@ -621,6 +625,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		nebulaeFramebuffer->addChild(displayTexture);
+		displayTexture->fallbackString = modeDisplays[0].labelTexture;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Nebulae::INPUT_TEXTURE));
 
@@ -628,6 +633,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
 		nebulaeFramebuffer->addChild(displayPitch);
+		displayPitch->fallbackString = modeDisplays[0].labelPitch;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Nebulae::INPUT_PITCH));
 
@@ -637,6 +643,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
 		nebulaeFramebuffer->addChild(displayTrigger);
+		displayTrigger->fallbackString = modeDisplays[0].labelTrigger;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Nebulae::INPUT_TRIGGER));
 
