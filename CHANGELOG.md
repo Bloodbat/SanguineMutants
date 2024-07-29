@@ -48,11 +48,15 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - LED markers for some modules.
 
+- Leave Displays in module browser.
+
 ## Changes
 
 - Different alternative firmwares use different face plate colors.
 
 - Mode tooltips to Funes select knob.
+
+- Shaped lights don't turn off in module browser.
 
 ## Fixes
 
