@@ -48,7 +48,7 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - LED markers for some modules.
 
-- Leave Displays in module browser.
+- Leave displays on in module browser.
 
 ## Changes
 
