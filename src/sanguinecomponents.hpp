@@ -130,10 +130,12 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 	unsigned char backgroundCharAlpha = 16;
 	DisplayType displayType = DISPLAY_STRING;
 	std::string backgroundCharacter = " ";
+	std::string fallbackString = "";
 	math::Vec textMargin = { 2.f, 2.f };
 	float kerning = 2.f;
 	bool leadingZero = true;
 	bool drawHalo = true;
+	int fallbackNumber = 0;
 
 	SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule);
 	void draw(const DrawArgs& args) override;
