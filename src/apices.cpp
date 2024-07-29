@@ -880,6 +880,7 @@ struct ApicesWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		apicesFrambuffer->addChild(oledDisplay1);
+		oledDisplay1->fallbackString = knobLabelsTwinMode[0].knob1;
 
 		if (module)
 			oledDisplay1->oledText = &module->oledText1;
@@ -887,18 +888,21 @@ struct ApicesWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
 		apicesFrambuffer->addChild(oledDisplay2);
+		oledDisplay2->fallbackString = knobLabelsTwinMode[0].knob2;
 
 		if (module)
 			oledDisplay2->oledText = &module->oledText2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
 		apicesFrambuffer->addChild(oledDisplay3);
+		oledDisplay3->fallbackString = knobLabelsTwinMode[0].knob3;
 
 		if (module)
 			oledDisplay3->oledText = &module->oledText3;
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
 		apicesFrambuffer->addChild(oledDisplay4);
+		oledDisplay4->fallbackString = knobLabelsTwinMode[0].knob4;
 
 		if (module)
 			oledDisplay4->oledText = &module->oledText4;
