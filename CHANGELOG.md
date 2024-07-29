@@ -56,7 +56,16 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 ## Fixes
 
-- Aleae reset.
+- Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
+
+
+# 2.3.2
+
+## Changes
+
+- Display values for certain knobs.
+
+## Fixes
 
 - Apices and Mortuus handle CV triggers better.
 
@@ -68,7 +77,7 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Renaissance spelling.
 
-- Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
+- Aleae reset.
 
 
 # 2.3.1
