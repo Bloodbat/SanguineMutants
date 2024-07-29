@@ -583,7 +583,11 @@ SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string sh
 }
 
 void SanguineShapedLight::draw(const DrawArgs& args) {
-	// Do not call Widget::draw: it draws on the wrong layer.	
+	// Draw lights in module browser.
+	if (!module) {
+		Widget::draw(args);
+	}
+	// else do not call Widget::draw: it draws on the wrong layer.
 }
 
 void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
