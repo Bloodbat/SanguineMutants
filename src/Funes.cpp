@@ -686,6 +686,7 @@ struct FunesWidget : ModuleWidget {
 
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 59.074, 32.314);
 		funesFrambuffer->addChild(alphaDisplay);
+		alphaDisplay->fallbackString = funesDisplayLabels[8];
 
 		if (module) {
 			alphaDisplay->values.displayText = &module->displayText;

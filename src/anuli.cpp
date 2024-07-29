@@ -381,6 +381,7 @@ struct AnuliWidget : ModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 47.368f, 22.087f);
 		anuliFrambuffer->addChild(displayModel);
+		displayModel->fallbackString = anuliModeLabels[0];
 
 		if (module) {
 			displayModel->values.displayText = &module->displayText;
@@ -409,9 +410,11 @@ struct AnuliWidget : ModuleWidget {
 
 		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 49.592, 61.388);
 		anuliFrambuffer->addChild(displayPolyphony);
+		displayPolyphony->fallbackNumber = 1;
 
-		if (module)
+		if (module) {
 			displayPolyphony->values.numberValue = &module->polyphonyMode;
+		}
 
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(33.006, 72.385), module, Anuli::PARAM_BRIGHTNESS));
 

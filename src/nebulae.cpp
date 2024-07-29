@@ -569,7 +569,7 @@ struct NebulaeWidget : ModuleWidget {
 		FramebufferWidget* nebulaeFramebuffer = new FramebufferWidget();
 		addChild(nebulaeFramebuffer);
 
-		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);		
+		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
 		nebulaeFramebuffer->addChild(displayFreeze);
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Nebulae::INPUT_FREEZE));
@@ -588,13 +588,14 @@ struct NebulaeWidget : ModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
 		nebulaeFramebuffer->addChild(displayModel);
+		displayModel->fallbackString = modeList[0].display;
 
 		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Nebulae::PARAM_MODE));
 
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Nebulae::PARAM_POSITION, Nebulae::LIGHT_POSITION_CV));
 
-		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);		
+		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		nebulaeFramebuffer->addChild(displayPosition);
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Nebulae::INPUT_POSITION));
@@ -602,7 +603,7 @@ struct NebulaeWidget : ModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 50.173),
 			module, Nebulae::PARAM_DENSITY, Nebulae::LIGHT_DENSITY_CV));
 
-		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);		
+		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		nebulaeFramebuffer->addChild(displayDensity);
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Nebulae::INPUT_DENSITY));
@@ -610,7 +611,7 @@ struct NebulaeWidget : ModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
 			module, Nebulae::PARAM_SIZE, Nebulae::LIGHT_SIZE_CV));
 
-		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);		
+		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		nebulaeFramebuffer->addChild(displaySize);
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Nebulae::INPUT_SIZE));
@@ -618,14 +619,14 @@ struct NebulaeWidget : ModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 50.173),
 			module, Nebulae::PARAM_TEXTURE, Nebulae::LIGHT_TEXTURE_CV));
 
-		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);		
+		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		nebulaeFramebuffer->addChild(displayTexture);
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Nebulae::INPUT_TEXTURE));
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Nebulae::PARAM_PITCH));
 
-		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);		
+		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
 		nebulaeFramebuffer->addChild(displayPitch);
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Nebulae::INPUT_PITCH));
@@ -634,7 +635,7 @@ struct NebulaeWidget : ModuleWidget {
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Nebulae::INPUT_BLEND));
 
-		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);		
+		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
 		nebulaeFramebuffer->addChild(displayTrigger);
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Nebulae::INPUT_TRIGGER));
