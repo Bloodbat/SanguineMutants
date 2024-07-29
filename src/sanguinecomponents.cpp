@@ -191,7 +191,9 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 					break;
 				}
 				case DISPLAY_STRING: {
-					displayValue = *values.displayText;
+					if (values.displayText) {
+						displayValue = *values.displayText;
+					}
 					break;
 				}
 				}
