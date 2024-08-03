@@ -228,7 +228,7 @@ struct Fluctus : Module {
 
 	void process(const ProcessArgs& args) override {
 		dsp::Frame<2> inputFrame;
-		dsp::Frame<2> outputFrame;
+		dsp::Frame<2> outputFrame = {};
 
 		// Get input
 		if (!inputBuffer.full()) {
@@ -354,7 +354,7 @@ struct Fluctus : Module {
 		// Lights
 		fluctus::Parameters* fluctusParameters = fluctusProcessor->mutable_parameters();
 
-		dsp::Frame<2> lightFrame;
+		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode)
 		{
