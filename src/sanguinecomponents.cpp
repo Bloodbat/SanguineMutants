@@ -609,20 +609,82 @@ void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
+SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+	bool createCentered, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) {
+	module = theModule;
+	setSvg(Svg::load(asset::plugin(pluginInstance, shapeFileName)));
+	lightColor = (alpha << 24) + (blue << 16) + (green << 8) + red;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
+}
+
+SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+	bool createCentered, unsigned int newLightColor) {
+	module = theModule;
+	setSvg(Svg::load(asset::plugin(pluginInstance, shapeFileName)));
+	lightColor = newLightColor;
+
+	if (createCentered) {
+		box.pos = centerWidgetInMillimeters(this, X, Y);
+	}
+	else
+	{
+		box.pos = mm2px(Vec(X, Y));
+	}
+}
+
+// draw and drawLayer logic partially based on code by BaconPaul and Hemmer.
+void SanguineStaticRGBLight::draw(const DrawArgs& args) {
+	// Draw lights in module browser.	
+	if (!module) {
+		if (!sw->svg)
+			return;
+
+		NSVGimage* mySvg = sw->svg->handle;
+
+		fillSvgSolidColor(mySvg, lightColor);
+		svgDraw(args.vg, sw->svg->handle);
+	}
+	// else do not call Widget::draw: it draws on the wrong layer.
+}
+
+void SanguineStaticRGBLight::drawLayer(const DrawArgs& args, int layer) {
+	if (layer == 1) {
+		//From SvgWidget::draw()
+		if (!sw->svg)
+			return;
+		if (module && !module->isBypassed()) {
+			NSVGimage* mySvg = sw->svg->handle;
+
+			fillSvgSolidColor(mySvg, lightColor);
+			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+
+			svgDraw(args.vg, sw->svg->handle);
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
 SanguineMonoInputLight::SanguineMonoInputLight(Module* theModule, const float X, const float Y, bool createCentered) :
-	SanguineShapedLight(theModule, "res/in_mono_light.svg", X, Y, createCentered) {
+	SanguineStaticRGBLight(theModule, "res/in_light.svg", X, Y, createCentered, kSanguineYellowLight) {
 }
 
 SanguineMonoOutputLight::SanguineMonoOutputLight(Module* theModule, const float X, const float Y, bool createCentered) :
-	SanguineShapedLight(theModule, "res/out_mono_light.svg", X, Y, createCentered) {
+	SanguineStaticRGBLight(theModule, "res/out_light.svg", X, Y, createCentered, kSanguineYellowLight) {
 }
 
 SanguinePolyInputLight::SanguinePolyInputLight(Module* theModule, const float X, const float Y, bool createCentered) :
-	SanguineShapedLight(theModule, "res/in_light.svg", X, Y, createCentered) {
+	SanguineStaticRGBLight(theModule, "res/in_light.svg", X, Y, createCentered, kSanguineBlueLight) {
 }
 
 SanguinePolyOutputLight::SanguinePolyOutputLight(Module* theModule, const float X, const float Y, bool createCentered) :
-	SanguineShapedLight(theModule, "res/out_light.svg", X, Y, createCentered) {
+	SanguineStaticRGBLight(theModule, "res/out_light.svg", X, Y, createCentered, kSanguineBlueLight) {
 }
 
 SanguineBloodLogoLight::SanguineBloodLogoLight(Module* theModule, const float X, const float Y, bool createCentered) :
@@ -649,7 +711,8 @@ SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std:
 
 // Drawing utils
 
-void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor) {
+void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
+	const unsigned char haloOpacity, const float radiusFactor) {
 	// Adapted from LightWidget
 	// Don't draw halo if rendering in a framebuffer, e.g. screenshots or Module Browser
 	if (args.fb)
@@ -676,7 +739,8 @@ void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloCo
 	nvgFill(args.vg);
 }
 
-void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX) {
+void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
+	const unsigned char haloOpacity, const float positionX) {
 	// Adapted from MindMeld & LightWidget.
 	if (args.fb)
 		return;
@@ -700,4 +764,11 @@ void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor,
 	nvgFillPaint(args.vg, paint);
 	nvgFill(args.vg);
 	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
+}
+
+void fillSvgSolidColor(NSVGimage* svgImage, const unsigned int fillColor) {
+	for (NSVGshape* shape = svgImage->shapes; shape; shape = shape->next) {
+		shape->fill.color = fillColor;
+		shape->fill.type = NSVG_PAINT_COLOR;
+	}
 }

@@ -6,6 +6,10 @@
 
 using namespace rack;
 
+// Color constants for decorative lights
+static const unsigned int kSanguineBlueLight = (255 << 24) + (255 << 16) + (167 << 8) + 0;
+static const unsigned int kSanguineYellowLight = (255 << 24) + (100 << 16) + (250 << 8) + 239;
+
 // Ports
 
 struct BananutBlack : app::SvgPort {
@@ -239,19 +243,29 @@ struct SanguineShapedLight : SvgLight {
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
-struct SanguineMonoInputLight : SanguineShapedLight {
+struct SanguineStaticRGBLight : SvgLight {
+	unsigned int lightColor;
+	SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+		bool createCentered, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
+	SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+		bool createCentered, unsigned int newLightColor);
+	void draw(const DrawArgs& args) override;
+	void drawLayer(const DrawArgs& args, int layer) override;
+};
+
+struct SanguineMonoInputLight : SanguineStaticRGBLight {
 	SanguineMonoInputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
-struct SanguineMonoOutputLight : SanguineShapedLight {
+struct SanguineMonoOutputLight : SanguineStaticRGBLight {
 	SanguineMonoOutputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
-struct SanguinePolyInputLight : SanguineShapedLight {
+struct SanguinePolyInputLight : SanguineStaticRGBLight {
 	SanguinePolyInputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
-struct SanguinePolyOutputLight : SanguineShapedLight {
+struct SanguinePolyOutputLight : SanguineStaticRGBLight {
 	SanguinePolyOutputLight(Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
@@ -269,13 +283,17 @@ struct SanguineMutantsLogoLight : SanguineShapedLight {
 
 // Panels
 struct SanguinePanel : SvgPanel {
-	widget::SvgWidget* foreground;	
+	widget::SvgWidget* foreground;
 	SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName);
 };
 
 // Drawing utils
-void drawCircularHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float radiusFactor);
-void drawRectHalo(const Widget::DrawArgs& args, Vec boxSize, NVGcolor haloColor, unsigned char haloOpacity, float positionX);
+void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
+	const unsigned char haloOpacity, const float radiusFactor);
+void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
+	const unsigned char haloOpacity, const float positionX);
+
+inline void fillSvgSolidColor(NSVGimage* svgImage, const unsigned int fillColor);
 
 // Light colors.
 
