@@ -98,8 +98,8 @@ struct Velamina : Module {
 				if (inputs[INPUT_CV_1 + i].isConnected()) {
 					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
 					gain[currentChannel] = simd::fmax(clamp((inputs[INPUT_CV_1 + i].getVoltageSimd<float_4>(channel) * params[PARAM_GAIN_1 + i].getValue() +
-						params[PARAM_OFFSET_1 + i].getValue()),0.f, 8.f) / 5.f, 0.f);
-					gain[currentChannel] = simd::pow(gain[currentChannel],  1 / (0.1f + 0.9f * params[PARAM_RESPONSE_1 + i].getValue()));
+						params[PARAM_OFFSET_1 + i].getValue()), 0.f, 8.f) / 5.f, 0.f);
+					gain[currentChannel] = simd::pow(gain[currentChannel], 1 / (0.1f + 0.9f * params[PARAM_RESPONSE_1 + i].getValue()));
 				}
 				else {
 					gain[currentChannel] = params[PARAM_GAIN_1 + i].getValue() + params[PARAM_OFFSET_1 + i].getValue();
@@ -135,7 +135,10 @@ struct Velamina : Module {
 
 				if (channelCount < 2) {
 					if (channelCount > 0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsequence-point"
 						voltageSum = voltageSum = portVoltages[i][0][0];
+#pragma GCC diagnostic pop
 
 						voltageSum = clamp(voltageSum, -10.f, 10.f);
 					}

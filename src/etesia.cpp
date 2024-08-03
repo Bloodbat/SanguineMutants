@@ -235,7 +235,7 @@ struct Etesia : Module {
 
 	void process(const ProcessArgs& args) override {
 		dsp::Frame<2> inputFrame;
-		dsp::Frame<2> outputFrame;
+		dsp::Frame<2> outputFrame = {};
 
 		// Get input
 		if (!inputBuffer.full()) {
@@ -357,7 +357,7 @@ struct Etesia : Module {
 		// Lights
 		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 
-		dsp::Frame<2> lightFrame;
+		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode)
 		{
