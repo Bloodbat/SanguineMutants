@@ -454,7 +454,7 @@ struct AnuliWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		static const std::vector<std::string> modelLabels = {
+		static const std::vector<std::string> anuliMenuLabels = {
 			"Modal resonator",
 			"Sympathetic strings",
 			"Modulated/inharmonic string",
@@ -466,7 +466,7 @@ struct AnuliWidget : ModuleWidget {
 
 		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
 			for (int i = 0; i < 7; i++) {
-				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+				menu->addChild(createCheckMenuItem(anuliMenuLabels[i], "",
 					[=]() { return module->params[Anuli::PARAM_MODE].getValue() == i; },
 					[=]() { module->setMode(i); }
 				));

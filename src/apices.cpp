@@ -54,7 +54,7 @@ static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
 static const uint8_t kButtonCount = 3;
 static const uint8_t kInputCount = 2;
 
-static const std::vector<std::string> modeList{
+static const std::vector<std::string> apicesModeList{
 	"ENVELOPE",
 	"LFO",
 	"TAP LFO",
@@ -74,7 +74,7 @@ struct KnobLabels {
 	std::string knob4;
 };
 
-static const std::vector<KnobLabels> knobLabelsSplitMode{
+static const std::vector<KnobLabels> apicesKnobLabelsSplitMode{
 	{ "1. Attack", "1. Decay", "2. Attack",  "2. Decay" },
 	{ "1. Frequency", "1. Waveform", "2. Frequency", "2. Waveform" },
 	{ "1. Waveform", "1. Wave. Var.", "2. Waveform", "2. Wave. Var." },
@@ -87,7 +87,7 @@ static const std::vector<KnobLabels> knobLabelsSplitMode{
 	{ "1. Gravity", "1. Bounce", "2. Gravity", "2. Bounce" }
 };
 
-static const std::vector<KnobLabels> knobLabelsTwinMode{
+static const std::vector<KnobLabels> apicesKnobLabelsTwinMode{
 	{ "Attack", "Decay", "Sustain", "Release" },
 	{ "Frequency", "Waveform", "Wave. Var", "Phase" },
 	{ "Amplitude", "Waveform", "Wave. Var", "Phase" },
@@ -495,8 +495,8 @@ struct Apices : Module {
 		settings.processorFunction[1] = processorFunction[1];
 		std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
 		settings.snap_mode = bSnapMode;
-		displayText1 = modeList[settings.processorFunction[0]];
-		displayText2 = modeList[settings.processorFunction[1]];
+		displayText1 = apicesModeList[settings.processorFunction[0]];
+		displayText2 = apicesModeList[settings.processorFunction[1]];
 	}
 
 	void refreshLeds(const ProcessArgs& args) {
@@ -690,10 +690,10 @@ struct Apices : Module {
 
 	void updateOleds() {
 		if (editMode == EDIT_MODE_SPLIT) {
-			oledText1 = knobLabelsSplitMode[processorFunction[0]].knob1;
-			oledText2 = knobLabelsSplitMode[processorFunction[0]].knob2;
-			oledText3 = knobLabelsSplitMode[processorFunction[0]].knob3;
-			oledText4 = knobLabelsSplitMode[processorFunction[0]].knob4;
+			oledText1 = apicesKnobLabelsSplitMode[processorFunction[0]].knob1;
+			oledText2 = apicesKnobLabelsSplitMode[processorFunction[0]].knob2;
+			oledText3 = apicesKnobLabelsSplitMode[processorFunction[0]].knob3;
+			oledText4 = apicesKnobLabelsSplitMode[processorFunction[0]].knob4;
 		}
 		else {
 
@@ -712,10 +712,10 @@ struct Apices : Module {
 
 			std::string channelText = (editMode == EDIT_MODE_TWIN) ? "1&2. " : string::f("%d. ", editMode - EDIT_MODE_FIRST + 1);
 
-			oledText1 = channelText + knobLabelsTwinMode[currentFunction].knob1;
-			oledText2 = channelText + knobLabelsTwinMode[currentFunction].knob2;
-			oledText3 = channelText + knobLabelsTwinMode[currentFunction].knob3;
-			oledText4 = channelText + knobLabelsTwinMode[currentFunction].knob4;
+			oledText1 = channelText + apicesKnobLabelsTwinMode[currentFunction].knob1;
+			oledText2 = channelText + apicesKnobLabelsTwinMode[currentFunction].knob2;
+			oledText3 = channelText + apicesKnobLabelsTwinMode[currentFunction].knob3;
+			oledText4 = channelText + apicesKnobLabelsTwinMode[currentFunction].knob4;
 		}
 
 	}
@@ -828,11 +828,11 @@ struct ApicesWidget : ModuleWidget {
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFrambuffer->addChild(displayChannel1);
-		displayChannel1->fallbackString = modeList[0];
+		displayChannel1->fallbackString = apicesModeList[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
 		apicesFrambuffer->addChild(displayChannel2);
-		displayChannel2->fallbackString = modeList[0];
+		displayChannel2->fallbackString = apicesModeList[0];
 
 		if (module) {
 			displayChannel1->values.displayText = &module->displayText1;
@@ -880,7 +880,7 @@ struct ApicesWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		apicesFrambuffer->addChild(oledDisplay1);
-		oledDisplay1->fallbackString = knobLabelsTwinMode[0].knob1;
+		oledDisplay1->fallbackString = apicesKnobLabelsTwinMode[0].knob1;
 
 		if (module)
 			oledDisplay1->oledText = &module->oledText1;
@@ -888,21 +888,21 @@ struct ApicesWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
 		apicesFrambuffer->addChild(oledDisplay2);
-		oledDisplay2->fallbackString = knobLabelsTwinMode[0].knob2;
+		oledDisplay2->fallbackString = apicesKnobLabelsTwinMode[0].knob2;
 
 		if (module)
 			oledDisplay2->oledText = &module->oledText2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
 		apicesFrambuffer->addChild(oledDisplay3);
-		oledDisplay3->fallbackString = knobLabelsTwinMode[0].knob3;
+		oledDisplay3->fallbackString = apicesKnobLabelsTwinMode[0].knob3;
 
 		if (module)
 			oledDisplay3->oledText = &module->oledText3;
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
 		apicesFrambuffer->addChild(oledDisplay4);
-		oledDisplay4->fallbackString = knobLabelsTwinMode[0].knob4;
+		oledDisplay4->fallbackString = apicesKnobLabelsTwinMode[0].knob4;
 
 		if (module)
 			oledDisplay4->oledText = &module->oledText4;

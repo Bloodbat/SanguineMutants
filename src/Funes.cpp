@@ -50,7 +50,7 @@ static const std::string funesDisplayLabels[24] = {
   "HI-HAT",
 };
 
-static const std::vector<std::string> frequencyModes = {
+static const std::vector<std::string> funesFrequencyModes = {
 	"LFO mode",
 	"C0 +/- 7 semitones",
 	"C1 +/- 7 semitones",
@@ -64,7 +64,7 @@ static const std::vector<std::string> frequencyModes = {
 	"C0 to C8"
 };
 
-static const std::vector<std::string> modelLabels = {
+static const std::vector<std::string> funesModelLabels = {
 	"Classic waveshapes with filter",
 	"Phase distortion",
 	"6-operator FM 1",
@@ -174,7 +174,7 @@ struct Funes : Module {
 	Funes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configSwitch(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", modelLabels);
+		configSwitch(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", funesModelLabels);
 		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 
 		configParam(PARAM_FREQUENCY, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
@@ -187,7 +187,7 @@ struct Funes : Module {
 		configParam(PARAM_TIMBRE_CV, -1.0, 1.0, 0.0, "Timbre CV");
 		configParam(PARAM_FREQUENCY_CV, -1.0, 1.0, 0.0, "Frequency CV");
 		configParam(PARAM_MORPH_CV, -1.0, 1.0, 0.0, "Morph CV");
-		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", frequencyModes);
+		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funesFrequencyModes);
 		paramQuantities[PARAM_FREQ_MODE]->snapEnabled = true;
 
 		configInput(INPUT_ENGINE, "Model");
@@ -713,7 +713,7 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(createSubmenuItem("Frequency mode", "", [=](Menu* menu) {
 			for (int i = 0; i < 11; i++) {
-				menu->addChild(createCheckMenuItem(frequencyModes[i], "",
+				menu->addChild(createCheckMenuItem(funesFrequencyModes[i], "",
 					[=]() {return module->frequencyMode == i; },
 					[=]() {module->setFrequencyMode(i); }
 				));
@@ -734,7 +734,7 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(createSubmenuItem("Pitched models", "", [=](Menu* menu) {
 			for (int i = 8; i < 16; i++) {
-				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
 					[=]() { return module->patch.engine == i; },
 					[=]() {	module->setEngine(i); }
 				));
@@ -743,7 +743,7 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(createSubmenuItem("Noise/percussive models", "", [=](Menu* menu) {
 			for (int i = 16; i < 24; i++) {
-				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
 					[=]() { return module->patch.engine == i; },
 					[=]() { module->setEngine(i); }
 				));
@@ -752,7 +752,7 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(createSubmenuItem("New synthesis models", "", [=](Menu* menu) {
 			for (int i = 0; i < 8; i++) {
-				menu->addChild(createCheckMenuItem(modelLabels[i], "",
+				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
 					[=]() { return module->patch.engine == i; },
 					[=]() {	module->setEngine(i); }
 				));
