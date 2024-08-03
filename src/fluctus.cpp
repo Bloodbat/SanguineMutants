@@ -6,7 +6,7 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-static const std::vector<NebulaeModeInfo> modeList{
+static const std::vector<NebulaeModeInfo> fluctusModeList{
 	{ "GRANULAR", "Granular mode" },
 	{ "STRETCH", "Pitch shifter/time stretcher" },
 	{ "LOOPING DLY", "Looping delay" },
@@ -14,7 +14,7 @@ static const std::vector<NebulaeModeInfo> modeList{
 	{ "BEAT-REPEAT", "Beat-repeat " },
 };
 
-static const std::vector<EtesiaModeDisplay> modeDisplays{
+static const std::vector<EtesiaModeDisplay> fluctusModeDisplays{
 	{"Freeze",  "Position",     "Density",          "Size",             "Texture",     "Pitch",         "Trigger",   "Blend",       "Spread",         "Feedback",   "Reverb"},
 	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",       "Pitch",         "Time",      "Blend",       "Spread",         "Feedback",   "Reverb"},
 	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",       "Pitch",         "Time",      "Blend",       "Spread",         "Feedback",   "Reverb"},
@@ -22,7 +22,7 @@ static const std::vector<EtesiaModeDisplay> modeDisplays{
 	{"Freeze",  "Loop begin",   "Loop size mod.",   "Loop size",        "Slice step",  "Playback spd.", "Clock",     "Slice prob.", "Clock div.",     "Pitch mod.", "Feedback"}
 };
 
-static const std::vector<EtesiaModeDisplay> modeTooltips{
+static const std::vector<EtesiaModeDisplay> fluctusModeTooltips{
 	{"Freeze",  "Position",                    "Density",              "Size",                    "Texture",        "Pitch",          "Trigger",   "Blend",             "Spread",                    "Feedback",         "Reverb"},
 	{"Stutter", "Scrub",                       "Diffusion",            "Overlap",                 "LP/HP",          "Pitch",          "Time",      "Blend",             "Spread",                    "Feedback",         "Reverb"},
 	{"Stutter", "Time / Start",                "Diffusion",            "Overlap / Duration",      "LP/HP",          "Pitch",          "Time",      "Blend",             "Spread",                    "Feedback",         "Reverb"},
@@ -96,18 +96,18 @@ struct Fluctus : Module {
 
 	LedModes lastLedMode = LEDS_INPUT;
 
-	std::string textMode = modeList[0].display;
-	std::string textFreeze = modeDisplays[0].labelFreeze;
-	std::string textPosition = modeDisplays[0].labelPosition;
-	std::string textDensity = modeDisplays[0].labelDensity;
-	std::string textSize = modeDisplays[0].labelSize;
-	std::string textTexture = modeDisplays[0].labelTexture;
-	std::string textPitch = modeDisplays[0].labelPitch;
-	std::string textTrigger = modeDisplays[0].labelTrigger;
-	std::string textBlend = modeDisplays[0].labelBlend;
-	std::string textSpread = modeDisplays[0].labelSpread;
-	std::string textFeedback = modeDisplays[0].labelFeeback;
-	std::string textReverb = modeDisplays[0].labelReverb;
+	std::string textMode = fluctusModeList[0].display;
+	std::string textFreeze = fluctusModeDisplays[0].labelFreeze;
+	std::string textPosition = fluctusModeDisplays[0].labelPosition;
+	std::string textDensity = fluctusModeDisplays[0].labelDensity;
+	std::string textSize = fluctusModeDisplays[0].labelSize;
+	std::string textTexture = fluctusModeDisplays[0].labelTexture;
+	std::string textPitch = fluctusModeDisplays[0].labelPitch;
+	std::string textTrigger = fluctusModeDisplays[0].labelTrigger;
+	std::string textBlend = fluctusModeDisplays[0].labelBlend;
+	std::string textSpread = fluctusModeDisplays[0].labelSpread;
+	std::string textFeedback = fluctusModeDisplays[0].labelFeeback;
+	std::string textReverb = fluctusModeDisplays[0].labelReverb;
 
 	dsp::SampleRateConverter<2> inputSrc;
 	dsp::SampleRateConverter<2> outputSrc;
@@ -406,53 +406,53 @@ struct Fluctus : Module {
 			playbackMode = fluctus::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
-				textMode = modeList[playbackMode].display;
+				textMode = fluctusModeList[playbackMode].display;
 
-				textFreeze = modeDisplays[playbackMode].labelFreeze;
-				textPosition = modeDisplays[playbackMode].labelPosition;
-				textDensity = modeDisplays[playbackMode].labelDensity;
-				textSize = modeDisplays[playbackMode].labelSize;
-				textTexture = modeDisplays[playbackMode].labelTexture;
-				textPitch = modeDisplays[playbackMode].labelPitch;
-				textTrigger = modeDisplays[playbackMode].labelTrigger;
+				textFreeze = fluctusModeDisplays[playbackMode].labelFreeze;
+				textPosition = fluctusModeDisplays[playbackMode].labelPosition;
+				textDensity = fluctusModeDisplays[playbackMode].labelDensity;
+				textSize = fluctusModeDisplays[playbackMode].labelSize;
+				textTexture = fluctusModeDisplays[playbackMode].labelTexture;
+				textPitch = fluctusModeDisplays[playbackMode].labelPitch;
+				textTrigger = fluctusModeDisplays[playbackMode].labelTrigger;
 				// Parasite
-				textBlend = modeDisplays[playbackMode].labelBlend;
-				textSpread = modeDisplays[playbackMode].labelSpread;
-				textFeedback = modeDisplays[playbackMode].labelFeeback;
-				textReverb = modeDisplays[playbackMode].labelReverb;
+				textBlend = fluctusModeDisplays[playbackMode].labelBlend;
+				textSpread = fluctusModeDisplays[playbackMode].labelSpread;
+				textFeedback = fluctusModeDisplays[playbackMode].labelFeeback;
+				textReverb = fluctusModeDisplays[playbackMode].labelReverb;
 
-				paramQuantities[PARAM_FREEZE]->name = modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = modeTooltips[playbackMode].labelFreeze + nebulaeCVSuffix;
+				paramQuantities[PARAM_FREEZE]->name = fluctusModeTooltips[playbackMode].labelFreeze;
+				inputInfos[INPUT_FREEZE]->name = fluctusModeTooltips[playbackMode].labelFreeze + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_POSITION]->name = modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = modeTooltips[playbackMode].labelPosition + nebulaeCVSuffix;
+				paramQuantities[PARAM_POSITION]->name = fluctusModeTooltips[playbackMode].labelPosition;
+				inputInfos[INPUT_POSITION]->name = fluctusModeTooltips[playbackMode].labelPosition + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_DENSITY]->name = modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = modeTooltips[playbackMode].labelDensity + nebulaeCVSuffix;
+				paramQuantities[PARAM_DENSITY]->name = fluctusModeTooltips[playbackMode].labelDensity;
+				inputInfos[INPUT_DENSITY]->name = fluctusModeTooltips[playbackMode].labelDensity + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_SIZE]->name = modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = modeTooltips[playbackMode].labelSize + nebulaeCVSuffix;
+				paramQuantities[PARAM_SIZE]->name = fluctusModeTooltips[playbackMode].labelSize;
+				inputInfos[INPUT_SIZE]->name = fluctusModeTooltips[playbackMode].labelSize + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_TEXTURE]->name = modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = modeTooltips[playbackMode].labelTexture + nebulaeCVSuffix;
+				paramQuantities[PARAM_TEXTURE]->name = fluctusModeTooltips[playbackMode].labelTexture;
+				inputInfos[INPUT_TEXTURE]->name = fluctusModeTooltips[playbackMode].labelTexture + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_PITCH]->name = modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = modeTooltips[playbackMode].labelPitch + nebulaeCVSuffix;
+				paramQuantities[PARAM_PITCH]->name = fluctusModeTooltips[playbackMode].labelPitch;
+				inputInfos[INPUT_PITCH]->name = fluctusModeTooltips[playbackMode].labelPitch + nebulaeCVSuffix;
 
-				inputInfos[INPUT_TRIGGER]->name = modeTooltips[playbackMode].labelTrigger;
+				inputInfos[INPUT_TRIGGER]->name = fluctusModeTooltips[playbackMode].labelTrigger;
 
 				// Parasite
-				paramQuantities[PARAM_BLEND]->name = modeTooltips[playbackMode].labelBlend;
-				inputInfos[INPUT_BLEND]->name = modeTooltips[playbackMode].labelBlend + nebulaeCVSuffix;
+				paramQuantities[PARAM_BLEND]->name = fluctusModeTooltips[playbackMode].labelBlend;
+				inputInfos[INPUT_BLEND]->name = fluctusModeTooltips[playbackMode].labelBlend + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_SPREAD]->name = modeTooltips[playbackMode].labelSpread;
-				inputInfos[INPUT_SPREAD]->name = modeTooltips[playbackMode].labelSpread + nebulaeCVSuffix;
+				paramQuantities[PARAM_SPREAD]->name = fluctusModeTooltips[playbackMode].labelSpread;
+				inputInfos[INPUT_SPREAD]->name = fluctusModeTooltips[playbackMode].labelSpread + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback;
-				inputInfos[INPUT_FEEDBACK]->name = modeTooltips[playbackMode].labelFeeback + nebulaeCVSuffix;
+				paramQuantities[PARAM_FEEDBACK]->name = fluctusModeTooltips[playbackMode].labelFeeback;
+				inputInfos[INPUT_FEEDBACK]->name = fluctusModeTooltips[playbackMode].labelFeeback + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_REVERB]->name = modeTooltips[playbackMode].labelReverb;
-				inputInfos[INPUT_REVERB]->name = modeTooltips[playbackMode].labelReverb + nebulaeCVSuffix;
+				paramQuantities[PARAM_REVERB]->name = fluctusModeTooltips[playbackMode].labelReverb;
+				inputInfos[INPUT_REVERB]->name = fluctusModeTooltips[playbackMode].labelReverb + nebulaeCVSuffix;
 
 				lastPlaybackMode = playbackMode;
 			}
@@ -593,7 +593,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
 		etesiaFramebuffer->addChild(displayFreeze);
-		displayFreeze->fallbackString = modeDisplays[0].labelFreeze;
+		displayFreeze->fallbackString = fluctusModeDisplays[0].labelFreeze;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Fluctus::INPUT_FREEZE));
 		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Fluctus::PARAM_FREEZE);
@@ -611,7 +611,7 @@ struct FluctusWidget : ModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
 		etesiaFramebuffer->addChild(displayModel);
-		displayModel->fallbackString = modeList[0].display;
+		displayModel->fallbackString = fluctusModeList[0].display;
 
 		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Fluctus::PARAM_MODE));
 
@@ -620,7 +620,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		etesiaFramebuffer->addChild(displayPosition);
-		displayPosition->fallbackString = modeDisplays[0].labelPosition;
+		displayPosition->fallbackString = fluctusModeDisplays[0].labelPosition;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Fluctus::INPUT_POSITION));
 
@@ -629,7 +629,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		etesiaFramebuffer->addChild(displayDensity);
-		displayDensity->fallbackString = modeDisplays[0].labelDensity;
+		displayDensity->fallbackString = fluctusModeDisplays[0].labelDensity;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Fluctus::INPUT_DENSITY));
 
@@ -638,7 +638,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		etesiaFramebuffer->addChild(displaySize);
-		displaySize->fallbackString = modeDisplays[0].labelSize;
+		displaySize->fallbackString = fluctusModeDisplays[0].labelSize;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Fluctus::INPUT_SIZE));
 
@@ -647,7 +647,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		etesiaFramebuffer->addChild(displayTexture);
-		displayTexture->fallbackString = modeDisplays[0].labelTexture;
+		displayTexture->fallbackString = fluctusModeDisplays[0].labelTexture;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Fluctus::INPUT_TEXTURE));
 
@@ -655,7 +655,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
 		etesiaFramebuffer->addChild(displayPitch);
-		displayPitch->fallbackString = modeDisplays[0].labelPitch;
+		displayPitch->fallbackString = fluctusModeDisplays[0].labelPitch;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Fluctus::INPUT_PITCH));
 
@@ -663,13 +663,13 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay(module, 86.118, 51.174);
 		etesiaFramebuffer->addChild(displayBlend);
-		displayBlend->fallbackString = modeDisplays[0].labelBlend;
+		displayBlend->fallbackString = fluctusModeDisplays[0].labelBlend;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Fluctus::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
 		etesiaFramebuffer->addChild(displayTrigger);
-		displayTrigger->fallbackString = modeDisplays[0].labelTrigger;
+		displayTrigger->fallbackString = fluctusModeDisplays[0].labelTrigger;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Fluctus::INPUT_TRIGGER));
 
@@ -677,7 +677,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay(module, 86.118, 86.709);
 		etesiaFramebuffer->addChild(displaySpread);
-		displaySpread->fallbackString = modeDisplays[0].labelSpread;
+		displaySpread->fallbackString = fluctusModeDisplays[0].labelSpread;
 
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Fluctus::PARAM_SPREAD));
 
@@ -685,7 +685,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
 		etesiaFramebuffer->addChild(displayFeedback);
-		displayFeedback->fallbackString = modeDisplays[0].labelFeeback;
+		displayFeedback->fallbackString = fluctusModeDisplays[0].labelFeeback;
 
 		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Fluctus::PARAM_FEEDBACK));
 
@@ -693,7 +693,7 @@ struct FluctusWidget : ModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay(module, 125.214, 86.709);
 		etesiaFramebuffer->addChild(displayReverb);
-		displayReverb->fallbackString = modeDisplays[0].labelReverb;
+		displayReverb->fallbackString = fluctusModeDisplays[0].labelReverb;
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Fluctus::PARAM_REVERB));
 
@@ -739,8 +739,8 @@ struct FluctusWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(modeList.size()); i++) {
-			modelLabels.push_back(modeList[i].display + ": " + modeList[i].menuLabel);
+		for (int i = 0; i < int(fluctusModeList.size()); i++) {
+			modelLabels.push_back(fluctusModeList[i].display + ": " + fluctusModeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },
