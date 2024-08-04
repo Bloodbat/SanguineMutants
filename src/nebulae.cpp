@@ -243,6 +243,8 @@ struct Nebulae : Module {
 		// Trigger
 		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
 
+		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
+
 		// Render frames
 		if (outputBuffer.empty()) {
 			clouds::ShortFrame input[32] = {};
@@ -282,7 +284,6 @@ struct Nebulae : Module {
 
 			bool frozen = params[PARAM_FREEZE].getValue();
 
-			clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
 			cloudsParameters->trigger = bTriggered;
 			cloudsParameters->gate = bTriggered;
 			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
@@ -350,8 +351,6 @@ struct Nebulae : Module {
 		}
 
 		// Lights
-		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
-
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode)
@@ -461,7 +460,6 @@ struct Nebulae : Module {
 				}
 			}
 
-			// These could probably do with base colored lights: they are never colorfully changed.
 			switch (ledMode)
 			{
 			case LEDS_INPUT:

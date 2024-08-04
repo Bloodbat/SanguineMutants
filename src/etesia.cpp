@@ -247,6 +247,8 @@ struct Etesia : Module {
 		// Trigger
 		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
 
+		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
+
 		// Render frames
 		if (outputBuffer.empty()) {
 			etesia::ShortFrame input[32] = {};
@@ -286,7 +288,6 @@ struct Etesia : Module {
 
 			bool frozen = params[PARAM_FREEZE].getValue();
 
-			etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 			etesiaParameters->trigger = bTriggered;
 			etesiaParameters->gate = bTriggered;
 			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
@@ -355,8 +356,6 @@ struct Etesia : Module {
 		}
 
 		// Lights
-		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
-
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode)
@@ -486,7 +485,6 @@ struct Etesia : Module {
 				}
 			}
 
-			// These could probably do with base colored lights: they are never colorfully changed.
 			switch (ledMode)
 			{
 			case LEDS_INPUT:
