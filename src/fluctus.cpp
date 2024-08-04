@@ -240,6 +240,8 @@ struct Fluctus : Module {
 		// Trigger
 		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
 
+		fluctus::Parameters* fluctusParameters = fluctusProcessor->mutable_parameters();
+
 		// Render frames
 		if (outputBuffer.empty()) {
 			fluctus::ShortFrame input[32] = {};
@@ -279,7 +281,6 @@ struct Fluctus : Module {
 
 			bool frozen = params[PARAM_FREEZE].getValue();
 
-			fluctus::Parameters* fluctusParameters = fluctusProcessor->mutable_parameters();
 			fluctusParameters->trigger = bTriggered;
 			fluctusParameters->gate = bTriggered;
 			fluctusParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
@@ -352,8 +353,6 @@ struct Fluctus : Module {
 		}
 
 		// Lights
-		fluctus::Parameters* fluctusParameters = fluctusProcessor->mutable_parameters();
-
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode)
@@ -481,7 +480,6 @@ struct Fluctus : Module {
 				}
 			}
 
-			// These could probably do with base colored lights: they are never colorfully changed.
 			switch (ledMode)
 			{
 			case LEDS_INPUT:
