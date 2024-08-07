@@ -162,7 +162,8 @@ namespace etesia {
 
 		case PLAYBACK_MODE_OLIVERB:
 		{
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 			// Pre-delay, controlled by position or tap tempo sync
 			Parameters p = {
 			  ws_player_.synchronized() ?
@@ -180,6 +181,7 @@ namespace etesia {
 			  parameters_.trigger, // trigger;
 			  false // gate;
 			};
+#pragma GCC diagnostic pop
 
 			if (resolution() == 8) {
 				ws_player_.Play(buffer_8_, p, &output[0].l, size);
