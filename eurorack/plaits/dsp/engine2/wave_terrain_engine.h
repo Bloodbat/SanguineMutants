@@ -46,16 +46,16 @@ class WaveTerrainEngine : public Engine {
   WaveTerrainEngine() { }
   ~WaveTerrainEngine() { }
   
-  virtual void Init(stmlib::BufferAllocator* allocator);
-  virtual void Reset();
-  virtual void LoadUserData(const uint8_t* user_data) {
+  virtual void Init(stmlib::BufferAllocator* allocator) override;
+  virtual void Reset() override;
+  virtual void LoadUserData(const uint8_t* user_data) override {
     user_terrain_ = (const int8_t*)(user_data);
   }
   virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
-      bool* already_enveloped);
+      bool* already_enveloped) override;
   
  private:
   float Terrain(float x, float y, int terrain_index);

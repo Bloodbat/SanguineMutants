@@ -121,7 +121,10 @@ void SpeechEngine::Render(
     const bool replay_prosody = word_bank >= 0 && \
         !(parameters.trigger & TRIGGER_UNPATCHED);
     
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wparentheses"
     *already_enveloped = !replay_prosody & TRIGGER_UNPATCHED;
+#pragma GCC diagnostic pop
     
     lpc_speech_synth_controller_.Render(
         parameters.trigger & TRIGGER_UNPATCHED,
