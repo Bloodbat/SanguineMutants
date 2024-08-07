@@ -42,14 +42,14 @@ class BassDrumEngine : public Engine {
   BassDrumEngine() { }
   ~BassDrumEngine() { }
   
-  virtual void Init(stmlib::BufferAllocator* allocator);
-  virtual void Reset();
-  virtual void LoadUserData(const uint8_t* user_data) { }
+  virtual void Init(stmlib::BufferAllocator* allocator) override;
+  virtual void Reset() override;
+  virtual void LoadUserData(const uint8_t* user_data) override { }
   virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
-      bool* already_enveloped);
+      bool* already_enveloped) override;
 
  private:
   AnalogBassDrum analog_bass_drum_;

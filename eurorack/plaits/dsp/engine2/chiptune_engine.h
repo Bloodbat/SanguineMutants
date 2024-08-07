@@ -46,14 +46,14 @@ class ChiptuneEngine : public Engine {
     NO_ENVELOPE = 2
   };
   
-  virtual void Init(stmlib::BufferAllocator* allocator);
-  virtual void Reset();
-  virtual void LoadUserData(const uint8_t* user_data) { }
+  virtual void Init(stmlib::BufferAllocator* allocator) override;
+  virtual void Reset() override;
+  virtual void LoadUserData(const uint8_t* user_data) override { }
   virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
-      bool* already_enveloped);
+      bool* already_enveloped) override;
   
   inline void set_envelope_shape(float envelope_shape) {
     envelope_shape_ = envelope_shape;
