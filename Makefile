@@ -1,5 +1,5 @@
 FLAGS += \
-	-DTEST \
+	-DNOASM \
 	-I./eurorack \
 	-I./alt_firmware \
 	-Wno-unused-local-typedefs
