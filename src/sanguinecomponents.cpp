@@ -706,7 +706,7 @@ SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std:
 
 	SvgWidget* foreground = new SvgWidget();
 	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForegroundFileName)));
-	fb->addChild(foreground);
+	fb->addChildBelow(foreground, panelBorder);
 }
 
 // Drawing utils
