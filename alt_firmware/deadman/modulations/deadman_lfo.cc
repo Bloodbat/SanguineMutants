@@ -263,7 +263,7 @@ namespace deadman {
 			if (unclipped_modulated_rate > 65535) {
 				unclipped_modulated_rate = 65335;
 			}
-			else if (unclipped_modulated_rate < 0) {
+			else if (unclipped_modulated_rate <= 0) {
 				unclipped_modulated_rate = 0;
 			}
 			uint16_t modulated_rate = static_cast<uint16_t>(unclipped_modulated_rate);
