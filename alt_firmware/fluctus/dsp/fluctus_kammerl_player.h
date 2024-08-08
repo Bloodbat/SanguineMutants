@@ -45,6 +45,10 @@
 
 #include "fluctus/fluctus_resources.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wtype-limits"
+
 namespace fluctus {
 
 // Maximum clock divisor.
@@ -405,5 +409,7 @@ private:
 };
 
 }  // namespace fluctus
+
+#pragma GCC diagnostic pop
 
 #endif  // FLUCTUS_DSP_KAMMERL_PLAYER_H_

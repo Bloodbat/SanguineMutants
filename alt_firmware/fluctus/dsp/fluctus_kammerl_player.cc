@@ -37,7 +37,10 @@ float KammerlPlayer::quantizeSize(float size) const {
 		size_t index = std::upper_bound(kSizeQuantizationBorder,
 				kSizeQuantizationBorder + kNumSizeQuantizationIntevals, size)
 				- kSizeQuantizationBorder;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
 		CONSTRAIN(index, 0, kNumSizeQuantizationIntevals - 1);
+#pragma GCC diagnostic pop
 		return kSizeQuantization[index];
 	}
 	return size;
