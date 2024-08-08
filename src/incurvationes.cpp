@@ -121,6 +121,19 @@ struct Incurvationes : Module {
 
 			warpsParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
 
+			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
+
+			warpsParameters->frequency_shift_pot = algorithmValue;
+			/* SIGSEV when using internal oscillator and voltages exceeding certain thresholds are applied or frequency knob is moved (positive or negative voltages).
+			   Have been unable to find why, and it happens kinda randomly. */
+			warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
+			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
+
+			warpsParameters->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f * inputs[INPUT_LEVEL1].getNormalVoltage(2.f) + 12.f;
+			warpsParameters->note += log2f(96000.f * args.sampleTime) * 12.f;
+
+			warpsModulator.Process(inputFrames, outputFrames, 60);
+
 			if (isLightsTurn) {
 				const uint8_t(*palette)[3];
 				float zone;
@@ -141,19 +154,6 @@ struct Incurvationes : Module {
 					lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.0f);
 				}
 			}
-
-			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
-
-			warpsParameters->frequency_shift_pot = algorithmValue;
-			/* SIGSEV when using internal oscillator and voltages exceeding certain thresholds are applied or frequency knob is moved (positive or negative voltages).
-			   Have been unable to find why, and it happens kinda randomly. */
-			warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
-			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
-
-			warpsParameters->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f * inputs[INPUT_LEVEL1].getNormalVoltage(2.f) + 12.f;
-			warpsParameters->note += log2f(96000.f * args.sampleTime) * 12.f;
-
-			warpsModulator.Process(inputFrames, outputFrames, 60);
 		}
 
 		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
