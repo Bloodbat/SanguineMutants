@@ -58,6 +58,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Shaped lights don't turn off in module browser.
 
+- Mortuus ByteBeats equation 6 regained some of its complexity.
+
 ## Fixes
 
 - Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
