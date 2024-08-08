@@ -145,7 +145,7 @@ struct Incurvationes : Module {
 			warpsParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
 			warpsParameters->frequency_shift_pot = algorithmValue;
-			/* SIGSEV when using internal oscillators and negative voltages are applied or frequency knob is moved (positive or negative voltages.
+			/* SIGSEV when using internal oscillator and voltages exceeding certain thresholds are applied or frequency knob is moved (positive or negative voltages).
 			   Have been unable to find why, and it happens kinda randomly. */
 			warpsParameters->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
 			warpsParameters->phase_shift = warpsParameters->modulation_algorithm;
