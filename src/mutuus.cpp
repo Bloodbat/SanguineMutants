@@ -180,8 +180,6 @@ struct Mutuus : Module {
 				/* The good: now it works closer to what it should be.
 				   The bad: frequency shifter CV modulation crashes rack now here as well. :( */
 				mutuusParameters->raw_algorithm_pot = algorithmValue;
-				mutuusParameters->raw_algorithm_pot = stmlib::Interpolate(mutuus::lut_pot_curve,
-					mutuusParameters->raw_algorithm_pot, 512.0f);
 
 				mutuusParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
 

@@ -164,8 +164,6 @@ struct Distortiones : Module {
 				/* The good: now it works closer to what it should be.
 				   The bad: frequency shifter CV modulation crashes rack now here as well. :( */
 				distortionesParameters->raw_algorithm_pot = algorithmValue;
-				distortionesParameters->raw_algorithm_pot = stmlib::Interpolate(distortiones::lut_pot_curve,
-					distortionesParameters->raw_algorithm_pot, 512.0f);
 
 				distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
 
