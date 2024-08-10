@@ -102,8 +102,8 @@ void MutuusModulator::ProcessFreqShifter(
     frequency = 2.0f * fabs(frequency - 0.5f);
     frequency = frequency <= 0.4f
         ? frequency * frequency * frequency * 62.5f
-        : 4.0f * SemitonesToRatio(180.0f * (frequency - 0.4f));
-    frequency *= SemitonesToRatio(
+        : 4.0f * SemitonesToRatioSafe(180.0f * (frequency - 0.4f));
+    frequency *= SemitonesToRatioSafe(
         parameters_.raw_algorithm_cv * 60.0f * \
             (1.0f - linear_modulation_amount) * direction);
     frequency *= direction;
