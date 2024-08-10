@@ -3,6 +3,8 @@ FLAGS += \
 	-I./eurorack \
 	-I./alt_firmware \
 	-Wno-unused-local-typedefs
+	
+EXTRA_FLAGS =
 
 SOURCES += $(wildcard src/*.cpp)
 
