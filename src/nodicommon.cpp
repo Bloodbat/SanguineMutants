@@ -23,7 +23,7 @@ void NodiDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 			if (module && !module->isBypassed()) {
 				// Blink effect
-				if (!(displayTimeout && *displayTimeout & 0x1000)) {
+				if (!(displayTimeout && (*displayTimeout & 0x1000))) {
 					nvgFillColor(args.vg, textColor);
 					if (values.displayText && !(values.displayText->empty()))
 					{
