@@ -7,3 +7,6 @@ dist
 /SanguineMutants.vcxproj
 /SanguineMutants.vcxproj.filters
 /.vs
+/.settings
+/.cproject
+/.project
