@@ -126,8 +126,8 @@ struct Explorator : Module {
 			for (int channel = 0; channel < channelsSign; channel += 4) {
 				voltagesSign = inputs[INPUT_SIGN].getVoltageSimd<float_4>(channel);
 				outputs[OUTPUT_SIGN_INVERTED].setVoltageSimd(-voltagesSign, channel);
-				outputs[OUTPUT_SIGN_HALF_RECTIFIER].setVoltageSimd(fmax(0.f, voltagesSign), channel);
-				outputs[OUTPUT_SIGN_FULL_RECTIFIER].setVoltageSimd(fabs(voltagesSign), channel);
+				outputs[OUTPUT_SIGN_HALF_RECTIFIER].setVoltageSimd(simd::fmax(0.f, voltagesSign), channel);
+				outputs[OUTPUT_SIGN_FULL_RECTIFIER].setVoltageSimd(simd::fabs(voltagesSign), channel);
 			}
 		}
 
