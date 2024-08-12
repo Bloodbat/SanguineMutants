@@ -61,13 +61,11 @@ struct Settings {
 static const size_t kNumBlocks = 2;
 static const size_t kNumChannels = 2;
 static const size_t kBlockSize = 4;
-static const int32_t kLongPressDuration = 600;
 static const uint8_t kNumAdcChannels = 4;
 static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
 static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
 
 static const uint8_t kButtonCount = 3;
-static const uint8_t kInputCount = 2;
 
 static const std::vector<std::string> mortuusModeList{
 	"ENVELOPE",
