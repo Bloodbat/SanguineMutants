@@ -1,53 +1,53 @@
 {
-  "slug": "SanguineMutants",
-  "name": "Sanguine Modules",
-  "version": "2.4.0",
-  "license": "GPL-3.0-or-later",
-  "author": "Bloodbat",
-  "pluginUrl": "https://github.com/Bloodbat/SanguineMutants",
-  "sourceUrl": "https://github.com/Bloodbat/SanguineMutants",
-  "description": "A collection of modules based on Mutable Instruments Eurorack devices and their variants.",
-  "changelogUrl": "https://github.com/Bloodbat/SanguineMutants/blob/main/CHANGELOG.md",
-  "manualUrl": "https://raw.githubusercontent.com/Bloodbat/SanguineModulesManuals/main/mutants_manual.pdf",
-  "modules": [
+  "slug" : "SanguineMutants",
+  "name" : "Sanguine Modules",
+  "version" : "2.4.0",
+  "license" : "GPL-3.0-or-later",
+  "author" : "Bloodbat",
+  "pluginUrl" : "https://github.com/Bloodbat/SanguineMutants",
+  "sourceUrl" : "https://github.com/Bloodbat/SanguineMutants",
+  "description" : "A collection of modules based on Mutable Instruments Eurorack devices and their variants.",
+  "changelogUrl" : "https://github.com/Bloodbat/SanguineMutants/blob/main/CHANGELOG.md",
+  "manualUrl" : "https://raw.githubusercontent.com/Bloodbat/SanguineModulesManuals/main/mutants_manual.pdf",
+  "modules" : [
     {
-      "slug": "Funes",
-      "name": "Funes",
-      "description": "Based on Mutable Instruments' Plaits 1.2",
-      "tags": [
+      "slug" : "Funes",
+      "name" : "Funes",
+      "description" : "Based on Mutable Instruments' Plaits 1.2",
+      "tags" : [
         "Oscillator",
         "Hardware clone",
         "Polyphonic"
       ]
     },
     {
-      "slug": "Sanguine-Mutants-Blank",
-      "name": "Sanguine Mutants Blank",
-      "description": "Put a goblin and the Mutants logo on your rack!",
-      "tags": [
+      "slug" : "Sanguine-Mutants-Blank",
+      "name" : "Sanguine Mutants Blank",
+      "description" : "Put a goblin and the Mutants logo on your rack!",
+      "tags" : [
         "Blank",
         "Visual"
       ]
     },
     {
-      "slug": "Sanguine-Apices",
-      "name": "Apices",
-      "description": "Based on Mutable Instruments' Peaks",
-      "tags": [
+      "slug" : "Sanguine-Apices",
+      "name" : "Apices",
+      "description" : "Based on Mutable Instruments' Peaks",
+      "tags" : [
         "Drum",
         "Envelope generator",
         "Oscillator",
-        "LFO",
+        "Low-frequency oscillator",
         "Sequencer",
         "Hardware clone",
         "Dual"
       ]
     },
     {
-      "slug": "Sanguine-Aleae",
-      "name": "Aleae",
-      "description": "Based on Mutable Instruments' Branches",
-      "tags": [
+      "slug" : "Sanguine-Aleae",
+      "name" : "Aleae",
+      "description" : "Based on Mutable Instruments' Branches",
+      "tags" : [
         "Random",
         "Dual",
         "Hardware clone",
@@ -55,86 +55,86 @@
       ]
     },
     {
-      "slug": "Sanguine-Nodi",
-      "name": "Nodi",
-      "description": "A macro oscillator based on Mutable Instruments' Braids",
-      "tags": [
-        "VCO",
+      "slug" : "Sanguine-Nodi",
+      "name" : "Nodi",
+      "description" : "A macro oscillator based on Mutable Instruments' Braids",
+      "tags" : [
+        "Oscillator",
         "Waveshaper",
-		"Polyphonic",
+        "Polyphonic",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Contextus",
-      "name": "Contextus",
-      "description": "A macro oscillator based on the Renaissance alternative firmware for Braids",
-      "tags": [
-        "VCO",
+      "slug" : "Sanguine-Contextus",
+      "name" : "Contextus",
+      "description" : "A macro oscillator based on the Renaissance alternative firmware for Braids",
+      "tags" : [
+        "Oscillator",
         "Waveshaper",
-		"Polyphonic",
+        "Polyphonic",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Nebulae",
-      "name": "Nebulae",
-      "description": "A texture synthesizer based on Audible Instruments' Clouds",
-      "tags": [
+      "slug" : "Sanguine-Nebulae",
+      "name" : "Nebulae",
+      "description" : "A texture synthesizer based on Audible Instruments' Clouds",
+      "tags" : [
         "Granular",
         "Reverb",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Etesia",
-      "name": "Etesia",
-      "description": "A texture synthesizer based on the Clouds Parasite",
-      "tags": [
+      "slug" : "Sanguine-Etesia",
+      "name" : "Etesia",
+      "description" : "A texture synthesizer based on the Clouds Parasite",
+      "tags" : [
         "Granular",
         "Reverb",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Mortuus",
-      "name": "Mortuus",
-      "description": "Based on the Dead Man's Catch alternative firmware for Peaks",
-      "tags": [
+      "slug" : "Sanguine-Mortuus",
+      "name" : "Mortuus",
+      "description" : "Based on the Dead Man's Catch alternative firmware for Peaks",
+      "tags" : [
         "Drum",
         "Envelope generator",
         "Oscillator",
-        "LFO",
+        "Low-frequency oscillator",
         "Sequencer",
         "Hardware clone",
         "Dual"
       ]
     },
     {
-      "slug": "Sanguine-Fluctus",
-      "name": "Fluctus",
-      "description": "A texture synthesizer based on the Kammerl Beat-Repeat firmware",
-      "tags": [
+      "slug" : "Sanguine-Fluctus",
+      "name" : "Fluctus",
+      "description" : "A texture synthesizer based on the Kammerl Beat-Repeat firmware",
+      "tags" : [
         "Granular",
         "Reverb",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Incurvationes",
-      "name": "Incurvationes",
-      "description": "A meta modulator based on Mutable Instruments Warps",
-      "tags": [
+      "slug" : "Sanguine-Incurvationes",
+      "name" : "Incurvationes",
+      "description" : "A meta modulator based on Mutable Instruments Warps",
+      "tags" : [
         "Ring modulator",
         "Waveshaper",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Distortiones",
-      "name": "Distortiones",
-      "description": "A doctored meta modulator based on the Parasite alternative firmware for Warps",
-      "tags": [
+      "slug" : "Sanguine-Distortiones",
+      "name" : "Distortiones",
+      "description" : "A doctored meta modulator based on the Parasite alternative firmware for Warps",
+      "tags" : [
         "Ring modulator",
         "Waveshaper",
         "Effect",
@@ -142,10 +142,10 @@
       ]
     },
     {
-      "slug": "Sanguine-Mutuus",
-      "name": "Mutuus",
-      "description": "An experimental meta modulator based on the Symbiote alternative firmware for Warps",
-      "tags": [
+      "slug" : "Sanguine-Mutuus",
+      "name" : "Mutuus",
+      "description" : "An experimental meta modulator based on the Symbiote alternative firmware for Warps",
+      "tags" : [
         "Ring modulator",
         "Waveshaper",
         "Effect",
@@ -154,10 +154,10 @@
       ]
     },
     {
-      "slug": "Sanguine-Explorator",
-      "name": "Explorator",
-      "description": "A fully polyphonic multiple, mixer, noise source, sample and hold, inverter, rectifier and logic unit, based on Mutable Instruments Links and Kinks",
-      "tags": [
+      "slug" : "Sanguine-Explorator",
+      "name" : "Explorator",
+      "description" : "A fully polyphonic multiple, mixer, noise source, sample and hold, inverter, rectifier and logic unit, based on Mutable Instruments Links and Kinks",
+      "tags" : [
         "Multiple",
         "Mixer",
         "Hardware clone",
@@ -168,29 +168,29 @@
       ]
     },
     {
-      "slug": "Sanguine-Marmora",
-      "name": "Marmora",
-      "description": "Based on Mutable Instruments Marbles",
-      "tags": [
+      "slug" : "Sanguine-Marmora",
+      "name" : "Marmora",
+      "description" : "Based on Mutable Instruments Marbles",
+      "tags" : [
         "Random",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Anuli",
-      "name": "Anuli",
-      "description": "Anuli is a polyphonic resonator based on Mutable Instruments Rings",
-      "tags": [
+      "slug" : "Sanguine-Anuli",
+      "name" : "Anuli",
+      "description" : "Anuli is a polyphonic resonator based on Mutable Instruments Rings",
+      "tags" : [
         "Physical modeling",
         "Polyphonic",
         "Hardware clone"
       ]
     },
     {
-      "slug": "Sanguine-Velamina",
-      "name": "Velamina",
-      "description": "A voltage controller amplifier based on the revised Mutable Instruments Veils",
-      "tags": [
+      "slug" : "Sanguine-Velamina",
+      "name" : "Velamina",
+      "description" : "A voltage controller amplifier based on the revised Mutable Instruments Veils",
+      "tags" : [
         "Mixer",
         "Polyphonic",
         "Voltage-controlled amplifier"
