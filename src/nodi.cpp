@@ -720,15 +720,11 @@ struct NodiWidget : ModuleWidget {
 		const float lightXBase = 5.256f;
 		const float lightXDelta = 4.0f;
 
+		const int offset = 8;
 		float currentX = lightXBase;
 		for (int i = 0; i < 8; i++) {
 			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 20.308), module, Nodi::LIGHT_CHANNEL_MODEL + i * 3));
-			currentX += lightXDelta;
-		}
-
-		currentX = lightXBase;		
-		for (int i = 8; i < 16; i++) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, Nodi::LIGHT_CHANNEL_MODEL + i * 3));
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, Nodi::LIGHT_CHANNEL_MODEL + ((i + offset) * 3)));
 			currentX += lightXDelta;
 		}
 
