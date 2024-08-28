@@ -6,10 +6,6 @@
 
 using namespace rack;
 
-// Color constants for decorative lights
-static const unsigned int kSanguineBlueLight = (255 << 24) + (255 << 16) + (167 << 8) + 0;
-static const unsigned int kSanguineYellowLight = (255 << 24) + (100 << 16) + (250 << 8) + 239;
-
 // Ports
 
 struct BananutBlack : app::SvgPort {
@@ -183,6 +179,20 @@ struct SanguineLightUpSwitch : app::SvgSwitch {
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
+struct SanguineLightUpRGBSwitch : app::SvgSwitch {
+	std::vector<unsigned int>colors;
+	std::vector<NVGcolor> halos;
+	SvgWidget* glyph;
+	TransformWidget* transformWidget;
+	SanguineLightUpRGBSwitch();
+	void addColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
+	void addColor(unsigned int color);
+	void addHalo(NVGcolor haloColor);
+	void drawLayer(const DrawArgs& args, int layer) override;
+	void setBackground(const std::string fileName);
+	void setGlyph(const std::string fileName, const float offsetX, const float offsetY);
+};
+
 struct Befaco2StepSwitch : app::SvgSwitch {
 	Befaco2StepSwitch();
 };
@@ -295,6 +305,11 @@ void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolo
 
 inline void fillSvgSolidColor(NSVGimage* svgImage, const unsigned int fillColor);
 
+// utils
+inline unsigned int rgbColorToInt(const uint8_t red, const uint8_t green, const uint8_t blue, const uint8_t alpha = 255) {
+	return (alpha << 24) + (blue << 16) + (green << 8) + red;
+}
+
 // Light colors.
 
 struct RGBLightColor {
@@ -302,3 +317,7 @@ struct RGBLightColor {
 	float green;
 	float blue;
 };
+
+// Color constants for decorative lights
+static const unsigned int kSanguineBlueLight = rgbColorToInt(0, 167, 255);
+static const unsigned int kSanguineYellowLight = rgbColorToInt(239, 250, 100);

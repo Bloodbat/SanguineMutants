@@ -402,6 +402,84 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
+SanguineLightUpRGBSwitch::SanguineLightUpRGBSwitch() {
+	momentary = true;
+	shadow->opacity = 0.0;
+	sw->wrap();
+	box.size = sw->box.size;
+	transformWidget = new TransformWidget;
+	fb->addChildAbove(transformWidget, sw);
+	glyph = new SvgWidget();
+	transformWidget->addChild(glyph);
+}
+
+void SanguineLightUpRGBSwitch::addColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) {
+	colors.push_back(rgbColorToInt(red, green, blue, alpha));
+}
+
+void SanguineLightUpRGBSwitch::addColor(unsigned int color) {
+	colors.push_back(color);
+}
+
+void SanguineLightUpRGBSwitch::addHalo(NVGcolor haloColor) {
+	halos.push_back(haloColor);
+}
+
+void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
+	// Programmers responsibility: set both a background and glyph or Rack will crash here. You've been warned.
+	if (layer == 1) {
+		if (module && !module->isBypassed()) {
+			svgDraw(args.vg, sw->svg->handle);
+			uint32_t frameNum = getParamQuantity()->getValue();
+			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+			/*
+			Programmer responsibility : make sure there are enough colors here for every switch state
+			or Rack will go bye-bye.
+			*/
+			fillSvgSolidColor(glyph->svg->handle, colors[frameNum]);
+			nvgSave(args.vg);
+			nvgTransform(args.vg, transformWidget->transform[0], transformWidget->transform[1], transformWidget->transform[2],
+				transformWidget->transform[3], transformWidget->transform[4], transformWidget->transform[5]);
+			svgDraw(args.vg, glyph->svg->handle);
+			nvgRestore(args.vg);
+			/*
+			Programmer responsibility: make sure there are enough halos here for  every switch state
+			or Rack will go to synth heaven.
+			*/
+			drawCircularHalo(args, box.size, halos[frameNum], 175, 8.f);
+		}
+		// For module browser
+		else if (!module) {
+			svgDraw(args.vg, sw->svg->handle);
+			fillSvgSolidColor(glyph->svg->handle, colors[0]);
+			nvgSave(args.vg);
+			nvgTransform(args.vg, transformWidget->transform[0], transformWidget->transform[1], transformWidget->transform[2],
+				transformWidget->transform[3], transformWidget->transform[4], transformWidget->transform[5]);
+			svgDraw(args.vg, glyph->svg->handle);
+			nvgRestore(args.vg);
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
+void SanguineLightUpRGBSwitch::setBackground(const std::string fileName) {
+	sw->setSvg(Svg::load(asset::plugin(pluginInstance, fileName)));
+	sw->wrap();
+	box.size = sw->box.size;
+	fb->box.size = sw->box.size;
+	// Move shadow downward by 10%
+	shadow->box.size = sw->box.size;
+	shadow->box.pos = math::Vec(0, sw->box.size.y * 0.10);
+}
+
+void SanguineLightUpRGBSwitch::setGlyph(const std::string fileName, const float offsetX, const float offsetY) {
+	glyph->setSvg(Svg::load(asset::plugin(pluginInstance, fileName)));
+	glyph->wrap();
+	transformWidget->box.size = glyph->box.size;
+	transformWidget->identity();
+	transformWidget->translate(millimetersToPixelsVec(offsetX, offsetY));
+}
+
 Befaco2StepSwitch::Befaco2StepSwitch() {
 	addFrame(Svg::load(asset::system("res/ComponentLibrary/BefacoSwitch_0.svg")));
 	addFrame(Svg::load(asset::system("res/ComponentLibrary/BefacoSwitch_2.svg")));
