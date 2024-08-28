@@ -717,15 +717,14 @@ struct ContextusWidget : ModuleWidget {
 		}
 
 		currentX = lightXBase;
-		const int offset = 8;
-		for (int i = 0; i < 8; i++) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, (Contextus::LIGHT_CHANNEL_MODEL + i + offset) * 3));
+		for (int i = 8; i < 16; i++) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, Contextus::LIGHT_CHANNEL_MODEL + i * 3));
 			currentX += lightXDelta;
 		}
 
 		NodiDisplay* nodiDisplay = new NodiDisplay(4, module, 71.12, 20.996);
 		nodiFrambuffer->addChild(nodiDisplay);
-		nodiDisplay->fallbackString = contextusModelInfos[0].code;		
+		nodiDisplay->fallbackString = contextusModelInfos[0].code;
 
 		if (module) {
 			nodiDisplay->values.displayText = &module->displayText;

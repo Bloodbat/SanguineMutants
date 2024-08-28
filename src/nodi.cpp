@@ -726,10 +726,9 @@ struct NodiWidget : ModuleWidget {
 			currentX += lightXDelta;
 		}
 
-		currentX = lightXBase;
-		const int offset = 8;
-		for (int i = 0; i < 8; i++) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, (Nodi::LIGHT_CHANNEL_MODEL + i + offset) * 3));
+		currentX = lightXBase;		
+		for (int i = 8; i < 16; i++) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, Nodi::LIGHT_CHANNEL_MODEL + i * 3));
 			currentX += lightXDelta;
 		}
 
