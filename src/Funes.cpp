@@ -215,7 +215,7 @@ struct Funes : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		int channels = std::max(inputs[INPUT_NOTE].getChannels(), 1);
+		int channels = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		if (outputBuffer.empty()) {
 			const int blockSize = 12;

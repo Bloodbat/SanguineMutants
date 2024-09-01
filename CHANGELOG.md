@@ -50,6 +50,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Leave displays on in module browser.
 
+- Funes polyphonic channel count can also be set by the trigger input.
+
 ## Changes
 
 - Different alternative firmwares use different face plate colors.
