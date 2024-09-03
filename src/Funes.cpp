@@ -711,14 +711,10 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Frequency mode", "", [=](Menu* menu) {
-			for (int i = 0; i < 11; i++) {
-				menu->addChild(createCheckMenuItem(funesFrequencyModes[i], "",
-					[=]() {return module->frequencyMode == i; },
-					[=]() {module->setFrequencyMode(i); }
-				));
-			}
-			}));
+		menu->addChild(createIndexSubmenuItem("Frequency mode", funesFrequencyModes,
+			[=]() {return module->frequencyMode; },
+			[=](int i) {module->setFrequencyMode(i); }
+		));
 
 		menu->addChild(new MenuSeparator);
 

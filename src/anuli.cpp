@@ -464,25 +464,17 @@ struct AnuliWidget : ModuleWidget {
 			"Disastrous Peace"
 		};
 
-		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
-			for (int i = 0; i < 7; i++) {
-				menu->addChild(createCheckMenuItem(anuliMenuLabels[i], "",
-					[=]() { return module->params[Anuli::PARAM_MODE].getValue() == i; },
-					[=]() { module->setMode(i); }
-				));
-			}
-			}));
+		menu->addChild(createIndexSubmenuItem("Mode", anuliMenuLabels,
+			[=]() { return module->params[Anuli::PARAM_MODE].getValue(); },
+			[=](int i) { module->setMode(i); }
+		));
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Disastrous Peace FX", "", [=](Menu* menu) {
-			for (int i = 0; i < 6; i++) {
-				menu->addChild(createCheckMenuItem(anuliFxLabels[i], "",
-					[=]() { return module->params[Anuli::PARAM_FX].getValue() == i; },
-					[=]() { module->params[Anuli::PARAM_FX].setValue(i); }
-				));
-			}
-			}));
+		menu->addChild(createIndexSubmenuItem("Disastrous Peace FX", anuliFxLabels,
+			[=]() { return module->params[Anuli::PARAM_FX].getValue(); },
+			[=](int i) { module->params[Anuli::PARAM_FX].setValue(i); }
+		));
 	}
 };
 

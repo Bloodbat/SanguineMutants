@@ -226,7 +226,7 @@ struct Distortiones : Module {
 	}
 };
 
-static const std::string distortionesModelLabels[9] = {
+static const std::vector<std::string> distortionesModelLabels = {
 	"Binaural doppler panner",
 	"Wave folder",
 	"Chebyschev wave shaper",
@@ -279,14 +279,10 @@ struct DistortionesWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
-			for (int i = 0; i < 9; i++) {
-				menu->addChild(createCheckMenuItem(distortionesModelLabels[i], "",
-					[=]() {return module->featureMode == i; },
-					[=]() {module->setFeatureMode(i); }
-				));
-			}
-			}));
+		menu->addChild(createIndexSubmenuItem("Mode", distortionesModelLabels,
+			[=]() {return module->featureMode; },
+			[=](int i) {module->setFeatureMode(i); }
+		));
 	}
 };
 

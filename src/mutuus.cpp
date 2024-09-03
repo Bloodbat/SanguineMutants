@@ -245,7 +245,7 @@ struct Mutuus : Module {
 	}
 };
 
-static const std::string mutuusModelLabels[9] = {
+static const std::vector<std::string> mutuusModelLabels = {
 	"Dual state variable filter",
 	"Ladder filter",
 	"Reverbs",
@@ -300,14 +300,10 @@ struct MutuusWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Mode", "", [=](Menu* menu) {
-			for (int i = 0; i < 9; i++) {
-				menu->addChild(createCheckMenuItem(mutuusModelLabels[i], "",
-					[=]() {return module->featureMode == i; },
-					[=]() {module->setFeatureMode(i); }
-				));
-			}
-			}));
+		menu->addChild(createIndexSubmenuItem("Mode", mutuusModelLabels,
+			[=]() {return module->featureMode; },
+			[=](int i) {module->setFeatureMode(i); }
+		));
 	}
 };
 
