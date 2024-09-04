@@ -930,11 +930,11 @@ struct MarmoraWidget : ModuleWidget {
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(25.641, 35.373), module, Marmora::PARAM_T_RANGE, Marmora::LIGHT_T_RANGE));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(50.226, 37.59), module, Marmora::PARAM_GATE_BIAS));
+		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(50.226, 37.59), module, Marmora::PARAM_GATE_BIAS));
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(71.12, 37.59), module, Marmora::INPUT_DEJA_VU));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(92.014, 37.59), module, Marmora::PARAM_GATE_JITTER));
+		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(71.12, 58.483), module, Marmora::PARAM_GATE_JITTER));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(116.623, 35.373), module, Marmora::PARAM_X_RANGE, Marmora::LIGHT_X_RANGE));
 
@@ -946,7 +946,7 @@ struct MarmoraWidget : ModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(48.445, 59.072), module, Marmora::PARAM_T_JITTER));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(71.12, 58.483), module, Marmora::PARAM_DEJA_VU_LENGTH));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(92.014, 37.59), module, Marmora::PARAM_DEJA_VU_LENGTH));
 
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(93.795, 59.072), module, Marmora::PARAM_X_STEPS));
 
