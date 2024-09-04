@@ -44,7 +44,7 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Frequency mode (range) to Funes faceplate.
 
-- Make Nodi and Contextus polyphonic.
+- Nodi and Contextus are now polyphonic.
 
 - LED markers for some modules.
 
@@ -52,15 +52,19 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Funes polyphonic channel count can also be set by the trigger input.
 
+- Nicer context menus for mode selection (for certain modules and modes).
+
 ## Changes
 
 - Different alternative firmwares use different face plate colors.
 
-- Mode tooltips to Funes select knob.
+- Mode tooltips for Funes' select knob.
 
 - Shaped lights don't turn off in module browser.
 
 - Mortuus ByteBeats equation 6 regained some of its complexity.
+
+- Displays are shown in module browser.
 
 ## Fixes
 
