@@ -220,10 +220,10 @@ static const std::vector<std::string> marmoraScaleLabels = {
 };
 
 static const std::vector<std::string> marmoraInternalClockLabels = {
-	"T₁ → X₁, T₂ → X₂, T₃ → X₃",
-	"T₁ → X₁, X₂, X₃",
-	"T₂ → X₁, X₂, X₃",
-	"T₃ → X₁, X₂, X₃",
+	"t₁ → X₁, T₂ → X₂, T₃ → X₃",
+	"t₁ → X₁, X₂, X₃",
+	"t₂ → X₁, X₂, X₃",
+	"t₃ → X₁, X₂, X₃",
 };
 
 static const std::vector<std::string> marmoraLockLabels = {
