@@ -205,9 +205,9 @@ static const std::vector<std::string> marmoraXModeLabels = {
 };
 
 static const std::vector<std::string> marmoraXRangeLabels = {
-	"Narrow",
-	"Positive",
-	"Full"
+	"Narrow (0V - 2V)",
+	"Positive (0V - +5V)",
+	"Full (-5V - +5V)"
 };
 
 static const std::vector<std::string> marmoraScaleLabels = {
@@ -368,7 +368,7 @@ struct Marmora : Module {
 		configParam(PARAM_T_BIAS, 0.0, 1.0, 0.5, "Gate bias", "%", 0.f, 100.f);
 		configParam(PARAM_X_BIAS, 0.0, 1.0, 0.5, "Distribution bias", "%", 0.f, 100.f);
 		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "Clock range mode", marmoraTRangeLabels);
-		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "Output voltage range mode", marmoraXRangeLabels);
+		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "Output voltage range", marmoraXRangeLabels);
 		configButton(PARAM_EXTERNAL, "External processing mode");
 		configParam(PARAM_T_JITTER, 0.0, 1.0, 0.0, "Randomness amount", "%", 0.f, 100.f);
 		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "Smoothness", "%", 0.f, 100.f);
@@ -423,6 +423,8 @@ struct Marmora : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		// TODO!! Add reseeding! (From the manual).
+
 		// Clocks
 		bool tGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, tGate);
