@@ -24,6 +24,16 @@ static const std::vector<std::string> anuliFxLabels = {
 	"Caveman (variant)"
 };
 
+static const std::vector<std::string> anuliMenuLabels = {
+			"Modal resonator",
+			"Sympathetic strings",
+			"Modulated/inharmonic string",
+			"FM voice",
+			"Quantized sympathetic strings",
+			"Reverb string",
+			"Disastrous Peace"
+};
+
 struct Anuli : Module {
 	enum ParamIds {
 		PARAM_FREQUENCY,
@@ -100,7 +110,7 @@ struct Anuli : Module {
 	Anuli() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODE, 0.f, 6.f, 0.f, "Resonator model");
+		configSwitch(PARAM_MODE, 0.f, 6.f, 0.f, "Resonator model", anuliMenuLabels);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
 		configSwitch(PARAM_FX, 0.f, 5.f, 0.f, "Disastrous peace FX", anuliFxLabels);
@@ -453,16 +463,6 @@ struct AnuliWidget : ModuleWidget {
 		assert(module);
 
 		menu->addChild(new MenuSeparator);
-
-		static const std::vector<std::string> anuliMenuLabels = {
-			"Modal resonator",
-			"Sympathetic strings",
-			"Modulated/inharmonic string",
-			"FM voice",
-			"Quantized sympathetic strings",
-			"Reverb string",
-			"Disastrous Peace"
-		};
 
 		menu->addChild(createIndexSubmenuItem("Mode", anuliMenuLabels,
 			[=]() { return module->params[Anuli::PARAM_MODE].getValue(); },
