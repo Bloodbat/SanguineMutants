@@ -1035,6 +1035,8 @@ struct MarmoraWidget : ModuleWidget {
 			[=](int i) {module->params[Marmora::PARAM_T_RANGE].setValue(i); }
 		));
 
+		menu->addChild(new MenuSeparator);
+
 		menu->addChild(createIndexSubmenuItem("X mode", marmoraXModeLabels,
 			[=]() {return module->params[Marmora::PARAM_X_MODE].getValue(); },
 			[=](int i) {module->params[Marmora::PARAM_X_MODE].setValue(i); }
@@ -1045,15 +1047,17 @@ struct MarmoraWidget : ModuleWidget {
 			[=](int i) {module->params[Marmora::PARAM_X_RANGE].setValue(i); }
 		));
 
+		menu->addChild(createIndexSubmenuItem("Internal X clock source", marmoraInternalClockLabels,
+			[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue(); },
+			[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
+		));
+
 		menu->addChild(createIndexSubmenuItem("Scale", marmoraScaleLabels,
 			[=]() {return module->params[Marmora::PARAM_SCALE].getValue(); },
 			[=](int i) {module->params[Marmora::PARAM_SCALE].setValue(i); }
 		));
 
-		menu->addChild(createIndexSubmenuItem("Internal X clock source", marmoraInternalClockLabels,
-			[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
-		));
+		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createCheckMenuItem("Scale edit mode", "",
 			[=]() {return module->bScaleEditMode; },
