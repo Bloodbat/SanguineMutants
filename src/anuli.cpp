@@ -397,7 +397,7 @@ struct AnuliWidget : ModuleWidget {
 			displayModel->values.displayText = &module->displayText;
 		}
 
-		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(91.161, 22.087), module, Anuli::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(90.161, 22.087), module, Anuli::PARAM_MODE));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(101.146, 22.087),
 			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
