@@ -25,13 +25,13 @@ static const std::vector<std::string> anuliFxLabels = {
 };
 
 static const std::vector<std::string> anuliMenuLabels = {
-			"Modal resonator",
-			"Sympathetic strings",
-			"Modulated/inharmonic string",
-			"FM voice",
-			"Quantized sympathetic strings",
-			"Reverb string",
-			"Disastrous Peace"
+	"Modal resonator",
+	"Sympathetic strings",
+	"Modulated/inharmonic string",
+	"FM voice",
+	"Quantized sympathetic strings",
+	"Reverb string",
+	"Disastrous Peace"
 };
 
 struct Anuli : Module {
