@@ -115,6 +115,12 @@ Sanguine1PSYellow::Sanguine1PSYellow() {
 	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1PSYellow_fg.svg")));
 }
 
+Sanguine1SGray::Sanguine1SGray() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1SGray.svg")));
+	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1S_bg.svg")));
+	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine1SGray_fg.svg")));
+}
+
 Sanguine2PSBlue::Sanguine2PSBlue() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PSBlue.svg")));
 	bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine2PS_bg.svg")));

@@ -90,6 +90,10 @@ struct Sanguine1PSYellow : Rogan {
 	Sanguine1PSYellow();
 };
 
+struct Sanguine1SGray : Rogan {
+	Sanguine1SGray();
+};
+
 struct Sanguine2PSBlue : Rogan {
 	Sanguine2PSBlue();
 };
