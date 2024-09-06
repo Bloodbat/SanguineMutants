@@ -247,7 +247,7 @@ struct Mutuus : Module {
 
 static const std::vector<std::string> mutuusModelLabels = {
 	"Dual state variable filter",
-	"Ladder filter",
+	"Ensemble FX",
 	"Reverbs",
 	"Frequency shifter",
 	"Bit crusher",
