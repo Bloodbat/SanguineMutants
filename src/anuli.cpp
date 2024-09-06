@@ -218,11 +218,15 @@ struct Anuli : Module {
 
 				// Patch
 				rings::Patch patch;
-				float structure = params[PARAM_STRUCTURE].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue()) * inputs[INPUT_STRUCTURE_CV].getVoltage(channel) / 5.0;
+				float structure = params[PARAM_STRUCTURE].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue()) *
+					inputs[INPUT_STRUCTURE_CV].getVoltage(channel) / 5.0;
 				patch.structure = clamp(structure, 0.0f, 0.9995f);
-				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue()) * inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel) / 5.0, 0.0f, 1.0f);
-				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue()) * inputs[INPUT_DAMPING_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
-				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue()) * inputs[INPUT_POSITION_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
+				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue()) *
+					inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel) / 5.0, 0.0f, 1.0f);
+				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue()) *
+					inputs[INPUT_DAMPING_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
+				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue()) *
+					inputs[INPUT_POSITION_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
 
 				// Performance
 				rings::PerformanceState performanceState;
@@ -233,7 +237,8 @@ struct Anuli : Module {
 					transpose = roundf(transpose);
 				}
 				performanceState.tonic = 12.0 + clamp(transpose, 0.0f, 60.0f);
-				performanceState.fm = clamp(48.0 * 3.3 * dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue()) * inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.0, channel) / 5.0, -48.0f, 48.0f);
+				performanceState.fm = clamp(48.0 * 3.3 * dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue()) *
+					inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.0, channel) / 5.0, -48.0f, 48.0f);
 
 				performanceState.internal_exciter = !inputs[INPUT_IN].isConnected();
 				performanceState.internal_strum = !inputs[INPUT_STRUM].isConnected();
