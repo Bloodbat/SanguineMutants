@@ -1,7 +1,7 @@
 name: Build VCV Rack Plugin
 #on: [push, pull_request]
 
-on: 
+on:
   workflow_dispatch:
   schedule:
    # It's always night... somewhere
@@ -148,7 +148,7 @@ jobs:
 #          file_glob: true
 
   publish-nightly:
-    name: Publish Nightly 
+    name: Publish Nightly
     #if: ${{ github.ref == 'refs/heads/mutantsdev' && github.repository_owner == 'Bloodbat' }}
     if: ${{ github.repository_owner == 'Bloodbat' }}
     runs-on: ubuntu-latest
