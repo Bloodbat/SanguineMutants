@@ -18,10 +18,10 @@ static const std::vector<std::string> anuliModeLabels = {
 static const std::vector<std::string> anuliFxLabels = {
 	"Formant filter",
 	"Rolandish chorus",
-	"Caveman",
-	"Formant filter (variant)",
-	"Rolandish chorus (variant)",
-	"Caveman (variant)"
+	"Caveman reverb",
+	"Formant filter (less abrasive variant)",
+	"Rolandish chorus (Solinaish ensemble)",
+	"Caveman reverb (shinier variant)"
 };
 
 static const std::vector<std::string> anuliMenuLabels = {
