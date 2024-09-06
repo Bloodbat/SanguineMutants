@@ -718,12 +718,12 @@ struct FunesWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createMenuItem("Reset custom data for current engine", "",
-			[=]() {module->customDataReset(); }
-		));
-
 		menu->addChild(createMenuItem("Load custom data for current engine", "",
 			[=]() {module->customDataShowLoadDialog(); }
+		));
+
+		menu->addChild(createMenuItem("Reset custom data for current engine", "",
+			[=]() {module->customDataReset(); }
 		));
 
 		menu->addChild(new MenuSeparator);
