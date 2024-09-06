@@ -389,12 +389,12 @@ struct AnuliWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(8.383, 22.087), module, Anuli::LIGHT_RESONATOR));
+		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(9.021, 17.317), module, Anuli::LIGHT_RESONATOR));
 
 		FramebufferWidget* anuliFrambuffer = new FramebufferWidget();
 		addChild(anuliFrambuffer);
 
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 47.368f, 22.087f);
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 53.34f, 22.087f);
 		anuliFrambuffer->addChild(displayModel);
 		displayModel->fallbackString = anuliModeLabels[0];
 
@@ -402,10 +402,7 @@ struct AnuliWidget : ModuleWidget {
 			displayModel->values.displayText = &module->displayText;
 		}
 
-		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(90.161, 22.087), module, Anuli::PARAM_MODE));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(101.146, 22.087),
-			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
 
@@ -417,13 +414,11 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(33.006, 49.715), module, Anuli::PARAM_FREQUENCY));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(60.761, 61.388), module, Anuli::LIGHT_POLYPHONY));
-
 		addParam(createParamCentered<Sanguine3PSGreen>(millimetersToPixelsVec(73.674, 49.715), module, Anuli::PARAM_STRUCTURE));
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 42.833), module, Anuli::PARAM_STRUCTURE_MOD));
 
-		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 49.592, 61.388);
+		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34, 54.795);
 		anuliFrambuffer->addChild(displayPolyphony);
 		displayPolyphony->fallbackNumber = 1;
 
@@ -433,12 +428,11 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(33.006, 72.385), module, Anuli::PARAM_BRIGHTNESS));
 
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(53.34f, 67.085f), module, Anuli::LIGHT_POLYPHONY));
+
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(73.674, 72.385), module, Anuli::PARAM_POSITION));
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(18.415, 81.324), module, Anuli::PARAM_BRIGHTNESS_MOD));
-
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 53.34, 72.329);
-		addChild(bloodLogo);
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 81.324), module, Anuli::PARAM_POSITION_MOD));
 
@@ -447,6 +441,17 @@ struct AnuliWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(53.34, 84.417), module, Anuli::PARAM_DAMPING));
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
+
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 6.42, 100.55);
+		addChild(bloodLogo);
+
+		SanguineTinyNumericDisplay* displayChannelCount = new SanguineTinyNumericDisplay(2, module, 22.578, 100.75);
+		anuliFrambuffer->addChild(displayChannelCount);
+		displayChannelCount->fallbackNumber = 1;
+
+		if (module) {
+			displayChannelCount->values.numberValue = &module->channelCount;
+		}
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
 
@@ -458,6 +463,9 @@ struct AnuliWidget : ModuleWidget {
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(8.728, 116.807), module, Anuli::INPUT_STRUM));
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(22.58, 116.807), module, Anuli::INPUT_PITCH));
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(36.382, 116.807), module, Anuli::INPUT_IN));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(71.828, 116.609),
+			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
 
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(84.046, 116.807), module, Anuli::OUTPUT_ODD));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(97.898, 116.807), module, Anuli::OUTPUT_EVEN));
