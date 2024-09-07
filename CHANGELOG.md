@@ -1,3 +1,10 @@
+# 2.4.1
+
+## Changes
+
+- Mode selector encoder knobs for Nebulae and its descendants.
+
+
 # 2.4.0
 
 ## New Modules
