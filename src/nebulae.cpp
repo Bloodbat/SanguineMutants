@@ -589,7 +589,7 @@ struct NebulaeWidget : ModuleWidget {
 		nebulaeFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = nebulaeModeList[0].display;
 
-		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Nebulae::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Nebulae::PARAM_MODE));
 
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Nebulae::PARAM_POSITION, Nebulae::LIGHT_POSITION_CV));

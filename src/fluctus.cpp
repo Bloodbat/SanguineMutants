@@ -611,7 +611,7 @@ struct FluctusWidget : ModuleWidget {
 		etesiaFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = fluctusModeList[0].display;
 
-		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Fluctus::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Fluctus::PARAM_MODE));
 
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Fluctus::PARAM_POSITION, Fluctus::LIGHT_POSITION_CV));

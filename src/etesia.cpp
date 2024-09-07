@@ -622,7 +622,7 @@ struct EtesiaWidget : ModuleWidget {
 		etesiaFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = etesiaModeList[0].display;
 
-		addParam(createParamCentered<Sanguine1PGrayCap>(millimetersToPixelsVec(129.805, 25.227), module, Etesia::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Etesia::PARAM_MODE));
 
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173), module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
 
