@@ -917,6 +917,7 @@ struct MortuusWidget : ModuleWidget {
 		setModule(module);
 
 		SanguinePanel* panel = new SanguinePanel("res/backplate_22hp_red.svg", "res/mortuus_faceplate.svg");
+		panel->addLayer("res/apices_common.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

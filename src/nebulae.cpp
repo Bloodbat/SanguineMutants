@@ -557,6 +557,7 @@ struct NebulaeWidget : ModuleWidget {
 		setModule(module);
 
 		SanguinePanel* panel = new SanguinePanel("res/backplate_27hp_purple.svg", "res/nebulae_faceplate.svg");
+		panel->addLayer("res/nebulae_common.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

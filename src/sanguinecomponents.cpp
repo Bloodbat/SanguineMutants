@@ -793,6 +793,12 @@ SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std:
 	fb->addChildBelow(foreground, panelBorder);
 }
 
+void SanguinePanel::addLayer(const std::string layerFileName) {
+	SvgWidget* layer = new SvgWidget();
+	layer->setSvg(Svg::load(asset::plugin(pluginInstance, layerFileName)));
+	fb->addChildBelow(layer, panelBorder);
+}
+
 // Drawing utils
 
 void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,

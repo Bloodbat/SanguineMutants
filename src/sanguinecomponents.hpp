@@ -299,6 +299,7 @@ struct SanguineMutantsLogoLight : SanguineShapedLight {
 struct SanguinePanel : SvgPanel {
 	widget::SvgWidget* foreground;
 	SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName);
+	void addLayer(const std::string layerFileName);
 };
 
 // Drawing utils

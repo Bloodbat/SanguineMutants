@@ -707,6 +707,7 @@ struct NodiWidget : ModuleWidget {
 		setModule(module);
 
 		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_purple.svg", "res/nodi_faceplate.svg");
+		panel->addLayer("res/nodi_common.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

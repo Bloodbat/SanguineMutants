@@ -261,6 +261,7 @@ struct MutuusWidget : ModuleWidget {
 	MutuusWidget(Mutuus* module) {
 		setModule(module);
 		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_green.svg", "res/mutuus_faceplate.svg");
+		panel->addLayer("res/incurvationes_common.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

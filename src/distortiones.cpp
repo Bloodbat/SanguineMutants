@@ -242,6 +242,7 @@ struct DistortionesWidget : ModuleWidget {
 	DistortionesWidget(Distortiones* module) {
 		setModule(module);
 		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_red.svg", "res/distortiones_faceplate.svg");
+		panel->addLayer("res/incurvationes_common.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
