@@ -24,3 +24,4 @@ extern Model* modelExplorator;
 extern Model* modelMarmora;
 extern Model* modelAnuli;
 extern Model* modelVelamina;
+extern Model* modelAestus;

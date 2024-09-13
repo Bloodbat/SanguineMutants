@@ -1,3 +1,12 @@
+# 2.5.0
+
+## New Modules
+
+### Aestus
+
+Based on MI's Tides, it fixes PLL mode, separates it from the clock input, and restores switching banks using the clock input when module is using the Sheep firmware.
+
+
 # 2.4.2
 
 ## Additions

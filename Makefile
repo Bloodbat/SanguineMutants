@@ -3,7 +3,7 @@ FLAGS += \
 	-I./eurorack \
 	-I./alt_firmware \
 	-Wno-unused-local-typedefs
-	
+
 EXTRA_FLAGS =
 
 SOURCES += $(wildcard src/*.cpp)
@@ -66,7 +66,7 @@ SOURCES += eurorack/clouds/dsp/mu_law.cc
 SOURCES += eurorack/clouds/dsp/pvoc/frame_transformation.cc
 SOURCES += eurorack/clouds/dsp/pvoc/phase_vocoder.cc
 SOURCES += eurorack/clouds/dsp/pvoc/stft.cc
-SOURCES += eurorack/clouds/resources.cc 
+SOURCES += eurorack/clouds/resources.cc
 
 SOURCES += alt_firmware/clouds_parasite/dsp/etesia_granular_processor.cc
 SOURCES += alt_firmware/clouds_parasite/etesia_resources.cc
@@ -131,6 +131,9 @@ SOURCES += eurorack/rings/dsp/string_synth_part.cc
 SOURCES += eurorack/rings/dsp/string.cc
 SOURCES += eurorack/rings/dsp/resonator.cc
 SOURCES += eurorack/rings/resources.cc
+
+SOURCES += eurorack/tides/generator.cc
+SOURCES += eurorack/tides/resources.cc
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
