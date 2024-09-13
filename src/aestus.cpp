@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
+#include "sanguinehelpers.hpp"
 #include "tides/generator.h"
 
 static const std::vector<std::string> displayModels = {
@@ -209,10 +210,6 @@ struct Aestus : Module {
 
 			displayModel = displayModels[params[PARAM_MODEL].getValue()];
 		}
-	}
-
-	long long getSystemTimeMs() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	}
 
 	void onReset() override {
