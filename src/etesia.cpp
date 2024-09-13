@@ -378,17 +378,23 @@ struct Etesia : Module {
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
-			ledMode = LEDS_MOMENTARY;
+			if (ledMode != LEDS_MOMENTARY) {
+				ledMode = LEDS_MOMENTARY;
+			}
 			displayTimeout++;
 		}
 
 		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
-			ledMode = LEDS_QUALITY_MOMENTARY;
+			if (ledMode != LEDS_QUALITY_MOMENTARY) {
+				ledMode = LEDS_QUALITY_MOMENTARY;
+			}
 			displayTimeout++;
 		}
 
 		if (playbackMode != lastLEDPlaybackMode) {
-			ledMode = LEDS_MODE_MOMENTARY;
+			if (ledMode != LEDS_MODE_MOMENTARY) {
+				ledMode = LEDS_MODE_MOMENTARY;
+			}
 			displayTimeout++;
 		}
 
