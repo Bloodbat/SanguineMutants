@@ -558,10 +558,6 @@ struct Marmora : Module {
 		}
 	}
 
-	long long getSystemTimeMs() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	}
-
 	void drawLight(const int light, const LightModes lightMode, const float sampleTime) {
 		switch (lightMode)
 		{

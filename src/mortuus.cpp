@@ -561,10 +561,6 @@ struct Mortuus : Module {
 		}
 	}
 
-	long long getSystemTimeMs() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	}
-
 	void pollSwitches(const ProcessArgs& args) {
 		for (uint8_t i = 0; i < kButtonCount; ++i) {
 			if (stSwitches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {

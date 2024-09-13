@@ -352,10 +352,6 @@ struct Anuli : Module {
 		}
 	}
 
-	long long getSystemTimeMs() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	}
-
 	void setMode(int modeNum) {
 		if (modeNum < 6) {
 			bEasterEgg = false;

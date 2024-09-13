@@ -222,10 +222,6 @@ struct Mutuus : Module {
 		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 0x8000 * 5.0);
 	}
 
-	long long getSystemTimeMs() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	}
-
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 		json_object_set_new(rootJ, "mode", json_integer(mutuusModulator.feature_mode()));
