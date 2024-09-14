@@ -96,6 +96,7 @@ struct Aestus : Module {
 
 		generator.Init();
 		lightsDivider.setDivision(kLightsFrequency);
+		onReset();
 	}
 
 	void process(const ProcessArgs& args) override {
