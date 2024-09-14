@@ -243,7 +243,7 @@ class Generator {
   int16_t attenuation_;
   
   uint32_t phase_;
-  uint32_t phase_increment_;
+  uint32_t phase_increment_ = 0;
   uint16_t x_;
   uint16_t y_;
   uint16_t z_;
@@ -270,7 +270,7 @@ class Generator {
   // Polyblep status.
   int32_t next_sample_;
   bool slope_up_;
-  uint32_t mid_point_;
+  uint32_t mid_point_ = 0;
   
   static const FrequencyRatio frequency_ratios_[];
   static const int16_t num_frequency_ratios_;
