@@ -200,14 +200,8 @@ struct Aestus : Module {
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.0, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.0, -unipolarFlag), sampleTime);
 
-			if (bSync) {
-				lights[LIGHT_SYNC + 0].setBrightnessSmooth(!(getSystemTimeMs() & 128), sampleTime);
-				lights[LIGHT_SYNC + 1].setBrightnessSmooth(1.f, sampleTime);
-			}
-			else {
-				lights[LIGHT_SYNC + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_SYNC + 1].setBrightnessSmooth(0.f, sampleTime);
-			}
+			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 1.f : 0.f, sampleTime);
 
 			displayModel = displayModels[params[PARAM_MODEL].getValue()];
 		}
