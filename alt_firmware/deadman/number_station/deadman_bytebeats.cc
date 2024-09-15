@@ -56,11 +56,11 @@ namespace deadman {
 		// uint32_t p2 = 0;
 		int32_t sample = 0;
 		// temporary vars
-		uint32_t p;
-		uint32_t q;
-		uint32_t q1;
-		uint32_t q2;
-		uint8_t j;
+		uint32_t p = 0;
+		uint32_t q = 0;
+		uint32_t q1 = 0;
+		uint32_t q2 = 0;
+		uint8_t j = 0;
 
 		uint16_t bytepitch = (65535 - frequency_) >> 11; // was 12
 		if (bytepitch < 1) {
@@ -113,7 +113,7 @@ namespace deadman {
 			case 3:
 				p0 = p0_ >> 11;
 				p1 = p1_ >> 9;
-				// This one is the second one listed at from http://xifeng.weebly.com/bytebeats.html        
+				// This one is the second one listed at from http://xifeng.weebly.com/bytebeats.html
 				if (p1 == 0) // Prevent %0 -Bloodbat
 					p1 = 1;
 				sample = ((((((((t_ >> p0) | t_) | (t_ >> p0)) * 10) & ((5 * t_) | (t_ >> 10))) | (t_ ^ (t_ % p1))) & 0xFF)) << 8;

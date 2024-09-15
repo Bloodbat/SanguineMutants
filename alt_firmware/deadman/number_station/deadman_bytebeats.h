@@ -76,13 +76,13 @@ namespace deadman {
 		}
 
 	private:
-		uint16_t frequency_;
-		uint16_t p0_;
-		uint16_t p1_;
-		uint16_t p2_;
-		uint32_t t_;
-		uint32_t phase_;
-		uint8_t equation_index_;
+		uint16_t frequency_ = 0;
+		uint16_t p0_ = 0;
+		uint16_t p1_ = 0;
+		uint16_t p2_ = 0;
+		uint32_t t_ = 0;
+		uint32_t phase_ = 0;
+		uint8_t equation_index_ = 0;
 
 
 
