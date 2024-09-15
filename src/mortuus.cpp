@@ -769,12 +769,8 @@ struct Mortuus : Module {
 		if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
 			lockPots();
 			for (uint8_t i = 0; i < 4; ++i) {
-				processors[0].set_parameter(
-					i,
-					static_cast<uint16_t>(potValue[i]) << 8);
-				processors[1].set_parameter(
-					i,
-					static_cast<uint16_t>(potValue[i + 4]) << 8);
+				processors[0].set_parameter(i, static_cast<uint16_t>(potValue[i]) << 8);
+				processors[1].set_parameter(i, static_cast<uint16_t>(potValue[i + 4]) << 8);
 			}
 		}
 
