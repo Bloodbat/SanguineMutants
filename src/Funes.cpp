@@ -660,17 +660,17 @@ struct FunesWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(86.86, 89.884), module, Funes::PARAM_LPG_DECAY));
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(52.962, 67.293), module, Funes::PARAM_FREQUENCY_ROOT));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(161.831, 32.306), module, Funes::INPUT_ENGINE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(161.831, 55.118), module, Funes::INPUT_TIMBRE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(161.831, 74.89), module, Funes::INPUT_FREQUENCY));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(161.831, 95.976), module, Funes::INPUT_MORPH));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(120.305, 74.878), module, Funes::INPUT_HARMONICS));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(14.378, 116.972), module, Funes::INPUT_TRIGGER));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(27.855, 116.972), module, Funes::INPUT_LEVEL));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(41.331, 116.972), module, Funes::INPUT_NOTE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 32.306), module, Funes::INPUT_ENGINE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 55.118), module, Funes::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 74.89), module, Funes::INPUT_FREQUENCY));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 95.976), module, Funes::INPUT_MORPH));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(120.305, 74.878), module, Funes::INPUT_HARMONICS));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(14.378, 116.972), module, Funes::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(27.855, 116.972), module, Funes::INPUT_LEVEL));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(41.331, 116.972), module, Funes::INPUT_NOTE));
 
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(147.979, 116.972), module, Funes::OUTPUT_OUT));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(161.831, 116.972), module, Funes::OUTPUT_AUX));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(147.979, 116.972), module, Funes::OUTPUT_OUT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(161.831, 116.972), module, Funes::OUTPUT_AUX));
 
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(41.489, 14.41), module, Funes::LIGHT_MODEL + 0 * 2));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(46.489, 14.41), module, Funes::LIGHT_MODEL + 1 * 2));

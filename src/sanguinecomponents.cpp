@@ -19,12 +19,24 @@ BananutGreen::BananutGreen() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutGreen.svg")));
 }
 
+BananutGreenPoly::BananutGreenPoly() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutGreenPoly.svg")));
+}
+
 BananutPurple::BananutPurple() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutPurple.svg")));
 }
 
+BananutPurplePoly::BananutPurplePoly() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutPurplePoly.svg")));
+}
+
 BananutRed::BananutRed() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
+}
+
+BananutRedPoly::BananutRedPoly() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutRedPoly.svg")));
 }
 
 BananutYellow::BananutYellow() {

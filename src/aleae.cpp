@@ -167,11 +167,11 @@ struct AleaeWidget : ModuleWidget {
 			Aleae::PARAM_OUT_MODE1, Aleae::LIGHTS_OUT_MODE + 0));
 
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Aleae::PARAM_THRESHOLD1));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(6.012, 44.303), module, Aleae::INPUT_IN1));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(24.481, 44.303), module, Aleae::INPUT_P1));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(6.012, 59.959), module, Aleae::OUTPUT_OUT1A));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Aleae::INPUT_IN1));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Aleae::INPUT_P1));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Aleae::OUTPUT_OUT1A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Aleae::LIGHTS_STATE + 0 * 2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(24.481, 59.959), module, Aleae::OUTPUT_OUT1B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Aleae::OUTPUT_OUT1B));
 
 		// Switch #2
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 74.653), module,
@@ -181,11 +181,11 @@ struct AleaeWidget : ModuleWidget {
 			Aleae::PARAM_OUT_MODE2, Aleae::LIGHTS_OUT_MODE + 1));
 
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Aleae::PARAM_THRESHOLD2));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(6.012, 102.232), module, Aleae::INPUT_IN2));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(24.481, 102.232), module, Aleae::INPUT_P2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT2A));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Aleae::INPUT_IN2));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Aleae::INPUT_P2));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT2A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 117.888), module, Aleae::LIGHTS_STATE + 1 * 2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(24.481, 117.888), module, Aleae::OUTPUT_OUT2B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Aleae::OUTPUT_OUT2B));
 	}
 };
 

@@ -20,12 +20,24 @@ struct BananutGreen : app::SvgPort {
 	BananutGreen();
 };
 
+struct BananutGreenPoly : app::SvgPort {
+	BananutGreenPoly();
+};
+
 struct BananutPurple : app::SvgPort {
 	BananutPurple();
 };
 
+struct BananutPurplePoly : app::SvgPort {
+	BananutPurplePoly();
+};
+
 struct BananutRed : app::SvgPort {
 	BananutRed();
+};
+
+struct BananutRedPoly : app::SvgPort {
+	BananutRedPoly();
 };
 
 struct BananutYellow : app::SvgPort {

@@ -400,11 +400,11 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(53.34, 37.683), module, Anuli::PARAM_POLYPHONY));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(98.297, 35.904), module, Anuli::INPUT_STRUCTURE_CV));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 35.904), module, Anuli::INPUT_STRUCTURE_CV));
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(18.415, 42.833), module, Anuli::PARAM_FREQUENCY_MOD));
 
@@ -432,11 +432,11 @@ struct AnuliWidget : ModuleWidget {
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 81.324), module, Anuli::PARAM_POSITION_MOD));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.383, 86.197), module, Anuli::INPUT_BRIGHTNESS_CV));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 86.197), module, Anuli::INPUT_BRIGHTNESS_CV));
 
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(53.34, 84.417), module, Anuli::PARAM_DAMPING));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 6.42, 100.55);
 		addChild(bloodLogo);
@@ -454,17 +454,17 @@ struct AnuliWidget : ModuleWidget {
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 94.721, 99.605);
 		addChild(mutantsLogo);
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(53.34, 112.736), module, Anuli::INPUT_DAMPING_CV));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(53.34, 112.736), module, Anuli::INPUT_DAMPING_CV));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(8.728, 116.807), module, Anuli::INPUT_STRUM));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(22.58, 116.807), module, Anuli::INPUT_PITCH));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(36.382, 116.807), module, Anuli::INPUT_IN));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(8.728, 116.807), module, Anuli::INPUT_STRUM));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(22.58, 116.807), module, Anuli::INPUT_PITCH));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(36.382, 116.807), module, Anuli::INPUT_IN));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(71.828, 116.609),
 			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
 
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(84.046, 116.807), module, Anuli::OUTPUT_ODD));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(97.898, 116.807), module, Anuli::OUTPUT_EVEN));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(84.046, 116.807), module, Anuli::OUTPUT_ODD));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(97.898, 116.807), module, Anuli::OUTPUT_EVEN));
 	}
 
 	void appendContextMenu(Menu* menu) override {
