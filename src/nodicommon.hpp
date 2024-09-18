@@ -2,11 +2,6 @@
 
 #include "sanguinecomponents.hpp"
 
-struct NodiModelInfo {
-	std::string code;
-	std::string label;
-};
-
 static const uint16_t nodiBitReductionMasks[7] = {
 	0xc000,
 	0xe000,

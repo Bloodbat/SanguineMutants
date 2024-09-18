@@ -15,64 +15,124 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-static const std::vector<NodiModelInfo> contextusModelInfos = {
-	{"CSAW", "Quirky sawtooth"},
-	{"/\\-_", "Triangle to saw"},
-	{"//-_", "Sawtooth wave with dephasing"},
-	{"FOLD", "Wavefolded sine/triangle"},
-	{"uuuu", "Buzz"},
-	{"SUB-", "Square sub"},
-	{"SUB/", "Saw sub"},
-	{"SYN-", "Square sync"},
-	{"SYN/", "Saw sync"},
-	{"//x3", "Triple saw"},
-	{"-_x3", "Triple square"},
-	{"/\\x3", "Triple triangle"},
-	{"SIx3", "Triple sine"},
-	{"RING", "Triple ring mod"},
-	{"\\\\CH", "Saw diatonic chords"},
-	{"-_CH", "Square diatonic chords"},
-	{"/\\CH", "Triangle diatonic chords"},
-	{"SICH", "Sine diatonic chords"},
-	{"WTCH", "Wavetable diatonic chords"},
-	{"\\\\x6", "Saw chord stack"},
-	{"-_x6", "Square chord stack"},
-	{"/\\x6", "Triangle chord stack"},
-	{"SIx6", "Sine chord stack"},
-	{"WTx6", "Wavetable chord stack"},
-	{"////", "Saw swarm"},
-	{"//uu", "Saw comb"},
-	{"TOY*", "Circuit-bent toy"},
-	{"ZLPF", "Low-pass filtered waveform"},
-	{"ZPKF", "Peak filtered waveform"},
-	{"ZBPF", "Band-pass filtered waveform"},
-	{"ZHPF", "High-pass filtered waveform"},
-	{"VOSM", "VOSIM formant"},
-	{"VOWL", "Speech synthesis"},
-	{"VFOF", "FOF speech synthesis"},
-	{"HARM", "12 sine harmonics"},
-	{"FM  ", "2-operator phase-modulation"},
-	{"FBFM", "2-operator phase-modulation with feedback"},
-	{"WTFM", "2-operator phase-modulation with chaotic feedback"},
-	{"PLUK", "Plucked string"},
-	{"BOWD", "Bowed string"},
-	{"BLOW", "Blown reed"},
-	{"FLUT", "Flute"},
-	{"BELL", "Bell"},
-	{"DRUM", "Drum"},
-	{"KICK", "Kick drum circuit simulation"},
-	{"CYMB", "Cymbal"},
-	{"SNAR", "Snare"},
-	{"WTBL", "Wavetable"},
-	{"WMAP", "2D wavetable"},
-	{"WLIN", "1D wavetable"},
-	{"SAM1", "Software Automated Mouth 1"},
-	{"SAM2", "Software Automated Mouth 2"},
-	{"NOIS", "Filtered noise"},
-	{"TWNQ", "Twin peaks noise"},
-	{"CLKN", "Clocked noise"},
-	{"CLOU", "Granular cloud"},
-	{"PRTC", "Particle noise"},
+static const std::vector<std::string> contextusDisplayLabels = {
+	"CSAW",
+	"/\\-_",
+	"//-_",
+	"FOLD",
+	"uuuu",
+	"SUB-",
+	"SUB/",
+	"SYN-",
+	"SYN/",
+	"//x3",
+	"-_x3",
+	"/\\x3",
+	"SIx3",
+	"RING",
+	"\\\\CH",
+	"-_CH",
+	"/\\CH",
+	"SICH",
+	"WTCH",
+	"\\\\x6",
+	"-_x6",
+	"/\\x6",
+	"SIx6",
+	"WTx6",
+	"////",
+	"//uu",
+	"TOY*",
+	"ZLPF",
+	"ZPKF",
+	"ZBPF",
+	"ZHPF",
+	"VOSM",
+	"VOWL",
+	"VFOF",
+	"HARM",
+	"FM  ",
+	"FBFM",
+	"WTFM",
+	"PLUK",
+	"BOWD",
+	"BLOW",
+	"FLUT",
+	"BELL",
+	"DRUM",
+	"KICK",
+	"CYMB",
+	"SNAR",
+	"WTBL",
+	"WMAP",
+	"WLIN",
+	"SAM1",
+	"SAM2",
+	"NOIS",
+	"TWNQ",
+	"CLKN",
+	"CLOU",
+	"PRTC"
+};
+
+static const std::vector<std::string> contextusMenuLabels = {
+	"Quirky sawtooth",
+	"Triangle to saw",
+	"Sawtooth wave with dephasing",
+	"Wavefolded sine/triangle",
+	"Buzz",
+	"Square sub",
+	"Saw sub",
+	"Square sync",
+	"Saw sync",
+	"Triple saw",
+	"Triple square",
+	"Triple triangle",
+	"Triple sine",
+	"Triple ring mod",
+	"Saw diatonic chords",
+	"Square diatonic chords",
+	"Triangle diatonic chords",
+	"Sine diatonic chords",
+	"Wavetable diatonic chords",
+	"Saw chord stack",
+	"Square chord stack",
+	"Triangle chord stack",
+	"Sine chord stack",
+	"Wavetable chord stack",
+	"Saw swarm",
+	"Saw comb",
+	"Circuit-bent toy",
+	"Low-pass filtered waveform",
+	"Peak filtered waveform",
+	"Band-pass filtered waveform",
+	"High-pass filtered waveform",
+	"VOSIM formant",
+	"Speech synthesis",
+	"FOF speech synthesis",
+	"12 sine harmonics",
+	"2-operator phase-modulation",
+	"2-operator phase-modulation with feedback",
+	"2-operator phase-modulation with chaotic feedback",
+	"Plucked string",
+	"Bowed string",
+	"Blown reed",
+	"Flute",
+	"Bell",
+	"Drum",
+	"Kick drum circuit simulation",
+	"Cymbal",
+	"Snare",
+	"Wavetable",
+	"2D wavetable",
+	"1D wavetable",
+	"Software Automated Mouth 1",
+	"Software Automated Mouth 2",
+	"Filtered noise",
+	"Twin peaks noise",
+	"Clocked noise",
+	"Granular cloud",
+	"Particle noise"
 };
 
 static const RGBLightColor contextusLightColors[57]{
@@ -242,8 +302,8 @@ struct Contextus : Module {
 	Contextus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODEL, 0.f, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", "", 0.f, 1.f);
-		paramQuantities[PARAM_MODEL]->snapEnabled = true;
+		configSwitch(PARAM_MODEL, 0.f, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f,
+			"Model", contextusMenuLabels);
 		configParam(PARAM_MODULATION, -1.0, 1.0, 0.0, "Modulation");
 		configParam(PARAM_COARSE, -5.0, 3.0, -1.0, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
 		configParam(PARAM_FINE, -1.0, 1.0, 0.0, "Fine frequency", " semitones");
@@ -544,7 +604,7 @@ struct Contextus : Module {
 		// Display handling
 		// Display - return to model after 2s
 		if (lastSettingChanged == renaissance::SETTING_OSCILLATOR_SHAPE) {
-			displayText = contextusModelInfos[settings[0].shape].code;
+			displayText = contextusDisplayLabels[settings[0].shape];
 		}
 		else {
 			int value;
@@ -697,7 +757,7 @@ struct ContextusWidget : ModuleWidget {
 		setModule(module);
 
 		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_red.svg", "res/contextus_faceplate.svg");
-		panel->addLayer("res/nodi_common.svg");		
+		panel->addLayer("res/nodi_common.svg");
 		setPanel(panel);
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -721,7 +781,7 @@ struct ContextusWidget : ModuleWidget {
 
 		NodiDisplay* nodiDisplay = new NodiDisplay(4, module, 71.12, 20.996);
 		nodiFrambuffer->addChild(nodiDisplay);
-		nodiDisplay->fallbackString = contextusModelInfos[0].code;
+		nodiDisplay->fallbackString = contextusDisplayLabels[0];
 
 		if (module) {
 			nodiDisplay->values.displayText = &module->displayText;
@@ -791,8 +851,8 @@ struct ContextusWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(contextusModelInfos.size()); i++) {
-			modelLabels.push_back(contextusModelInfos[i].code + ": " + contextusModelInfos[i].label);
+		for (int i = 0; i < int(contextusDisplayLabels.size()); i++) {
+			modelLabels.push_back(contextusDisplayLabels[i] + ": " + contextusMenuLabels[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
