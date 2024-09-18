@@ -8,6 +8,11 @@ static const std::vector<std::string> displayModels = {
 	"S",
 };
 
+static const std::vector<std::string> aestusMenuLabels = {
+	"Aestus",
+	"Sheep"
+};
+
 struct Aestus : Module {
 	enum ParamIds {
 		PARAM_MODE,
@@ -75,7 +80,7 @@ struct Aestus : Module {
 		configParam(PARAM_SLOPE, -1.0, 1.0, 0.0, "Slope");
 		configParam(PARAM_SMOOTHNESS, -1.0, 1.0, 0.0, "Smoothness");
 
-		configSwitch(PARAM_MODEL, 0.f, 1.f, 0.f, "Module model");
+		configSwitch(PARAM_MODEL, 0.f, 1.f, 0.f, "Module model", aestusMenuLabels);
 
 		configInput(INPUT_SHAPE, "Shape");
 		configInput(INPUT_SLOPE, "Slope");
@@ -237,6 +242,10 @@ struct Aestus : Module {
 			generator.set_range(tides::GeneratorRange(json_integer_value(rangeJ)));
 		}
 	}
+
+	void setModel(int modelNum) {
+		params[PARAM_MODEL].setValue(modelNum);
+	}
 };
 
 struct AestusWidget : ModuleWidget {
@@ -297,6 +306,18 @@ struct AestusWidget : ModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(35.554, 111.643), module, Aestus::OUTPUT_LOW));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(49.998, 111.643), module, Aestus::OUTPUT_UNI));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(64.442, 111.643), module, Aestus::OUTPUT_BI));
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		Aestus* module = dynamic_cast<Aestus*>(this->module);
+		assert(module);
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createIndexSubmenuItem("Mode", aestusMenuLabels,
+			[=]() { return module->params[Aestus::PARAM_MODEL].getValue(); },
+			[=](int i) { module->setModel(i); }
+		));
 	}
 };
 
