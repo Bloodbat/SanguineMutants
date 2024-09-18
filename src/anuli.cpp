@@ -111,7 +111,6 @@ struct Anuli : Module {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configSwitch(PARAM_MODE, 0.f, 6.f, 0.f, "Resonator model", anuliMenuLabels);
-		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
 		configSwitch(PARAM_FX, 0.f, 5.f, 0.f, "Disastrous peace FX", anuliFxLabels);
 

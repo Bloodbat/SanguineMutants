@@ -175,7 +175,6 @@ struct Funes : Module {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configSwitch(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", funesModelLabels);
-		paramQuantities[PARAM_MODEL]->snapEnabled = true;
 
 		configParam(PARAM_FREQUENCY, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
 		configParam(PARAM_FREQUENCY_ROOT, -4.0, 4.0, 0.0, "Frequency Root", " semitones", 0.f, 12.f);
@@ -188,7 +187,6 @@ struct Funes : Module {
 		configParam(PARAM_FREQUENCY_CV, -1.0, 1.0, 0.0, "Frequency CV");
 		configParam(PARAM_MORPH_CV, -1.0, 1.0, 0.0, "Morph CV");
 		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funesFrequencyModes);
-		paramQuantities[PARAM_FREQ_MODE]->snapEnabled = true;
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
