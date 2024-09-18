@@ -210,15 +210,15 @@ struct VelaminaWidget : ModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(42.837, 52.697),
 			module, Velamina::PARAM_GAIN_4, Velamina::LIGHT_GAIN_4));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.326, 80.55), module, Velamina::INPUT_CV_1));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(19.82, 80.55), module, Velamina::INPUT_CV_2));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(31.323, 80.55), module, Velamina::INPUT_CV_3));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(42.837, 80.55), module, Velamina::INPUT_CV_4));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.326, 80.55), module, Velamina::INPUT_CV_1));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(19.82, 80.55), module, Velamina::INPUT_CV_2));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(31.323, 80.55), module, Velamina::INPUT_CV_3));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.837, 80.55), module, Velamina::INPUT_CV_4));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(8.326, 96.59), module, Velamina::INPUT_IN_1));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(19.82, 96.59), module, Velamina::INPUT_IN_2));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(31.323, 96.59), module, Velamina::INPUT_IN_3));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(42.837, 96.59), module, Velamina::INPUT_IN_4));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(8.326, 96.59), module, Velamina::INPUT_IN_1));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(19.82, 96.59), module, Velamina::INPUT_IN_2));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(31.323, 96.59), module, Velamina::INPUT_IN_3));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(42.837, 96.59), module, Velamina::INPUT_IN_4));
 
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(4.626, 105.454),
 			module, Velamina::LIGHT_OUT_1));
@@ -229,10 +229,10 @@ struct VelaminaWidget : ModuleWidget {
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(39.145, 105.454),
 			module, Velamina::LIGHT_OUT_4));
 
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(8.326, 112.956), module, Velamina::OUTPUT_1));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(19.82, 112.956), module, Velamina::OUTPUT_2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(31.323, 112.956), module, Velamina::OUTPUT_3));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.837, 112.956), module, Velamina::OUTPUT_4));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(8.326, 112.956), module, Velamina::OUTPUT_1));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(19.82, 112.956), module, Velamina::OUTPUT_2));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(31.323, 112.956), module, Velamina::OUTPUT_3));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(42.837, 112.956), module, Velamina::OUTPUT_4));
 	}
 };
 

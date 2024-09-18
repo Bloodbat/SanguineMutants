@@ -745,7 +745,7 @@ struct NodiWidget : ModuleWidget {
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(71.12, 67.247),
 			module, Nodi::LIGHT_MODEL));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.222, 36.606), module, Nodi::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 36.606), module, Nodi::INPUT_TIMBRE));
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(22.768, 36.606), module, Nodi::PARAM_TIMBRE));
 
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.46, 40.534), module, Nodi::PARAM_COARSE));
@@ -772,7 +772,7 @@ struct NodiWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(23.804, 76.712), module, Nodi::PARAM_AD_COLOR));
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(119.4, 76.712), module, Nodi::PARAM_AD_MODULATION));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(8.222, 97.889), module, Nodi::INPUT_COLOR));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 97.889), module, Nodi::INPUT_COLOR));
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(22.768, 97.889), module, Nodi::PARAM_COLOR));
 
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.457, 93.965), module, Nodi::PARAM_PITCH_OCTAVE));
@@ -781,15 +781,15 @@ struct NodiWidget : ModuleWidget {
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(90.806, 93.965), module, Nodi::PARAM_PITCH_RANGE));
 
 		addParam(createParamCentered<Sanguine1PSOrange>(millimetersToPixelsVec(119.474, 97.889), module, Nodi::PARAM_FM));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(133.968, 97.889), module, Nodi::INPUT_FM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(133.968, 97.889), module, Nodi::INPUT_FM));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(8.222, 117.788), module, Nodi::INPUT_PITCH));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.722, 117.788), module, Nodi::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(8.222, 117.788), module, Nodi::INPUT_PITCH));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.722, 117.788), module, Nodi::INPUT_TRIGGER));
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 117.788), module, Nodi::PARAM_TRIGGER_DELAY));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(46.798, 117.788), module, Nodi::PARAM_AUTO, Nodi::LIGHT_AUTO));
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(62.4, 113.511), module, Nodi::PARAM_BITS));
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(79.841, 113.511), module, Nodi::PARAM_RATE));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(133.968, 117.788), module, Nodi::OUTPUT_OUT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(133.968, 117.788), module, Nodi::OUTPUT_OUT));
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 110.323);
 		addChild(bloodLogo);

@@ -393,52 +393,52 @@ struct ExploratorWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		// 1:3
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(5.49, 23.491), module, Explorator::INPUT_1_TO_3));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(18.897, 23.491), module, Explorator::OUTPUT_1_TO_3_A));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(5.49, 23.491), module, Explorator::INPUT_1_TO_3));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(18.897, 23.491), module, Explorator::OUTPUT_1_TO_3_A));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(12.194, 31.498),
 			module, Explorator::LIGHT_1_TO_3));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(5.49, 39.504), module, Explorator::OUTPUT_1_TO_3_B));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(18.897, 39.504), module, Explorator::OUTPUT_1_TO_3_C));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(5.49, 39.504), module, Explorator::OUTPUT_1_TO_3_B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(18.897, 39.504), module, Explorator::OUTPUT_1_TO_3_C));
 
 		// Sign
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(31.871, 23.491), module, Explorator::INPUT_SIGN));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(45.277, 23.491), module, Explorator::OUTPUT_SIGN_INVERTED));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(31.871, 23.491), module, Explorator::INPUT_SIGN));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(45.277, 23.491), module, Explorator::OUTPUT_SIGN_INVERTED));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(38.574, 31.498),
 			module, Explorator::LIGHT_SIGN));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(31.871, 39.504), module, Explorator::OUTPUT_SIGN_HALF_RECTIFIER));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(45.277, 39.504), module, Explorator::OUTPUT_SIGN_FULL_RECTIFIER));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(31.871, 39.504), module, Explorator::OUTPUT_SIGN_HALF_RECTIFIER));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(45.277, 39.504), module, Explorator::OUTPUT_SIGN_FULL_RECTIFIER));
 
 		// 2:2
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(5.49, 57.521), module, Explorator::INPUT_2_TO_2_A));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.897, 57.521), module, Explorator::INPUT_2_TO_2_B));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(5.49, 57.521), module, Explorator::INPUT_2_TO_2_A));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(18.897, 57.521), module, Explorator::INPUT_2_TO_2_B));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(12.194, 65.527),
 			module, Explorator::LIGHT_2_TO_2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(5.49, 73.534), module, Explorator::OUTPUT_2_TO_2_A));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(18.897, 73.534), module, Explorator::OUTPUT_2_TO_2_B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(5.49, 73.534), module, Explorator::OUTPUT_2_TO_2_A));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(18.897, 73.534), module, Explorator::OUTPUT_2_TO_2_B));
 
 		// Logic
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(31.871, 57.521), module, Explorator::INPUT_LOGIC_A));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(45.277, 57.521), module, Explorator::INPUT_LOGIC_B));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(31.871, 57.521), module, Explorator::INPUT_LOGIC_A));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(45.277, 57.521), module, Explorator::INPUT_LOGIC_B));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(38.212, 65.527),
 			module, Explorator::LIGHT_LOGIC));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(31.871, 73.534), module, Explorator::OUTPUT_LOGIC_MIN));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(45.277, 73.534), module, Explorator::OUTPUT_LOGIC_MAX));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(31.871, 73.534), module, Explorator::OUTPUT_LOGIC_MIN));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(45.277, 73.534), module, Explorator::OUTPUT_LOGIC_MAX));
 
 		// 3:1
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(5.49, 91.55), module, Explorator::INPUT_3_TO_1_A));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.897, 91.55), module, Explorator::INPUT_3_TO_1_B));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(5.49, 91.55), module, Explorator::INPUT_3_TO_1_A));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(18.897, 91.55), module, Explorator::INPUT_3_TO_1_B));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(12.194, 99.557),
 			module, Explorator::LIGHT_3_TO_1));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(5.49, 107.563), module, Explorator::INPUT_3_TO_1_C));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(18.897, 107.563), module, Explorator::OUTPUT_3_TO_1));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(5.49, 107.563), module, Explorator::INPUT_3_TO_1_C));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(18.897, 107.563), module, Explorator::OUTPUT_3_TO_1));
 
 		// Sample and hold
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(31.871, 91.55), module, Explorator::INPUT_SH_VOLTAGE));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(45.277, 91.55), module, Explorator::INPUT_SH_TRIGGER));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(31.871, 91.55), module, Explorator::INPUT_SH_VOLTAGE));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(45.277, 91.55), module, Explorator::INPUT_SH_TRIGGER));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(38.212, 99.557),
 			module, Explorator::LIGHT_SH));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(31.871, 107.563), module, Explorator::OUTPUT_SH_NOISE));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(45.277, 107.563), module, Explorator::OUTPUT_SH_VOLTAGE));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(31.871, 107.563), module, Explorator::OUTPUT_SH_NOISE));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(45.277, 107.563), module, Explorator::OUTPUT_SH_VOLTAGE));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(15.273, 119.127),
 			module, Explorator::PARAM_HARDWARE, Explorator::LIGHT_HARDWARE));
