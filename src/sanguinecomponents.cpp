@@ -162,7 +162,6 @@ Sanguine3PSRed::Sanguine3PSRed() {
 SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule) {
 	characterCount = newCharacterCount;
 	module = theModule;
-	fontSize = 10;
 }
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
@@ -180,7 +179,6 @@ void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 
 void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
-		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {
 			// Text				
 			nvgFontSize(args.vg, fontSize);
@@ -199,43 +197,40 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 			std::string displayValue = "";
 
 			// TODO!!! Ensure we draw only characterCount chars.
-
-			if (module && !module->isBypassed()) {
-				switch (displayType)
-				{
-				case DISPLAY_NUMERIC:
+			switch (displayType)
+			{
+			case DISPLAY_NUMERIC: {
+				if (module && !module->isBypassed()) {
 					if (values.numberValue) {
 						displayValue = std::to_string(*values.numberValue);
 						if (*values.numberValue < 10 && leadingZero)
 							displayValue.insert(0, 1, '0');
 					}
-					break;
-				case DISPLAY_STRING:
-					if (values.displayText) {
-						displayValue = *values.displayText;
-					}
-					break;
 				}
-
-				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-				if (drawHalo) {
-					drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
-				}
-			}
-			else if (!module) {
-				switch (displayType)
-				{
-				case DISPLAY_NUMERIC:
+				else if (!module) {
 					displayValue = std::to_string(fallbackNumber);
 					if (fallbackNumber < 10 && leadingZero)
 						displayValue.insert(0, 1, '0');
-					break;
-				case DISPLAY_STRING:
-					displayValue = fallbackString;
-					break;
 				}
+				break;
+			}
+			case DISPLAY_STRING: {
+				if (module && !module->isBypassed()) {
+					if (values.displayText) {
+						displayValue = *values.displayText;
+					}
+				}
+				else if (!module) {
+					displayValue = fallbackString;
+				}
+				break;
+			}
+			}
 
-				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
+			nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
+
+			if (drawHalo) {
+				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 			}
 		}
 	}
@@ -244,7 +239,7 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
-	fontName = "res/components/Segment14.ttf";
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
 	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
 	fontSize = 40;
 
@@ -263,7 +258,7 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* t
 
 SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
-	fontName = "res/components/Segment7Standard.otf";
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
 	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
 	fontSize = 33.95;
 
@@ -285,7 +280,7 @@ SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, M
 SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule)
 {
-	fontName = "res/components/sanguinematrix.ttf";
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
 	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
 	fontSize = 16.45;
 
@@ -322,7 +317,7 @@ SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCoun
 };
 
 Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) {
-	fontName = "res/components/sanguinematrix.ttf";
+	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
 	box.size = mm2px(Vec(16.298, 5.418));
 
 	module = theModule;
@@ -353,7 +348,6 @@ void Sanguine96x32OLEDDisplay::draw(const DrawArgs& args) {
 
 void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
-		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {
 			// Text					
 			nvgFontSize(args.vg, 6);
@@ -452,7 +446,7 @@ void SanguineLightUpRGBSwitch::addHalo(NVGcolor haloColor) {
 void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
 	// Programmers responsibility: set both a background and glyph or Rack will crash here. You've been warned.
 	if (layer == 1) {
-		if (module && !module->isBypassed() && sw->svg) {
+		if (module && !module->isBypassed()) {
 			svgDraw(args.vg, sw->svg->handle);
 			uint32_t frameNum = getParamQuantity()->getValue();
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
@@ -473,7 +467,7 @@ void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
 			drawCircularHalo(args, box.size, halos[frameNum], 175, 8.f);
 		}
 		// For module browser
-		else if (!module && sw->svg) {
+		else if (!module) {
 			svgDraw(args.vg, sw->svg->handle);
 			fillSvgSolidColor(glyph->svg->handle, colors[0]);
 			nvgSave(args.vg);
@@ -512,10 +506,9 @@ Befaco2StepSwitch::Befaco2StepSwitch() {
 // Lights
 
 SanguineMultiColoredShapedLight::SanguineMultiColoredShapedLight() {
-	module = nullptr;
 }
 
-/* Returns the parameterized value of the line p2--p3 where it intersects with p0--p1 */
+/** Returns the parameterized value of the line p2--p3 where it intersects with p0--p1 */
 float SanguineMultiColoredShapedLight::getLineCrossing(math::Vec p0, math::Vec p1, math::Vec p2, math::Vec p3) {
 	math::Vec b = p2.minus(p0);
 	math::Vec d = p1.minus(p0);
@@ -552,7 +545,7 @@ NVGpaint SanguineMultiColoredShapedLight::getPaint(NVGcontext* vg, NSVGpaint* p,
 };
 
 void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer) {
-	if (innerColor && svg) {
+	if (innerColor) {
 		if (layer == 1) {
 			if (module && !module->isBypassed()) {
 				int shapeIndex = 0;
@@ -806,7 +799,8 @@ SanguineMutantsLogoLight::SanguineMutantsLogoLight(Module* theModule, const floa
 
 SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName) {
 	setBackground(Svg::load(asset::plugin(pluginInstance, newBackgroundFileName)));
-	foreground = new SvgWidget();
+
+	SvgWidget* foreground = new SvgWidget();
 	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForegroundFileName)));
 	fb->addChildBelow(foreground, panelBorder);
 }
@@ -851,11 +845,9 @@ void SanguineModuleWidget::makePanel() {
 	BackplateColors themeBackplateColor = PLATE_PURPLE;
 	FaceplateThemes faceplateTheme = defaultTheme;
 
-	// Programmer responsibility: if the module is not a SanguineModule, Rack will jump off a cliff.
-	// Now you know.
 	SanguineModule* sanguineModule = dynamic_cast<SanguineModule*>(this->module);
 
-	if (sanguineModule) {
+	if (module) {
 		if (!sanguineModule->bUniqueTheme) {
 			sanguineModule->setModuleTheme(faceplateTheme);
 		}

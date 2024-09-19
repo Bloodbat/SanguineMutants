@@ -5,7 +5,7 @@
 
 static const std::vector<std::string> displayModels = {
 	"A",
-	"S",
+	"S"
 };
 
 static const std::vector<std::string> aestusMenuLabels = {
@@ -13,7 +13,7 @@ static const std::vector<std::string> aestusMenuLabels = {
 	"Sheep"
 };
 
-struct Aestus : Module {
+struct Aestus : SanguineModule {
 	enum ParamIds {
 		PARAM_MODE,
 		PARAM_RANGE,
@@ -224,7 +224,7 @@ struct Aestus : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
 		json_object_set_new(rootJ, "mode", json_integer(int(generator.mode())));
 		json_object_set_new(rootJ, "range", json_integer(int(generator.range())));
 
@@ -232,6 +232,8 @@ struct Aestus : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* modeJ = json_object_get(rootJ, "mode");
 		if (modeJ) {
 			generator.set_mode(tides::GeneratorMode(json_integer_value(modeJ)));
@@ -248,12 +250,15 @@ struct Aestus : Module {
 	}
 };
 
-struct AestusWidget : ModuleWidget {
+struct AestusWidget : SanguineModuleWidget {
 	AestusWidget(Aestus* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_14hp_purple.svg", "res/aestus_faceplate.svg");
-		setPanel(panel);
+		moduleName = "aestus";
+		panelSize = SIZE_14;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -309,6 +314,8 @@ struct AestusWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Aestus* module = dynamic_cast<Aestus*>(this->module);
 		assert(module);
 
