@@ -30,7 +30,7 @@ static const std::vector<EtesiaModeDisplay> fluctusModeTooltips{
 	{"Freeze",  "Loop begin",                  "Loop size modulation", "Loop size",               "Slice step",     "Playback speed", "Clock",     "Slice probability", "Clock division",            "Pitch modulation", "Feedback"}
 };
 
-struct Fluctus : Module {
+struct Fluctus : SanguineModule {
 	enum ParamIds {
 		PARAM_MODE,
 		PARAM_FREEZE,
@@ -560,12 +560,15 @@ struct Fluctus : Module {
 
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
+
 		json_object_set_new(rootJ, "buffersize", json_integer(bufferSize));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* buffersizeJ = json_object_get(rootJ, "buffersize");
 		if (buffersizeJ) {
 			bufferSize = json_integer_value(buffersizeJ);
@@ -580,13 +583,15 @@ struct Fluctus : Module {
 	}
 };
 
-struct FluctusWidget : ModuleWidget {
+struct FluctusWidget : SanguineModuleWidget {
 	FluctusWidget(Fluctus* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_27hp_green.svg", "res/fluctus_faceplate.svg");
-		panel->addLayer("res/nebulae_common.svg");
-		setPanel(panel);
+		moduleName = "fluctus";
+		panelSize = SIZE_27;
+		backplateColor = PLATE_GREEN;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -739,6 +744,8 @@ struct FluctusWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Fluctus* module = dynamic_cast<Fluctus*>(this->module);
 
 		menu->addChild(new MenuSeparator);

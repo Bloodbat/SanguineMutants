@@ -4,7 +4,7 @@
 
 using simd::float_4;
 
-struct Explorator : Module {
+struct Explorator : SanguineModule {
 	enum ParamIds {
 		PARAM_HARDWARE,
 		PARAMS_COUNT
@@ -380,12 +380,15 @@ struct Explorator : Module {
 	}
 };
 
-struct ExploratorWidget : ModuleWidget {
+struct ExploratorWidget : SanguineModuleWidget {
 	ExploratorWidget(Explorator* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_purple.svg", "res/explorator_faceplate.svg");
-		setPanel(panel);
+		moduleName = "explorator";
+		panelSize = SIZE_10;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

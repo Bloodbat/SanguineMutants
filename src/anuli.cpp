@@ -34,7 +34,7 @@ static const std::vector<std::string> anuliMenuLabels = {
 	"Disastrous Peace"
 };
 
-struct Anuli : Module {
+struct Anuli : SanguineModule {
 	enum ParamIds {
 		PARAM_FREQUENCY,
 		PARAM_STRUCTURE,
@@ -372,12 +372,15 @@ struct Anuli : Module {
 	}
 };
 
-struct AnuliWidget : ModuleWidget {
+struct AnuliWidget : SanguineModuleWidget {
 	AnuliWidget(Anuli* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_21hp_purple.svg", "res/anuli_faceplate.svg");
-		setPanel(panel);
+		moduleName = "anuli";
+		panelSize = SIZE_21;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -467,6 +470,8 @@ struct AnuliWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Anuli* module = dynamic_cast<Anuli*>(this->module);
 		assert(module);
 

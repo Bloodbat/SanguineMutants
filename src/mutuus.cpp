@@ -6,7 +6,7 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-struct Mutuus : Module {
+struct Mutuus : SanguineModule {
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -223,12 +223,15 @@ struct Mutuus : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
+
 		json_object_set_new(rootJ, "mode", json_integer(mutuusModulator.feature_mode()));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
 			mutuusModulator.set_feature_mode(static_cast<mutuus::FeatureMode>(json_integer_value(modeJ)));
 			featureMode = mutuusModulator.feature_mode();
@@ -253,12 +256,15 @@ static const std::vector<std::string> mutuusModelLabels = {
 	"Meta mode",
 };
 
-struct MutuusWidget : ModuleWidget {
+struct MutuusWidget : SanguineModuleWidget {
 	MutuusWidget(Mutuus* module) {
 		setModule(module);
-		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_green.svg", "res/mutuus_faceplate.svg");
-		panel->addLayer("res/incurvationes_common.svg");
-		setPanel(panel);
+
+		moduleName = "mutuus";
+		panelSize = SIZE_10;
+		backplateColor = PLATE_GREEN;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -293,6 +299,8 @@ struct MutuusWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Mutuus* module = dynamic_cast<Mutuus*>(this->module);
 
 		menu->addChild(new MenuSeparator);

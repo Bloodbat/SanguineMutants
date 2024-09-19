@@ -1,4 +1,7 @@
+#pragma once
+
 #include <rack.hpp>
+#include "themes.hpp"
 
 using namespace rack;
 

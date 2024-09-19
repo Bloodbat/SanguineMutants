@@ -91,7 +91,7 @@ static const std::vector<std::string> funesModelLabels = {
 	"Analog hi-hat"
 };
 
-struct Funes : Module {
+struct Funes : SanguineModule {
 	enum ParamIds {
 		PARAM_MODEL,
 		PARAM_FREQUENCY,
@@ -517,7 +517,7 @@ struct Funes : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
 		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
@@ -534,6 +534,8 @@ struct Funes : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
 		if (lowCpuJ)
 			bLowCpu = json_boolean_value(lowCpuJ);
@@ -631,13 +633,16 @@ struct Funes : Module {
 	}
 };
 
-struct FunesWidget : ModuleWidget {
+struct FunesWidget : SanguineModuleWidget {
 
 	FunesWidget(Funes* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_34hp_purple.svg", "res/funes_faceplate.svg");
-		setPanel(panel);
+		moduleName = "funes";
+		panelSize = SIZE_34;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -698,6 +703,8 @@ struct FunesWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Funes* module = dynamic_cast<Funes*>(this->module);
 
 		menu->addChild(new MenuSeparator);

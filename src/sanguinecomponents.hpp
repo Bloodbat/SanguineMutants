@@ -3,6 +3,7 @@
 #include "rack.hpp"
 #include <color.hpp>
 #include "sanguinehelpers.hpp"
+#include "themes.hpp"
 
 using namespace rack;
 
@@ -312,6 +313,28 @@ struct SanguinePanel : SvgPanel {
 	widget::SvgWidget* foreground;
 	SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName);
 	void addLayer(const std::string layerFileName);
+};
+
+// Modules
+struct SanguineModule : Module {
+	bool bUniqueTheme = false;
+	FaceplateThemes previousTheme = THEME_NONE;
+	FaceplateThemes currentTheme = THEME_VITRIOL;
+	void dataFromJson(json_t* rootJ) override;
+	json_t* dataToJson() override;
+	void setModuleTheme(int themeNum);
+};
+
+// Module widgets
+struct SanguineModuleWidget : ModuleWidget {
+	bool bFaceplateSuffix = true;
+	bool bHasCommon = true;
+	std::string moduleName;
+	PanelSizes panelSize = SIZE_34;
+	BackplateColors backplateColor = PLATE_PURPLE;
+	void appendContextMenu(Menu* menu) override;
+	void makePanel();
+	void step() override;
 };
 
 // Drawing utils

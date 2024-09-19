@@ -6,7 +6,7 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-struct Distortiones : Module {
+struct Distortiones : SanguineModule {
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -204,12 +204,15 @@ struct Distortiones : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
+
 		json_object_set_new(rootJ, "mode", json_integer(distortionesModulator.feature_mode()));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
 			distortionesModulator.set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
 			featureMode = distortionesModulator.feature_mode();
@@ -234,12 +237,15 @@ static const std::vector<std::string> distortionesModelLabels = {
 	"Meta mode",
 };
 
-struct DistortionesWidget : ModuleWidget {
+struct DistortionesWidget : SanguineModuleWidget {
 	DistortionesWidget(Distortiones* module) {
 		setModule(module);
-		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_red.svg", "res/distortiones_faceplate.svg");
-		panel->addLayer("res/incurvationes_common.svg");
-		setPanel(panel);
+
+		moduleName = "distortiones";
+		panelSize = SIZE_10;
+		backplateColor = PLATE_RED;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -272,6 +278,8 @@ struct DistortionesWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Distortiones* module = dynamic_cast<Distortiones*>(this->module);
 
 		menu->addChild(new MenuSeparator);

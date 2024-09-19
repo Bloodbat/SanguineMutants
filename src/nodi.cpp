@@ -168,7 +168,7 @@ static const RGBLightColor nodiLightColors[48]{
 {1.f, 1.f, 1.f}
 };
 
-struct Nodi : Module {
+struct Nodi : SanguineModule {
 	enum ParamIds {
 		PARAM_FINE,
 		PARAM_COARSE,
@@ -729,7 +729,7 @@ struct Nodi : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_t* lowCpuJ = json_boolean(bLowCpu);
 		json_object_set_new(rootJ, "bLowCpu", lowCpuJ);
@@ -738,6 +738,8 @@ struct Nodi : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* lowCpuJ = json_object_get(rootJ, "bLowCpu");
 		if (lowCpuJ) {
 			bLowCpu = json_boolean_value(lowCpuJ);
@@ -752,13 +754,15 @@ struct Nodi : Module {
 	}
 };
 
-struct NodiWidget : ModuleWidget {
+struct NodiWidget : SanguineModuleWidget {
 	NodiWidget(Nodi* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_purple.svg", "res/nodi_faceplate.svg");
-		panel->addLayer("res/nodi_common.svg");
-		setPanel(panel);
+		moduleName = "nodi";
+		panelSize = SIZE_28;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -849,6 +853,8 @@ struct NodiWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Nodi* module = dynamic_cast<Nodi*>(this->module);
 
 		menu->addChild(new MenuSeparator);

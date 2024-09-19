@@ -6,7 +6,7 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-struct Incurvationes : Module {
+struct Incurvationes : SanguineModule {
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -161,13 +161,15 @@ struct Incurvationes : Module {
 	}
 };
 
-struct IncurvationesWidget : ModuleWidget {
+struct IncurvationesWidget : SanguineModuleWidget {
 	IncurvationesWidget(Incurvationes* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_purple.svg", "res/incurvationes_faceplate.svg");
-		panel->addLayer("res/incurvationes_common.svg");
-		setPanel(panel);
+		moduleName = "incurvationes";
+		panelSize = SIZE_10;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

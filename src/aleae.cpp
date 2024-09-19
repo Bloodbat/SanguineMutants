@@ -11,7 +11,7 @@
 #define	ROLL_HEADS 0
 #define ROLL_TAILS 1
 
-struct Aleae : Module {
+struct Aleae : SanguineModule {
 	enum ParamIds {
 		PARAM_THRESHOLD1,
 		PARAM_THRESHOLD2,
@@ -150,11 +150,15 @@ struct Aleae : Module {
 	}
 };
 
-struct AleaeWidget : ModuleWidget {
+struct AleaeWidget : SanguineModuleWidget {
 	AleaeWidget(Aleae* module) {
 		setModule(module);
-		SanguinePanel* panel = new SanguinePanel("res/backplate_6hp_purple.svg", "res/aleae_faceplate.svg");
-		setPanel(panel);
+
+		moduleName = "aleae";
+		panelSize = SIZE_6;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));

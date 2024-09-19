@@ -37,7 +37,7 @@ static const std::vector<NebulaeModeDisplay> nebulaeModeTooltips{
 	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch"}
 };
 
-struct Nebulae : Module {
+struct Nebulae : SanguineModule {
 	enum ParamIds {
 		PARAM_MODE,
 		PARAM_FREEZE,
@@ -538,12 +538,15 @@ struct Nebulae : Module {
 
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
+
 		json_object_set_new(rootJ, "buffersize", json_integer(bufferSize));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* buffersizeJ = json_object_get(rootJ, "buffersize");
 		if (buffersizeJ) {
 			bufferSize = json_integer_value(buffersizeJ);
@@ -558,13 +561,15 @@ struct Nebulae : Module {
 	}
 };
 
-struct NebulaeWidget : ModuleWidget {
+struct NebulaeWidget : SanguineModuleWidget {
 	NebulaeWidget(Nebulae* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_27hp_purple.svg", "res/nebulae_faceplate.svg");
-		panel->addLayer("res/nebulae_common.svg");
-		setPanel(panel);
+		moduleName = "nebulae";
+		panelSize = SIZE_27;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -697,6 +702,8 @@ struct NebulaeWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Nebulae* module = dynamic_cast<Nebulae*>(this->module);
 
 		menu->addChild(new MenuSeparator);

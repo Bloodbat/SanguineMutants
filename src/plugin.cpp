@@ -1,6 +1,5 @@
 #include "plugin.hpp"
 
-
 Plugin* pluginInstance;
 
 void init(rack::Plugin* p) {
@@ -23,4 +22,6 @@ void init(rack::Plugin* p) {
 	p->addModel(modelMarmora);
 	p->addModel(modelAnuli);
 	p->addModel(modelVelamina);
-}
+	
+	getDefaultTheme();
+	}

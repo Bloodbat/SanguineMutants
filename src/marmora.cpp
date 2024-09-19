@@ -231,7 +231,7 @@ static const std::vector<std::string> marmoraLockLabels = {
 	"Locked"
 };
 
-struct Marmora : Module {
+struct Marmora : SanguineModule {
 	enum ParamIds {
 		PARAM_DEJA_VU_T,
 		PARAM_DEJA_VU_X,
@@ -755,7 +755,7 @@ struct Marmora : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
 
@@ -784,6 +784,8 @@ struct Marmora : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
 		if (y_divider_indexJ)
 			yDividerIndex = json_integer_value(y_divider_indexJ);
@@ -888,12 +890,15 @@ struct Marmora : Module {
 	}
 };
 
-struct MarmoraWidget : ModuleWidget {
+struct MarmoraWidget : SanguineModuleWidget {
 	MarmoraWidget(Marmora* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_purple.svg", "res/marmora_faceplate.svg");
-		setPanel(panel);
+		moduleName = "marmora";
+		panelSize = SIZE_28;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -1017,6 +1022,8 @@ struct MarmoraWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Marmora* module = dynamic_cast<Marmora*>(this->module);
 
 		menu->addChild(new MenuSeparator);

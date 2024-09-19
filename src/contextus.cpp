@@ -195,7 +195,7 @@ static const RGBLightColor contextusLightColors[57]{
 {0.9468f, 0.0532000000000003f, 0.9468f}
 };
 
-struct Contextus : Module {
+struct Contextus : SanguineModule {
 	enum ParamIds {
 		PARAM_FINE,
 		PARAM_COARSE,
@@ -729,7 +729,7 @@ struct Contextus : Module {
 	}
 
 	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_t* lowCpuJ = json_boolean(bLowCpu);
 		json_object_set_new(rootJ, "bLowCpu", lowCpuJ);
@@ -738,6 +738,8 @@ struct Contextus : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* lowCpuJ = json_object_get(rootJ, "bLowCpu");
 		if (lowCpuJ) {
 			bLowCpu = json_boolean_value(lowCpuJ);
@@ -752,13 +754,15 @@ struct Contextus : Module {
 	}
 };
 
-struct ContextusWidget : ModuleWidget {
+struct ContextusWidget : SanguineModuleWidget {
 	ContextusWidget(Contextus* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_28hp_red.svg", "res/contextus_faceplate.svg");
-		panel->addLayer("res/nodi_common.svg");
-		setPanel(panel);
+		moduleName = "contextus";
+		panelSize = SIZE_28;
+		backplateColor = PLATE_RED;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -846,6 +850,8 @@ struct ContextusWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
 		Contextus* module = dynamic_cast<Contextus*>(this->module);
 
 		menu->addChild(new MenuSeparator);

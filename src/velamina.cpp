@@ -4,7 +4,7 @@
 #include "sanguinehelpers.hpp"
 using simd::float_4;
 
-struct Velamina : Module {
+struct Velamina : SanguineModule {
 	enum ParamIds {
 		PARAM_GAIN_1,
 		PARAM_GAIN_2,
@@ -179,12 +179,15 @@ struct Velamina : Module {
 };
 
 
-struct VelaminaWidget : ModuleWidget {
+struct VelaminaWidget : SanguineModuleWidget {
 	VelaminaWidget(Velamina* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_10hp_purple.svg", "res/velamina_faceplate.svg");
-		setPanel(panel);
+		moduleName = "velamina";
+		panelSize = SIZE_10;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

@@ -117,7 +117,7 @@ static const LightModes lightStates[FUNCTION_LAST][4]{
 	{ LIGHT_ON, LIGHT_OFF, LIGHT_BLINK, LIGHT_BLINK } // BOUNCE BALL@
 };
 
-struct Apices : Module {
+struct Apices : SanguineModule {
 	enum ParamIds {
 		PARAM_KNOB_1,
 		PARAM_KNOB_2,
@@ -711,10 +711,9 @@ struct Apices : Module {
 	}
 
 	json_t* dataToJson() override {
-
 		saveState();
 
-		json_t* rootJ = json_object();
+		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "edit_mode", json_integer((int)settings.editMode));
 		json_object_set_new(rootJ, "fcn_channel_1", json_integer((int)settings.processorFunction[0]));
@@ -733,6 +732,8 @@ struct Apices : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
 		json_t* editModeJ = json_object_get(rootJ, "edit_mode");
 		if (editModeJ) {
 			settings.editMode = static_cast<EditMode>(json_integer_value(editModeJ));
@@ -801,13 +802,15 @@ struct Apices : Module {
 	}
 };
 
-struct ApicesWidget : ModuleWidget {
+struct ApicesWidget : SanguineModuleWidget {
 	ApicesWidget(Apices* module) {
 		setModule(module);
 
-		SanguinePanel* panel = new SanguinePanel("res/backplate_22hp_purple.svg", "res/apices_faceplate.svg");
-		panel->addLayer("res/apices_common.svg");
-		setPanel(panel);
+		moduleName = "apices";
+		panelSize = SIZE_22;
+		backplateColor = PLATE_PURPLE;
+
+		makePanel();
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -906,6 +909,7 @@ struct ApicesWidget : ModuleWidget {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
 
 		menu->addChild(new MenuSeparator);
 		Apices* apices = dynamic_cast<Apices*>(this->module);
