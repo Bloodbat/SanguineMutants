@@ -31,10 +31,10 @@
 
 #include <algorithm>
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/utils/dsp.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/utils/parasites_dsp.h"
 
 #include "clouds_parasite/dsp/etesia_mu_law.h"
 
@@ -90,8 +90,7 @@ class AudioBuffer {
   
   inline void Write(float in) {
     if (resolution == RESOLUTION_16_BIT) {
-      s16_[write_head_] = stmlib::Clip16(
-            static_cast<int32_t>(in * 32768.0f));
+      s16_[write_head_] = parasites_stmlib::Clip16(static_cast<int32_t>(in * 32768.0f));
     } else if (resolution == RESOLUTION_8_BIT_DITHERED) {
       float sample = in * 127.0f;
       sample += quantization_error_;
@@ -101,11 +100,10 @@ class AudioBuffer {
       quantization_error_ = sample - static_cast<float>(in);
       s8_[write_head_] = quantized;
     } else if (resolution == RESOLUTION_8_BIT_MU_LAW) {
-      int16_t sample = stmlib::Clip16(static_cast<int32_t>(in * 32768.0f));
+      int16_t sample = parasites_stmlib::Clip16(static_cast<int32_t>(in * 32768.0f));
       s8_[write_head_] = Lin2MuLaw(sample);
     } else {
-      s8_[write_head_] = static_cast<int8_t>(
-          stmlib::Clip16(in * 32768.0f) >> 8);
+      s8_[write_head_] = static_cast<int8_t>(parasites_stmlib::Clip16(in * 32768.0f) >> 8);
     }
     
     if (resolution == RESOLUTION_16_BIT) {
@@ -134,8 +132,7 @@ class AudioBuffer {
       if (crossfade_counter_ < kCrossFadeSize) {
         while (size--) {
           if (crossfade_counter_ < kCrossFadeSize) {
-            tail_[crossfade_counter_++] = stmlib::Clip16(
-                static_cast<int32_t>(*in * 32767.0f));
+            tail_[crossfade_counter_++] = parasites_stmlib::Clip16(static_cast<int32_t>(*in * 32767.0f));
             in += stride;
           }
         }
@@ -145,8 +142,7 @@ class AudioBuffer {
         write_head_ >= kInterpolationTail && write_head_ < (size_ - size)) {
       // Fast write routine for the most common case.
       while (size--) {
-        s16_[write_head_] = stmlib::Clip16(
-            static_cast<int32_t>(*in * 32767.0f));
+        s16_[write_head_] = parasites_stmlib::Clip16(static_cast<int32_t>(*in * 32767.0f));
         ++write_head_;
         in += stride;
       }
@@ -170,8 +166,7 @@ class AudioBuffer {
         && write_head_ >= kInterpolationTail && write_head_ < (size_ - size)) {
       // Fast write routine for the most common case.
       while (size--) {
-        s16_[write_head_] = stmlib::Clip16(
-            static_cast<int32_t>(*in * 32768.0f));
+        s16_[write_head_] = parasites_stmlib::Clip16(static_cast<int32_t>(*in * 32768.0f));
         ++write_head_;
         in += stride;
       }

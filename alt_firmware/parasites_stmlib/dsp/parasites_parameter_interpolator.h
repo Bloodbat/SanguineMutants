@@ -1,6 +1,6 @@
-// Copyright 2014 Emilie Gillet.
+// Copyright 2015 Olivier Gillet.
 //
-// Author: Emilie Gillet (emilie.o.gillet@gmail.com)
+// Author: Olivier Gillet (ol.gillet@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,53 +24,42 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Naive phase vocoder.
+// Linear interpolation of parameters in rendering loops.
 
-#ifndef ETESIA_DSP_PVOC_PHASE_VOCODER_H_
-#define ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#ifndef PARASITES_STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
+#define PARASITES_STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
 
 #include "parasites_stmlib/parasites_stmlib.h"
 
-#include "parasites_stmlib/fft/parasites_shy_fft.h"
+namespace parasites_stmlib {
 
-#include "clouds_parasite/dsp/etesia_frame.h"
-#include "clouds_parasite/dsp/pvoc/etesia_stft.h"
-#include "clouds_parasite/dsp/pvoc/etesia_frame_transformation.h"
-
-namespace etesia {
-
-struct Parameters;
-
-class PhaseVocoder {
+class ParameterInterpolator {
  public:
-  PhaseVocoder() { }
-  ~PhaseVocoder() { }
-  
-  void Init(
-      void** buffer, size_t* buffer_size,
-      const float* large_window_lut, size_t largest_fft_size,
-      int32_t num_channels,
-      int32_t resolution,
-      float sample_rate);
+  ParameterInterpolator(float* state, float new_value, size_t size) {
+    state_ = state;
+    value_ = *state;
+    increment_ = (new_value - *state) / static_cast<float>(size);
+  }
 
-  void Process(
-      const Parameters& parameters,
-      const FloatFrame* input,
-      FloatFrame* output,
-      size_t size);
-  void Buffer();
+  ~ParameterInterpolator() {
+    *state_ = value_;
+  }
+  
+  inline float Next() {
+    value_ += increment_;
+    return value_;
+  }
+
+  inline float subsample(float t) {
+    return value_ + increment_ * t;
+  }
   
  private:
-  FFT fft_;
-  
-  STFT stft_[2];
-  FrameTransformation frame_transformation_[2];
-
-  int32_t num_channels_;
-  
-  DISALLOW_COPY_AND_ASSIGN(PhaseVocoder);
+  float* state_;
+  float value_;
+  float increment_;
 };
 
-}  // namespace etesia
+}  // namespace parasites_stmlib
 
-#endif  // 	ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#endif  // PARASITES_STMLIB_DSP_PARAMETER_INTERPOLATOR_H_

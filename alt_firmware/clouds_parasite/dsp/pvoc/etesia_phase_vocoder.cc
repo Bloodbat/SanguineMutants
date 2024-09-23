@@ -30,12 +30,12 @@
 
 #include <algorithm>
 
-#include "stmlib/utils/buffer_allocator.h"
+#include "parasites_stmlib/utils/parasites_buffer_allocator.h"
 
 namespace etesia {
 
 using namespace std;
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 void PhaseVocoder::Init(
     void** buffer,

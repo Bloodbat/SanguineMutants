@@ -29,26 +29,18 @@
 #ifndef ETESIA_DSP_PVOC_STFT_H_
 #define ETESIA_DSP_PVOC_STFT_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
-// #define USE_ARM_FFT
-
-#ifdef USE_ARM_FFT
-  #include <arm_math.h>
-#else
-  #include "stmlib/fft/shy_fft.h"
-#endif  // USE_ARM_FFT
+#include "parasites_stmlib/fft/parasites_shy_fft.h"
 
 namespace etesia {
 
 struct Parameters;
 
 const size_t kMaxFftSize = 4096;
-#ifdef USE_ARM_FFT
-  typedef arm_rfft_fast_instance_f32 FFT;
-#else
-  typedef stmlib::ShyFFT<float, kMaxFftSize, stmlib::RotationPhasor> FFT;
-#endif  // USE_ARM_FFT
+
+typedef parasites_stmlib::ShyFFT<float, kMaxFftSize, parasites_stmlib::RotationPhasor> FFT;
+
 
 typedef class FrameTransformation Modifier;
 

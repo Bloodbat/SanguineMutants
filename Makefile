@@ -12,6 +12,10 @@ SOURCES += eurorack/stmlib/utils/random.cc
 SOURCES += eurorack/stmlib/dsp/atan.cc
 SOURCES += eurorack/stmlib/dsp/units.cc
 
+SOURCES += alt_firmware/parasites_stmlib/utils/parasites_random.cc
+SOURCES += alt_firmware/parasites_stmlib/dsp/parasites_atan.cc
+SOURCES += alt_firmware/parasites_stmlib/dsp/parasites_units.cc
+
 SOURCES += $(wildcard eurorack/plaits/dsp/*.cc)
 SOURCES += $(wildcard eurorack/plaits/dsp/chords/*.cc)
 SOURCES += $(wildcard eurorack/plaits/dsp/engine/*.cc)

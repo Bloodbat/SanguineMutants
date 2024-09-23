@@ -29,11 +29,11 @@
 #ifndef ETESIA_DSP_LOOPING_SAMPLE_PLAYER_H_
 #define ETESIA_DSP_LOOPING_SAMPLE_PLAYER_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include <algorithm>
 
-#include "stmlib/dsp/units.h"
+#include "parasites_stmlib/dsp/parasites_units.h"
 
 #include "clouds_parasite/dsp/etesia_audio_buffer.h"
 #include "clouds_parasite/dsp/etesia_frame.h"
@@ -53,7 +53,7 @@ namespace etesia {
 	  6.0f / 1.0f, 8.0f / 1.0f, 12.0f / 1.0f
 	};
 
-	using namespace stmlib;
+	using namespace parasites_stmlib;
 
 	class LoopingSamplePlayer {
 	public:

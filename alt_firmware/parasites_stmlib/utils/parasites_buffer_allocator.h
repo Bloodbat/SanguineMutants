@@ -1,6 +1,6 @@
-// Copyright 2014 Emilie Gillet.
+// Copyright 2014 Olivier Gillet.
 //
-// Author: Emilie Gillet (emilie.o.gillet@gmail.com)
+// Author: Olivier Gillet (ol.gillet@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,53 +24,59 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Naive phase vocoder.
+// Stream buffer for serialization.
 
-#ifndef ETESIA_DSP_PVOC_PHASE_VOCODER_H_
-#define ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#ifndef PARASITES_STMLIB_UTILS_BUFFER_ALLOCATOR_H_
+#define PARASITES_STMLIB_UTILS_BUFFER_ALLOCATOR_H_
 
 #include "parasites_stmlib/parasites_stmlib.h"
 
-#include "parasites_stmlib/fft/parasites_shy_fft.h"
+namespace parasites_stmlib {
 
-#include "clouds_parasite/dsp/etesia_frame.h"
-#include "clouds_parasite/dsp/pvoc/etesia_stft.h"
-#include "clouds_parasite/dsp/pvoc/etesia_frame_transformation.h"
-
-namespace etesia {
-
-struct Parameters;
-
-class PhaseVocoder {
+class BufferAllocator {
  public:
-  PhaseVocoder() { }
-  ~PhaseVocoder() { }
+  BufferAllocator() { }
+  ~BufferAllocator() { }
   
-  void Init(
-      void** buffer, size_t* buffer_size,
-      const float* large_window_lut, size_t largest_fft_size,
-      int32_t num_channels,
-      int32_t resolution,
-      float sample_rate);
+  BufferAllocator(void* buffer, size_t size) {
+    Init(buffer, size);
+  }
+  
+  inline void Init(void* buffer, size_t size) {
+    buffer_ = static_cast<uint8_t*>(buffer);
+    size_ = size;
+    Free();
+  }
+  
+  template<typename T>
+  inline T* Allocate(size_t size) {
+    size_t size_bytes = sizeof(T) * size;
+    if (size_bytes <= free_) {
+      T* start = static_cast<T*>(static_cast<void*>(next_));
+      next_ += size_bytes;
+      free_ -= size_bytes;
+      return start;
+    } else {
+      return NULL;
+    }
+  }
+  
+  inline void Free() {
+    next_ = buffer_;
+    free_ = size_;
+  }
+  
+  inline size_t free() const { return free_; }
 
-  void Process(
-      const Parameters& parameters,
-      const FloatFrame* input,
-      FloatFrame* output,
-      size_t size);
-  void Buffer();
-  
  private:
-  FFT fft_;
-  
-  STFT stft_[2];
-  FrameTransformation frame_transformation_[2];
+  uint8_t* next_;
+  uint8_t* buffer_;
+  size_t free_;
+  size_t size_;
 
-  int32_t num_channels_;
-  
-  DISALLOW_COPY_AND_ASSIGN(PhaseVocoder);
+  DISALLOW_COPY_AND_ASSIGN(BufferAllocator);
 };
 
-}  // namespace etesia
+}  // namespace parasites_stmlib
 
-#endif  // 	ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#endif   // PARASITES_STMLIB_UTILS_STREAM_BUFFER_H_

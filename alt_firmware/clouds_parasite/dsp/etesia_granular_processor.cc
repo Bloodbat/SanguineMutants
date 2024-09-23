@@ -30,15 +30,15 @@
 
 #include <cstring>
 
-#include "stmlib/dsp/parameter_interpolator.h"
-#include "stmlib/utils/buffer_allocator.h"
+#include "parasites_stmlib/dsp/parasites_parameter_interpolator.h"
+#include "parasites_stmlib/utils/parasites_buffer_allocator.h"
 
 #include "clouds_parasite/etesia_resources.h"
 
 namespace etesia {
 
 	using namespace std;
-	using namespace stmlib;
+	using namespace parasites_stmlib;
 
 	void EtesiaGranularProcessor::Init(
 		void* large_buffer, size_t large_buffer_size,

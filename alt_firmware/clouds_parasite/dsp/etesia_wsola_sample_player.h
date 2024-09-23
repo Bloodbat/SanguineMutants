@@ -35,8 +35,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/units.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_units.h"
 
 #include "clouds_parasite/dsp/etesia_audio_buffer.h"
 #include "clouds_parasite/dsp/etesia_correlator.h"
@@ -49,7 +49,7 @@ namespace etesia {
 
 	const int32_t kMaxWSOLASize = 4096;
 
-	using namespace stmlib;
+	using namespace parasites_stmlib;
 
 	class WSOLASamplePlayer {
 	public:

@@ -29,13 +29,13 @@
 #ifndef ETESIA_DSP_RESONESTOR_H_
 #define ETESIA_DSP_RESONESTOR_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/utils/random.h"
-#include "stmlib/dsp/units.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/utils/parasites_random.h"
+#include "parasites_stmlib/dsp/parasites_units.h"
 #include "clouds_parasite/dsp/fx/etesia_fx_engine.h"
 #include "clouds_parasite/etesia_resources.h"
 
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 namespace etesia {
 

@@ -29,8 +29,8 @@
 #ifndef ETESIA_DSP_FX_PITCH_SHIFTER_H_
 #define ETESIA_DSP_FX_PITCH_SHIFTER_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/dsp.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
 
 #include "clouds_parasite/etesia_resources.h"
 #include "clouds_parasite/dsp/etesia_frame.h"
@@ -76,7 +76,7 @@ namespace etesia {
 				phase_ += 1.0f;
 			}
 			float tri = 2.0f * (phase_ >= 0.5f ? 1.0f - phase_ : phase_);
-			tri = stmlib::Interpolate(lut_window, tri, LUT_WINDOW_SIZE - 1);
+			tri = parasites_stmlib::Interpolate(lut_window, tri, LUT_WINDOW_SIZE - 1);
 			float phase = phase_ * size_;
 			float half = phase + size_ * 0.5f;
 			if (half >= size_) {

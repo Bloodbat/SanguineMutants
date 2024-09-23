@@ -29,13 +29,13 @@
 #ifndef ETESIA_DSP_GRANULAR_SAMPLE_PLAYER_H_
 #define ETESIA_DSP_GRANULAR_SAMPLE_PLAYER_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include <algorithm>
 
-#include "stmlib/dsp/atan.h"
-#include "stmlib/dsp/units.h"
-#include "stmlib/utils/random.h"
+#include "parasites_stmlib/dsp/parasites_atan.h"
+#include "parasites_stmlib/dsp/parasites_units.h"
+#include "parasites_stmlib/utils/parasites_random.h"
 
 #include "clouds_parasite/dsp/etesia_audio_buffer.h"
 #include "clouds_parasite/dsp/etesia_frame.h"
@@ -48,7 +48,7 @@ namespace etesia {
 
 	const int32_t kMaxNumGrains = 40;
 
-	using namespace stmlib;
+	using namespace parasites_stmlib;
 
 	class GranularSamplePlayer {
 	public:

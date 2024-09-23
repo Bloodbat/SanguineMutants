@@ -29,7 +29,7 @@
 #ifndef ETESIA_DSP_PVOC_FRAME_TRANSFORMATION_H_
 #define ETESIA_DSP_PVOC_FRAME_TRANSFORMATION_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include "clouds_parasite/dsp/pvoc/etesia_stft.h"
 

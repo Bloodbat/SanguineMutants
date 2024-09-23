@@ -27,13 +27,13 @@
 // Smoothed random oscillator
 
 #include "../etesia_resources.h"
-#include "stmlib/utils/random.h"
-#include "stmlib/dsp/dsp.h"
+#include "parasites_stmlib/utils/parasites_random.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
 
 #ifndef ETESIA_RANDOM_OSCILLATOR_H_
 #define ETESIA_RANDOM_OSCILLATOR_H_
 
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 namespace etesia
 {

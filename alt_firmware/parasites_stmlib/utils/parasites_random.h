@@ -1,6 +1,6 @@
-// Copyright 2014 Emilie Gillet.
+// Copyright 2012 Olivier Gillet.
 //
-// Author: Emilie Gillet (emilie.o.gillet@gmail.com)
+// Author: Olivier Gillet (ol.gillet@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,53 +24,51 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Naive phase vocoder.
+// Fast 16-bit pseudo random number generator.
 
-#ifndef ETESIA_DSP_PVOC_PHASE_VOCODER_H_
-#define ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#ifndef PARASITES_STMLIB_UTILS_RANDOM_H_
+#define PARASITES_STMLIB_UTILS_RANDOM_H_
 
 #include "parasites_stmlib/parasites_stmlib.h"
 
-#include "parasites_stmlib/fft/parasites_shy_fft.h"
+namespace parasites_stmlib {
 
-#include "clouds_parasite/dsp/etesia_frame.h"
-#include "clouds_parasite/dsp/pvoc/etesia_stft.h"
-#include "clouds_parasite/dsp/pvoc/etesia_frame_transformation.h"
-
-namespace etesia {
-
-struct Parameters;
-
-class PhaseVocoder {
+class Random {
  public:
-  PhaseVocoder() { }
-  ~PhaseVocoder() { }
-  
-  void Init(
-      void** buffer, size_t* buffer_size,
-      const float* large_window_lut, size_t largest_fft_size,
-      int32_t num_channels,
-      int32_t resolution,
-      float sample_rate);
+  static inline uint32_t state() { return rng_state_; }
 
-  void Process(
-      const Parameters& parameters,
-      const FloatFrame* input,
-      FloatFrame* output,
-      size_t size);
-  void Buffer();
-  
+  static inline void Seed(uint16_t seed) {
+    rng_state_ = seed;
+  }
+
+  static inline uint32_t GetWord() {
+    rng_state_ = rng_state_ * 1664525L + 1013904223L;
+    return state();
+  }
+
+  static inline int16_t GetSample() {
+    return static_cast<int16_t>(GetWord() >> 16);
+  }
+
+  static inline float GetFloat() {
+    return static_cast<float>(GetWord()) / 4294967296.0f;
+  }
+
+  static inline uint32_t GetGeometric (uint16_t p) {
+    uint16_t one_minus_p = 0x10000 - p; // 1.0 - p
+    uint32_t log_u = nlog2_16(GetWord() >> 16);
+    uint32_t log_p = nlog2_16(one_minus_p);
+    uint32_t res = log_u / log_p;  // divide and floor in one go
+    return res;
+  }
+
  private:
-  FFT fft_;
-  
-  STFT stft_[2];
-  FrameTransformation frame_transformation_[2];
+  static uint32_t rng_state_;
+  static uint32_t nlog2_16(uint16_t x);
 
-  int32_t num_channels_;
-  
-  DISALLOW_COPY_AND_ASSIGN(PhaseVocoder);
+  DISALLOW_COPY_AND_ASSIGN(Random);
 };
 
-}  // namespace etesia
+}  // namespace parasites_stmlib
 
-#endif  // 	ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#endif  // PARASITES_STMLIB_UTILS_RANDOM_H_

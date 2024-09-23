@@ -31,10 +31,10 @@
 
 #include <algorithm>
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/cosine_oscillator.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_cosine_oscillator.h"
 
 namespace etesia {
 
@@ -64,7 +64,7 @@ struct DataType<FORMAT_12_BIT> {
   
   static inline T Compress(float value) {
     return static_cast<uint16_t>(
-        stmlib::Clip16(static_cast<int32_t>(value * 4096.0f)));
+        parasites_stmlib::Clip16(static_cast<int32_t>(value * 4096.0f)));
   }
 };
 
@@ -78,7 +78,7 @@ struct DataType<FORMAT_16_BIT> {
   
   static inline T Compress(float value) {
     return static_cast<uint16_t>(
-        stmlib::Clip16(static_cast<int32_t>(value * 32768.0f)));
+        parasites_stmlib::Clip16(static_cast<int32_t>(value * 32768.0f)));
   }
 };
 
@@ -225,7 +225,7 @@ class FxEngine {
     }
 
     inline void SoftLimit() {
-      accumulator_ = stmlib::SoftLimit(accumulator_);
+      accumulator_ = parasites_stmlib::SoftLimit(accumulator_);
     }
 
     template<typename D>
@@ -317,7 +317,7 @@ class FxEngine {
   };
   
   inline void SetLFOFrequency(LFOIndex index, float frequency) {
-    lfo_[index].template Init<stmlib::COSINE_OSCILLATOR_APPROXIMATE>(
+    lfo_[index].template Init<parasites_stmlib::COSINE_OSCILLATOR_APPROXIMATE>(
         frequency * 32.0f);
   }
   
@@ -346,7 +346,7 @@ class FxEngine {
   
   int32_t write_ptr_;
   T* buffer_;
-  stmlib::CosineOscillator lfo_[2];
+  parasites_stmlib::CosineOscillator lfo_[2];
   
   DISALLOW_COPY_AND_ASSIGN(FxEngine);
 };

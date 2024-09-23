@@ -31,12 +31,12 @@
 #include <algorithm>
 
 #include "clouds_parasite/dsp/pvoc/etesia_frame_transformation.h"
-#include "stmlib/dsp/dsp.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
 
 namespace etesia {
 
 using namespace std;
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 void STFT::Init(
     FFT* fft,

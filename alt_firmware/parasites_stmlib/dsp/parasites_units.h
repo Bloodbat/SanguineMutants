@@ -1,6 +1,6 @@
-// Copyright 2014 Emilie Gillet.
+// Copyright 2014 Olivier Gillet.
 //
-// Author: Emilie Gillet (emilie.o.gillet@gmail.com)
+// Author: Olivier Gillet (ol.gillet@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,53 +24,27 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Naive phase vocoder.
+// Conversion from semitones to frequency ratio.
 
-#ifndef ETESIA_DSP_PVOC_PHASE_VOCODER_H_
-#define ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#ifndef PARASITES_STMLIB_DSP_UNITS_H_
+#define PARASITES_STMLIB_DSP_UNITS_H_
 
 #include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
 
-#include "parasites_stmlib/fft/parasites_shy_fft.h"
+namespace parasites_stmlib {
 
-#include "clouds_parasite/dsp/etesia_frame.h"
-#include "clouds_parasite/dsp/pvoc/etesia_stft.h"
-#include "clouds_parasite/dsp/pvoc/etesia_frame_transformation.h"
+extern const float lut_pitch_ratio_high[257];
+extern const float lut_pitch_ratio_low[257];
 
-namespace etesia {
+inline float SemitonesToRatio(float semitones) {
+  float pitch = semitones + 128.0f;
+  MAKE_INTEGRAL_FRACTIONAL(pitch)
 
-struct Parameters;
+  return lut_pitch_ratio_high[pitch_integral] * \
+      lut_pitch_ratio_low[static_cast<int32_t>(pitch_fractional * 256.0f)];
+}
 
-class PhaseVocoder {
- public:
-  PhaseVocoder() { }
-  ~PhaseVocoder() { }
-  
-  void Init(
-      void** buffer, size_t* buffer_size,
-      const float* large_window_lut, size_t largest_fft_size,
-      int32_t num_channels,
-      int32_t resolution,
-      float sample_rate);
+}  // namespace parasites_stmlib
 
-  void Process(
-      const Parameters& parameters,
-      const FloatFrame* input,
-      FloatFrame* output,
-      size_t size);
-  void Buffer();
-  
- private:
-  FFT fft_;
-  
-  STFT stft_[2];
-  FrameTransformation frame_transformation_[2];
-
-  int32_t num_channels_;
-  
-  DISALLOW_COPY_AND_ASSIGN(PhaseVocoder);
-};
-
-}  // namespace etesia
-
-#endif  // 	ETESIA_DSP_PVOC_PHASE_VOCODER_H_
+#endif  // PARASITES_STMLIB_DSP_UNITS_H_

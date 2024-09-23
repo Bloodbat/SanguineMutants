@@ -30,9 +30,9 @@
 
 #include <algorithm>
 
-#include "stmlib/dsp/atan.h"
-#include "stmlib/dsp/units.h"
-#include "stmlib/utils/random.h"
+#include "parasites_stmlib/dsp/parasites_atan.h"
+#include "parasites_stmlib/dsp/parasites_units.h"
+#include "parasites_stmlib/utils/parasites_random.h"
 
 #include "clouds_parasite/dsp/etesia_frame.h"
 #include "clouds_parasite/dsp/etesia_parameters.h"
@@ -40,7 +40,7 @@
 namespace etesia {
 
 using namespace std;
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 void FrameTransformation::Init(
     float* buffer,
@@ -98,7 +98,7 @@ void FrameTransformation::Process(
   if (!glitch) {
     // Decide on which glitch algorithm will be used next time... if glitch
     // is enabled on the next frame!
-    glitch_algorithm_ = stmlib::Random::GetSample() & 3;
+    glitch_algorithm_ = parasites_stmlib::Random::GetSample() & 3;
   }
 
   ifft_in[0] = 0.0f;
@@ -133,7 +133,7 @@ void FrameTransformation::SetPhases(
   int32_t amount = static_cast<int32_t>(r * 32768.0f);
   for (int32_t i = 0; i < size_; ++i) {
     synthesis_phase[i] += \
-        static_cast<int32_t>(stmlib::Random::GetSample()) * amount >> 14;
+        static_cast<int32_t>(parasites_stmlib::Random::GetSample()) * amount >> 14;
   }
 }
 
@@ -159,7 +159,7 @@ void FrameTransformation::AddGlitch(float* xf_polar) {
         // Create trails
         float held = 0.0;
         for (int32_t i = 0; i < size_; ++i) {
-          if ((stmlib::Random::GetSample() & 15) == 0) {
+          if ((parasites_stmlib::Random::GetSample() & 15) == 0) {
             held = x[i];
           }
           x[i] = held;
@@ -171,7 +171,7 @@ void FrameTransformation::AddGlitch(float* xf_polar) {
     case 1:
       // Spectral shift up with aliasing.
       {
-        float factor = 1.0f + (stmlib::Random::GetSample() & 7) / 4.0f;
+        float factor = 1.0f + (parasites_stmlib::Random::GetSample() & 7) / 4.0f;
         float source = 0.0f;
         for (int32_t i = 0; i < size_; ++i) {
           source += factor;
@@ -193,7 +193,7 @@ void FrameTransformation::AddGlitch(float* xf_polar) {
       {
         // Nasty high-pass
         for (int32_t i = 0; i < size_; ++i) {
-          uint32_t random = stmlib::Random::GetSample() & 15;
+          uint32_t random = parasites_stmlib::Random::GetSample() & 15;
           if (random == 0) {
             x[i] *= static_cast<float>(i) / 16.0f;
           }

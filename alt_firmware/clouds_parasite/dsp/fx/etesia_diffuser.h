@@ -29,7 +29,7 @@
 #ifndef ETESIA_DSP_FX_DIFFUSER_H_
 #define ETESIA_DSP_FX_DIFFUSER_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include "clouds_parasite/dsp/fx/etesia_fx_engine.h"
 

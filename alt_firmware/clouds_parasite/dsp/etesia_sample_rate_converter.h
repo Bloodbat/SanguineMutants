@@ -29,7 +29,7 @@
 #ifndef ETESIA_DSP_SAMPLE_RATE_CONVERTER_H_
 #define ETESIA_DSP_SAMPLE_RATE_CONVERTER_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include "clouds_parasite/dsp/etesia_frame.h"
 

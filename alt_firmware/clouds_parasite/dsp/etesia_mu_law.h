@@ -29,7 +29,7 @@
 #ifndef ETESIA_DSP_MU_LAW_H_
 #define ETESIA_DSP_MU_LAW_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 namespace etesia {
 
