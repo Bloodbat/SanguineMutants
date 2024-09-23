@@ -28,12 +28,12 @@
 
 #include "distortiones/dsp/distortiones_oscillator.h"
 
-#include "stmlib/dsp/parameter_interpolator.h"
-#include "stmlib/utils/random.h"
+#include "parasites_stmlib/dsp/parasites_parameter_interpolator.h"
+#include "parasites_stmlib/utils/parasites_random.h"
 
 namespace distortiones {
 
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 const float kToFloat = 1.0f / 4294967296.0f;
 const float kToUint32 = 4294967296.0f;
@@ -196,7 +196,7 @@ float Oscillator::RenderNoise(
     float* out,
     size_t size) {
   for (size_t i = 0; i < size; ++i) {
-    float noise = static_cast<float>(stmlib::Random::GetWord()) * kToFloat;
+    float noise = static_cast<float>(parasites_stmlib::Random::GetWord()) * kToFloat;
     out[i] = 2.0f * noise - 1.0f;
   }
   Duck(out, modulation, out, size);

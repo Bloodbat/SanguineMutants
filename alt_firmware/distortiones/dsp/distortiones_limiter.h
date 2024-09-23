@@ -29,12 +29,12 @@
 #ifndef DISTORTIONES_DSP_LIMITER_H_
 #define DISTORTIONES_DSP_LIMITER_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include <algorithm>
 
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/filter.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_filter.h"
 
 namespace distortiones {
 
@@ -55,7 +55,7 @@ class Limiter {
       float s = *in_out * pre_gain;
       SLOPE(peak_, fabs(s), 0.05f, 0.00002f);
       float gain = (peak_ <= 1.0f ? 1.0f : 1.0f / peak_);
-      *in_out++ = stmlib::SoftLimit(s * gain * 0.8f);
+      *in_out++ = parasites_stmlib::SoftLimit(s * gain * 0.8f);
     }
   }
 

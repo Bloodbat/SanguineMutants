@@ -29,9 +29,9 @@
 #ifndef DISTORTIONES_DSP_OSCILLATOR_H_
 #define DISTORTIONES_DSP_OSCILLATOR_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/filter.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_filter.h"
 
 #include "distortiones/dsp/distortiones_parameters.h"
 #include "distortiones/distortiones_resources.h"
@@ -56,7 +56,7 @@ class Oscillator {
 
   inline float midi_to_increment(float midi_pitch) const {
     int32_t pitch = static_cast<int32_t>(midi_pitch * 256.0f);
-    pitch = 32768 + stmlib::Clip16(pitch - 20480);
+    pitch = 32768 + parasites_stmlib::Clip16(pitch - 20480);
     float increment = lut_midi_to_f_high[pitch >> 8] * \
         lut_midi_to_f_low[pitch & 0xff];
     return increment;
@@ -96,7 +96,7 @@ class Oscillator {
   float one_hertz_;
   
   static RenderFn fn_table_[];
-  stmlib::Svf filter_;
+  parasites_stmlib::Svf filter_;
 
   DISALLOW_COPY_AND_ASSIGN(Oscillator);
 };

@@ -35,7 +35,7 @@
 namespace distortiones {
 
 using namespace std;
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 void FilterBank::Init(float sample_rate) {
   low_src_down_.Init();

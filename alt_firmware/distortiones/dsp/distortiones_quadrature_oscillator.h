@@ -29,9 +29,9 @@
 #ifndef DISTORTIONES_DSP_QUADRATURE_OSCILLATOR_H_
 #define DISTORTIONES_DSP_QUADRATURE_OSCILLATOR_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/parameter_interpolator.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_parameter_interpolator.h"
 
 #include "distortiones/dsp/distortiones_parameters.h"
 #include "distortiones/distortiones_resources.h"
@@ -59,11 +59,8 @@ class QuadratureOscillator {
       size_t size) {
     float normalized_frequency = frequency * one_hertz_;
     CONSTRAIN(normalized_frequency, -0.25f, 0.25f);
-    stmlib::ParameterInterpolator frequency_parameter(
-        &frequency_,
-        normalized_frequency,
-        size);
-    stmlib::ParameterInterpolator shape_parameter(&shape_, shape, size);
+    parasites_stmlib::ParameterInterpolator frequency_parameter(&frequency_, normalized_frequency, size);
+    parasites_stmlib::ParameterInterpolator shape_parameter(&shape_, shape, size);
 
     float phase = phase_;
     while (size--) {
@@ -80,15 +77,9 @@ class QuadratureOscillator {
       
       float iq[2];
       for (int32_t component = 0; component < 2; ++component) {
-        float a = stmlib::Interpolate(
-            wav_table[2 * shape_integral + component],
-            phase,
-            1024);
+        float a = parasites_stmlib::Interpolate(wav_table[2 * shape_integral + component], phase, 1024);
         
-        float b = stmlib::Interpolate(
-            wav_table[2 * shape_integral + 2 + component],
-            phase,
-            1024);
+        float b = parasites_stmlib::Interpolate(wav_table[2 * shape_integral + 2 + component], phase, 1024);
         
         iq[component] = a + (b - a) * shape_fractional;
       }

@@ -30,13 +30,13 @@
 
 #include <algorithm>
 
-#include "stmlib/dsp/cosine_oscillator.h"
-#include "stmlib/dsp/units.h"
+#include "parasites_stmlib/dsp/parasites_cosine_oscillator.h"
+#include "parasites_stmlib/dsp/parasites_units.h"
 
 namespace distortiones {
 
 using namespace std;
-using namespace stmlib;
+using namespace parasites_stmlib;
 
 void Vocoder::Init(float sample_rate) {
   modulator_filter_bank_.Init(sample_rate);

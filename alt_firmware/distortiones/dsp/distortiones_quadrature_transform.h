@@ -30,9 +30,9 @@
 #ifndef DISTORTIONES_DSP_QUADRATURE_TRANSFORM_H_
 #define DISTORTIONES_DSP_QUADRATURE_TRANSFORM_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/filter.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_filter.h"
 
 namespace distortiones {
 

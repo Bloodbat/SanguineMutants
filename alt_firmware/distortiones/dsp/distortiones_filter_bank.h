@@ -29,10 +29,10 @@
 #ifndef DISTORTIONES_DSP_FILTER_BANK_H_
 #define DISTORTIONES_DSP_FILTER_BANK_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/filter.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_filter.h"
 
 #include "distortiones/dsp/distortiones_sample_rate_converter.h"
 #include "distortiones/distortiones_resources.h"
@@ -78,7 +78,7 @@ struct Band {
   int32_t group;
   float sample_rate;
   float post_gain;
-  stmlib::CrossoverSvf svf[2];
+  parasites_stmlib::CrossoverSvf svf[2];
   int32_t decimation_factor;
   float* samples;
   PooledDelayLine delay_line;

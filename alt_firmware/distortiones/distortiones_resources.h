@@ -34,7 +34,7 @@
 #define DISTORTIONES_RESOURCES_H_
 
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 
 

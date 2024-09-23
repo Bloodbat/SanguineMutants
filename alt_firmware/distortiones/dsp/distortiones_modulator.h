@@ -29,10 +29,10 @@
 #ifndef DISTORTIONES_DSP_MODULATOR_H_
 #define DISTORTIONES_DSP_MODULATOR_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/dsp.h"
-#include "stmlib/dsp/filter.h"
-#include "stmlib/dsp/parameter_interpolator.h"
+#include "parasites_stmlib/parasites_stmlib.h"
+#include "parasites_stmlib/dsp/parasites_dsp.h"
+#include "parasites_stmlib/dsp/parasites_filter.h"
+#include "parasites_stmlib/dsp/parasites_parameter_interpolator.h"
 
 #include "distortiones/dsp/distortiones_oscillator.h"
 #include "distortiones/dsp/distortiones_parameters.h"
@@ -69,7 +69,7 @@ namespace distortiones {
 			size_t in_stride,
 			size_t size) {
 			// Process noise gate and compute raw output
-			stmlib::ParameterInterpolator drive_modulation(&drive_, drive, size);
+			parasites_stmlib::ParameterInterpolator drive_modulation(&drive_, drive, size);
 			float level = level_;
 			for (size_t i = 0; i < size; ++i) {
 				float s = static_cast<float>(*in) / 32768.0f;
@@ -88,20 +88,14 @@ namespace distortiones {
 			float pre_gain_b = drive_2 * drive_2 * drive * 24.0f;
 			float pre_gain = pre_gain_a + (pre_gain_b - pre_gain_a) * drive_2;
 			float drive_squished = drive * (2.0f - drive);
-			float post_gain = 1.0f / stmlib::SoftClip(
+			float post_gain = 1.0f / parasites_stmlib::SoftClip(
 				0.33f + drive_squished * (pre_gain - 0.33f));
-			stmlib::ParameterInterpolator pre_gain_modulation(
-				&pre_gain_,
-				pre_gain,
-				size);
-			stmlib::ParameterInterpolator post_gain_modulation(
-				&post_gain_,
-				post_gain,
-				size);
+			parasites_stmlib::ParameterInterpolator pre_gain_modulation(&pre_gain_,pre_gain,size);
+			parasites_stmlib::ParameterInterpolator post_gain_modulation(&post_gain_,post_gain,size);
 
 			for (size_t i = 0; i < size; ++i) {
 				float pre = pre_gain_modulation.Next() * out[i];
-				float post = stmlib::SoftClip(pre) * post_gain_modulation.Next();
+				float post = parasites_stmlib::SoftClip(pre) * post_gain_modulation.Next();
 				out[i] = pre + (post - pre) * limit;
 			}
 		}
@@ -324,7 +318,7 @@ namespace distortiones {
 		Vocoder vocoder_;
 		QuadratureTransform quadrature_transform_[2];
 
-		stmlib::OnePole filter_[4];
+		parasites_stmlib::OnePole filter_[4];
 
 		/* everything that follows will be used as delay buffer */
 		ShortFrame delay_buffer_[8192 + 4096];

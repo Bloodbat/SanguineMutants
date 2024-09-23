@@ -29,7 +29,7 @@
 #ifndef DISTORTIONES_DSP_VOCODER_H_
 #define DISTORTIONES_DSP_VOCODER_H_
 
-#include "stmlib/stmlib.h"
+#include "parasites_stmlib/parasites_stmlib.h"
 
 #include "distortiones/dsp/distortiones_filter_bank.h"
 #include "distortiones/dsp/distortiones_limiter.h"
