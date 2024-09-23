@@ -3,7 +3,7 @@
 #include "sanguinehelpers.hpp"
 #include "tides/generator.h"
 
-static const std::vector<std::string> displayModels = {
+static const std::vector<std::string> aestusDisplayModels = {
 	"A",
 	"S"
 };
@@ -68,7 +68,7 @@ struct Aestus : SanguineModule {
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
-	std::string displayModel = displayModels[0];
+	std::string displayModel = aestusDisplayModels[0];
 
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -208,7 +208,7 @@ struct Aestus : SanguineModule {
 			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 1.f : 0.f, sampleTime);
 
-			displayModel = displayModels[params[PARAM_MODEL].getValue()];
+			displayModel = aestusDisplayModels[params[PARAM_MODEL].getValue()];
 		}
 	}
 
@@ -276,7 +276,7 @@ struct AestusWidget : SanguineModuleWidget {
 		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 32.724, 17.143);
 		displayModel->displayType = DISPLAY_STRING;
 		aestusFrameBuffer->addChild(displayModel);
-		displayModel->fallbackString = displayModels[0];
+		displayModel->fallbackString = aestusDisplayModels[0];
 
 		if (module)
 			displayModel->values.displayText = &module->displayModel;
