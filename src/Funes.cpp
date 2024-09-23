@@ -733,6 +733,12 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
+		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
+			system::openBrowser("https://bloodbat.github.io/Funes-Editors/");
+			}));
+
+		menu->addChild(new MenuSeparator);
+
 		menu->addChild(createSubmenuItem("Pitched models", "", [=](Menu* menu) {
 			for (int i = 8; i < 16; i++) {
 				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
