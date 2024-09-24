@@ -61,6 +61,40 @@ struct Aestus : SanguineModule {
 		LIGHTS_COUNT
 	};
 
+	struct ModeParam : ParamQuantity {
+		std::string getDisplayValueString() override {
+			if (module != nullptr) {
+				Aestus* moduleAestus = static_cast<Aestus*>(module);
+				if (paramId == PARAM_MODE) {
+					return aestusModeMenuLabels[moduleAestus->generator.mode()];
+				}
+				else {
+					assert(false);
+				}
+			}
+			else {
+				return "";
+			}
+		}
+	};
+
+	struct RangeParam : ParamQuantity {
+		std::string getDisplayValueString() override {
+			if (module != nullptr) {
+				Aestus* moduleAestus = static_cast<Aestus*>(module);
+				if (paramId == PARAM_RANGE) {
+					return aestusRangeMenuLabels[moduleAestus->generator.range()];
+				}
+				else {
+					assert(false);
+				}
+			}
+			else {
+				return "";
+			}
+		}
+	};
+
 	bool bSheep = false;
 	tides::Generator generator;
 	int frame = 0;
@@ -73,8 +107,8 @@ struct Aestus : SanguineModule {
 
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		configButton(PARAM_MODE, "Output mode");
-		configButton(PARAM_RANGE, "Frequency range");
+		configButton<ModeParam>(PARAM_MODE, "Output mode");
+		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
 		configParam(PARAM_FREQUENCY, -48.0, 48.0, 0.0, "Main frequency");
 		configParam(PARAM_FM, -12.0, 12.0, 0.0, "FM input attenuverter");
 		configParam(PARAM_SHAPE, -1.0, 1.0, 0.0, "Shape");
