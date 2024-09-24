@@ -253,16 +253,15 @@ namespace bumps {
 
 	void Generator::FillBuffer() {
 		if (feature_mode_ == FEAT_MODE_FUNCTION) {
-#ifndef WAVETABLE_HACK
+			//#ifndef WAVETABLE_HACK
 			if (range_ == GENERATOR_RANGE_HIGH) {
 				FillBufferAudioRate();
 			}
 			else {
 				FillBufferControlRate();
 			}
-#else
-			FillBufferWavetable();
-#endif
+			//#else			
+			//#endif
 		}
 		else if (feature_mode_ == FEAT_MODE_HARMONIC) {
 			if (mode_ == GENERATOR_MODE_LOOPING)
@@ -274,6 +273,9 @@ namespace bumps {
 		}
 		else if (feature_mode_ == FEAT_MODE_RANDOM) {
 			FillBufferRandom();
+		}
+		else if (feature_mode_ == FEAT_MODE_SHEEP) {
+			FillBufferWavetable();
 		}
 	}
 

@@ -8,13 +8,15 @@
 static const std::vector<std::string> temulentiDisplayModels = {
 	"T",
 	"B",
-	"D"
+	"D",
+	"S"
 };
 
 static const std::vector<std::string> temulentiMenuLabels = {
 	"Tidal Modulator",
 	"Two Bumps - Harmonic oscillator",
-	"Two Drunks - Random walk"
+	"Two Drunks - Random walk",
+	"Sheep - Wavetable synthesizer"
 };
 
 static const std::vector<std::string> temulentiQuantizerLabels = {
@@ -100,7 +102,7 @@ struct Temulenti : SanguineModule {
 		configParam(PARAM_SLOPE, -1.0, 1.0, 0.0, "Slope");
 		configParam(PARAM_SMOOTHNESS, -1.0, 1.0, 0.0, "Smoothness");
 
-		configSwitch(PARAM_MODEL, 0.f, 2.f, 0.f, "Module model", temulentiMenuLabels);
+		configSwitch(PARAM_MODEL, 0.f, 3.f, 0.f, "Module model", temulentiMenuLabels);
 
 		configInput(INPUT_SHAPE, "Shape");
 		configInput(INPUT_SLOPE, "Slope");

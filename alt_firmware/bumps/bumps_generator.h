@@ -26,6 +26,8 @@
 //
 // Tidal generator.
 
+// Modified by Bloodbat, 2024.
+
 #ifndef BUMPS_GENERATOR_H_
 #define BUMPS_GENERATOR_H_
 
@@ -124,12 +126,14 @@ class Generator {
   }
 
   void set_slope(int16_t slope) {
-#ifndef WAVETABLE_HACK
-    if (range_ == GENERATOR_RANGE_HIGH &&
-        feature_mode_ != FEAT_MODE_HARMONIC) {
-      CONSTRAIN(slope, -32512, 32512);
-    }
-#endif  // WAVETABLE_HACK
+//#ifndef WAVETABLE_HACK
+      if (feature_mode_ < FEAT_MODE_SHEEP) {
+          if (range_ == GENERATOR_RANGE_HIGH &&
+              feature_mode_ != FEAT_MODE_HARMONIC) {
+              CONSTRAIN(slope, -32512, 32512);
+          }
+      }
+//#endif  // WAVETABLE_HACK
     slope_ = slope;
   }
 
@@ -189,6 +193,7 @@ class Generator {
     FEAT_MODE_FUNCTION,
     FEAT_MODE_HARMONIC,
     FEAT_MODE_RANDOM,
+    FEAT_MODE_SHEEP
   };
 
   FeatureMode feature_mode_;
