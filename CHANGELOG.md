@@ -4,7 +4,42 @@
 
 ### Aestus
 
-Based on MI's Tides, it fixes PLL mode, separates it from the clock input, and restores switching banks using the clock input when module is using the Sheep firmware.
+Based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+
+### Temulenti
+
+Based on the Parasite firmware for MI's Tides: fixes PLL mode, separates it from the clock input; restores functionality when using the clock input in Two Bumps or Two Drunks modes, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+
+
+## Additions
+
+- Faceplate theme support with two themes: "Vitriol": the standard Sanguine look and "Plumbago" a dark as night design.
+
+- Golden polyphonic ports.
+
+- Tooltips for Contextus' and Nodi's mode selection encoders.
+
+- Funes context menu entry to open the custom data editors.
+
+
+## Changes
+
+- Mortuus: better ByteBeats outputs for most equations.
+
+- Use the Parasites STMLIB for Etesia and Distortiones (the library fork the hardware firmwares use).
+
+- Reorder Funes' context menu.
+
+
+## Fixes
+
+- Colors for certain small faceplate elements.
+
+- Export faceplate layers with proper color settings.
+
+- Remove black outlines for 22hp and 6hp backgrounds: they were never meant to be there.
+
+- Broken "Superlock" icons in Marmora faceplate.
 
 
 # 2.4.2
