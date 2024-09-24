@@ -194,8 +194,8 @@ struct Aestus : SanguineModule {
 		if (bLightsTurn) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ? 1.0 : 0.0, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ? 1.0 : 0.0, sampleTime);
+			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ? 1.0 : 0.0, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ? 1.0 : 0.0, sampleTime);
 
 			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ? 1.0 : 0.0, sampleTime);
 			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ? 1.0 : 0.0, sampleTime);
