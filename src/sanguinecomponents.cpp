@@ -845,6 +845,8 @@ void SanguineModuleWidget::makePanel() {
 	BackplateColors themeBackplateColor = PLATE_PURPLE;
 	FaceplateThemes faceplateTheme = defaultTheme;
 
+	// Programmer responsibility: if the module is not a SanguineModule, Rack will jump off a cliff.
+	// Now you know.
 	SanguineModule* sanguineModule = dynamic_cast<SanguineModule*>(this->module);
 
 	if (module) {
