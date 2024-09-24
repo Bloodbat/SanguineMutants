@@ -390,7 +390,7 @@ struct TemulentiWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Mode", temulentiMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Model", temulentiMenuLabels,
 			[=]() { return module->params[Temulenti::PARAM_MODEL].getValue(); },
 			[=](int i) { module->setModel(i); }
 		));
