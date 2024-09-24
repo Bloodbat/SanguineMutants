@@ -977,9 +977,7 @@ void Generator::FillBufferHarmonic() {
 
   // pre-compute spectral envelope
   for (uint8_t harm=0; harm<kNumHarmonics; harm++) {
-    uint16_t x = mode == GENERATOR_MODE_AR ?
-      (harm << 16) / kNumHarmonicsPowers :
-      (harm << 16) / kNumHarmonics;
+    uint16_t x = mode_ == GENERATOR_MODE_AR ? (harm << 16) / kNumHarmonicsPowers : (harm << 16) / kNumHarmonics;
 
     // first peak has half the width
     uint16_t peak1 = ComputePeak(center1, width >> 1, x);
@@ -998,16 +996,14 @@ void Generator::FillBufferHarmonic() {
 
     uint32_t pi = abs(phase_increment_end) >> 16;
     pi =
-      mode == GENERATOR_MODE_AR ? pi << harm :
-      mode == GENERATOR_MODE_LOOPING ? pi * (harm + 1) :
-      // mode == GENERATOR_MODE_AD ?
-      pi * ((harm << 1) + 1);
+      mode_ == GENERATOR_MODE_AR ? pi << harm : 
+        mode_ == GENERATOR_MODE_LOOPING ? pi * (harm + 1) :
+        /* mode == GENERATOR_MODE_AD ? */ pi * ((harm << 1) + 1);
 
     if (pi > kCutoffHigh)
       antialias[harm] = 0;
     else if (pi > kCutoffLow)
-      antialias[harm] = UINT16_MAX * (kCutoffHigh - pi)
-        / (kCutoffHigh - kCutoffLow);
+      antialias[harm] = UINT16_MAX * (kCutoffHigh - pi) / (kCutoffHigh - kCutoffLow);
     else
       antialias[harm] = UINT16_MAX;
 
@@ -1092,13 +1088,13 @@ void Generator::FillBufferHarmonic() {
       unipolar += (((tn * envelope_[harm_permut_[harm]]) >> 16) * antialias[harm]) >> 16;
 
       int32_t t = tn;
-      if (mode == GENERATOR_MODE_AR) { // power of two harmonics
+      if (mode_ == GENERATOR_MODE_AR) { // power of two harmonics
         if (harm == kNumHarmonicsPowers) break;
         if ((harm & 3) == 0)
           tn = Interpolate1022(wav_sine1024, phase_ << harm);
         else
           tn = 2 * ((tn * tn) >> 15) - 32768;
-      } else if (mode == GENERATOR_MODE_AD) { // odd harmonics
+      } else if (mode_ == GENERATOR_MODE_AD) { // odd harmonics
         tn = ((sine * tn) >> 14) - tn1;
         tn1 = t;
         t = tn;
