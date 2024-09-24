@@ -22,11 +22,11 @@ static const std::vector<std::string> temulentiMenuLabels = {
 static const std::vector<std::string> temulentiQuantizerLabels = {
 	"Off",
 	"Semitones",
-	"Ionian",
-	"Aeolian",
+	"Major",
+	"Minor",
 	"Whole tones",
 	"Pentatonic Minor",
-	"Pent-3",
+	"Poor pentatonic",
 	"Fifths"
 };
 
