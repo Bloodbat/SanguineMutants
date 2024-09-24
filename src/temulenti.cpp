@@ -130,11 +130,11 @@ struct Temulenti : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, "Output mode");
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
-		configParam(PARAM_FREQUENCY, -48.0, 48.0, 0.0, "Main frequency");
-		configParam(PARAM_FM, -12.0, 12.0, 0.0, "FM input attenuverter");
-		configParam(PARAM_SHAPE, -1.0, 1.0, 0.0, "Shape");
-		configParam(PARAM_SLOPE, -1.0, 1.0, 0.0, "Slope");
-		configParam(PARAM_SMOOTHNESS, -1.0, 1.0, 0.0, "Smoothness");
+		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
+		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
+		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape");
+		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope");
+		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness");
 
 		configSwitch(PARAM_MODEL, 0.f, 3.f, 0.f, "Module model", temulentiMenuLabels);
 
@@ -155,7 +155,7 @@ struct Temulenti : SanguineModule {
 
 		configButton(PARAM_SYNC, "PLL mode");
 
-		configSwitch(PARAM_QUANTIZER, 0.0, 7.0, 0.0, "Quantizer scale", temulentiQuantizerLabels);
+		configSwitch(PARAM_QUANTIZER, 0.f, 7.f, 0.f, "Quantizer scale", temulentiQuantizerLabels);
 
 		generator.Init();
 		lightsDivider.setDivision(kLightsFrequency);
@@ -192,7 +192,7 @@ struct Temulenti : SanguineModule {
 			pitchParam += 60.f;
 			// This is probably not original but seems useful to keep the same frequency as in normal mode.						
 			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC)
-				pitchParam -= 12;
+				pitchParam -= 12.f;
 
 			// This is equivalent to shifting left by 7 bits.
 			int16_t pitch = static_cast<int16_t>(pitchParam * 0x80);
@@ -205,7 +205,7 @@ struct Temulenti : SanguineModule {
 			}
 
 			// Scale to the global sample rate.
-			pitch += log2f(48000.0 / args.sampleRate) * 12.0 * 0x80;
+			pitch += log2f(48000.f / args.sampleRate) * 12.f * 0x80;
 
 			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 				generator.set_pitch_high_range(clamp(pitch, -0x8000, 0x7fff), fm);
@@ -216,13 +216,13 @@ struct Temulenti : SanguineModule {
 
 			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM) {
 				//TODO: should this be inverted?
-				generator.set_pulse_width(clamp(1.0 - params[PARAM_FM].getValue() / 12.0f, 0.0f, 2.0f) * 0x7fff);
+				generator.set_pulse_width(clamp(1.f - params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 0x7fff);
 			}
 
 			// Slope, smoothness, pitch
-			int16_t shape = clamp(params[PARAM_SHAPE].getValue() + inputs[INPUT_SHAPE].getVoltage() / 5.0f, -1.0f, 1.0f) * 0x7fff;
-			int16_t slope = clamp(params[PARAM_SLOPE].getValue() + inputs[INPUT_SLOPE].getVoltage() / 5.0f, -1.0f, 1.0f) * 0x7fff;
-			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() + inputs[INPUT_SMOOTHNESS].getVoltage() / 5.0f, -1.0f, 1.0f) * 0x7fff;
+			int16_t shape = clamp(params[PARAM_SHAPE].getValue() + inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
+			int16_t slope = clamp(params[PARAM_SLOPE].getValue() + inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
+			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() + inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
 			generator.set_shape(shape);
 			generator.set_slope(slope);
 			generator.set_smoothness(smoothness);
@@ -231,18 +231,18 @@ struct Temulenti : SanguineModule {
 		}
 
 		// Level
-		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.0) / 8.0f, 0.0f, 1.0f) * 0xffff;
+		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f) * 0xffff;
 		if (level < 32)
 		{
 			level = 0;
 		}
 
 		uint8_t gate = 0;
-		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7)
+		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f)
 			gate |= bumps::CONTROL_FREEZE;
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7)
+		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f)
 			gate |= bumps::CONTROL_GATE;
-		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7)
+		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f)
 			gate |= bumps::CONTROL_CLOCK;
 		if (!(lastGate & bumps::CONTROL_CLOCK) && (gate & bumps::CONTROL_CLOCK))
 			gate |= bumps::CONTROL_CLOCK_RISING;
@@ -262,34 +262,34 @@ struct Temulenti : SanguineModule {
 		float unipolarFlag = static_cast<float>(uni) / 0xffff;
 		float bipolarFlag = static_cast<float>(bi) / 0x8000;
 
-		outputs[OUTPUT_HIGH].setVoltage((sample.flags & bumps::FLAG_END_OF_ATTACK) ? 0.0 : 5.0);
-		outputs[OUTPUT_LOW].setVoltage((sample.flags & bumps::FLAG_END_OF_RELEASE) ? 0.0 : 5.0);
-		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.0);
-		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.0);
+		outputs[OUTPUT_HIGH].setVoltage((sample.flags & bumps::FLAG_END_OF_ATTACK) ? 0.f : 5.f);
+		outputs[OUTPUT_LOW].setVoltage((sample.flags & bumps::FLAG_END_OF_RELEASE) ? 0.f : 5.f);
+		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
+		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
 		if (bLightsTurn) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
 			generator.feature_mode_ = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AD ? 1.0 : 0.0, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AR ? 1.0 : 0.0, sampleTime);
+			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AD ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AR ? 1.f : 0.f, sampleTime);
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_LOW ? 1.0 : 0.0, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_HIGH ? 1.0 : 0.0, sampleTime);
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_LOW ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_HIGH ? 1.f : 0.f, sampleTime);
 
 			if (sample.flags & bumps::FLAG_END_OF_ATTACK)
-				unipolarFlag *= -1.0;
-			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.0, unipolarFlag), sampleTime);
-			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.0, -unipolarFlag), sampleTime);
+				unipolarFlag *= -1.f;
+			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
+			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
 			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 1.f : 0.f, sampleTime);
 
 			if (quantize) {
-				lights[LIGHT_QUANTIZER1].setBrightness(quantize & 1 ? 1.0 : 0.0);
-				lights[LIGHT_QUANTIZER2].setBrightness(quantize & 2 ? 1.0 : 0.0);
-				lights[LIGHT_QUANTIZER3].setBrightness(quantize & 4 ? 1.0 : 0.0);
+				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantize & 1 ? 1.f : 0.f, sampleTime);
+				lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantize & 2 ? 1.f : 0.f, sampleTime);
+				lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantize & 4 ? 1.f : 0.f, sampleTime);
 			}
 			else {
 				for (int i = 0; i < 3; i++) {

@@ -168,20 +168,20 @@ struct Aestus : SanguineModule {
 
 			// Pitch
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			pitch += 12.0 * inputs[INPUT_PITCH].getVoltage();
-			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1) / 5.0;
-			pitch += 60.0;
+			pitch += 12.f * inputs[INPUT_PITCH].getVoltage();
+			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
+			pitch += 60.f;
 			// Scale to the global sample rate
-			pitch += log2f(48000.0 / args.sampleRate) * 12.0;
+			pitch += log2f(48000.f / args.sampleRate) * 12.f;
 			generator.set_pitch(int(clamp(pitch * 0x80, float(-0x8000), float(0x7fff))));
 
 			// Shape, slope, smoothness
 			int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
-				inputs[INPUT_SHAPE].getVoltage() / 5.0f, -1.0f, 1.0f) * 0x7fff;
+				inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
 			int16_t slope = clamp(params[PARAM_SLOPE].getValue() +
-				inputs[INPUT_SLOPE].getVoltage() / 5.0f, -1.0f, 1.0f) * 0x7fff;
+				inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
 			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() +
-				inputs[INPUT_SMOOTHNESS].getVoltage() / 5.0f, -1.0f, 1.0f) * 0x7fff;
+				inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
 			generator.set_shape(shape);
 			generator.set_slope(slope);
 			generator.set_smoothness(smoothness);
@@ -198,11 +198,11 @@ struct Aestus : SanguineModule {
 		}
 
 		uint8_t gate = 0;
-		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7)
+		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f)
 			gate |= tides::CONTROL_FREEZE;
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7)
+		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f)
 			gate |= tides::CONTROL_GATE;
-		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7)
+		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f)
 			gate |= tides::CONTROL_CLOCK;
 		if (!(lastGate & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK))
 			gate |= tides::CONTROL_CLOCK_RISING;
@@ -221,24 +221,24 @@ struct Aestus : SanguineModule {
 		float unipolarFlag = float(uni) / 0xffff;
 		float bipolarFlag = float(bi) / 0x8000;
 
-		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 0.0 : 5.0);
-		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 0.0 : 5.0);
-		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.0);
-		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.0);
+		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 0.f : 5.f);
+		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 0.f : 5.f);
+		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
+		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
 		if (bLightsTurn) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ? 1.0 : 0.0, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ? 1.0 : 0.0, sampleTime);
+			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ? 1.f : 0.f, sampleTime);
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ? 1.0 : 0.0, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ? 1.0 : 0.0, sampleTime);
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ? 1.f : 0.f, sampleTime);
 
 			if (sample.flags & tides::FLAG_END_OF_ATTACK)
-				unipolarFlag *= -1.0;
-			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.0, unipolarFlag), sampleTime);
-			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.0, -unipolarFlag), sampleTime);
+				unipolarFlag *= -1.f;
+			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
+			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
 			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 1.f : 0.f, sampleTime);
