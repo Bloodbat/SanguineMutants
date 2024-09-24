@@ -21,6 +21,7 @@
         "Noise",
         "Oscillator",
         "Polyphonic",
+        "Speech",
         "Synth voice"
       ]
     },
@@ -45,7 +46,8 @@
         "Hardware clone",
         "Low-frequency oscillator",
         "Oscillator",
-        "Sequencer"
+        "Sequencer",
+        "Speech"
       ]
     },
     {
@@ -84,6 +86,7 @@
         "Noise",
         "Oscillator",
         "Polyphonic",
+        "Speech",
         "Synth voice",
         "Waveshaper"
       ]
@@ -126,7 +129,8 @@
         "Hardware clone",
         "Low-frequency oscillator",
         "Oscillator",
-        "Sequencer"
+        "Sequencer",
+        "Speech"
       ]
     },
     {
