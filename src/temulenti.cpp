@@ -332,15 +332,12 @@ struct TemulentiWidget : SanguineModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<CKD6>(millimetersToPixelsVec(6.665, 17.143), module, Temulenti::PARAM_MODE));
-		addChild(createLightCentered<CKD6Light<GreenRedLight>>(millimetersToPixelsVec(6.665, 17.143), module, Temulenti::LIGHT_MODE));
-
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(23.075, 18.802), module, Temulenti::PARAM_MODEL));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(11.966, 19.002), module, Temulenti::PARAM_MODEL));
 
 		FramebufferWidget* temulentiFrameBuffer = new FramebufferWidget();
 		addChild(temulentiFrameBuffer);
 
-		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 32.724, 17.143);
+		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 23.42, 17.343);
 		displayModel->displayType = DISPLAY_STRING;
 		temulentiFrameBuffer->addChild(displayModel);
 		displayModel->fallbackString = temulentiDisplayModels[0];
@@ -348,28 +345,33 @@ struct TemulentiWidget : SanguineModuleWidget {
 		if (module)
 			displayModel->values.displayText = &module->displayModel;
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(48.038, 18.802), module,
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.56, 19.002), module, Temulenti::PARAM_QUANTIZER));
+		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 16.496), module, Temulenti::LIGHT_QUANTIZER1));
+		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 19.002), module, Temulenti::LIGHT_QUANTIZER2));
+		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 21.496), module, Temulenti::LIGHT_QUANTIZER3));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(59.142, 19.002), module,
 			Temulenti::PARAM_SYNC, Temulenti::LIGHT_SYNC));
 
-		addParam(createParamCentered<CKD6>(millimetersToPixelsVec(64.442, 17.143), module, Temulenti::PARAM_RANGE));
-		addChild(createLightCentered<CKD6Light<GreenRedLight>>(millimetersToPixelsVec(64.442, 17.143), module, Temulenti::LIGHT_RANGE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 29.086), module,
+			Temulenti::PARAM_MODE, Temulenti::LIGHT_MODE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(23.075, 34.714), module, Temulenti::LIGHT_PHASE));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 37.214), module, Temulenti::LIGHT_PHASE));
 
-		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(9.557, 25.99), module, Temulenti::LIGHT_QUANTIZER1));
-		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(11.965, 25.99), module, Temulenti::LIGHT_QUANTIZER2));
-		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(14.374, 25.99), module, Temulenti::LIGHT_QUANTIZER3));
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(11.966, 34.714), module, Temulenti::PARAM_QUANTIZER));
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 34.714), module, Temulenti::PARAM_FREQUENCY));
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 34.714), module, Temulenti::PARAM_FM));
+		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 37.214), module, Temulenti::PARAM_FREQUENCY));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 60.355), module, Temulenti::PARAM_SHAPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 60.355), module, Temulenti::PARAM_SLOPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 60.355), module, Temulenti::PARAM_SMOOTHNESS));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 37.214), module, Temulenti::PARAM_FM));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(11.966, 76.495), module, Temulenti::INPUT_SHAPE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(35.56, 76.495), module, Temulenti::INPUT_SLOPE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(59.142, 76.495), module, Temulenti::INPUT_SMOOTHNESS));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 45.343),
+			module, Temulenti::PARAM_RANGE, Temulenti::LIGHT_RANGE));
+
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 62.855), module, Temulenti::PARAM_SHAPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 62.855), module, Temulenti::PARAM_SLOPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 62.855), module, Temulenti::PARAM_SMOOTHNESS));
+
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(11.966, 78.995), module, Temulenti::INPUT_SHAPE));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(35.56, 78.995), module, Temulenti::INPUT_SLOPE));
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(59.142, 78.995), module, Temulenti::INPUT_SMOOTHNESS));
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(6.665, 95.56), module, Temulenti::INPUT_TRIGGER));
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(21.11, 95.56), module, Temulenti::INPUT_FREEZE));
