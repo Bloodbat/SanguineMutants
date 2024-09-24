@@ -4,13 +4,13 @@
 #include "tides/generator.h"
 
 static const std::vector<std::string> aestusDisplayModels = {
-	"A",
+	"T",
 	"S"
 };
 
 static const std::vector<std::string> aestusMenuLabels = {
-	"Aestus",
-	"Sheep"
+	"Tidal Modulator",
+	"Sheep - Wavetable synthesizer"
 };
 
 struct Aestus : SanguineModule {
