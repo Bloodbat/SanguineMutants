@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "tides/generator.h"
+#include "aestuscommon.hpp"
 
 static const std::vector<std::string> aestusDisplayModels = {
 	"T",
@@ -248,6 +249,14 @@ struct Aestus : SanguineModule {
 	void setModel(int modelNum) {
 		params[PARAM_MODEL].setValue(modelNum);
 	}
+
+	void setMode(int modeNum) {
+		generator.set_mode(tides::GeneratorMode(modeNum));
+	}
+
+	void setRange(int rangeNum) {
+		generator.set_range(tides::GeneratorRange(rangeNum));
+	}
 };
 
 struct AestusWidget : SanguineModuleWidget {
@@ -321,9 +330,19 @@ struct AestusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Mode", aestusMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Model", aestusMenuLabels,
 			[=]() { return module->params[Aestus::PARAM_MODEL].getValue(); },
 			[=](int i) { module->setModel(i); }
+		));
+
+		menu->addChild(createIndexSubmenuItem("Mode", aestusModeMenuLabels,
+			[=]() { return module->generator.mode(); },
+			[=](int i) { module->setMode(i); }
+		));
+
+		menu->addChild(createIndexSubmenuItem("Range", aestusRangeMenuLabels,
+			[=]() { return module->generator.range(); },
+			[=](int i) { module->setRange(i); }
 		));
 	}
 };
