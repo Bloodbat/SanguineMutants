@@ -25,3 +25,4 @@ extern Model* modelMarmora;
 extern Model* modelAnuli;
 extern Model* modelVelamina;
 extern Model* modelAestus;
+extern Model* modelTemulenti;

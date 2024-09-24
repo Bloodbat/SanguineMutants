@@ -207,6 +207,18 @@
         "Oscillator",
         "Waveshaper"
       ]
+    },
+    {
+      "slug" : "Sanguine-Temulenti",
+      "name" : "Temulenti",
+      "description" : "Based on the Parasite firmware for Mutable Instruments Tides",
+      "tags" : [
+        "Function generator",
+        "Hardware clone",
+        "Low-frequency oscillator",
+        "Oscillator",
+        "Waveshaper"
+      ]
     }
   ]
 }
