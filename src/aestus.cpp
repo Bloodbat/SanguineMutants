@@ -144,7 +144,7 @@ struct Aestus : SanguineModule {
 
 		tides::GeneratorMode mode = generator.mode();
 		if (stMode.process(params[PARAM_MODE].getValue())) {
-			mode = tides::GeneratorMode((int(mode) - 1 + 3) % 3);
+			mode = tides::GeneratorMode((int(mode) + 1) % 3);
 			generator.set_mode(mode);
 		}
 

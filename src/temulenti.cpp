@@ -173,7 +173,7 @@ struct Temulenti : SanguineModule {
 
 		bumps::GeneratorRange range = generator.range();
 		if (stRange.process(params[PARAM_RANGE].getValue())) {
-			range = bumps::GeneratorRange((int(range) + 1) % 3);
+			range = bumps::GeneratorRange((int(range) - 1 + 3) % 3);
 			generator.set_range(range);
 		}
 
