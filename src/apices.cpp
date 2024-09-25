@@ -303,9 +303,7 @@ struct Apices : SanguineModule {
 				Slice slice = NextSlice(1);
 
 				for (size_t i = 0; i < kNumChannels; ++i) {
-					gateFlags[i] = peaks::ExtractGateFlags(
-						gateFlags[i],
-						gateInputs & (1 << i));
+					gateFlags[i] = peaks::ExtractGateFlags(gateFlags[i], gateInputs & (1 << i));
 
 					frame[k].samples[i] = slice.block->output[i][slice.frame_index];
 				}
