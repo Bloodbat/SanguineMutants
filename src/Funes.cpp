@@ -1,19 +1,8 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
-
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-
-#pragma GCC diagnostic push
-
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
-
 #include "plaits/dsp/voice.h"
 #include "plaits/user_data.h"
-
-#pragma GCC diagnostic pop
 
 #include <osdialog.h>
 #include <thread>
