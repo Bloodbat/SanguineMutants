@@ -203,6 +203,9 @@ struct Vimina : SanguineModule {
 				lights[currentLight + 1].setBrightnessSmooth(!bIsGreenLight, sampleTime);
 			}
 		}
+		if (moduleClock.time >= kTimerCounterMax) {
+			moduleClock.reset();
+		}
 	}
 
 	bool checkRisingEdge(const uint8_t channel, const bool voltageAboveThreshold) {
@@ -392,8 +395,8 @@ struct Vimina : SanguineModule {
 	}
 
 	bool checkMultiplyStrikeTurn(const uint8_t channel, const uint16_t elapsed) {
-		uint16_t interval = getPulseTrackerPeriod() / -channelFactor[channel];
-		if (elapsed % interval <= kTimingErrorCorrectionAmount) {
+		float interval = getPulseTrackerPeriod() / -channelFactor[channel];
+		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
 			if (!multiplyDebouncing[channel]) {
 				return true;
 			}
