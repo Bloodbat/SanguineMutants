@@ -3,7 +3,7 @@
 #include "sanguinehelpers.hpp"
 
 static const std::vector<std::string> viminaModeLabels = {
-	"Clock factorer",
+	"Clock multiplier/divider",
 	"Clock swing"
 };
 
