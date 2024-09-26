@@ -136,6 +136,11 @@ struct Vimina : SanguineModule {
 		configSwitch(PARAM_MODE1, 0.f, 1.f, 1.f, "Channel 1 mode", viminaModeLabels);
 		configSwitch(PARAM_MODE2, 0.f, 1.f, 0.f, "Channel 2 mode", viminaModeLabels);
 
+		configBypass(INPUT_CLOCK, OUTPUT_OUT1A);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT1B);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT2A);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT2B);
+
 		init();
 
 		lightsDivider.setDivision(kLightsFrequency);
