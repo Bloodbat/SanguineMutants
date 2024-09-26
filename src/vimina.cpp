@@ -123,7 +123,7 @@ struct Vimina : SanguineModule {
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int i = 0; i < 2; i++) {
-			configParam(PARAM_FACTOR1 + i, 0.f, 1.f, 0.5f, string::f("Channel %d factor", i + 1));
+			configParam(PARAM_FACTOR1 + i, 0.f, kMaxParamValue, 0.5f, string::f("Channel %d factor", i + 1));
 			configSwitch(PARAM_RESET1 + i, 0.f, 1.f, 0.f, string::f("Channel %d reset", i + 1));
 
 			configInput(INPUT_CV1 + i, string::f("Channel %d factor", i + 1));
