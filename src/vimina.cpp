@@ -52,7 +52,7 @@ struct Vimina : SanguineModule {
 
 	static const int kLightsFrequency = 16;
 
-	static const int kMaxModuleChannels = 2;
+	static const int kMaxModuleSections = 2;
 
 	static const int kTimerCounterMax = 65535;
 
@@ -82,21 +82,21 @@ struct Vimina : SanguineModule {
 	static const int kLedGeneratedGateDuration = 128;
 	static const int kPulseTrackerBufferSize = 2;
 
-	int16_t channelFactor[kMaxModuleChannels] = {};
-	int16_t channelSwing[kMaxModuleChannels] = {};
+	int16_t channelFactor[kMaxModuleSections] = {};
+	int16_t channelSwing[kMaxModuleSections] = {};
 
 	uint16_t pulseTrackerRecordedCount = 0;
 
-	uint16_t ledGateDuration[kMaxModuleChannels] = {};
-	ChannelStates ledState[kMaxModuleChannels] = {};
+	uint16_t ledGateDuration[kMaxModuleSections] = {};
+	ChannelStates ledState[kMaxModuleSections] = {};
 
-	ChannelStates channelState[kMaxModuleChannels] = {};
-	uint8_t triggerExtendCount[kMaxModuleChannels] = {};
+	ChannelStates channelState[kMaxModuleSections] = {};
+	uint8_t triggerExtendCount[kMaxModuleSections] = {};
 
-	int8_t divisionCounter[kMaxModuleChannels] = {};
-	int8_t swingCounter[kMaxModuleChannels] = {};
+	int8_t divisionCounter[kMaxModuleSections] = {};
+	int8_t swingCounter[kMaxModuleSections] = {};
 
-	float channelVoltage[kMaxModuleChannels] = {};
+	float channelVoltage[kMaxModuleSections] = {};
 	float pulseTrackerBuffer[kPulseTrackerBufferSize] = {};
 
 	// Swing constants
@@ -108,15 +108,15 @@ struct Vimina : SanguineModule {
 
 	const float kClockSpeed = 20000.f;
 
-	bool gateInputState[kMaxModuleChannels] = {};
-	bool multiplyDebouncing[kMaxModuleChannels];
+	bool gateInputState[kMaxModuleSections] = {};
+	bool multiplyDebouncing[kMaxModuleSections];
 
-	ChannelFunctions channelFunction[kMaxModuleChannels] = {
+	ChannelFunctions channelFunction[kMaxModuleSections] = {
 		CHANNEL_FUNCTION_SWING,
 		CHANNEL_FUNCTION_FACTORER
 	};
 
-	dsp::BooleanTrigger btReset[kMaxModuleChannels];
+	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
 	dsp::Timer moduleClock; // Replaces the ATMega88pa's TCNT1
 
@@ -174,31 +174,31 @@ struct Vimina : SanguineModule {
 			bIsReset = checkRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage() >= 2.f);
 		}
 
-		for (uint8_t channel = 0; channel < kMaxModuleChannels; channel++) {
-			channelFunction[channel] = ChannelFunctions(params[PARAM_MODE1 + channel].getValue());
+		for (uint8_t section = 0; section < kMaxModuleSections; section++) {
+			channelFunction[section] = ChannelFunctions(params[PARAM_MODE1 + section].getValue());
 
-			if (btReset[channel].process(params[PARAM_RESET1 + channel].getValue())) {
-				handleReset(channel);
+			if (btReset[section].process(params[PARAM_RESET1 + section].getValue())) {
+				handleReset(section);
 			}
 
 			if (bClockConnected) {
-				setupChannel(channel);
+				setupChannel(section);
 
-				handleTriggers(channel, bIsTrigger, bIsReset);
+				handleTriggers(section, bIsTrigger, bIsReset);
 
-				transformClock(channel);
+				transformClock(section);
 
-				setOutputVoltages(channel);
+				setOutputVoltages(section);
 			}
-			channelState[channel] = CHANNEL_REST; // Clean up.
+			channelState[section] = CHANNEL_REST; // Clean up.
 
 			if (bIsLightsTurn) {
 				const float sampleTime = kLightsFrequency * args.sampleTime;
 
-				updateChannelLeds(channel, sampleTime);
+				updateChannelLeds(section, sampleTime);
 
-				int currentLight = LIGHTS_MODE + channel * 2;
-				bool bIsGreenLight = channelFunction[channel] == CHANNEL_FUNCTION_FACTORER;
+				int currentLight = LIGHTS_MODE + section * 2;
+				bool bIsGreenLight = channelFunction[section] == CHANNEL_FUNCTION_FACTORER;
 				lights[currentLight + 0].setBrightnessSmooth(bIsGreenLight, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!bIsGreenLight, sampleTime);
 			}
@@ -388,7 +388,7 @@ struct Vimina : SanguineModule {
 		pulseTrackerBuffer[kPulseTrackerBufferSize - 1] = 0;
 		pulseTrackerRecordedCount = 0;
 
-		for (uint8_t i = 0; i < kMaxModuleChannels; ++i) {
+		for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
 			triggerExtendCount[i] = 0;
 		}
 		moduleClock.reset();
