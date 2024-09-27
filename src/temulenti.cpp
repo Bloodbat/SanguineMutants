@@ -202,8 +202,7 @@ struct Temulenti : SanguineModule {
 			generator.set_range(range);
 		}
 
-		bool bSync = bool(params[PARAM_SYNC].getValue()) ||
-			(generator.feature_mode_ == bumps::Generator::FEAT_MODE_FUNCTION && inputs[INPUT_CLOCK].isConnected());
+		bool bSync = bool(params[PARAM_SYNC].getValue());
 
 		//Buffer loop
 		if (generator.writable_block()) {
