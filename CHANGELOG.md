@@ -4,11 +4,11 @@
 
 ### Aestus
 
-Based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+Based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
 
 ### Temulenti
 
-Based on the Parasite firmware for MI's Tides: fixes PLL mode, separates it from the clock input; restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep wave table synthesizer can be accesed, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
 
 
 ## Additions
