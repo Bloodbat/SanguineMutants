@@ -66,7 +66,12 @@ struct Aestus : SanguineModule {
 			if (module != nullptr) {
 				Aestus* moduleAestus = static_cast<Aestus*>(module);
 				if (paramId == PARAM_MODE) {
-					return aestusModeMenuLabels[moduleAestus->generator.mode()];
+					if (!moduleAestus->bSheep) {
+						return aestusModeMenuLabels[moduleAestus->generator.mode()];
+					}
+					else {
+						return aestusSheepMenuLabels[moduleAestus->generator.mode()];
+					}
 				}
 				else {
 					assert(false);
@@ -107,7 +112,7 @@ struct Aestus : SanguineModule {
 
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		configButton<ModeParam>(PARAM_MODE, "Output mode");
+		configButton<ModeParam>(PARAM_MODE, aestusModelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
 		configParam(PARAM_FREQUENCY, -48.0, 48.0, 0.0, "Main frequency");
 		configParam(PARAM_FM, -12.0, 12.0, 0.0, "FM input attenuverter");
@@ -244,6 +249,13 @@ struct Aestus : SanguineModule {
 			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 1.f : 0.f, sampleTime);
 
 			displayModel = aestusDisplayModels[params[PARAM_MODEL].getValue()];
+
+			if (!bSheep) {
+				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[0];
+			}
+			else {
+				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[1];
+			}
 		}
 	}
 
@@ -370,10 +382,18 @@ struct AestusWidget : SanguineModuleWidget {
 			[=](int i) { module->setModel(i); }
 		));
 
-		menu->addChild(createIndexSubmenuItem("Mode", aestusModeMenuLabels,
-			[=]() { return module->generator.mode(); },
-			[=](int i) { module->setMode(i); }
-		));
+		if (!module->bSheep) {
+			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[0], aestusModeMenuLabels,
+				[=]() { return module->generator.mode(); },
+				[=](int i) { module->setMode(i); }
+			));
+		}
+		else {
+			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[1], aestusSheepMenuLabels,
+				[=]() { return module->generator.mode(); },
+				[=](int i) { module->setMode(i); }
+			));
+		}
 
 		menu->addChild(createIndexSubmenuItem("Range", aestusRangeMenuLabels,
 			[=]() { return module->generator.range(); },

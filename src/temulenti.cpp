@@ -87,7 +87,14 @@ struct Temulenti : SanguineModule {
 			if (module != nullptr) {
 				Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
 				if (paramId == PARAM_MODE) {
-					return aestusModeMenuLabels[moduleTemulenti->generator.mode()];
+					switch (moduleTemulenti->generator.feature_mode_) {
+					case bumps::Generator::FEAT_MODE_SHEEP:
+						return aestusSheepMenuLabels[moduleTemulenti->generator.mode()];
+						break;
+					default:
+						return aestusModeMenuLabels[moduleTemulenti->generator.mode()];
+						break;
+					}
 				}
 				else {
 					assert(false);
@@ -128,7 +135,7 @@ struct Temulenti : SanguineModule {
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		configButton<ModeParam>(PARAM_MODE, "Output mode");
+		configButton<ModeParam>(PARAM_MODE, aestusModelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
 		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
 		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
@@ -298,6 +305,16 @@ struct Temulenti : SanguineModule {
 			}
 
 			displayModel = temulentiDisplayModels[params[PARAM_MODEL].getValue()];
+
+			switch (generator.feature_mode_)
+			{
+			case bumps::Generator::FEAT_MODE_SHEEP:
+				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[1];
+				break;
+			default:
+				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[0];
+				break;
+			}
 		}
 	}
 
@@ -433,10 +450,21 @@ struct TemulentiWidget : SanguineModuleWidget {
 			[=](int i) { module->setModel(i); }
 		));
 
-		menu->addChild(createIndexSubmenuItem("Mode", aestusModeMenuLabels,
-			[=]() { return module->generator.mode(); },
-			[=](int i) { module->setMode(i); }
-		));
+		switch (module->generator.feature_mode_)
+		{
+		case bumps::Generator::FEAT_MODE_SHEEP:
+			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[1], aestusSheepMenuLabels,
+				[=]() { return module->generator.mode(); },
+				[=](int i) { module->setMode(i); }
+			));
+			break;
+		default:
+			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[0], aestusModeMenuLabels,
+				[=]() { return module->generator.mode(); },
+				[=](int i) { module->setMode(i); }
+			));
+			break;
+		}
 
 		menu->addChild(createIndexSubmenuItem("Range", aestusRangeMenuLabels,
 			[=]() { return module->generator.range(); },

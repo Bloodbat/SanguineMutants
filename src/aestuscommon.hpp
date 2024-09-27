@@ -11,3 +11,14 @@ static const std::vector<std::string> aestusRangeMenuLabels = {
 	"Medium",
 	"Low"
 };
+
+static const std::vector<std::string> aestusSheepMenuLabels = {
+	"Additive harmonics",
+	"PWMish",
+	"Nodi WMAP"
+};
+
+static const std::vector<std::string> aestusModelModeHeaders = {
+	"Mode",
+	"Wave table"
+};
