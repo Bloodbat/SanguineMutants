@@ -161,7 +161,7 @@ struct Aestus : SanguineModule {
 
 		bSheep = bool(params[PARAM_MODEL].getValue());
 
-		bool bSync = bool(params[PARAM_SYNC].getValue());
+		bool bSync = bool(params[PARAM_SYNC].getValue()) || (!bSheep && inputs[INPUT_CLOCK].isConnected());
 
 		// Buffer loop
 		if (++frame >= 16) {
