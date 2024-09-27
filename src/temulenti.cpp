@@ -30,6 +30,18 @@ static const std::vector<std::string> temulentiQuantizerLabels = {
 	"Fifths"
 };
 
+static const std::vector<std::string> temulentiBumpsModeLabels = {
+	"Odd",
+	"First 16",
+	"Octaves"
+};
+
+static const std::vector<std::string> temulentiDrunksModeLabels = {
+	"Trigger",
+	"Cycling",
+	"Gate"
+};
+
 struct Temulenti : SanguineModule {
 	enum ParamIds {
 		PARAM_MODE,
@@ -88,6 +100,12 @@ struct Temulenti : SanguineModule {
 				Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
 				if (paramId == PARAM_MODE) {
 					switch (moduleTemulenti->generator.feature_mode_) {
+					case bumps::Generator::FEAT_MODE_RANDOM:
+						return temulentiDrunksModeLabels[moduleTemulenti->generator.mode()];
+						break;
+					case bumps::Generator::FEAT_MODE_HARMONIC:
+						return temulentiBumpsModeLabels[moduleTemulenti->generator.mode()];
+						break;
 					case bumps::Generator::FEAT_MODE_SHEEP:
 						return aestusSheepMenuLabels[moduleTemulenti->generator.mode()];
 						break;
@@ -308,6 +326,9 @@ struct Temulenti : SanguineModule {
 
 			switch (generator.feature_mode_)
 			{
+			case bumps::Generator::FEAT_MODE_HARMONIC:
+				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[2];
+				break;
 			case bumps::Generator::FEAT_MODE_SHEEP:
 				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[1];
 				break;
@@ -452,6 +473,18 @@ struct TemulentiWidget : SanguineModuleWidget {
 
 		switch (module->generator.feature_mode_)
 		{
+		case bumps::Generator::FEAT_MODE_RANDOM:
+			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[0], temulentiDrunksModeLabels,
+				[=]() { return module->generator.mode(); },
+				[=](int i) { module->setMode(i); }
+			));
+			break;
+		case bumps::Generator::FEAT_MODE_HARMONIC:
+			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[2], temulentiBumpsModeLabels,
+				[=]() { return module->generator.mode(); },
+				[=](int i) { module->setMode(i); }
+			));
+			break;
 		case bumps::Generator::FEAT_MODE_SHEEP:
 			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[1], aestusSheepMenuLabels,
 				[=]() { return module->generator.mode(); },
@@ -471,7 +504,7 @@ struct TemulentiWidget : SanguineModuleWidget {
 			[=](int i) { module->setRange(i); }
 		));
 
-		menu->addChild(createIndexSubmenuItem("Quantizer mode", temulentiQuantizerLabels,
+		menu->addChild(createIndexSubmenuItem("Quantizer scale", temulentiQuantizerLabels,
 			[=]() { return module->params[Temulenti::PARAM_QUANTIZER].getValue(); },
 			[=](int i) { module->setQuantizer(i); }
 		));

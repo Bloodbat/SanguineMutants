@@ -20,5 +20,6 @@ static const std::vector<std::string> aestusSheepMenuLabels = {
 
 static const std::vector<std::string> aestusModelModeHeaders = {
 	"Mode",
-	"Wave table"
+	"Wave table",
+	"Harmonics"
 };
