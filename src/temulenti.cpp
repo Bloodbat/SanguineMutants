@@ -153,7 +153,7 @@ struct Temulenti : SanguineModule {
 		configOutput(OUTPUT_UNI, "Unipolar");
 		configOutput(OUTPUT_BI, "Bipolar");
 
-		configButton(PARAM_SYNC, "PLL mode");
+		configButton(PARAM_SYNC, "Clock sync/PLL mode");
 
 		configSwitch(PARAM_QUANTIZER, 0.f, 7.f, 0.f, "Quantizer scale", temulentiQuantizerLabels);
 

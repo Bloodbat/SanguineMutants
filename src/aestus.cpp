@@ -132,7 +132,7 @@ struct Aestus : SanguineModule {
 		configOutput(OUTPUT_UNI, "Unipolar");
 		configOutput(OUTPUT_BI, "Bipolar");
 
-		configButton(PARAM_SYNC, "PLL mode");
+		configButton(PARAM_SYNC, "Clock sync/PLL mode");
 
 		generator.Init();
 		lightsDivider.setDivision(kLightsFrequency);
