@@ -801,8 +801,7 @@ SanguineMutantsLogoLight::SanguineMutantsLogoLight(Module* theModule, const floa
 
 SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName) {
 	setBackground(Svg::load(asset::plugin(pluginInstance, newBackgroundFileName)));
-
-	SvgWidget* foreground = new SvgWidget();
+	foreground = new SvgWidget();
 	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForegroundFileName)));
 	fb->addChildBelow(foreground, panelBorder);
 }
