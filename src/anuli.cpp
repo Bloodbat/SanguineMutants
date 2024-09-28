@@ -96,8 +96,8 @@ struct Anuli : SanguineModule {
 
 	int channelCount = 0;
 	int polyphonyMode = 1;
-	int strummingFlagCounter;
-	int strummingFlagInterval;
+	int strummingFlagCounter = 0;
+	int strummingFlagInterval = 0;
 
 	rings::ResonatorModel resonatorModel = rings::RESONATOR_MODEL_MODAL;
 	rings::ResonatorModel fxModel = rings::RESONATOR_MODEL_MODAL;

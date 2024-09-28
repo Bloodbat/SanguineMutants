@@ -269,7 +269,7 @@ struct Contextus : SanguineModule {
 	uint16_t gainLp[PORT_MAX_CHANNELS];
 	uint16_t triggerDelay[PORT_MAX_CHANNELS];
 
-	int channelCount;
+	int channelCount = 0;
 
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
 	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
@@ -293,7 +293,7 @@ struct Contextus : SanguineModule {
 
 	// Display stuff
 	renaissance::SettingsData lastSettings;
-	renaissance::Setting lastSettingChanged;
+	renaissance::Setting lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 
 	uint32_t displayTimeout = 0;
 
