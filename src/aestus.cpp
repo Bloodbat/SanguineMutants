@@ -178,15 +178,15 @@ struct Aestus : SanguineModule {
 			pitch += 60.f;
 			// Scale to the global sample rate
 			pitch += log2f(48000.f / args.sampleRate) * 12.f;
-			generator.set_pitch(int(clamp(pitch * 0x80, float(-0x8000), float(0x7fff))));
+			generator.set_pitch(int(clamp(pitch * 128, float(-32768), float(32767))));
 
 			// Shape, slope, smoothness
 			int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
-				inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
+				inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			int16_t slope = clamp(params[PARAM_SLOPE].getValue() +
-				inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
+				inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() +
-				inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 0x7fff;
+				inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			generator.set_shape(shape);
 			generator.set_slope(slope);
 			generator.set_smoothness(smoothness);
@@ -197,7 +197,7 @@ struct Aestus : SanguineModule {
 
 		// Level
 		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.0) / 8.0f, 0.0f, 1.0f)
-			* 0xffff;
+			* 65535;
 		if (level < 32) {
 			level = 0;
 		}
@@ -223,8 +223,8 @@ struct Aestus : SanguineModule {
 
 		uni = uni * level >> 16;
 		bi = -bi * level >> 16;
-		float unipolarFlag = float(uni) / 0xffff;
-		float bipolarFlag = float(bi) / 0x8000;
+		float unipolarFlag = float(uni) / 65535;
+		float bipolarFlag = float(bi) / 32768;
 
 		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
 		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
