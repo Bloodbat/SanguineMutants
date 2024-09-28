@@ -7,6 +7,9 @@ dist
 /SanguineMutants.vcxproj
 /SanguineMutants.vcxproj.filters
 /.vs
+/diagram_sources
+/faceplate_sources
 /.settings
 /.cproject
 /.project
+*.so
