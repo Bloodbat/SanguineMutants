@@ -80,6 +80,7 @@ struct Aestus : SanguineModule {
 			else {
 				return "";
 			}
+			return"";
 		}
 	};
 
@@ -97,6 +98,7 @@ struct Aestus : SanguineModule {
 			else {
 				return "";
 			}
+			return "";
 		}
 	};
 

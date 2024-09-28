@@ -121,6 +121,7 @@ struct Temulenti : SanguineModule {
 			else {
 				return "";
 			}
+			return "";
 		}
 	};
 
@@ -138,6 +139,7 @@ struct Temulenti : SanguineModule {
 			else {
 				return "";
 			}
+			return "";
 		}
 	};
 
