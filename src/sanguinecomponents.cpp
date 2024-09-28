@@ -162,6 +162,7 @@ Sanguine3PSRed::Sanguine3PSRed() {
 SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule) {
 	characterCount = newCharacterCount;
 	module = theModule;
+	fontSize = 10;
 }
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
@@ -506,6 +507,7 @@ Befaco2StepSwitch::Befaco2StepSwitch() {
 // Lights
 
 SanguineMultiColoredShapedLight::SanguineMultiColoredShapedLight() {
+	module = nullptr;
 }
 
 /** Returns the parameterized value of the line p2--p3 where it intersects with p0--p1 */
