@@ -111,10 +111,10 @@ class FMVoice {
   float amplitude_envelope_;
   float brightness_envelope_;
   float gain_;
-  float fm_amount_;
-  uint32_t carrier_phase_;
-  uint32_t modulator_phase_;
-  float previous_sample_;
+  float fm_amount_ = 0.f;
+  uint32_t carrier_phase_ = 0;
+  uint32_t modulator_phase_ = 0;
+  float previous_sample_ = 0.f;
   
   Follower follower_;
   

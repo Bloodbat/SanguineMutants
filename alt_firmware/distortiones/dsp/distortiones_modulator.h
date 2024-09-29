@@ -101,7 +101,7 @@ namespace distortiones {
 		}
 
 	private:
-		float level_;
+		float level_ = 0.f;
 		float drive_;
 		float post_gain_;
 		float pre_gain_;
