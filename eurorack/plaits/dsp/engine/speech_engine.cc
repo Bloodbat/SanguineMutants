@@ -32,114 +32,113 @@
 
 namespace plaits {
 
-using namespace std;
-using namespace stmlib;
+	using namespace std;
+	using namespace stmlib;
 
-void SpeechEngine::Init(BufferAllocator* allocator) {
-  sam_speech_synth_.Init();
-  naive_speech_synth_.Init();
-  lpc_speech_synth_word_bank_.Init(
-      word_banks_,
-      LPC_SPEECH_SYNTH_NUM_WORD_BANKS,
-      allocator);
-  lpc_speech_synth_controller_.Init(&lpc_speech_synth_word_bank_);
-  word_bank_quantizer_.Init(LPC_SPEECH_SYNTH_NUM_WORD_BANKS + 1, 0.1f, false);
-  
-  temp_buffer_[0] = allocator->Allocate<float>(kMaxBlockSize);
-  temp_buffer_[1] = allocator->Allocate<float>(kMaxBlockSize);
-  
-  prosody_amount_ = 0.0f;
-  speed_ = 0.0f;
-}
+	void SpeechEngine::Init(BufferAllocator* allocator) {
+		sam_speech_synth_.Init();
+		naive_speech_synth_.Init();
+		lpc_speech_synth_word_bank_.Init(
+			word_banks_,
+			LPC_SPEECH_SYNTH_NUM_WORD_BANKS,
+			allocator);
+		lpc_speech_synth_controller_.Init(&lpc_speech_synth_word_bank_);
+		word_bank_quantizer_.Init(LPC_SPEECH_SYNTH_NUM_WORD_BANKS + 1, 0.1f, false);
 
-void SpeechEngine::Reset() {
-  lpc_speech_synth_word_bank_.Reset();
-}
+		temp_buffer_[0] = allocator->Allocate<float>(kMaxBlockSize);
+		temp_buffer_[1] = allocator->Allocate<float>(kMaxBlockSize);
 
-void SpeechEngine::Render(
-    const EngineParameters& parameters,
-    float* out,
-    float* aux,
-    size_t size,
-    bool* already_enveloped) {
-  const float f0 = NoteToFrequency(parameters.note);
-  
-  const float group = parameters.harmonics * 6.0f;
-  
-  // Interpolates between the 3 models: naive, SAM, LPC.
-  if (group <= 2.0f) {
-    *already_enveloped = false;
-    
-    float blend = group;
-    if (group <= 1.0f) {
-      naive_speech_synth_.Render(
-          parameters.trigger == TRIGGER_RISING_EDGE,
-          f0,
-          parameters.morph,
-          parameters.timbre,
-          temp_buffer_[0],
-          aux,
-          out,
-          size);
-    } else {
-      lpc_speech_synth_controller_.Render(
-          parameters.trigger & TRIGGER_UNPATCHED,
-          parameters.trigger & TRIGGER_RISING_EDGE,
-          -1,
-          f0,
-          0.0f,
-          0.0f,
-          parameters.morph,
-          parameters.timbre,
-          1.0f,
-          aux,
-          out,
-          size);
-      blend = 2.0f - blend;
-    }
-  
-    sam_speech_synth_.Render(
-        parameters.trigger == TRIGGER_RISING_EDGE,
-        f0,
-        parameters.morph,
-        parameters.timbre,
-        temp_buffer_[0],
-        temp_buffer_[1],
-        size);
-    
-    blend *= blend * (3.0f - 2.0f * blend);
-    blend *= blend * (3.0f - 2.0f * blend);
-    for (size_t i = 0; i < size; ++i) {
-      aux[i] += (temp_buffer_[0][i] - aux[i]) * blend;
-      out[i] += (temp_buffer_[1][i] - out[i]) * blend;
-    }
-  } else {
-    // Change phonemes/words for LPC.
-    const int word_bank = word_bank_quantizer_.Process(
-        (group - 2.0f) * 0.275f) - 1;
-    
-    const bool replay_prosody = word_bank >= 0 && \
-        !(parameters.trigger & TRIGGER_UNPATCHED);
-    
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wparentheses"
-    *already_enveloped = !replay_prosody & TRIGGER_UNPATCHED;
-#pragma GCC diagnostic pop
-    
-    lpc_speech_synth_controller_.Render(
-        parameters.trigger & TRIGGER_UNPATCHED,
-        parameters.trigger & TRIGGER_RISING_EDGE,
-        word_bank,
-        f0,
-        prosody_amount_,
-        speed_,
-        parameters.morph,
-        parameters.timbre,
-        replay_prosody ? parameters.accent : 1.0f,
-        aux,
-        out,
-        size);
-  }
-}
+		prosody_amount_ = 0.0f;
+		speed_ = 0.0f;
+	}
+
+	void SpeechEngine::Reset() {
+		lpc_speech_synth_word_bank_.Reset();
+	}
+
+	void SpeechEngine::Render(
+		const EngineParameters& parameters,
+		float* out,
+		float* aux,
+		size_t size,
+		bool* already_enveloped) {
+		const float f0 = NoteToFrequency(parameters.note);
+
+		const float group = parameters.harmonics * 6.0f;
+
+		// Interpolates between the 3 models: naive, SAM, LPC.
+		if (group <= 2.0f) {
+			*already_enveloped = false;
+
+			float blend = group;
+			if (group <= 1.0f) {
+				naive_speech_synth_.Render(
+					parameters.trigger == TRIGGER_RISING_EDGE,
+					f0,
+					parameters.morph,
+					parameters.timbre,
+					temp_buffer_[0],
+					aux,
+					out,
+					size);
+			}
+			else {
+				lpc_speech_synth_controller_.Render(
+					parameters.trigger & TRIGGER_UNPATCHED,
+					parameters.trigger & TRIGGER_RISING_EDGE,
+					-1,
+					f0,
+					0.0f,
+					0.0f,
+					parameters.morph,
+					parameters.timbre,
+					1.0f,
+					aux,
+					out,
+					size);
+				blend = 2.0f - blend;
+			}
+
+			sam_speech_synth_.Render(
+				parameters.trigger == TRIGGER_RISING_EDGE,
+				f0,
+				parameters.morph,
+				parameters.timbre,
+				temp_buffer_[0],
+				temp_buffer_[1],
+				size);
+
+			blend *= blend * (3.0f - 2.0f * blend);
+			blend *= blend * (3.0f - 2.0f * blend);
+			for (size_t i = 0; i < size; ++i) {
+				aux[i] += (temp_buffer_[0][i] - aux[i]) * blend;
+				out[i] += (temp_buffer_[1][i] - out[i]) * blend;
+			}
+		}
+		else {
+			// Change phonemes/words for LPC.
+			const int word_bank = word_bank_quantizer_.Process(
+				(group - 2.0f) * 0.275f) - 1;
+
+			const bool replay_prosody = word_bank >= 0 && \
+				!(parameters.trigger & TRIGGER_UNPATCHED);
+
+			*already_enveloped = (!replay_prosody) & TRIGGER_UNPATCHED;
+
+			lpc_speech_synth_controller_.Render(
+				parameters.trigger & TRIGGER_UNPATCHED,
+				parameters.trigger & TRIGGER_RISING_EDGE,
+				word_bank,
+				f0,
+				prosody_amount_,
+				speed_,
+				parameters.morph,
+				parameters.timbre,
+				replay_prosody ? parameters.accent : 1.0f,
+				aux,
+				out,
+				size);
+		}
+	}
 
 }  // namespace plaits
