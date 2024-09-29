@@ -42,84 +42,80 @@
 
 namespace rings {
 
-using namespace stmlib;
+	using namespace stmlib;
 
-class FMVoice {
- public:
-  FMVoice() { }
-  ~FMVoice() { }
-  
-  void Init();
-  void Process(
-      const float* in,
-      float* out,
-      float* aux,
-      size_t size);
-  
-  inline void set_frequency(float frequency) {
-    carrier_frequency_ = frequency;
-  }
-  
-  inline void set_ratio(float ratio) {
-    ratio_ = ratio;
-  }
+	class FMVoice {
+	public:
+		FMVoice() { }
+		~FMVoice() { }
 
-  inline void set_brightness(float brightness) {
-    brightness_ = brightness;
-  }
-  
-  inline void set_damping(float damping) {
-    damping_ = damping;
-  }
-  
-  inline void set_position(float position) {
-    position_ = position;
-  }
-  
-  inline void set_feedback_amount(float feedback_amount) {
-    feedback_amount_ = feedback_amount;
-  }
-  
-  inline void TriggerInternalEnvelope() {
-    amplitude_envelope_ = 1.0f;
-    brightness_envelope_ = 1.0f;
-  }
-  
-  inline float SineFm(uint32_t phase, float fm) const {
-    phase += (static_cast<uint32_t>((fm + 4.0f) * 536870912.0f)) << 3;
-    uint32_t integral = phase >> 20;
-    float fractional = static_cast<float>(phase << 12) / 4294967296.0f;
-    float a = lut_sine[integral];
-    float b = lut_sine[integral + 1];
-    return a + (b - a) * fractional;
-  }
-  
- private:
-  float carrier_frequency_;
-  float ratio_;
-  float brightness_;
-  float damping_;
-  float position_;
-  float feedback_amount_;
-  
-  float previous_carrier_frequency_;
-  float previous_modulator_frequency_;
-  float previous_brightness_;
-  float previous_damping_;
-  float previous_feedback_amount_;
-  
-  float amplitude_envelope_;
-  float brightness_envelope_;
-  float gain_;
-  float fm_amount_ = 0.f;
-  uint32_t carrier_phase_ = 0;
-  uint32_t modulator_phase_ = 0;
-  float previous_sample_ = 0.f;
-  
-  Follower follower_;
-  
-  DISALLOW_COPY_AND_ASSIGN(FMVoice);
-};
+		void Init();
+		void Process(const float* in, float* out, float* aux, size_t size);
+
+		inline void set_frequency(float frequency) {
+			carrier_frequency_ = frequency;
+		}
+
+		inline void set_ratio(float ratio) {
+			ratio_ = ratio;
+		}
+
+		inline void set_brightness(float brightness) {
+			brightness_ = brightness;
+		}
+
+		inline void set_damping(float damping) {
+			damping_ = damping;
+		}
+
+		inline void set_position(float position) {
+			position_ = position;
+		}
+
+		inline void set_feedback_amount(float feedback_amount) {
+			feedback_amount_ = feedback_amount;
+		}
+
+		inline void TriggerInternalEnvelope() {
+			amplitude_envelope_ = 1.0f;
+			brightness_envelope_ = 1.0f;
+		}
+
+		inline float SineFm(uint32_t phase, float fm) const {
+			phase += (static_cast<uint32_t>((fm + 4.0f) * 536870912.0f)) << 3;
+			uint32_t integral = phase >> 20;
+			float fractional = static_cast<float>(phase << 12) / 4294967296.0f;
+			float a = lut_sine[integral];
+			float b = lut_sine[integral + 1];
+			return a + (b - a) * fractional;
+		}
+
+	private:
+		float carrier_frequency_;
+		float ratio_;
+		float brightness_;
+		float damping_;
+		float position_;
+		float feedback_amount_;
+
+		float previous_carrier_frequency_;
+		float previous_modulator_frequency_;
+		float previous_brightness_;
+		float previous_damping_;
+		float previous_feedback_amount_;
+
+		float amplitude_envelope_;
+		float brightness_envelope_;
+		float gain_;
+		float fm_amount_;
+		uint32_t carrier_phase_;
+		uint32_t modulator_phase_;
+		float previous_sample_ = 0.f;
+
+		Follower follower_;
+
+		DISALLOW_COPY_AND_ASSIGN(FMVoice);
+	};
 
 }  // namespace rings
 
