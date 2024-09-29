@@ -370,8 +370,8 @@ struct Mortuus : SanguineModule {
 
 			// TODO! More PLO testing!
 			uint32_t gateTriggers = 0;
-			gateTriggers |= inputs[GATE_1_INPUT].getVoltage() > 0.1 ? 1 : 0;
-			gateTriggers |= inputs[GATE_2_INPUT].getVoltage() > 0.1 ? 2 : 0;
+			gateTriggers |= inputs[GATE_1_INPUT].getVoltage() >= 0.7f ? 1 : 0;
+			gateTriggers |= inputs[GATE_2_INPUT].getVoltage() >= 0.7f ? 2 : 0;
 
 			uint32_t buttons = 0;
 			buttons |= (params[PARAM_TRIGGER_1].getValue() ? 1 : 0);
