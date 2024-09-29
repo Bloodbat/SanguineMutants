@@ -106,7 +106,7 @@ struct Vimina : SanguineModule {
 	// Scaling constant
 	const float kMaxParamValue = 1.f;
 
-	const float kClockSpeed = 20000.f;
+	const float kClockSpeed = 8000.f;
 
 	bool gateInputState[kMaxModuleSections] = {};
 	bool multiplyDebouncing[kMaxModuleSections];
@@ -149,7 +149,6 @@ struct Vimina : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		// TODO POLYPHONY!: Channel count should be set by clock!
 
-		// Hardware processor runs at 20Mhz?		
 		moduleClock.process(kClockSpeed * args.sampleTime);
 
 		bool bClockConnected = inputs[INPUT_CLOCK].isConnected();
