@@ -135,12 +135,7 @@ struct Velamina : SanguineModule {
 
 				if (channelCount < 2) {
 					if (channelCount > 0) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsequence-point"
-						voltageSum = voltageSum = portVoltages[i][0][0];
-#pragma GCC diagnostic pop
-
-						voltageSum = clamp(voltageSum, -10.f, 10.f);
+						voltageSum = clamp(portVoltages[i][0][0], -10.f, 10.f);
 					}
 
 					lights[currentLight + 0].setBrightnessSmooth(rescale(-voltageSum, 0.f, 10.f, 0.f, 1.f), sampleTime);
