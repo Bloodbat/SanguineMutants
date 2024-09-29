@@ -510,7 +510,7 @@ SanguineMultiColoredShapedLight::SanguineMultiColoredShapedLight() {
 	module = nullptr;
 }
 
-/** Returns the parameterized value of the line p2--p3 where it intersects with p0--p1 */
+/* Returns the parameterized value of the line p2--p3 where it intersects with p0--p1 */
 float SanguineMultiColoredShapedLight::getLineCrossing(math::Vec p0, math::Vec p1, math::Vec p2, math::Vec p3) {
 	math::Vec b = p2.minus(p0);
 	math::Vec d = p1.minus(p0);
