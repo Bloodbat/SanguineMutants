@@ -365,7 +365,7 @@ struct Contextus : SanguineModule {
 
 			memset(&jitterSource[i], 0, sizeof(renaissance::VcoJitterSource));
 			jitterSource[i].Init();
-			memset(&envelope[i], 0, sizeof(renaissance::SignatureWaveshaper));
+			memset(&waveShaper[i], 0, sizeof(renaissance::SignatureWaveshaper));
 			waveShaper[i].Init(0x0000);
 			memset(&settings[i], 0, sizeof(renaissance::SettingsData));
 
@@ -375,6 +375,7 @@ struct Contextus : SanguineModule {
 
 			previousPitch[i] = 0;
 		}
+		memset(&lastSettings, 0, sizeof(renaissance::SettingsData));
 
 		clockDivider.setDivision(kClockUpdateFrequency);
 	}
