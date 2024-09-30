@@ -335,21 +335,24 @@ struct Apices : SanguineModule {
 			parameters[i] = adcValue[i];
 		}
 
-		if (editMode == EDIT_MODE_SPLIT) {
-			processors[0].CopyParameters(&parameters[0], 2);
-			processors[1].CopyParameters(&parameters[2], 2);
-			processors[0].set_control_mode(peaks::CONTROL_MODE_HALF);
-			processors[1].set_control_mode(peaks::CONTROL_MODE_HALF);
-		}
-		else if (editMode == EDIT_MODE_TWIN) {
+		switch (editMode)
+		{
+		case EDIT_MODE_TWIN:
 			processors[0].CopyParameters(&parameters[0], 4);
 			processors[1].CopyParameters(&parameters[0], 4);
 			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
 			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
-		}
-		else {
+			break;
+		case EDIT_MODE_SPLIT:
+			processors[0].CopyParameters(&parameters[0], 2);
+			processors[1].CopyParameters(&parameters[2], 2);
+			processors[0].set_control_mode(peaks::CONTROL_MODE_HALF);
+			processors[1].set_control_mode(peaks::CONTROL_MODE_HALF);
+			break;
+		default:
 			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
 			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
+			break;
 		}
 	}
 
