@@ -5,9 +5,9 @@
 #include "nodicommon.hpp"
 
 #include "renaissance/renaissance_macro_oscillator.h"
-#include "braids/signature_waveshaper.h"
-#include "braids/vco_jitter_source.h"
-#include "braids/envelope.h"
+#include "renaissance/renaissance_signature_waveshaper.h"
+#include "renaissance/renaissance_vco_jitter_source.h"
+#include "renaissance/renaissance_envelope.h"
 #include "renaissance/renaissance_quantizer.h"
 #include "renaissance/renaissance_quantizer_scales.h"
 
@@ -257,17 +257,17 @@ struct Contextus : SanguineModule {
 
 	renaissance::MacroOscillator osc[PORT_MAX_CHANNELS];
 	renaissance::SettingsData settings[PORT_MAX_CHANNELS];
-	braids::VcoJitterSource jitterSource[PORT_MAX_CHANNELS];
-	braids::SignatureWaveshaper waveShaper[PORT_MAX_CHANNELS];
-	braids::Envelope envelope[PORT_MAX_CHANNELS];
+	renaissance::VcoJitterSource jitterSource[PORT_MAX_CHANNELS];
+	renaissance::SignatureWaveshaper waveShaper[PORT_MAX_CHANNELS];
+	renaissance::Envelope envelope[PORT_MAX_CHANNELS];
 	renaissance::Quantizer quantizer[PORT_MAX_CHANNELS];
 
-	uint8_t currentScale[PORT_MAX_CHANNELS];
+	uint8_t currentScale[PORT_MAX_CHANNELS] = {};
 
-	int16_t previousPitch[PORT_MAX_CHANNELS];
+	int16_t previousPitch[PORT_MAX_CHANNELS] = {};
 
-	uint16_t gainLp[PORT_MAX_CHANNELS];
-	uint16_t triggerDelay[PORT_MAX_CHANNELS];
+	uint16_t gainLp[PORT_MAX_CHANNELS] = {};
+	uint16_t triggerDelay[PORT_MAX_CHANNELS] = {};
 
 	int channelCount = 0;
 
@@ -277,9 +277,9 @@ struct Contextus : SanguineModule {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	bool bFlagTriggerDetected[PORT_MAX_CHANNELS];
-	bool bLastTrig[PORT_MAX_CHANNELS];
-	bool bTriggerFlag[PORT_MAX_CHANNELS];
+	bool bFlagTriggerDetected[PORT_MAX_CHANNELS] = {};
+	bool bLastTrig[PORT_MAX_CHANNELS] = {};
+	bool bTriggerFlag[PORT_MAX_CHANNELS] = {};
 
 	bool bAutoTrigger = false;
 	bool bDritfEnabled = false;
@@ -292,12 +292,12 @@ struct Contextus : SanguineModule {
 	bool bLowCpu = false;
 
 	// Display stuff
-	renaissance::SettingsData lastSettings;
+	renaissance::SettingsData lastSettings = {};
 	renaissance::Setting lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 
 	uint32_t displayTimeout = 0;
 
-	std::string displayText;
+	std::string displayText = "";
 
 	Contextus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -360,12 +360,12 @@ struct Contextus : SanguineModule {
 			osc[i].Init();
 			memset(&quantizer[i], 0, sizeof(renaissance::Quantizer));
 			quantizer[i].Init();
-			memset(&envelope[i], 0, sizeof(braids::Envelope));
+			memset(&envelope[i], 0, sizeof(renaissance::Envelope));
 			envelope[i].Init();
 
-			memset(&jitterSource[i], 0, sizeof(braids::VcoJitterSource));
+			memset(&jitterSource[i], 0, sizeof(renaissance::VcoJitterSource));
 			jitterSource[i].Init();
-			memset(&waveShaper[i], 0, sizeof(braids::SignatureWaveshaper));
+			memset(&envelope[i], 0, sizeof(renaissance::SignatureWaveshaper));
 			waveShaper[i].Init(0x0000);
 			memset(&settings[i], 0, sizeof(renaissance::SettingsData));
 
@@ -505,7 +505,7 @@ struct Contextus : SanguineModule {
 				pitch = clamp(int(pitch), 0, 16383);
 
 				if (settings[channel].vco_flatten) {
-					pitch = braids::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
+					pitch = renaissance::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
 				}
 
 				// Pitch transposition
@@ -515,7 +515,7 @@ struct Contextus : SanguineModule {
 
 				if (bTriggerFlag[channel]) {
 					osc[channel].Strike();
-					envelope[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
+					envelope[channel].Trigger(renaissance::ENV_SEGMENT_ATTACK);
 					bTriggerFlag[channel] = false;
 				}
 
