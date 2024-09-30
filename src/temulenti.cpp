@@ -5,6 +5,8 @@
 #include "bumps/bumps_cv_scaler.h"
 #include "aestuscommon.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 static const std::vector<std::string> temulentiDisplayModels = {
 	"T",
 	"B",
@@ -184,6 +186,7 @@ struct Temulenti : SanguineModule {
 
 		configSwitch(PARAM_QUANTIZER, 0.f, 7.f, 0.f, "Quantizer scale", temulentiQuantizerLabels);
 
+		memset(&generator, 0, sizeof(bumps::Generator));
 		generator.Init();
 		lightsDivider.setDivision(kLightsFrequency);
 		onReset();

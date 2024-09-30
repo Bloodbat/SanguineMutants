@@ -4,6 +4,8 @@
 #include "tides/generator.h"
 #include "aestuscommon.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 static const std::vector<std::string> aestusDisplayModels = {
 	"T",
 	"S"
@@ -141,6 +143,7 @@ struct Aestus : SanguineModule {
 
 		configButton(PARAM_SYNC, "Clock sync/PLL mode");
 
+		memset(&generator, 0, sizeof(tides::Generator));
 		generator.Init();
 		lightsDivider.setDivision(kLightsFrequency);
 		onReset();
