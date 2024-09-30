@@ -5,6 +5,8 @@
 #include "rings/dsp/string_synth_part.h"
 #include "sanguinehelpers.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 static const std::vector<std::string> anuliModeLabels = {
 	"Modal. Reso",
 	"Sym. Strings",
@@ -144,8 +146,11 @@ struct Anuli : SanguineModule {
 		configBypass(INPUT_IN, OUTPUT_EVEN);
 
 		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
+			memset(&strummer[i], 0, sizeof(rings::Strummer));
 			strummer[i].Init(0.01, 44100.0 / 24);
+			memset(&part[i], 0, sizeof(rings::Part));
 			part[i].Init(reverbBuffer[i]);
+			memset(&stringSynth[i], 0, sizeof(rings::StringSynthPart));
 			stringSynth[i].Init(reverbBuffer[i]);
 
 			bStrum[i] = false;

@@ -236,12 +236,12 @@ struct Nodi : SanguineModule {
 	braids::Envelope envelope[PORT_MAX_CHANNELS];
 	braids::Quantizer quantizer[PORT_MAX_CHANNELS];
 
-	uint8_t currentScale[PORT_MAX_CHANNELS];
+	uint8_t currentScale[PORT_MAX_CHANNELS] = {};
 
-	int16_t previousPitch[PORT_MAX_CHANNELS];
+	int16_t previousPitch[PORT_MAX_CHANNELS] = {};
 
-	uint16_t gainLp[PORT_MAX_CHANNELS];
-	uint16_t triggerDelay[PORT_MAX_CHANNELS];
+	uint16_t gainLp[PORT_MAX_CHANNELS] = {};
+	uint16_t triggerDelay[PORT_MAX_CHANNELS] = {};
 
 	int channelCount = 0;
 
@@ -251,9 +251,9 @@ struct Nodi : SanguineModule {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	bool bFlagTriggerDetected[PORT_MAX_CHANNELS];
-	bool bLastTrig[PORT_MAX_CHANNELS];
-	bool bTriggerFlag[PORT_MAX_CHANNELS];
+	bool bFlagTriggerDetected[PORT_MAX_CHANNELS] = {};
+	bool bLastTrig[PORT_MAX_CHANNELS] = {};
+	bool bTriggerFlag[PORT_MAX_CHANNELS] = {};
 
 	bool bAutoTrigger = false;
 	bool bDritfEnabled = false;
@@ -266,12 +266,12 @@ struct Nodi : SanguineModule {
 	bool bLowCpu = false;
 
 	// Display stuff	
-	braids::SettingsData lastSettings;
+	braids::SettingsData lastSettings = {};
 	braids::Setting lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
 
 	uint32_t displayTimeout = 0;
 
-	std::string displayText;
+	std::string displayText = "";
 
 	Nodi() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -349,6 +349,7 @@ struct Nodi : SanguineModule {
 
 			previousPitch[i] = 0;
 		}
+		memset(&lastSettings, 0, sizeof(braids::SettingsData));
 
 		clockDivider.setDivision(kClockUpdateFrequency);
 	}
