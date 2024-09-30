@@ -85,9 +85,9 @@ namespace renaissance {
 			return a + ((b - a) * (i & 0xff) >> 8);
 		}
 
+	private:
 		int32_t transfer_[257];
 
-	private:
 		DISALLOW_COPY_AND_ASSIGN(SignatureWaveshaper);
 	};
 
