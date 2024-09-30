@@ -26,14 +26,14 @@
 //
 // Macro-oscillator entry point.
 
-#ifndef REINASSANCE_MACRO_OSCILLATOR_H_
-#define REINASSANCE_MACRO_OSCILLATOR_H_
+#ifndef RENAISSANCE_MACRO_OSCILLATOR_H_
+#define RENAISSANCE_MACRO_OSCILLATOR_H_
 
 #include "stmlib/stmlib.h"
 
 #include <cstring>
 
-#include "braids/analog_oscillator.h"
+#include "renaissance/renaissance_analog_oscillator.h"
 #include "renaissance/renaissance_digital_oscillator.h"
 #include "renaissance/renaissance_resources.h"
 #include "renaissance/renaissance_settings.h"
@@ -41,84 +41,84 @@
 
 namespace renaissance {
 
-class MacroOscillator {
- public:
-  typedef void (MacroOscillator::*RenderFn)(const uint8_t*, int16_t*, size_t);
+	class MacroOscillator {
+	public:
+		typedef void (MacroOscillator::* RenderFn)(const uint8_t*, int16_t*, size_t);
 
-  MacroOscillator() { }
-  ~MacroOscillator() { }
+		MacroOscillator() { }
+		~MacroOscillator() { }
 
-  inline void Init() {
-    analog_oscillator_[0].Init();
-    analog_oscillator_[1].Init();
-    analog_oscillator_[2].Init();
+		inline void Init() {
+			analog_oscillator_[0].Init();
+			analog_oscillator_[1].Init();
+			analog_oscillator_[2].Init();
 
-    digital_oscillator_.Init();
+			digital_oscillator_.Init();
 
-    lp_state_ = 0;
-    previous_parameter_[0] = 0;
-    previous_parameter_[1] = 0;
-  }
+			lp_state_ = 0;
+			previous_parameter_[0] = 0;
+			previous_parameter_[1] = 0;
+		}
 
-  inline void set_shape(MacroOscillatorShape shape) {
-    if (shape != shape_) {
-      Strike();
-    }
-    shape_ = shape;
-  }
+		inline void set_shape(MacroOscillatorShape shape) {
+			if (shape != shape_) {
+				Strike();
+			}
+			shape_ = shape;
+		}
 
-  inline MacroOscillatorShape shape() {
-    return shape_;
-  }
+		inline MacroOscillatorShape shape() {
+			return shape_;
+		}
 
-  inline void set_pitch(int16_t pitch) {
-    pitch_ = pitch;
-  }
+		inline void set_pitch(int16_t pitch) {
+			pitch_ = pitch;
+		}
 
-  inline int16_t pitch() const { return pitch_; }
+		inline int16_t pitch() const { return pitch_; }
 
-  inline void set_parameters(
-      int16_t parameter_1,
-      int16_t parameter_2) {
-    parameter_[0] = parameter_1;
-    parameter_[1] = parameter_2;
-  }
+		inline void set_parameters(
+			int16_t parameter_1,
+			int16_t parameter_2) {
+			parameter_[0] = parameter_1;
+			parameter_[1] = parameter_2;
+		}
 
-  inline void Strike() {
-    digital_oscillator_.Strike();
-  }
+		inline void Strike() {
+			digital_oscillator_.Strike();
+		}
 
-  void Render(const uint8_t* sync_buffer, int16_t* buffer, size_t size);
+		void Render(const uint8_t* sync_buffer, int16_t* buffer, size_t size);
 
- private:
-  void RenderCSaw(const uint8_t*, int16_t*, size_t);
-  void RenderMorph(const uint8_t*, int16_t*, size_t);
-  void RenderSawSquare(const uint8_t*, int16_t*, size_t);
-  void RenderSub(const uint8_t*, int16_t*, size_t);
-  void RenderDualSync(const uint8_t*, int16_t*, size_t);
-  void RenderSineTriangle(const uint8_t*, int16_t*, size_t);
-  void RenderBuzz(const uint8_t*, int16_t*, size_t);
-  void RenderDigital(const uint8_t*, int16_t*, size_t);
-  void RenderSawComb(const uint8_t*, int16_t*, size_t);
-  void RenderTriple(const uint8_t*, int16_t*, size_t);
+	private:
+		void RenderCSaw(const uint8_t*, int16_t*, size_t);
+		void RenderMorph(const uint8_t*, int16_t*, size_t);
+		void RenderSawSquare(const uint8_t*, int16_t*, size_t);
+		void RenderSub(const uint8_t*, int16_t*, size_t);
+		void RenderDualSync(const uint8_t*, int16_t*, size_t);
+		void RenderSineTriangle(const uint8_t*, int16_t*, size_t);
+		void RenderBuzz(const uint8_t*, int16_t*, size_t);
+		void RenderDigital(const uint8_t*, int16_t*, size_t);
+		void RenderSawComb(const uint8_t*, int16_t*, size_t);
+		void RenderTriple(const uint8_t*, int16_t*, size_t);
 
-  void ConfigureTriple(braids::AnalogOscillatorShape shape);
+		void ConfigureTriple(renaissance::AnalogOscillatorShape shape);
 
-  int16_t parameter_[2];
-  int16_t previous_parameter_[2];
-  int16_t pitch_;
-  uint8_t sync_buffer_[24];
-  int16_t temp_buffer_[24];
-  int32_t lp_state_;
+		int16_t parameter_[2];
+		int16_t previous_parameter_[2];
+		int16_t pitch_;
+		uint8_t sync_buffer_[24];
+		int16_t temp_buffer_[24];
+		int32_t lp_state_;
 
-  braids::AnalogOscillator analog_oscillator_[3];
-  DigitalOscillator digital_oscillator_;
+		renaissance::AnalogOscillator analog_oscillator_[3];
+		DigitalOscillator digital_oscillator_;
 
-  MacroOscillatorShape shape_;
-  static RenderFn fn_table_[];
+		MacroOscillatorShape shape_;
+		static RenderFn fn_table_[];
 
-  DISALLOW_COPY_AND_ASSIGN(MacroOscillator);
-};
+		DISALLOW_COPY_AND_ASSIGN(MacroOscillator);
+	};
 
 }  // namespace renaissance
 
