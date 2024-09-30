@@ -450,7 +450,7 @@ void SanguineLightUpRGBSwitch::addHalo(NVGcolor haloColor) {
 void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
 	// Programmers responsibility: set both a background and glyph or Rack will crash here. You've been warned.
 	if (layer == 1) {
-		if (module && !module->isBypassed()) {
+		if (module && !module->isBypassed() && sw->svg) {
 			svgDraw(args.vg, sw->svg->handle);
 			uint32_t frameNum = getParamQuantity()->getValue();
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
@@ -471,7 +471,7 @@ void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
 			drawCircularHalo(args, box.size, halos[frameNum], 175, 8.f);
 		}
 		// For module browser
-		else if (!module) {
+		else if (!module && sw->svg) {
 			svgDraw(args.vg, sw->svg->handle);
 			fillSvgSolidColor(glyph->svg->handle, colors[0]);
 			nvgSave(args.vg);
@@ -550,7 +550,7 @@ NVGpaint SanguineMultiColoredShapedLight::getPaint(NVGcontext* vg, NSVGpaint* p,
 };
 
 void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer) {
-	if (innerColor) {
+	if (innerColor && svg) {
 		if (layer == 1) {
 			if (module && !module->isBypassed()) {
 				int shapeIndex = 0;
@@ -853,7 +853,7 @@ void SanguineModuleWidget::makePanel() {
 	// Now you know.
 	SanguineModule* sanguineModule = dynamic_cast<SanguineModule*>(this->module);
 
-	if (module) {
+	if (sanguineModule) {
 		if (!sanguineModule->bUniqueTheme) {
 			sanguineModule->setModuleTheme(faceplateTheme);
 		}
