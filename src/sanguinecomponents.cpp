@@ -198,40 +198,43 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 			std::string displayValue = "";
 
 			// TODO!!! Ensure we draw only characterCount chars.
-			switch (displayType)
-			{
-			case DISPLAY_NUMERIC: {
-				if (module && !module->isBypassed()) {
+
+			if (module && !module->isBypassed()) {
+				switch (displayType)
+				{
+				case DISPLAY_NUMERIC:
 					if (values.numberValue) {
 						displayValue = std::to_string(*values.numberValue);
 						if (*values.numberValue < 10 && leadingZero)
 							displayValue.insert(0, 1, '0');
 					}
-				}
-				else if (!module) {
-					displayValue = std::to_string(fallbackNumber);
-					if (fallbackNumber < 10 && leadingZero)
-						displayValue.insert(0, 1, '0');
-				}
-				break;
-			}
-			case DISPLAY_STRING: {
-				if (module && !module->isBypassed()) {
+					break;
+				case DISPLAY_STRING:
 					if (values.displayText) {
 						displayValue = *values.displayText;
 					}
+					break;
 				}
-				else if (!module) {
+
+				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
+				if (drawHalo) {
+					drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
+				}
+			}
+			else if (!module) {
+				switch (displayType)
+				{
+				case DISPLAY_NUMERIC:
+					displayValue = std::to_string(fallbackNumber);
+					if (fallbackNumber < 10 && leadingZero)
+						displayValue.insert(0, 1, '0');
+					break;
+				case DISPLAY_STRING:
 					displayValue = fallbackString;
+					break;
 				}
-				break;
-			}
-			}
 
-			nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
-
-			if (drawHalo) {
-				drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
+				nvgText(args.vg, textPos.x, textPos.y, displayValue.c_str(), NULL);
 			}
 		}
 	}
