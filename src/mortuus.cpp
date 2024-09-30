@@ -234,7 +234,7 @@ struct Mortuus : SanguineModule {
 
 	EditMode editMode = EDIT_MODE_TWIN;
 	ProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
-	Settings settings;
+	Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -316,13 +316,13 @@ struct Mortuus : SanguineModule {
 
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODE, 0.0f, FUNCTION_LAST - 1, 0.0f, "Mode", "", 0.0f, 1.0f, 1.0f);
+		configParam(PARAM_MODE, 0.f, FUNCTION_LAST - 1, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
-		configParam(PARAM_KNOB_1, 0.0f, 65535.0f, 32678.0f, "Knob 1", "", 0.f, (1.f / 65535.f) * 100);
-		configParam(PARAM_KNOB_2, 0.0f, 65535.0f, 32678.0f, "Knob 2", "", 0.f, (1.f / 65535.f) * 100);
-		configParam(PARAM_KNOB_3, 0.0f, 65535.0f, 32678.0f, "Knob 3", "", 0.f, (1.f / 65535.f) * 100);
-		configParam(PARAM_KNOB_4, 0.0f, 65535.0f, 32678.0f, "Knob 4", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_1, 0.f, 65535.f, 32678.f, "Knob 1", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_2, 0.f, 65535.f, 32678.f, "Knob 2", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_3, 0.f, 65535.f, 32678.f, "Knob 3", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_4, 0.f, 65535.f, 32678.f, "Knob 4", "", 0.f, (1.f / 65535.f) * 100);
 		configButton(PARAM_EDIT_MODE, "Toggle split mode");
 		configButton(PARAM_CHANNEL_SELECT, "Expert mode channel select");
 		configButton(PARAM_EXPERT_MODE, "Toggle expert mode");
@@ -333,11 +333,10 @@ struct Mortuus : SanguineModule {
 		settings.processorFunction[0] = FUNCTION_ENVELOPE;
 		settings.processorFunction[1] = FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
-		std::fill(&settings.potValue[0], &settings.potValue[8], 0);
 
 		for (int i = 0; i < 2; i++)
 		{
-			memset(&processors[i], 0, sizeof(processors[i]));
+			memset(&processors[i], 0, sizeof(deadman::Processors));
 			processors[i].Init(i);
 		}
 
@@ -503,8 +502,8 @@ struct Mortuus : SanguineModule {
 	}
 
 	void lockPots() {
-		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels], kAdcThresholdLocked);
-		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels], false);
+		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels - 1], kAdcThresholdLocked);
+		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels - 1], false);
 	}
 
 	void pollPots() {
@@ -574,7 +573,7 @@ struct Mortuus : SanguineModule {
 		settings.editMode = editMode;
 		settings.processorFunction[0] = processorFunction[0];
 		settings.processorFunction[1] = processorFunction[1];
-		std::copy(&potValue[0], &potValue[8], &settings.potValue[0]);
+		std::copy(&potValue[0], &potValue[7], &settings.potValue[0]);
 		settings.snap_mode = bSnapMode;
 		displayText1 = mortuusModeList[settings.processorFunction[0]];
 		displayText2 = mortuusModeList[settings.processorFunction[1]];
@@ -754,17 +753,17 @@ struct Mortuus : SanguineModule {
 	}
 
 	void init() {
-		std::fill(&potValue[0], &potValue[8], 0);
+		std::fill(&potValue[0], &potValue[7], 0);
 		std::fill(&brightness[0], &brightness[1], 0);
-		std::fill(&adcLp[0], &adcLp[kNumAdcChannels], 0);
-		std::fill(&adcValue[0], &adcValue[kNumAdcChannels], 0);
-		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels], 0);
-		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels], false);
+		std::fill(&adcLp[0], &adcLp[kNumAdcChannels - 1], 0);
+		std::fill(&adcValue[0], &adcValue[kNumAdcChannels - 1], 0);
+		std::fill(&adcThreshold[0], &adcThreshold[kNumAdcChannels - 1], 0);
+		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels - 1], false);
 
 		editMode = static_cast<EditMode>(settings.editMode);
 		processorFunction[0] = static_cast<ProcessorFunction>(settings.processorFunction[0]);
 		processorFunction[1] = static_cast<ProcessorFunction>(settings.processorFunction[1]);
-		std::copy(&settings.potValue[0], &settings.potValue[8], &potValue[0]);
+		std::copy(&settings.potValue[0], &settings.potValue[7], &potValue[0]);
 
 		if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
 			lockPots();
