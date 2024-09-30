@@ -93,8 +93,8 @@ struct Anuli : SanguineModule {
 	rings::Part part[PORT_MAX_CHANNELS];
 	rings::StringSynthPart stringSynth[PORT_MAX_CHANNELS];
 	rings::Strummer strummer[PORT_MAX_CHANNELS];
-	bool bStrum[PORT_MAX_CHANNELS];
-	bool bLastStrum[PORT_MAX_CHANNELS];
+	bool bStrum[PORT_MAX_CHANNELS] = {};
+	bool bLastStrum[PORT_MAX_CHANNELS] = {};
 
 	int channelCount = 0;
 	int polyphonyMode = 1;
@@ -152,9 +152,6 @@ struct Anuli : SanguineModule {
 			part[i].Init(reverbBuffer[i]);
 			memset(&stringSynth[i], 0, sizeof(rings::StringSynthPart));
 			stringSynth[i].Init(reverbBuffer[i]);
-
-			bStrum[i] = false;
-			bLastStrum[i] = false;
 		}
 
 		clockDivider.setDivision(kDividerFrequency);
