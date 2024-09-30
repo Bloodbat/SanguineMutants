@@ -140,7 +140,7 @@ namespace deadman {
 					if (j == 0) ++t_;
 				}
 				break;
-			case 5: // Still not particularly fun...
+			case 5:
 				//p0 = p0_ >> 11;
 
 				p0f = float(p0_) / 2048;
@@ -157,6 +157,10 @@ namespace deadman {
 
 				pf = int(fmodf((t_ / (1236 + p0f)), 128)) & int(((t_ >> int((p1f / 32))) * p1f));
 
+				if (pf < 0.1) {
+					pf = 1.f;
+				}
+
 				//q1 = ((500 * p1) % 5);
 
 				q1f = fmodf((500 * p1f), 5);
@@ -167,9 +171,19 @@ namespace deadman {
 
 				//q = (t_ / q2) % p;
 
+				if (q2f < 0.1) {
+					q2f = 1.f;
+				}
+
 				qf = fmodf((t_ / q2f), pf);
 
-				sample = (t_ >> int(qf) >> (int(p1f) >> 5)) + (t_ / (t_ >> ((int(p1f) >> 5) & 12)) >> int(pf));
+				tf = (t_ >> ((int(p1f) >> 5) & 12));
+
+				if (tf > 0.1f) {
+					tf = 1.f;
+				}
+
+				sample = int((t_ >> int(qf) >> (int(p1f) >> 5)) + (float(t_) / float(int(tf) >> int(pf))));
 
 				//if (j == 0) ++t_ ;
 				//}
