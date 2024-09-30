@@ -22,8 +22,8 @@
 // 
 // See http://creativecommons.org/licenses/MIT/ for more information.
 
-#ifndef REINASSANCE_ENVELOPE_H_
-#define REINASSANCE_ENVELOPE_H_
+#ifndef RENAISSANCE_ENVELOPE_H_
+#define RENAISSANCE_ENVELOPE_H_
 
 #include "stmlib/stmlib.h"
 

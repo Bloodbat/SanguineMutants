@@ -30,8 +30,8 @@
 // make resources
 
 
-#ifndef REINASSANCE_RESOURCES_H_
-#define REINASSANCE_RESOURCES_H_
+#ifndef RENAISSANCE_RESOURCES_H_
+#define RENAISSANCE_RESOURCES_H_
 
 
 #include "stmlib/stmlib.h"
@@ -40,69 +40,69 @@
 
 namespace renaissance {
 
-typedef uint8_t ResourceId;
+	typedef uint8_t ResourceId;
 
-extern const char* string_table[];
+	extern const char* string_table[];
 
-extern const uint16_t* lookup_table_table[];
+	extern const uint16_t* lookup_table_table[];
 
-extern const int16_t* lookup_table_signed_table[];
+	extern const int16_t* lookup_table_signed_table[];
 
-extern const uint32_t* lookup_table_hr_table[];
+	extern const uint32_t* lookup_table_hr_table[];
 
-extern const int16_t* waveform_table[];
+	extern const int16_t* waveform_table[];
 
-extern const int16_t* waveshaper_table[];
+	extern const int16_t* waveshaper_table[];
 
-extern const uint8_t* wt_table[];
+	extern const uint8_t* wt_table[];
 
-extern const uint16_t* char_table[];
+	extern const uint16_t* char_table[];
 
-extern const uint16_t lut_resonator_coefficient[];
-extern const uint16_t lut_resonator_scale[];
-extern const uint16_t lut_svf_cutoff[];
-extern const uint16_t lut_svf_damp[];
-extern const uint16_t lut_svf_scale[];
-extern const uint16_t lut_granular_envelope[];
-extern const uint16_t lut_granular_envelope_rate[];
-extern const uint16_t lut_bowing_envelope[];
-extern const uint16_t lut_bowing_friction[];
-extern const uint16_t lut_blowing_envelope[];
-extern const uint16_t lut_flute_body_filter[];
-extern const uint16_t lut_fm_frequency_quantizer[];
-extern const uint16_t lut_vco_detune[];
-extern const uint16_t lut_bell[];
-extern const uint16_t lut_env_expo[];
-extern const int16_t lut_blowing_jet[];
-extern const uint32_t lut_oscillator_increments[];
-extern const uint32_t lut_oscillator_delays[];
-extern const uint32_t lut_env_portamento_increments[];
-extern const int16_t wav_formant_sine[];
-extern const int16_t wav_formant_square[];
-extern const int16_t wav_sine[];
-extern const int16_t wav_bandlimited_comb_0[];
-extern const int16_t wav_bandlimited_comb_1[];
-extern const int16_t wav_bandlimited_comb_2[];
-extern const int16_t wav_bandlimited_comb_3[];
-extern const int16_t wav_bandlimited_comb_4[];
-extern const int16_t wav_bandlimited_comb_5[];
-extern const int16_t wav_bandlimited_comb_6[];
-extern const int16_t wav_bandlimited_comb_7[];
-extern const int16_t wav_bandlimited_comb_8[];
-extern const int16_t wav_bandlimited_comb_9[];
-extern const int16_t wav_bandlimited_comb_10[];
-extern const int16_t wav_bandlimited_comb_11[];
-extern const int16_t wav_bandlimited_comb_12[];
-extern const int16_t wav_bandlimited_comb_13[];
-extern const int16_t wav_bandlimited_comb_14[];
-extern const int16_t ws_moderate_overdrive[];
-extern const int16_t ws_violent_overdrive[];
-extern const int16_t ws_sine_fold[];
-extern const int16_t ws_tri_fold[];
-extern const uint8_t wt_waves[];
-extern const uint8_t wt_map[];
-extern const uint8_t wt_code[];
-extern const uint16_t chr_characters[];
+	extern const uint16_t lut_resonator_coefficient[];
+	extern const uint16_t lut_resonator_scale[];
+	extern const uint16_t lut_svf_cutoff[];
+	extern const uint16_t lut_svf_damp[];
+	extern const uint16_t lut_svf_scale[];
+	extern const uint16_t lut_granular_envelope[];
+	extern const uint16_t lut_granular_envelope_rate[];
+	extern const uint16_t lut_bowing_envelope[];
+	extern const uint16_t lut_bowing_friction[];
+	extern const uint16_t lut_blowing_envelope[];
+	extern const uint16_t lut_flute_body_filter[];
+	extern const uint16_t lut_fm_frequency_quantizer[];
+	extern const uint16_t lut_vco_detune[];
+	extern const uint16_t lut_bell[];
+	extern const uint16_t lut_env_expo[];
+	extern const int16_t lut_blowing_jet[];
+	extern const uint32_t lut_oscillator_increments[];
+	extern const uint32_t lut_oscillator_delays[];
+	extern const uint32_t lut_env_portamento_increments[];
+	extern const int16_t wav_formant_sine[];
+	extern const int16_t wav_formant_square[];
+	extern const int16_t wav_sine[];
+	extern const int16_t wav_bandlimited_comb_0[];
+	extern const int16_t wav_bandlimited_comb_1[];
+	extern const int16_t wav_bandlimited_comb_2[];
+	extern const int16_t wav_bandlimited_comb_3[];
+	extern const int16_t wav_bandlimited_comb_4[];
+	extern const int16_t wav_bandlimited_comb_5[];
+	extern const int16_t wav_bandlimited_comb_6[];
+	extern const int16_t wav_bandlimited_comb_7[];
+	extern const int16_t wav_bandlimited_comb_8[];
+	extern const int16_t wav_bandlimited_comb_9[];
+	extern const int16_t wav_bandlimited_comb_10[];
+	extern const int16_t wav_bandlimited_comb_11[];
+	extern const int16_t wav_bandlimited_comb_12[];
+	extern const int16_t wav_bandlimited_comb_13[];
+	extern const int16_t wav_bandlimited_comb_14[];
+	extern const int16_t ws_moderate_overdrive[];
+	extern const int16_t ws_violent_overdrive[];
+	extern const int16_t ws_sine_fold[];
+	extern const int16_t ws_tri_fold[];
+	extern const uint8_t wt_waves[];
+	extern const uint8_t wt_map[];
+	extern const uint8_t wt_code[];
+	extern const uint16_t chr_characters[];
 #define STR_DUMMY 0  // dummy
 #define LUT_RESONATOR_COEFFICIENT 0
 #define LUT_RESONATOR_COEFFICIENT_SIZE 129

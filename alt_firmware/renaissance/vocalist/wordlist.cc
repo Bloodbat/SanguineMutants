@@ -40,7 +40,7 @@ const unsigned int wordpos[2][16] = {
 {0, 5418, 516, 712, 778, 980, 1174, 1334, 1546, 1782, 2186, 2362, 2508, 3304, 3642, 4210},
 {4374, 4590, 5044, 5418, 5760, 6072, 6512, 6902, 7334, 7734, 8086, 8480, 8894, 9232, 9560, 9924},
 };
-const unsigned char doubleAbsorbOffset[] = {0, 1, // hello
+const unsigned char doubleAbsorbOffset[] = { 0, 1, // hello
 47, 48, // robot
 0, 1, // harder
 0, 1, 10, 11, // faster
