@@ -132,7 +132,6 @@ enum DisplayType {
 
 struct SanguineBaseSegmentDisplay : TransparentWidget {
 	Module* module;
-	std::shared_ptr<Font> font = nullptr;
 	NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
 	NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
 	NVGcolor textColor = nvgRGB(200, 0, 0);
@@ -148,6 +147,7 @@ struct SanguineBaseSegmentDisplay : TransparentWidget {
 	DisplayType displayType = DISPLAY_STRING;
 	std::string backgroundCharacter = " ";
 	std::string fallbackString = "";
+	std::string fontName = "";
 	math::Vec textMargin = { 2.f, 2.f };
 	float kerning = 2.f;
 	bool leadingZero = true;
@@ -178,9 +178,9 @@ struct SanguineTinyNumericDisplay : SanguineLedNumberDisplay {
 
 struct Sanguine96x32OLEDDisplay : TransparentWidget {
 	Module* module;
-	std::shared_ptr<Font> font = nullptr;
 	std::string* oledText = nullptr;
 	std::string fallbackString = "";
+	std::string fontName = "";
 	NVGcolor textColor = nvgRGB(254, 254, 254);
 	Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered = true);
 	void draw(const DrawArgs& args) override;

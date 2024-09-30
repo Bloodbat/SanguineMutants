@@ -180,6 +180,7 @@ void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 
 void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
+		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {
 			// Text				
 			nvgFontSize(args.vg, fontSize);
@@ -243,7 +244,7 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment14.ttf"));
+	fontName = "res/components/Segment14.ttf";
 	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
 	fontSize = 40;
 
@@ -262,7 +263,7 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* t
 
 SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/Segment7Standard.otf"));
+	fontName = "res/components/Segment7Standard.otf";
 	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
 	fontSize = 33.95;
 
@@ -284,7 +285,7 @@ SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, M
 SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule)
 {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
+	fontName = "res/components/sanguinematrix.ttf";
 	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
 	fontSize = 16.45;
 
@@ -321,7 +322,7 @@ SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCoun
 };
 
 Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/components/sanguinematrix.ttf"));
+	fontName = "res/components/sanguinematrix.ttf";
 	box.size = mm2px(Vec(16.298, 5.418));
 
 	module = theModule;
@@ -352,6 +353,7 @@ void Sanguine96x32OLEDDisplay::draw(const DrawArgs& args) {
 
 void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
+		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {
 			// Text					
 			nvgFontSize(args.vg, 6);
