@@ -77,7 +77,7 @@ struct Incurvationes : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		memset(&warpsModulator, 0, sizeof(warpsModulator));
+		memset(&warpsModulator, 0, sizeof(warps::Modulator));
 		warpsModulator.Init(96000.0f);
 
 		lightDivider.setDivision(kLightFrequency);

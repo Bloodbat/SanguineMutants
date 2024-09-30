@@ -81,7 +81,7 @@ struct Distortiones : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		memset(&distortionesModulator, 0, sizeof(distortionesModulator));
+		memset(&distortionesModulator, 0, sizeof(distortiones::DistortionesModulator));
 		distortionesModulator.Init(96000.0f);
 
 		featureMode = distortiones::FEATURE_MODE_META;

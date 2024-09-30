@@ -87,7 +87,7 @@ struct Mutuus : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		memset(&mutuusModulator, 0, sizeof(mutuusModulator));
+		memset(&mutuusModulator, 0, sizeof(mutuus::MutuusModulator));
 		mutuusModulator.Init(96000.0f, reverbBuffer);
 
 		featureMode = mutuus::FEATURE_MODE_META;

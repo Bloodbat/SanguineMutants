@@ -8,6 +8,8 @@
 #include "marbles/scale_recorder.h"
 #include "sanguinehelpers.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 static const int BLOCK_SIZE = 5;
 static const int MAX_T_MODES = 7;
 static const int MAX_SCALES = 6;
@@ -407,8 +409,11 @@ struct Marmora : SanguineModule {
 
 		lightsDivider.setDivision(kLightDivider);
 
+		memset(&randomGenerator, 0, sizeof(marbles::RandomGenerator));
 		randomGenerator.Init(1);
+		memset(&randomStream, 0, sizeof(marbles::RandomStream));
 		randomStream.Init(&randomGenerator);
+		memset(&noteFilter, 0, sizeof(marbles::NoteFilter));
 		noteFilter.Init();
 		scaleRecorder.Init();
 
@@ -735,7 +740,9 @@ struct Marmora : SanguineModule {
 
 	void onSampleRateChange() override {
 		float sampleRate = APP->engine->getSampleRate();
+		memset(&tGenerator, 0, sizeof(marbles::TGenerator));
 		tGenerator.Init(&randomStream, sampleRate);
+		memset(&xyGenerator, 0, sizeof(marbles::XYGenerator));
 		xyGenerator.Init(&randomStream, sampleRate);
 
 		// Set scales
