@@ -4,7 +4,7 @@
 
 - Theme support for existing modules with two available options: "Vitriol" the usual, colorful faceplate or "Plumbago" a black as night variation.
 
-- Polyphonic ports are now show with golden jacks.
+- Polyphonic ports are now shown with golden jacks.
 
 - Nodi and Contextus show the selected mode by name in the knob's tooltip.
 
