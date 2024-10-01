@@ -1,3 +1,42 @@
+# 2.4.2
+
+## Additions
+
+- Theme support for existing modules with two available options: "Vitriol" the usual, colorful faceplate or "Plumbago" a black as night variation.
+
+- Polyphonic ports are now show with golden jacks.
+
+- Nodi and Contextus show the selected mode by name in the knob's tooltip.
+
+- Funes' menu is prettier and includes an entry to visit the data editors.
+
+- A pretty circle of LEDs that show the selected mode for Distortiones and Mutuus.
+
+## Fixes
+
+- Plugin no longer Rack Pro when it is used as a guest of hosts such as Reaper and Ableton and patches are loaded.
+
+- Plugin no longer crashes Rack when used headless.
+
+- Etesia, Fluctus and Nebulae LEDs are no longer as prone to get stuck in parameter mode when fiddling with the knobs.
+
+- Faceplate tweaks to prevent rendering errors.
+
+- Apices' and Mortuus' inputs follow the hardware spec more closely.
+
+- Mortuus ByteBeats are more stable and every equation is interesting again.
+
+- Display rendering order.
+
+## Changes
+
+- Etesia and Distortiones use the Parasites lib internally instead of MI's one.
+
+- Better module tags, some are from modulargrid, others from functions I know they have (and now you should too :))
+
+- Funes' Harmo input move to a location less prone to confusion (also, a connecting line has been added between the port and the Harmonics knob).
+
+
 # 2.4.1
 
 ## Changes
