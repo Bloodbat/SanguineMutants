@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sanguinecomponents.hpp"
+#include "plugin.hpp"
 
 static const uint16_t nodiBitReductionMasks[7] = {
 	0xc000,
