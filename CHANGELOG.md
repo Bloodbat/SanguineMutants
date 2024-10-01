@@ -14,7 +14,7 @@
 
 ## Fixes
 
-- Plugin no longer Rack Pro when it is used as a guest of hosts such as Reaper and Ableton and patches are loaded.
+- Plugin no longer crashes Rack Pro when it is used as a guest of hosts such as Reaper and Ableton and patches are loaded.
 
 - Plugin no longer crashes Rack when used headless.
 
