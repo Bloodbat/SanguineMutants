@@ -34,6 +34,7 @@ struct Distortiones : SanguineModule {
 		ENUMS(LIGHT_CARRIER, 2),
 		ENUMS(LIGHT_ALGORITHM, 3),
 		LIGHT_MODE_SWITCH,
+		ENUMS(LIGHT_MODE, 9),
 		LIGHTS_COUNT
 	};
 
@@ -114,13 +115,13 @@ struct Distortiones : SanguineModule {
 		}
 
 		bool isLightsTurn = lightDivider.process();
+		const float sampleTime = kLightFrequency * args.sampleTime;
 
 		if (bModeSwitchEnabled) {
 			featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
 			distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
 
 			if (isLightsTurn) {
-				const float sampleTime = kLightFrequency * args.sampleTime;
 				int8_t ramp = getSystemTimeMs() & 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
@@ -135,6 +136,10 @@ struct Distortiones : SanguineModule {
 			lights[LIGHT_CARRIER + 1].value = (distortionesParameters->carrier_shape == 2 || distortionesParameters->carrier_shape == 3) ? 1.0 : 0.0;
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
+
+			for (int i = 0; i < 9; i++) {
+				lights[LIGHT_MODE + i].setBrightnessSmooth(featureMode == i ? 1.f : 0.f, sampleTime);
+			}
 		}
 
 		float_4 f4Voltages;
@@ -275,6 +280,16 @@ struct DistortionesWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.777, 112.172), module, Distortiones::INPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(32.044, 112.172), module, Distortiones::OUTPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.896, 112.172), module, Distortiones::OUTPUT_AUX));
+
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(13.849, 58.44), module, Distortiones::LIGHT_MODE + 0));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(3.776, 47.107), module, Distortiones::LIGHT_MODE + 1));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(2.716, 31.98), module, Distortiones::LIGHT_MODE + 2));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(11.122, 19.359), module, Distortiones::LIGHT_MODE + 3));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(25.482, 14.496), module, Distortiones::LIGHT_MODE + 4));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(39.824, 19.413), module, Distortiones::LIGHT_MODE + 5));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(48.183, 32.064), module, Distortiones::LIGHT_MODE + 6));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(47.067, 47.187), module, Distortiones::LIGHT_MODE + 7));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(36.952, 58.483), module, Distortiones::LIGHT_MODE + 8));
 	}
 
 	void appendContextMenu(Menu* menu) override {
