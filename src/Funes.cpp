@@ -656,7 +656,7 @@ struct FunesWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 55.118), module, Funes::INPUT_TIMBRE));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 74.89), module, Funes::INPUT_FREQUENCY));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 95.976), module, Funes::INPUT_MORPH));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(120.305, 74.878), module, Funes::INPUT_HARMONICS));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(105.51, 77.287), module, Funes::INPUT_HARMONICS));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(14.378, 116.972), module, Funes::INPUT_TRIGGER));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(27.855, 116.972), module, Funes::INPUT_LEVEL));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(41.331, 116.972), module, Funes::INPUT_NOTE));
