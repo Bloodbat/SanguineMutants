@@ -17,7 +17,7 @@ Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additi
 
 - Theme support for existing modules with two available options: "Vitriol" the usual, colorful faceplate or "Plumbago" a black as night variation.
 
-- Polyphonic ports are now show with golden jacks.
+- Polyphonic ports are now shown with golden jacks.
 
 - Nodi and Contextus show the selected mode by name in the knob's tooltip.
 
@@ -27,7 +27,7 @@ Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additi
 
 ## Fixes
 
-- Plugin no longer Rack Pro when it is used as a guest of hosts such as Reaper and Ableton and patches are loaded.
+- Plugin no longer crashes Rack Pro when it is used as a guest of hosts such as Reaper and Ableton and patches are loaded.
 
 - Plugin no longer crashes Rack when used headless.
 
