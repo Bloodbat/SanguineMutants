@@ -150,6 +150,7 @@
         "Effect",
         "Hardware clone",
         "Oscillator",
+        "Polyphonic",
         "Ring modulator",
         "Vocoder",
         "Waveshaper"
@@ -165,6 +166,7 @@
         "Effect",
         "Hardware clone",
         "Oscillator",
+        "Polyphonic",
         "Ring modulator",
         "Vocoder",
         "Waveshaper"
@@ -181,6 +183,7 @@
         "Filter",
         "Hardware clone",
         "Oscillator",
+        "Polyphonic",
         "Reverb",
         "Ring modulator",
         "Vocoder",

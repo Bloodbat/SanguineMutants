@@ -40,25 +40,25 @@ struct Mutuus : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	int featureMode;
-	int frame = 0;
+	int featureMode = 0;
+	int frame[PORT_MAX_CHANNELS] = {};
 
 	const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightDivider;
-	mutuus::MutuusModulator mutuusModulator;
-	mutuus::ShortFrame inputFrames[60] = {};
-	mutuus::ShortFrame outputFrames[60] = {};
+	mutuus::MutuusModulator mutuusModulator[PORT_MAX_CHANNELS];
+	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
+	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
 
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
 
 	float lastAlgorithmValue = 0.f;
 
-	mutuus::Parameters* mutuusParameters = mutuusModulator.mutable_parameters();
+	mutuus::Parameters* mutuusParameters[PORT_MAX_CHANNELS];
 
-	uint16_t reverbBuffer[32768];
+	uint16_t reverbBuffer[PORT_MAX_CHANNELS][32768] = {};
 
 	Mutuus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -88,8 +88,11 @@ struct Mutuus : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		memset(&mutuusModulator, 0, sizeof(mutuus::MutuusModulator));
-		mutuusModulator.Init(96000.0f, reverbBuffer);
+		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
+			memset(&mutuusModulator[i], 0, sizeof(mutuus::MutuusModulator));
+			mutuusModulator[i].Init(96000.0f, reverbBuffer[i]);
+			mutuusParameters[i] = mutuusModulator[i].mutable_parameters();
+		}
 
 		featureMode = mutuus::FEATURE_MODE_META;
 		lightDivider.setDivision(kLightFrequency);
@@ -98,7 +101,7 @@ struct Mutuus : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
-		mutuusParameters->carrier_shape = params[PARAM_CARRIER].getValue();
+		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
 
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
 			bModeSwitchEnabled = !bModeSwitchEnabled;
@@ -123,10 +126,11 @@ struct Mutuus : SanguineModule {
 		bool isLightsTurn = lightDivider.process();
 		float sampleTime = kLightFrequency * args.sampleTime;
 
+		float algorithmValue = 0.f;
+
 		if (bModeSwitchEnabled) {
 			featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-			mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
-
+			mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
 			if (isLightsTurn) {
 				int8_t ramp = getSystemTimeMs() & 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
@@ -136,60 +140,89 @@ struct Mutuus : SanguineModule {
 				}
 			}
 		}
+		else {
+			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
+			algorithmValue = lastAlgorithmValue / 8.0;
+		}
+
+		for (int channel = 0; channel < channelCount; channel++) {
+			mutuusModulator[channel].set_feature_mode(mutuus::FeatureMode(featureMode));
+
+			mutuusParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+
+			mutuusModulator[channel].set_alt_feature_mode(bool(params[PARAM_STEREO].getValue()));
+
+			float_4 f4Voltages;
+
+			// Buffer loop
+			if (++frame[channel] >= 60) {
+				frame[channel] = 0;
+
+				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
+				f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f, channel);
+				f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f, channel);
+				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
+				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
+
+				f4Voltages /= 5.f;
+
+				mutuusParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
+				mutuusParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
+
+				mutuusParameters[channel]->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
+				mutuusParameters[channel]->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
+
+				mutuusParameters[channel]->raw_level[0] = mutuusParameters[channel]->channel_drive[0];
+				mutuusParameters[channel]->raw_level[1] = mutuusParameters[channel]->channel_drive[1];
+
+				mutuusParameters[channel]->raw_level_pot[0] = clamp(params[PARAM_LEVEL1].getValue(), 0.0f, 1.0f);
+				mutuusParameters[channel]->raw_level_pot[1] = clamp(params[PARAM_LEVEL2].getValue(), 0.0f, 1.0f);
+
+				if (!bModeSwitchEnabled) {
+					mutuusParameters[channel]->raw_algorithm_pot = algorithmValue;
+
+					mutuusParameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
+
+					mutuusParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
+					mutuusParameters[channel]->raw_algorithm = mutuusParameters[channel]->modulation_algorithm;
+				}
+
+				mutuusParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
+				mutuusParameters[channel]->raw_modulation = mutuusParameters[channel]->modulation_parameter;
+				mutuusParameters[channel]->raw_modulation_pot = clamp(params[PARAM_TIMBRE].getValue(), 0.f, 1.f);
+				mutuusParameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
+
+				mutuusParameters[channel]->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0
+					* inputs[INPUT_LEVEL1].getNormalVoltage(2.0, channel) + 12.0;
+				mutuusParameters[channel]->note += log2f(96000.0f * args.sampleTime) * 12.0f;
+
+				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
+			}
+
+			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
+
+			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.0, channel);
+			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.0, channel);
+		}
+
+		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
+		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		if (isLightsTurn) {
-			lights[LIGHT_CARRIER + 0].value = (mutuusParameters->carrier_shape == 1 || mutuusParameters->carrier_shape == 2) ? 1.0 : 0.0;
-			lights[LIGHT_CARRIER + 1].value = (mutuusParameters->carrier_shape == 2 || mutuusParameters->carrier_shape == 3) ? 1.0 : 0.0;
+			lights[LIGHT_CARRIER + 0].value = (mutuusParameters[0]->carrier_shape == 1
+				|| mutuusParameters[0]->carrier_shape == 2) ? 1.0 : 0.0;
+			lights[LIGHT_CARRIER + 1].value = (mutuusParameters[0]->carrier_shape == 2
+				|| mutuusParameters[0]->carrier_shape == 3) ? 1.0 : 0.0;
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
 
-			mutuusModulator.set_alt_feature_mode(bool(params[PARAM_STEREO].getValue()));
-			lights[LIGHT_STEREO].setBrightness(mutuusModulator.alt_feature_mode() ? 1.f : 0.f);
+			lights[LIGHT_STEREO].setBrightness(mutuusModulator[0].alt_feature_mode() ? 1.f : 0.f);
 
 			for (int i = 0; i < 9; i++) {
 				lights[LIGHT_MODE + i].setBrightnessSmooth(featureMode == i ? 1.f : 0.f, sampleTime);
-			}
-		}
 
-		float_4 f4Voltages;
-
-		// Buffer loop
-		if (++frame >= 60) {
-			frame = 0;
-
-			// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-			f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f);
-			f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f);
-			f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage();
-			f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage();
-
-			f4Voltages /= 5.f;
-
-			mutuusParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
-			mutuusParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
-
-			mutuusParameters->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
-			mutuusParameters->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
-
-			mutuusParameters->raw_level[0] = mutuusParameters->channel_drive[0];
-			mutuusParameters->raw_level[1] = mutuusParameters->channel_drive[1];
-
-			mutuusParameters->raw_level_pot[0] = clamp(params[PARAM_LEVEL1].getValue(), 0.0f, 1.0f);
-			mutuusParameters->raw_level_pot[1] = clamp(params[PARAM_LEVEL2].getValue(), 0.0f, 1.0f);
-
-			if (!bModeSwitchEnabled) {
-				lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
-
-				float algorithmValue = lastAlgorithmValue / 8.0;
-
-				mutuusParameters->raw_algorithm_pot = algorithmValue;
-
-				mutuusParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
-
-				mutuusParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
-				mutuusParameters->raw_algorithm = mutuusParameters->modulation_algorithm;
-
-				if (isLightsTurn) {
+				if (!bModeSwitchEnabled) {
 					const uint8_t(*palette)[3];
 					float zone;
 					if (featureMode != mutuus::FEATURE_MODE_META) {
@@ -199,7 +232,7 @@ struct Mutuus : SanguineModule {
 						palette = paletteWarpsDefault;
 					}
 
-					zone = 8.0f * mutuusParameters->modulation_algorithm;
+					zone = 8.0f * mutuusParameters[0]->modulation_algorithm;
 					MAKE_INTEGRAL_FRACTIONAL(zone);
 					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
 					for (int i = 0; i < 3; i++) {
@@ -209,28 +242,13 @@ struct Mutuus : SanguineModule {
 					}
 				}
 			}
-
-			mutuusParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
-			mutuusParameters->raw_modulation = mutuusParameters->modulation_parameter;
-			mutuusParameters->raw_modulation_pot = clamp(params[PARAM_TIMBRE].getValue(), 0.f, 1.f);
-			mutuusParameters->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
-
-			mutuusParameters->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0 * inputs[INPUT_LEVEL1].getNormalVoltage(2.0) + 12.0;
-			mutuusParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
-
-			mutuusModulator.Process(inputFrames, outputFrames, 60);
 		}
-
-		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 32768), -32768, 32767);
-		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 32768), -32768, 32767);
-		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 32768 * 5.0);
-		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 32768 * 5.0);
 	}
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "mode", json_integer(mutuusModulator.feature_mode()));
+		json_object_set_new(rootJ, "mode", json_integer(mutuusModulator[0].feature_mode()));
 		return rootJ;
 	}
 
@@ -238,14 +256,14 @@ struct Mutuus : SanguineModule {
 		SanguineModule::dataFromJson(rootJ);
 
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
-			mutuusModulator.set_feature_mode(static_cast<mutuus::FeatureMode>(json_integer_value(modeJ)));
-			featureMode = mutuusModulator.feature_mode();
+			mutuusModulator[0].set_feature_mode(static_cast<mutuus::FeatureMode>(json_integer_value(modeJ)));
+			featureMode = mutuusModulator[0].feature_mode();
 		}
 	}
 
 	void setFeatureMode(int modeNumber) {
 		featureMode = modeNumber;
-		mutuusModulator.set_feature_mode(mutuus::FeatureMode(featureMode));
+		mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
 	}
 };
 

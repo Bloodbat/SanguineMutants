@@ -38,23 +38,23 @@ struct Distortiones : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	int featureMode;
-	int frame = 0;
+	int featureMode = 0;
+	int frame[PORT_MAX_CHANNELS] = {};
 
 	const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightDivider;
-	distortiones::DistortionesModulator distortionesModulator;
-	distortiones::ShortFrame inputFrames[60] = {};
-	distortiones::ShortFrame outputFrames[60] = {};
+	distortiones::DistortionesModulator distortionesModulator[PORT_MAX_CHANNELS];
+	distortiones::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
+	distortiones::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
 
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
 
 	float lastAlgorithmValue = 0.f;
 
-	distortiones::Parameters* distortionesParameters = distortionesModulator.mutable_parameters();
+	distortiones::Parameters* distortionesParameters[PORT_MAX_CHANNELS];
 
 	Distortiones() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -82,8 +82,11 @@ struct Distortiones : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		memset(&distortionesModulator, 0, sizeof(distortiones::DistortionesModulator));
-		distortionesModulator.Init(96000.0f);
+		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
+			memset(&distortionesModulator[i], 0, sizeof(distortiones::DistortionesModulator));
+			distortionesModulator[i].Init(96000.0f);
+			distortionesParameters[i] = distortionesModulator[i].mutable_parameters();
+		}
 
 		featureMode = distortiones::FEATURE_MODE_META;
 		lightDivider.setDivision(kLightFrequency);
@@ -92,7 +95,7 @@ struct Distortiones : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
-		distortionesParameters->carrier_shape = params[PARAM_CARRIER].getValue();
+		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
 
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
 			bModeSwitchEnabled = !bModeSwitchEnabled;
@@ -117,9 +120,11 @@ struct Distortiones : SanguineModule {
 		bool isLightsTurn = lightDivider.process();
 		const float sampleTime = kLightFrequency * args.sampleTime;
 
+		float algorithmValue = 0.f;
+
 		if (bModeSwitchEnabled) {
 			featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-			distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
+			distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
 
 			if (isLightsTurn) {
 				int8_t ramp = getSystemTimeMs() & 127;
@@ -130,88 +135,104 @@ struct Distortiones : SanguineModule {
 				}
 			}
 		}
+		else {
+			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
+			algorithmValue = lastAlgorithmValue / 8.0;
+		}
+
+		for (int channel = 0; channel < channelCount; channel++) {
+			distortionesModulator[channel].set_feature_mode(distortiones::FeatureMode(featureMode));
+
+			distortionesParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+
+			float_4 f4Voltages;
+
+			// Buffer loop
+			if (++frame[channel] >= 60) {
+				frame[channel] = 0;
+
+				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
+				f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f, channel);
+				f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f, channel);
+				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
+				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
+
+				f4Voltages /= 5.f;
+
+				distortionesParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
+				distortionesParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
+
+				distortionesParameters[channel]->raw_level[0] = distortionesParameters[channel]->channel_drive[0];
+				distortionesParameters[channel]->raw_level[1] = distortionesParameters[channel]->channel_drive[1];
+
+
+
+				if (!bModeSwitchEnabled) {
+					distortionesParameters[channel]->raw_algorithm_pot = algorithmValue;
+
+					distortionesParameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
+
+					distortionesParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
+					distortionesParameters[channel]->raw_algorithm = distortionesParameters[channel]->modulation_algorithm;
+				}
+
+				distortionesParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
+
+				distortionesParameters[channel]->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0
+					* inputs[INPUT_LEVEL1].getNormalVoltage(2.0, channel) + 12.0;
+				distortionesParameters[channel]->note += log2f(96000.0f * args.sampleTime) * 12.0f;
+
+				distortionesModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
+			}
+
+			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
+
+			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.0, channel);
+			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.0, channel);
+		}
+
+		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
+		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		if (isLightsTurn) {
-			lights[LIGHT_CARRIER + 0].value = (distortionesParameters->carrier_shape == 1 || distortionesParameters->carrier_shape == 2) ? 1.0 : 0.0;
-			lights[LIGHT_CARRIER + 1].value = (distortionesParameters->carrier_shape == 2 || distortionesParameters->carrier_shape == 3) ? 1.0 : 0.0;
+			lights[LIGHT_CARRIER + 0].value = (distortionesParameters[0]->carrier_shape == 1
+				|| distortionesParameters[0]->carrier_shape == 2) ? 1.0 : 0.0;
+			lights[LIGHT_CARRIER + 1].value = (distortionesParameters[0]->carrier_shape == 2
+				|| distortionesParameters[0]->carrier_shape == 3) ? 1.0 : 0.0;
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
 
 			for (int i = 0; i < 9; i++) {
 				lights[LIGHT_MODE + i].setBrightnessSmooth(featureMode == i ? 1.f : 0.f, sampleTime);
 			}
-		}
-
-		float_4 f4Voltages;
-
-		// Buffer loop
-		if (++frame >= 60) {
-			frame = 0;
-
-			// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-			f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f);
-			f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f);
-			f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage();
-			f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage();
-
-			f4Voltages /= 5.f;
-
-			distortionesParameters->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
-			distortionesParameters->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
-
-			distortionesParameters->raw_level[0] = distortionesParameters->channel_drive[0];
-			distortionesParameters->raw_level[1] = distortionesParameters->channel_drive[1];
 
 			if (!bModeSwitchEnabled) {
-				lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
+				const uint8_t(*palette)[3];
+				float zone;
+				if (featureMode != distortiones::FEATURE_MODE_META) {
+					palette = paletteWarpsFreqsShift;
+				}
+				else {
+					palette = paletteWarpsDefault;
+				}
 
-				float algorithmValue = lastAlgorithmValue / 8.0;
-				distortionesParameters->raw_algorithm_pot = algorithmValue;
-
-				distortionesParameters->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
-
-				distortionesParameters->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
-				distortionesParameters->raw_algorithm = distortionesParameters->modulation_algorithm;
-
-				if (isLightsTurn) {
-					const uint8_t(*palette)[3];
-					float zone;
-					if (featureMode != distortiones::FEATURE_MODE_META) {
-						palette = paletteWarpsFreqsShift;
-					}
-					else {
-						palette = paletteWarpsDefault;
-					}
-
-					zone = 8.0f * distortionesParameters->modulation_algorithm;
-					MAKE_INTEGRAL_FRACTIONAL(zone);
-					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-					for (int i = 0; i < 3; i++) {
-						int a = palette[zone_integral][i];
-						int b = palette[zone_integral + 1][i];
-						lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
-					}
+				zone = 8.0f * distortionesParameters[0]->modulation_algorithm;
+				MAKE_INTEGRAL_FRACTIONAL(zone);
+				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+				for (int i = 0; i < 3; i++) {
+					int a = palette[zone_integral][i];
+					int b = palette[zone_integral + 1][i];
+					lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
 				}
 			}
-
-			distortionesParameters->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
-
-			distortionesParameters->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0 * inputs[INPUT_LEVEL1].getNormalVoltage(2.0) + 12.0;
-			distortionesParameters->note += log2f(96000.0f * args.sampleTime) * 12.0f;
-
-			distortionesModulator.Process(inputFrames, outputFrames, 60);
 		}
-
-		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 32768), -32768, 32767);
-		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 32768), -32768, 32767);
-		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 32768 * 5.0);
-		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 32768 * 5.0);
 	}
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "mode", json_integer(distortionesModulator.feature_mode()));
+		json_object_set_new(rootJ, "mode", json_integer(distortionesModulator[0].feature_mode()));
 		return rootJ;
 	}
 
@@ -219,14 +240,14 @@ struct Distortiones : SanguineModule {
 		SanguineModule::dataFromJson(rootJ);
 
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
-			distortionesModulator.set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
-			featureMode = distortionesModulator.feature_mode();
+			distortionesModulator[0].set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
+			featureMode = distortionesModulator[0].feature_mode();
 		}
 	}
 
 	void setFeatureMode(int modeNumber) {
 		featureMode = modeNumber;
-		distortionesModulator.set_feature_mode(distortiones::FeatureMode(featureMode));
+		distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
 	}
 };
 
@@ -267,19 +288,19 @@ struct DistortionesWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(16.906, 63.862),
 			module, Distortiones::PARAM_CARRIER, Distortiones::LIGHT_CARRIER));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.894, 63.862), module, Distortiones::INPUT_ALGORITHM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(33.894, 63.862), module, Distortiones::INPUT_ALGORITHM));
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Distortiones::PARAM_LEVEL1));
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Distortiones::PARAM_LEVEL2));
 
-		addInput(createInputCentered<BananutYellow>(millimetersToPixelsVec(8.412, 96.146), module, Distortiones::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBlue>(millimetersToPixelsVec(25.4, 96.146), module, Distortiones::INPUT_LEVEL2));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(42.388, 96.146), module, Distortiones::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Distortiones::INPUT_LEVEL1));
+		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Distortiones::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 96.146), module, Distortiones::INPUT_TIMBRE));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.925, 112.172), module, Distortiones::INPUT_CARRIER));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.777, 112.172), module, Distortiones::INPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(32.044, 112.172), module, Distortiones::OUTPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.896, 112.172), module, Distortiones::OUTPUT_AUX));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.925, 112.172), module, Distortiones::INPUT_CARRIER));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(18.777, 112.172), module, Distortiones::INPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(32.044, 112.172), module, Distortiones::OUTPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(42.896, 112.172), module, Distortiones::OUTPUT_AUX));
 
 		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(13.849, 58.44), module, Distortiones::LIGHT_MODE + 0));
 		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(3.776, 47.107), module, Distortiones::LIGHT_MODE + 1));
