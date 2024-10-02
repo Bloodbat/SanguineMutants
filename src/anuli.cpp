@@ -8,7 +8,7 @@
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 static const std::vector<std::string> anuliModeLabels = {
-	"Modal. Reso",
+	"Modal Reso.",
 	"Sym. Strings",
 	"M. I. String",
 	"FM voice",
