@@ -174,6 +174,10 @@ struct Anuli : SanguineModule {
 		outputs[OUTPUT_ODD].setChannels(channelCount);
 		outputs[OUTPUT_EVEN].setChannels(channelCount);
 
+		polyphonyMode = params[PARAM_POLYPHONY].getValue();
+
+		fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
+
 		for (int channel = 0; channel < channelCount; channel++) {
 			int modeNum = 0;
 
@@ -316,10 +320,6 @@ struct Anuli : SanguineModule {
 			uint8_t pulseWidthModulationCounter = getSystemTimeMs() & 15;
 			uint8_t triangle = (getSystemTimeMs() >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
-
-			polyphonyMode = params[PARAM_POLYPHONY].getValue();
-
-			fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
 				int currentLight = LIGHT_RESONATOR + channel * 3;
