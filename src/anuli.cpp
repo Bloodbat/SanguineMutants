@@ -180,6 +180,13 @@ struct Anuli : SanguineModule {
 
 		int modeNum = int(params[PARAM_MODE].getValue());
 
+		float structureMod = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
+		float brightnessMod = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
+		float dampingMod = dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue());
+		float positionMod = dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue());
+
+		float frequencyMod = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
+
 		for (int channel = 0; channel < channelCount; channel++) {
 			if (inputs[INPUT_MODE].isConnected()) {
 				modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
@@ -230,29 +237,32 @@ struct Anuli : SanguineModule {
 					part[channel].set_model(resonatorModel[channel]);
 				}
 
+
+
 				// Patch
 				rings::Patch patch;
-				float structure = params[PARAM_STRUCTURE].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue()) *
-					inputs[INPUT_STRUCTURE_CV].getVoltage(channel) / 5.0;
-				patch.structure = clamp(structure, 0.0f, 0.9995f);
-				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue()) *
-					inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel) / 5.0, 0.0f, 1.0f);
-				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue()) *
-					inputs[INPUT_DAMPING_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
-				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3 * dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue()) *
-					inputs[INPUT_POSITION_CV].getVoltage(channel) / 5.0, 0.0f, 0.9995f);
+
+				float structure = params[PARAM_STRUCTURE].getValue() + 3.3f * structureMod *
+					inputs[INPUT_STRUCTURE_CV].getVoltage(channel) / 5.f;
+				patch.structure = clamp(structure, 0.f, 0.9995f);
+				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3f * brightnessMod *
+					inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel) / 5.f, 0.f, 1.f);
+				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3f * dampingMod *
+					inputs[INPUT_DAMPING_CV].getVoltage(channel) / 5.f, 0.f, 0.9995f);
+				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3f * positionMod *
+					inputs[INPUT_POSITION_CV].getVoltage(channel) / 5.f, 0.f, 0.9995f);
 
 				// Performance
 				rings::PerformanceState performanceState;
-				performanceState.note = 12.0 * inputs[INPUT_PITCH].getNormalVoltage(1 / 12.0, channel);
+
+				performanceState.note = 12.f * inputs[INPUT_PITCH].getNormalVoltage(1.f / 12.f, channel);
 				float transpose = params[PARAM_FREQUENCY].getValue();
 				// Quantize transpose if pitch input is connected
 				if (inputs[INPUT_PITCH].isConnected()) {
 					transpose = roundf(transpose);
 				}
-				performanceState.tonic = 12.0 + clamp(transpose, 0.0f, 60.0f);
-				performanceState.fm = clamp(48.0 * 3.3 * dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue()) *
-					inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.0, channel) / 5.0, -48.0f, 48.0f);
+				performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
+				performanceState.fm = clamp(48.f * 3.3f * frequencyMod * inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.f, channel) / 5.f, -48.f, 48.f);
 
 				performanceState.internal_exciter = !inputs[INPUT_IN].isConnected();
 				performanceState.internal_strum = !inputs[INPUT_STRUM].isConnected();
@@ -302,11 +312,11 @@ struct Anuli : SanguineModule {
 				dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
 				// "Note that you need to insert a jack into each output to split the signals: when only one jack is inserted, both signals are mixed together."
 				if (outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected()) {
-					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.0, 1.0) * 5.0, channel);
-					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.0, 1.0) * 5.0, channel);
+					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
+					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
 				}
 				else {
-					float v = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.0, 1.0) * 5.0;
+					float v = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
 					outputs[OUTPUT_ODD].setVoltage(v, channel);
 					outputs[OUTPUT_EVEN].setVoltage(v, channel);
 				}
