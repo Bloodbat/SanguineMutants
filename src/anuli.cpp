@@ -78,7 +78,7 @@ struct Anuli : SanguineModule {
 
 	enum LightIds {
 		ENUMS(LIGHT_POLYPHONY, 2),
-		ENUMS(LIGHT_RESONATOR, 16 * 3),
+		ENUMS(LIGHT_RESONATOR, PORT_MAX_CHANNELS * 3),
 		ENUMS(LIGHT_FX, 2),
 		LIGHTS_COUNT
 	};
@@ -223,10 +223,12 @@ struct Anuli : SanguineModule {
 				if (part[channel].polyphony() != polyphonyMode)
 					part[channel].set_polyphony(polyphonyMode);
 				// Model
-				if (bEasterEgg[channel])
+				if (bEasterEgg[channel]) {
 					stringSynth[channel].set_fx(rings::FxType(fxModel));
-				else
+				}
+				else {
 					part[channel].set_model(resonatorModel[channel]);
+				}
 
 				// Patch
 				rings::Patch patch;
