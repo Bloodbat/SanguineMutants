@@ -178,13 +178,10 @@ struct Anuli : SanguineModule {
 
 		fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
 
-		for (int channel = 0; channel < channelCount; channel++) {
-			int modeNum = 0;
+		int modeNum = int(params[PARAM_MODE].getValue());
 
-			if (!inputs[INPUT_MODE].isConnected()) {
-				modeNum = int(params[PARAM_MODE].getValue());
-			}
-			else {
+		for (int channel = 0; channel < channelCount; channel++) {
+			if (inputs[INPUT_MODE].isConnected()) {
 				modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
 			}
 
