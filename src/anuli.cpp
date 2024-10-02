@@ -66,6 +66,7 @@ struct Anuli : SanguineModule {
 		INPUT_STRUM,
 		INPUT_PITCH,
 		INPUT_IN,
+		INPUT_MODE,
 		INPUTS_COUNT
 	};
 
@@ -77,7 +78,7 @@ struct Anuli : SanguineModule {
 
 	enum LightIds {
 		ENUMS(LIGHT_POLYPHONY, 2),
-		ENUMS(LIGHT_RESONATOR, 3),
+		ENUMS(LIGHT_RESONATOR, 16 * 3),
 		ENUMS(LIGHT_FX, 2),
 		LIGHTS_COUNT
 	};
@@ -101,9 +102,9 @@ struct Anuli : SanguineModule {
 	int strummingFlagCounter = 0;
 	int strummingFlagInterval = 0;
 
-	rings::ResonatorModel resonatorModel = rings::RESONATOR_MODEL_MODAL;
+	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS];
 	rings::ResonatorModel fxModel = rings::RESONATOR_MODEL_MODAL;
-	bool bEasterEgg = false;
+	bool bEasterEgg[PORT_MAX_CHANNELS] = {};
 
 	std::string displayText = "";
 
@@ -139,6 +140,8 @@ struct Anuli : SanguineModule {
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
 		configInput(INPUT_IN, "Audio");
 
+		configInput(INPUT_MODE, "Mode");
+
 		configOutput(OUTPUT_ODD, "Odd");
 		configOutput(OUTPUT_EVEN, "Even");
 
@@ -152,6 +155,8 @@ struct Anuli : SanguineModule {
 			part[i].Init(reverbBuffer[i]);
 			memset(&stringSynth[i], 0, sizeof(rings::StringSynthPart));
 			stringSynth[i].Init(reverbBuffer[i]);
+
+			resonatorModel[i] = rings::RESONATOR_MODEL_MODAL;
 		}
 
 		clockDivider.setDivision(kDividerFrequency);
@@ -160,22 +165,9 @@ struct Anuli : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		const float sampleTime = kDividerFrequency * args.sampleTime;
 
-		bool dividerTurn = clockDivider.process();
+		bool bDividerTurn = clockDivider.process();
 
-		if (dividerTurn) {
-			if (params[PARAM_MODE].getValue() < 6) {
-				bEasterEgg = false;
-				resonatorModel = rings::ResonatorModel(params[PARAM_MODE].getValue());
-			}
-			else {
-				bEasterEgg = true;
-			}
-			displayText = anuliModeLabels[params[PARAM_MODE].getValue()];
-
-			polyphonyMode = params[PARAM_POLYPHONY].getValue();
-
-			fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
-		}
+		uint8_t disastrousCount = 0;
 
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()), inputs[INPUT_IN].getChannels()), 1);
 
@@ -183,6 +175,24 @@ struct Anuli : SanguineModule {
 		outputs[OUTPUT_EVEN].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; channel++) {
+			int modeNum = 0;
+
+			if (!inputs[INPUT_MODE].isConnected()) {
+				modeNum = int(params[PARAM_MODE].getValue());
+			}
+			else {
+				modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
+			}
+
+			if (modeNum < 6) {
+				bEasterEgg[channel] = false;
+				resonatorModel[channel] = rings::ResonatorModel(modeNum);
+			}
+			else {
+				bEasterEgg[channel] = true;
+				++disastrousCount;
+			}
+
 			// TODO
 			// "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
 			// Get input
@@ -212,10 +222,10 @@ struct Anuli : SanguineModule {
 				if (part[channel].polyphony() != polyphonyMode)
 					part[channel].set_polyphony(polyphonyMode);
 				// Model
-				if (bEasterEgg)
+				if (bEasterEgg[channel])
 					stringSynth[channel].set_fx(rings::FxType(fxModel));
 				else
-					part[channel].set_model(resonatorModel);
+					part[channel].set_model(resonatorModel[channel]);
 
 				// Patch
 				rings::Patch patch;
@@ -259,7 +269,7 @@ struct Anuli : SanguineModule {
 				// Process audio
 				float out[24];
 				float aux[24];
-				if (bEasterEgg) {
+				if (bEasterEgg[channel]) {
 					strummer[channel].Process(NULL, 24, &performanceState);
 					stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
 				}
@@ -300,67 +310,87 @@ struct Anuli : SanguineModule {
 			}
 		}
 
-		if (dividerTurn) {
+		if (bDividerTurn) {
+			displayText = anuliModeLabels[resonatorModel[0]];
+
 			uint8_t pulseWidthModulationCounter = getSystemTimeMs() & 15;
 			uint8_t triangle = (getSystemTimeMs() >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
 
-			if (!bEasterEgg) {
-				if (resonatorModel < 3) {
-					lights[LIGHT_RESONATOR + 0].setBrightnessSmooth(resonatorModel >= 1 ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_RESONATOR + 1].setBrightnessSmooth(resonatorModel <= 1 ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_RESONATOR + 2].setBrightnessSmooth(0.f, sampleTime);
+			polyphonyMode = params[PARAM_POLYPHONY].getValue();
+
+			fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
+
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+				int currentLight = LIGHT_RESONATOR + channel * 3;
+				if (channel < channelCount) {
+					if (!bEasterEgg[channel]) {
+						if (resonatorModel[channel] < 3) {
+							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] >= 1 ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+						}
+						else {
+							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+						}
+					}
+					else {
+						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
+					}
 				}
 				else {
-					lights[LIGHT_RESONATOR + 0].setBrightnessSmooth((resonatorModel >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_RESONATOR + 1].setBrightnessSmooth((resonatorModel <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_RESONATOR + 2].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 				}
 
-				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
-				lights[LIGHT_RESONATOR + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_RESONATOR + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_RESONATOR + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
 
-				if (fxModel < 3) {
-					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
+				if (disastrousCount < 1) {
+					lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
+					lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
 				}
 				else {
-					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+					if (fxModel < 3) {
+						lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 1.f : 0.f, sampleTime);
+						lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
+					}
+					else {
+						lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+						lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+					}
 				}
-			}
 
-			if (polyphonyMode != 3) {
-				lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 2 ? 1.f : 0.f);
-				lights[LIGHT_POLYPHONY + 1].setBrightness(polyphonyMode >= 2 ? 1.f : 0.f);
-			}
-			else {
-				lights[LIGHT_POLYPHONY + 0].setBrightness(1.f);
-				lights[LIGHT_POLYPHONY + 1].setBrightness(pulseWidthModulationCounter < triangle ? 1.f : 0.f);
-			}
+				if (polyphonyMode != 3) {
+					lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 2 ? 1.f : 0.f);
+					lights[LIGHT_POLYPHONY + 1].setBrightness(polyphonyMode >= 2 ? 1.f : 0.f);
+				}
+				else {
+					lights[LIGHT_POLYPHONY + 0].setBrightness(1.f);
+					lights[LIGHT_POLYPHONY + 1].setBrightness(pulseWidthModulationCounter < triangle ? 1.f : 0.f);
+				}
 
-			++strummingFlagInterval;
-			if (strummingFlagCounter) {
-				--strummingFlagCounter;
-				lights[LIGHT_POLYPHONY + 0].setBrightness(0.f);
-				lights[LIGHT_POLYPHONY + 1].setBrightness(0.f);
+				++strummingFlagInterval;
+				if (strummingFlagCounter) {
+					--strummingFlagCounter;
+					lights[LIGHT_POLYPHONY + 0].setBrightness(0.f);
+					lights[LIGHT_POLYPHONY + 1].setBrightness(0.f);
+				}
 			}
 		}
 	}
 
 	void setMode(int modeNum) {
 		if (modeNum < 6) {
-			bEasterEgg = false;
-			resonatorModel = rings::ResonatorModel(modeNum);
+			bEasterEgg[0] = false;
+			resonatorModel[0] = rings::ResonatorModel(modeNum);
 			params[PARAM_MODE].setValue(modeNum);
 		}
 		else {
-			bEasterEgg = true;
+			bEasterEgg[0] = true;
 			params[PARAM_MODE].setValue(modeNum);
 		}
 	}
@@ -389,7 +419,23 @@ struct AnuliWidget : SanguineModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(9.021, 17.317), module, Anuli::LIGHT_RESONATOR));
+		const float xDelta = 3.71f;
+		const int lightIdOffset = 8;
+
+		float currentXA = 23.989f;
+		float currentXB = 56.725f;
+
+		for (int i = 0; i < 8; i++) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXA, 14.973),
+				module, Anuli::LIGHT_RESONATOR + i * 3));
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXB, 14.973),
+				module, Anuli::LIGHT_RESONATOR + ((i + lightIdOffset) * 3)));
+			currentXA += xDelta;
+			currentXB += xDelta;
+		}
+
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(9.021, 22.087), module, Anuli::INPUT_MODE));
 
 		FramebufferWidget* anuliFrambuffer = new FramebufferWidget();
 		addChild(anuliFrambuffer);

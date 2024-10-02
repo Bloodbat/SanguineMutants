@@ -11,6 +11,10 @@ BananutBlack::BananutBlack() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
 }
 
+BananutBlackPoly::BananutBlackPoly() {
+	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlackPoly.svg")));
+}
+
 BananutBlue::BananutBlue() {
 	setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/BananutBlue.svg")));
 }

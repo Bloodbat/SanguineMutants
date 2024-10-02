@@ -13,6 +13,10 @@ struct BananutBlack : app::SvgPort {
 	BananutBlack();
 };
 
+struct BananutBlackPoly : app::SvgPort {
+	BananutBlackPoly();
+};
+
 struct BananutBlue : app::SvgPort {
 	BananutBlue();
 };
