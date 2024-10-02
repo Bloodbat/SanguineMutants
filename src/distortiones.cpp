@@ -202,10 +202,10 @@ struct Distortiones : SanguineModule {
 			distortionesModulator.Process(inputFrames, outputFrames, 60);
 		}
 
-		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
-		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 0x8000), -0x8000, 0x7fff);
-		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 0x8000 * 5.0);
-		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 0x8000 * 5.0);
+		inputFrames[frame].l = clamp(int(inputs[INPUT_CARRIER].getVoltage() / 16.0 * 32768), -32768, 32767);
+		inputFrames[frame].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage() / 16.0 * 32768), -32768, 32767);
+		outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[frame].l) / 32768 * 5.0);
+		outputs[OUTPUT_AUX].setVoltage(float(outputFrames[frame].r) / 32768 * 5.0);
 	}
 
 	json_t* dataToJson() override {
