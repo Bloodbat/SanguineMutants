@@ -487,16 +487,8 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
 
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 6.42, 100.55);
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 22.578, 100.55);
 		addChild(bloodLogo);
-
-		SanguineTinyNumericDisplay* displayChannelCount = new SanguineTinyNumericDisplay(2, module, 22.578, 100.75);
-		anuliFrambuffer->addChild(displayChannelCount);
-		displayChannelCount->fallbackNumber = 1;
-
-		if (module) {
-			displayChannelCount->values.numberValue = &module->channelCount;
-		}
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
 
