@@ -344,38 +344,38 @@ struct Anuli : SanguineModule {
 					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 				}
+			}
 
 
-				if (disastrousCount < 1) {
-					lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
+			if (disastrousCount < 1) {
+				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
+			}
+			else {
+				if (fxModel < 3) {
+					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 1.f : 0.f, sampleTime);
+					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
 				}
 				else {
-					if (fxModel < 3) {
-						lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 1.f : 0.f, sampleTime);
-						lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
-					}
-					else {
-						lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-						lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-					}
+					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
 				}
+			}
 
-				if (polyphonyMode != 3) {
-					lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 2 ? 1.f : 0.f);
-					lights[LIGHT_POLYPHONY + 1].setBrightness(polyphonyMode >= 2 ? 1.f : 0.f);
-				}
-				else {
-					lights[LIGHT_POLYPHONY + 0].setBrightness(1.f);
-					lights[LIGHT_POLYPHONY + 1].setBrightness(pulseWidthModulationCounter < triangle ? 1.f : 0.f);
-				}
+			if (polyphonyMode != 3) {
+				lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 2 ? 1.f : 0.f);
+				lights[LIGHT_POLYPHONY + 1].setBrightness(polyphonyMode >= 2 ? 1.f : 0.f);
+			}
+			else {
+				lights[LIGHT_POLYPHONY + 0].setBrightness(1.f);
+				lights[LIGHT_POLYPHONY + 1].setBrightness(pulseWidthModulationCounter < triangle ? 1.f : 0.f);
+			}
 
-				++strummingFlagInterval;
-				if (strummingFlagCounter) {
-					--strummingFlagCounter;
-					lights[LIGHT_POLYPHONY + 0].setBrightness(0.f);
-					lights[LIGHT_POLYPHONY + 1].setBrightness(0.f);
-				}
+			++strummingFlagInterval;
+			if (strummingFlagCounter) {
+				--strummingFlagCounter;
+				lights[LIGHT_POLYPHONY + 0].setBrightness(0.f);
+				lights[LIGHT_POLYPHONY + 1].setBrightness(0.f);
 			}
 		}
 	}
