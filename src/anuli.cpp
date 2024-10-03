@@ -189,6 +189,10 @@ struct Anuli : SanguineModule {
 
 		float frequencyMod = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
 
+		bool bInternalExciter = !inputs[INPUT_IN].isConnected();
+		bool bInternalStrum = !inputs[INPUT_STRUM].isConnected();
+		bool bInternalNote = !inputs[INPUT_PITCH].isConnected();
+
 		for (int channel = 0; channel < channelCount; channel++) {
 			if (inputs[INPUT_MODE].isConnected()) {
 				modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
@@ -239,8 +243,6 @@ struct Anuli : SanguineModule {
 					part[channel].set_model(resonatorModel[channel]);
 				}
 
-
-
 				// Patch
 				rings::Patch patch;
 
@@ -271,9 +273,9 @@ struct Anuli : SanguineModule {
 				performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
 				performanceState.fm = clamp(48.f * 3.3f * frequencyMod * inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.f, channel) / 5.f, -48.f, 48.f);
 
-				performanceState.internal_exciter = !inputs[INPUT_IN].isConnected();
-				performanceState.internal_strum = !inputs[INPUT_STRUM].isConnected();
-				performanceState.internal_note = !inputs[INPUT_PITCH].isConnected();
+				performanceState.internal_exciter = bInternalExciter;
+				performanceState.internal_strum = bInternalStrum;
+				performanceState.internal_note = bInternalNote;
 
 				// TODO
 				// "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
