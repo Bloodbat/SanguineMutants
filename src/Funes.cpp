@@ -633,10 +633,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		makePanel();
 
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addScrews(SCREW_ALL);
 
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(133.8, 32.306), module, Funes::PARAM_MODEL));
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(19.083, 67.293), module, Funes::PARAM_FREQUENCY));
