@@ -37,9 +37,9 @@ struct Vimina : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	enum ChannelFunctions {
-		CHANNEL_FUNCTION_FACTORER,
-		CHANNEL_FUNCTION_SWING
+	enum SectionFunctions {
+		SECTION_FUNCTION_FACTORER,
+		SECTION_FUNCTION_SWING
 	};
 
 	enum ChannelStates {
@@ -69,7 +69,7 @@ struct Vimina : SanguineModule {
 	where negative numbers are multiplier factors; positive numbers are divider
 	factors, and 1 is bypass.
 	*/
-	static const int kMaxFactors = 15;
+	static const int kFactorCount = 15;
 	/*
 	The index of 1 in the set above.
 	This is the factor setting where factorer is neither dividing nor multiplying.
@@ -111,9 +111,9 @@ struct Vimina : SanguineModule {
 	bool gateInputState[kMaxModuleSections] = {};
 	bool multiplyDebouncing[kMaxModuleSections];
 
-	ChannelFunctions channelFunction[kMaxModuleSections] = {
-		CHANNEL_FUNCTION_SWING,
-		CHANNEL_FUNCTION_FACTORER
+	SectionFunctions channelFunction[kMaxModuleSections] = {
+		SECTION_FUNCTION_SWING,
+		SECTION_FUNCTION_FACTORER
 	};
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
@@ -179,7 +179,7 @@ struct Vimina : SanguineModule {
 		}
 
 		for (uint8_t section = 0; section < kMaxModuleSections; section++) {
-			channelFunction[section] = ChannelFunctions(params[PARAM_MODE1 + section].getValue());
+			channelFunction[section] = SectionFunctions(params[PARAM_MODE1 + section].getValue());
 
 			if (btReset[section].process(params[PARAM_RESET1 + section].getValue())) {
 				handleReset(section);
@@ -202,7 +202,7 @@ struct Vimina : SanguineModule {
 				updateChannelLeds(section, sampleTime);
 
 				int currentLight = LIGHTS_MODE + section * 2;
-				bool bIsGreenLight = channelFunction[section] == CHANNEL_FUNCTION_FACTORER;
+				bool bIsGreenLight = channelFunction[section] == SECTION_FUNCTION_FACTORER;
 				lights[currentLight + 0].setBrightnessSmooth(bIsGreenLight, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!bIsGreenLight, sampleTime);
 			}
@@ -232,132 +232,132 @@ struct Vimina : SanguineModule {
 
 	void handleReset(const uint8_t channel) {
 		switch (channelFunction[channel]) {
-		case CHANNEL_FUNCTION_FACTORER:
+		case SECTION_FUNCTION_FACTORER:
 			resetDivision(channel);
 			break;
-		case CHANNEL_FUNCTION_SWING:
+		case SECTION_FUNCTION_SWING:
 			resetSwing(channel);
 			break;
 		}
 	}
 
-	void setupChannel(const uint8_t channel) {
-		channelVoltage[channel] = clamp(params[PARAM_FACTOR1 + channel].getValue() +
-			(inputs[INPUT_CV1 + channel].getVoltage() / 10.f), 0.f, 1.f);
+	void setupChannel(const uint8_t section) {
+		channelVoltage[section] = clamp(params[PARAM_FACTOR1 + section].getValue() +
+			(inputs[INPUT_CV1 + section].getVoltage() / 10.f), 0.f, 1.f);
 
-		switch (channelFunction[channel])
+		switch (channelFunction[section])
 		{
-		case CHANNEL_FUNCTION_FACTORER:
+		case SECTION_FUNCTION_FACTORER:
 			int16_t factorIndex;
-			factorIndex = (channelVoltage[channel] / (kMaxParamValue / (kMaxFactors - 1))) - kFactorerBypassIndex;
+			factorIndex = (channelVoltage[section] / (kMaxParamValue / (kFactorCount - 1))) - kFactorerBypassIndex;
 			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
 			if (factorIndex == 0) {
-				channelFactor[channel] = kFactorerBypassValue;
+				channelFactor[section] = kFactorerBypassValue;
 			}
 			else if (factorIndex < 0) {
-				channelFactor[channel] = --factorIndex; // abs
+				channelFactor[section] = --factorIndex; // abs
 			}
 			else {
-				channelFactor[channel] = ++factorIndex;
+				channelFactor[section] = ++factorIndex;
 			}
 			break;
-		case CHANNEL_FUNCTION_SWING:
-			channelSwing[channel] = channelVoltage[channel] / (kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
+		case SECTION_FUNCTION_SWING:
+			channelSwing[section] = channelVoltage[section] / (kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
 			break;
 		}
 	}
 
-	void handleTriggers(const uint8_t channel, const bool isTrigger, const bool isReset) {
+	void handleTriggers(const uint8_t section, const bool isTrigger, const bool isReset) {
 		if (isTrigger) {
-			switch (channelFunction[channel]) {
-			case CHANNEL_FUNCTION_FACTORER:
-				if (channelFactor[channel] > kFactorerBypassValue) {
-					if (divisionCounter[channel] <= 0) {
-						channelState[channel] = CHANNEL_GENERATED; // divide converts thru to exec on every division
+			switch (channelFunction[section]) {
+			case SECTION_FUNCTION_FACTORER:
+				if (channelFactor[section] > kFactorerBypassValue) {
+					if (divisionCounter[section] <= 0) {
+						channelState[section] = CHANNEL_GENERATED; // divide converts thru to exec on every division
 					}
 					// Deal with counter.
-					if (divisionCounter[channel] >= channelFactor[channel] - 1) {
-						resetDivision(channel);
+					if (divisionCounter[section] >= channelFactor[section] - 1) {
+						resetDivision(section);
 					}
 					else {
-						++divisionCounter[channel];
+						++divisionCounter[section];
 					}
 				}
 				else {
 					// Mult always acknowledges thru.
-					channelState[channel] = CHANNEL_THRU;
+					channelState[section] = CHANNEL_THRU;
 				}
 				break;
-			case CHANNEL_FUNCTION_SWING:
-				switch (swingCounter[channel]) {
+			case SECTION_FUNCTION_SWING:
+				switch (swingCounter[section]) {
 				case 0: // thru beat
-					channelState[channel] = CHANNEL_THRU;
-					swingCounter[channel] = 1;
+					channelState[section] = CHANNEL_THRU;
+					swingCounter[section] = 1;
 					break;
 				case 1:
 					// Skipped thru beat.
 					// Unless lowest setting, no swing - should do thru.
-					if (channelSwing[channel] <= kSwingFactorMin) {
-						channelState[channel] = CHANNEL_GENERATED;
-						resetSwing(channel);
+					if (channelSwing[section] <= kSwingFactorMin) {
+						channelState[section] = CHANNEL_GENERATED;
+						resetSwing(section);
 					}
 					else {
 						// Rest.
-						channelState[channel] = CHANNEL_REST;
-						swingCounter[channel] = 2;
+						channelState[section] = CHANNEL_REST;
+						swingCounter[section] = 2;
 					}
 					break;
 				default:
-					resetSwing(channel); // Something is wrong if we're here, so reset.
+					resetSwing(section); // Something is wrong if we're here, so reset.
 					break;
 				}
 				break;
 			}
 		}
 		if (isReset) {
-			handleReset(channel);
+			handleReset(section);
 		}
 	}
 
-	void transformClock(const uint8_t channel) {
-		switch (channelFunction[channel]) {
-		case CHANNEL_FUNCTION_FACTORER:
-			if (channelFactor[channel] < kFactorerBypassValue && pulseTrackerRecordedCount >= kPulseTrackerBufferSize &&
-				checkMultiplyStrikeTurn(channel, getPulseTrackerElapsed())) {
-				channelState[channel] = CHANNEL_GENERATED;
-				multiplyDebouncing[channel] = true;
+	void transformClock(const uint8_t section) {
+		switch (channelFunction[section]) {
+		case SECTION_FUNCTION_FACTORER:
+			if (channelFactor[section] < kFactorerBypassValue && pulseTrackerRecordedCount >= kPulseTrackerBufferSize &&
+				checkMultiplyStrikeTurn(section, getPulseTrackerElapsed())) {
+				channelState[section] = CHANNEL_GENERATED;
+				multiplyDebouncing[section] = true;
 			}
 			break;
-		case CHANNEL_FUNCTION_SWING:
-			if (checkSwingStrikeTurn(channel, getPulseTrackerElapsed())) {
-				channelState[channel] = CHANNEL_GENERATED;
-				resetSwing(channel); // reset
+		case SECTION_FUNCTION_SWING:
+			if (checkSwingStrikeTurn(section, getPulseTrackerElapsed())) {
+				channelState[section] = CHANNEL_GENERATED;
+				resetSwing(section); // reset
 			}
 			break;
 		}
 	}
 
-	void setOutputVoltages(const uint8_t channel) {
-		if (channelState[channel] > CHANNEL_REST) {
-			outputs[OUTPUT_OUT1A + channel].setVoltage(10.f);
-			outputs[OUTPUT_OUT1B + channel].setVoltage(10.f);
-			triggerExtendCount[channel] = kTriggerExtendCount;
-			if (channelState[channel] < CHANNEL_GENERATED) {
-				ledGateDuration[channel] = kLedThruGateDuration;
-				ledState[channel] = CHANNEL_THRU;
+	void setOutputVoltages(const uint8_t section) {
+		if (channelState[section] > CHANNEL_REST) {
+			outputs[OUTPUT_OUT1A + section].setVoltage(10.f);
+			outputs[OUTPUT_OUT1B + section].setVoltage(10.f);
+			triggerExtendCount[section] = kTriggerExtendCount;
+			if (channelState[section] < CHANNEL_GENERATED) {
+				ledGateDuration[section] = kLedThruGateDuration;
+				ledState[section] = CHANNEL_THRU;
 			}
 			else {
-				ledGateDuration[channel] = kLedGeneratedGateDuration;
-				ledState[channel] = CHANNEL_GENERATED;
+				ledGateDuration[section] = kLedGeneratedGateDuration;
+				ledState[section] = CHANNEL_GENERATED;
 			}
 		}
 		else {
-			if (triggerExtendCount[channel] <= 0) {
-				outputs[OUTPUT_OUT1A + channel].setVoltage(0.f);
-				outputs[OUTPUT_OUT1B + channel].setVoltage(0.f);
+			if (triggerExtendCount[section] <= 0) {
+				outputs[OUTPUT_OUT1A + section].setVoltage(0.f);
+				outputs[OUTPUT_OUT1B + section].setVoltage(0.f);
 			}
 			else {
-				triggerExtendCount[channel] -= 1;
+				triggerExtendCount[section] -= 1;
 			}
 		}
 	}
@@ -398,15 +398,15 @@ struct Vimina : SanguineModule {
 		moduleClock.reset();
 	}
 
-	bool checkMultiplyStrikeTurn(const uint8_t channel, const uint16_t elapsed) {
-		float interval = getPulseTrackerPeriod() / -channelFactor[channel];
+	bool checkMultiplyStrikeTurn(const uint8_t section, const uint16_t elapsed) {
+		float interval = getPulseTrackerPeriod() / -channelFactor[section];
 		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
-			if (!multiplyDebouncing[channel]) {
+			if (!multiplyDebouncing[section]) {
 				return true;
 			}
 		}
 		else {
-			multiplyDebouncing[channel] = false;
+			multiplyDebouncing[section] = false;
 		}
 		return false;
 	}
@@ -419,10 +419,10 @@ struct Vimina : SanguineModule {
 		swingCounter[channel] = 0;
 	}
 
-	bool checkSwingStrikeTurn(uint8_t channel, uint16_t elapsed) {
-		if (swingCounter[channel] >= 2 && channelSwing[channel] > kSwingFactorMin) {
+	bool checkSwingStrikeTurn(uint8_t section, uint16_t elapsed) {
+		if (swingCounter[section] >= 2 && channelSwing[section] > kSwingFactorMin) {
 			uint16_t period = getPulseTrackerPeriod();
-			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[channel])) - period;
+			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section])) - period;
 			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
 		}
 		else {
