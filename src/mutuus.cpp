@@ -24,6 +24,7 @@ struct Mutuus : SanguineModule {
 		INPUT_TIMBRE,
 		INPUT_CARRIER,
 		INPUT_MODULATOR,
+		INPUT_MODE,
 		INPUTS_COUNT
 	};
 	enum OutputIds {
@@ -37,6 +38,7 @@ struct Mutuus : SanguineModule {
 		LIGHT_MODE_SWITCH,
 		LIGHT_STEREO,
 		ENUMS(LIGHT_MODE, 9),
+		ENUMS(LIGHT_CHANNEL_MODE, PORT_MAX_CHANNELS * 3),
 		LIGHTS_COUNT
 	};
 
@@ -85,6 +87,8 @@ struct Mutuus : SanguineModule {
 
 		configOutput(OUTPUT_MODULATOR, "Modulator");
 		configOutput(OUTPUT_AUX, "Auxiliary");
+
+		configInput(INPUT_MODE, "Mode");
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
@@ -146,7 +150,13 @@ struct Mutuus : SanguineModule {
 		}
 
 		for (int channel = 0; channel < channelCount; channel++) {
-			mutuusModulator[channel].set_feature_mode(mutuus::FeatureMode(featureMode));
+			mutuus::FeatureMode channelFeatureMode = mutuus::FeatureMode(featureMode);
+
+			if (inputs[INPUT_MODE].isConnected()) {
+				channelFeatureMode = mutuus::FeatureMode(clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+			}
+
+			mutuusModulator[channel].set_feature_mode(channelFeatureMode);
 
 			mutuusParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
 
@@ -242,6 +252,22 @@ struct Mutuus : SanguineModule {
 					}
 				}
 			}
+
+
+			for (int channel = 0; channel < channelCount; channel++) {
+				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
+
+				for (int i = 0; i < 3; i++) {
+					lights[currentLight + i].setBrightnessSmooth((paletteWarpsParasiteFeatureMode[mutuusModulator[channel].feature_mode()][i]) / 255.f, sampleTime);
+				}
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; channel++) {
+				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+			}
 		}
 	}
 
@@ -302,14 +328,17 @@ struct MutuusWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Rogan6PSWhite>(millimetersToPixelsVec(25.4, 37.486), module, Mutuus::PARAM_ALGORITHM));
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(25.4, 37.486), module, Mutuus::LIGHT_ALGORITHM));
-		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(42.388, 79.669), module, Mutuus::PARAM_TIMBRE));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(16.906, 63.862),
+
+		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(8.412, 63.862), module, Mutuus::INPUT_MODE));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(25.4, 63.862),
 			module, Mutuus::PARAM_CARRIER, Mutuus::LIGHT_CARRIER));
 
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(33.894, 63.862), module, Mutuus::INPUT_ALGORITHM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 63.862), module, Mutuus::INPUT_ALGORITHM));
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Mutuus::PARAM_LEVEL1));
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Mutuus::PARAM_LEVEL2));
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(42.388, 79.669), module, Mutuus::PARAM_TIMBRE));
 
 		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Mutuus::INPUT_LEVEL1));
 		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Mutuus::INPUT_LEVEL2));
@@ -329,6 +358,23 @@ struct MutuusWidget : SanguineModuleWidget {
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(48.183, 32.064), module, Mutuus::LIGHT_MODE + 6));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(47.067, 47.187), module, Mutuus::LIGHT_MODE + 7));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(36.952, 58.483), module, Mutuus::LIGHT_MODE + 8));
+
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 0 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 1 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 2 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 3 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 4 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 5 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 6 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 7 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 8 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 9 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 10 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 11 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 12 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 13 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 14 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 15 * 3));
 	}
 
 	void appendContextMenu(Menu* menu) override {
