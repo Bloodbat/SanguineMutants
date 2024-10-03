@@ -169,7 +169,7 @@ struct Anuli : SanguineModule {
 
 		bool bDividerTurn = clockDivider.process();
 
-		uint8_t disastrousCount = 0;
+		bool bDisastrousPeace = false;
 
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()), inputs[INPUT_IN].getChannels()), 1);
 
@@ -204,7 +204,7 @@ struct Anuli : SanguineModule {
 			}
 			else {
 				bEasterEgg[channel] = true;
-				++disastrousCount;
+				bDisastrousPeace = true;
 			}
 
 			// TODO
@@ -240,7 +240,9 @@ struct Anuli : SanguineModule {
 					stringSynth[channel].set_fx(rings::FxType(fxModel));
 				}
 				else {
-					part[channel].set_model(resonatorModel[channel]);
+					if (part[channel].model() != resonatorModel[channel]) {
+						part[channel].set_model(resonatorModel[channel]);
+					}
 				}
 
 				// Patch
@@ -325,9 +327,9 @@ struct Anuli : SanguineModule {
 					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
 				}
 				else {
-					float v = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
-					outputs[OUTPUT_ODD].setVoltage(v, channel);
-					outputs[OUTPUT_EVEN].setVoltage(v, channel);
+					float outVoltage = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
+					outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
+					outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
 				}
 			}
 		}
@@ -372,7 +374,7 @@ struct Anuli : SanguineModule {
 			}
 
 
-			if (disastrousCount < 1) {
+			if (bDisastrousPeace) {
 				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
