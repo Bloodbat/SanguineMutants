@@ -306,19 +306,19 @@ struct MutuusWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(16.906, 63.862),
 			module, Mutuus::PARAM_CARRIER, Mutuus::LIGHT_CARRIER));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.894, 63.862), module, Mutuus::INPUT_ALGORITHM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(33.894, 63.862), module, Mutuus::INPUT_ALGORITHM));
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Mutuus::PARAM_LEVEL1));
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Mutuus::PARAM_LEVEL2));
 
-		addInput(createInputCentered<BananutYellow>(millimetersToPixelsVec(8.412, 96.146), module, Mutuus::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBlue>(millimetersToPixelsVec(25.4, 96.146), module, Mutuus::INPUT_LEVEL2));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(42.388, 96.146), module, Mutuus::INPUT_TIMBRE));
+		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Mutuus::INPUT_LEVEL1));
+		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Mutuus::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 96.146), module, Mutuus::INPUT_TIMBRE));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.925, 112.172), module, Mutuus::INPUT_CARRIER));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(18.777, 112.172), module, Mutuus::INPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(32.044, 112.172), module, Mutuus::OUTPUT_MODULATOR));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(42.896, 112.172), module, Mutuus::OUTPUT_AUX));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.925, 112.172), module, Mutuus::INPUT_CARRIER));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(18.777, 112.172), module, Mutuus::INPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(32.044, 112.172), module, Mutuus::OUTPUT_MODULATOR));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(42.896, 112.172), module, Mutuus::OUTPUT_AUX));
 
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(13.849, 58.44), module, Mutuus::LIGHT_MODE + 0));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(3.776, 47.107), module, Mutuus::LIGHT_MODE + 1));
