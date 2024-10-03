@@ -110,6 +110,8 @@ struct Anuli : SanguineModule {
 
 	const int kDividerFrequency = 64;
 
+	const float kVoltPerOctave = 1.f / 12.f;
+
 	Anuli() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -260,7 +262,7 @@ struct Anuli : SanguineModule {
 				// Performance
 				rings::PerformanceState performanceState;
 
-				performanceState.note = 12.f * inputs[INPUT_PITCH].getNormalVoltage(1.f / 12.f, channel);
+				performanceState.note = 12.f * inputs[INPUT_PITCH].getNormalVoltage(kVoltPerOctave, channel);
 				float transpose = params[PARAM_FREQUENCY].getValue();
 				// Quantize transpose if pitch input is connected
 				if (inputs[INPUT_PITCH].isConnected()) {
