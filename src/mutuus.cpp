@@ -326,7 +326,7 @@ struct MutuusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Rogan6PSWhite>(millimetersToPixelsVec(25.4, 37.486), module, Mutuus::PARAM_ALGORITHM));
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(25.4, 37.486), module, Mutuus::LIGHT_ALGORITHM));
 
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(8.412, 63.862), module, Mutuus::INPUT_MODE));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(8.412, 63.862), module, Mutuus::INPUT_MODE));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(25.4, 63.862),
 			module, Mutuus::PARAM_CARRIER, Mutuus::LIGHT_CARRIER));

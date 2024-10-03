@@ -307,7 +307,7 @@ struct DistortionesWidget : SanguineModuleWidget {
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(25.4, 37.486),
 			module, Distortiones::LIGHT_ALGORITHM));
 
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(8.412, 63.862), module, Distortiones::INPUT_MODE));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(8.412, 63.862), module, Distortiones::INPUT_MODE));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(25.4, 63.862),
 			module, Distortiones::PARAM_CARRIER, Distortiones::LIGHT_CARRIER));
