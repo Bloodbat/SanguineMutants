@@ -450,7 +450,7 @@ struct ViminaWidget : SanguineModuleWidget {
 
 		makePanel();
 
-		addScrews(SCREW_TOP_RIGHT | SCREW_BOTTOM_RIGHT);
+		addScrews(SCREW_TOP_LEFT | SCREW_BOTTOM_LEFT);
 
 		// Channel 1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,
