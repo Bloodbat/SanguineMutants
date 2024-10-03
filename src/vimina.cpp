@@ -96,9 +96,6 @@ struct Vimina : SanguineModule {
 	int8_t divisionCounter[kMaxModuleSections] = {};
 	int8_t swingCounter[kMaxModuleSections] = {};
 
-	float channelVoltage[kMaxModuleSections] = {};
-	float pulseTrackerBuffer[kPulseTrackerBufferSize] = {};
-
 	// Swing constants
 	const float kSwingFactorMin = 50.f;
 	const float kSwingFactorMax = 70.f; // Maximum swing amount can be set up to 99.
@@ -107,6 +104,10 @@ struct Vimina : SanguineModule {
 	const float kMaxParamValue = 1.f;
 
 	const float kClockSpeed = 8000.f;
+
+	float channelVoltage[kMaxModuleSections] = {};
+	float pulseTrackerBuffer[kPulseTrackerBufferSize] = {};
+
 
 	bool gateInputState[kMaxModuleSections] = {};
 	bool multiplyDebouncing[kMaxModuleSections];
