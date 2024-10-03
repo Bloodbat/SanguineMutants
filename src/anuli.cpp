@@ -163,6 +163,8 @@ struct Anuli : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		const float sampleTime = kDividerFrequency * args.sampleTime;
 
 		bool bDividerTurn = clockDivider.process();
@@ -242,15 +244,20 @@ struct Anuli : SanguineModule {
 				// Patch
 				rings::Patch patch;
 
-				float structure = params[PARAM_STRUCTURE].getValue() + 3.3f * structureMod *
-					inputs[INPUT_STRUCTURE_CV].getVoltage(channel) / 5.f;
+				float_4 voltages;
+
+				voltages[0] = inputs[INPUT_STRUCTURE_CV].getVoltage(channel);
+				voltages[1] = inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel);
+				voltages[2] = inputs[INPUT_DAMPING_CV].getVoltage(channel);
+				voltages[3] = inputs[INPUT_POSITION_CV].getVoltage(channel);
+
+				voltages /= 5.f;
+
+				float structure = params[PARAM_STRUCTURE].getValue() + 3.3f * structureMod * voltages[0];
 				patch.structure = clamp(structure, 0.f, 0.9995f);
-				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3f * brightnessMod *
-					inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel) / 5.f, 0.f, 1.f);
-				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3f * dampingMod *
-					inputs[INPUT_DAMPING_CV].getVoltage(channel) / 5.f, 0.f, 0.9995f);
-				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3f * positionMod *
-					inputs[INPUT_POSITION_CV].getVoltage(channel) / 5.f, 0.f, 0.9995f);
+				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3f * brightnessMod * voltages[1], 0.f, 1.f);
+				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3f * dampingMod * voltages[2], 0.f, 0.9995f);
+				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3f * positionMod * voltages[3], 0.f, 0.9995f);
 
 				// Performance
 				rings::PerformanceState performanceState;
@@ -340,8 +347,10 @@ struct Anuli : SanguineModule {
 							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 						}
 						else {
-							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] >= 4 &&
+								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
+								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 						}
 					}
@@ -369,8 +378,10 @@ struct Anuli : SanguineModule {
 					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
 				}
 				else {
-					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 &&
+						pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 &&
+						pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
 				}
 			}
 
