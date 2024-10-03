@@ -165,8 +165,6 @@ struct Anuli : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
-		const float sampleTime = kDividerFrequency * args.sampleTime;
-
 		bool bDividerTurn = clockDivider.process();
 
 		uint8_t disastrousCount = 0;
@@ -331,40 +329,42 @@ struct Anuli : SanguineModule {
 		}
 
 		if (bDividerTurn) {
+			const float sampleTime = kDividerFrequency * args.sampleTime;
+
 			displayText = bEasterEgg[0] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[0]];
 
 			uint8_t pulseWidthModulationCounter = getSystemTimeMs() & 15;
 			uint8_t triangle = (getSystemTimeMs() >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			for (int channel = 0; channel < channelCount; channel++) {
 				int currentLight = LIGHT_RESONATOR + channel * 3;
-				if (channel < channelCount) {
-					if (!bEasterEgg[channel]) {
-						if (resonatorModel[channel] < 3) {
-							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] >= 1 ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-						}
-						else {
-							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] >= 4 &&
-								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
-								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-						}
+				if (!bEasterEgg[channel]) {
+					if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
+						lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] >= 1 ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 					}
 					else {
-						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] >= 4 &&
+							pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
+							pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 					}
 				}
 				else {
 					lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
 				}
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; channel++) {
+				const int currentLight = LIGHT_RESONATOR + channel * 3;
+				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 
@@ -373,7 +373,7 @@ struct Anuli : SanguineModule {
 				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
 			else {
-				if (fxModel < 3) {
+				if (fxModel < rings::RESONATOR_MODEL_FM_VOICE) {
 					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 1.f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
 				}
