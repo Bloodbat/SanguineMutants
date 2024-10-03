@@ -339,11 +339,20 @@ struct SanguineModule : Module {
 
 // Module widgets
 struct SanguineModuleWidget : ModuleWidget {
+	enum ScrewIds {
+		SCREW_TOP_LEFT = 1,
+		SCREW_BOTTOM_LEFT = 2,
+		SCREW_TOP_RIGHT = 4,
+		SCREW_BOTTOM_RIGHT = 8,
+		SCREW_ALL = 15
+	};
+
 	bool bFaceplateSuffix = true;
 	bool bHasCommon = true;
 	std::string moduleName;
 	PanelSizes panelSize = SIZE_34;
 	BackplateColors backplateColor = PLATE_PURPLE;
+	void addScrews(int screwIds);
 	void appendContextMenu(Menu* menu) override;
 	void makePanel();
 	void step() override;

@@ -913,6 +913,21 @@ void SanguineModuleWidget::appendContextMenu(Menu* menu) {
 	));
 }
 
+void SanguineModuleWidget::addScrews(int screwIds) {
+	if (screwIds & SCREW_TOP_LEFT) {
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+	}
+	if (screwIds & SCREW_TOP_RIGHT) {
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+	}
+	if (screwIds & SCREW_BOTTOM_LEFT) {
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+	}
+	if (screwIds & SCREW_BOTTOM_RIGHT) {
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+	}
+}
+
 void SanguineModuleWidget::step() {
 	SanguineModule* sanguineModule = dynamic_cast<SanguineModule*>(this->module);
 	if (module) {
