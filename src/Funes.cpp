@@ -747,10 +747,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createCheckMenuItem("Low CPU (disable resampling)", "",
-			[=]() {return module->bLowCpu; },
-			[=]() {module->bLowCpu = !module->bLowCpu; }
-		));
+		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 
 		menu->addChild(new MenuSeparator);
 
