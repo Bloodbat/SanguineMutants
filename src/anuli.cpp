@@ -96,6 +96,9 @@ struct Anuli : SanguineModule {
 	rings::Strummer strummer[PORT_MAX_CHANNELS];
 	bool bStrum[PORT_MAX_CHANNELS] = {};
 	bool bLastStrum[PORT_MAX_CHANNELS] = {};
+	bool bEasterEgg[PORT_MAX_CHANNELS] = {};
+
+	bool bNotesModeSelection = false;
 
 	int channelCount = 0;
 	int polyphonyMode = 1;
@@ -104,7 +107,6 @@ struct Anuli : SanguineModule {
 
 	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS];
 	rings::ResonatorModel fxModel = rings::RESONATOR_MODEL_MODAL;
-	bool bEasterEgg[PORT_MAX_CHANNELS] = {};
 
 	std::string displayText = "";
 
@@ -195,7 +197,12 @@ struct Anuli : SanguineModule {
 
 		for (int channel = 0; channel < channelCount; channel++) {
 			if (inputs[INPUT_MODE].isConnected()) {
-				modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
+				if (!bNotesModeSelection) {
+					modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
+				}
+				else {
+					modeNum = clamp(int(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 6);
+				}
 			}
 
 			if (modeNum < 6) {
@@ -409,6 +416,30 @@ struct Anuli : SanguineModule {
 		}
 	}
 
+	void setStrummingFlag(bool flag) {
+		if (flag) {
+			// Make sure the LED is off for a short enough time (ui.cc).
+			strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
+			strummingFlagInterval = 0;
+		}
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = SanguineModule::dataToJson();
+
+		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
+		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
+			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
+		}
+	}
+
 	void setMode(int modeNum) {
 		if (modeNum < 6) {
 			bEasterEgg[0] = false;
@@ -418,14 +449,6 @@ struct Anuli : SanguineModule {
 		else {
 			bEasterEgg[0] = true;
 			params[PARAM_MODE].setValue(modeNum);
-		}
-	}
-
-	void setStrummingFlag(bool flag) {
-		if (flag) {
-			// Make sure the LED is off for a short enough time (ui.cc).
-			strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
-			strummingFlagInterval = 0;
 		}
 	}
 };
@@ -551,6 +574,10 @@ struct AnuliWidget : SanguineModuleWidget {
 			[=]() { return module->params[Anuli::PARAM_FX].getValue(); },
 			[=](int i) { module->params[Anuli::PARAM_FX].setValue(i); }
 		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
 	}
 };
 

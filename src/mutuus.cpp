@@ -56,6 +56,8 @@ struct Mutuus : SanguineModule {
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
 
+	bool bNotesModeSelection = false;
+
 	float lastAlgorithmValue = 0.f;
 
 	mutuus::Parameters* mutuusParameters[PORT_MAX_CHANNELS];
@@ -153,7 +155,12 @@ struct Mutuus : SanguineModule {
 			mutuus::FeatureMode channelFeatureMode = mutuus::FeatureMode(featureMode);
 
 			if (inputs[INPUT_MODE].isConnected()) {
-				channelFeatureMode = mutuus::FeatureMode(clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+				if (!bNotesModeSelection) {
+					channelFeatureMode = mutuus::FeatureMode(clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+				}
+				else {
+					channelFeatureMode = mutuus::FeatureMode(clamp(int(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
+				}
 			}
 
 			mutuusModulator[channel].set_feature_mode(channelFeatureMode);
@@ -275,6 +282,9 @@ struct Mutuus : SanguineModule {
 		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "mode", json_integer(mutuusModulator[0].feature_mode()));
+
+		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
+
 		return rootJ;
 	}
 
@@ -284,6 +294,10 @@ struct Mutuus : SanguineModule {
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
 			mutuusModulator[0].set_feature_mode(static_cast<mutuus::FeatureMode>(json_integer_value(modeJ)));
 			featureMode = mutuusModulator[0].feature_mode();
+		}
+
+		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
+			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
 		}
 	}
 
@@ -385,6 +399,10 @@ struct MutuusWidget : SanguineModuleWidget {
 			[=]() {return module->featureMode; },
 			[=](int i) {module->setFeatureMode(i); }
 		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createBoolPtrMenuItem("C4-A#4 direct mode selection", "", &module->bNotesModeSelection));
 	}
 };
 

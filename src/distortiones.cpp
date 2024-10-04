@@ -54,6 +54,8 @@ struct Distortiones : SanguineModule {
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
 
+	bool bNotesModeSelection = false;
+
 	float lastAlgorithmValue = 0.f;
 
 	distortiones::Parameters* distortionesParameters[PORT_MAX_CHANNELS];
@@ -148,7 +150,12 @@ struct Distortiones : SanguineModule {
 			distortiones::FeatureMode channelFeatureMode = distortiones::FeatureMode(featureMode);
 
 			if (inputs[INPUT_MODE].isConnected()) {
-				channelFeatureMode = distortiones::FeatureMode(clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+				if (!bNotesModeSelection) {
+					channelFeatureMode = distortiones::FeatureMode(clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+				}
+				else {
+					channelFeatureMode = distortiones::FeatureMode(clamp(int(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
+				}
 			}
 
 			distortionesModulator[channel].set_feature_mode(channelFeatureMode);
@@ -258,6 +265,9 @@ struct Distortiones : SanguineModule {
 		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "mode", json_integer(distortionesModulator[0].feature_mode()));
+
+		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
+
 		return rootJ;
 	}
 
@@ -267,6 +277,10 @@ struct Distortiones : SanguineModule {
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
 			distortionesModulator[0].set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
 			featureMode = distortionesModulator[0].feature_mode();
+		}
+
+		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
+			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
 		}
 	}
 
@@ -366,6 +380,10 @@ struct DistortionesWidget : SanguineModuleWidget {
 			[=]() {return module->featureMode; },
 			[=](int i) {module->setFeatureMode(i); }
 		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createBoolPtrMenuItem("C4-A#4 direct mode selection", "", &module->bNotesModeSelection));
 	}
 };
 
