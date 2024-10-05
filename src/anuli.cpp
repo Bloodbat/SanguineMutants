@@ -381,7 +381,7 @@ struct Anuli : SanguineModule {
 			}
 
 
-			if (bDisastrousPeace) {
+			if (!bDisastrousPeace) {
 				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
