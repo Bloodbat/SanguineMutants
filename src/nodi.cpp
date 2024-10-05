@@ -331,17 +331,19 @@ struct Nodi : SanguineModule {
 
 		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
 			memset(&osc[i], 0, sizeof(braids::MacroOscillator));
-			osc[i].Init();
 			memset(&quantizer[i], 0, sizeof(braids::Quantizer));
-			quantizer[i].Init();
 			memset(&envelope[i], 0, sizeof(braids::Envelope));
+			memset(&jitterSource[i], 0, sizeof(braids::VcoJitterSource));
+			memset(&waveShaper[i], 0, sizeof(braids::SignatureWaveshaper));
+			memset(&settings[i], 0, sizeof(braids::SettingsData));
+
+			osc[i].Init();
+			quantizer[i].Init();
 			envelope[i].Init();
 
-			memset(&jitterSource[i], 0, sizeof(braids::VcoJitterSource));
+
 			jitterSource[i].Init();
-			memset(&waveShaper[i], 0, sizeof(braids::SignatureWaveshaper));
 			waveShaper[i].Init(0x0000);
-			memset(&settings[i], 0, sizeof(braids::SettingsData));
 
 			bLastTrig[i] = false;
 

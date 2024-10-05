@@ -154,10 +154,10 @@ struct Anuli : SanguineModule {
 
 		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
 			memset(&strummer[i], 0, sizeof(rings::Strummer));
-			strummer[i].Init(0.01, 44100.0 / 24);
 			memset(&part[i], 0, sizeof(rings::Part));
-			part[i].Init(reverbBuffer[i]);
 			memset(&stringSynth[i], 0, sizeof(rings::StringSynthPart));
+			strummer[i].Init(0.01, 44100.0 / 24);
+			part[i].Init(reverbBuffer[i]);
 			stringSynth[i].Init(reverbBuffer[i]);
 
 			resonatorModel[i] = rings::RESONATOR_MODEL_MODAL;

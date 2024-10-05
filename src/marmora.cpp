@@ -410,10 +410,11 @@ struct Marmora : SanguineModule {
 		lightsDivider.setDivision(kLightDivider);
 
 		memset(&randomGenerator, 0, sizeof(marbles::RandomGenerator));
-		randomGenerator.Init(1);
 		memset(&randomStream, 0, sizeof(marbles::RandomStream));
-		randomStream.Init(&randomGenerator);
 		memset(&noteFilter, 0, sizeof(marbles::NoteFilter));
+
+		randomGenerator.Init(1);
+		randomStream.Init(&randomGenerator);
 		noteFilter.Init();
 		scaleRecorder.Init();
 
@@ -741,8 +742,9 @@ struct Marmora : SanguineModule {
 	void onSampleRateChange() override {
 		float sampleRate = APP->engine->getSampleRate();
 		memset(&tGenerator, 0, sizeof(marbles::TGenerator));
-		tGenerator.Init(&randomStream, sampleRate);
 		memset(&xyGenerator, 0, sizeof(marbles::XYGenerator));
+
+		tGenerator.Init(&randomStream, sampleRate);
 		xyGenerator.Init(&randomStream, sampleRate);
 
 		// Set scales

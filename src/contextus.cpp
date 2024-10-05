@@ -357,17 +357,19 @@ struct Contextus : SanguineModule {
 
 		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
 			memset(&osc[i], 0, sizeof(renaissance::MacroOscillator));
-			osc[i].Init();
 			memset(&quantizer[i], 0, sizeof(renaissance::Quantizer));
-			quantizer[i].Init();
 			memset(&envelope[i], 0, sizeof(renaissance::Envelope));
+			memset(&jitterSource[i], 0, sizeof(renaissance::VcoJitterSource));
+			memset(&waveShaper[i], 0, sizeof(renaissance::SignatureWaveshaper));
+			memset(&settings[i], 0, sizeof(renaissance::SettingsData));
+
+			osc[i].Init();
+			quantizer[i].Init();
 			envelope[i].Init();
 
-			memset(&jitterSource[i], 0, sizeof(renaissance::VcoJitterSource));
 			jitterSource[i].Init();
-			memset(&waveShaper[i], 0, sizeof(renaissance::SignatureWaveshaper));
 			waveShaper[i].Init(0x0000);
-			memset(&settings[i], 0, sizeof(renaissance::SettingsData));
+
 
 			bLastTrig[i] = false;
 
