@@ -218,6 +218,7 @@ struct Contextus : SanguineModule {
 		PARAM_SCALE,
 		PARAM_ROOT,
 
+		// Unused: kept for compatibility.
 		PARAM_META,
 		PARAM_VCA,
 		PARAM_DRIFT,
@@ -234,6 +235,7 @@ struct Contextus : SanguineModule {
 		INPUT_FM,
 		INPUT_TIMBRE,
 		INPUT_COLOR,
+		INPUT_META,
 		INPUTS_COUNT
 	};
 
@@ -244,7 +246,6 @@ struct Contextus : SanguineModule {
 
 	enum LightIds {
 		ENUMS(LIGHT_MODEL, 1 * 3),
-		LIGHT_META,
 		LIGHT_MORSE,
 		LIGHT_VCA,
 		LIGHT_DRIFT,
@@ -284,7 +285,6 @@ struct Contextus : SanguineModule {
 	bool bAutoTrigger = false;
 	bool bDritfEnabled = false;
 	bool bFlattenEnabled = false;
-	bool bMetaModulation = false;
 	bool bPaques = false;
 	bool bSignatureEnabled = false;
 	bool bVCAEnabled = false;
@@ -348,7 +348,9 @@ struct Contextus : SanguineModule {
 		configInput(INPUT_COLOR, "Color");
 		configOutput(OUTPUT_OUT, "Audio");
 
-		configButton(PARAM_META, "Toggle meta modulation");
+		configInput(INPUT_META, "Meta modulation");
+		// Unused: kept for compatibility.
+		configButton(PARAM_META, "");
 		configButton(PARAM_VCA, "Toggle AD VCA");
 		configButton(PARAM_DRIFT, "Toggle oscillator drift");
 		configButton(PARAM_FLAT, "Toggle lower and higher frequency detuning");
@@ -385,7 +387,6 @@ struct Contextus : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
-		bMetaModulation = params[PARAM_META].getValue();
 		bVCAEnabled = params[PARAM_VCA].getValue();
 		bDritfEnabled = params[PARAM_DRIFT].getValue();
 		bFlattenEnabled = params[PARAM_FLAT].getValue();
@@ -429,7 +430,7 @@ struct Contextus : SanguineModule {
 			}
 
 			// Handle switches
-			settings[channel].meta_modulation = bMetaModulation;
+			settings[channel].meta_modulation = 1;
 			settings[channel].ad_vca = bVCAEnabled;
 			settings[channel].vco_drift = bDritfEnabled;
 			settings[channel].vco_flatten = bFlattenEnabled;
@@ -451,9 +452,10 @@ struct Contextus : SanguineModule {
 
 				// Set model
 				int model = params[PARAM_MODEL].getValue();
-				if (settings[channel].meta_modulation) {
-					model += roundf(fm / 10.0 * renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				if (inputs[INPUT_META].isConnected()) {
+					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.0 * renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 				}
+
 				settings[channel].shape = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
 				// Setup oscillator from settings
@@ -472,8 +474,7 @@ struct Contextus : SanguineModule {
 
 				// Set pitch
 				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.0;
-				if (!settings[channel].meta_modulation)
-					pitchV += fm;
+				pitchV += fm;
 				if (bLowCpu)
 					pitchV += log2f(96000.0 / args.sampleRate);
 				int32_t pitch = (pitchV * 12.0 + 60) * 128;
@@ -613,10 +614,6 @@ struct Contextus : SanguineModule {
 			int value;
 			switch (lastSettingChanged)
 			{
-			case renaissance::SETTING_META_MODULATION: {
-				displayText = nodiMetaLabel;
-				break;
-			}
 			case renaissance::SETTING_RESOLUTION: {
 				value = settings[0].resolution;
 				displayText = nodiBitsStrings[value];
@@ -722,8 +719,7 @@ struct Contextus : SanguineModule {
 	}
 
 	inline void pollSwitches(const float sampleTime) {
-		// Handle switch lights
-		lights[LIGHT_META].setBrightnessSmooth(bMetaModulation, sampleTime);
+		// Handle switch lights		
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled, sampleTime);
 		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled, sampleTime);
@@ -792,7 +788,7 @@ struct ContextusWidget : SanguineModuleWidget {
 			nodiDisplay->displayTimeout = &module->displayTimeout;
 		}
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(105.031, 20.996), module, Contextus::PARAM_META, Contextus::LIGHT_META));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(106.234, 20.996), module, Contextus::INPUT_META));
 
 		addParam(createParamCentered<Rogan6PSWhite>(millimetersToPixelsVec(71.12, 67.247), module, Contextus::PARAM_MODEL));
 		addChild(createLightCentered<Rogan6PSLight<RedGreenBlueLight>>(millimetersToPixelsVec(71.12, 67.247), module, Contextus::LIGHT_MODEL));
