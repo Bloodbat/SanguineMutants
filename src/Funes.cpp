@@ -306,7 +306,7 @@ struct Funes : SanguineModule {
 					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
 				}
 
-				if (displayChannel == channel && bDisplayModulatedModel) {
+				if (displayChannel == channel) {
 					displayModelNum = voice[channel].active_engine();
 				}
 
@@ -345,7 +345,13 @@ struct Funes : SanguineModule {
 
 			// Update model text and frequency mode every 16 samples only.
 			if (clockDivider.process()) {
-				displayText = funesDisplayLabels[displayModelNum];
+				if (displayChannel >= channelCount) {
+					displayChannel = channelCount - 1;
+				}
+
+				if (bDisplayModulatedModel) {
+					displayText = funesDisplayLabels[displayModelNum];
+				}
 
 				frequencyMode = params[PARAM_FREQ_MODE].getValue();
 
