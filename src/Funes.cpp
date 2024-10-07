@@ -205,7 +205,7 @@ struct Funes : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		int channels = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
+		int channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		if (outputBuffer.empty()) {
 			const int blockSize = 12;
@@ -275,7 +275,7 @@ struct Funes : SanguineModule {
 
 			// Render output buffer for each voice
 			dsp::Frame<16 * 2> outputFrames[blockSize];
-			for (int channel = 0; channel < channels; channel++) {
+			for (int channel = 0; channel < channelCount; channel++) {
 				// Construct modulations
 				plaits::Modulations modulations;
 				if (!bNotesModelSelection) {
@@ -365,7 +365,7 @@ struct Funes : SanguineModule {
 				outputSrc.setRates(48000, int(args.sampleRate));
 				int inLen = blockSize;
 				int outLen = outputBuffer.capacity();
-				outputSrc.setChannels(channels * 2);
+				outputSrc.setChannels(channelCount * 2);
 				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
 				outputBuffer.endIncr(outLen);
 			}
@@ -486,14 +486,14 @@ struct Funes : SanguineModule {
 		// Set output
 		if (!outputBuffer.empty()) {
 			dsp::Frame<16 * 2> outputFrame = outputBuffer.shift();
-			for (int c = 0; c < channels; c++) {
+			for (int c = 0; c < channelCount; c++) {
 				// Inverting op-amp on outputs
 				outputs[OUTPUT_OUT].setVoltage(-outputFrame.samples[c * 2 + 0] * 5.f, c);
 				outputs[OUTPUT_AUX].setVoltage(-outputFrame.samples[c * 2 + 1] * 5.f, c);
 			}
 		}
-		outputs[OUTPUT_OUT].setChannels(channels);
-		outputs[OUTPUT_AUX].setChannels(channels);
+		outputs[OUTPUT_OUT].setChannels(channelCount);
+		outputs[OUTPUT_AUX].setChannels(channelCount);
 	}
 
 	void onReset() override {
