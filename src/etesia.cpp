@@ -239,8 +239,9 @@ struct Etesia : SanguineModule {
 
 		// Get input
 		if (!inputBuffer.full()) {
-			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltage() * params[PARAM_IN_GAIN].getValue() / 5.0;
-			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage() * params[PARAM_IN_GAIN].getValue() / 5.0 : inputFrame.samples[0];
+			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.0;
+			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
+				* params[PARAM_IN_GAIN].getValue() / 5.0 : inputFrame.samples[0];
 			inputBuffer.push(inputFrame);
 		}
 
