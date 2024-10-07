@@ -3,6 +3,7 @@
 #include "sanguinehelpers.hpp"
 #include "plaits/dsp/voice.h"
 #include "plaits/user_data.h"
+#include "sanguinechannels.hpp"
 
 #include <osdialog.h>
 #include <thread>
@@ -135,7 +136,9 @@ struct Funes : SanguineModule {
 
 	int frequencyMode = 10;
 	int lastFrequencyMode = 10;
-	int modelNum = 0;
+	int displayModelNum = 0;
+
+	int displayChannel = 0;
 
 	uint32_t displayTimeout = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
@@ -215,7 +218,7 @@ struct Funes : SanguineModule {
 					int updatedModel = std::round((lastModelVoltage + 4.f) * 12.f);
 					if (updatedModel >= 0 && updatedModel < 24) {
 						patch.engine = updatedModel;
-						modelNum = patch.engine;
+						displayModelNum = patch.engine;
 					}
 				}
 			}
@@ -226,24 +229,7 @@ struct Funes : SanguineModule {
 				lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
 				lastFrequencyMode = params[PARAM_FREQ_MODE].getValue();
 				patch.engine = params[PARAM_MODEL].getValue();
-				modelNum = patch.engine;
-			}
-
-			// Check if engine for first poly channel is different than "base" engine.
-			int activeEngine = voice[0].active_engine();
-			if (bDisplayModulatedModel && (activeEngine != modelNum && activeEngine >= 0))
-				modelNum = activeEngine;
-
-			// Update model text and frequency mode every 16 samples only.
-			if (clockDivider.process()) {
-				displayText = funesDisplayLabels[modelNum];
-
-				frequencyMode = params[PARAM_FREQ_MODE].getValue();
-
-				if (frequencyMode != lastFrequencyMode) {
-					ledsMode = LEDOctave;
-					displayTimeout--;
-				}
+				displayModelNum = patch.engine;
 			}
 
 			// Calculate pitch for low cpu mode if needed
@@ -295,6 +281,7 @@ struct Funes : SanguineModule {
 				if (!bNotesModelSelection) {
 					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
 				}
+
 				modulations.note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
 				modulations.frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
 				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
@@ -317,6 +304,10 @@ struct Funes : SanguineModule {
 				for (int i = 0; i < blockSize; i++) {
 					outputFrames[i].samples[channel * 2 + 0] = output[i].out / 32768.f;
 					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
+				}
+
+				if (displayChannel == channel && bDisplayModulatedModel) {
+					displayModelNum = voice[channel].active_engine();
 				}
 
 				if (ledsMode == LEDNormal) {
@@ -349,6 +340,18 @@ struct Funes : SanguineModule {
 					// Pulse the light if at least one voice is using a different engine.
 					if (activeEngine != patch.engine)
 						pulse = true;
+				}
+			}
+
+			// Update model text and frequency mode every 16 samples only.
+			if (clockDivider.process()) {
+				displayText = funesDisplayLabels[displayModelNum];
+
+				frequencyMode = params[PARAM_FREQ_MODE].getValue();
+
+				if (frequencyMode != lastFrequencyMode) {
+					ledsMode = LEDOctave;
+					displayTimeout--;
 				}
 			}
 
@@ -512,6 +515,7 @@ struct Funes : SanguineModule {
 		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
 		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
 		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
+		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
 
 		const uint8_t* userDataBuffer = user_data.getBuffer();
 		if (userDataBuffer != nullptr) {
@@ -540,6 +544,10 @@ struct Funes : SanguineModule {
 		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
 		if (frequencyModeJ)
 			setFrequencyMode(json_integer_value(frequencyModeJ));
+
+		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
+		if (displayChannelJ)
+			displayChannel = json_integer_value(displayChannelJ);
 
 		json_t* userDataJ = json_object_get(rootJ, "userData");
 		if (userDataJ) {
@@ -598,14 +606,14 @@ struct Funes : SanguineModule {
 
 	void setEngine(int newModelNum) {
 		params[PARAM_MODEL].setValue(newModelNum);
-		modelNum = newModelNum;
+		displayModelNum = newModelNum;
 		patch.engine = newModelNum;
 	}
 
 	void toggleModulatedDisplay() {
 		bDisplayModulatedModel = !bDisplayModulatedModel;
 		if (!bDisplayModulatedModel)
-			this->modelNum = params[PARAM_MODEL].getValue();
+			this->displayModelNum = params[PARAM_MODEL].getValue();
 	}
 
 	void toggleNotesModelSelection() {
@@ -754,6 +762,13 @@ struct FunesWidget : SanguineModuleWidget {
 		menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
 			[=]() {return module->bDisplayModulatedModel; },
 			[=]() {module->toggleModulatedDisplay(); }));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createIndexSubmenuItem("Display channel", channelNumbers,
+			[=]() {return module->displayChannel; },
+			[=](int i) {module->displayChannel = i; }
+		));
 
 		menu->addChild(new MenuSeparator);
 
