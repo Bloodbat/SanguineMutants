@@ -13,6 +13,8 @@
 
 #include "sanguinehelpers.hpp"
 
+#include "sanguinechannels.hpp"
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 static const std::vector<std::string> nodiDisplayLabels = {
@@ -245,6 +247,7 @@ struct Nodi : SanguineModule {
 	uint16_t triggerDelay[PORT_MAX_CHANNELS] = {};
 
 	int channelCount = 0;
+	int displayChannel = 0;
 
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
 	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
@@ -463,6 +466,7 @@ struct Nodi : SanguineModule {
 
 				// pitch_range
 				if (settings[channel].pitch_range == braids::PITCH_RANGE_EXTERNAL || settings[channel].pitch_range == braids::PITCH_RANGE_LFO) {
+					// Do nothing: calibration not implemented.
 				}
 				else if (settings[channel].pitch_range == braids::PITCH_RANGE_FREE) {
 					pitch = pitch - 1638;
@@ -594,6 +598,9 @@ struct Nodi : SanguineModule {
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 				}
 			}
+			if (displayChannel >= channelCount) {
+				displayChannel = channelCount - 1;
+			}
 		}
 
 		handleDisplay(args);
@@ -605,7 +612,7 @@ struct Nodi : SanguineModule {
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
 			if (!bPaques)
 			{
-				displayText = nodiDisplayLabels[settings[0].shape];
+				displayText = nodiDisplayLabels[settings[displayChannel].shape];
 			}
 			else
 			{
@@ -617,12 +624,12 @@ struct Nodi : SanguineModule {
 			switch (lastSettingChanged)
 			{
 			case braids::SETTING_RESOLUTION: {
-				value = settings[0].resolution;
+				value = settings[displayChannel].resolution;
 				displayText = nodiBitsStrings[value];
 				break;
 			}
 			case braids::SETTING_SAMPLE_RATE: {
-				value = settings[0].sample_rate;
+				value = settings[displayChannel].sample_rate;
 				displayText = nodiRatesStrings[value];
 				break;
 			}
@@ -631,32 +638,32 @@ struct Nodi : SanguineModule {
 				break;
 			}
 			case braids::SETTING_TRIG_DELAY: {
-				value = settings[0].trig_delay;
+				value = settings[displayChannel].trig_delay;
 				displayText = nodiTriggerDelayStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_ATTACK: {
-				value = settings[0].ad_attack;
+				value = settings[displayChannel].ad_attack;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_DECAY: {
-				value = settings[0].ad_decay;
+				value = settings[displayChannel].ad_decay;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_FM: {
-				value = settings[0].ad_fm;
+				value = settings[displayChannel].ad_fm;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_TIMBRE: {
-				value = settings[0].ad_timbre;
+				value = settings[displayChannel].ad_timbre;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
 			case braids::SETTING_AD_COLOR: {
-				value = settings[0].ad_color;
+				value = settings[displayChannel].ad_color;
 				displayText = nodiNumberStrings[value];
 				break;
 			}
@@ -665,22 +672,22 @@ struct Nodi : SanguineModule {
 				break;
 			}
 			case braids::SETTING_PITCH_RANGE: {
-				value = settings[0].pitch_range;
+				value = settings[displayChannel].pitch_range;
 				displayText = nodiPitchRangeStrings[value];
 				break;
 			}
 			case braids::SETTING_PITCH_OCTAVE: {
-				value = settings[0].pitch_octave;
+				value = settings[displayChannel].pitch_octave;
 				displayText = nodiOctaveStrings[value];
 				break;
 			}
 			case braids::SETTING_QUANTIZER_SCALE: {
-				value = settings[0].quantizer_scale;
+				value = settings[displayChannel].quantizer_scale;
 				displayText = nodiQuantizationStrings[value];
 				break;
 			}
 			case braids::SETTING_QUANTIZER_ROOT: {
-				value = settings[0].quantizer_root;
+				value = settings[displayChannel].quantizer_root;
 				displayText = nodiNoteStrings[value];
 				break;
 			}
@@ -710,7 +717,7 @@ struct Nodi : SanguineModule {
 		}
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
-		uint8_t* arraySettings = &settings[0].shape;
+		uint8_t* arraySettings = &settings[displayChannel].shape;
 		for (int i = 0; i <= braids::SETTING_LAST_EDITABLE_SETTING; i++) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
@@ -736,6 +743,9 @@ struct Nodi : SanguineModule {
 		json_t* lowCpuJ = json_boolean(bLowCpu);
 		json_object_set_new(rootJ, "bLowCpu", lowCpuJ);
 
+		json_t* displayChannelJ = json_integer(displayChannel);
+		json_object_set_new(rootJ, "displayChannel", displayChannelJ);
+
 		return rootJ;
 	}
 
@@ -745,6 +755,11 @@ struct Nodi : SanguineModule {
 		json_t* lowCpuJ = json_object_get(rootJ, "bLowCpu");
 		if (lowCpuJ) {
 			bLowCpu = json_boolean_value(lowCpuJ);
+		}
+
+		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
+		if (displayChannelJ) {
+			displayChannel = json_integer_value(displayChannelJ);
 		}
 	}
 
@@ -864,6 +879,13 @@ struct NodiWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
 			[=](int i) {module->setModelParam(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createIndexSubmenuItem("Display channel", channelNumbers,
+			[=]() {return module->displayChannel; },
+			[=](int i) {module->displayChannel = i; }
 		));
 
 		menu->addChild(new MenuSeparator);
