@@ -106,12 +106,7 @@ struct Distortiones : SanguineModule {
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
 			bModeSwitchEnabled = !bModeSwitchEnabled;
 
-			if (bModeSwitchEnabled) {
-				paramQuantities[PARAM_ALGORITHM]->snapEnabled = true;
-			}
-			else {
-				paramQuantities[PARAM_ALGORITHM]->snapEnabled = false;
-			}
+			paramQuantities[PARAM_ALGORITHM]->snapEnabled = bModeSwitchEnabled;
 
 			if (bLastInModeSwitch) {
 				params[PARAM_ALGORITHM].setValue(lastAlgorithmValue);
