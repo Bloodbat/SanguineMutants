@@ -552,14 +552,7 @@ struct Contextus : SanguineModule {
 					renderBuffer[i] = stmlib::Mix(sample, warped, signature);
 				}
 
-				if (bLowCpu) {
-					for (int i = 0; i < 24; i++) {
-						dsp::Frame<1> f;
-						f.samples[0] = renderBuffer[i] / 32768.0;
-						drbOutputBuffer[channel].push(f);
-					}
-				}
-				else {
+				if (!bLowCpu) {
 					// Sample rate convert
 					dsp::Frame<1> in[24];
 					for (int i = 0; i < 24; i++) {
@@ -571,6 +564,13 @@ struct Contextus : SanguineModule {
 					int outLen = drbOutputBuffer[channel].capacity();
 					sampleRateConverter[channel].process(in, &inLen, drbOutputBuffer[channel].endData(), &outLen);
 					drbOutputBuffer[channel].endIncr(outLen);
+				}
+				else {
+					for (int i = 0; i < 24; i++) {
+						dsp::Frame<1> f;
+						f.samples[0] = renderBuffer[i] / 32768.0;
+						drbOutputBuffer[channel].push(f);
+					}
 				}
 			}
 

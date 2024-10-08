@@ -364,18 +364,18 @@ struct Funes : SanguineModule {
 			}
 
 			// Convert output
-			if (bLowCpu) {
-				int len = std::min((int)outputBuffer.capacity(), blockSize);
-				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
-				outputBuffer.endIncr(len);
-			}
-			else {
+			if (!bLowCpu) {
 				outputSrc.setRates(48000, int(args.sampleRate));
 				int inLen = blockSize;
 				int outLen = outputBuffer.capacity();
 				outputSrc.setChannels(channelCount * 2);
 				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
 				outputBuffer.endIncr(outLen);
+			}
+			else {
+				int len = std::min((int)outputBuffer.capacity(), blockSize);
+				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
+				outputBuffer.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz
