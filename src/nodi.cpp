@@ -280,21 +280,21 @@ struct Nodi : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configSwitch(PARAM_MODEL, 0.f, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", nodiMenuLabels);
-		configParam(PARAM_MODULATION, -1.0, 1.0, 0.0, "Modulation");
-		configParam(PARAM_COARSE, -5.0, 3.0, -1.0, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
-		configParam(PARAM_FINE, -1.0, 1.0, 0.0, "Fine frequency", " semitones");
-		configParam(PARAM_ATTACK, 0.0, 15.0, 0.0, "Attack");
+		configParam(PARAM_MODULATION, -1.f, 1.f, 0.f, "Modulation");
+		configParam(PARAM_COARSE, -5.f, 3.f, -1.f, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
+		configParam(PARAM_FINE, -1.f, 1.f, 0.f, "Fine frequency", " semitones");
+		configParam(PARAM_ATTACK, 0.f, 15.f, 0.f, "Attack");
 		paramQuantities[PARAM_ATTACK]->snapEnabled = true;
 
-		configParam(PARAM_AD_TIMBRE, 0.0, 15.f, 0.0, "Timbre AD");
+		configParam(PARAM_AD_TIMBRE, 0.f, 15.f, 0.f, "Timbre AD");
 		paramQuantities[PARAM_AD_TIMBRE]->snapEnabled = true;
 
-		configParam(PARAM_TIMBRE, 0.0, 1.0, 0.5, "Timbre", "%", 0.f, 100.f);
-		configParam(PARAM_ROOT, 0.0, 11.0, 0.0, "Quantizer root note", "", 0.f, 1.0, 1.f);
+		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
+		configParam(PARAM_ROOT, 0.f, 11.f, 0.f, "Quantizer root note", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_ROOT]->snapEnabled = true;
-		configParam(PARAM_SCALE, 0.0, 48.0, 0.0, "Quantizer scale");
+		configParam(PARAM_SCALE, 0.f, 48.f, 0.f, "Quantizer scale");
 		paramQuantities[PARAM_SCALE]->snapEnabled = true;
-		configParam(PARAM_DECAY, 0.0, 15.f, 7.0, "Decay");
+		configParam(PARAM_DECAY, 0.f, 15.f, 7.f, "Decay");
 		paramQuantities[PARAM_DECAY]->snapEnabled = true;
 
 		configParam(PARAM_AD_COLOR, 0.f, 15.f, 0.f, "Color AD");
@@ -302,12 +302,12 @@ struct Nodi : SanguineModule {
 		configParam(PARAM_AD_MODULATION, 0.f, 15.f, 0.f, "FM AD");
 		paramQuantities[PARAM_AD_MODULATION]->snapEnabled = true;
 
-		configParam(PARAM_COLOR, 0.0, 1.0, 0.5, "Color", "%", 0.f, 100.f);
-		configParam(PARAM_PITCH_OCTAVE, 0.0, 4.0, 2.f, "Octave", "", 0.f, 1.f, -2.f);
+		configParam(PARAM_COLOR, 0.f, 1.f, 0.5f, "Color", "%", 0.f, 100.f);
+		configParam(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", "", 0.f, 1.f, -2.f);
 		paramQuantities[PARAM_PITCH_OCTAVE]->snapEnabled = true;
 		configParam(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range");
 		paramQuantities[PARAM_PITCH_RANGE]->snapEnabled = true;
-		configParam(PARAM_FM, -1.0, 1.0, 0.0, "FM");
+		configParam(PARAM_FM, -1.f, 1.f, 0.f, "FM");
 
 		configParam(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay");
 		paramQuantities[PARAM_TRIGGER_DELAY]->snapEnabled = true;
@@ -388,7 +388,7 @@ struct Nodi : SanguineModule {
 			settings[channel].ad_color = params[PARAM_AD_COLOR].getValue();
 
 			// Trigger
-			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.0;
+			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 			if (!bLastTrig[channel] && bTriggerInput) {
 				bFlagTriggerDetected[channel] = bTriggerInput;
 			}
@@ -431,7 +431,7 @@ struct Nodi : SanguineModule {
 				if (!bPaques) {
 					int model = params[PARAM_MODEL].getValue();
 					if (inputs[INPUT_META].isConnected()) {
-						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.0 * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 					}
 
 					settings[channel].shape = clamp(model, 0, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
@@ -444,25 +444,25 @@ struct Nodi : SanguineModule {
 				}
 
 				// Set timbre/modulation
-				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.0;
-				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.0;
+				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
+				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
 
-				timbre += adValue / 65535. * settings[channel].ad_timbre / 16.;
-				modulation += adValue / 65535. * settings[channel].ad_color / 16.;
+				timbre += adValue / 65535.f * settings[channel].ad_timbre / 16.f;
+				modulation += adValue / 65535.f * settings[channel].ad_color / 16.f;
 
-				int16_t param1 = math::rescale(clamp(timbre, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
-				int16_t param2 = math::rescale(clamp(modulation, 0.0, 1.0), 0.0, 1.0, 0, INT16_MAX);
+				int16_t param1 = math::rescale(clamp(timbre, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
+				int16_t param2 = math::rescale(clamp(modulation, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
 				osc[channel].set_parameters(param1, param2);
 
 				// Set pitch
-				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.0;
+				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.f;
 				pitchV += fm;
 
 				if (bLowCpu) {
-					pitchV += log2f(96000.0 / args.sampleRate);
+					pitchV += log2f(96000.f / args.sampleRate);
 				}
 
-				int32_t pitch = (pitchV * 12.0 + 60) * 128;
+				int32_t pitch = (pitchV * 12.f + 60) * 128;
 
 				// pitch_range
 				if (settings[channel].pitch_range == braids::PITCH_RANGE_EXTERNAL || settings[channel].pitch_range == braids::PITCH_RANGE_LFO) {
@@ -535,7 +535,7 @@ struct Nodi : SanguineModule {
 					// Sample rate convert
 					dsp::Frame<1> in[24];
 					for (int i = 0; i < 24; i++) {
-						in[i].samples[0] = renderBuffer[i] / 32768.0;
+						in[i].samples[0] = renderBuffer[i] / 32768.f;
 					}
 					sampleRateConverter[channel].setRates(96000, args.sampleRate);
 
@@ -547,7 +547,7 @@ struct Nodi : SanguineModule {
 				else {
 					for (int i = 0; i < 24; i++) {
 						dsp::Frame<1> f;
-						f.samples[0] = renderBuffer[i] / 32768.0;
+						f.samples[0] = renderBuffer[i] / 32768.f;
 						drbOutputBuffer[channel].push(f);
 					}
 				}
@@ -556,7 +556,7 @@ struct Nodi : SanguineModule {
 			// Output
 			if (!drbOutputBuffer[channel].empty()) {
 				dsp::Frame<1> f = drbOutputBuffer[channel].shift();
-				outputs[OUTPUT_OUT].setVoltage(5.0 * f.samples[0], channel);
+				outputs[OUTPUT_OUT].setVoltage(5.f * f.samples[0], channel);
 			}
 		} // Channels
 
@@ -787,7 +787,7 @@ struct NodiWidget : SanguineModuleWidget {
 		addChild(nodiFrambuffer);
 
 		const float lightXBase = 5.256f;
-		const float lightXDelta = 4.0f;
+		const float lightXDelta = 4.f;
 
 		const int offset = 8;
 		float currentX = lightXBase;

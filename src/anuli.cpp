@@ -124,16 +124,16 @@ struct Anuli : SanguineModule {
 		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Polyphony");
 		paramQuantities[PARAM_POLYPHONY]->snapEnabled = true;
 
-		configParam(PARAM_FREQUENCY, 0.0, 60.0, 30.0, "Frequency");
-		configParam(PARAM_STRUCTURE, 0.0, 1.0, 0.5, "Structure");
-		configParam(PARAM_BRIGHTNESS, 0.0, 1.0, 0.5, "Brightness");
-		configParam(PARAM_DAMPING, 0.0, 1.0, 0.5, "Damping");
-		configParam(PARAM_POSITION, 0.0, 1.0, 0.5, "Position");
-		configParam(PARAM_BRIGHTNESS_MOD, -1.0, 1.0, 0.0, "Brightness CV");
-		configParam(PARAM_FREQUENCY_MOD, -1.0, 1.0, 0.0, "Frequency CV");
-		configParam(PARAM_DAMPING_MOD, -1.0, 1.0, 0.0, "Damping CV");
-		configParam(PARAM_STRUCTURE_MOD, -1.0, 1.0, 0.0, "Structure CV");
-		configParam(PARAM_POSITION_MOD, -1.0, 1.0, 0.0, "Position CV");
+		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency");
+		configParam(PARAM_STRUCTURE, 0.f, 1.f, 0.5f, "Structure");
+		configParam(PARAM_BRIGHTNESS, 0.f, 1.f, 0.5f, "Brightness");
+		configParam(PARAM_DAMPING, 0.f, 1.f, 0.5f, "Damping");
+		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Position");
+		configParam(PARAM_BRIGHTNESS_MOD, -1.f, 1.f, 0.f, "Brightness CV");
+		configParam(PARAM_FREQUENCY_MOD, -1.f, 1.f, 0.f, "Frequency CV");
+		configParam(PARAM_DAMPING_MOD, -1.f, 1.f, 0.f, "Damping CV");
+		configParam(PARAM_STRUCTURE_MOD, -1.f, 1.f, 0.f, "Structure CV");
+		configParam(PARAM_POSITION_MOD, -1.f, 1.f, 0.f, "Position CV");
 
 		configInput(INPUT_BRIGHTNESS_CV, "Brightness");
 		configInput(INPUT_FREQUENCY_CV, "Frequency");
@@ -156,7 +156,7 @@ struct Anuli : SanguineModule {
 			memset(&strummer[i], 0, sizeof(rings::Strummer));
 			memset(&part[i], 0, sizeof(rings::Part));
 			memset(&stringSynth[i], 0, sizeof(rings::StringSynthPart));
-			strummer[i].Init(0.01, 44100.0 / 24);
+			strummer[i].Init(0.01f, 44100.f / 24);
 			part[i].Init(reverbBuffer[i]);
 			stringSynth[i].Init(reverbBuffer[i]);
 
@@ -219,12 +219,12 @@ struct Anuli : SanguineModule {
 			// Get input
 			if (!inputBuffer[channel].full()) {
 				dsp::Frame<1> frame;
-				frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.0;
+				frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
 				inputBuffer[channel].push(frame);
 			}
 
 			if (!bStrum[channel]) {
-				bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.0;
+				bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
 			}
 
 			// Render frames

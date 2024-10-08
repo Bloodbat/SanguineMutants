@@ -59,7 +59,7 @@ struct Velamina : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		for (int i = 0; i < 4; i++) {
-			configParam(PARAM_GAIN_1 + i, 0.f, 1.f, 0.f, string::f("Channel %d gain", i + 1), "%", 0, 100);
+			configParam(PARAM_GAIN_1 + i, 0.f, 1.f, 0.f, string::f("Channel %d gain", i + 1), "%", 0.f, 100.f);
 			configParam(PARAM_RESPONSE_1 + i, 0.f, 1.f, 0.f, string::f("Channel %d response (Exponential <-> Linear)", i + 1));
 			configParam(PARAM_OFFSET_1 + i, 0.f, 5.f, 0.f, string::f("Channel %d CV offset", i + 1), "V");
 			configInput(INPUT_IN_1 + i, string::f("Channel %d", i + 1));

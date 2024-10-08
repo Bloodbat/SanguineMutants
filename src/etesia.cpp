@@ -126,7 +126,7 @@ struct Etesia : SanguineModule {
 	etesia::PlaybackMode lastPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
 	etesia::PlaybackMode lastLEDPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
 
-	float freezeLight = 0.0;
+	float freezeLight = 0.f;
 
 	float lastBlend;
 	float lastSpread;
@@ -164,22 +164,22 @@ struct Etesia : SanguineModule {
 		configParam(PARAM_MODE, 0.f, 5.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
-		configParam(PARAM_POSITION, 0.0, 1.0, 0.5, "Grain position", "%", 0.f, 100.f);
+		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Grain position", "%", 0.f, 100.f);
 		configInput(INPUT_POSITION, "Grain position CV");
 
-		configParam(PARAM_DENSITY, 0.0, 1.0, 0.5, "Grain density", "%", 0.f, 100.f);
+		configParam(PARAM_DENSITY, 0.f, 1.f, 0.5f, "Grain density", "%", 0.f, 100.f);
 		configInput(INPUT_DENSITY, "Grain density CV");
 
-		configParam(PARAM_SIZE, 0.0, 1.0, 0.5, "Grain size", "%", 0.f, 100.f);
+		configParam(PARAM_SIZE, 0.f, 1.f, 0.5f, "Grain size", "%", 0.f, 100.f);
 		configInput(INPUT_SIZE, "Grain size CV");
 
-		configParam(PARAM_TEXTURE, 0.0, 1.0, 0.5, "Grain texture", "%", 0.f, 100.f);
+		configParam(PARAM_TEXTURE, 0.f, 1.f, 0.5f, "Grain texture", "%", 0.f, 100.f);
 		configInput(INPUT_TEXTURE, "Grain texture CV");
 
-		configParam(PARAM_PITCH, -2.0, 2.0, 0.0, "Grain pitch");
+		configParam(PARAM_PITCH, -2.f, 2.f, 0.f, "Grain pitch");
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
 
-		configParam(PARAM_BLEND, 0.0, 1.0, 0.5, "Dry/wet", "%", 0.f, 100.f);
+		configParam(PARAM_BLEND, 0.f, 1.f, 0.5f, "Dry/wet", "%", 0.f, 100.f);
 		configInput(INPUT_BLEND, "Dry/wet CV");
 
 		configInput(INPUT_TRIGGER, "Trigger");
@@ -209,8 +209,8 @@ struct Etesia : SanguineModule {
 
 		lastBlend = 0.5f;
 		lastSpread = 0.5f;
-		lastFeedback = 0.5;
-		lastReverb = 0.5;
+		lastFeedback = 0.5f;
+		lastReverb = 0.5f;
 
 		lastHiFi = 1;
 		lastStereo = 1;
@@ -239,14 +239,14 @@ struct Etesia : SanguineModule {
 
 		// Get input
 		if (!inputBuffer.full()) {
-			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.0;
+			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
 			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
-				* params[PARAM_IN_GAIN].getValue() / 5.0 : inputFrame.samples[0];
+				* params[PARAM_IN_GAIN].getValue() / 5.f : inputFrame.samples[0];
 			inputBuffer.push(inputFrame);
 		}
 
 		// Trigger
-		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.0;
+		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.f;
 
 		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 
@@ -291,17 +291,17 @@ struct Etesia : SanguineModule {
 
 			etesiaParameters->trigger = bTriggered;
 			etesiaParameters->gate = bTriggered;
-			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.0 || frozen);
-			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.0, 0.0f, 1.0f);
-			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.0, 0.0f, 1.0f);
-			etesiaParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.0, -48.0f, 48.0f);
-			etesiaParameters->density = clamp(params[PARAM_DENSITY].getValue() + inputs[INPUT_DENSITY].getVoltage() / 5.0, 0.0f, 1.0f);
-			etesiaParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + inputs[INPUT_TEXTURE].getVoltage() / 5.0, 0.0f, 1.0f);
-			float blend = clamp(params[PARAM_BLEND].getValue() + inputs[INPUT_BLEND].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || frozen);
+			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + inputs[INPUT_POSITION].getVoltage() / 5.f, 0.f, 1.f);
+			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + inputs[INPUT_SIZE].getVoltage() / 5.f, 0.f, 1.f);
+			etesiaParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
+			etesiaParameters->density = clamp(params[PARAM_DENSITY].getValue() + inputs[INPUT_DENSITY].getVoltage() / 5.f, 0.f, 1.f);
+			etesiaParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + inputs[INPUT_TEXTURE].getVoltage() / 5.f, 0.f, 1.f);
+			float blend = clamp(params[PARAM_BLEND].getValue() + inputs[INPUT_BLEND].getVoltage() / 5.f, 0.f, 1.f);
 			etesiaParameters->dry_wet = blend;
-			etesiaParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + inputs[INPUT_SPREAD].getVoltage() / 5.0, 0.0f, 1.0f);
-			etesiaParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + inputs[INPUT_FEEDBACK].getVoltage() / 5.0, 0.0f, 1.0f);
-			etesiaParameters->reverb = clamp(params[PARAM_REVERB].getValue() + inputs[INPUT_REVERB].getVoltage() / 5.0, 0.0f, 1.0f);
+			etesiaParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + inputs[INPUT_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
+			etesiaParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + inputs[INPUT_FEEDBACK].getVoltage() / 5.f, 0.f, 1.f);
+			etesiaParameters->reverb = clamp(params[PARAM_REVERB].getValue() + inputs[INPUT_REVERB].getVoltage() / 5.f, 0.f, 1.f);
 			etesiaParameters->granular.reverse = params[PARAM_REVERSE].getValue();
 
 			etesia::ShortFrame output[32];
@@ -325,14 +325,14 @@ struct Etesia : SanguineModule {
 				}
 			}
 
-			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters->freeze ? 1.0 : 0.0, args.sampleTime);
+			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters->freeze ? 1.f : 0.f, args.sampleTime);
 
 			// Convert output buffer
 			{
 				dsp::Frame<2> outputFrames[32];
 				for (int i = 0; i < 32; i++) {
-					outputFrames[i].samples[0] = output[i].l / 32768.0;
-					outputFrames[i].samples[1] = output[i].r / 32768.0;
+					outputFrames[i].samples[0] = output[i].l / 32768.f;
+					outputFrames[i].samples[1] = output[i].r / 32768.f;
 				}
 
 				outputSrc.setRates(32000, args.sampleRate);
@@ -349,10 +349,10 @@ struct Etesia : SanguineModule {
 		if (!outputBuffer.empty()) {
 			outputFrame = outputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
-				outputs[OUTPUT_LEFT].setVoltage(5.0 * outputFrame.samples[0]);
+				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
 			}
 			if (outputs[OUTPUT_RIGHT].isConnected()) {
-				outputs[OUTPUT_RIGHT].setVoltage(5.0 * outputFrame.samples[1]);
+				outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame.samples[1]);
 			}
 		}
 
@@ -373,9 +373,9 @@ struct Etesia : SanguineModule {
 
 		vuMeter.process(args.sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-		lights[LIGHT_FREEZE].setBrightness(etesiaParameters->freeze ? 0.75 : 0.0);
+		lights[LIGHT_FREEZE].setBrightness(etesiaParameters->freeze ? 0.75f : 0.f);
 
-		lights[LIGHT_REVERSE].setBrightness(etesiaParameters->granular.reverse ? 0.75 : 0.0);
+		lights[LIGHT_REVERSE].setBrightness(etesiaParameters->granular.reverse ? 0.75f : 0.f);
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {

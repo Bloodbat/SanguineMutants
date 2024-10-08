@@ -57,14 +57,14 @@ struct Incurvationes : SanguineModule {
 
 		configButton(PARAM_EASTER_EGG, "Frequency shifter (Easter egg)");
 
-		configParam(PARAM_ALGORITHM, 0.0, 8.0, 0.0, "Algorithm");
+		configParam(PARAM_ALGORITHM, 0.f, 8.f, 0.f, "Algorithm");
 
 		configParam(PARAM_CARRIER, 0.f, 3.f, 0.f, "Internal oscillator mode");
 
-		configParam(PARAM_TIMBRE, 0.0, 1.0, 0.5, "Timbre", "%", 0, 100);
+		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
 
-		configParam(PARAM_LEVEL1, 0.0, 1.0, 1.0, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
-		configParam(PARAM_LEVEL2, 0.0, 1.0, 1.0, "Modulator amplitude", "%", 0, 100);
+		configParam(PARAM_LEVEL1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0.f, 100.f);
+		configParam(PARAM_LEVEL2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0.f, 100.f);
 
 		configInput(INPUT_LEVEL1, "Level 1");
 		configInput(INPUT_LEVEL2, "Level 2");
@@ -80,7 +80,7 @@ struct Incurvationes : SanguineModule {
 
 		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
 			memset(&warpsModulator[i], 0, sizeof(warps::Modulator));
-			warpsModulator[i].Init(96000.0f);
+			warpsModulator[i].Init(96000.f);
 			warpsParameters[i] = warpsModulator[i].mutable_parameters();
 		}
 
@@ -136,11 +136,11 @@ struct Incurvationes : SanguineModule {
 				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.f * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.f * 32768), -32768, 32767);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.0, channel);
-			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.0, channel);
+			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
+			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
@@ -148,9 +148,9 @@ struct Incurvationes : SanguineModule {
 
 		if (isLightsTurn) {
 			lights[LIGHT_CARRIER + 0].value = (warpsParameters[0]->carrier_shape == 1
-				|| warpsParameters[0]->carrier_shape == 2) ? 1.0 : 0.0;
+				|| warpsParameters[0]->carrier_shape == 2) ? 1.f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (warpsParameters[0]->carrier_shape == 2
-				|| warpsParameters[0]->carrier_shape == 3) ? 1.0 : 0.0;
+				|| warpsParameters[0]->carrier_shape == 3) ? 1.f : 0.f;
 
 			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? 1.f : 0.f);
 
@@ -169,7 +169,7 @@ struct Incurvationes : SanguineModule {
 					int a = palette[zone_integral][i];
 					int b = palette[zone_integral + 1][i];
 
-					colorValues[channel][i] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.0f;
+					colorValues[channel][i] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
 
 					lights[currentLight + i].setBrightness(colorValues[channel][i]);
 				}

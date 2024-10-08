@@ -166,18 +166,18 @@ struct Funes : SanguineModule {
 	Funes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configSwitch(PARAM_MODEL, 0.0f, 23.0f, 8.0f, "Model", funesModelLabels);
+		configSwitch(PARAM_MODEL, 0.f, 23.f, 8.f, "Model", funesModelLabels);
 
-		configParam(PARAM_FREQUENCY, -4.0, 4.0, 0.0, "Frequency", " semitones", 0.f, 12.f);
-		configParam(PARAM_FREQUENCY_ROOT, -4.0, 4.0, 0.0, "Frequency Root", " semitones", 0.f, 12.f);
-		configParam(PARAM_HARMONICS, 0.0, 1.0, 0.5, "Harmonics", "%", 0.f, 100.f);
-		configParam(PARAM_TIMBRE, 0.0, 1.0, 0.5, "Timbre", "%", 0.f, 100.f);
-		configParam(PARAM_LPG_COLOR, 0.0, 1.0, 0.5, "Lowpass gate response", "%", 0.f, 100.f);
-		configParam(PARAM_MORPH, 0.0, 1.0, 0.5, "Morph", "%", 0.f, 100.f);
-		configParam(PARAM_LPG_DECAY, 0.0, 1.0, 0.5, "Lowpass gate decay", "%", 0.f, 100.f);
-		configParam(PARAM_TIMBRE_CV, -1.0, 1.0, 0.0, "Timbre CV");
-		configParam(PARAM_FREQUENCY_CV, -1.0, 1.0, 0.0, "Frequency CV");
-		configParam(PARAM_MORPH_CV, -1.0, 1.0, 0.0, "Morph CV");
+		configParam(PARAM_FREQUENCY, -4.f, 4.f, 0.f, "Frequency", " semitones", 0.f, 12.f);
+		configParam(PARAM_FREQUENCY_ROOT, -4.f, 4.f, 0.f, "Frequency Root", " semitones", 0.f, 12.f);
+		configParam(PARAM_HARMONICS, 0.f, 1.f, 0.5f, "Harmonics", "%", 0.f, 100.f);
+		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_COLOR, 0.f, 1.f, 0.5f, "Lowpass gate response", "%", 0.f, 100.f);
+		configParam(PARAM_MORPH, 0.f, 1.f, 0.5f, "Morph", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_DECAY, 0.f, 1.f, 0.5f, "Lowpass gate decay", "%", 0.f, 100.f);
+		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV");
+		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV");
+		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV");
 		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funesFrequencyModes);
 
 		configInput(INPUT_ENGINE, "Model");

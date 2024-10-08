@@ -65,14 +65,14 @@ struct Distortiones : SanguineModule {
 
 		configButton(PARAM_MODE_SWITCH, "Mode select");
 
-		configParam(PARAM_ALGORITHM, 0.0, 8.0, 0.0, "Algorithm");
+		configParam(PARAM_ALGORITHM, 0.f, 8.f, 0.f, "Algorithm");
 
 		configParam(PARAM_CARRIER, 0.f, 3.f, 0.f, "Internal oscillator mode");
 
-		configParam(PARAM_TIMBRE, 0.0, 1.0, 0.5, "Timbre", "%", 0, 100);
+		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0, 100);
 
-		configParam(PARAM_LEVEL1, 0.0, 1.0, 1.0, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
-		configParam(PARAM_LEVEL2, 0.0, 1.0, 1.0, "Modulator amplitude", "%", 0, 100);
+		configParam(PARAM_LEVEL1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
+		configParam(PARAM_LEVEL2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0, 100);
 
 		configInput(INPUT_LEVEL1, "Level 1");
 		configInput(INPUT_LEVEL2, "Level 2");
@@ -90,7 +90,7 @@ struct Distortiones : SanguineModule {
 
 		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
 			memset(&distortionesModulator[i], 0, sizeof(distortiones::DistortionesModulator));
-			distortionesModulator[i].Init(96000.0f);
+			distortionesModulator[i].Init(96000.f);
 			distortionesParameters[i] = distortionesModulator[i].mutable_parameters();
 		}
 
@@ -138,7 +138,7 @@ struct Distortiones : SanguineModule {
 		}
 		else {
 			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
-			algorithmValue = lastAlgorithmValue / 8.0;
+			algorithmValue = lastAlgorithmValue / 8.f;
 		}
 
 		for (int channel = 0; channel < channelCount; channel++) {
@@ -182,26 +182,26 @@ struct Distortiones : SanguineModule {
 				if (!bModeSwitchEnabled) {
 					distortionesParameters[channel]->raw_algorithm_pot = algorithmValue;
 
-					distortionesParameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.0f, 1.0f);
+					distortionesParameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.f, 1.f);
 
-					distortionesParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.0f, 1.0f);
+					distortionesParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
 					distortionesParameters[channel]->raw_algorithm = distortionesParameters[channel]->modulation_algorithm;
 				}
 
-				distortionesParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.0f, 1.0f);
+				distortionesParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
-				distortionesParameters[channel]->note = 60.0 * params[PARAM_LEVEL1].getValue() + 12.0
-					* inputs[INPUT_LEVEL1].getNormalVoltage(2.0, channel) + 12.0;
-				distortionesParameters[channel]->note += log2f(96000.0f * args.sampleTime) * 12.0f;
+				distortionesParameters[channel]->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f
+					* inputs[INPUT_LEVEL1].getNormalVoltage(2.f, channel) + 12.f;
+				distortionesParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
 				distortionesModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.0 * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.f * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.f * 32768), -32768, 32767);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.0, channel);
-			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.0, channel);
+			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
+			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
@@ -209,9 +209,9 @@ struct Distortiones : SanguineModule {
 
 		if (isLightsTurn) {
 			lights[LIGHT_CARRIER + 0].value = (distortionesParameters[0]->carrier_shape == 1
-				|| distortionesParameters[0]->carrier_shape == 2) ? 1.0 : 0.0;
+				|| distortionesParameters[0]->carrier_shape == 2) ? 1.f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (distortionesParameters[0]->carrier_shape == 2
-				|| distortionesParameters[0]->carrier_shape == 3) ? 1.0 : 0.0;
+				|| distortionesParameters[0]->carrier_shape == 3) ? 1.f : 0.f;
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 1.f : 0.f);
 
@@ -229,7 +229,7 @@ struct Distortiones : SanguineModule {
 					palette = paletteWarpsDefault;
 				}
 
-				zone = 8.0f * distortionesParameters[0]->modulation_algorithm;
+				zone = 8.f * distortionesParameters[0]->modulation_algorithm;
 				MAKE_INTEGRAL_FRACTIONAL(zone);
 				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
 				for (int i = 0; i < 3; i++) {

@@ -12,7 +12,7 @@ void NodiDisplay::drawLayer(const DrawArgs& args, int layer) {
 			// Text
 			nvgFontSize(args.vg, fontSize);
 			nvgFontFaceId(args.vg, font->handle);
-			nvgTextLetterSpacing(args.vg, 2.5);
+			nvgTextLetterSpacing(args.vg, 2.5f);
 
 			Vec textPos = Vec(9, 52);
 			nvgFillColor(args.vg, nvgTransRGBA(textColor, 16));

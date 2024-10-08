@@ -11,7 +11,7 @@ struct SaturatorFloat_4 {
 	static inline simd::float_4 saturation(simd::float_4 x) {
 		const simd::float_4 y1 = 0.98765f; // (2*x - 1)/x**2 where x is 0.9.
 		const simd::float_4 offset = 0.075f / limit; // Magic.
-		simd::float_4 x1 = (x + 1.0f) * 0.5f;
+		simd::float_4 x1 = (x + 1.f) * 0.5f;
 		return limit * (offset + x1 - simd::sqrt(x1 * x1 - y1 * x) * (1.f / y1));
 	}
 
@@ -29,7 +29,7 @@ struct SaturatorFloat {
 	static inline float saturation(float x) {
 		const float y1 = 0.98765f; // (2*x - 1)/x**2 where x is 0.9.
 		const float offset = 0.075f / limit; // Magic.
-		float x1 = (x + 1.0f) * 0.5f;
+		float x1 = (x + 1.f) * 0.5f;
 		return limit * (offset + x1 - sqrtf(x1 * x1 - y1 * x) * (1.f / y1));
 	}
 

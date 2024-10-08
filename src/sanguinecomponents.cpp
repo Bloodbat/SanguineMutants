@@ -180,10 +180,10 @@ SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCoun
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
 	// Background		
 	nvgBeginPath(args.vg);
-	nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
+	nvgRoundedRect(args.vg, 0.f, 0.f, box.size.x, box.size.y, 5.f);
 	nvgFillColor(args.vg, backgroundColor);
 	nvgFill(args.vg);
-	nvgStrokeWidth(args.vg, 1.0);
+	nvgStrokeWidth(args.vg, 1.f);
 	nvgStrokeColor(args.vg, borderColor);
 	nvgStroke(args.vg);
 
@@ -257,7 +257,7 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
 	fontName = "res/components/Segment14.ttf";
-	box.size = mm2px(Vec(newCharacterCount * 12.6, 21.2));
+	box.size = mm2px(Vec(newCharacterCount * 12.6f, 21.2f));
 	fontSize = 40;
 
 	if (createCentered) {
@@ -276,8 +276,8 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* t
 SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule) {
 	fontName = "res/components/Segment7Standard.otf";
-	box.size = mm2px(Vec(newCharacterCount * 7.75, 15));
-	fontSize = 33.95;
+	box.size = mm2px(Vec(newCharacterCount * 7.75f, 15.f));
+	fontSize = 33.95f;
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
@@ -298,8 +298,8 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module*
 	SanguineBaseSegmentDisplay(newCharacterCount, theModule)
 {
 	fontName = "res/components/sanguinematrix.ttf";
-	box.size = mm2px(Vec(newCharacterCount * 5.70275, 10.16));
-	fontSize = 16.45;
+	box.size = mm2px(Vec(newCharacterCount * 5.70275f, 10.16f));
+	fontSize = 16.45f;
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
@@ -317,8 +317,8 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module*
 SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineLedNumberDisplay(newCharacterCount, theModule, X, Y, createCentered) {
 	displayType = DISPLAY_NUMERIC;
-	box.size = mm2px(Vec(newCharacterCount * 6.45, 8.f));
-	fontSize = 21.4;
+	box.size = mm2px(Vec(newCharacterCount * 6.45f, 8.f));
+	fontSize = 21.4f;
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
@@ -335,7 +335,7 @@ SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCoun
 
 Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) {
 	fontName = "res/components/sanguinematrix.ttf";
-	box.size = mm2px(Vec(16.298, 5.418));
+	box.size = mm2px(Vec(16.298f, 5.418f));
 
 	module = theModule;
 
@@ -353,10 +353,10 @@ void Sanguine96x32OLEDDisplay::draw(const DrawArgs& args) {
 	NVGcolor backgroundColor = nvgRGB(10, 10, 10);
 	NVGcolor borderColor = nvgRGB(100, 100, 100);
 	nvgBeginPath(args.vg);
-	nvgRect(args.vg, 0.0, 0.0, box.size.x, box.size.y);
+	nvgRect(args.vg, 0.f, 0.f, box.size.x, box.size.y);
 	nvgFillColor(args.vg, backgroundColor);
 	nvgFill(args.vg);
-	nvgStrokeWidth(args.vg, 1.0);
+	nvgStrokeWidth(args.vg, 1.f);
 	nvgStrokeColor(args.vg, borderColor);
 	nvgStroke(args.vg);
 
@@ -373,7 +373,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 			nvgFillColor(args.vg, textColor);
 
-			Vec textPos = Vec(3, 7.5);
+			Vec textPos = Vec(3.f, 7.5f);
 
 			if (module && !module->isBypassed()) {
 				if (oledText && !(oledText->empty())) {
@@ -386,7 +386,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 							displayText += textCopy[i];
 						textCopy.erase(0, 8);
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
-						textPos = Vec(3, 14.5);
+						textPos = Vec(3.f, 14.5f);
 						displayText = "";
 						for (uint32_t i = 0; (i < 8 || i < textCopy.length()); i++)
 							displayText += textCopy[i];
@@ -412,7 +412,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineLightUpSwitch::SanguineLightUpSwitch() {
 	momentary = true;
-	shadow->opacity = 0.0;
+	shadow->opacity = 0.f;
 	sw->wrap();
 	box.size = sw->box.size;
 }
@@ -431,7 +431,7 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 			rack::window::svgDraw(args.vg, svg->handle);
 			if (frameNum < halos.size()) {
-				drawCircularHalo(args, box.size, halos[frameNum], 175, 8.f);
+				drawCircularHalo(args, box.size, halos[frameNum], 175.f, 8.f);
 			}
 		}
 	}
@@ -440,7 +440,7 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 
 SanguineLightUpRGBSwitch::SanguineLightUpRGBSwitch() {
 	momentary = true;
-	shadow->opacity = 0.0;
+	shadow->opacity = 0.f;
 	sw->wrap();
 	box.size = sw->box.size;
 	transformWidget = new TransformWidget;
@@ -482,7 +482,7 @@ void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
 			Programmer responsibility: make sure there are enough halos here for  every switch state
 			or Rack will go to synth heaven.
 			*/
-			drawCircularHalo(args, box.size, halos[frameNum], 175, 8.f);
+			drawCircularHalo(args, box.size, halos[frameNum], 175.f, 8.f);
 		}
 		// For module browser
 		else if (!module && sw->svg) {
@@ -505,7 +505,7 @@ void SanguineLightUpRGBSwitch::setBackground(const std::string fileName) {
 	fb->box.size = sw->box.size;
 	// Move shadow downward by 10%
 	shadow->box.size = sw->box.size;
-	shadow->box.pos = math::Vec(0, sw->box.size.y * 0.10);
+	shadow->box.pos = math::Vec(0.f, sw->box.size.y * 0.10f);
 }
 
 void SanguineLightUpRGBSwitch::setGlyph(const std::string fileName, const float offsetX, const float offsetY) {
@@ -559,7 +559,7 @@ NVGpaint SanguineMultiColoredShapedLight::getPaint(NVGcontext* vg, NSVGpaint* p,
 	if (p->type == NSVG_PAINT_LINEAR_GRADIENT)
 		paint = nvgLinearGradient(vg, s.x, s.y, e.x, e.y, innerColor, outerColor);
 	else
-		paint = nvgRadialGradient(vg, s.x, s.y, 0.0, 160, innerColor, outerColor);
+		paint = nvgRadialGradient(vg, s.x, s.y, 0.f, 160.f, innerColor, outerColor);
 	return paint;
 };
 
@@ -581,7 +581,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 					nvgSave(args.vg);
 
 					// Opacity
-					if (shape->opacity < 1.0)
+					if (shape->opacity < 1.f)
 						nvgAlpha(args.vg, shape->opacity);
 
 					// Build path
@@ -606,7 +606,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 						// Using the even-odd fill rule, if we draw a line from a point on the path to a point outside the boundary (e.g. top left) and count the number of times it crosses another path, the parity of this count determines whether the path is a hole (odd) or solid (even).
 						int crossings = 0;
 						math::Vec p0 = math::Vec(path->pts[0], path->pts[1]);
-						math::Vec p1 = math::Vec(path->bounds[0] - 1.0, path->bounds[1] - 1.0);
+						math::Vec p1 = math::Vec(path->bounds[0] - 1.f, path->bounds[1] - 1.f);
 						// Iterate all other paths
 						for (NSVGpath* path2 = shape->paths; path2; path2 = path2->next) {
 							if (path2 == path)
@@ -623,7 +623,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 								math::Vec p3 = (i < path2->npts) ? math::Vec(p[4], p[5]) : math::Vec(path2->pts[0], path2->pts[1]);
 								float crossing = getLineCrossing(p0, p1, p2, p3);
 								float crossing2 = getLineCrossing(p2, p3, p0, p1);
-								if (0.0 <= crossing && crossing < 1.0 && 0.0 <= crossing2) {
+								if (0.f <= crossing && crossing < 1.f && 0.f <= crossing2) {
 									crossings++;
 								}
 							}
@@ -995,7 +995,7 @@ void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolo
 	NVGcolor icol = color::mult(nvgTransRGBA(haloColor, haloOpacity), halo);
 
 	NVGcolor ocol = nvgRGBA(0, 0, 0, 0);
-	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f + positionX, 4.5f, boxSize.x - 4.5, boxSize.y - 4.5, 5, 8, icol, ocol);
+	NVGpaint paint = nvgBoxGradient(args.vg, 4.5f + positionX, 4.5f, boxSize.x - 4.5f, boxSize.y - 4.5f, 5.f, 8.f, icol, ocol);
 	nvgFillPaint(args.vg, paint);
 	nvgFill(args.vg);
 

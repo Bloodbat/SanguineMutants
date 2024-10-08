@@ -261,14 +261,14 @@ template <typename TBase>
 struct CKD6Light : TBase {
 	CKD6Light() {
 		this->bgColor = color::BLACK_TRANSPARENT;
-		this->box.size = Vec(28 - 6, 28 - 6);
+		this->box.size = Vec(28.f - 6.f, 28.f - 6.f);
 	}
 };
 
 template <typename Base>
 struct Rogan6PSLight : Base {
 	Rogan6PSLight() {
-		this->box.size = mm2px(Vec(23.04, 23.04));
+		this->box.size = mm2px(Vec(23.04f, 23.04f));
 		this->borderColor = nvgRGBA(0, 0, 0, 0);
 	}
 };

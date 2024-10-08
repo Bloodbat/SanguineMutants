@@ -118,11 +118,11 @@ struct Aestus : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusModelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
-		configParam(PARAM_FREQUENCY, -48.0, 48.0, 0.0, "Main frequency");
-		configParam(PARAM_FM, -12.0, 12.0, 0.0, "FM input attenuverter");
-		configParam(PARAM_SHAPE, -1.0, 1.0, 0.0, "Shape");
-		configParam(PARAM_SLOPE, -1.0, 1.0, 0.0, "Slope");
-		configParam(PARAM_SMOOTHNESS, -1.0, 1.0, 0.0, "Smoothness");
+		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
+		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
+		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape");
+		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope");
+		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness");
 
 		configSwitch(PARAM_MODEL, 0.f, 1.f, 0.f, "Module model", aestusMenuLabels);
 
@@ -201,7 +201,7 @@ struct Aestus : SanguineModule {
 		}
 
 		// Level
-		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.0) / 8.0f, 0.0f, 1.0f)
+		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f)
 			* 65535;
 		if (level < 32) {
 			level = 0;

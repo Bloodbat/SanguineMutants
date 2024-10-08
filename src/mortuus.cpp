@@ -413,8 +413,8 @@ struct Mortuus : SanguineModule {
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
 			// TODO Check the output values against an actual device.
-			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.0f, 65535.f, -8.0f, 8.0f));
-			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.0f, 65535.f, -8.0f, 8.0f));
+			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
+			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
 	}
 
@@ -591,7 +591,7 @@ struct Mortuus : SanguineModule {
 		int currentLight;
 		switch (editMode) {
 		case EDIT_MODE_FIRST:
-			lights[LIGHT_CHANNEL1].setBrightnessSmooth((flash == 1) ? 1.0f : 0.0f, sampleTime);
+			lights[LIGHT_CHANNEL1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL2].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
@@ -604,7 +604,7 @@ struct Mortuus : SanguineModule {
 			break;
 		case EDIT_MODE_SECOND:
 			lights[LIGHT_CHANNEL1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.0f : 0.0f, sampleTime);
+			lights[LIGHT_CHANNEL2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(1.f, sampleTime);
 			for (int i = 0; i < 4; i++) {
@@ -650,23 +650,23 @@ struct Mortuus : SanguineModule {
 			break;
 		}
 
-		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.0f : 0.0f, sampleTime);
-		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.0F : 0.F, sampleTime);
+		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 1.f : 0.f, sampleTime);
+		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & 2) ? 1.f : 0.f, sampleTime);
 
 		ProcessorFunction currentProcessorFunction = getProcessorFunction();
 		for (int i = 0; i < 4; i++) {
 			currentLight = LIGHT_FUNCTION_1 + i;
 			switch (lightStates[currentProcessorFunction][i]) {
 			case LIGHT_ON: {
-				lights[currentLight].setBrightnessSmooth(1.0f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(1.f, sampleTime);
 				break;
 			}
 			case LIGHT_OFF: {
-				lights[currentLight].setBrightnessSmooth(0.0f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
 				break;
 			}
 			case LIGHT_BLINK: {
-				lights[currentLight].setBrightnessSmooth(getSystemTimeMs() & 256 ? 0.0f : 1.f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(getSystemTimeMs() & 256 ? 0.f : 1.f, sampleTime);
 				break;
 			}
 			default: {
@@ -721,7 +721,7 @@ struct Mortuus : SanguineModule {
 			if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightness((pattern & 1) ? 1.0f : 0.0f);
+					lights[LIGHT_FUNCTION_1 + i].setBrightness((pattern & 1) ? 1.f : 0.f);
 					pattern = pattern >> 1;
 				}
 			}
@@ -729,14 +729,14 @@ struct Mortuus : SanguineModule {
 			else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
 				int digit = processors[0].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.0f : 0.0f);
+					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.f : 0.f);
 				}
 			}
 			// Ibid
 			else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.0f : 0.0f);
+					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.f : 0.f);
 				}
 			}
 			if (channel1IsStation) {
@@ -747,8 +747,8 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.0f, 255.0f, 0.0f, 1.0f), sampleTime);
-		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.0f, 255.0f, 0.0f, 1.0f), sampleTime);
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 1.f), sampleTime);
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 1.f), sampleTime);
 	}
 
 	void onReset() override {
