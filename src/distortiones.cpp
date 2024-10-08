@@ -124,10 +124,10 @@ struct Distortiones : SanguineModule {
 		float algorithmValue = 0.f;
 
 		if (bModeSwitchEnabled) {
-			featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-			distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
-
 			if (isLightsTurn) {
+				featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+				distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
+
 				int8_t ramp = getSystemTimeMs() & 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 

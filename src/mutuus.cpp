@@ -130,9 +130,10 @@ struct Mutuus : SanguineModule {
 		float algorithmValue = 0.f;
 
 		if (bModeSwitchEnabled) {
-			featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-			mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
 			if (isLightsTurn) {
+				featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+				mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
+
 				int8_t ramp = getSystemTimeMs() & 127;
 				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
 
