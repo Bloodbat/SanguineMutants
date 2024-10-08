@@ -320,8 +320,6 @@ struct Nebulae : SanguineModule {
 				}
 			}
 
-			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 1.f : 0.f, args.sampleTime);
-
 			// Convert output buffer
 			{
 				dsp::Frame<2> outputFrames[32];
@@ -368,7 +366,7 @@ struct Nebulae : SanguineModule {
 
 		vuMeter.process(args.sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-		lights[LIGHT_FREEZE].setBrightness(cloudsParameters->freeze ? 0.75f : 0.f);
+		lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 0.75f : 0.f, args.sampleTime);
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
