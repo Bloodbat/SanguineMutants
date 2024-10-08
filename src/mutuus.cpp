@@ -212,8 +212,8 @@ struct Mutuus : SanguineModule {
 				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 16.f * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 16.f * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768), -32768, 32767);
 
 			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
 			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
