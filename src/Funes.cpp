@@ -234,8 +234,9 @@ struct Funes : SanguineModule {
 
 			// Calculate pitch for low cpu mode if needed
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			if (bLowCpu)
+			if (bLowCpu) {
 				pitch += std::log2(48000.f * args.sampleTime);
+			}
 
 			// Update patch
 
@@ -338,8 +339,9 @@ struct Funes : SanguineModule {
 					}
 
 					// Pulse the light if at least one voice is using a different engine.
-					if (activeEngine != patch.engine)
+					if (activeEngine != patch.engine) {
 						pulse = true;
+					}
 				}
 			}
 
@@ -536,24 +538,29 @@ struct Funes : SanguineModule {
 		SanguineModule::dataFromJson(rootJ);
 
 		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
-		if (lowCpuJ)
+		if (lowCpuJ) {
 			bLowCpu = json_boolean_value(lowCpuJ);
+		}
 
 		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
-		if (displayModulatedModelJ)
+		if (displayModulatedModelJ) {
 			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
+		}
 
 		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
-		if (notesModelSelectionJ)
+		if (notesModelSelectionJ) {
 			bNotesModelSelection = json_boolean_value(notesModelSelectionJ);
+		}
 
 		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
-		if (frequencyModeJ)
+		if (frequencyModeJ) {
 			setFrequencyMode(json_integer_value(frequencyModeJ));
+		}
 
 		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ)
+		if (displayChannelJ) {
 			displayChannel = json_integer_value(displayChannelJ);
+		}
 
 		json_t* userDataJ = json_object_get(rootJ, "userData");
 		if (userDataJ) {
@@ -600,7 +607,8 @@ struct Funes : SanguineModule {
 		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
 		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
 		if (!pathC) {
-			// Fail silently			
+			// Fail silently
+			// TODO!!! Maybe not fail silently=
 			return;
 		}
 		const std::string path = pathC;
@@ -618,14 +626,16 @@ struct Funes : SanguineModule {
 
 	void toggleModulatedDisplay() {
 		bDisplayModulatedModel = !bDisplayModulatedModel;
-		if (!bDisplayModulatedModel)
+		if (!bDisplayModulatedModel) {
 			this->displayModelNum = params[PARAM_MODEL].getValue();
+		}
 	}
 
 	void toggleNotesModelSelection() {
 		bNotesModelSelection = !bNotesModelSelection;
-		if (bNotesModelSelection)
+		if (bNotesModelSelection) {
 			inputs[INPUT_ENGINE].setChannels(0);
+		}
 		// Try to wait for DSP to finish.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 	}

@@ -475,8 +475,11 @@ struct Contextus : SanguineModule {
 				// Set pitch
 				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.0;
 				pitchV += fm;
-				if (bLowCpu)
+
+				if (bLowCpu) {
 					pitchV += log2f(96000.0 / args.sampleRate);
+				}
+
 				int32_t pitch = (pitchV * 12.0 + 60) * 128;
 
 				// pitch_range
