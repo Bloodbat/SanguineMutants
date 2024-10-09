@@ -126,6 +126,7 @@ struct Aleae : SanguineModule {
 				outputs[OUTPUT_OUT1B + i].setChannels(channelCount);
 			}
 
+			// TODO: account for polyphony when switching lights?
 			int currentLight = LIGHTS_STATE + i * 2;
 			lights[currentLight + 1].setSmoothBrightness(lightAActive, args.sampleTime);
 			lights[currentLight + 0].setSmoothBrightness(lightBActive, args.sampleTime);
