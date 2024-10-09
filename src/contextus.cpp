@@ -730,11 +730,11 @@ struct Contextus : SanguineModule {
 
 	inline void pollSwitches(const float sampleTime) {
 		// Handle switch lights		
-		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled, sampleTime);
-		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled, sampleTime);
-		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled, sampleTime);
-		lights[LIGHT_SIGN].setBrightnessSmooth(bSignatureEnabled, sampleTime);
-		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger, sampleTime);
+		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_SIGN].setBrightnessSmooth(bSignatureEnabled ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger ? 0.75f : 0.f, sampleTime);
 	}
 
 	json_t* dataToJson() override {

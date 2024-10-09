@@ -172,10 +172,10 @@ static const LightModes scaleLights[MAX_SCALES][2]{
 };
 
 static const RGBLightColor paletteMarmoraClockSource[4]{
-	{ 0.f, 0.f, 1.f },
-	{ 0.f, 1.f, 0.f },
-	{ 1.f, 1.f, 0.f },
-	{ 1.f, 0.f, 0.f }
+	{ 0.f, 0.f, 0.75f },
+	{ 0.f, 0.75f, 0.f },
+	{ 0.75f, 0.75f, 0.f },
+	{ 0.75f, 0.f, 0.f }
 };
 
 enum DejaVuLockModes {
@@ -507,23 +507,23 @@ struct Marmora : SanguineModule {
 			drawLight(LIGHT_T_MODE + 1, tModeLights[tMode][1], sampleTime);
 
 			int xMode = int(params[PARAM_X_MODE].getValue()) % 3;
-			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1);
-			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2);
+			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? 0.75f : 0.f);
+			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2 ? 0.75f : 0.f);
 
 			int tRange = int(params[PARAM_T_RANGE].getValue()) % 3;
-			lights[LIGHT_T_RANGE + 0].setBrightness(tRange == 0 || tRange == 1);
-			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2);
+			lights[LIGHT_T_RANGE + 0].setBrightness(tRange == 0 || tRange == 1 ? 0.75f : 0.f);
+			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2 ? 0.75f : 0.f);
 
 			int xRange = int(params[PARAM_X_RANGE].getValue()) % 3;
-			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1);
-			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2);
+			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? 0.75f : 0.f);
+			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? 0.75f : 0.f);
 
 			if (!bScaleEditMode) {
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue(), sampleTime);
-				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue(), sampleTime);
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f, sampleTime);
+				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f, sampleTime);
 			}
 			else {
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(1.f, sampleTime);
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
 
@@ -573,15 +573,15 @@ struct Marmora : SanguineModule {
 			break;
 		}
 		case LIGHT_ON: {
-			lights[light].setBrightnessSmooth(1.f, sampleTime);
+			lights[light].setBrightnessSmooth(0.75f, sampleTime);
 			break;
 		}
 		case LIGHT_BLINK_SLOW: {
-			lights[light].setBrightnessSmooth((getSystemTimeMs() & 255) > 128 ? 1.f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((getSystemTimeMs() & 255) > 128 ? 0.75f : 0.f, sampleTime);
 			break;
 		}
 		case LIGHT_BLINK_FAST: {
-			lights[light].setBrightnessSmooth((getSystemTimeMs() & 127) > 64 ? 1.f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((getSystemTimeMs() & 127) > 64 ? 0.75f : 0.f, sampleTime);
 			break;
 		}
 		}

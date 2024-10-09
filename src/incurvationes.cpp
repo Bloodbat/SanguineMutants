@@ -148,11 +148,11 @@ struct Incurvationes : SanguineModule {
 
 		if (isLightsTurn) {
 			lights[LIGHT_CARRIER + 0].value = (warpsParameters[0]->carrier_shape == 1
-				|| warpsParameters[0]->carrier_shape == 2) ? 1.f : 0.f;
+				|| warpsParameters[0]->carrier_shape == 2) ? 0.75f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (warpsParameters[0]->carrier_shape == 2
-				|| warpsParameters[0]->carrier_shape == 3) ? 1.f : 0.f;
+				|| warpsParameters[0]->carrier_shape == 3) ? 0.75f : 0.f;
 
-			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? 1.f : 0.f);
+			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? 0.75f : 0.f);
 
 			const uint8_t(*palette)[3];
 

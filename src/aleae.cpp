@@ -131,10 +131,10 @@ struct Aleae : SanguineModule {
 			lights[currentLight + 0].setSmoothBrightness(lightBActive, args.sampleTime);
 
 			currentLight = LIGHTS_ROLL_MODE + i * 2;
-			lights[currentLight + 0].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 1.f : 0.f, args.sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.f : 1.f, args.sampleTime);
+			lights[currentLight + 0].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.75f : 0.f, args.sampleTime);
+			lights[currentLight + 1].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.f : 0.75f, args.sampleTime);
 
-			lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i], args.sampleTime);
+			lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i] ? 0.75 : 0.f, args.sampleTime);
 		}
 	}
 
@@ -161,7 +161,7 @@ struct AleaeWidget : SanguineModuleWidget {
 		makePanel();
 
 
-		addScrews(SCREW_TOP_LEFT | SCREW_BOTTOM_LEFT);		
+		addScrews(SCREW_TOP_LEFT | SCREW_BOTTOM_LEFT);
 
 		// Switch #1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,

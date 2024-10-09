@@ -302,19 +302,19 @@ struct Temulenti : SanguineModule {
 
 			generator.feature_mode_ = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AD ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AR ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AD ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AR ? 0.75f : 0.f, sampleTime);
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_LOW ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_HIGH ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_LOW ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_HIGH ? 0.75f : 0.f, sampleTime);
 
 			if (sample.flags & bumps::FLAG_END_OF_ATTACK)
 				unipolarFlag *= -1.f;
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 0.75f : 0.f, sampleTime);
 
 			if (quantize) {
 				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantize & 1 ? 1.f : 0.f, sampleTime);

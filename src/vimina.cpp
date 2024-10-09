@@ -204,8 +204,8 @@ struct Vimina : SanguineModule {
 
 				int currentLight = LIGHTS_MODE + section * 2;
 				bool bIsGreenLight = channelFunction[section] == SECTION_FUNCTION_FACTORER;
-				lights[currentLight + 0].setBrightnessSmooth(bIsGreenLight, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(!bIsGreenLight, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(bIsGreenLight ? 0.75f : 0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(!bIsGreenLight ? 0.75f : 0.f, sampleTime);
 			}
 		}
 		if (moduleClock.time >= kTimerCounterMax) {

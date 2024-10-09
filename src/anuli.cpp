@@ -387,14 +387,14 @@ struct Anuli : SanguineModule {
 			}
 			else {
 				if (fxModel < rings::RESONATOR_MODEL_FM_VOICE) {
-					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 1.f : 0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 1.f : 0.f, sampleTime);
+					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 0.75f : 0.f, sampleTime);
+					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 0.75f : 0.f, sampleTime);
 				}
 				else {
 					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 &&
-						pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+						pulseWidthModulationCounter < triangle) ? 0.75f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 &&
-						pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+						pulseWidthModulationCounter < triangle) ? 0.75f : 0.f, sampleTime);
 				}
 			}
 
