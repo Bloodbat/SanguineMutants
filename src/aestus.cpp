@@ -154,19 +154,19 @@ struct Aestus : SanguineModule {
 
 		tides::GeneratorMode mode = generator.mode();
 		if (stMode.process(params[PARAM_MODE].getValue())) {
-			mode = tides::GeneratorMode((int(mode) + 1) % 3);
+			mode = tides::GeneratorMode((static_cast<int>(mode) + 1) % 3);
 			generator.set_mode(mode);
 		}
 
 		tides::GeneratorRange range = generator.range();
 		if (stRange.process(params[PARAM_RANGE].getValue())) {
-			range = tides::GeneratorRange((int(range) - 1 + 3) % 3);
+			range = tides::GeneratorRange((static_cast<int>(range) - 1 + 3) % 3);
 			generator.set_range(range);
 		}
 
-		bSheep = bool(params[PARAM_MODEL].getValue());
+		bSheep = static_cast<bool>(params[PARAM_MODEL].getValue());
 
-		bool bSync = bool(params[PARAM_SYNC].getValue()) || (!bSheep && inputs[INPUT_CLOCK].isConnected());
+		bool bSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bSheep && inputs[INPUT_CLOCK].isConnected());
 
 		// Buffer loop
 		if (++frame >= 16) {
@@ -183,7 +183,7 @@ struct Aestus : SanguineModule {
 			pitch += 60.f;
 			// Scale to the global sample rate
 			pitch += log2f(48000.f / args.sampleRate) * 12.f;
-			generator.set_pitch(int(clamp(pitch * 128, float(-32768), float(32767))));
+			generator.set_pitch(static_cast<int>(clamp(pitch * 128, static_cast<float>(-32768), static_cast<float>(32767))));
 
 			// Shape, slope, smoothness
 			int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
@@ -228,8 +228,8 @@ struct Aestus : SanguineModule {
 
 		uni = uni * level >> 16;
 		bi = -bi * level >> 16;
-		float unipolarFlag = float(uni) / 65535;
-		float bipolarFlag = float(bi) / 32768;
+		float unipolarFlag = static_cast<float>(uni) / 65535;
+		float bipolarFlag = static_cast<float>(bi) / 32768;
 
 		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
 		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
@@ -277,8 +277,8 @@ struct Aestus : SanguineModule {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
-		json_object_set_new(rootJ, "mode", json_integer(int(generator.mode())));
-		json_object_set_new(rootJ, "range", json_integer(int(generator.range())));
+		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
+		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
 
 		return rootJ;
 	}

@@ -422,7 +422,7 @@ struct Apices : SanguineModule {
 
 	void pollPots() {
 		for (uint8_t i = 0; i < kNumAdcChannels; ++i) {
-			adcLp[i] = (int32_t(params[PARAM_KNOB_1 + i].getValue()) + adcLp[i] * 7) >> 3;
+			adcLp[i] = (static_cast<int32_t>(params[PARAM_KNOB_1 + i].getValue()) + adcLp[i] * 7) >> 3;
 			int32_t value = adcLp[i];
 			int32_t current_value = adcValue[i];
 			if (value >= current_value + adcThreshold[i] || value <= current_value - adcThreshold[i] || !adcThreshold[i]) {
@@ -591,13 +591,13 @@ struct Apices : SanguineModule {
 			switch (processorFunction[i]) {
 			case FUNCTION_DRUM_GENERATOR:
 			case FUNCTION_FM_DRUM_GENERATOR:
-				buttonBrightness[i] = int16_t(abs(brightness[i]) >> 8);
+				buttonBrightness[i] = static_cast<int16_t>(abs(brightness[i]) >> 8);
 				buttonBrightness[i] = buttonBrightness[i] >= 255 ? 255 : buttonBrightness[i];
 				break;
 			case FUNCTION_LFO:
 			case FUNCTION_TAP_LFO:
 			case FUNCTION_MINI_SEQUENCER: {
-				int32_t brightnessVal = int32_t(brightness[i]) * 409 >> 8;
+				int32_t brightnessVal = static_cast<int32_t>(brightness[i]) * 409 >> 8;
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
 				CONSTRAIN(brightnessVal, 0, 255);
@@ -715,9 +715,9 @@ struct Apices : SanguineModule {
 
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "edit_mode", json_integer((int)settings.editMode));
-		json_object_set_new(rootJ, "fcn_channel_1", json_integer((int)settings.processorFunction[0]));
-		json_object_set_new(rootJ, "fcn_channel_2", json_integer((int)settings.processorFunction[1]));
+		json_object_set_new(rootJ, "edit_mode", json_integer(static_cast<int>(settings.editMode)));
+		json_object_set_new(rootJ, "fcn_channel_1", json_integer(static_cast<int>(settings.processorFunction[0])));
+		json_object_set_new(rootJ, "fcn_channel_2", json_integer(static_cast<int>(settings.processorFunction[1])));
 
 		json_t* potValuesJ = json_array();
 		for (int p : potValue) {

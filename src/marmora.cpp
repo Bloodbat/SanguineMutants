@@ -506,15 +506,15 @@ struct Marmora : SanguineModule {
 			drawLight(LIGHT_T_MODE + 0, tModeLights[tMode][0], sampleTime);
 			drawLight(LIGHT_T_MODE + 1, tModeLights[tMode][1], sampleTime);
 
-			int xMode = int(params[PARAM_X_MODE].getValue()) % 3;
+			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue()) % 3;
 			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? 0.75f : 0.f);
 			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2 ? 0.75f : 0.f);
 
-			int tRange = int(params[PARAM_T_RANGE].getValue()) % 3;
+			int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue()) % 3;
 			lights[LIGHT_T_RANGE + 0].setBrightness(tRange == 0 || tRange == 1 ? 0.75f : 0.f);
 			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2 ? 0.75f : 0.f);
 
-			int xRange = int(params[PARAM_X_RANGE].getValue()) % 3;
+			int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue()) % 3;
 			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? 0.75f : 0.f);
 			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? 0.75f : 0.f);
 
@@ -631,7 +631,7 @@ struct Marmora : SanguineModule {
 			16
 		};
 		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(loop_length) - 1);
-		int dejaVuLength = loop_length[(int)roundf(dejaVuLengthIndex)];
+		int dejaVuLength = loop_length[static_cast<int>(roundf(dejaVuLengthIndex))];
 
 		// Setup TGenerator
 		bool tExternalClock = inputs[INPUT_T_CLOCK].isConnected();

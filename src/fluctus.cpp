@@ -276,8 +276,8 @@ struct Fluctus : SanguineModule {
 
 			// Set up Fluctus processor
 			fluctusProcessor->set_playback_mode(playbackMode);
-			fluctusProcessor->set_num_channels(bool(params[PARAM_STEREO].getValue()) ? 2 : 1);
-			fluctusProcessor->set_low_fidelity(!bool(params[PARAM_HI_FI].getValue()));
+			fluctusProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
+			fluctusProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			fluctusProcessor->Prepare();
 
 			bool frozen = params[PARAM_FREEZE].getValue();
@@ -747,7 +747,7 @@ struct FluctusWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(fluctusModeList.size()); i++) {
+		for (int i = 0; i < static_cast<int>(fluctusModeList.size()); i++) {
 			modelLabels.push_back(fluctusModeList[i].display + ": " + fluctusModeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,

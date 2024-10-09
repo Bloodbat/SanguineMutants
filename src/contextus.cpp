@@ -513,7 +513,7 @@ struct Contextus : SanguineModule {
 				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
 				pitch += adValue * settings[channel].ad_fm >> 7;
 
-				pitch = clamp(int(pitch), 0, 16383);
+				pitch = clamp(static_cast<int>(pitch), 0, 16383);
 
 				if (settings[channel].vco_flatten) {
 					pitch = renaissance::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
@@ -871,7 +871,7 @@ struct ContextusWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(contextusDisplayLabels.size()); i++) {
+		for (int i = 0; i < static_cast<int>(contextusDisplayLabels.size()); i++) {
 			modelLabels.push_back(contextusDisplayLabels[i] + ": " + contextusMenuLabels[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,

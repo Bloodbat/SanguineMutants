@@ -279,8 +279,8 @@ struct Nebulae : SanguineModule {
 
 			// Set up Clouds processor			
 			cloudsProcessor->set_playback_mode(playbackMode);
-			cloudsProcessor->set_num_channels(bool(params[PARAM_STEREO].getValue()) ? 2 : 1);
-			cloudsProcessor->set_low_fidelity(!bool(params[PARAM_HI_FI].getValue()));
+			cloudsProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
+			cloudsProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			cloudsProcessor->Prepare();
 
 			bool frozen = params[PARAM_FREEZE].getValue();
@@ -705,7 +705,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(nebulaeModeList.size()); i++) {
+		for (int i = 0; i < static_cast<int>(nebulaeModeList.size()); i++) {
 			modelLabels.push_back(nebulaeModeList[i].display + ": " + nebulaeModeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,

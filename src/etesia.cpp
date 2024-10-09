@@ -283,8 +283,8 @@ struct Etesia : SanguineModule {
 
 			// Set up Etesia processor
 			etesiaProcessor->set_playback_mode(playbackMode);
-			etesiaProcessor->set_num_channels(bool(params[PARAM_STEREO].getValue()) ? 2 : 1);
-			etesiaProcessor->set_low_fidelity(!bool(params[PARAM_HI_FI].getValue()));
+			etesiaProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
+			etesiaProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			etesiaProcessor->Prepare();
 
 			bool frozen = params[PARAM_FREEZE].getValue();
@@ -754,7 +754,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(etesiaModeList.size()); i++) {
+		for (int i = 0; i < static_cast<int>(etesiaModeList.size()); i++) {
 			modelLabels.push_back(etesiaModeList[i].display + ": " + etesiaModeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,

@@ -197,17 +197,17 @@ struct Temulenti : SanguineModule {
 
 		bumps::GeneratorMode mode = generator.mode();
 		if (stMode.process(params[PARAM_MODE].getValue())) {
-			mode = bumps::GeneratorMode((int(mode) + 1) % 3);
+			mode = bumps::GeneratorMode((static_cast<int>(mode) + 1) % 3);
 			generator.set_mode(mode);
 		}
 
 		bumps::GeneratorRange range = generator.range();
 		if (stRange.process(params[PARAM_RANGE].getValue())) {
-			range = bumps::GeneratorRange((int(range) - 1 + 3) % 3);
+			range = bumps::GeneratorRange((static_cast<int>(range) - 1 + 3) % 3);
 			generator.set_range(range);
 		}
 
-		bool bSync = bool(params[PARAM_SYNC].getValue());
+		bool bSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
 		//Buffer loop
 		if (generator.writable_block()) {
@@ -357,8 +357,8 @@ struct Temulenti : SanguineModule {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
-		json_object_set_new(rootJ, "mode", json_integer(int(generator.mode())));
-		json_object_set_new(rootJ, "range", json_integer(int(generator.range())));
+		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
+		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
 
 		return rootJ;
 	}

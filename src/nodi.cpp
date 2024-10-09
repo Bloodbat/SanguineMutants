@@ -492,7 +492,7 @@ struct Nodi : SanguineModule {
 				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
 				pitch += adValue * settings[channel].ad_fm >> 7;
 
-				pitch = clamp(int(pitch), 0, 16383);
+				pitch = clamp(static_cast<int>(pitch), 0, 16383);
 
 				if (settings[channel].vco_flatten) {
 					pitch = braids::Interpolate88(braids::lut_vco_detune, pitch << 2);
@@ -873,7 +873,7 @@ struct NodiWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < int(nodiDisplayLabels.size() - 1); i++) {
+		for (int i = 0; i < static_cast<int>(nodiDisplayLabels.size() - 1); i++) {
 			modelLabels.push_back(nodiDisplayLabels[i] + ": " + nodiMenuLabels[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,

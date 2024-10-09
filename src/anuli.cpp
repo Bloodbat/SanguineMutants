@@ -182,7 +182,7 @@ struct Anuli : SanguineModule {
 
 		fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
 
-		int modeNum = int(params[PARAM_MODE].getValue());
+		int modeNum = static_cast<int>(params[PARAM_MODE].getValue());
 
 		float structureMod = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
 		float brightnessMod = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
@@ -198,10 +198,10 @@ struct Anuli : SanguineModule {
 		for (int channel = 0; channel < channelCount; channel++) {
 			if (inputs[INPUT_MODE].isConnected()) {
 				if (!bNotesModeSelection) {
-					modeNum = clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
+					modeNum = clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 6);
 				}
 				else {
-					modeNum = clamp(int(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 6);
+					modeNum = clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 6);
 				}
 			}
 
@@ -295,7 +295,7 @@ struct Anuli : SanguineModule {
 					setStrummingFlag(performanceState.strum);
 				}
 
-				performanceState.chord = clamp(int(roundf(structure * (rings::kNumChords - 1))), 0, rings::kNumChords - 1);
+				performanceState.chord = clamp(static_cast<int>(roundf(structure * (rings::kNumChords - 1))), 0, rings::kNumChords - 1);
 
 				// Process audio
 				float out[24];

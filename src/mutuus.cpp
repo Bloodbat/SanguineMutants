@@ -152,10 +152,10 @@ struct Mutuus : SanguineModule {
 
 			if (inputs[INPUT_MODE].isConnected()) {
 				if (!bNotesModeSelection) {
-					channelFeatureMode = mutuus::FeatureMode(clamp(int(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
 				}
 				else {
-					channelFeatureMode = mutuus::FeatureMode(clamp(int(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
+					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
 				}
 			}
 
@@ -163,7 +163,7 @@ struct Mutuus : SanguineModule {
 
 			mutuusParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
 
-			mutuusModulator[channel].set_alt_feature_mode(bool(params[PARAM_STEREO].getValue()));
+			mutuusModulator[channel].set_alt_feature_mode(static_cast<bool>(params[PARAM_STEREO].getValue()));
 
 			float_4 f4Voltages;
 
@@ -212,11 +212,11 @@ struct Mutuus : SanguineModule {
 				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(int(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(int(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frame[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768), -32768, 32767);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(float(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
-			outputs[OUTPUT_AUX].setVoltage(float(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
+			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
+			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);

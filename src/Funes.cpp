@@ -365,7 +365,7 @@ struct Funes : SanguineModule {
 
 			// Convert output
 			if (!bLowCpu) {
-				outputSrc.setRates(48000, int(args.sampleRate));
+				outputSrc.setRates(48000, static_cast<int>(args.sampleRate));
 				int inLen = blockSize;
 				int outLen = outputBuffer.capacity();
 				outputSrc.setChannels(channelCount * 2);
@@ -373,7 +373,7 @@ struct Funes : SanguineModule {
 				outputBuffer.endIncr(outLen);
 			}
 			else {
-				int len = std::min((int)outputBuffer.capacity(), blockSize);
+				int len = std::min(static_cast<int>(outputBuffer.capacity()), blockSize);
 				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
 				outputBuffer.endIncr(len);
 			}
