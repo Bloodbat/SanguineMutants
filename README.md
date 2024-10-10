@@ -10,83 +10,81 @@ You can find the Mutants manual [here](https://raw.githubusercontent.com/Bloodba
 
 ## Aestus
 
-Based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+A modulator based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
 
 ## Aleae
 
-A polyphonic pair of Bernoulli gates based on Mutable Instruments Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
+A polyphonic pair of Bernoulli gates based on MI's Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
 
 ## Anuli
 
-Based on MI's Rings, it restores missing light animations; the "3" polyphony mode... and is completely polyphonic.
+A completely polyphonic resonator based on MI's Rings, it restores missing light animations, and the "3" polyphony mode.
 
 ## Apices
 
-Based on Mutable Instruments Peaks. It exposes every control and has access to the Bouncing Ball envelope, unavailable in unmodified hardware.
+A versatile complement to any patch, based on MI's Peaks. It exposes every control and provides access to the Bouncing Ball envelope, unavailable in unmodified hardware.
 
 ## Contextus
 
-Based on the Renaissance alternative firmware for Braids. Exposes every control and is fully polyphonic.
+A polyphonic, multipurpose macro oscillator based on the Renaissance alternative firmware for MI's Braids. Exposes every control.
 
 ## Distortiones
 
-Based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module and is fully polyphonic.
+A polyphonic, doctored, flexible meta-modulator based on the Parasite firmware for MI's Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
 
 ## Etesia
 
-Based on the Parasite firmware for Clouds and Southpole's Smoke Parasite. Exposes every control.
+A texture synthesizer based on the Parasite firmware for MI's Clouds and Southpole's Smoke Parasite. Exposes every control.
 
 ## Explorator
 
-Based on MI's Kinks and Links; combined in a single module. Both the Kinks and Links sides are fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
+A completely polyphonic collection of utility modules based on MI's Kinks and Links; combined in a single module. The Links 3:1 section can optionally behave as the hardware module and average input voltages. All LEDs now reflect when polyphonic channels are used.
 
 ## Fluctus
 
-Based on the Kammerl Beat-Repeat firmware for Clouds.
+A texture synthesizer based on the Kammerl Beat-Repeat firmware for MI's Clouds.
 
 ## Funes
 
-Based on Mutable Instruments Plaits and Audible Instruments Macro Oscillator 2. It exposes every control and can access the 1.2 firmware modes.
+A powerful, polyphonic macro oscillator Based on MI's Plaits. It exposes every control and can access the 1.2 firmware modes.
 
-An editor for some of the new firmware modes modes is available!
-
-You can find the editor [here](https://bloodbat.github.io/Funes-Editors/)
+An editor for some of the new firmware modes is available! You can find it [here](https://bloodbat.github.io/Funes-Editors/)
 
 ## Incurvationes
 
-A fully polyphonic module based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
+A fully polyphonic meta-modulator based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
 
 ## Marmora
 
-Based on MI's Marbles, it exposes every control and adds missing features like user defined scales; super lock; t and X reset; restores missing light animations and showing polarity in the output port LEDs.
+A random sampler based on MI's Marbles, it exposes every control and adds missing features like user defined scales; super lock; t and X reset; restores missing light animations and showing polarity in the output port LEDs.
 
 ## Mortuus
 
-Based on the Dead Man's Catch firmware for Peaks.
+An all-around gap filler based on the Dead Man's Catch firmware, with some additions, for MI's Peaks.
 
 ## Mutants Blank
 
-Put a goblin and the Mutants logo on your rack!
+Rack sleekerizer: add the Mutants goblin and a glowing Mutants logo to your rack!
 
 ## Mutuus
 
-Based on the Symbiote firmware for Warps, fully polyphonic.
+A polyphonic, multifaceted meta-modulator based on the Symbiote firmware for MI's Warps.
 
 ## Nebulae
 
-Based on Mutable Instruments' Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control. Lights behave closer to hardware version.
+A texture synthesizer Based on MI's Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control. Lights behave closer to hardware version.
 
 ## Nodi
 
-Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports, and is fully polyphonic.
+A polyphonic, adaptable macro oscillator based on MI's Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports.
 
 ## Temulenti
 
-Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
+A multifaceted modulator based based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
 
 ## Velamina
 
-My attempt at recreating MI's Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
+A polyphonic tetrad of voltage controlled amplifiers; my attempt at recreating MI's Veils... the 2020 version. Outputs beyond 10V are saturated.
 
 ## Vimina
 
