@@ -358,22 +358,13 @@ struct Etesia : SanguineModule {
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode)
-		{
 		case LEDS_OUTPUT: {
 			lightFrame = outputFrame;
 			break;
-		}
-		default: {
+		default:
 			lightFrame = inputFrame;
 			break;
 		}
-		}
-
-		vuMeter.process(args.sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
-
-		lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters->freeze ? 0.75f : 0.f, args.sampleTime);
-
-		lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters->granular.reverse ? 0.75f : 0.f, args.sampleTime);
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
@@ -412,6 +403,14 @@ struct Etesia : SanguineModule {
 		}
 
 		if (lightDivider.process()) { // Expensive, so call this infrequently
+			const float sampleTime = args.sampleTime * kClockDivider;
+
+			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
+
+			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters->freeze ? 0.75f : 0.f, sampleTime);
+
+			lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters->granular.reverse ? 0.75f : 0.f, sampleTime);
+
 			playbackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
@@ -493,7 +492,7 @@ struct Etesia : SanguineModule {
 			switch (ledMode)
 			{
 			case LEDS_INPUT:
-			case LEDS_OUTPUT: {
+			case LEDS_OUTPUT:
 				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
 				lights[LIGHT_BLEND + 1].setBrightness(0.f);
 				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
@@ -503,9 +502,9 @@ struct Etesia : SanguineModule {
 				lights[LIGHT_REVERB].setBrightness(0.f);
 				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
 				break;
-			}
+
 			case LEDS_PARAMETERS:
-			case LEDS_MOMENTARY: {
+			case LEDS_MOMENTARY:
 				float value;
 				int currentLight;
 
@@ -516,8 +515,8 @@ struct Etesia : SanguineModule {
 					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
 				break;
-			}
-			case LEDS_QUALITY_MOMENTARY: {
+
+			case LEDS_QUALITY_MOMENTARY:
 				lights[LIGHT_BLEND].setBrightness(0.f);
 				lights[LIGHT_BLEND + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
 				lights[LIGHT_SPREAD].setBrightness(0.f);
@@ -527,9 +526,8 @@ struct Etesia : SanguineModule {
 				lights[LIGHT_REVERB].setBrightness(0.f);
 				lights[LIGHT_REVERB + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
 				break;
-			}
 
-			case LEDS_MODE_MOMENTARY: {
+			case LEDS_MODE_MOMENTARY:
 				lights[LIGHT_BLEND].setBrightness(playbackMode == 0 || playbackMode == 5 ? 1.f : 0.f);
 				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == 0 || playbackMode == 5 ? 1.f : 0.f);
 				lights[LIGHT_SPREAD].setBrightness(playbackMode == 1 || playbackMode == 4 ? 1.f : 0.f);
@@ -538,9 +536,7 @@ struct Etesia : SanguineModule {
 				lights[LIGHT_FEEDBACK + 1].setBrightness(playbackMode == 2 || playbackMode > 3 ? 1.f : 0.f);
 				lights[LIGHT_REVERB].setBrightness(playbackMode >= 3 ? 1.f : 0.f);
 				lights[LIGHT_REVERB + 1].setBrightness(playbackMode >= 3 ? 1.f : 0.f);
-
 				break;
-			}
 			}
 
 			float rescaledLight = math::rescale(inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f);
@@ -558,8 +554,6 @@ struct Etesia : SanguineModule {
 			rescaledLight = math::rescale(inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f);
 			lights[LIGHT_TEXTURE_CV + 0].setBrightness(rescaledLight);
 			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-rescaledLight);
-
-			const float sampleTime = args.sampleTime * kClockDivider;
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 0.75f : 0.f, sampleTime);
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 0.75f : 0.f, sampleTime);
