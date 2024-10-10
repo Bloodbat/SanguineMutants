@@ -516,17 +516,22 @@ struct Nebulae : SanguineModule {
 			}
 			}
 
-			lights[LIGHT_POSITION_CV + 0].setBrightness(math::rescale(inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f));
-			lights[LIGHT_POSITION_CV + 1].setBrightness(math::rescale(-inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f));
 
-			lights[LIGHT_DENSITY_CV + 0].setBrightness(math::rescale(inputs[INPUT_DENSITY].getVoltage(), 0.f, 5.f, 0.f, 1.f));
-			lights[LIGHT_DENSITY_CV + 1].setBrightness(math::rescale(-inputs[INPUT_DENSITY].getVoltage(), 0.f, 5.f, 0.f, 1.f));
+			float rescaledLight = math::rescale(inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f);
+			lights[LIGHT_POSITION_CV + 0].setBrightness(rescaledLight);
+			lights[LIGHT_POSITION_CV + 1].setBrightness(-rescaledLight);
 
-			lights[LIGHT_SIZE_CV + 0].setBrightness(math::rescale(inputs[INPUT_SIZE].getVoltage(), 0.f, 5.f, 0.f, 1.f));
-			lights[LIGHT_SIZE_CV + 1].setBrightness(math::rescale(-inputs[INPUT_SIZE].getVoltage(), 0.f, 5.f, 0.f, 1.f));
+			rescaledLight = math::rescale(inputs[INPUT_DENSITY].getVoltage(), 0.f, 5.f, 0.f, 1.f);
+			lights[LIGHT_DENSITY_CV + 0].setBrightness(rescaledLight);
+			lights[LIGHT_DENSITY_CV + 1].setBrightness(-rescaledLight);
 
-			lights[LIGHT_TEXTURE_CV + 0].setBrightness(math::rescale(inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f));
-			lights[LIGHT_TEXTURE_CV + 1].setBrightness(math::rescale(-inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f));
+			rescaledLight = math::rescale(inputs[INPUT_SIZE].getVoltage(), 0.f, 5.f, 0.f, 1.f);
+			lights[LIGHT_SIZE_CV + 0].setBrightness(rescaledLight);
+			lights[LIGHT_SIZE_CV + 1].setBrightness(-rescaledLight);
+
+			rescaledLight = math::rescale(inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f);
+			lights[LIGHT_TEXTURE_CV + 0].setBrightness(rescaledLight);
+			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-rescaledLight);
 
 			const float sampleTime = args.sampleTime * kClockDivider;
 
