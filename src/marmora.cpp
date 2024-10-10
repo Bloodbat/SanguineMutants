@@ -579,8 +579,9 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_X3 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
 			}
 
-			lights[LIGHT_Y + 0].setBrightnessSmooth(math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f), sampleTime);
-			lights[LIGHT_Y + 1].setBrightnessSmooth(math::rescale(-voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f), sampleTime);
+			float yVoltage = math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f);
+			lights[LIGHT_Y + 0].setBrightnessSmooth(yVoltage, sampleTime);
+			lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
 
 			if (!bXClockSourceExternal) {
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
