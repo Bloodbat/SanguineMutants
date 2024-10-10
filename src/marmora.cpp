@@ -541,14 +541,15 @@ struct Marmora : SanguineModule {
 			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime);
 			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime);
 
+			// T1 and T3 are booleans: they'll never go negative.
 			lights[LIGHT_T1 + 0].setBrightnessSmooth(gates[blockIndex * 2 + 0], sampleTime);
-			lights[LIGHT_T1 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 0], sampleTime);
+			//lights[LIGHT_T1 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 0], sampleTime);
 
 			lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
-			lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
+			//lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
 
 			lights[LIGHT_T3 + 0].setBrightnessSmooth(gates[blockIndex * 2 + 1], sampleTime);
-			lights[LIGHT_T3 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 1], sampleTime);
+			//lights[LIGHT_T3 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 1], sampleTime);
 
 			if (!bScaleEditMode) {
 				float outputVoltage = 0.f;
