@@ -551,14 +551,19 @@ struct Marmora : SanguineModule {
 			lights[LIGHT_T3 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 1], sampleTime);
 
 			if (!bScaleEditMode) {
-				lights[LIGHT_X1 + 0].setBrightnessSmooth(math::rescale(voltages[blockIndex * 4 + 0], 0.f, 5.f, 0.f, 1.f), sampleTime);
-				lights[LIGHT_X1 + 1].setBrightnessSmooth(math::rescale(-voltages[blockIndex * 4 + 0], 0.f, 5.f, 0.f, 1.f), sampleTime);
+				float outputVoltage = 0.f;
 
-				lights[LIGHT_X2 + 0].setBrightnessSmooth(math::rescale(voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f), sampleTime);
-				lights[LIGHT_X2 + 1].setBrightnessSmooth(math::rescale(-voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f), sampleTime);
+				outputVoltage = math::rescale(voltages[blockIndex * 4 + 0], 0.f, 5.f, 0.f, 1.f);
+				lights[LIGHT_X1 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
+				lights[LIGHT_X1 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 
-				lights[LIGHT_X3 + 0].setBrightnessSmooth(math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f), sampleTime);
-				lights[LIGHT_X3 + 1].setBrightnessSmooth(math::rescale(-voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f), sampleTime);
+				outputVoltage = math::rescale(voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f);
+				lights[LIGHT_X2 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
+				lights[LIGHT_X2 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
+
+				outputVoltage = math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f);
+				lights[LIGHT_X3 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
+				lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 			}
 			else {
 				float scaledVoltage = math::rescale(newNoteVoltage, 0.f, 5.f, 0.f, 1.f);
