@@ -1,6 +1,6 @@
 # Sanguine Modules Mutants
 
-A module collection based on Mutable Instruments and their variants.
+A collection based on Mutable Instruments modules and their variants.
 
 You can find the Mutants manual [here](https://raw.githubusercontent.com/Bloodbat/SanguineModulesManuals/main/mutants_manual.pdf)
 
@@ -14,7 +14,7 @@ Based on MI's Tides, it fixes PLL mode, separates it from the clock input; resto
 
 ## Aleae
 
-Based on Mutable Instruments Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
+A polyphonic pair of Bernoulli gates based on Mutable Instruments Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
 
 ## Anuli
 
@@ -30,7 +30,7 @@ Based on the Renaissance alternative firmware for Braids. Exposes every control 
 
 ## Distortiones
 
-Based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
+Based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module and is fully polyphonic.
 
 ## Etesia
 
@@ -38,7 +38,7 @@ Based on the Parasite firmware for Clouds and Southpole's Smoke Parasite. Expose
 
 ## Explorator
 
-Based on MI's Kinks and Links; combined in a single module. The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
+Based on MI's Kinks and Links; combined in a single module. Both the Kinks and Links sides are fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
 
 ## Fluctus
 
@@ -48,11 +48,13 @@ Based on the Kammerl Beat-Repeat firmware for Clouds.
 
 Based on Mutable Instruments Plaits and Audible Instruments Macro Oscillator 2. It exposes every control and can access the 1.2 firmware modes.
 
-An editor for some of the new firmware modes modes is available in this repository! You need to download it and run it locally in your browser.
+An editor for some of the new firmware modes modes is available!
+
+You can find the editor [here](https://bloodbat.github.io/Funes-Editors/)
 
 ## Incurvationes
 
-Based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
+A fully polyphonic module based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
 
 ## Marmora
 
@@ -68,7 +70,7 @@ Put a goblin and the Mutants logo on your rack!
 
 ## Mutuus
 
-Based on the Symbiote firmware for Warps.
+Based on the Symbiote firmware for Warps, fully polyphonic.
 
 ## Nebulae
 
