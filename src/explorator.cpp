@@ -6,7 +6,7 @@ using simd::float_4;
 
 struct Explorator : SanguineModule {
 	enum ParamIds {
-		PARAM_HARDWARE,
+		PARAM_AVERAGER,
 		PARAMS_COUNT
 	};
 	enum InputIds {
@@ -46,7 +46,7 @@ struct Explorator : SanguineModule {
 		ENUMS(LIGHT_SIGN, 3),
 		ENUMS(LIGHT_LOGIC, 3),
 		ENUMS(LIGHT_SH, 3),
-		LIGHT_HARDWARE,
+		LIGHT_AVERAGER,
 		LIGHTS_COUNT
 	};
 
@@ -89,13 +89,13 @@ struct Explorator : SanguineModule {
 		configOutput(OUTPUT_SH_NOISE, "Noise");
 		configOutput(OUTPUT_SH_VOLTAGE, "Sample and hold voltage");
 
-		configButton(PARAM_HARDWARE, "3:1 hardware behavior (averager)");
+		configButton(PARAM_AVERAGER, "3:1 hardware behavior (averager)");
 
 		lightDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool attenuate3to1 = params[PARAM_HARDWARE].getValue();
+		bool attenuate3to1 = params[PARAM_AVERAGER].getValue();
 
 		// 1:3
 		int channels1to3 = inputs[INPUT_1_TO_3].getChannels();
@@ -374,7 +374,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_SH + 2].setBrightnessSmooth(sampleAndHoldVoltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 			}
 
-			lights[LIGHT_HARDWARE].setBrightnessSmooth(attenuate3to1 ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_AVERAGER].setBrightnessSmooth(attenuate3to1 ? 0.75f : 0.f, sampleTime);
 		} // Light Divider
 	}
 };
@@ -440,7 +440,7 @@ struct ExploratorWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(45.277, 107.563), module, Explorator::OUTPUT_SH_VOLTAGE));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(15.273, 119.127),
-			module, Explorator::PARAM_HARDWARE, Explorator::LIGHT_HARDWARE));
+			module, Explorator::PARAM_AVERAGER, Explorator::LIGHT_AVERAGER));
 	}
 };
 
