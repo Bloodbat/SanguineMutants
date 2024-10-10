@@ -284,6 +284,7 @@
       "description" : "Based on the Twigs alternative firmware for MI's Branches",
       "tags" : [
         "Clock modulator",
+        "Dual",
         "Hardware clone",
         "Utility"
       ]
