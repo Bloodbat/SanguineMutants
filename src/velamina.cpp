@@ -154,8 +154,8 @@ struct Velamina : SanguineModule {
 						}
 					}
 
-					voltageSum = voltageSum / channelCount;
-					gainSum = gainSum / channelCount;
+					voltageSum /= channelCount;
+					gainSum /= channelCount;
 
 					voltageSum = clamp(voltageSum, -10.f, 10.f);
 
