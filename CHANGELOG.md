@@ -10,6 +10,48 @@ Based on MI's Tides, it fixes PLL mode, separates it from the clock input; resto
 
 Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
 
+### Vimina
+
+A dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
+
+## Additions
+
+- Polyphony for Incurvationes, Distortiones and Mutuus, active channels are show using rows of LEDs next around the INT. OSC. button.
+
+- Polyphonic indicator LED lights show the current algorithm for every channel in Incurvationes.
+
+- Polyphonic indicator LED lights show the current mode for every channel in Distortiones and Mutuus.
+
+- Direct or note CV per channel mode selection for Anuli, Distortiones and Mutuus.
+
+- Per channel "Meta-modulation" is always available for Nodi and Contextus: the FM input always does FM.
+
+- Nebulae, Etesia and Fluctus always sum polyphonic input channels, per the voltage standards.
+
+- Ability to select the channel to show in the display for Funes, Nodi and Contextus.
+
+- Note preview for played notes when editing scales in Marmora.
+
+## Changes
+
+- Anuli's channel counter is gone, replaced by a row of LEDs at the top that show active channels and their selected modes.
+
+- Separate Sanguine Mutants and Sanguine Monsters in the browser.
+
+- Remove out label and use a 1 x 2 one that is closer to hardware faceplates for Incurvationes, Distortiones and Mutuus.
+
+- Input voltage scaling for Incurvationes, Distortiones and Mutuus.
+
+- Dim LED button's light intensity a little.
+
+- Performance tweaks.
+
+## Fixes
+
+- Anuli's Modal Resonator display label.
+
+
+---
 
 # 2.4.2
 
@@ -50,12 +92,16 @@ Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additi
 - Funes' Harmo input move to a location less prone to confusion (also, a connecting line has been added between the port and the Harmonics knob).
 
 
+---
+
 # 2.4.1
 
 ## Changes
 
 - Mode selector encoder knobs for Nebulae and its descendants.
 
+
+---
 
 # 2.4.0
 
@@ -130,6 +176,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 - Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
 
 
+---
+
 # 2.3.2
 
 ## Changes
@@ -151,6 +199,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 - Aleae reset.
 
 
+---
+
 # 2.3.1
 
 ## Changes
@@ -161,6 +211,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 - Contextus crashing Rack.
 
+
+---
 
 # 2.3.0
 
@@ -205,6 +257,8 @@ Based on the Dead Man's Catch firmware for Peaks.
 - Apices trigger detection.
 
 
+---
+
 # 2.2.0
 
 ## New Modules
@@ -222,6 +276,8 @@ Based on the Dead Man's Catch firmware for Peaks.
 - Misc. small fixes and changes.
 
 
+---
+
 # 2.1.0
 
 ## New Modules
@@ -230,6 +286,8 @@ Based on the Dead Man's Catch firmware for Peaks.
 
 Based in MI's Peaks.
 
+
+---
 
 # 2.0.1
 
@@ -255,6 +313,8 @@ Based in MI's Peaks.
 
 - Misc. tweaks and fixes.
 
+
+---
 
 # 2.0.0
 

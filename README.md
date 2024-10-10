@@ -8,6 +8,10 @@ You can find the Mutants manual [here](https://raw.githubusercontent.com/Bloodba
 
 ![alt text](pics/mutants_modules.png)
 
+## Aestus
+
+Based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+
 ## Aleae
 
 Based on Mutable Instruments Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
@@ -74,6 +78,14 @@ Based on Mutable Instruments' Clouds and Southpole's Smoke; inspired by the Mons
 
 Based on Mutable Instruments Braids and Southpole's CornrowsX. Exposes every control, some unavailable in other ports, and is fully polyphonic.
 
+## Temulenti
+
+Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
+
 ## Velamina
 
 My attempt at recreating MI's Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
+
+## Vimina
+
+A dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
