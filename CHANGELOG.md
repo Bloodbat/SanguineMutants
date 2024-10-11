@@ -46,6 +46,8 @@ A dual clock divider, multiplier and swinger based on the Twigs firmware for MI'
 
 - Performance tweaks.
 
+- Disable "LFO" range in Nodi and Contextus.
+
 ## Fixes
 
 - Anuli's Modal Resonator display label.
