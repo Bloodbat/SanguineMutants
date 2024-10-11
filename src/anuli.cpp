@@ -195,6 +195,8 @@ struct Anuli : SanguineModule {
 		bool bInternalStrum = !inputs[INPUT_STRUM].isConnected();
 		bool bInternalNote = !inputs[INPUT_PITCH].isConnected();
 
+		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
+
 		for (int channel = 0; channel < channelCount; channel++) {
 			if (inputs[INPUT_MODE].isConnected()) {
 				if (!bNotesModeSelection) {
@@ -205,14 +207,9 @@ struct Anuli : SanguineModule {
 				}
 			}
 
-			if (modeNum < 6) {
-				bEasterEgg[channel] = false;
-				resonatorModel[channel] = rings::ResonatorModel(modeNum);
-			}
-			else {
-				bEasterEgg[channel] = true;
-				bDisastrousPeace = true;
-			}
+			bEasterEgg[channel] = modeNum >= 6;
+			bDisastrousPeace = bDisastrousPeace || bEasterEgg[channel];
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
 
 			// TODO
 			// "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
@@ -230,26 +227,20 @@ struct Anuli : SanguineModule {
 			// Render frames
 			if (outputBuffer[channel].empty()) {
 				float in[24] = {};
-				// Convert input buffer
-				{
-					inputSrc[channel].setRates(args.sampleRate, 48000);
-					int inLen = inputBuffer[channel].size();
-					int outLen = 24;
-					inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, (dsp::Frame<1>*) in, &outLen);
-					inputBuffer[channel].startIncr(inLen);
-				}
+				// Convert input buffer				
+				inputSrc[channel].setRates(args.sampleRate, 48000);
+				int inLen = inputBuffer[channel].size();
+				int outLen = 24;
+				inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, (dsp::Frame<1>*) in, &outLen);
+				inputBuffer[channel].startIncr(inLen);
 
 				// Polyphony			
 				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
 				}
-				// Model
-				if (bEasterEgg[channel]) {
-					stringSynth[channel].set_fx(rings::FxType(fxModel));
-				}
-				else if (part[channel].model() != resonatorModel[channel]) {
-					part[channel].set_model(resonatorModel[channel]);
-				}
+				// Model				
+				stringSynth[channel].set_fx(rings::FxType(fxModel));
+				part[channel].set_model(resonatorModel[channel]);
 
 				// Patch
 				rings::Patch patch;
@@ -328,7 +319,7 @@ struct Anuli : SanguineModule {
 			if (!outputBuffer[channel].empty()) {
 				dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
 				// "Note that you need to insert a jack into each output to split the signals: when only one jack is inserted, both signals are mixed together."
-				if (outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected()) {
+				if (bHaveBothOutputs) {
 					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
 					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
 				}
@@ -353,32 +344,32 @@ struct Anuli : SanguineModule {
 
 			for (int channel = 0; channel < channelCount; channel++) {
 				int currentLight = LIGHT_RESONATOR + channel * 3;
-				if (!bEasterEgg[channel]) {
-					if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
-						lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+					if (!bEasterEgg[channel]) {
+						if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
+							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+						}
+						else {
+							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] & 4 &&
+								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
+								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+						}
 					}
 					else {
-						lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] & 4 &&
-							pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
-							pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
 					}
 				}
-				else {
-					lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
-				}
-			}
 
 			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; channel++) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+					for (int j = 0; j < 3; j++) {
+					lights[currentLight + j].setBrightnessSmooth(0.f, sampleTime);
+				}
 			}
 
 
