@@ -519,11 +519,11 @@ struct Contextus : SanguineModule {
 				}
 
 				// Pitch transposition
-				int32_t t = 0;
+				int32_t transposition = 0;
 				// TODO!!! Fix disabled LFO: disabled in hardware and prone to crashing Rack, probably needs firmware work.
-				//t = settings[channel].pitch_range == renaissance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
-				t += (static_cast<int32_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
-				osc[channel].set_pitch(pitch + t);
+				//transposition = settings[channel].pitch_range == renaissance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
+				transposition += (static_cast<int32_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
+				osc[channel].set_pitch(pitch + transposition);
 
 				if (bTriggerFlag[channel]) {
 					osc[channel].Strike();
