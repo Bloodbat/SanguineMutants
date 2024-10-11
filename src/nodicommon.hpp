@@ -63,7 +63,7 @@ static const std::vector<std::string> nodiRatesStrings = {
 };
 
 static const std::vector<std::string> nodiPitchRangeStrings = {
-	"EXT-",
+	"EXT.",
 	"FREE",
 	"XTND",
 	"440 ",
