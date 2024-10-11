@@ -240,16 +240,15 @@ struct Anuli : SanguineModule {
 				}
 
 				// Polyphony			
-				if (part[channel].polyphony() != polyphonyMode)
+				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
+				}
 				// Model
 				if (bEasterEgg[channel]) {
 					stringSynth[channel].set_fx(rings::FxType(fxModel));
 				}
-				else {
-					if (part[channel].model() != resonatorModel[channel]) {
-						part[channel].set_model(resonatorModel[channel]);
-					}
+				else if (part[channel].model() != resonatorModel[channel]) {
+					part[channel].set_model(resonatorModel[channel]);
 				}
 
 				// Patch
@@ -356,12 +355,12 @@ struct Anuli : SanguineModule {
 				int currentLight = LIGHT_RESONATOR + channel * 3;
 				if (!bEasterEgg[channel]) {
 					if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
-						lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] >= 1 ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
 						lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
 						lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 					}
 					else {
-						lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] >= 4 &&
+						lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] & 4 &&
 							pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
 						lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
 							pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
