@@ -42,7 +42,7 @@ static const std::string nodiNumberStrings[16] = {
 	"  15"
 };
 
-static const std::string nodiBitsStrings[7] = {
+static const std::vector<std::string> nodiBitsStrings = {
 	"2BIT",
 	"3BIT",
 	"4BIT",
@@ -52,7 +52,7 @@ static const std::string nodiBitsStrings[7] = {
 	"16B "
 };
 
-static const std::string nodiRatesStrings[7] = {
+static const std::vector<std::string> nodiRatesStrings = {
 	"4KHZ",
 	"8KHZ",
 	"16K ",
@@ -62,15 +62,15 @@ static const std::string nodiRatesStrings[7] = {
 	"96K "
 };
 
-static const std::string nodiPitchRangeStrings[5] = {
-	"EXT.",
+static const std::vector<std::string> nodiPitchRangeStrings = {
+	"EXT-",
 	"FREE",
 	"XTND",
 	"440 ",
 	"LFO "
 };
 
-static const std::string nodiOctaveStrings[5] = {
+static const std::vector<std::string> nodiOctaveStrings = {
 	"-2",
 	"-1",
 	"0",
@@ -130,7 +130,7 @@ static const std::string nodiQuantizationStrings[49] = {
 	"JOGE"
 };
 
-static const std::string nodiTriggerDelayStrings[7] = {
+static const std::vector<std::string> nodiTriggerDelayStrings = {
 	"NONE",
 	"125u",
 	"250u",
@@ -140,7 +140,7 @@ static const std::string nodiTriggerDelayStrings[7] = {
 	"4ms "
 };
 
-static const std::string nodiNoteStrings[12] = {
+static const std::vector<std::string> nodiNoteStrings = {
 	"C",
 	"Db",
 	"D",
@@ -153,6 +153,58 @@ static const std::string nodiNoteStrings[12] = {
 	"A",
 	"Bb",
 	"B",
+};
+
+static const std::vector<std::string> nodiScaleStrings = {
+	"Off",
+	"Semitones",
+	"Ionian",
+	"Dorian",
+	"Phrygian",
+	"Lydian",
+	"Mixolydian",
+	"Aeolian",
+	"Locrian",
+	"Blues major",
+	"Blues minor",
+	"Pentatonic major",
+	"Pentatonic minor",
+	"Folk",
+	"Japanese",
+	"Gamelan",
+	"Gypsy",
+	"Arabian",
+	"Flamenco",
+	"Whole tone",
+	"Pythagorean",
+	"1_4_Eb",
+	"1_4_E",
+	"1_4_Ea",
+	"Bhairav",
+	"Gunakri",
+	"Marwa",
+	"Shree",
+	"Purvi",
+	"Bilawal",
+	"Yaman",
+	"Kafi",
+	"Bhimpalasree",
+	"Darbari",
+	"Rageshree",
+	"Khamaj",
+	"Mimal",
+	"Parameshwari",
+	"Rangeshwari",
+	"Gangeshwari",
+	"Kameshwari",
+	"Pa__Kafi",
+	"Natbhairav",
+	"M_Kauns",
+	"Bairagi",
+	"B_todi",
+	"Chandradeep",
+	"Kaushik_todi",
+	"Jogeshwari"
 };
 
 static const std::string nodiMetaLabel = "META";

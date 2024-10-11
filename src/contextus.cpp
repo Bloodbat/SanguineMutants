@@ -317,10 +317,8 @@ struct Contextus : SanguineModule {
 		paramQuantities[PARAM_AD_TIMBRE]->snapEnabled = true;
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
-		configParam(PARAM_ROOT, 0.f, 11.f, 0.f, "Quantizer root note", "", 0.f, 1.f, 1.f);
-		paramQuantities[PARAM_ROOT]->snapEnabled = true;
-		configParam(PARAM_SCALE, 0.f, 48.f, 0.f, "Quantizer scale");
-		paramQuantities[PARAM_SCALE]->snapEnabled = true;
+		configSwitch(PARAM_ROOT, 0.f, 11.f, 0.f, "Quantizer root note", nodiNoteStrings);
+		configSwitch(PARAM_SCALE, 0.f, 48.f, 0.f, "Quantizer scale", nodiScaleStrings);
 		configParam(PARAM_DECAY, 0.f, 15.f, 7.f, "Decay");
 		paramQuantities[PARAM_DECAY]->snapEnabled = true;
 
@@ -330,19 +328,14 @@ struct Contextus : SanguineModule {
 		paramQuantities[PARAM_AD_MODULATION]->snapEnabled = true;
 
 		configParam(PARAM_COLOR, 0.f, 1.f, 0.5f, "Color", "%", 0.f, 100.f);
-		configParam(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", "", 0.f, 1.f, -2.f);
-		paramQuantities[PARAM_PITCH_OCTAVE]->snapEnabled = true;
-		configParam(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range");
-		paramQuantities[PARAM_PITCH_RANGE]->snapEnabled = true;
+		configSwitch(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", nodiOctaveStrings);
+		configSwitch(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range", nodiPitchRangeStrings);
 		configParam(PARAM_FM, -1.f, 1.f, 0.f, "FM");
 
-		configParam(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay");
-		paramQuantities[PARAM_TRIGGER_DELAY]->snapEnabled = true;
+		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiTriggerDelayStrings);
 
-		configParam(PARAM_BITS, 0.f, 6.f, 6.f, "Bit crusher resolution");
-		paramQuantities[PARAM_BITS]->snapEnabled = true;
-		configParam(PARAM_RATE, 0.f, 6.0f, 6.0f, "Bit crusher sample rate");
-		paramQuantities[PARAM_RATE]->snapEnabled = true;
+		configSwitch(PARAM_BITS, 0.f, 6.f, 6.f, "Bit crusher resolution", nodiBitsStrings);
+		configSwitch(PARAM_RATE, 0.f, 6.0f, 6.0f, "Bit crusher sample rate", nodiRatesStrings);
 
 		configInput(INPUT_TRIGGER, "Trigger");
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
