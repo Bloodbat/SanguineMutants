@@ -67,7 +67,7 @@ static const std::vector<std::string> nodiPitchRangeStrings = {
 	"FREE",
 	"XTND",
 	"440 ",
-	"LFO "
+	//"LFO "
 };
 
 static const std::vector<std::string> nodiOctaveStrings = {

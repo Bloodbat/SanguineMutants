@@ -302,7 +302,7 @@ struct Nodi : SanguineModule {
 
 		configParam(PARAM_COLOR, 0.f, 1.f, 0.5f, "Color", "%", 0.f, 100.f);
 		configSwitch(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", nodiOctaveStrings);
-		configSwitch(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range", nodiPitchRangeStrings);
+		configSwitch(PARAM_PITCH_RANGE, 0.f, 3.f, 0.f, "Pitch range", nodiPitchRangeStrings);
 		configParam(PARAM_FM, -1.f, 1.f, 0.f, "FM");
 
 		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiTriggerDelayStrings);
@@ -462,8 +462,8 @@ struct Nodi : SanguineModule {
 				switch (settings[channel].pitch_range)
 				{
 				case braids::PITCH_RANGE_EXTERNAL:
-				case braids::PITCH_RANGE_LFO:
-					// Do nothing: calibration not implemented.
+					//case braids::PITCH_RANGE_LFO:
+						// Do nothing: calibration not implemented.
 					break;
 				case braids::PITCH_RANGE_FREE:
 					pitch -= 1638;
@@ -498,7 +498,10 @@ struct Nodi : SanguineModule {
 				}
 
 				// Pitch transposition
-				int32_t t = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ? -(36 << 7) : 0;
+				int32_t t = 0;
+
+				// TODO!!! Fix disabled LFO: disabled in hardware and prone to crashing Rack, probably needs firmware work.
+				//t = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ? -(36 << 7) : 0;
 				t += (static_cast<int32_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
 				osc[channel].set_pitch(pitch + t);
 
