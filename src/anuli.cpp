@@ -346,8 +346,10 @@ struct Anuli : SanguineModule {
 
 			displayText = bEasterEgg[0] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[0]];
 
-			uint8_t pulseWidthModulationCounter = getSystemTimeMs() & 15;
-			uint8_t triangle = (getSystemTimeMs() >> 5) & 31;
+			long long systemTimeMs = getSystemTimeMs();
+
+			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
+			uint8_t triangle = (systemTimeMs >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
 
 			for (int channel = 0; channel < channelCount; channel++) {
