@@ -746,8 +746,9 @@ struct Marmora : SanguineModule {
 			y.length = 1;
 
 			unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(y_divider_ratios);
-			if (index < LENGTHOF(y_divider_ratios))
+			if (index < LENGTHOF(y_divider_ratios)) {
 				yDividerIndex = index;
+			}
 			y.ratio = y_divider_ratios[yDividerIndex];
 			y.scale_index = xScale;
 
@@ -840,8 +841,9 @@ struct Marmora : SanguineModule {
 		SanguineModule::dataFromJson(rootJ);
 
 		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
-		if (y_divider_indexJ)
+		if (y_divider_indexJ) {
 			yDividerIndex = json_integer_value(y_divider_indexJ);
+		}
 
 		int dirtyScalesCount = 0;
 
