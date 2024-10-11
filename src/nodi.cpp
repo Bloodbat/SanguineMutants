@@ -456,14 +456,14 @@ struct Nodi : SanguineModule {
 					pitchV += log2f(96000.f / args.sampleRate);
 				}
 
-				int32_t pitch = (pitchV * 12.f + 60) * 128;
+				int16_t pitch = (pitchV * 12.f + 60) * 128;
 
 				// pitch_range
 				switch (settings[channel].pitch_range)
 				{
 				case braids::PITCH_RANGE_EXTERNAL:
 					//case braids::PITCH_RANGE_LFO:
-						// Do nothing: calibration not implemented.
+							  // Do nothing: calibration not implemented.
 					break;
 				case braids::PITCH_RANGE_FREE:
 					pitch -= 1638;
@@ -482,7 +482,7 @@ struct Nodi : SanguineModule {
 				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
 
 				// Check if the pitch has changed to cause an auto-retrigger
-				int32_t pitch_delta = pitch - previousPitch[channel];
+				int16_t pitch_delta = pitch - previousPitch[channel];
 				if (settings[channel].auto_trig && (pitch_delta >= 0x40 || -pitch_delta >= 0x40)) {
 					bFlagTriggerDetected[channel] = true;
 				}
@@ -491,18 +491,18 @@ struct Nodi : SanguineModule {
 				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
 				pitch += adValue * settings[channel].ad_fm >> 7;
 
-				pitch = clamp(static_cast<int>(pitch), 0, 16383);
+				pitch = clamp(static_cast<int16_t>(pitch), 0, 16383);
 
 				if (settings[channel].vco_flatten) {
 					pitch = braids::Interpolate88(braids::lut_vco_detune, pitch << 2);
 				}
 
 				// Pitch transposition
-				int32_t transposition = 0;
+				int16_t transposition = 0;
 
 				// TODO!!! Fix disabled LFO: disabled in hardware and prone to crashing Rack, probably needs firmware work.
 				//transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ? -(36 << 7) : 0;
-				transposition += (static_cast<int32_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
+				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
 				osc[channel].set_pitch(pitch + transposition);
 
 				if (bTriggerFlag[channel]) {
