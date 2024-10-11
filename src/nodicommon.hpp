@@ -207,7 +207,6 @@ static const std::vector<std::string> nodiScaleStrings = {
 	"Jogeshwari"
 };
 
-static const std::string nodiMetaLabel = "META";
 static const std::string nodiAutoLabel = "AUTO";
 static const std::string nodiVCALabel = "\\VCA";
 static const std::string nodiFlatLabel = "FLAT";
