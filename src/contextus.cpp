@@ -418,6 +418,7 @@ struct Contextus : SanguineModule {
 				++triggerDelay[channel];
 				bFlagTriggerDetected[channel] = false;
 			}
+			
 			if (triggerDelay[channel]) {
 				--triggerDelay[channel];
 				if (triggerDelay[channel] == 0) {
@@ -479,19 +480,24 @@ struct Contextus : SanguineModule {
 				int32_t pitch = (pitchV * 12.f + 60) * 128;
 
 				// pitch_range
-				if (settings[channel].pitch_range == renaissance::PITCH_RANGE_EXTERNAL || settings[channel].pitch_range == renaissance::PITCH_RANGE_LFO) {
+				switch (settings[channel].pitch_range)
+				{
+				case renaissance::PITCH_RANGE_EXTERNAL:
+				case renaissance::PITCH_RANGE_LFO:
 					// Do nothing: calibration not implemented.
-				}
-				else if (settings[channel].pitch_range == renaissance::PITCH_RANGE_FREE) {
-					pitch = pitch - 1638;
-				}
-				else if (settings[channel].pitch_range == renaissance::PITCH_RANGE_440) {
+					break;
+				case renaissance::PITCH_RANGE_FREE:
+					pitch -= 1638;
+					break;
+				case renaissance::PITCH_RANGE_440:
 					pitch = 69 << 7;
-				}
-				else { // PITCH_RANGE_EXTENDED
+					break;
+				case renaissance::PITCH_RANGE_EXTENDED:
+				default:
 					pitch -= 60 << 7;
 					pitch = (pitch - 1638) * 9 >> 1;
 					pitch += 60 << 7;
+					break;
 				}
 
 				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);

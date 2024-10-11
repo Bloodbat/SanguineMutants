@@ -305,7 +305,7 @@ struct Nodi : SanguineModule {
 		configSwitch(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range", nodiPitchRangeStrings);
 		configParam(PARAM_FM, -1.f, 1.f, 0.f, "FM");
 
-		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiTriggerDelayStrings);		
+		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiTriggerDelayStrings);
 
 		configSwitch(PARAM_BITS, 0.f, 6.f, 6.f, "Bit crusher resolution", nodiBitsStrings);
 		configSwitch(PARAM_RATE, 0.f, 6.0f, 6.0f, "Bit crusher sample rate", nodiRatesStrings);
@@ -392,6 +392,7 @@ struct Nodi : SanguineModule {
 				++triggerDelay[channel];
 				bFlagTriggerDetected[channel] = false;
 			}
+
 			if (triggerDelay[channel]) {
 				--triggerDelay[channel];
 				if (triggerDelay[channel] == 0) {
@@ -458,19 +459,24 @@ struct Nodi : SanguineModule {
 				int32_t pitch = (pitchV * 12.f + 60) * 128;
 
 				// pitch_range
-				if (settings[channel].pitch_range == braids::PITCH_RANGE_EXTERNAL || settings[channel].pitch_range == braids::PITCH_RANGE_LFO) {
+				switch (settings[channel].pitch_range)
+				{
+				case braids::PITCH_RANGE_EXTERNAL:
+				case braids::PITCH_RANGE_LFO:
 					// Do nothing: calibration not implemented.
-				}
-				else if (settings[channel].pitch_range == braids::PITCH_RANGE_FREE) {
-					pitch = pitch - 1638;
-				}
-				else if (settings[channel].pitch_range == braids::PITCH_RANGE_440) {
+					break;
+				case braids::PITCH_RANGE_FREE:
+					pitch -= 1638;
+					break;
+				case braids::PITCH_RANGE_440:
 					pitch = 69 << 7;
-				}
-				else { // PITCH_RANGE_EXTENDED
+					break;
+				case braids::PITCH_RANGE_EXTENDED:
+				default:
 					pitch -= 60 << 7;
 					pitch = (pitch - 1638) * 9 >> 1;
 					pitch += 60 << 7;
+					break;
 				}
 
 				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
