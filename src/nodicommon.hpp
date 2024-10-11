@@ -3,7 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "plugin.hpp"
 
-static const uint16_t nodiBitReductionMasks[7] = {
+static const std::vector<uint16_t> nodiBitReductionMasks = {
 	0xc000,
 	0xe000,
 	0xf000,
@@ -13,7 +13,7 @@ static const uint16_t nodiBitReductionMasks[7] = {
 	0xffff
 };
 
-static const uint16_t nodiDecimationFactors[7] = {
+static const std::vector<uint16_t> nodiDecimationFactors = {
 	24,
 	12,
 	6,
@@ -23,7 +23,7 @@ static const uint16_t nodiDecimationFactors[7] = {
 	1
 };
 
-static const std::string nodiNumberStrings[16] = {
+static const std::vector<std::string> nodiNumberStrings = {
 	"   0",
 	"   1",
 	"   2",
