@@ -159,32 +159,32 @@ struct Incurvationes : SanguineModule {
 			palette = bEasterEggEnabled ? paletteWarpsFreqsShift : paletteWarpsDefault;
 			float colorValues[PORT_MAX_CHANNELS][3] = {};
 
-			for (int channel = 0; channel < channelCount; channel++) {
-				float zone = 8.f * (bEasterEggEnabled ? warpsParameters[channel]->phase_shift : warpsParameters[channel]->modulation_algorithm);
-
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
 				const int currentLight = LIGHT_CHANNEL_ALGORITHM + channel * 3;
-				MAKE_INTEGRAL_FRACTIONAL(zone);
-				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+
 				for (int i = 0; i < 3; i++) {
-					int a = palette[zone_integral][i];
-					int b = palette[zone_integral + 1][i];
+					lights[currentLight + i].setBrightness(0.f);
+				}
 
-					colorValues[channel][i] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
+				if (channel < channelCount) {
+					float zone = 8.f * (bEasterEggEnabled ? warpsParameters[channel]->phase_shift : warpsParameters[channel]->modulation_algorithm);
 
-					lights[currentLight + i].setBrightness(colorValues[channel][i]);
+					MAKE_INTEGRAL_FRACTIONAL(zone);
+					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+					for (int i = 0; i < 3; i++) {
+						int a = palette[zone_integral][i];
+						int b = palette[zone_integral + 1][i];
+
+						colorValues[channel][i] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
+
+						lights[currentLight + i].setBrightness(colorValues[channel][i]);
+					}
 				}
 			}
 
 			lights[LIGHT_ALGORITHM + 0].setBrightness(colorValues[0][0]);
 			lights[LIGHT_ALGORITHM + 1].setBrightness(colorValues[0][1]);
 			lights[LIGHT_ALGORITHM + 2].setBrightness(colorValues[0][2]);
-
-			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; channel++) {
-				const int currentLight = LIGHT_CHANNEL_ALGORITHM + channel * 3;
-				lights[currentLight + 0].setBrightness(0.f);
-				lights[currentLight + 1].setBrightness(0.f);
-				lights[currentLight + 2].setBrightness(0.f);
-			}
 		}
 	}
 };

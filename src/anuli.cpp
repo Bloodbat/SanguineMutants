@@ -342,8 +342,14 @@ struct Anuli : SanguineModule {
 			uint8_t triangle = (systemTimeMs >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
 
-			for (int channel = 0; channel < channelCount; channel++) {
-				int currentLight = LIGHT_RESONATOR + channel * 3;
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+				const int currentLight = LIGHT_RESONATOR + channel * 3;
+
+				for (int j = 0; j < 3; j++) {
+					lights[currentLight + j].setBrightnessSmooth(0.f, sampleTime);
+				}
+
+				if (channel < channelCount) {
 					if (!bEasterEgg[channel]) {
 						if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
 							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
@@ -364,14 +370,7 @@ struct Anuli : SanguineModule {
 						lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
 					}
 				}
-
-			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; channel++) {
-				const int currentLight = LIGHT_RESONATOR + channel * 3;
-					for (int j = 0; j < 3; j++) {
-					lights[currentLight + j].setBrightnessSmooth(0.f, sampleTime);
-				}
 			}
-
 
 			if (!bDisastrousPeace) {
 				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);

@@ -592,20 +592,21 @@ struct Contextus : SanguineModule {
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, sampleTime);
 			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, sampleTime);
 
-			for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
-				int currentLight = LIGHT_CHANNEL_MODEL + i * 3;
-				int currentModel = settings[i].shape;
-				if (i < channelCount) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+				int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+
+				for (int i = 0; i < 3; i++) {
+					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
+				}
+
+				if (channel < channelCount) {
+					int currentModel = settings[channel].shape;
 					lights[currentLight + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, sampleTime);
 				}
-				else {
-					lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-				}
 			}
+
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
 			}

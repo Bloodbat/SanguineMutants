@@ -257,19 +257,18 @@ struct Mutuus : SanguineModule {
 			}
 
 
-			for (int channel = 0; channel < channelCount; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
 				for (int i = 0; i < 3; i++) {
-					lights[currentLight + i].setBrightnessSmooth((paletteWarpsParasiteFeatureMode[mutuusModulator[channel].feature_mode()][i]) / 255.f, sampleTime);
+					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
 				}
-			}
 
-			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; channel++) {
-				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+				if (channel < channelCount) {
+					for (int i = 0; i < 3; i++) {
+						lights[currentLight + i].setBrightnessSmooth((paletteWarpsParasiteFeatureMode[mutuusModulator[channel].feature_mode()][i]) / 255.f, sampleTime);
+					}
+				}
 			}
 		}
 	}
