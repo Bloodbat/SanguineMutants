@@ -290,13 +290,13 @@ struct Anuli : SanguineModule {
 				// Process audio
 				float out[24];
 				float aux[24];
-				if (bEasterEgg[channel]) {
-					strummer[channel].Process(NULL, 24, &performanceState);
-					stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
-				}
-				else {
+				if (!bEasterEgg[channel]) {
 					strummer[channel].Process(in, 24, &performanceState);
 					part[channel].Process(performanceState, patch, in, out, aux, 24);
+				}
+				else {
+					strummer[channel].Process(NULL, 24, &performanceState);
+					stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
 				}
 
 				// Convert output buffer
