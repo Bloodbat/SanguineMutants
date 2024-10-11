@@ -128,8 +128,10 @@ struct Distortiones : SanguineModule {
 				featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
 				distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
 
-				int8_t ramp = getSystemTimeMs() & 127;
-				uint8_t tri = (getSystemTimeMs() & 255) < 128 ? 127 + ramp : 255 - ramp;
+				long long systemTimeMs = getSystemTimeMs();
+
+				int8_t ramp = systemTimeMs & 127;
+				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
 
 				for (int i = 0; i < 3; i++) {
 					lights[LIGHT_ALGORITHM + i].setBrightnessSmooth(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f, sampleTime);

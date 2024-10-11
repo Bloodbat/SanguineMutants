@@ -439,6 +439,7 @@ struct Marmora : SanguineModule {
 		bool tGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, tGate);
 		tClocks[blockIndex] = lastTClock;
+		long long systemTimeMs = getSystemTimeMs();
 
 		bool xGate = (inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f);
 		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, xGate);
@@ -504,22 +505,22 @@ struct Marmora : SanguineModule {
 			const float sampleTime = kLightDivider * args.sampleTime;
 
 			if (bDejaVuTEnabled || dejaVuLockModeT == DEJA_VU_SUPER_LOCK) {
-				drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime);
+				drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime, systemTimeMs);
 			}
 			else {
 				lights[LIGHT_DEJA_VU_T].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			if (bDejaVuXEnabled || dejaVuLockModeX == DEJA_VU_SUPER_LOCK) {
-				drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime);
+				drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime, systemTimeMs);
 			}
 			else {
 				lights[LIGHT_DEJA_VU_X].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			int tMode = params[PARAM_T_MODE].getValue();
-			drawLight(LIGHT_T_MODE + 0, tModeLights[tMode][0], sampleTime);
-			drawLight(LIGHT_T_MODE + 1, tModeLights[tMode][1], sampleTime);
+			drawLight(LIGHT_T_MODE + 0, tModeLights[tMode][0], sampleTime, systemTimeMs);
+			drawLight(LIGHT_T_MODE + 1, tModeLights[tMode][1], sampleTime, systemTimeMs);
 
 			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue()) % 3;
 			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? 0.75f : 0.f);
@@ -542,8 +543,8 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
 
-			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime);
-			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime);
+			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime, systemTimeMs);
+			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime, systemTimeMs);
 
 			if (!bScaleEditMode) {
 				// T1 and T3 are booleans: they'll never go negative.
@@ -606,7 +607,7 @@ struct Marmora : SanguineModule {
 		}
 	}
 
-	void drawLight(const int light, const LightModes lightMode, const float sampleTime) {
+	void drawLight(const int light, const LightModes lightMode, const float sampleTime, const long long systemTimeMs) {
 		switch (lightMode)
 		{
 		case LIGHT_OFF:
@@ -619,23 +620,23 @@ struct Marmora : SanguineModule {
 			break;
 		}
 		case LIGHT_BLINK_SLOW: {
-			lights[light].setBrightnessSmooth((getSystemTimeMs() & 255) > 128 ? 0.75f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((systemTimeMs & 255) > 128 ? 0.75f : 0.f, sampleTime);
 			break;
 		}
 		case LIGHT_BLINK_FAST: {
-			lights[light].setBrightnessSmooth((getSystemTimeMs() & 127) > 64 ? 0.75f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((systemTimeMs & 127) > 64 ? 0.75f : 0.f, sampleTime);
 			break;
 		}
 		}
 	}
 
-	void drawDejaVuLight(const int light, DejaVuLockModes lockMode, const float sampleTime) {
+	void drawDejaVuLight(const int light, DejaVuLockModes lockMode, const float sampleTime, const long long systemTimeMs) {
 		switch (lockMode)
 		{
 		case DEJA_VU_LOCK_ON: {
-			int slowTriangle = (getSystemTimeMs() & 1023) >> 5;
+			int slowTriangle = (systemTimeMs & 1023) >> 5;
 			slowTriangle = slowTriangle >= 16 ? 31 - slowTriangle : slowTriangle;
-			int pulseWidth = getSystemTimeMs() & 15;
+			int pulseWidth = systemTimeMs & 15;
 			lights[light].setBrightnessSmooth(slowTriangle >= pulseWidth ? 0.75f : 0.f, sampleTime);
 			break;
 		}
@@ -644,9 +645,9 @@ struct Marmora : SanguineModule {
 			break;
 		}
 		case DEJA_VU_SUPER_LOCK: {
-			int fastTriangle = (getSystemTimeMs() & 511) >> 4;
+			int fastTriangle = (systemTimeMs & 511) >> 4;
 			fastTriangle = fastTriangle >= 16 ? 31 - fastTriangle : fastTriangle;
-			int pulseWidth = getSystemTimeMs() & 15;
+			int pulseWidth = systemTimeMs & 15;
 			lights[light].setBrightnessSmooth(fastTriangle >= pulseWidth ? 0.75f : 0.f, sampleTime);
 			break;
 		}

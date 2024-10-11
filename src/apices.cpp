@@ -498,7 +498,9 @@ struct Apices : SanguineModule {
 		// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
 		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
 
-		uint8_t flash = (getSystemTimeMs() >> 7) & 7;
+		long long systemTimeMs = getSystemTimeMs();
+
+		uint8_t flash = (systemTimeMs >> 7) & 7;
 		int currentLight;
 		switch (editMode) {
 		case EDIT_MODE_FIRST:
@@ -577,7 +579,7 @@ struct Apices : SanguineModule {
 				break;
 			}
 			case LIGHT_BLINK: {
-				lights[currentLight].setBrightnessSmooth(getSystemTimeMs() & 256 ? 0.f : 1.f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(systemTimeMs & 256 ? 0.f : 1.f, sampleTime);
 				break;
 			}
 			default: {
