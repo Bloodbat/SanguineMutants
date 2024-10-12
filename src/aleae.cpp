@@ -43,6 +43,7 @@ struct Aleae : SanguineModule {
 	};
 
 	dsp::BooleanTrigger btGateTriggers[2][16];
+	dsp::ClockDivider lightsDivider;
 
 	bool rollResults[2][16] = {};
 	bool lastRollResults[2][16];
@@ -50,6 +51,8 @@ struct Aleae : SanguineModule {
 	bool rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
 	bool outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
 	bool bOutputsConnected[OUTPUTS_COUNT];
+
+	const int kLightFrequency = 16;
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -64,6 +67,7 @@ struct Aleae : SanguineModule {
 			for (int j = 0; j < 16; j++) {
 				lastRollResults[i][j] = ROLL_HEADS;
 			}
+			lightsDivider.setDivision(kLightFrequency);
 		}
 	}
 
@@ -72,6 +76,8 @@ struct Aleae : SanguineModule {
 		bOutputsConnected[1] = outputs[OUTPUT_OUT2A].isConnected();
 		bOutputsConnected[2] = outputs[OUTPUT_OUT1B].isConnected();
 		bOutputsConnected[3] = outputs[OUTPUT_OUT2B].isConnected();
+
+		bool bIsLightsTurn = lightsDivider.process();
 
 		for (int i = 0; i < 2; i++) {
 			// Get input.
@@ -127,15 +133,18 @@ struct Aleae : SanguineModule {
 			}
 
 			// TODO: account for polyphony when switching lights?
-			int currentLight = LIGHTS_STATE + i * 2;
-			lights[currentLight + 1].setSmoothBrightness(lightAActive, args.sampleTime);
-			lights[currentLight + 0].setSmoothBrightness(lightBActive, args.sampleTime);
+			if (bIsLightsTurn) {
+				const float sampleTime = args.sampleTime * kLightFrequency;
+				int currentLight = LIGHTS_STATE + i * 2;
+				lights[currentLight + 1].setSmoothBrightness(lightAActive, sampleTime);
+				lights[currentLight + 0].setSmoothBrightness(lightBActive, sampleTime);
 
-			currentLight = LIGHTS_ROLL_MODE + i * 2;
-			lights[currentLight + 0].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.75f : 0.f, args.sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.f : 0.75f, args.sampleTime);
+				currentLight = LIGHTS_ROLL_MODE + i * 2;
+				lights[currentLight + 0].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.75f : 0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.f : 0.75f, sampleTime);
 
-			lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i] ? 0.75 : 0.f, args.sampleTime);
+				lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i] ? 0.75 : 0.f, sampleTime);
+			}
 		}
 	}
 
