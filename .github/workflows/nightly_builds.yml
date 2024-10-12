@@ -6,10 +6,10 @@ on:
   schedule:
    # It's always night... somewhere
    #        +--------- minute (0 - 59)
-   #        ¦ +--------- hour (0 - 23)
-   #        ¦ ¦ +--------- day of the month (1 - 31)
-   #        ¦ ¦ ¦ +--------- month (1 - 12 or JAN-DEC)
-   #        ¦ ¦ ¦ ¦ +--------- day of the week (0 - 6 or SUN-SAT)
+   #        Â¦ +--------- hour (0 - 23)
+   #        Â¦ Â¦ +--------- day of the month (1 - 31)
+   #        Â¦ Â¦ Â¦ +--------- month (1 - 12 or JAN-DEC)
+   #        Â¦ Â¦ Â¦ Â¦ +--------- day of the week (0 - 6 or SUN-SAT)
    - cron: '46 18 * * *'  # Every day at 18:46 UTC
 
 env:
@@ -40,7 +40,7 @@ jobs:
           echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
           cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
         # only modify plugin version if no tag was created
-        if: "! startsWith(github.ref, 'refs/tags/v')"
+        # if: "! startsWith(github.ref, 'refs/tags/v')"
 
   build:
     name: ${{ matrix.platform }}
