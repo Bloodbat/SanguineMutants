@@ -2,14 +2,9 @@ build
 dep
 dist
 /plugin.dll
-/SanguineMutants.vcxproj.user
-/SanguineMutants.sln
-/SanguineMutants.vcxproj
-/SanguineMutants.vcxproj.filters
-/.vs
-/diagram_sources
-/faceplate_sources
 /.settings
 /.cproject
 /.project
 *.so
+/.vscode
+/SanguineMutants.code-workspace
