@@ -12,7 +12,7 @@ Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additi
 
 ### Vimina
 
-A dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
+A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
 
 ## Additions
 

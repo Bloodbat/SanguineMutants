@@ -24,7 +24,7 @@ Base modules are listed in alphabetical order with their alternative firmwares i
   
   - ### Vimina
 
-    A dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
+    A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
 
 - ### Anuli
 
