@@ -30,6 +30,8 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Ability to select the channel to show in the display for Funes, Nodi and Contextus.
 
+- Ability to select the channel to show in Aleae's LEDs.
+
 - Note preview for played notes when editing scales in Marmora.
 
 ## Changes

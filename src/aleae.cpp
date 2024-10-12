@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinechannels.hpp"
 
 #define ROLL_DIRECT 0
 #define ROLL_TOGGLE 1
@@ -53,6 +54,7 @@ struct Aleae : SanguineModule {
 	bool bOutputsConnected[OUTPUTS_COUNT];
 
 	const int kLightFrequency = 16;
+	int ledsChannel = 0;
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -111,10 +113,10 @@ struct Aleae : SanguineModule {
 				bool gateAActive = (rollResults[i][channel] == ROLL_HEADS && (outModes[i] == OUT_MODE_LATCH || gatePresent));
 				bool gateBActive = (rollResults[i][channel] == ROLL_TAILS && (outModes[i] == OUT_MODE_LATCH || gatePresent));
 
-				if (gateAActive)
-					lightAActive = true;
-				if (gateBActive)
-					lightBActive = true;
+				if (channel == ledsChannel) {
+					lightAActive = gateAActive;
+					lightBActive = gateBActive;
+				}
 
 				// Set output gates
 				if (bOutputsConnected[0 + i]) {
@@ -132,8 +134,11 @@ struct Aleae : SanguineModule {
 				outputs[OUTPUT_OUT1B + i].setChannels(channelCount);
 			}
 
-			// TODO: account for polyphony when switching lights?
 			if (bIsLightsTurn) {
+				if (ledsChannel >= channelCount) {
+					ledsChannel = channelCount - 1;
+				}
+
 				const float sampleTime = args.sampleTime * kLightFrequency;
 				int currentLight = LIGHTS_STATE + i * 2;
 				lights[currentLight + 1].setSmoothBrightness(lightAActive, sampleTime);
@@ -156,6 +161,24 @@ struct Aleae : SanguineModule {
 			for (int j = 0; j < 16; j++) {
 				lastRollResults[i][j] = ROLL_HEADS;
 			}
+		}
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = SanguineModule::dataToJson();
+
+		json_t* ledsChannelJ = json_integer(ledsChannel);
+		json_object_set_new(rootJ, "ledsChannel", ledsChannelJ);
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
+		json_t* ledsChannelJ = json_object_get(rootJ, "ledsChannel");
+		if (ledsChannelJ) {
+			ledsChannel = json_integer_value(ledsChannelJ);
 		}
 	}
 };
@@ -200,6 +223,19 @@ struct AleaeWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT2A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 117.888), module, Aleae::LIGHTS_STATE + 1 * 2));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Aleae::OUTPUT_OUT2B));
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
+		Aleae* module = dynamic_cast<Aleae*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createIndexSubmenuItem("LEDs channel", channelNumbers,
+			[=]() {return module->ledsChannel; },
+			[=](int i) {module->ledsChannel = i; }
+		));
 	}
 };
 
