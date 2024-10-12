@@ -40,9 +40,9 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Separate Sanguine Mutants and Sanguine Monsters in the browser.
 
-- Remove out label and use a 1 x 2 one that is closer to hardware faceplates for Incurvationes, Distortiones and Mutuus.
+- Remove "Out" port label and use a "1 x 2" one that is closer to hardware faceplates for Incurvationes, Distortiones and Mutuus.
 
-- Input voltage scaling for Incurvationes, Distortiones and Mutuus.
+- Input voltage scaling for Incurvationes, Distortiones and Mutuus (your old patches may be too loud! Adjust input gain).
 
 - Dim LED button's light intensity a little.
 
