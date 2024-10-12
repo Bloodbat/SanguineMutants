@@ -48,7 +48,7 @@ struct Mutuus : SanguineModule {
 	const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 	mutuus::MutuusModulator mutuusModulator[PORT_MAX_CHANNELS];
 	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
 	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
@@ -101,7 +101,7 @@ struct Mutuus : SanguineModule {
 		}
 
 		featureMode = mutuus::FEATURE_MODE_META;
-		lightDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -124,7 +124,7 @@ struct Mutuus : SanguineModule {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
-		bool isLightsTurn = lightDivider.process();
+		bool isLightsTurn = lightsDivider.process();
 		float sampleTime = kLightFrequency * args.sampleTime;
 
 		float algorithmValue = 0.f;

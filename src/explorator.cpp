@@ -51,7 +51,7 @@ struct Explorator : SanguineModule {
 	};
 
 	const int kLightFrequency = 128;
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 	dsp::SchmittTrigger stSampleAndHold[16];
 	float voltagesSampleAndHold[16] = {};
 	int lastSampleAndHoldChannels = 0;
@@ -91,7 +91,7 @@ struct Explorator : SanguineModule {
 
 		configButton(PARAM_AVERAGER, "3:1 hardware behavior (averager)");
 
-		lightDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -230,7 +230,7 @@ struct Explorator : SanguineModule {
 
 		// Lights
 
-		if (lightDivider.process()) {
+		if (lightsDivider.process()) {
 			const float sampleTime = args.sampleTime * kLightFrequency;
 
 			// 1:3

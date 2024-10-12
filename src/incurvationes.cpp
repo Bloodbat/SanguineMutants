@@ -48,7 +48,7 @@ struct Incurvationes : SanguineModule {
 
 	bool bEasterEggEnabled = false;
 
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 
 	warps::Parameters* warpsParameters[PORT_MAX_CHANNELS];
 
@@ -84,7 +84,7 @@ struct Incurvationes : SanguineModule {
 			warpsParameters[i] = warpsModulator[i].mutable_parameters();
 		}
 
-		lightDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -94,7 +94,7 @@ struct Incurvationes : SanguineModule {
 
 		bEasterEggEnabled = params[PARAM_EASTER_EGG].getValue();
 
-		bool isLightsTurn = lightDivider.process();
+		bool isLightsTurn = lightsDivider.process();
 
 		float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.f;
 

@@ -46,7 +46,7 @@ struct Distortiones : SanguineModule {
 	const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 	distortiones::DistortionesModulator distortionesModulator[PORT_MAX_CHANNELS];
 	distortiones::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
 	distortiones::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
@@ -95,7 +95,7 @@ struct Distortiones : SanguineModule {
 		}
 
 		featureMode = distortiones::FEATURE_MODE_META;
-		lightDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -118,7 +118,7 @@ struct Distortiones : SanguineModule {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
-		bool isLightsTurn = lightDivider.process();
+		bool isLightsTurn = lightsDivider.process();
 		const float sampleTime = kLightFrequency * args.sampleTime;
 
 		float algorithmValue = 0.f;

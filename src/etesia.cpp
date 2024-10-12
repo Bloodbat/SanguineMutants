@@ -119,7 +119,7 @@ struct Etesia : SanguineModule {
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> inputBuffer;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 	dsp::VuMeter2 vuMeter;
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
 	etesia::PlaybackMode playbackMode = etesia::PLAYBACK_MODE_GRANULAR;
@@ -222,7 +222,7 @@ struct Etesia : SanguineModule {
 		etesiaProcessor = new etesia::EtesiaGranularProcessor();
 		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
 
-		lightDivider.setDivision(kClockDivider);
+		lightsDivider.setDivision(kClockDivider);
 
 		etesiaProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
@@ -419,7 +419,7 @@ struct Etesia : SanguineModule {
 			lastLEDPlaybackMode = playbackMode;
 		}
 
-		if (lightDivider.process()) { // Expensive, so call this infrequently
+		if (lightsDivider.process()) { // Expensive, so call this infrequently
 			const float sampleTime = args.sampleTime * kClockDivider;
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
@@ -574,7 +574,7 @@ struct Etesia : SanguineModule {
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 0.75f : 0.f, sampleTime);
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 0.75f : 0.f, sampleTime);
-		} // lightDivider
+		} // lightsDivider
 	}
 
 

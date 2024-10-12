@@ -117,7 +117,7 @@ struct Nebulae : SanguineModule {
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> inputBuffer;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 	dsp::VuMeter2 vuMeter;
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
 	clouds::PlaybackMode playbackMode = clouds::PLAYBACK_MODE_GRANULAR;
@@ -218,7 +218,7 @@ struct Nebulae : SanguineModule {
 		cloudsProcessor = new clouds::GranularProcessor();
 		memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
 
-		lightDivider.setDivision(kClockDivider);
+		lightsDivider.setDivision(kClockDivider);
 
 		cloudsProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
@@ -414,7 +414,7 @@ struct Nebulae : SanguineModule {
 			lastLEDPlaybackMode = playbackMode;
 		}
 
-		if (lightDivider.process()) { // Expensive, so call this infrequently
+		if (lightsDivider.process()) { // Expensive, so call this infrequently
 			const float sampleTime = args.sampleTime * kClockDivider;
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
@@ -548,7 +548,7 @@ struct Nebulae : SanguineModule {
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 0.75f : 0.f, sampleTime);
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 0.75f : 0.f, sampleTime);
-		} // lightDivider
+		} // lightsDivider
 	}
 
 

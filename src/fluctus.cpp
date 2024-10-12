@@ -114,7 +114,7 @@ struct Fluctus : SanguineModule {
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> inputBuffer;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 	dsp::VuMeter2 vuMeter;
-	dsp::ClockDivider lightDivider;
+	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
 	fluctus::PlaybackMode playbackMode = fluctus::PLAYBACK_MODE_GRANULAR;
@@ -215,7 +215,7 @@ struct Fluctus : SanguineModule {
 		fluctusProcessor = new fluctus::FluctusGranularProcessor();
 		memset(fluctusProcessor, 0, sizeof(*fluctusProcessor));
 
-		lightDivider.setDivision(kClockDivider);
+		lightsDivider.setDivision(kClockDivider);
 
 		fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
@@ -417,7 +417,7 @@ struct Fluctus : SanguineModule {
 			lastLEDPlaybackMode = playbackMode;
 		}
 
-		if (lightDivider.process()) { // Expensive, so call this infrequently
+		if (lightsDivider.process()) { // Expensive, so call this infrequently
 			const float sampleTime = args.sampleTime * kClockDivider;
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
@@ -571,7 +571,7 @@ struct Fluctus : SanguineModule {
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 0.75f : 0.f, sampleTime);
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 0.75f : 0.f, sampleTime);
-		} // lightDivider
+		} // lightsDivider
 	}
 
 
