@@ -1107,12 +1107,12 @@ struct MarmoraWidget : SanguineModuleWidget {
 			[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
 		));
 
+		menu->addChild(new MenuSeparator);
+
 		menu->addChild(createIndexSubmenuItem("Scale", marmoraScaleLabels,
 			[=]() {return module->params[Marmora::PARAM_SCALE].getValue(); },
 			[=](int i) {module->params[Marmora::PARAM_SCALE].setValue(i); }
 		));
-
-		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createCheckMenuItem("Scale edit mode", "",
 			[=]() {return module->bScaleEditMode; },
