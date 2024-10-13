@@ -883,7 +883,11 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Display channel", channelNumbers,
+		std::vector<std::string> availableChannels;
+		for (int i = 0; i < module->channelCount; i++) {
+			availableChannels.push_back(channelNumbers[i]);
+		}
+		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
 			[=]() {return module->displayChannel; },
 			[=](int i) {module->displayChannel = i; }
 		));

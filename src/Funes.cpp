@@ -133,12 +133,17 @@ struct Funes : SanguineModule {
 	float triPhase = 0.f;
 	float lastLPGColor = 0.5f;
 	float lastLPGDecay = 0.5f;
+	float lastModelVoltage = 0.f;
+
+	static const int textUpdateFrequency = 16;
 
 	int frequencyMode = 10;
 	int lastFrequencyMode = 10;
 	int displayModelNum = 0;
 
 	int displayChannel = 0;
+
+	int channelCount = 0;
 
 	uint32_t displayTimeout = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
@@ -158,9 +163,6 @@ struct Funes : SanguineModule {
 
 	std::string displayText = "";
 
-	float lastModelVoltage = 0.f;
-
-	static const int textUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
 	Funes() {
@@ -205,7 +207,7 @@ struct Funes : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		int channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
+		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		if (outputBuffer.empty()) {
 			const int blockSize = 12;
@@ -781,7 +783,11 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Display channel", channelNumbers,
+		std::vector<std::string> availableChannels;
+		for (int i = 0; i < module->channelCount; i++) {
+			availableChannels.push_back(channelNumbers[i]);
+		}
+		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
 			[=]() {return module->displayChannel; },
 			[=](int i) {module->displayChannel = i; }
 		));

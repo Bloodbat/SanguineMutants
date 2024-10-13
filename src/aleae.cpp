@@ -55,6 +55,7 @@ struct Aleae : SanguineModule {
 
 	const int kLightFrequency = 16;
 	int ledsChannel = 0;
+	int channelCount = 0;
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -85,9 +86,10 @@ struct Aleae : SanguineModule {
 			// Get input.
 			Input* input = &inputs[INPUT_IN1 + i];
 			// 2nd input is normalized to 1st.
-			if (i == 1 && !input->isConnected())
+			if (i == 1 && !input->isConnected()) {
 				input = &inputs[INPUT_IN1 + 0];
-			int channelCount = std::max(input->getChannels(), 1);
+			}
+			channelCount = std::max(input->getChannels(), 1);
 
 			rollModes[i] = params[PARAM_ROLL_MODE1 + i].getValue();
 			outModes[i] = params[PARAM_OUT_MODE1 + i].getValue();
@@ -232,7 +234,11 @@ struct AleaeWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("LEDs channel", channelNumbers,
+		std::vector<std::string> availableChannels;
+		for (int i = 0; i < module->channelCount; i++) {
+			availableChannels.push_back(channelNumbers[i]);
+		}
+		menu->addChild(createIndexSubmenuItem("LEDs channel", availableChannels,
 			[=]() {return module->ledsChannel; },
 			[=](int i) {module->ledsChannel = i; }
 		));

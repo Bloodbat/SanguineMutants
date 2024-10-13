@@ -152,7 +152,7 @@ struct Vimina : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		channelCount = inputs[INPUT_CLOCK].getChannels();
+		channelCount = std::max(inputs[INPUT_CLOCK].getChannels(), 1);
 
 		bool bClockConnected = inputs[INPUT_CLOCK].isConnected();
 
@@ -539,7 +539,11 @@ struct ViminaWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("LEDs channel", channelNumbers,
+		std::vector<std::string> availableChannels;
+		for (int i = 0; i < module->channelCount; i++) {
+			availableChannels.push_back(channelNumbers[i]);
+		}
+		menu->addChild(createIndexSubmenuItem("LEDs channel", availableChannels,
 			[=]() {return module->ledsChannel; },
 			[=](int i) {module->ledsChannel = i; }
 		));
