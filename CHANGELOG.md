@@ -28,7 +28,7 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Nebulae, Etesia and Fluctus always sum polyphonic input channels, per the voltage standards.
 
-- Ability to select the channel to show in the display for Funes, Nodi and Contextus.
+- Ability to select the channel to show in the display for Anuli, Funes, Nodi and Contextus.
 
 - Ability to select the channel to show in Aleae's LEDs.
 

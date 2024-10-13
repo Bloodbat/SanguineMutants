@@ -4,6 +4,7 @@
 #include "rings/dsp/strummer.h"
 #include "rings/dsp/string_synth_part.h"
 #include "sanguinehelpers.hpp"
+#include "sanguinechannels.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -104,6 +105,8 @@ struct Anuli : SanguineModule {
 	int polyphonyMode = 1;
 	int strummingFlagCounter = 0;
 	int strummingFlagInterval = 0;
+
+	int displayChannel = 0;
 
 	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS];
 	rings::ResonatorModel fxModel = rings::RESONATOR_MODEL_MODAL;
@@ -334,7 +337,11 @@ struct Anuli : SanguineModule {
 		if (bDividerTurn) {
 			const float sampleTime = kDividerFrequency * args.sampleTime;
 
-			displayText = bEasterEgg[0] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[0]];
+			if (displayChannel >= channelCount) {
+				displayChannel = channelCount - 1;
+			}
+
+			displayText = bEasterEgg[0] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[displayChannel]];
 
 			long long systemTimeMs = getSystemTimeMs();
 
@@ -420,6 +427,10 @@ struct Anuli : SanguineModule {
 
 		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
 
+		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
+
+		return rootJ;
+
 		return rootJ;
 	}
 
@@ -428,6 +439,11 @@ struct Anuli : SanguineModule {
 
 		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
 			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
+		}
+
+		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
+		if (displayChannelJ) {
+			displayChannel = json_integer_value(displayChannelJ);
 		}
 	}
 
@@ -564,6 +580,13 @@ struct AnuliWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Disastrous Peace FX", anuliFxLabels,
 			[=]() { return module->params[Anuli::PARAM_FX].getValue(); },
 			[=](int i) { module->params[Anuli::PARAM_FX].setValue(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createIndexSubmenuItem("Display channel", channelNumbers,
+			[=]() {return module->displayChannel; },
+			[=](int i) {module->displayChannel = i; }
 		));
 
 		menu->addChild(new MenuSeparator);
