@@ -56,6 +56,8 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Make Anuli's Disastrous Peace mode respect polyphony.
 
+- Output port nut colors for Nebulae family.
+
 
 ---
 

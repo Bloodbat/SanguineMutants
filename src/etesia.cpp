@@ -312,7 +312,7 @@ struct Etesia : SanguineModule {
 			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || frozen);
 			etesiaParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
 			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + parameters1[0], 0.f, 1.f);
-			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + parameters1[1], 0.f, 1.f);			
+			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + parameters1[1], 0.f, 1.f);
 			etesiaParameters->density = clamp(params[PARAM_DENSITY].getValue() + parameters1[2], 0.f, 1.f);
 			etesiaParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + parameters1[3], 0.f, 1.f);
 			etesiaParameters->dry_wet = clamp(params[PARAM_BLEND].getValue() + parameters2[0], 0.f, 1.f);
@@ -741,8 +741,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
 
-		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(129.013, 116.972), module, Etesia::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Etesia::OUTPUT_RIGHT));
 
 		if (module) {
 			displayModel->values.displayText = &module->textMode;

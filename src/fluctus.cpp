@@ -736,8 +736,8 @@ struct FluctusWidget : SanguineModuleWidget {
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
 
-		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(115.161, 116.972), module, Fluctus::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutGreen>(millimetersToPixelsVec(129.013, 116.972), module, Fluctus::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Fluctus::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Fluctus::OUTPUT_RIGHT));
 
 		if (module) {
 			displayModel->values.displayText = &module->textMode;
