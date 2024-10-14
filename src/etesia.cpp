@@ -51,6 +51,7 @@ struct Etesia : SanguineModule {
 		PARAM_STEREO,
 		PARAM_LEDS_MODE,
 		PARAM_REVERSE,
+		PARAM_OUT_GAIN,
 		PARAMS_COUNT
 	};
 	enum InputIds {
@@ -194,6 +195,8 @@ struct Etesia : SanguineModule {
 		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb", "%", 0.f, 100.f);
 
 		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain", "%", 0.f, 100.f);
+		
+		configParam(PARAM_OUT_GAIN, 0.f, 2.f, 1.f, "Output gain", "%", 0.f, 100.f);
 
 		configInput(INPUT_LEFT, "Left");
 		configInput(INPUT_RIGHT, "Right");
@@ -364,9 +367,11 @@ struct Etesia : SanguineModule {
 		if (!outputBuffer.empty()) {
 			outputFrame = outputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
+				outputFrame.samples[0] *= params[PARAM_OUT_GAIN].getValue();
 				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
 			}
 			if (outputs[OUTPUT_RIGHT].isConnected()) {
+				outputFrame.samples[1] *= params[PARAM_OUT_GAIN].getValue();
 				outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame.samples[1]);
 			}
 		}
@@ -725,11 +730,13 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Etesia::PARAM_REVERB));
 
-		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(14.603, 97.272), module, Etesia::PARAM_IN_GAIN));
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(41.434, 117.002), module, Etesia::PARAM_IN_GAIN));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(31.438, 97.272),
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(95.701, 117.002), module, Etesia::PARAM_OUT_GAIN));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(18.631, 96.727),
 			module, Etesia::PARAM_HI_FI, Etesia::LIGHT_HI_FI));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(56.63, 97.272),
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(43.823, 96.727),
 			module, Etesia::PARAM_STEREO, Etesia::LIGHT_STEREO));
 
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));

@@ -34,6 +34,8 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Note preview for played notes when editing scales in Marmora.
 
+- Output attenuator/amplifier for Nebulae family.
+
 ## Changes
 
 - Anuli's channel counter is gone, replaced by a row of LEDs at the top that show active channels and their selected modes.
