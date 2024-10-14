@@ -14,7 +14,7 @@ static const std::vector<NebulaeModeInfo> fluctusModeList{
 	{ "BEAT-REPEAT", "Beat-repeat " },
 };
 
-static const std::vector<EtesiaModeDisplay> fluctusModeDisplays{
+static const std::vector<CloudyParasiteModeDisplay> fluctusModeDisplays{
 	{"Freeze",  "Position",     "Density",          "Size",             "Texture",     "Pitch",         "Trigger",   "Blend",       "Spread",         "Feedback",   "Reverb"},
 	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",       "Pitch",         "Time",      "Blend",       "Spread",         "Feedback",   "Reverb"},
 	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",       "Pitch",         "Time",      "Blend",       "Spread",         "Feedback",   "Reverb"},
@@ -22,7 +22,7 @@ static const std::vector<EtesiaModeDisplay> fluctusModeDisplays{
 	{"Freeze",  "Loop begin",   "Loop size mod.",   "Loop size",        "Slice step",  "Playback spd.", "Clock",     "Slice prob.", "Clock div.",     "Pitch mod.", "Feedback"}
 };
 
-static const std::vector<EtesiaModeDisplay> fluctusModeTooltips{
+static const std::vector<CloudyParasiteModeDisplay> fluctusModeTooltips{
 	{"Freeze",  "Position",                    "Density",              "Size",                    "Texture",        "Pitch",          "Trigger",   "Blend",             "Spread",                    "Feedback",         "Reverb"},
 	{"Stutter", "Scrub",                       "Diffusion",            "Overlap",                 "LP/HP",          "Pitch",          "Time",      "Blend",             "Spread",                    "Feedback",         "Reverb"},
 	{"Stutter", "Time / Start",                "Diffusion",            "Overlap / Duration",      "LP/HP",          "Pitch",          "Time",      "Blend",             "Spread",                    "Feedback",         "Reverb"},
@@ -616,11 +616,11 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		FramebufferWidget* etesiaFramebuffer = new FramebufferWidget();
-		addChild(etesiaFramebuffer);
+		FramebufferWidget* fluctusFramebuffer = new FramebufferWidget();
+		addChild(fluctusFramebuffer);
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
-		etesiaFramebuffer->addChild(displayFreeze);
+		fluctusFramebuffer->addChild(displayFreeze);
 		displayFreeze->fallbackString = fluctusModeDisplays[0].labelFreeze;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Fluctus::INPUT_FREEZE));
@@ -638,7 +638,7 @@ struct FluctusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(107.606, 12.851), module, Fluctus::PARAM_LEDS_MODE));
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
-		etesiaFramebuffer->addChild(displayModel);
+		fluctusFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = fluctusModeList[0].display;
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Fluctus::PARAM_MODE));
@@ -647,7 +647,7 @@ struct FluctusWidget : SanguineModuleWidget {
 			module, Fluctus::PARAM_POSITION, Fluctus::LIGHT_POSITION_CV));
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
-		etesiaFramebuffer->addChild(displayPosition);
+		fluctusFramebuffer->addChild(displayPosition);
 		displayPosition->fallbackString = fluctusModeDisplays[0].labelPosition;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Fluctus::INPUT_POSITION));
@@ -656,7 +656,7 @@ struct FluctusWidget : SanguineModuleWidget {
 			module, Fluctus::PARAM_DENSITY, Fluctus::LIGHT_DENSITY_CV));
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
-		etesiaFramebuffer->addChild(displayDensity);
+		fluctusFramebuffer->addChild(displayDensity);
 		displayDensity->fallbackString = fluctusModeDisplays[0].labelDensity;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Fluctus::INPUT_DENSITY));
@@ -665,7 +665,7 @@ struct FluctusWidget : SanguineModuleWidget {
 			module, Fluctus::PARAM_SIZE, Fluctus::LIGHT_SIZE_CV));
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
-		etesiaFramebuffer->addChild(displaySize);
+		fluctusFramebuffer->addChild(displaySize);
 		displaySize->fallbackString = fluctusModeDisplays[0].labelSize;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Fluctus::INPUT_SIZE));
@@ -674,7 +674,7 @@ struct FluctusWidget : SanguineModuleWidget {
 			module, Fluctus::PARAM_TEXTURE, Fluctus::LIGHT_TEXTURE_CV));
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
-		etesiaFramebuffer->addChild(displayTexture);
+		fluctusFramebuffer->addChild(displayTexture);
 		displayTexture->fallbackString = fluctusModeDisplays[0].labelTexture;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Fluctus::INPUT_TEXTURE));
@@ -682,7 +682,7 @@ struct FluctusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Fluctus::PARAM_PITCH));
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
-		etesiaFramebuffer->addChild(displayPitch);
+		fluctusFramebuffer->addChild(displayPitch);
 		displayPitch->fallbackString = fluctusModeDisplays[0].labelPitch;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Fluctus::INPUT_PITCH));
@@ -690,13 +690,13 @@ struct FluctusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PGreen>(millimetersToPixelsVec(86.118, 41.169), module, Fluctus::PARAM_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay(module, 86.118, 51.174);
-		etesiaFramebuffer->addChild(displayBlend);
+		fluctusFramebuffer->addChild(displayBlend);
 		displayBlend->fallbackString = fluctusModeDisplays[0].labelBlend;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Fluctus::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
-		etesiaFramebuffer->addChild(displayTrigger);
+		fluctusFramebuffer->addChild(displayTrigger);
 		displayTrigger->fallbackString = fluctusModeDisplays[0].labelTrigger;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Fluctus::INPUT_TRIGGER));
@@ -704,7 +704,7 @@ struct FluctusWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 78.013), module, Fluctus::INPUT_SPREAD));
 
 		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay(module, 86.118, 86.709);
-		etesiaFramebuffer->addChild(displaySpread);
+		fluctusFramebuffer->addChild(displaySpread);
 		displaySpread->fallbackString = fluctusModeDisplays[0].labelSpread;
 
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Fluctus::PARAM_SPREAD));
@@ -712,7 +712,7 @@ struct FluctusWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 78.013), module, Fluctus::INPUT_FEEDBACK));
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
-		etesiaFramebuffer->addChild(displayFeedback);
+		fluctusFramebuffer->addChild(displayFeedback);
 		displayFeedback->fallbackString = fluctusModeDisplays[0].labelFeeback;
 
 		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Fluctus::PARAM_FEEDBACK));
@@ -720,7 +720,7 @@ struct FluctusWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 78.013), module, Fluctus::INPUT_REVERB));
 
 		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay(module, 125.214, 86.709);
-		etesiaFramebuffer->addChild(displayReverb);
+		fluctusFramebuffer->addChild(displayReverb);
 		displayReverb->fallbackString = fluctusModeDisplays[0].labelReverb;
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Fluctus::PARAM_REVERB));

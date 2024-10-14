@@ -15,7 +15,7 @@ static const std::vector<NebulaeModeInfo> etesiaModeList{
 	{ "RESONESTOR", "Resonestor" }
 };
 
-static const std::vector<EtesiaModeDisplay> etesiaModeDisplays{
+static const std::vector<CloudyParasiteModeDisplay> etesiaModeDisplays{
 	{"Freeze",  "Position",     "Density",          "Size",             "Texture",           "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
 	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",             "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
 	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",             "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
@@ -24,7 +24,7 @@ static const std::vector<EtesiaModeDisplay> etesiaModeDisplays{
 	{"Voice",   "Timbre",       "Decay",            "Chord",            "Filter LP-V Λ-BP",  "Pitch",     "Burst",   "Distortion", "Stereo",    "Harmonics",  "Scatter"}
 };
 
-static const std::vector<EtesiaModeDisplay> etesiaModeTooltips{
+static const std::vector<CloudyParasiteModeDisplay> etesiaModeTooltips{
 	{"Freeze",  "Position",     "Density",            "Size",               "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",         "Reverb"},
 	{"Stutter", "Scrub",        "Diffusion",          "Overlap",            "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
 	{"Stutter", "Time / Start", "Diffusion",          "Overlap / Duration", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
@@ -195,7 +195,7 @@ struct Etesia : SanguineModule {
 		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb", "%", 0.f, 100.f);
 
 		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain", "%", 0.f, 100.f);
-		
+
 		configParam(PARAM_OUT_GAIN, 0.f, 2.f, 1.f, "Output gain", "%", 0.f, 100.f);
 
 		configInput(INPUT_LEFT, "Left");

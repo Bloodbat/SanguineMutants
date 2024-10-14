@@ -1,6 +1,6 @@
 #pragma once
 
-struct EtesiaModeDisplay {
+struct CloudyParasiteModeDisplay {
 	std::string labelFreeze;
 	std::string labelPosition;
 	std::string labelDensity;
