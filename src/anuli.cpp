@@ -240,6 +240,7 @@ struct Anuli : SanguineModule {
 				// Polyphony			
 				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
+					stringSynth[channel].set_polyphony(polyphonyMode);
 				}
 				// Model				
 				stringSynth[channel].set_fx(rings::FxType(fxModel));

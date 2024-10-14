@@ -54,6 +54,8 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Anuli's Modal Resonator display label.
 
+- Make Anuli's Disastrous Peace mode respect polyphony.
+
 
 ---
 
