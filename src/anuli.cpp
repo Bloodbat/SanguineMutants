@@ -396,14 +396,9 @@ struct Anuli : SanguineModule {
 				}
 			}
 
-			if (polyphonyMode != 3) {
-				lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 2 ? 1.f : 0.f);
-				lights[LIGHT_POLYPHONY + 1].setBrightness(polyphonyMode >= 2 ? 1.f : 0.f);
-			}
-			else {
-				lights[LIGHT_POLYPHONY + 0].setBrightness(1.f);
-				lights[LIGHT_POLYPHONY + 1].setBrightness(pulseWidthModulationCounter < triangle ? 1.f : 0.f);
-			}
+			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
+			lights[LIGHT_POLYPHONY + 1].setBrightness((polyphonyMode != 3 && polyphonyMode & 0x06) ||
+				(polyphonyMode == 3 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f);
 
 			++strummingFlagInterval;
 			if (strummingFlagCounter) {
