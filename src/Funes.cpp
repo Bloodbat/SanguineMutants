@@ -755,29 +755,6 @@ struct FunesWidget : SanguineModuleWidget {
 			[=](int i) {module->setFrequencyMode(i); }
 		));
 
-		int engineNum = module->patch.engine;
-		if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
-			menu->addChild(new MenuSeparator);
-
-			menu->addChild(createMenuItem("Load custom data", "",
-				[=]() {module->customDataShowLoadDialog(); }
-			));
-
-			menu->addChild(createMenuItem("Reset to factory data", "",
-				[=]() {module->customDataReset(); }
-			));
-		}
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
-			system::openBrowser("https://bloodbat.github.io/Funes-Editors/");
-			}));
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
-
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
@@ -800,6 +777,29 @@ struct FunesWidget : SanguineModuleWidget {
 		menu->addChild(createCheckMenuItem("C0 model modulation (monophonic)", "",
 			[=]() {return module->bNotesModelSelection; },
 			[=]() {module->toggleNotesModelSelection(); }));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
+			system::openBrowser("https://bloodbat.github.io/Funes-Editors/");
+			}));
+
+		int engineNum = module->patch.engine;
+		if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
+			menu->addChild(new MenuSeparator);
+
+			menu->addChild(createMenuItem("Load custom data", "",
+				[=]() {module->customDataShowLoadDialog(); }
+			));
+
+			menu->addChild(createMenuItem("Reset to factory data", "",
+				[=]() {module->customDataReset(); }
+			));
+		}
 	}
 };
 
