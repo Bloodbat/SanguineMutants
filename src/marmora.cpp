@@ -307,7 +307,7 @@ struct Marmora : SanguineModule {
 	};
 
 	struct MarmoraScale {
-		bool dirty;
+		bool bScaleDirty;
 		marbles::Scale scale;
 	};
 
@@ -329,7 +329,7 @@ struct Marmora : SanguineModule {
 	bool bNoteGate = false;
 	bool bLastGate = false;
 
-	bool gates[BLOCK_SIZE * 2] = {};
+	bool bGates[BLOCK_SIZE * 2] = {};
 
 	DejaVuLockModes dejaVuLockModeT = DEJA_VU_LOCK_ON;
 	DejaVuLockModes dejaVuLockModeX = DEJA_VU_LOCK_ON;
@@ -423,7 +423,7 @@ struct Marmora : SanguineModule {
 		scaleRecorder.Init();
 
 		for (int i = 0; i < MAX_SCALES; i++) {
-			marmoraScales[i].dirty = false;
+			marmoraScales[i].bScaleDirty = false;
 			marmoraScales[i].scale.Init();
 			copyScale(preset_scales[i], marmoraScales[i].scale);
 		}
@@ -436,13 +436,13 @@ struct Marmora : SanguineModule {
 		// TODO!! Add reseeding! (From the manual).
 
 		// Clocks
-		bool tGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
-		lastTClock = stmlib::ExtractGateFlags(lastTClock, tGate);
+		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
+		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTGate);
 		tClocks[blockIndex] = lastTClock;
 		long long systemTimeMs = getSystemTimeMs();
 
-		bool xGate = (inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f);
-		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, xGate);
+		bool bXGate = (inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f);
+		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, bXGate);
 		xyClocks[blockIndex] = lastXYClock;
 
 		// Lock modes
@@ -481,9 +481,9 @@ struct Marmora : SanguineModule {
 
 		// Outputs
 		if (!bScaleEditMode) {
-			outputs[OUTPUT_T1].setVoltage(gates[blockIndex * 2 + 0] ? 10.f : 0.f);
+			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2 + 0] ? 10.f : 0.f);
 			outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) ? 10.f : 0.f);
-			outputs[OUTPUT_T3].setVoltage(gates[blockIndex * 2 + 1] ? 10.f : 0.f);
+			outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] ? 10.f : 0.f);
 
 			outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4 + 0]);
 			outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
@@ -548,14 +548,14 @@ struct Marmora : SanguineModule {
 
 			if (!bScaleEditMode) {
 				// T1 and T3 are booleans: they'll never go negative.
-				lights[LIGHT_T1 + 0].setBrightnessSmooth(gates[blockIndex * 2 + 0], sampleTime);
-				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 0], sampleTime);
+				lights[LIGHT_T1 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 0], sampleTime);
+				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 0], sampleTime);
 
 				lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
 				//lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
 
-				lights[LIGHT_T3 + 0].setBrightnessSmooth(gates[blockIndex * 2 + 1], sampleTime);
-				//lights[LIGHT_T3 + 1].setBrightnessSmooth(-gates[blockIndex * 2 + 1], sampleTime);
+				lights[LIGHT_T3 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
+				//lights[LIGHT_T3 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 1], sampleTime);
 
 				float outputVoltage = 0.f;
 
@@ -677,7 +677,7 @@ struct Marmora : SanguineModule {
 		int dejaVuLength = loop_length[static_cast<int>(roundf(dejaVuLengthIndex))];
 
 		// Setup TGenerator
-		bool tExternalClock = inputs[INPUT_T_CLOCK].isConnected();
+		bool bTExternalClock = inputs[INPUT_T_CLOCK].isConnected();
 
 		tGenerator.set_model(marbles::TGeneratorModel(params[PARAM_T_MODE].getValue()));
 		tGenerator.set_range(marbles::TGeneratorRange(params[PARAM_T_RANGE].getValue()));
@@ -697,7 +697,7 @@ struct Marmora : SanguineModule {
 		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
 		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
 
-		tGenerator.Process(tExternalClock, &bTReset, tClocks, ramps, gates, BLOCK_SIZE);
+		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, BLOCK_SIZE);
 
 		// Set up XYGenerator
 		marbles::ClockSource xClockSource = marbles::ClockSource(xClockSourceInternal);
@@ -797,7 +797,7 @@ struct Marmora : SanguineModule {
 			for (int i = 0; i < MAX_SCALES; i++) {
 				xyGenerator.LoadScale(i, preset_scales[i]);
 				copyScale(preset_scales[i], marmoraScales[i].scale);
-				marmoraScales[i].dirty = false;
+				marmoraScales[i].bScaleDirty = false;
 			}
 			bModuleAdded = true;
 		}
@@ -814,7 +814,7 @@ struct Marmora : SanguineModule {
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
 
 		for (int scale = 0; scale < MAX_SCALES; scale++) {
-			if (marmoraScales[scale].dirty) {
+			if (marmoraScales[scale].bScaleDirty) {
 				json_t* scaleDataVoltagesJ = json_array();
 				json_t* scaleDataWeightsJ = json_array();
 
@@ -848,7 +848,7 @@ struct Marmora : SanguineModule {
 		int dirtyScalesCount = 0;
 
 		for (int scale = 0; scale < MAX_SCALES; scale++) {
-			bool scaleOk = true;
+			bool bScaleOk = true;
 
 			std::string scaleHeader = string::f("userScale%d", scale);
 			std::string scaleBaseInterval = scaleHeader + "Interval";
@@ -880,27 +880,27 @@ struct Marmora : SanguineModule {
 								customScale.degree[degree].weight = json_integer_value(weightJ);
 							}
 							else {
-								scaleOk = false;
+								bScaleOk = false;
 							}
 						}
 					}
 					else {
-						scaleOk = false;
+						bScaleOk = false;
 					}
 				}
 				else {
-					scaleOk = false;
+					bScaleOk = false;
 				}
-				if (scaleOk) {
+				if (bScaleOk) {
 					copyScale(customScale, marmoraScales[scale].scale);
-					marmoraScales[scale].dirty = true;
+					marmoraScales[scale].bScaleDirty = true;
 					dirtyScalesCount++;
 				}
 			} // if (scaleBaseIntervalJ) {
 		} // for
 		if (dirtyScalesCount > 0) {
 			for (int scale = 0; scale < MAX_SCALES; scale++) {
-				if (marmoraScales[scale].dirty) {
+				if (marmoraScales[scale].bScaleDirty) {
 					xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 				}
 			}
@@ -910,13 +910,13 @@ struct Marmora : SanguineModule {
 	void toggleScaleEdit() {
 		if (bScaleEditMode) {
 			marbles::Scale customScale;
-			bool success = scaleRecorder.ExtractScale(&customScale);
-			if (success) {
+			bool bScaleSuccessful = scaleRecorder.ExtractScale(&customScale);
+			if (bScaleSuccessful) {
 				int currentScale = params[PARAM_SCALE].getValue();
 				marmoraScales[currentScale].scale.Init();
 				copyScale(customScale, marmoraScales[currentScale].scale);
 				xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
-				marmoraScales[currentScale].dirty = true;
+				marmoraScales[currentScale].bScaleDirty = true;
 			}
 		}
 		else {
@@ -930,7 +930,7 @@ struct Marmora : SanguineModule {
 		int currentScale = params[PARAM_SCALE].getValue();
 
 		copyScale(preset_scales[currentScale], marmoraScales[currentScale].scale);
-		marmoraScales[currentScale].dirty = false;
+		marmoraScales[currentScale].bScaleDirty = false;
 		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 	}
 
