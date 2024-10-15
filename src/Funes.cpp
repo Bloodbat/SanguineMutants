@@ -340,10 +340,8 @@ struct Funes : SanguineModule {
 						activeLights[currentLight] = true;
 					}
 
-					// Pulse the light if at least one voice is using a different engine.
-					if (activeEngine != patch.engine) {
-						pulse = true;
-					}
+					// Pulse the light if at least one voice is using a different engine.					
+					pulse = activeEngine != patch.engine;
 				}
 			}
 

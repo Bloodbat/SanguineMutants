@@ -478,12 +478,7 @@ struct Nebulae : SanguineModule {
 
 				paramQuantities[PARAM_LEDS_MODE]->name = nebulaeLedButtonPrefix + nebulaeButtonTexts[ledMode];
 
-				if (bLastFrozen) {
-					bDisplaySwitched = true;
-				}
-				else {
-					bDisplaySwitched = false;
-				}
+				bLastFrozen = bDisplaySwitched;
 			}
 
 			int currentLight = 0;

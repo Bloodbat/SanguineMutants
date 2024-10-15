@@ -483,9 +483,8 @@ struct Nodi : SanguineModule {
 
 				// Check if the pitch has changed to cause an auto-retrigger
 				int16_t pitch_delta = pitch - previousPitch[channel];
-				if (settings[channel].auto_trig && (pitch_delta >= 0x40 || -pitch_delta >= 0x40)) {
-					bFlagTriggerDetected[channel] = true;
-				}
+				bFlagTriggerDetected[channel] = settings[channel].auto_trig && (pitch_delta >= 0x40 || -pitch_delta >= 0x40);
+
 				previousPitch[channel] = pitch;
 
 				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
