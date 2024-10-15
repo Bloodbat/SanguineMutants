@@ -444,15 +444,9 @@ struct Anuli : SanguineModule {
 	}
 
 	void setMode(int modeNum) {
-		if (modeNum < 6) {
-			bEasterEgg[0] = false;
-			resonatorModel[0] = rings::ResonatorModel(modeNum);
-			params[PARAM_MODE].setValue(modeNum);
-		}
-		else {
-			bEasterEgg[0] = true;
-			params[PARAM_MODE].setValue(modeNum);
-		}
+		resonatorModel[0] = modeNum < 6 ? rings::ResonatorModel(modeNum) : resonatorModel[0];
+		bEasterEgg[0] = modeNum > 5;
+		params[PARAM_MODE].setValue(modeNum);
 	}
 };
 
