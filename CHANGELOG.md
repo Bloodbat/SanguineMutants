@@ -52,6 +52,10 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Disable "LFO" range in Nodi and Contextus.
 
+- Better wording for Funes' custom data menu entries.
+
+- Show Funes' custom data menu entries only when a Model that can load custom data is selected.
+
 ## Fixes
 
 - Anuli's Modal Resonator display label.

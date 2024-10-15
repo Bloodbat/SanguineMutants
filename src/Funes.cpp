@@ -755,15 +755,18 @@ struct FunesWidget : SanguineModuleWidget {
 			[=](int i) {module->setFrequencyMode(i); }
 		));
 
-		menu->addChild(new MenuSeparator);
+		int engineNum = module->patch.engine;
+		if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
+			menu->addChild(new MenuSeparator);
 
-		menu->addChild(createMenuItem("Load custom data for current engine", "",
-			[=]() {module->customDataShowLoadDialog(); }
-		));
+			menu->addChild(createMenuItem("Load custom data", "",
+				[=]() {module->customDataShowLoadDialog(); }
+			));
 
-		menu->addChild(createMenuItem("Reset custom data for current engine", "",
-			[=]() {module->customDataReset(); }
-		));
+			menu->addChild(createMenuItem("Reset to factory data", "",
+				[=]() {module->customDataReset(); }
+			));
+		}
 
 		menu->addChild(new MenuSeparator);
 
