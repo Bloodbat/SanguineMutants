@@ -52,9 +52,7 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Disable "LFO" range in Nodi and Contextus.
 
-- Better wording for Funes' custom data menu entries.
-
-- Show Funes' custom data menu entries only when a Model that can load custom data is selected.
+- Funes menu: reorder; better wording for custom data entries; make menu smarter: only show custom data entries when a Model that can load custom data is selected.
 
 ## Fixes
 
