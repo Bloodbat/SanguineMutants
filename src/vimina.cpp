@@ -2,11 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
-
-static const std::vector<std::string> viminaModeLabels = {
-	"Clock multiplier/divider",
-	"Clock swing"
-};
+#include "vimina.hpp"
 
 struct Vimina : SanguineModule {
 	enum ParamIds {

@@ -2,15 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
-
-#define ROLL_DIRECT 0
-#define ROLL_TOGGLE 1
-
-#define OUT_MODE_TRIGGER 0
-#define OUT_MODE_LATCH 1
-
-#define	ROLL_HEADS 0
-#define ROLL_TAILS 1
+#include "aleae.hpp"
 
 struct Aleae : SanguineModule {
 	enum ParamIds {
@@ -46,11 +38,11 @@ struct Aleae : SanguineModule {
 	dsp::BooleanTrigger btGateTriggers[2][16];
 	dsp::ClockDivider lightsDivider;
 
-	bool rollResults[2][16] = {};
-	bool lastRollResults[2][16];
+	RollResults rollResults[2][16] = {};
+	RollResults lastRollResults[2][16] = {};
 
-	bool rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
-	bool outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
+	RollModes rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
+	OutModes outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
 	bool bOutputsConnected[OUTPUTS_COUNT];
 
 	const int kLightFrequency = 16;
@@ -91,8 +83,8 @@ struct Aleae : SanguineModule {
 			}
 			channelCount = std::max(input->getChannels(), 1);
 
-			rollModes[i] = params[PARAM_ROLL_MODE1 + i].getValue();
-			outModes[i] = params[PARAM_OUT_MODE1 + i].getValue();
+			rollModes[i] = static_cast<RollModes>(params[PARAM_ROLL_MODE1 + i].getValue());
+			outModes[i] = static_cast<OutModes>(params[PARAM_OUT_MODE1 + i].getValue());
 
 			bool lightAActive = false;
 			bool lightBActive = false;
@@ -106,7 +98,7 @@ struct Aleae : SanguineModule {
 					float threshold = params[PARAM_THRESHOLD1 + i].getValue() + inputs[INPUT_P1 + i].getPolyVoltage(channel) / 10.f;
 					rollResults[i][channel] = (random::uniform() >= threshold) ? ROLL_HEADS : ROLL_TAILS;
 					if (rollModes[i] == ROLL_TOGGLE) {
-						rollResults[i][channel] = lastRollResults[i][channel] ^ rollResults[i][channel];
+						rollResults[i][channel] = static_cast<RollResults>(lastRollResults[i][channel] ^ rollResults[i][channel]);
 					}
 					lastRollResults[i][channel] = rollResults[i][channel];
 				}
