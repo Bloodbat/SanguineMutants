@@ -1,37 +1,10 @@
 ﻿#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
-#include "cloudycommon.hpp"
 #include "sanguinehelpers.hpp"
+#include "etesia.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
-
-static const std::vector<NebulaeModeInfo> etesiaModeList{
-	{ "GRANULAR", "Granular mode" },
-	{ "STRETCH", "Pitch shifter/time stretcher" },
-	{ "LOOPING DLY", "Looping delay" },
-	{ "SPECTRAL", "Spectral madness" },
-	{ "OLIVERB", "Oliverb" },
-	{ "RESONESTOR", "Resonestor" }
-};
-
-static const std::vector<CloudyParasiteModeDisplay> etesiaModeDisplays{
-	{"Freeze",  "Position",     "Density",          "Size",             "Texture",           "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",             "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",             "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",       "Quantize / Parts",  "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",   "Reverb"},
-	{"Freeze",  "Pre-delay",    "Decay",            "Size",             "Dampen LP-V Λ-HP",  "Pitch",     "Clock",   "Dry/Wet",    "Diffusion", "Mod. Speed", "Mod. Amount"},
-	{"Voice",   "Timbre",       "Decay",            "Chord",            "Filter LP-V Λ-BP",  "Pitch",     "Burst",   "Distortion", "Stereo",    "Harmonics",  "Scatter"}
-};
-
-static const std::vector<CloudyParasiteModeDisplay> etesiaModeTooltips{
-	{"Freeze",  "Position",     "Density",            "Size",               "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",         "Reverb"},
-	{"Stutter", "Scrub",        "Diffusion",          "Overlap",            "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
-	{"Stutter", "Time / Start", "Diffusion",          "Overlap / Duration", "LP/HP",            "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",         "Reverb"},
-	{"Freeze",  "Buffer",       "FFT Update / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch",  "Blend",      "Spread",    "Feedback",         "Reverb"},
-	{"Freeze",  "Pre-delay",    "Decay",              "Size",               "Dampening",        "Pitch",     "Clock",   "Dry/Wet",    "Diffusion", "Modulation speed", "Modulation amount"},
-	{"Voice",   "Timbre",       "Decay",              "Chord",              "Filter",           "Pitch",     "Burst",   "Distortion", "Stereo",    "Harmonics",        "Scatter"}
-};
 
 struct Etesia : SanguineModule {
 	enum ParamIds {
