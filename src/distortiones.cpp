@@ -379,7 +379,7 @@ struct DistortionesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createBoolPtrMenuItem("C4-A#4 direct mode selection", "", &module->bNotesModeSelection));
+		menu->addChild(createBoolPtrMenuItem("C4-G#4 direct mode selection", "", &module->bNotesModeSelection));
 	}
 };
 
