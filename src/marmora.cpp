@@ -848,7 +848,7 @@ struct Marmora : SanguineModule {
 		int dirtyScalesCount = 0;
 
 		for (int scale = 0; scale < MAX_SCALES; scale++) {
-			bool bScaleOk = true;
+			bool bScaleOk = false;
 
 			std::string scaleHeader = string::f("userScale%d", scale);
 			std::string scaleBaseInterval = scaleHeader + "Interval";
@@ -865,38 +865,32 @@ struct Marmora : SanguineModule {
 				customScale.base_interval = json_number_value(scaleBaseIntervalJ);
 
 				json_t* scaleDegreesJ = json_object_get(rootJ, scaleDegrees.c_str());
-				if (scaleDegreesJ) {
+				bScaleOk = scaleDegreesJ;
+				if (bScaleOk) {
 					customScale.num_degrees = json_integer_value(scaleDegreesJ);
 
 					json_t* scaleDataVoltagesJ = json_object_get(rootJ, scaleDataVoltages.c_str());
 					json_t* scaleDataWeightsJ = json_object_get(rootJ, scaleDataWeights.c_str());
 
-					if (scaleDataVoltagesJ && scaleDataWeightsJ) {
+					bScaleOk = scaleDataVoltagesJ && scaleDataWeightsJ;
+					if (bScaleOk) {
 						for (int degree = 0; degree < customScale.num_degrees; degree++) {
 							json_t* voltageJ = json_array_get(scaleDataVoltagesJ, degree);
 							json_t* weightJ = json_array_get(scaleDataWeightsJ, degree);
-							if (voltageJ && weightJ) {
+							bScaleOk = voltageJ && weightJ;
+							if (bScaleOk) {
 								customScale.degree[degree].voltage = json_number_value(voltageJ);
 								customScale.degree[degree].weight = json_integer_value(weightJ);
 							}
-							else {
-								bScaleOk = false;
-							}
 						}
 					}
-					else {
-						bScaleOk = false;
-					}
-				}
-				else {
-					bScaleOk = false;
 				}
 				if (bScaleOk) {
 					copyScale(customScale, marmoraScales[scale].scale);
 					marmoraScales[scale].bScaleDirty = true;
 					dirtyScalesCount++;
 				}
-			} // if (scaleBaseIntervalJ) {
+			}
 		} // for
 		if (dirtyScalesCount > 0) {
 			for (int scale = 0; scale < MAX_SCALES; scale++) {
