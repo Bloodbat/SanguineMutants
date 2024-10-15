@@ -3,18 +3,9 @@
 #include "sanguinehelpers.hpp"
 #include "tides/generator.h"
 #include "aestuscommon.hpp"
+#include "aestus.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
-
-static const std::vector<std::string> aestusDisplayModels = {
-	"T",
-	"S"
-};
-
-static const std::vector<std::string> aestusMenuLabels = {
-	"Tidal Modulator",
-	"Sheep - Wavetable synthesizer"
-};
 
 struct Aestus : SanguineModule {
 	enum ParamIds {
