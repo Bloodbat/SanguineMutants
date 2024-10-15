@@ -482,8 +482,8 @@ struct Nodi : SanguineModule {
 				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
 
 				// Check if the pitch has changed to cause an auto-retrigger
-				int16_t pitch_delta = pitch - previousPitch[channel];
-				bFlagTriggerDetected[channel] = settings[channel].auto_trig && (pitch_delta >= 0x40 || -pitch_delta >= 0x40);
+				int16_t pitchDelta = pitch - previousPitch[channel];
+				bFlagTriggerDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 || -pitchDelta >= 0x40);
 
 				previousPitch[channel] = pitch;
 
