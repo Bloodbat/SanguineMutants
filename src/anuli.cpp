@@ -82,7 +82,7 @@ struct Anuli : SanguineModule {
 	int displayChannel = 0;
 
 	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS];
-	rings::ResonatorModel fxModel = rings::RESONATOR_MODEL_MODAL;
+	rings::FxType fxModel = rings::FX_FORMANT;
 
 	std::string displayText = "";
 
@@ -156,7 +156,7 @@ struct Anuli : SanguineModule {
 
 		polyphonyMode = params[PARAM_POLYPHONY].getValue();
 
-		fxModel = rings::ResonatorModel(params[PARAM_FX].getValue());
+		fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
 
 		int modeNum = static_cast<int>(params[PARAM_MODE].getValue());
 
@@ -358,7 +358,7 @@ struct Anuli : SanguineModule {
 				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
 			else {
-				if (fxModel < rings::RESONATOR_MODEL_FM_VOICE) {
+				if (fxModel < rings::FX_FORMANT_2) {
 					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 0.75f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 0.75f : 0.f, sampleTime);
 				}
