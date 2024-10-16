@@ -293,7 +293,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(voltage2to2Sum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 			}
 
-			// Logic			
+			// Logic
 			float voltageLogicSum = 0;
 
 			if (channelsLogic < 2) {

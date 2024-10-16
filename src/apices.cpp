@@ -654,7 +654,7 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		// Update module internal state from settings.		
+		// Update module internal state from settings.
 		init();
 		saveState();
 	}

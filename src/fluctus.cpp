@@ -336,7 +336,7 @@ struct Fluctus : SanguineModule {
 			bTriggered = false;
 		}
 
-		// Set output			
+		// Set output
 		if (!outputBuffer.empty()) {
 			outputFrame = outputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {

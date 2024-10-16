@@ -163,7 +163,7 @@ struct Aestus : SanguineModule {
 		if (++frame >= 16) {
 			frame = 0;
 
-			// Sync			
+			// Sync
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 			generator.set_sync(bSync);
 

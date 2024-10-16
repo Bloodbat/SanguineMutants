@@ -245,7 +245,7 @@ struct Funes : SanguineModule {
 				}
 
 				if (ledsMode == LEDNormal) {
-					// Model lights	
+					// Model lights
 					// Get the active engines for currnet channel.
 					int currentLight;
 					int clampedEngine;
@@ -271,7 +271,7 @@ struct Funes : SanguineModule {
 						activeLights[currentLight] = true;
 					}
 
-					// Pulse the light if at least one voice is using a different engine.					
+					// Pulse the light if at least one voice is using a different engine.
 					pulse = activeEngine != patch.engine;
 				}
 			}

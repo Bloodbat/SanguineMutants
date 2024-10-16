@@ -157,7 +157,7 @@ static const LightModes tModeLights[MAX_T_MODES][2]{
     { LIGHT_BLINK_SLOW, LIGHT_OFF }, // T_GENERATOR_MODEL_INDEPENDENT_BERNOULLI
     { LIGHT_BLINK_SLOW, LIGHT_BLINK_SLOW }, // T_GENERATOR_MODEL_DIVIDER
     { LIGHT_OFF, LIGHT_BLINK_SLOW }, // T_GENERATOR_MODEL_THREE_STATES
-    { LIGHT_OFF, LIGHT_BLINK_FAST }, // T_GENERATOR_MODEL_MARKOV	
+    { LIGHT_OFF, LIGHT_BLINK_FAST }, // T_GENERATOR_MODEL_MARKOV
 };
 
 static const LightModes scaleLights[MAX_SCALES][2]{
@@ -166,7 +166,7 @@ static const LightModes scaleLights[MAX_SCALES][2]{
     { LIGHT_OFF, LIGHT_BLINK_SLOW }, // Pentatonic
     { LIGHT_BLINK_FAST, LIGHT_OFF }, // Pelog
     { LIGHT_BLINK_FAST, LIGHT_BLINK_FAST }, // Raag Bhairav That
-    { LIGHT_OFF, LIGHT_BLINK_FAST } // Raag Shri	
+    { LIGHT_OFF, LIGHT_BLINK_FAST } // Raag Shri
 };
 
 static const RGBLightColor paletteMarmoraClockSource[4]{

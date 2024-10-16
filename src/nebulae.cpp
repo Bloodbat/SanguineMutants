@@ -251,7 +251,7 @@ struct Nebulae : SanguineModule {
 				currentBufferSize = bufferSize;
 			}
 
-			// Set up Clouds processor			
+			// Set up Clouds processor
 			cloudsProcessor->set_playback_mode(playbackMode);
 			cloudsProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
 			cloudsProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
@@ -327,7 +327,7 @@ struct Nebulae : SanguineModule {
 			bTriggered = false;
 		}
 
-		// Set output			
+		// Set output
 		if (!outputBuffer.empty()) {
 			outputFrame = outputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {

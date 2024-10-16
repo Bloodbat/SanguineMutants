@@ -116,7 +116,7 @@ struct Nodi : SanguineModule {
 
 	bool bLowCpu = false;
 
-	// Display stuff	
+	// Display stuff
 	braids::SettingsData lastSettings = {};
 	braids::Setting lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
 
@@ -578,7 +578,7 @@ struct Nodi : SanguineModule {
 	}
 
 	inline void pollSwitches(const float sampleTime) {
-		// Handle switch lights		
+		// Handle switch lights
 		lights[LIGHT_MORSE].setBrightnessSmooth(bPaques ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled ? 0.75f : 0.f, sampleTime);

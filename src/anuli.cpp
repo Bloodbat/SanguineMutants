@@ -203,19 +203,19 @@ struct Anuli : SanguineModule {
 			// Render frames
 			if (outputBuffer[channel].empty()) {
 				float in[24] = {};
-				// Convert input buffer				
+				// Convert input buffer
 				inputSrc[channel].setRates(args.sampleRate, 48000);
 				int inLen = inputBuffer[channel].size();
 				int outLen = 24;
 				inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, (dsp::Frame<1>*) in, &outLen);
 				inputBuffer[channel].startIncr(inLen);
 
-				// Polyphony			
+				// Polyphony
 				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
 					stringSynth[channel].set_polyphony(polyphonyMode);
 				}
-				// Model				
+				// Model
 				stringSynth[channel].set_fx(rings::FxType(fxModel));
 				part[channel].set_model(resonatorModel[channel]);
 

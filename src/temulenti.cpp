@@ -175,7 +175,7 @@ struct Temulenti : SanguineModule {
 
 		//Buffer loop
 		if (generator.writable_block()) {
-			// Sync			
+			// Sync
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 			generator.set_sync(bSync);
 
@@ -184,7 +184,7 @@ struct Temulenti : SanguineModule {
 			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536;
 
 			pitchParam += 60.f;
-			// This is probably not original but seems useful to keep the same frequency as in normal mode.						
+			// This is probably not original but seems useful to keep the same frequency as in normal mode.
 			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC)
 				pitchParam -= 12.f;
 

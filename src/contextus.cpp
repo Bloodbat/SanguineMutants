@@ -400,14 +400,14 @@ struct Contextus : SanguineModule {
 				dsp::Frame<1> f = drbOutputBuffer[channel].shift();
 				outputs[OUTPUT_OUT].setVoltage(5.f * f.samples[0], channel);
 			}
-		} // Channels						
+		} // Channels
 
 		if (clockDivider.process()) {
 			const float sampleTime = args.sampleTime * kClockUpdateFrequency;
 
 			pollSwitches(sampleTime);
 
-			// Handle model light		
+			// Handle model light
 			int currentModel = settings[0].shape;
 			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, sampleTime);
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, sampleTime);
@@ -551,7 +551,7 @@ struct Contextus : SanguineModule {
 	}
 
 	inline void pollSwitches(const float sampleTime) {
-		// Handle switch lights		
+		// Handle switch lights
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? 0.75f : 0.f, sampleTime);

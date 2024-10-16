@@ -178,7 +178,7 @@ SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCoun
 }
 
 void SanguineBaseSegmentDisplay::draw(const DrawArgs& args) {
-	// Background		
+	// Background
 	nvgBeginPath(args.vg);
 	nvgRoundedRect(args.vg, 0.f, 0.f, box.size.x, box.size.y, 5.f);
 	nvgFillColor(args.vg, backgroundColor);
@@ -194,7 +194,7 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {
-			// Text				
+			// Text
 			nvgFontSize(args.vg, fontSize);
 			nvgFontFaceId(args.vg, font->handle);
 			nvgTextLetterSpacing(args.vg, kerning);
@@ -367,7 +367,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {
-			// Text					
+			// Text
 			nvgFontSize(args.vg, 6);
 			nvgFontFaceId(args.vg, font->handle);
 
@@ -395,7 +395,7 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 					else {
 						nvgText(args.vg, textPos.x, textPos.y, oledText->c_str(), NULL);
 					}
-					//drawRectHalo(args, box.size, textColor, 55, 0.f);					
+					//drawRectHalo(args, box.size, textColor, 55, 0.f);
 				}
 			}
 			else {
@@ -756,7 +756,7 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 
 // draw and drawLayer logic partially based on code by BaconPaul and Hemmer.
 void SanguineStaticRGBLight::draw(const DrawArgs& args) {
-	// Draw lights in module browser.	
+	// Draw lights in module browser.
 	if (!module) {
 		if (!sw->svg)
 			return;

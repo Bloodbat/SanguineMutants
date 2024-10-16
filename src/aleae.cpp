@@ -103,7 +103,7 @@ struct Aleae : SanguineModule {
 					lastRollResults[i][channel] = rollResults[i][channel];
 				}
 
-				// Output gate logic								
+				// Output gate logic
 				bool gateAActive = (rollResults[i][channel] == ROLL_HEADS && (outModes[i] == OUT_MODE_LATCH || gatePresent));
 				bool gateBActive = (rollResults[i][channel] == ROLL_TAILS && (outModes[i] == OUT_MODE_LATCH || gatePresent));
 
