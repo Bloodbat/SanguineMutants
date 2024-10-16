@@ -214,12 +214,22 @@ struct Anuli : SanguineModule {
 
 				// Polyphony
 				if (part[channel].polyphony() != polyphonyMode) {
-					part[channel].set_polyphony(polyphonyMode);
-					stringSynth[channel].set_polyphony(polyphonyMode);
+					if (!bEasterEgg[channel]) {
+						part[channel].set_polyphony(polyphonyMode);
+					}
+					else {
+						stringSynth[channel].set_polyphony(polyphonyMode);
+					}
 				}
 				// Model
-				stringSynth[channel].set_fx(rings::FxType(fxModel));
-				part[channel].set_model(resonatorModel[channel]);
+				if (!bEasterEgg[channel]) {
+					if (part[channel].model() != resonatorModel[channel]) {
+						part[channel].set_model(resonatorModel[channel]);
+					}
+				}
+				else {
+					stringSynth[channel].set_fx(rings::FxType(fxModel));
+				}
 
 				// Patch
 				rings::Patch patch;
