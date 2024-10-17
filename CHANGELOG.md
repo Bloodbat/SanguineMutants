@@ -16,7 +16,7 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 ## Additions
 
-- Polyphony for Incurvationes, Distortiones and Mutuus, active channels are show using rows of LEDs next around the INT. OSC. button.
+- Polyphony for Incurvationes, Distortiones and Mutuus, active channels are shown using rows of LEDs around the INT. OSC. button.
 
 - Polyphonic indicator LED lights show the current algorithm for every channel in Incurvationes.
 
