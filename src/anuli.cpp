@@ -334,6 +334,7 @@ struct Anuli : SanguineModule {
 			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
 			uint8_t triangle = (systemTimeMs >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
+			bool trianglePulse = pulseWidthModulationCounter < triangle;
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
@@ -351,16 +352,16 @@ struct Anuli : SanguineModule {
 						}
 						else {
 							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] & 4 &&
-								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+								trianglePulse) ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
-								pulseWidthModulationCounter < triangle) ? 1.f : 0.f, sampleTime);
+								trianglePulse) ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 						}
 					}
 					else {
 						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(pulseWidthModulationCounter < triangle ? 1.f : 0.f, sampleTime);
+						lights[currentLight + 2].setBrightnessSmooth(trianglePulse ? 1.f : 0.f, sampleTime);
 					}
 				}
 			}
@@ -376,15 +377,15 @@ struct Anuli : SanguineModule {
 				}
 				else {
 					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 &&
-						pulseWidthModulationCounter < triangle) ? 0.75f : 0.f, sampleTime);
+						trianglePulse) ? 0.75f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 &&
-						pulseWidthModulationCounter < triangle) ? 0.75f : 0.f, sampleTime);
+						trianglePulse) ? 0.75f : 0.f, sampleTime);
 				}
 			}
 
 			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
 			lights[LIGHT_POLYPHONY + 1].setBrightness((polyphonyMode != 3 && polyphonyMode & 0x06) ||
-				(polyphonyMode == 3 && pulseWidthModulationCounter < triangle) ? 1.f : 0.f);
+				(polyphonyMode == 3 && trianglePulse) ? 1.f : 0.f);
 
 			++strummingFlagInterval;
 			if (strummingFlagCounter) {
