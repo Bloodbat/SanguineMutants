@@ -149,7 +149,8 @@ struct Anuli : SanguineModule {
 
 		bool bDisastrousPeace = false;
 
-		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()), inputs[INPUT_IN].getChannels()), 1);
+		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
+			inputs[INPUT_IN].getChannels()), 1);
 
 		outputs[OUTPUT_ODD].setChannels(channelCount);
 		outputs[OUTPUT_EVEN].setChannels(channelCount);
@@ -245,9 +246,12 @@ struct Anuli : SanguineModule {
 
 				float structure = params[PARAM_STRUCTURE].getValue() + 3.3f * structureMod * voltages[0];
 				patch.structure = clamp(structure, 0.f, 0.9995f);
-				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3f * brightnessMod * voltages[1], 0.f, 1.f);
-				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3f * dampingMod * voltages[2], 0.f, 0.9995f);
-				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3f * positionMod * voltages[3], 0.f, 0.9995f);
+				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3f *
+					brightnessMod * voltages[1], 0.f, 1.f);
+				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3f *
+					dampingMod * voltages[2], 0.f, 0.9995f);
+				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3f *
+					positionMod * voltages[3], 0.f, 0.9995f);
 
 				// Performance
 				rings::PerformanceState performanceState;
@@ -259,7 +263,8 @@ struct Anuli : SanguineModule {
 					transpose = roundf(transpose);
 				}
 				performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
-				performanceState.fm = clamp(48.f * 3.3f * frequencyMod * inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.f, channel) / 5.f, -48.f, 48.f);
+				performanceState.fm = clamp(48.f * 3.3f * frequencyMod *
+					inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.f, channel) / 5.f, -48.f, 48.f);
 
 				performanceState.internal_exciter = bInternalExciter;
 				performanceState.internal_strum = bInternalStrum;
@@ -274,7 +279,8 @@ struct Anuli : SanguineModule {
 					setStrummingFlag(performanceState.strum);
 				}
 
-				performanceState.chord = clamp(static_cast<int>(roundf(structure * (rings::kNumChords - 1))), 0, rings::kNumChords - 1);
+				performanceState.chord = clamp(static_cast<int>(roundf(structure *
+					(rings::kNumChords - 1))), 0, rings::kNumChords - 1);
 
 				// Process audio
 				float out[24];
