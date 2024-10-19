@@ -494,7 +494,7 @@ struct Funes : SanguineModule {
 		}
 	}
 
-#ifndef SANGUINE_CARDINAL
+#ifndef USING_CARDINAL_NOT_RACK
 	void customDataReset() {
 		bool success = user_data.Save(nullptr, patch.engine);
 		if (success) {
@@ -703,7 +703,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 
-#ifndef SANGUINE_CARDINAL
+#ifndef USING_CARDINAL_NOT_RACK
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
