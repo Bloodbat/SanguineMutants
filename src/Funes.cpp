@@ -494,6 +494,7 @@ struct Funes : SanguineModule {
 		}
 	}
 
+#ifndef SANGUINE_CARDINAL
 	void customDataReset() {
 		bool success = user_data.Save(nullptr, patch.engine);
 		if (success) {
@@ -538,6 +539,7 @@ struct Funes : SanguineModule {
 		waveDir = system::getDirectory(path);
 		customDataLoad(path);
 	}
+#endif
 
 	void setEngine(int newModelNum) {
 		params[PARAM_MODEL].setValue(newModelNum);
@@ -701,6 +703,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 
+#ifndef SANGUINE_CARDINAL
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
@@ -719,6 +722,7 @@ struct FunesWidget : SanguineModuleWidget {
 				[=]() {module->customDataReset(); }
 			));
 		}
+#endif
 	}
 };
 
