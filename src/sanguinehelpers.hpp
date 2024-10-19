@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rack.hpp"
+#include <chrono>
 
 rack::math::Vec millimetersToPixelsVec(const float x, const float y);
 
