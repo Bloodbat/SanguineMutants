@@ -494,7 +494,6 @@ struct Funes : SanguineModule {
 		}
 	}
 
-#ifndef USING_CARDINAL_NOT_RACK
 	void customDataReset() {
 		bool success = user_data.Save(nullptr, patch.engine);
 		if (success) {
@@ -526,20 +525,38 @@ struct Funes : SanguineModule {
 	}
 
 	void customDataShowLoadDialog() {
+#ifndef USING_CARDINAL_NOT_RACK
 		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
 		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
+
 		if (!pathC) {
 			// Fail silently
 			// TODO!!! Maybe not fail silently=
 			return;
 		}
-		const std::string path = pathC;
+
+		std::string path = pathC;
 		std::free(pathC);
 
 		waveDir = system::getDirectory(path);
 		customDataLoad(path);
+#else
+		async_dialog_filebrowser(false, nullptr, waveDir.empty() ? nullptr : waveDir.c_str(), "Load custom data .bin file", [this](char* pathC) {
+
+			if (pathC == nullptr) {
+				// Fail silently
+				// TODO!!! Maybe not fail silently=
+				return;
+			}
+
+			const std::string path = pathC;
+			std::free(pathC);
+
+			waveDir = system::getDirectory(path);
+			customDataLoad(path);
+			});
+#endif			
 	}
-#endif
 
 	void setEngine(int newModelNum) {
 		params[PARAM_MODEL].setValue(newModelNum);
@@ -703,7 +720,6 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 
-#ifndef USING_CARDINAL_NOT_RACK
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
@@ -722,7 +738,6 @@ struct FunesWidget : SanguineModuleWidget {
 				[=]() {module->customDataReset(); }
 			));
 		}
-#endif
 	}
 };
 
