@@ -5,7 +5,7 @@
 #include "plaits/user_data.h"
 #include "sanguinechannels.hpp"
 
-#include <osdialog.h>
+#include "osdialog.h"
 #include <thread>
 
 #include <fstream>
@@ -154,8 +154,7 @@ struct Funes : SanguineModule {
 						displayModelNum = patch.engine;
 					}
 				}
-			}
-			else if (params[PARAM_MODEL].getValue() != patch.engine) {
+			} else if (params[PARAM_MODEL].getValue() != patch.engine) {
 				ledsMode = LEDNormal;
 				displayTimeout = 0;
 				lastLPGColor = params[PARAM_LPG_COLOR].getValue();
@@ -177,15 +176,12 @@ struct Funes : SanguineModule {
 			// TODO: check with low cpu mode.
 			if (frequencyMode == 0) {
 				patch.note = -48.37f + pitch * 15.f;
-			}
-			else if (frequencyMode == 9) {
+			} else if (frequencyMode == 9) {
 				float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
 				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
-			}
-			else if (frequencyMode == 10) {
+			} else if (frequencyMode == 10) {
 				patch.note = 60.f + pitch * 12.f;
-			}
-			else {
+			} else {
 				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
 			}
 
@@ -258,12 +254,10 @@ struct Funes : SanguineModule {
 					if (noiseModels) {
 						currentLight = clampedEngine + 1;
 						activeLights[currentLight] = true;
-					}
-					else if (pitchedModels) {
+					} else if (pitchedModels) {
 						currentLight = clampedEngine;
 						activeLights[currentLight] = true;
-					}
-					else
+					} else
 					{
 						currentLight = clampedEngine;
 						activeLights[currentLight] = true;
@@ -302,8 +296,7 @@ struct Funes : SanguineModule {
 				outputSrc.setChannels(channelCount * 2);
 				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
 				outputBuffer.endIncr(outLen);
-			}
-			else {
+			} else {
 				int len = std::min(static_cast<int>(outputBuffer.capacity()), blockSize);
 				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
 				outputBuffer.endIncr(len);
@@ -393,14 +386,11 @@ struct Funes : SanguineModule {
 
 					if (octave == 0) {
 						ledValue = i == (triangle >> 1) ? 0.f : 1.f;
-					}
-					else if (octave == 10) {
+					} else if (octave == 10) {
 						ledValue = 1.f;
-					}
-					else if (octave == 9) {
+					} else if (octave == 9) {
 						ledValue = (i & 1) == ((triangle >> 3) & 1) ? 0.f : 1.f;
-					}
-					else {
+					} else {
 						ledValue = (octave - 1) == i ? 1.f : 0.f;
 					}
 					lights[(LIGHT_MODEL + 7 * 2) - i * 2 + 0].setBrightness(ledValue);
