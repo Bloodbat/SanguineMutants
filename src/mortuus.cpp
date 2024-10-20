@@ -47,7 +47,7 @@ struct Mortuus : SanguineModule {
 	};
 
 	EditMode editMode = EDIT_MODE_TWIN;
-	ProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
+	MortuusProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
 	Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -167,9 +167,9 @@ struct Mortuus : SanguineModule {
 			updateOleds();
 		}
 
-		ProcessorFunction currentFunction = getProcessorFunction();
+		MortuusProcessorFunction currentFunction = getProcessorFunction();
 		if (params[PARAM_MODE].getValue() != currentFunction) {
-			currentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
+			currentFunction = static_cast<MortuusProcessorFunction>(params[PARAM_MODE].getValue());
 			setFunction(editMode - EDIT_MODE_FIRST, currentFunction);
 			saveState();
 		}
@@ -259,13 +259,12 @@ struct Mortuus : SanguineModule {
 		}
 	}
 
-	void setFunction(uint8_t index, ProcessorFunction f) {
+	void setFunction(uint8_t index, MortuusProcessorFunction f) {
 		if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
 			processorFunction[0] = processorFunction[1] = f;
 			processors[0].set_function(processorFunctionTable[f][0]);
 			processors[1].set_function(processorFunctionTable[f][1]);
-		}
-		else {
+		} else {
 			processorFunction[index] = f;
 			processors[index].set_function(processorFunctionTable[f][index]);
 		}
@@ -347,8 +346,7 @@ struct Mortuus : SanguineModule {
 		case EDIT_MODE_SPLIT:
 			if (id < 2) {
 				processors[0].set_parameter(id, value);
-			}
-			else {
+			} else {
 				processors[1].set_parameter(id - 2, value);
 			}
 			potValue[id] = value >> 8;
@@ -469,7 +467,7 @@ struct Mortuus : SanguineModule {
 		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.75f : 0.f, sampleTime);
 
-		ProcessorFunction currentProcessorFunction = getProcessorFunction();
+		MortuusProcessorFunction currentProcessorFunction = getProcessorFunction();
 		for (int i = 0; i < 4; i++) {
 			currentLight = LIGHT_FUNCTION_1 + i;
 			switch (lightStates[currentProcessorFunction][i]) {
@@ -580,8 +578,8 @@ struct Mortuus : SanguineModule {
 		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels - 1], false);
 
 		editMode = static_cast<EditMode>(settings.editMode);
-		processorFunction[0] = static_cast<ProcessorFunction>(settings.processorFunction[0]);
-		processorFunction[1] = static_cast<ProcessorFunction>(settings.processorFunction[1]);
+		processorFunction[0] = static_cast<MortuusProcessorFunction>(settings.processorFunction[0]);
+		processorFunction[1] = static_cast<MortuusProcessorFunction>(settings.processorFunction[1]);
 		std::copy(&settings.potValue[0], &settings.potValue[7], &potValue[0]);
 
 		if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
@@ -605,8 +603,7 @@ struct Mortuus : SanguineModule {
 			oledText2 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob2;
 			oledText3 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob3;
 			oledText4 = mortuusKnobLabelsSplitMode[processorFunction[0]].knob4;
-		}
-		else {
+		} else {
 
 			int currentFunction = -1;
 			// same for both
@@ -616,8 +613,7 @@ struct Mortuus : SanguineModule {
 			// if expert, pick the active set of labels
 			else if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
 				currentFunction = processorFunction[editMode - EDIT_MODE_FIRST];
-			}
-			else {
+			} else {
 				return;
 			}
 
@@ -662,12 +658,12 @@ struct Mortuus : SanguineModule {
 
 		json_t* fcnChannel1J = json_object_get(rootJ, "fcn_channel_1");
 		if (fcnChannel1J) {
-			settings.processorFunction[0] = static_cast<ProcessorFunction>(json_integer_value(fcnChannel1J));
+			settings.processorFunction[0] = static_cast<MortuusProcessorFunction>(json_integer_value(fcnChannel1J));
 		}
 
 		json_t* fcnChannel2J = json_object_get(rootJ, "fcn_channel_2");
 		if (fcnChannel2J) {
-			settings.processorFunction[1] = static_cast<ProcessorFunction>(json_integer_value(fcnChannel2J));
+			settings.processorFunction[1] = static_cast<MortuusProcessorFunction>(json_integer_value(fcnChannel2J));
 		}
 
 		json_t* snapModeJ = json_object_get(rootJ, "snap_mode");
@@ -701,7 +697,7 @@ struct Mortuus : SanguineModule {
 		return s;
 	}
 
-	inline ProcessorFunction getProcessorFunction() const {
+	inline MortuusProcessorFunction getProcessorFunction() const {
 		return editMode == EDIT_MODE_SECOND ? processorFunction[1] : processorFunction[0];
 	}
 

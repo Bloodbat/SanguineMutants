@@ -47,7 +47,7 @@ struct Apices : SanguineModule {
 	};
 
 	EditMode editMode = EDIT_MODE_TWIN;
-	ProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
+	ApicesProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
 	Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -154,9 +154,9 @@ struct Apices : SanguineModule {
 			updateOleds();
 		}
 
-		ProcessorFunction currentFunction = getProcessorFunction();
+		ApicesProcessorFunction currentFunction = getProcessorFunction();
 		if (params[PARAM_MODE].getValue() != currentFunction) {
-			currentFunction = static_cast<ProcessorFunction>(params[PARAM_MODE].getValue());
+			currentFunction = static_cast<ApicesProcessorFunction>(params[PARAM_MODE].getValue());
 			setFunction(editMode - EDIT_MODE_FIRST, currentFunction);
 			saveState();
 		}
@@ -245,7 +245,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void setFunction(uint8_t index, ProcessorFunction f) {
+	void setFunction(uint8_t index, ApicesProcessorFunction f) {
 		if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
 			processorFunction[0] = processorFunction[1] = f;
 			processors[0].set_function(processorFunctionTable[f][0]);
@@ -455,7 +455,7 @@ struct Apices : SanguineModule {
 		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.75f : 0.f, sampleTime);
 
-		ProcessorFunction currentProcessorFunction = getProcessorFunction();
+		ApicesProcessorFunction currentProcessorFunction = getProcessorFunction();
 		for (int i = 0; i < 4; i++) {
 			currentLight = LIGHT_FUNCTION_1 + i;
 			switch (lightStates[currentProcessorFunction][i]) {
@@ -550,8 +550,8 @@ struct Apices : SanguineModule {
 		std::fill(&bSnapped[0], &bSnapped[kNumAdcChannels - 1], false);
 
 		editMode = static_cast<EditMode>(settings.editMode);
-		processorFunction[0] = static_cast<ProcessorFunction>(settings.processorFunction[0]);
-		processorFunction[1] = static_cast<ProcessorFunction>(settings.processorFunction[1]);
+		processorFunction[0] = static_cast<ApicesProcessorFunction>(settings.processorFunction[0]);
+		processorFunction[1] = static_cast<ApicesProcessorFunction>(settings.processorFunction[1]);
 		std::copy(&settings.potValue[0], &settings.potValue[7], &potValue[0]);
 
 		if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
@@ -632,12 +632,12 @@ struct Apices : SanguineModule {
 
 		json_t* fcnChannel1J = json_object_get(rootJ, "fcn_channel_1");
 		if (fcnChannel1J) {
-			settings.processorFunction[0] = static_cast<ProcessorFunction>(json_integer_value(fcnChannel1J));
+			settings.processorFunction[0] = static_cast<ApicesProcessorFunction>(json_integer_value(fcnChannel1J));
 		}
 
 		json_t* fcnChannel2J = json_object_get(rootJ, "fcn_channel_2");
 		if (fcnChannel2J) {
-			settings.processorFunction[1] = static_cast<ProcessorFunction>(json_integer_value(fcnChannel2J));
+			settings.processorFunction[1] = static_cast<ApicesProcessorFunction>(json_integer_value(fcnChannel2J));
 		}
 
 		json_t* snapModeJ = json_object_get(rootJ, "snap_mode");
@@ -671,7 +671,7 @@ struct Apices : SanguineModule {
 		return s;
 	}
 
-	inline ProcessorFunction getProcessorFunction() const {
+	inline ApicesProcessorFunction getProcessorFunction() const {
 		return editMode == EDIT_MODE_SECOND ? processorFunction[1] : processorFunction[0];
 	}
 

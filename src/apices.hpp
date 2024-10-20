@@ -2,7 +2,7 @@
 
 #include "apicescommon.hpp"
 
-enum ProcessorFunction {
+enum ApicesProcessorFunction {
     FUNCTION_ENVELOPE,
     FUNCTION_LFO,
     FUNCTION_TAP_LFO,
