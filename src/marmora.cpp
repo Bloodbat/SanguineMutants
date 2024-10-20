@@ -475,12 +475,9 @@ struct Marmora : SanguineModule {
 			x.register_mode = params[PARAM_EXTERNAL].getValue();
 			x.register_value = u;
 
-			float xSpread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
-			x.spread = xSpread;
-			float xBias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
-			x.bias = xBias;
-			float xSteps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
-			x.steps = xSteps;
+			x.spread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
+			x.bias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
+			x.steps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
 			if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK) {
 				x.deja_vu = bDejaVuXEnabled ? dejaVu : 0.f;
 			} else {
