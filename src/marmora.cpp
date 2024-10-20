@@ -266,8 +266,7 @@ struct Marmora : SanguineModule {
 			outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4 + 0]);
 			outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
 			outputs[OUTPUT_X3].setVoltage(voltages[blockIndex * 4 + 2]);
-		}
-		else {
+		} else {
 			outputs[OUTPUT_T1].setVoltage(bLastGate ? 10.f : 0.f);
 			outputs[OUTPUT_T2].setVoltage(bLastGate ? 10.f : 0.f);
 			outputs[OUTPUT_T3].setVoltage(bLastGate ? 10.f : 0.f);
@@ -284,15 +283,13 @@ struct Marmora : SanguineModule {
 
 			if (bDejaVuTEnabled || dejaVuLockModeT == DEJA_VU_SUPER_LOCK) {
 				drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime, systemTimeMs);
-			}
-			else {
+			} else {
 				lights[LIGHT_DEJA_VU_T].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			if (bDejaVuXEnabled || dejaVuLockModeX == DEJA_VU_SUPER_LOCK) {
 				drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime, systemTimeMs);
-			}
-			else {
+			} else {
 				lights[LIGHT_DEJA_VU_X].setBrightnessSmooth(0.f, sampleTime);
 			}
 
@@ -315,8 +312,7 @@ struct Marmora : SanguineModule {
 			if (!bScaleEditMode) {
 				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f, sampleTime);
-			}
-			else {
+			} else {
 				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
@@ -348,8 +344,7 @@ struct Marmora : SanguineModule {
 				outputVoltage = math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f);
 				lights[LIGHT_X3 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
 				lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
-			}
-			else {
+			} else {
 				lights[LIGHT_T1 + 0].setBrightnessSmooth(bLastGate, sampleTime);
 
 				lights[LIGHT_T2 + 0].setBrightnessSmooth(bLastGate, sampleTime);
@@ -376,8 +371,7 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
-			}
-			else {
+			} else {
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
@@ -397,6 +391,7 @@ struct Marmora : SanguineModule {
 			lights[light].setBrightnessSmooth(0.75f, sampleTime);
 			break;
 		}
+		case LIGHT_BLINK:
 		case LIGHT_BLINK_SLOW: {
 			lights[light].setBrightnessSmooth((systemTimeMs & 255) > 128 ? 0.75f : 0.f, sampleTime);
 			break;
@@ -467,8 +462,7 @@ struct Marmora : SanguineModule {
 		tGenerator.set_jitter(tJitter);
 		if (dejaVuLockModeT != DEJA_VU_SUPER_LOCK) {
 			tGenerator.set_deja_vu(bDejaVuTEnabled ? dejaVu : 0.f);
-		}
-		else {
+		} else {
 			tGenerator.set_deja_vu(0.5f);
 		}
 		tGenerator.set_length(dejaVuLength);
@@ -503,8 +497,7 @@ struct Marmora : SanguineModule {
 			x.steps = xSteps;
 			if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK) {
 				x.deja_vu = bDejaVuXEnabled ? dejaVu : 0.f;
-			}
-			else {
+			} else {
 				x.deja_vu = 0.5f;
 			}
 			x.length = dejaVuLength;
@@ -531,8 +524,7 @@ struct Marmora : SanguineModule {
 			y.scale_index = xScale;
 
 			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, BLOCK_SIZE);
-		}
-		else {
+		} else {
 			/* Was
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
 			*/
@@ -544,12 +536,10 @@ struct Marmora : SanguineModule {
 				if (!bLastGate) {
 					scaleRecorder.NewNote(voltage);
 					bLastGate = true;
-				}
-				else {
+				} else {
 					scaleRecorder.UpdateVoltage(voltage);
 				}
-			}
-			else {
+			} else {
 				if (bLastGate) {
 					scaleRecorder.AcceptNote();
 					bLastGate = false;
@@ -578,8 +568,7 @@ struct Marmora : SanguineModule {
 				marmoraScales[i].bScaleDirty = false;
 			}
 			bModuleAdded = true;
-		}
-		else {
+		} else {
 			for (int i = 0; i < MAX_SCALES; i++) {
 				xyGenerator.LoadScale(i, marmoraScales[i].scale);
 			}
@@ -690,8 +679,7 @@ struct Marmora : SanguineModule {
 				xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 				marmoraScales[currentScale].bScaleDirty = true;
 			}
-		}
-		else {
+		} else {
 			scaleRecorder.Clear();
 			bLastGate = false;
 		}

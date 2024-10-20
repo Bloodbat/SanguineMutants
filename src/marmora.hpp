@@ -8,13 +8,6 @@ enum DejaVuLockModes {
     DEJA_VU_SUPER_LOCK
 };
 
-enum LightModes {
-    LIGHT_OFF,
-    LIGHT_ON,
-    LIGHT_BLINK_SLOW,
-    LIGHT_BLINK_FAST
-};
-
 static const int BLOCK_SIZE = 5;
 static const int MAX_T_MODES = 7;
 static const int MAX_SCALES = 6;

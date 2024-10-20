@@ -16,12 +16,6 @@ enum EditMode {
     EDIT_MODE_LAST
 };
 
-enum LightModes {
-    LIGHT_OFF,
-    LIGHT_ON,
-    LIGHT_BLINK
-};
-
 struct Settings {
     uint8_t editMode;
     uint8_t processorFunction[2];

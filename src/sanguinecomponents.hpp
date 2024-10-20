@@ -273,6 +273,15 @@ struct Rogan6PSLight : Base {
 	}
 };
 
+// Light states
+enum LightModes {
+	LIGHT_OFF,
+	LIGHT_ON,
+	LIGHT_BLINK,
+	LIGHT_BLINK_SLOW,
+	LIGHT_BLINK_FAST
+};
+
 // Decorations
 
 struct SanguineShapedLight : SvgLight {
