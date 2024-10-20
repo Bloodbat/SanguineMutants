@@ -217,3 +217,14 @@ static const std::vector<std::string> marmoraLockLabels = {
     "Unlocked",
     "Locked"
 };
+
+static const int marmoraLoopLength[] = {
+            1, 1, 1, 2, 2,
+            2, 2, 2, 3, 3,
+            3, 3, 4, 4, 4,
+            4, 4, 5, 5, 6,
+            6, 6, 7, 7, 8,
+            8, 8, 10, 10, 12,
+            12, 12, 14, 14, 16,
+            16
+};

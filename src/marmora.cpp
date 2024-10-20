@@ -431,18 +431,9 @@ struct Marmora : SanguineModule {
 		ramps.slave[1] = rampSlave[1];
 
 		float dejaVu = clamp(params[PARAM_DEJA_VU].getValue() + inputs[INPUT_DEJA_VU].getVoltage() / 5.f, 0.f, 1.f);
-		static const int loop_length[] = {
-			1, 1, 1, 2, 2,
-			2, 2, 2, 3, 3,
-			3, 3, 4, 4, 4,
-			4, 4, 5, 5, 6,
-			6, 6, 7, 7, 8,
-			8, 8, 10, 10, 12,
-			12, 12, 14, 14, 16,
-			16
-		};
-		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(loop_length) - 1);
-		int dejaVuLength = loop_length[static_cast<int>(roundf(dejaVuLengthIndex))];
+
+		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmoraLoopLength) - 1);
+		int dejaVuLength = marmoraLoopLength[static_cast<int>(roundf(dejaVuLengthIndex))];
 
 		// Setup TGenerator
 		bool bTExternalClock = inputs[INPUT_T_CLOCK].isConnected();
