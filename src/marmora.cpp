@@ -383,23 +383,19 @@ struct Marmora : SanguineModule {
 		switch (lightMode)
 		{
 		case LIGHT_OFF:
-		{
 			lights[light].setBrightnessSmooth(0.f, sampleTime);
 			break;
-		}
-		case LIGHT_ON: {
+		case LIGHT_ON:
 			lights[light].setBrightnessSmooth(0.75f, sampleTime);
 			break;
-		}
-		case LIGHT_BLINK:
-		case LIGHT_BLINK_SLOW: {
+		case LIGHT_BLINK_SLOW:
 			lights[light].setBrightnessSmooth((systemTimeMs & 255) > 128 ? 0.75f : 0.f, sampleTime);
 			break;
-		}
-		case LIGHT_BLINK_FAST: {
+		case LIGHT_BLINK_FAST:
 			lights[light].setBrightnessSmooth((systemTimeMs & 127) > 64 ? 0.75f : 0.f, sampleTime);
 			break;
-		}
+		default:
+			break;
 		}
 	}
 
