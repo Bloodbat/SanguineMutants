@@ -438,8 +438,8 @@ struct Marmora : SanguineModule {
 		// Setup TGenerator
 		bool bTExternalClock = inputs[INPUT_T_CLOCK].isConnected();
 
-		tGenerator.set_model(marbles::TGeneratorModel(params[PARAM_T_MODE].getValue()));
-		tGenerator.set_range(marbles::TGeneratorRange(params[PARAM_T_RANGE].getValue()));
+		tGenerator.set_model(static_cast<marbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
+		tGenerator.set_range(static_cast<marbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
 		float tRate = 60.f * (params[PARAM_T_RATE].getValue() + inputs[INPUT_T_RATE].getVoltage() / 5.f);
 		tGenerator.set_rate(tRate);
 		float tBias = clamp(params[PARAM_T_BIAS].getValue() + inputs[INPUT_T_BIAS].getVoltage() / 5.f, 0.f, 1.f);
@@ -458,15 +458,15 @@ struct Marmora : SanguineModule {
 		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, BLOCK_SIZE);
 
 		// Set up XYGenerator
-		marbles::ClockSource xClockSource = marbles::ClockSource(xClockSourceInternal);
+		marbles::ClockSource xClockSource = static_cast<marbles::ClockSource>(xClockSourceInternal);
 		if (bXClockSourceExternal) {
 			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
 		}
 
 		if (!bScaleEditMode) {
 			marbles::GroupSettings x;
-			x.control_mode = marbles::ControlMode(params[PARAM_X_MODE].getValue());
-			x.voltage_range = marbles::VoltageRange(params[PARAM_X_RANGE].getValue());
+			x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
+			x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
 			// TODO Fix the scaling
 			//  I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong: custom scales seem to behave nicely when NOT doing that...) -Bat
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
