@@ -217,7 +217,6 @@ struct Marmora : SanguineModule {
 		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTGate);
 		tClocks[blockIndex] = lastTClock;
-		long long systemTimeMs = getSystemTimeMs();
 
 		bool bXGate = (inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f);
 		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, bXGate);
@@ -279,6 +278,8 @@ struct Marmora : SanguineModule {
 
 		// Lights
 		if (lightsDivider.process()) {
+			long long systemTimeMs = getSystemTimeMs();
+
 			const float sampleTime = kLightDivider * args.sampleTime;
 
 			if (bDejaVuTEnabled || dejaVuLockModeT == DEJA_VU_SUPER_LOCK) {
