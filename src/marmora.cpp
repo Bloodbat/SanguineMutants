@@ -309,18 +309,14 @@ struct Marmora : SanguineModule {
 			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? 0.75f : 0.f);
 			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? 0.75f : 0.f);
 
-			if (!bScaleEditMode) {
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f, sampleTime);
-				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f, sampleTime);
-			} else {
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(0.75f, sampleTime);
-				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
-			}
-
 			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime, systemTimeMs);
 			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime, systemTimeMs);
 
 			if (!bScaleEditMode) {
+				float lightExternalBrightness = params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f;
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(lightExternalBrightness, sampleTime);
+				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
+
 				// T1 and T3 are booleans: they'll never go negative.
 				lights[LIGHT_T1 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 0], sampleTime);
 				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 0], sampleTime);
@@ -345,6 +341,9 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_X3 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
 				lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 			} else {
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(0.75f, sampleTime);
+				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
+
 				lights[LIGHT_T1 + 0].setBrightnessSmooth(bLastGate, sampleTime);
 
 				lights[LIGHT_T2 + 0].setBrightnessSmooth(bLastGate, sampleTime);
