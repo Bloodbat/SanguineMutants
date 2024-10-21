@@ -35,23 +35,25 @@ struct Aleae : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	dsp::BooleanTrigger btGateTriggers[2][16];
-	dsp::ClockDivider lightsDivider;
-
-	RollResults rollResults[2][16] = {};
-	RollResults lastRollResults[2][16] = {};
-
-	RollModes rollModes[2] = { ROLL_DIRECT, ROLL_DIRECT };
-	OutModes outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
-	bool bOutputsConnected[OUTPUTS_COUNT];
-
 	static const int kLightFrequency = 16;
+	static const int kMaxModuleSections = 2;
 	int ledsChannel = 0;
 	int channelCount = 0;
 
+
+	dsp::BooleanTrigger btGateTriggers[kMaxModuleSections][16];
+	dsp::ClockDivider lightsDivider;
+
+	RollResults rollResults[kMaxModuleSections][16] = {};
+	RollResults lastRollResults[kMaxModuleSections][16] = {};
+
+	RollModes rollModes[kMaxModuleSections] = { ROLL_DIRECT, ROLL_DIRECT };
+	OutModes outModes[kMaxModuleSections] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
+	bool bOutputsConnected[OUTPUTS_COUNT];
+
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < kMaxModuleSections; i++) {
 			configParam(PARAM_THRESHOLD1 + i, 0.f, 1.f, 0.5f, string::f("Channel %d probability", i + 1), "%", 0, 100);
 			configSwitch(PARAM_ROLL_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", i + 1), { "Direct", "Toggle" });
 			configSwitch(PARAM_OUT_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d out mode", i + 1), { "Trigger", "Latch" });
@@ -74,7 +76,7 @@ struct Aleae : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < kMaxModuleSections; i++) {
 			// Get input.
 			Input* input = &inputs[INPUT_IN1 + i];
 			// 2nd input is normalized to 1st.
@@ -149,7 +151,7 @@ struct Aleae : SanguineModule {
 
 
 	void onReset() override {
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < kMaxModuleSections; i++) {
 			params[PARAM_ROLL_MODE1 + i].setValue(0);
 			params[PARAM_OUT_MODE1 + i].setValue(0);
 			for (int j = 0; j < 16; j++) {
