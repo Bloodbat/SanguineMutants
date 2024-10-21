@@ -1,3 +1,14 @@
+# 2.5.1
+
+## Changes
+
+- Improve Marmora performance.
+
+## Fixes
+
+- Vimina stops generating multiplied clocks when the source clock stops.
+
+
 # 2.5.0
 
 ## New Modules
