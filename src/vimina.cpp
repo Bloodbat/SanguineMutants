@@ -81,6 +81,7 @@ struct Vimina : SanguineModule {
 
 	int channelCount = 0;
 	int ledsChannel = 0;
+	int triggerCount[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	int16_t channelFactor[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	int16_t channelSwing[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
@@ -119,7 +120,7 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
-	dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1	
+	dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -174,7 +175,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; channel++) {
-			tmrModuleClock[channel].process(kClockSpeed * args.sampleTime);			
+			tmrModuleClock[channel].process(kClockSpeed * args.sampleTime);
 
 			bool bIsTrigger = false;
 
@@ -310,6 +311,7 @@ struct Vimina : SanguineModule {
 				} else {
 					// Mult always acknowledges thru.
 					channelState[section][channel] = CHANNEL_THRU;
+					triggerCount[section][channel] = 0;
 				}
 				break;
 			case SECTION_FUNCTION_SWING:
@@ -346,8 +348,9 @@ struct Vimina : SanguineModule {
 		switch (channelFunction[section]) {
 		case SECTION_FUNCTION_FACTORER:
 			if (channelFactor[section][channel] < kFactorerBypassValue && pulseTrackerRecordedCount[channel] >= kPulseTrackerBufferSize &&
-				checkMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel)) {
+				triggerCount[section][channel] >= channelFactor[section][channel] && checkMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel)) {
 				channelState[section][channel] = CHANNEL_GENERATED;
+				triggerCount[section][channel]--;
 				multiplyDebouncing[section][channel] = true;
 			}
 			break;
