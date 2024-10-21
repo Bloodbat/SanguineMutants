@@ -280,11 +280,9 @@ struct Vimina : SanguineModule {
 			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
 			if (factorIndex == 0) {
 				channelFactor[section][channel] = kFactorerBypassValue;
-			}
-			else if (factorIndex < 0) {
+			} else if (factorIndex < 0) {
 				channelFactor[section][channel] = --factorIndex; // abs
-			}
-			else {
+			} else {
 				channelFactor[section][channel] = ++factorIndex;
 			}
 			break;
@@ -306,12 +304,10 @@ struct Vimina : SanguineModule {
 					// Deal with counter.
 					if (divisionCounter[section][channel] >= channelFactor[section][channel] - 1) {
 						resetDivision(section, channel);
-					}
-					else {
+					} else {
 						++divisionCounter[section][channel];
 					}
-				}
-				else {
+				} else {
 					// Mult always acknowledges thru.
 					channelState[section][channel] = CHANNEL_THRU;
 				}
@@ -328,8 +324,7 @@ struct Vimina : SanguineModule {
 					if (channelSwing[section][channel] <= kSwingFactorMin) {
 						channelState[section][channel] = CHANNEL_GENERATED;
 						resetSwing(section, channel);
-					}
-					else {
+					} else {
 						// Rest.
 						channelState[section][channel] = CHANNEL_REST;
 						swingCounter[section][channel] = 2;
@@ -373,18 +368,15 @@ struct Vimina : SanguineModule {
 			if (channelState[section][channel] < CHANNEL_GENERATED) {
 				ledGateDuration[section][channel] = kLedThruGateDuration;
 				ledState[section][channel] = CHANNEL_THRU;
-			}
-			else {
+			} else {
 				ledGateDuration[section][channel] = kLedGeneratedGateDuration;
 				ledState[section][channel] = CHANNEL_GENERATED;
 			}
-		}
-		else {
+		} else {
 			if (triggerExtendCount[section][channel] <= 0) {
 				outputs[OUTPUT_OUT1A + section].setVoltage(0.f, channel);
 				outputs[OUTPUT_OUT1B + section].setVoltage(0.f, channel);
-			}
-			else {
+			} else {
 				triggerExtendCount[section][channel] -= 1;
 			}
 		}
@@ -434,8 +426,7 @@ struct Vimina : SanguineModule {
 			if (!multiplyDebouncing[section][channel]) {
 				return true;
 			}
-		}
-		else {
+		} else {
 			multiplyDebouncing[section][channel] = false;
 		}
 		return false;
@@ -454,8 +445,7 @@ struct Vimina : SanguineModule {
 			uint16_t period = getPulseTrackerPeriod(channel);
 			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
 			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
-		}
-		else {
+		} else {
 			// thru
 			return false;
 		}
