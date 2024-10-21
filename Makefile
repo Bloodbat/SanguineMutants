@@ -4,7 +4,11 @@ FLAGS += \
 	-I./alt_firmware \
 	-Wno-unused-local-typedefs
 
+ifndef DEBUGBUILD
 EXTRA_FLAGS =
+else
+EXTRA_FLAGS = -Og
+endif
 
 SOURCES += $(wildcard src/*.cpp)
 
