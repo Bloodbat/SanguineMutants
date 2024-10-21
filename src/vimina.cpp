@@ -180,7 +180,7 @@ struct Vimina : SanguineModule {
 			bool bIsTrigger = false;
 
 			if (bClockConnected) {
-				if (checkRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
+				if (isRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
 					// Pulse tracker is always recording. this should help smooth transitions
 					// between functions even though divide doesn't use it.
 					// Shift
@@ -195,7 +195,7 @@ struct Vimina : SanguineModule {
 
 			bool bIsReset = false;
 			if (bResetConnected) {
-				bIsReset = checkRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage(channel) >= 2.f, channel);
+				bIsReset = isRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage(channel) >= 2.f, channel);
 			}
 
 			for (uint8_t section = 0; section < kMaxModuleSections; section++) {
@@ -240,12 +240,6 @@ struct Vimina : SanguineModule {
 		}
 	}
 
-	bool checkRisingEdge(const uint8_t section, const bool voltageAboveThreshold, const int channel) {
-		bool lastGateState = gateInputState[section][channel];
-		gateInputState[section][channel] = voltageAboveThreshold;
-		return gateInputState[section][channel] && !lastGateState;
-	}
-
 	uint16_t getPulseTrackerElapsed(const int channel) {
 		return (tmrModuleClock[channel].time >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
 			tmrModuleClock[channel].time - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
@@ -269,36 +263,11 @@ struct Vimina : SanguineModule {
 		}
 	}
 
-	void setupChannel(const uint8_t section, const int channel) {
-		channelVoltage[section][channel] = clamp(params[PARAM_FACTOR1 + section].getValue() +
-			(inputs[INPUT_CV1 + section].getVoltage(channel) / 10.f), 0.f, 1.f);
-
-		switch (channelFunction[section])
-		{
-		case SECTION_FUNCTION_FACTORER:
-			int16_t factorIndex;
-			factorIndex = (channelVoltage[section][channel] / (kMaxParamValue / (kFactorCount - 1))) - kFactorerBypassIndex;
-			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
-			if (factorIndex == 0) {
-				channelFactor[section][channel] = kFactorerBypassValue;
-			} else if (factorIndex < 0) {
-				channelFactor[section][channel] = --factorIndex; // abs
-			} else {
-				channelFactor[section][channel] = ++factorIndex;
-			}
-			break;
-		case SECTION_FUNCTION_SWING:
-			channelSwing[section][channel] = channelVoltage[section][channel]
-				/ (kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
-			break;
-		}
-	}
-
 	void handleTriggers(const uint8_t section, const bool isTrigger, const bool isReset, const int channel) {
 		if (isTrigger) {
 			switch (channelFunction[section]) {
 			case SECTION_FUNCTION_FACTORER:
-				if (channelFactor[section][channel] > kFactorerBypassValue) {
+				if (isDivideEnabled(section, channel)) {
 					if (divisionCounter[section][channel] <= 0) {
 						channelState[section][channel] = CHANNEL_GENERATED; // divide converts thru to exec on every division
 					}
@@ -344,23 +313,66 @@ struct Vimina : SanguineModule {
 		}
 	}
 
-	void transformClock(const uint8_t section, const int channel) {
-		switch (channelFunction[section]) {
-		case SECTION_FUNCTION_FACTORER:
-			if (channelFactor[section][channel] < kFactorerBypassValue && pulseTrackerRecordedCount[channel] >= kPulseTrackerBufferSize &&
-				triggerCount[section][channel] >= channelFactor[section][channel] && checkMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel)) {
-				channelState[section][channel] = CHANNEL_GENERATED;
-				triggerCount[section][channel]--;
-				multiplyDebouncing[section][channel] = true;
+	void init() {
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = 0;
+			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = 0;
+			pulseTrackerRecordedCount[channel] = 0;
+
+			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
+				triggerExtendCount[i][channel] = 0;
 			}
-			break;
-		case SECTION_FUNCTION_SWING:
-			if (checkSwingStrikeTurn(section, getPulseTrackerElapsed(channel), channel)) {
-				channelState[section][channel] = CHANNEL_GENERATED;
-				resetSwing(section, channel);
-			}
-			break;
+			tmrModuleClock[channel].reset();
 		}
+	}
+
+	bool isDivideEnabled(const uint8_t section, const int channel) {
+		return channelFactor[section][channel] > kFactorerBypassValue;
+	}
+
+	bool isMultiplyEnabled(const uint8_t section, const int channel) {
+		return channelFactor[section][channel] < kFactorerBypassValue;
+	}
+
+	bool isMultiplyStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
+		float interval = getPulseTrackerPeriod(channel) / -channelFactor[section][channel];
+		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
+			if (!multiplyDebouncing[section][channel]) {
+				return true;
+			}
+		} else {
+			multiplyDebouncing[section][channel] = false;
+		}
+		return false;
+	}
+
+	bool isPulseTrackerPeriod(const int channel) {
+		return pulseTrackerRecordedCount[channel] >= kPulseTrackerBufferSize;
+	}
+
+	bool isRisingEdge(const uint8_t section, const bool voltageAboveThreshold, const int channel) {
+		bool lastGateState = gateInputState[section][channel];
+		gateInputState[section][channel] = voltageAboveThreshold;
+		return gateInputState[section][channel] && !lastGateState;
+	}
+
+	bool isSwingStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
+		if (swingCounter[section][channel] >= 2 && channelSwing[section][channel] > kSwingFactorMin) {
+			uint16_t period = getPulseTrackerPeriod(channel);
+			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
+			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
+		} else {
+			// thru
+			return false;
+		}
+	}
+
+	void resetDivision(const uint8_t section, const int channel) {
+		divisionCounter[section][channel] = 0;
+	}
+
+	void resetSwing(const uint8_t section, const int channel) {
+		swingCounter[section][channel] = 0;
 	}
 
 	void setOutputVoltages(const uint8_t section, const int channel) {
@@ -382,6 +394,52 @@ struct Vimina : SanguineModule {
 			} else {
 				triggerExtendCount[section][channel] -= 1;
 			}
+		}
+	}
+
+	void setupChannel(const uint8_t section, const int channel) {
+		channelVoltage[section][channel] = clamp(params[PARAM_FACTOR1 + section].getValue() +
+			(inputs[INPUT_CV1 + section].getVoltage(channel) / 10.f), 0.f, 1.f);
+
+		switch (channelFunction[section])
+		{
+		case SECTION_FUNCTION_FACTORER:
+			int16_t factorIndex;
+			factorIndex = (channelVoltage[section][channel] /
+				(kMaxParamValue / (kFactorCount - 1))) - kFactorerBypassIndex;
+			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
+			if (factorIndex == 0) {
+				channelFactor[section][channel] = kFactorerBypassValue;
+			} else if (factorIndex < 0) {
+				channelFactor[section][channel] = --factorIndex; // abs
+			} else {
+				channelFactor[section][channel] = ++factorIndex;
+			}
+			break;
+		case SECTION_FUNCTION_SWING:
+			channelSwing[section][channel] = channelVoltage[section][channel]
+				/ (kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
+			break;
+		}
+	}
+
+	void transformClock(const uint8_t section, const int channel) {
+		switch (channelFunction[section]) {
+		case SECTION_FUNCTION_FACTORER:
+			if (isMultiplyEnabled(section, channel) && isPulseTrackerPeriod(channel) &&
+				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
+				triggerCount[section][channel] >= channelFactor[section][channel]) {
+				channelState[section][channel] = CHANNEL_GENERATED;
+				triggerCount[section][channel]--;
+				multiplyDebouncing[section][channel] = true;
+			}
+			break;
+		case SECTION_FUNCTION_SWING:
+			if (isSwingStrikeTurn(section, getPulseTrackerElapsed(channel), channel)) {
+				channelState[section][channel] = CHANNEL_GENERATED;
+				resetSwing(section, channel);
+			}
+			break;
 		}
 	}
 
@@ -407,50 +465,6 @@ struct Vimina : SanguineModule {
 			lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[currentLight + 1].setBrightnessSmooth(1.f, sampleTime);
 			break;
-		}
-	}
-
-	void init() {
-		for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-			pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = 0;
-			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = 0;
-			pulseTrackerRecordedCount[channel] = 0;
-
-			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
-				triggerExtendCount[i][channel] = 0;
-			}
-			tmrModuleClock[channel].reset();
-		}
-	}
-
-	bool checkMultiplyStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
-		float interval = getPulseTrackerPeriod(channel) / -channelFactor[section][channel];
-		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
-			if (!multiplyDebouncing[section][channel]) {
-				return true;
-			}
-		} else {
-			multiplyDebouncing[section][channel] = false;
-		}
-		return false;
-	}
-
-	void resetDivision(const uint8_t section, const int channel) {
-		divisionCounter[section][channel] = 0;
-	}
-
-	void resetSwing(const uint8_t section, const int channel) {
-		swingCounter[section][channel] = 0;
-	}
-
-	bool checkSwingStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
-		if (swingCounter[section][channel] >= 2 && channelSwing[section][channel] > kSwingFactorMin) {
-			uint16_t period = getPulseTrackerPeriod(channel);
-			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
-			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
-		} else {
-			// thru
-			return false;
 		}
 	}
 
