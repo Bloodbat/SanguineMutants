@@ -53,16 +53,16 @@ struct Aleae : SanguineModule {
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		for (int i = 0; i < kMaxModuleSections; i++) {
-			configParam(PARAM_THRESHOLD1 + i, 0.f, 1.f, 0.5f, string::f("Channel %d probability", i + 1), "%", 0, 100);
-			configSwitch(PARAM_ROLL_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", i + 1), { "Direct", "Toggle" });
-			configSwitch(PARAM_OUT_MODE1 + i, 0.f, 1.f, 0.f, string::f("Channel %d out mode", i + 1), { "Trigger", "Latch" });
-			configInput(INPUT_IN1 + i, string::f("Channel %d", i + 1));
-			configInput(INPUT_P1 + i, string::f("Channel %d probability", i + 1));
-			configOutput(OUTPUT_OUT1A + i, string::f("Channel %d A", i + 1));
-			configOutput(OUTPUT_OUT1B + i, string::f("Channel %d B", i + 1));
-			for (int j = 0; j < 16; j++) {
-				lastRollResults[i][j] = ROLL_HEADS;
+		for (int section = 0; section < kMaxModuleSections; section++) {
+			configParam(PARAM_THRESHOLD1 + section, 0.f, 1.f, 0.5f, string::f("Channel %d probability", section + 1), "%", 0, 100);
+			configSwitch(PARAM_ROLL_MODE1 + section, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", section + 1), { "Direct", "Toggle" });
+			configSwitch(PARAM_OUT_MODE1 + section, 0.f, 1.f, 0.f, string::f("Channel %d out mode", section + 1), { "Trigger", "Latch" });
+			configInput(INPUT_IN1 + section, string::f("Channel %d", section + 1));
+			configInput(INPUT_P1 + section, string::f("Channel %d probability", section + 1));
+			configOutput(OUTPUT_OUT1A + section, string::f("Channel %d A", section + 1));
+			configOutput(OUTPUT_OUT1B + section, string::f("Channel %d B", section + 1));
+			for (int channel = 0; channel < 16; channel++) {
+				lastRollResults[section][channel] = ROLL_HEADS;
 			}
 			lightsDivider.setDivision(kLightFrequency);
 		}
@@ -76,17 +76,17 @@ struct Aleae : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
-		for (int i = 0; i < kMaxModuleSections; i++) {
+		for (int section = 0; section < kMaxModuleSections; section++) {
 			// Get input.
-			Input* input = &inputs[INPUT_IN1 + i];
+			Input* input = &inputs[INPUT_IN1 + section];
 			// 2nd input is normalized to 1st.
-			if (i == 1 && !input->isConnected()) {
+			if (section == 1 && !input->isConnected()) {
 				input = &inputs[INPUT_IN1 + 0];
 			}
 			channelCount = std::max(input->getChannels(), 1);
 
-			rollModes[i] = static_cast<RollModes>(params[PARAM_ROLL_MODE1 + i].getValue());
-			outModes[i] = static_cast<OutModes>(params[PARAM_OUT_MODE1 + i].getValue());
+			rollModes[section] = static_cast<RollModes>(params[PARAM_ROLL_MODE1 + section].getValue());
+			outModes[section] = static_cast<OutModes>(params[PARAM_OUT_MODE1 + section].getValue());
 
 			bool lightAActive = false;
 			bool lightBActive = false;
@@ -94,20 +94,20 @@ struct Aleae : SanguineModule {
 			// Process triggers.
 			for (int channel = 0; channel < channelCount; channel++) {
 				bool gatePresent = input->getVoltage(channel) >= 2.f;
-				if (btGateTriggers[i][channel].process(gatePresent)) {
+				if (btGateTriggers[section][channel].process(gatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
-					float threshold = params[PARAM_THRESHOLD1 + i].getValue() + inputs[INPUT_P1 + i].getPolyVoltage(channel) / 10.f;
-					rollResults[i][channel] = (random::uniform() >= threshold) ? ROLL_HEADS : ROLL_TAILS;
-					if (rollModes[i] == ROLL_TOGGLE) {
-						rollResults[i][channel] = static_cast<RollResults>(lastRollResults[i][channel] ^ rollResults[i][channel]);
+					float threshold = params[PARAM_THRESHOLD1 + section].getValue() + inputs[INPUT_P1 + section].getPolyVoltage(channel) / 10.f;
+					rollResults[section][channel] = (random::uniform() >= threshold) ? ROLL_HEADS : ROLL_TAILS;
+					if (rollModes[section] == ROLL_TOGGLE) {
+						rollResults[section][channel] = static_cast<RollResults>(lastRollResults[section][channel] ^ rollResults[section][channel]);
 					}
-					lastRollResults[i][channel] = rollResults[i][channel];
+					lastRollResults[section][channel] = rollResults[section][channel];
 				}
 
 				// Output gate logic
-				bool gateAActive = (rollResults[i][channel] == ROLL_HEADS && (outModes[i] == OUT_MODE_LATCH || gatePresent));
-				bool gateBActive = (rollResults[i][channel] == ROLL_TAILS && (outModes[i] == OUT_MODE_LATCH || gatePresent));
+				bool gateAActive = (rollResults[section][channel] == ROLL_HEADS && (outModes[section] == OUT_MODE_LATCH || gatePresent));
+				bool gateBActive = (rollResults[section][channel] == ROLL_TAILS && (outModes[section] == OUT_MODE_LATCH || gatePresent));
 
 				if (channel == ledsChannel) {
 					lightAActive = gateAActive;
@@ -115,19 +115,19 @@ struct Aleae : SanguineModule {
 				}
 
 				// Set output gates
-				if (bOutputsConnected[0 + i]) {
-					outputs[OUTPUT_OUT1A + i].setVoltage(gateAActive ? 10.f : 0.f, channel);
+				if (bOutputsConnected[0 + section]) {
+					outputs[OUTPUT_OUT1A + section].setVoltage(gateAActive ? 10.f : 0.f, channel);
 				}
-				if (bOutputsConnected[2 + i]) {
-					outputs[OUTPUT_OUT1B + i].setVoltage(gateBActive ? 10.f : 0.f, channel);
+				if (bOutputsConnected[2 + section]) {
+					outputs[OUTPUT_OUT1B + section].setVoltage(gateBActive ? 10.f : 0.f, channel);
 				}
 			}
 
-			if (bOutputsConnected[0 + i]) {
-				outputs[OUTPUT_OUT1A + i].setChannels(channelCount);
+			if (bOutputsConnected[0 + section]) {
+				outputs[OUTPUT_OUT1A + section].setChannels(channelCount);
 			}
-			if (bOutputsConnected[2 + i]) {
-				outputs[OUTPUT_OUT1B + i].setChannels(channelCount);
+			if (bOutputsConnected[2 + section]) {
+				outputs[OUTPUT_OUT1B + section].setChannels(channelCount);
 			}
 
 			if (bIsLightsTurn) {
@@ -136,26 +136,26 @@ struct Aleae : SanguineModule {
 				}
 
 				const float sampleTime = args.sampleTime * kLightFrequency;
-				int currentLight = LIGHTS_STATE + i * 2;
+				int currentLight = LIGHTS_STATE + section * 2;
 				lights[currentLight + 1].setSmoothBrightness(lightAActive, sampleTime);
 				lights[currentLight + 0].setSmoothBrightness(lightBActive, sampleTime);
 
-				currentLight = LIGHTS_ROLL_MODE + i * 2;
-				lights[currentLight + 0].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.75f : 0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(rollModes[i] == ROLL_DIRECT ? 0.f : 0.75f, sampleTime);
+				currentLight = LIGHTS_ROLL_MODE + section * 2;
+				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ? 0.75f : 0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ? 0.f : 0.75f, sampleTime);
 
-				lights[LIGHTS_OUT_MODE + i].setBrightnessSmooth(outModes[i] ? 0.75 : 0.f, sampleTime);
+				lights[LIGHTS_OUT_MODE + section].setBrightnessSmooth(outModes[section] ? 0.75 : 0.f, sampleTime);
 			}
 		}
 	}
 
 
 	void onReset() override {
-		for (int i = 0; i < kMaxModuleSections; i++) {
-			params[PARAM_ROLL_MODE1 + i].setValue(0);
-			params[PARAM_OUT_MODE1 + i].setValue(0);
-			for (int j = 0; j < 16; j++) {
-				lastRollResults[i][j] = ROLL_HEADS;
+		for (int section = 0; section < kMaxModuleSections; section++) {
+			params[PARAM_ROLL_MODE1 + section].setValue(0);
+			params[PARAM_OUT_MODE1 + section].setValue(0);
+			for (int channel = 0; channel < 16; channel++) {
+				lastRollResults[section][channel] = ROLL_HEADS;
 			}
 		}
 	}
