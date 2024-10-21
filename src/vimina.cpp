@@ -119,7 +119,7 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
-	dsp::Timer moduleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
+	dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1	
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -174,7 +174,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; channel++) {
-			moduleClock[channel].process(kClockSpeed * args.sampleTime);
+			tmrModuleClock[channel].process(kClockSpeed * args.sampleTime);			
 
 			bool bIsTrigger = false;
 
@@ -184,7 +184,7 @@ struct Vimina : SanguineModule {
 					// between functions even though divide doesn't use it.
 					// Shift
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel];
-					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = moduleClock[channel].time;
+					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel].time;
 					if (pulseTrackerRecordedCount[channel] < kPulseTrackerBufferSize) {
 						pulseTrackerRecordedCount[channel] += 1;
 					}
@@ -226,8 +226,8 @@ struct Vimina : SanguineModule {
 				}
 			}
 
-			if (moduleClock[channel].time >= kTimerCounterMax) {
-				moduleClock[channel].reset();
+			if (tmrModuleClock[channel].time >= kTimerCounterMax) {
+				tmrModuleClock[channel].reset();
 			}
 		}
 		if (bIsLightsTurn) {
@@ -246,9 +246,9 @@ struct Vimina : SanguineModule {
 	}
 
 	uint16_t getPulseTrackerElapsed(const int channel) {
-		return (moduleClock[channel].time >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
-			moduleClock[channel].time - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
-			moduleClock[channel].time + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
+		return (tmrModuleClock[channel].time >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
+			tmrModuleClock[channel].time - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
+			tmrModuleClock[channel].time + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
 	}
 
 	uint16_t getPulseTrackerPeriod(const int channel) {
@@ -416,7 +416,7 @@ struct Vimina : SanguineModule {
 			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
 				triggerExtendCount[i][channel] = 0;
 			}
-			moduleClock[channel].reset();
+			tmrModuleClock[channel].reset();
 		}
 	}
 
