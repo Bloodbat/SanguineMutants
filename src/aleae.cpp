@@ -45,7 +45,7 @@ struct Aleae : SanguineModule {
 	OutModes outModes[2] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
 	bool bOutputsConnected[OUTPUTS_COUNT];
 
-	const int kLightFrequency = 16;
+	static const int kLightFrequency = 16;
 	int ledsChannel = 0;
 	int channelCount = 0;
 
