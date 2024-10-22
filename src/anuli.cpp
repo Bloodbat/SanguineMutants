@@ -128,7 +128,7 @@ struct Anuli : SanguineModule {
 		configBypass(INPUT_IN, OUTPUT_ODD);
 		configBypass(INPUT_IN, OUTPUT_EVEN);
 
-		for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			memset(&strummer[channel], 0, sizeof(rings::Strummer));
 			memset(&part[channel], 0, sizeof(rings::Part));
 			memset(&stringSynth[channel], 0, sizeof(rings::StringSynthPart));
@@ -175,7 +175,7 @@ struct Anuli : SanguineModule {
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
-		for (int channel = 0; channel < channelCount; channel++) {
+		for (int channel = 0; channel < channelCount; ++channel) {
 			if (bHaveModeCable) {
 				if (!bNotesModeSelection) {
 					modeNum = static_cast<int>(inputs[INPUT_MODE].getVoltage(channel));
@@ -293,7 +293,7 @@ struct Anuli : SanguineModule {
 				// Convert output buffer
 				{
 					dsp::Frame<2> outputFrames[24];
-					for (int frame = 0; frame < 24; frame++) {
+					for (int frame = 0; frame < 24; ++frame) {
 						outputFrames[frame].samples[0] = out[frame];
 						outputFrames[frame].samples[1] = aux[frame];
 					}
@@ -337,10 +337,10 @@ struct Anuli : SanguineModule {
 			triangle = triangle < 16 ? triangle : 31 - triangle;
 			bool trianglePulse = pulseWidthModulationCounter < triangle;
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
-				for (int i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; ++i) {
 					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
 				}
 
@@ -451,7 +451,7 @@ struct AnuliWidget : SanguineModuleWidget {
 		float currentXA = 23.989f;
 		float currentXB = 56.725f;
 
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; ++i) {
 			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXA, 14.973),
 				module, Anuli::LIGHT_RESONATOR + i * 3));
 			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXB, 14.973),
@@ -558,7 +558,7 @@ struct AnuliWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; i++) {
+		for (int i = 0; i < module->channelCount; ++i) {
 			availableChannels.push_back(channelNumbers[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
