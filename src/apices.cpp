@@ -250,8 +250,7 @@ struct Apices : SanguineModule {
 			processorFunction[0] = processorFunction[1] = f;
 			processors[0].set_function(processorFunctionTable[f][0]);
 			processors[1].set_function(processorFunctionTable[f][1]);
-		}
-		else {
+		} else {
 			processorFunction[index] = f;
 			processors[index].set_function(processorFunctionTable[f][index]);
 		}
@@ -333,8 +332,7 @@ struct Apices : SanguineModule {
 		case EDIT_MODE_SPLIT:
 			if (id < 2) {
 				processors[0].set_parameter(id, value);
-			}
-			else {
+			} else {
 				processors[1].set_parameter(id - 2, value);
 			}
 			potValue[id] = value >> 8;
@@ -575,8 +573,7 @@ struct Apices : SanguineModule {
 			oledText2 = apicesKnobLabelsSplitMode[processorFunction[0]].knob2;
 			oledText3 = apicesKnobLabelsSplitMode[processorFunction[0]].knob3;
 			oledText4 = apicesKnobLabelsSplitMode[processorFunction[0]].knob4;
-		}
-		else {
+		} else {
 
 			int currentFunction = -1;
 			// same for both
@@ -586,8 +583,7 @@ struct Apices : SanguineModule {
 			// if expert, pick the active set of labels
 			else if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
 				currentFunction = processorFunction[editMode - EDIT_MODE_FIRST];
-			}
-			else {
+			} else {
 				return;
 			}
 
