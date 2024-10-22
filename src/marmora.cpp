@@ -400,26 +400,26 @@ struct Marmora : SanguineModule {
 	}
 
 	void drawDejaVuLight(const int light, DejaVuLockModes lockMode, const float sampleTime, const long long systemTimeMs) {
+		int slowTriangle;
+		int pulseWidth;
+		int fastTriangle;
 		switch (lockMode)
 		{
-		case DEJA_VU_LOCK_ON: {
-			int slowTriangle = (systemTimeMs & 1023) >> 5;
+		case DEJA_VU_LOCK_ON:
+			slowTriangle = (systemTimeMs & 1023) >> 5;
 			slowTriangle = slowTriangle >= 16 ? 31 - slowTriangle : slowTriangle;
-			int pulseWidth = systemTimeMs & 15;
+			pulseWidth = systemTimeMs & 15;
 			lights[light].setBrightnessSmooth(slowTriangle >= pulseWidth ? 0.75f : 0.f, sampleTime);
 			break;
-		}
-		case DEJA_VU_LOCK_OFF: {
+		case DEJA_VU_LOCK_OFF:
 			lights[light].setBrightnessSmooth(0.75f, sampleTime);
 			break;
-		}
-		case DEJA_VU_SUPER_LOCK: {
-			int fastTriangle = (systemTimeMs & 511) >> 4;
+		case DEJA_VU_SUPER_LOCK:
+			fastTriangle = (systemTimeMs & 511) >> 4;
 			fastTriangle = fastTriangle >= 16 ? 31 - fastTriangle : fastTriangle;
-			int pulseWidth = systemTimeMs & 15;
+			pulseWidth = systemTimeMs & 15;
 			lights[light].setBrightnessSmooth(fastTriangle >= pulseWidth ? 0.75f : 0.f, sampleTime);
 			break;
-		}
 		}
 	}
 
