@@ -128,15 +128,15 @@ struct Anuli : SanguineModule {
 		configBypass(INPUT_IN, OUTPUT_ODD);
 		configBypass(INPUT_IN, OUTPUT_EVEN);
 
-		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
-			memset(&strummer[i], 0, sizeof(rings::Strummer));
-			memset(&part[i], 0, sizeof(rings::Part));
-			memset(&stringSynth[i], 0, sizeof(rings::StringSynthPart));
-			strummer[i].Init(0.01f, 44100.f / 24);
-			part[i].Init(reverbBuffer[i]);
-			stringSynth[i].Init(reverbBuffer[i]);
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			memset(&strummer[channel], 0, sizeof(rings::Strummer));
+			memset(&part[channel], 0, sizeof(rings::Part));
+			memset(&stringSynth[channel], 0, sizeof(rings::StringSynthPart));
+			strummer[channel].Init(0.01f, 44100.f / 24);
+			part[channel].Init(reverbBuffer[channel]);
+			stringSynth[channel].Init(reverbBuffer[channel]);
 
-			resonatorModel[i] = rings::RESONATOR_MODEL_MODAL;
+			resonatorModel[channel] = rings::RESONATOR_MODEL_MODAL;
 		}
 
 		clockDivider.setDivision(kDividerFrequency);
@@ -179,8 +179,7 @@ struct Anuli : SanguineModule {
 			if (bHaveModeCable) {
 				if (!bNotesModeSelection) {
 					modeNum = static_cast<int>(inputs[INPUT_MODE].getVoltage(channel));
-				}
-				else {
+				} else {
 					modeNum = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f));
 				}
 				modeNum = clamp(modeNum, 0, 6);
@@ -217,8 +216,7 @@ struct Anuli : SanguineModule {
 				if (part[channel].polyphony() != polyphonyMode) {
 					if (!bEasterEgg[channel]) {
 						part[channel].set_polyphony(polyphonyMode);
-					}
-					else {
+					} else {
 						stringSynth[channel].set_polyphony(polyphonyMode);
 					}
 				}
@@ -227,8 +225,7 @@ struct Anuli : SanguineModule {
 					if (part[channel].model() != resonatorModel[channel]) {
 						part[channel].set_model(resonatorModel[channel]);
 					}
-				}
-				else {
+				} else {
 					stringSynth[channel].set_fx(rings::FxType(fxModel));
 				}
 
@@ -288,8 +285,7 @@ struct Anuli : SanguineModule {
 				if (!bEasterEgg[channel]) {
 					strummer[channel].Process(in, 24, &performanceState);
 					part[channel].Process(performanceState, patch, in, out, aux, 24);
-				}
-				else {
+				} else {
 					strummer[channel].Process(NULL, 24, &performanceState);
 					stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
 				}
@@ -297,9 +293,9 @@ struct Anuli : SanguineModule {
 				// Convert output buffer
 				{
 					dsp::Frame<2> outputFrames[24];
-					for (int i = 0; i < 24; i++) {
-						outputFrames[i].samples[0] = out[i];
-						outputFrames[i].samples[1] = aux[i];
+					for (int frame = 0; frame < 24; frame++) {
+						outputFrames[frame].samples[0] = out[frame];
+						outputFrames[frame].samples[1] = aux[frame];
 					}
 
 					outputSrc[channel].setRates(48000, args.sampleRate);
@@ -317,8 +313,7 @@ struct Anuli : SanguineModule {
 				if (bHaveBothOutputs) {
 					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
 					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
-				}
-				else {
+				} else {
 					float outVoltage = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
 					outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
 					outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
@@ -345,8 +340,8 @@ struct Anuli : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
-				for (int j = 0; j < 3; j++) {
-					lights[currentLight + j].setBrightnessSmooth(0.f, sampleTime);
+				for (int i = 0; i < 3; i++) {
+					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
 				}
 
 				if (channel < channelCount) {
@@ -355,16 +350,14 @@ struct Anuli : SanguineModule {
 							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-						}
-						else {
+						} else {
 							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] & 4 &&
 								trianglePulse) ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
 								trianglePulse) ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 						}
-					}
-					else {
+					} else {
 						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 						lights[currentLight + 2].setBrightnessSmooth(trianglePulse ? 1.f : 0.f, sampleTime);
@@ -375,13 +368,11 @@ struct Anuli : SanguineModule {
 			if (!bDisastrousPeace) {
 				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
+			} else {
 				if (fxModel < rings::FX_FORMANT_2) {
 					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 0.75f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 0.75f : 0.f, sampleTime);
-				}
-				else {
+				} else {
 					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 &&
 						trianglePulse) ? 0.75f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 &&
