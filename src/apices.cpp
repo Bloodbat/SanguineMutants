@@ -224,8 +224,7 @@ struct Apices : SanguineModule {
 			parameters[i] = adcValue[i];
 		}
 
-		switch (editMode)
-		{
+		switch (editMode) {
 		case EDIT_MODE_TWIN:
 			processors[0].CopyParameters(&parameters[0], 4);
 			processors[1].CopyParameters(&parameters[0], 4);
@@ -258,16 +257,15 @@ struct Apices : SanguineModule {
 
 	void processSwitch(uint16_t id) {
 		switch (id) {
-		case SWITCH_TWIN_MODE: {
+		case SWITCH_TWIN_MODE:
 			if (editMode <= EDIT_MODE_SPLIT) {
 				editMode = static_cast<EditMode>(EDIT_MODE_SPLIT - editMode);
 			}
 			changeControlMode();
 			saveState();
 			break;
-		}
 
-		case SWITCH_EXPERT: {
+		case SWITCH_EXPERT:
 			editMode = static_cast<EditMode>((editMode + EDIT_MODE_FIRST) % EDIT_MODE_LAST);
 			processorFunction[0] = processorFunction[1];
 			processors[0].set_function(processorFunctionTable[processorFunction[0]][0]);
@@ -276,14 +274,12 @@ struct Apices : SanguineModule {
 			changeControlMode();
 			saveState();
 			break;
-		}
 
-		case SWITCH_CHANNEL_SELECT: {
+		case SWITCH_CHANNEL_SELECT:
 			if (editMode >= EDIT_MODE_FIRST) {
 				editMode = static_cast<EditMode>(EDIT_MODE_SECOND - (editMode & 1));
 
-				switch (editMode)
-				{
+				switch (editMode) {
 				case EDIT_MODE_FIRST:
 					params[PARAM_MODE].setValue(processorFunction[0]);
 					break;
@@ -299,7 +295,6 @@ struct Apices : SanguineModule {
 				saveState();
 			}
 			break;
-		}
 		}
 	}
 
@@ -339,23 +334,24 @@ struct Apices : SanguineModule {
 			break;
 
 		case EDIT_MODE_FIRST:
-		case EDIT_MODE_SECOND: {
-			uint8_t index = id + (editMode - EDIT_MODE_FIRST) * 4;
-			peaks::Processors* p = &processors[editMode - EDIT_MODE_FIRST];
+		case EDIT_MODE_SECOND:
+			uint8_t index;
+			index = id + (editMode - EDIT_MODE_FIRST) * 4;
+			peaks::Processors* processor;
+			processor = &processors[editMode - EDIT_MODE_FIRST];
 
-			int16_t delta = static_cast<int16_t>(potValue[index]) - static_cast<int16_t>(value >> 8);
+			int16_t delta;
+			delta = static_cast<int16_t>(potValue[index]) - static_cast<int16_t>(value >> 8);
 			if (delta < 0) {
 				delta = -delta;
 			}
 
 			if (!bSnapMode || bSnapped[id] || delta <= 2) {
-				p->set_parameter(id, value);
+				processor->set_parameter(id, value);
 				potValue[index] = value >> 8;
 				bSnapped[id] = true;
 			}
 			break;
-		}
-
 		case EDIT_MODE_LAST:
 			break;
 		}
@@ -414,7 +410,7 @@ struct Apices : SanguineModule {
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			break;
-		case EDIT_MODE_TWIN: {
+		case EDIT_MODE_TWIN:
 			lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
@@ -426,8 +422,7 @@ struct Apices : SanguineModule {
 				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
 			}
 			break;
-		}
-		case EDIT_MODE_SPLIT: {
+		case EDIT_MODE_SPLIT:
 			lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
@@ -445,7 +440,6 @@ struct Apices : SanguineModule {
 				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
 			}
 			break;
-		}
 		default:
 			break;
 		}
@@ -457,21 +451,17 @@ struct Apices : SanguineModule {
 		for (int i = 0; i < 4; i++) {
 			currentLight = LIGHT_FUNCTION_1 + i;
 			switch (lightStates[currentProcessorFunction][i]) {
-			case LIGHT_ON: {
+			case LIGHT_ON:
 				lights[currentLight].setBrightnessSmooth(1.f, sampleTime);
 				break;
-			}
-			case LIGHT_OFF: {
+			case LIGHT_OFF:
 				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
 				break;
-			}
-			case LIGHT_BLINK: {
+			case LIGHT_BLINK:
 				lights[currentLight].setBrightnessSmooth(systemTimeMs & 256 ? 0.f : 1.f, sampleTime);
 				break;
-			}
-			default: {
+			default:
 				break;
-			}
 			}
 		}
 
@@ -485,14 +475,14 @@ struct Apices : SanguineModule {
 				break;
 			case FUNCTION_LFO:
 			case FUNCTION_TAP_LFO:
-			case FUNCTION_MINI_SEQUENCER: {
-				int32_t brightnessVal = static_cast<int32_t>(brightness[i]) * 409 >> 8;
+			case FUNCTION_MINI_SEQUENCER:
+				int32_t brightnessVal;
+				brightnessVal = static_cast<int32_t>(brightness[i]) * 409 >> 8;
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
 				CONSTRAIN(brightnessVal, 0, 255);
 				buttonBrightness[i] = brightnessVal;
 				break;
-			}
 			default:
 				buttonBrightness[i] = brightness[i] >> 7;
 				break;
