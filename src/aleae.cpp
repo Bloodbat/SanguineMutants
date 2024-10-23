@@ -6,26 +6,26 @@
 
 struct Aleae : SanguineModule {
 	enum ParamIds {
-		PARAM_THRESHOLD1,
-		PARAM_THRESHOLD2,
-		PARAM_ROLL_MODE1,
-		PARAM_ROLL_MODE2,
-		PARAM_OUT_MODE1,
-		PARAM_OUT_MODE2,
+		PARAM_THRESHOLD_1,
+		PARAM_THRESHOLD_2,
+		PARAM_ROLL_MODE_1,
+		PARAM_ROLL_MODE_2,
+		PARAM_OUT_MODE_1,
+		PARAM_OUT_MODE_2,
 		PARAMS_COUNT
 	};
 	enum InputIds {
-		INPUT_IN1,
-		INPUT_IN2,
-		INPUT_P1,
-		INPUT_P2,
+		INPUT_IN_1,
+		INPUT_IN_2,
+		INPUT_P_1,
+		INPUT_P_2,
 		INPUTS_COUNT
 	};
 	enum OutputIds {
-		OUTPUT_OUT1A,
-		OUTPUT_OUT2A,
-		OUTPUT_OUT1B,
-		OUTPUT_OUT2B,
+		OUTPUT_OUT_1A,
+		OUTPUT_OUT_2A,
+		OUTPUT_OUT_1B,
+		OUTPUT_OUT_2B,
 		OUTPUTS_COUNT
 	};
 	enum LightIds {
@@ -54,13 +54,13 @@ struct Aleae : SanguineModule {
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int section = 0; section < kMaxModuleSections; section++) {
-			configParam(PARAM_THRESHOLD1 + section, 0.f, 1.f, 0.5f, string::f("Channel %d probability", section + 1), "%", 0, 100);
-			configSwitch(PARAM_ROLL_MODE1 + section, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", section + 1), { "Direct", "Toggle" });
-			configSwitch(PARAM_OUT_MODE1 + section, 0.f, 1.f, 0.f, string::f("Channel %d out mode", section + 1), { "Trigger", "Latch" });
-			configInput(INPUT_IN1 + section, string::f("Channel %d", section + 1));
-			configInput(INPUT_P1 + section, string::f("Channel %d probability", section + 1));
-			configOutput(OUTPUT_OUT1A + section, string::f("Channel %d A", section + 1));
-			configOutput(OUTPUT_OUT1B + section, string::f("Channel %d B", section + 1));
+			configParam(PARAM_THRESHOLD_1 + section, 0.f, 1.f, 0.5f, string::f("Channel %d probability", section + 1), "%", 0, 100);
+			configSwitch(PARAM_ROLL_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", section + 1), { "Direct", "Toggle" });
+			configSwitch(PARAM_OUT_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d out mode", section + 1), { "Trigger", "Latch" });
+			configInput(INPUT_IN_1 + section, string::f("Channel %d", section + 1));
+			configInput(INPUT_P_1 + section, string::f("Channel %d probability", section + 1));
+			configOutput(OUTPUT_OUT_1A + section, string::f("Channel %d A", section + 1));
+			configOutput(OUTPUT_OUT_1B + section, string::f("Channel %d B", section + 1));
 			for (int channel = 0; channel < 16; channel++) {
 				lastRollResults[section][channel] = ROLL_HEADS;
 			}
@@ -69,24 +69,24 @@ struct Aleae : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bOutputsConnected[0] = outputs[OUTPUT_OUT1A].isConnected();
-		bOutputsConnected[1] = outputs[OUTPUT_OUT2A].isConnected();
-		bOutputsConnected[2] = outputs[OUTPUT_OUT1B].isConnected();
-		bOutputsConnected[3] = outputs[OUTPUT_OUT2B].isConnected();
+		bOutputsConnected[0] = outputs[OUTPUT_OUT_1A].isConnected();
+		bOutputsConnected[1] = outputs[OUTPUT_OUT_2A].isConnected();
+		bOutputsConnected[2] = outputs[OUTPUT_OUT_1B].isConnected();
+		bOutputsConnected[3] = outputs[OUTPUT_OUT_2B].isConnected();
 
 		bool bIsLightsTurn = lightsDivider.process();
 
 		for (int section = 0; section < kMaxModuleSections; section++) {
 			// Get input.
-			Input* input = &inputs[INPUT_IN1 + section];
+			Input* input = &inputs[INPUT_IN_1 + section];
 			// 2nd input is normalized to 1st.
 			if (section == 1 && !input->isConnected()) {
-				input = &inputs[INPUT_IN1 + 0];
+				input = &inputs[INPUT_IN_1 + 0];
 			}
 			channelCount = std::max(input->getChannels(), 1);
 
-			rollModes[section] = static_cast<RollModes>(params[PARAM_ROLL_MODE1 + section].getValue());
-			outModes[section] = static_cast<OutModes>(params[PARAM_OUT_MODE1 + section].getValue());
+			rollModes[section] = static_cast<RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
+			outModes[section] = static_cast<OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
 
 			bool lightAActive = false;
 			bool lightBActive = false;
@@ -97,7 +97,7 @@ struct Aleae : SanguineModule {
 				if (btGateTriggers[section][channel].process(gatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
-					float threshold = params[PARAM_THRESHOLD1 + section].getValue() + inputs[INPUT_P1 + section].getPolyVoltage(channel) / 10.f;
+					float threshold = params[PARAM_THRESHOLD_1 + section].getValue() + inputs[INPUT_P_1 + section].getPolyVoltage(channel) / 10.f;
 					rollResults[section][channel] = (random::uniform() >= threshold) ? ROLL_HEADS : ROLL_TAILS;
 					if (rollModes[section] == ROLL_TOGGLE) {
 						rollResults[section][channel] = static_cast<RollResults>(lastRollResults[section][channel] ^ rollResults[section][channel]);
@@ -116,18 +116,18 @@ struct Aleae : SanguineModule {
 
 				// Set output gates
 				if (bOutputsConnected[0 + section]) {
-					outputs[OUTPUT_OUT1A + section].setVoltage(gateAActive ? 10.f : 0.f, channel);
+					outputs[OUTPUT_OUT_1A + section].setVoltage(gateAActive ? 10.f : 0.f, channel);
 				}
 				if (bOutputsConnected[2 + section]) {
-					outputs[OUTPUT_OUT1B + section].setVoltage(gateBActive ? 10.f : 0.f, channel);
+					outputs[OUTPUT_OUT_1B + section].setVoltage(gateBActive ? 10.f : 0.f, channel);
 				}
 			}
 
 			if (bOutputsConnected[0 + section]) {
-				outputs[OUTPUT_OUT1A + section].setChannels(channelCount);
+				outputs[OUTPUT_OUT_1A + section].setChannels(channelCount);
 			}
 			if (bOutputsConnected[2 + section]) {
-				outputs[OUTPUT_OUT1B + section].setChannels(channelCount);
+				outputs[OUTPUT_OUT_1B + section].setChannels(channelCount);
 			}
 
 			if (bIsLightsTurn) {
@@ -152,8 +152,8 @@ struct Aleae : SanguineModule {
 
 	void onReset() override {
 		for (int section = 0; section < kMaxModuleSections; section++) {
-			params[PARAM_ROLL_MODE1 + section].setValue(0);
-			params[PARAM_OUT_MODE1 + section].setValue(0);
+			params[PARAM_ROLL_MODE_1 + section].setValue(0);
+			params[PARAM_OUT_MODE_1 + section].setValue(0);
 			for (int channel = 0; channel < 16; channel++) {
 				lastRollResults[section][channel] = ROLL_HEADS;
 			}
@@ -194,31 +194,31 @@ struct AleaeWidget : SanguineModuleWidget {
 
 		// Switch #1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,
-			Aleae::PARAM_ROLL_MODE1, Aleae::LIGHTS_ROLL_MODE + 0 * 2));
+			Aleae::PARAM_ROLL_MODE_1, Aleae::LIGHTS_ROLL_MODE + 0 * 2));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(25.863, 16.723), module,
-			Aleae::PARAM_OUT_MODE1, Aleae::LIGHTS_OUT_MODE + 0));
+			Aleae::PARAM_OUT_MODE_1, Aleae::LIGHTS_OUT_MODE + 0));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Aleae::PARAM_THRESHOLD1));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Aleae::INPUT_IN1));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Aleae::INPUT_P1));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Aleae::OUTPUT_OUT1A));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Aleae::PARAM_THRESHOLD_1));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Aleae::INPUT_IN_1));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Aleae::INPUT_P_1));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Aleae::OUTPUT_OUT_1A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Aleae::LIGHTS_STATE + 0 * 2));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Aleae::OUTPUT_OUT1B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Aleae::OUTPUT_OUT_1B));
 
 		// Switch #2
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 74.653), module,
-			Aleae::PARAM_ROLL_MODE2, Aleae::LIGHTS_ROLL_MODE + 1 * 2));
+			Aleae::PARAM_ROLL_MODE_2, Aleae::LIGHTS_ROLL_MODE + 1 * 2));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(25.863, 74.653), module,
-			Aleae::PARAM_OUT_MODE2, Aleae::LIGHTS_OUT_MODE + 1));
+			Aleae::PARAM_OUT_MODE_2, Aleae::LIGHTS_OUT_MODE + 1));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Aleae::PARAM_THRESHOLD2));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Aleae::INPUT_IN2));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Aleae::INPUT_P2));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT2A));
+		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Aleae::PARAM_THRESHOLD_2));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Aleae::INPUT_IN_2));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Aleae::INPUT_P_2));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT_2A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 117.888), module, Aleae::LIGHTS_STATE + 1 * 2));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Aleae::OUTPUT_OUT2B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Aleae::OUTPUT_OUT_2B));
 	}
 
 	void appendContextMenu(Menu* menu) override {

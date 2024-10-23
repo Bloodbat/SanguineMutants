@@ -6,12 +6,12 @@
 
 struct Vimina : SanguineModule {
 	enum ParamIds {
-		PARAM_FACTOR1,
-		PARAM_FACTOR2,
-		PARAM_MODE1,
-		PARAM_MODE2,
-		PARAM_RESET1,
-		PARAM_RESET2,
+		PARAM_FACTOR_1,
+		PARAM_FACTOR_2,
+		PARAM_MODE_1,
+		PARAM_MODE_2,
+		PARAM_RESET_1,
+		PARAM_RESET_2,
 		PARAMS_COUNT
 	};
 	enum InputIds {
@@ -22,10 +22,10 @@ struct Vimina : SanguineModule {
 		INPUTS_COUNT
 	};
 	enum OutputIds {
-		OUTPUT_OUT1A,
-		OUTPUT_OUT2A,
-		OUTPUT_OUT1B,
-		OUTPUT_OUT2B,
+		OUTPUT_OUT_1A,
+		OUTPUT_OUT_2A,
+		OUTPUT_OUT_1B,
+		OUTPUT_OUT_2B,
 		OUTPUTS_COUNT
 	};
 	enum LightIds {
@@ -125,23 +125,23 @@ struct Vimina : SanguineModule {
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int section = 0; section < kMaxModuleSections; section++) {
-			configParam(PARAM_FACTOR1 + section, 0.f, kMaxParamValue, 0.5f, string::f("Channel %d factor", section + 1));
-			configSwitch(PARAM_RESET1 + section, 0.f, 1.f, 0.f, string::f("Channel %d reset", section + 1));
+			configParam(PARAM_FACTOR_1 + section, 0.f, kMaxParamValue, 0.5f, string::f("Channel %d factor", section + 1));
+			configSwitch(PARAM_RESET_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d reset", section + 1));
 
 			configInput(INPUT_CV1 + section, string::f("Channel %d factor", section + 1));
-			configOutput(OUTPUT_OUT1A + section, string::f("Channel %d A", section + 1));
-			configOutput(OUTPUT_OUT1B + section, string::f("Channel %d B", section + 1));
+			configOutput(OUTPUT_OUT_1A + section, string::f("Channel %d A", section + 1));
+			configOutput(OUTPUT_OUT_1B + section, string::f("Channel %d B", section + 1));
 		}
 		configInput(INPUT_RESET, "Reset");
 		configInput(INPUT_CLOCK, "Clock");
 
-		configSwitch(PARAM_MODE1, 0.f, 1.f, 1.f, "Channel 1 mode", viminaModeLabels);
-		configSwitch(PARAM_MODE2, 0.f, 1.f, 0.f, "Channel 2 mode", viminaModeLabels);
+		configSwitch(PARAM_MODE_1, 0.f, 1.f, 1.f, "Channel 1 mode", viminaModeLabels);
+		configSwitch(PARAM_MODE_2, 0.f, 1.f, 0.f, "Channel 2 mode", viminaModeLabels);
 
-		configBypass(INPUT_CLOCK, OUTPUT_OUT1A);
-		configBypass(INPUT_CLOCK, OUTPUT_OUT1B);
-		configBypass(INPUT_CLOCK, OUTPUT_OUT2A);
-		configBypass(INPUT_CLOCK, OUTPUT_OUT2B);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT_1A);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT_1B);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT_2A);
+		configBypass(INPUT_CLOCK, OUTPUT_OUT_2B);
 
 		init();
 
@@ -166,13 +166,13 @@ struct Vimina : SanguineModule {
 		bool resetButtons[kMaxModuleSections] = {};
 
 		for (int section = 0; section < kMaxModuleSections; section++) {
-			resetButtons[section] = btReset[section].process(params[PARAM_RESET1 + section].getValue());
+			resetButtons[section] = btReset[section].process(params[PARAM_RESET_1 + section].getValue());
 		}
 
-		outputs[OUTPUT_OUT1A].setChannels(channelCount);
-		outputs[OUTPUT_OUT1B].setChannels(channelCount);
-		outputs[OUTPUT_OUT2A].setChannels(channelCount);
-		outputs[OUTPUT_OUT2B].setChannels(channelCount);
+		outputs[OUTPUT_OUT_1A].setChannels(channelCount);
+		outputs[OUTPUT_OUT_1B].setChannels(channelCount);
+		outputs[OUTPUT_OUT_2A].setChannels(channelCount);
+		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; channel++) {
 			tmrModuleClock[channel].process(kClockSpeed * args.sampleTime);
@@ -199,7 +199,7 @@ struct Vimina : SanguineModule {
 			}
 
 			for (uint8_t section = 0; section < kMaxModuleSections; section++) {
-				channelFunction[section] = SectionFunctions(params[PARAM_MODE1 + section].getValue());
+				channelFunction[section] = SectionFunctions(params[PARAM_MODE_1 + section].getValue());
 
 				if (resetButtons[section]) {
 					handleReset(section, channel);
@@ -377,8 +377,8 @@ struct Vimina : SanguineModule {
 
 	void setOutputVoltages(const uint8_t section, const int channel) {
 		if (channelState[section][channel] > CHANNEL_REST) {
-			outputs[OUTPUT_OUT1A + section].setVoltage(10.f, channel);
-			outputs[OUTPUT_OUT1B + section].setVoltage(10.f, channel);
+			outputs[OUTPUT_OUT_1A + section].setVoltage(10.f, channel);
+			outputs[OUTPUT_OUT_1B + section].setVoltage(10.f, channel);
 			triggerExtendCount[section][channel] = kTriggerExtendCount;
 			if (channelState[section][channel] < CHANNEL_GENERATED) {
 				ledGateDuration[section][channel] = kLedThruGateDuration;
@@ -389,8 +389,8 @@ struct Vimina : SanguineModule {
 			}
 		} else {
 			if (triggerExtendCount[section][channel] <= 0) {
-				outputs[OUTPUT_OUT1A + section].setVoltage(0.f, channel);
-				outputs[OUTPUT_OUT1B + section].setVoltage(0.f, channel);
+				outputs[OUTPUT_OUT_1A + section].setVoltage(0.f, channel);
+				outputs[OUTPUT_OUT_1B + section].setVoltage(0.f, channel);
 			} else {
 				triggerExtendCount[section][channel] -= 1;
 			}
@@ -398,7 +398,7 @@ struct Vimina : SanguineModule {
 	}
 
 	void setupChannel(const uint8_t section, const int channel) {
-		channelVoltage[section][channel] = clamp(params[PARAM_FACTOR1 + section].getValue() +
+		channelVoltage[section][channel] = clamp(params[PARAM_FACTOR_1 + section].getValue() +
 			(inputs[INPUT_CV1 + section].getVoltage(channel) / 10.f), 0.f, 1.f);
 
 		switch (channelFunction[section])
@@ -469,10 +469,10 @@ struct Vimina : SanguineModule {
 	}
 
 	void onReset() override {
-		params[PARAM_MODE1].setValue(1);
-		params[PARAM_MODE2].setValue(0);
-		params[PARAM_FACTOR1].setValue(0.5f);
-		params[PARAM_FACTOR2].setValue(0.5f);
+		params[PARAM_MODE_1].setValue(1);
+		params[PARAM_MODE_2].setValue(0);
+		params[PARAM_FACTOR_1].setValue(0.5f);
+		params[PARAM_FACTOR_2].setValue(0.5f);
 	}
 
 	json_t* dataToJson() override {
@@ -508,31 +508,31 @@ struct ViminaWidget : SanguineModuleWidget {
 
 		// Channel 1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,
-			Vimina::PARAM_MODE1, Vimina::LIGHTS_MODE + 0 * 2));
+			Vimina::PARAM_MODE_1, Vimina::LIGHTS_MODE + 0 * 2));
 
 		addParam(createParamCentered<VCVButton>(millimetersToPixelsVec(25.863, 16.723),
-			module, Vimina::PARAM_RESET1));
+			module, Vimina::PARAM_RESET_1));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Vimina::PARAM_FACTOR1));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Vimina::PARAM_FACTOR_1));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Vimina::INPUT_RESET));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Vimina::INPUT_CV1));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Vimina::OUTPUT_OUT1A));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Vimina::OUTPUT_OUT_1A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Vimina::LIGHTS_STATE + 0 * 2));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Vimina::OUTPUT_OUT1B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Vimina::OUTPUT_OUT_1B));
 
 		// Channel 2
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 74.653), module,
-			Vimina::PARAM_MODE2, Vimina::LIGHTS_MODE + 1 * 2));
+			Vimina::PARAM_MODE_2, Vimina::LIGHTS_MODE + 1 * 2));
 
 		addParam(createParamCentered<VCVButton>(millimetersToPixelsVec(25.863, 74.653),
-			module, Vimina::PARAM_RESET2));
+			module, Vimina::PARAM_RESET_2));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Vimina::PARAM_FACTOR2));
+		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Vimina::PARAM_FACTOR_2));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Vimina::INPUT_CLOCK));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Vimina::INPUT_CV2));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Vimina::OUTPUT_OUT2A));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Vimina::OUTPUT_OUT_2A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 117.888), module, Vimina::LIGHTS_STATE + 1 * 2));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Vimina::OUTPUT_OUT2B));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Vimina::OUTPUT_OUT_2B));
 	}
 
 	void appendContextMenu(Menu* menu) override {
