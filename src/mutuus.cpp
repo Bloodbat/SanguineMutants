@@ -11,15 +11,15 @@ struct Mutuus : SanguineModule {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
 		PARAM_CARRIER,
-		PARAM_LEVEL1,
-		PARAM_LEVEL2,
+		PARAM_LEVEL_1,
+		PARAM_LEVEL_2,
 		PARAM_MODE_SWITCH,
 		PARAM_STEREO,
 		PARAMS_COUNT
 	};
 	enum InputIds {
-		INPUT_LEVEL1,
-		INPUT_LEVEL2,
+		INPUT_LEVEL_1,
+		INPUT_LEVEL_2,
 		INPUT_ALGORITHM,
 		INPUT_TIMBRE,
 		INPUT_CARRIER,
@@ -77,11 +77,11 @@ struct Mutuus : SanguineModule {
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
 
-		configParam(PARAM_LEVEL1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0.f, 100.f);
-		configParam(PARAM_LEVEL2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0.f, 100.f);
+		configParam(PARAM_LEVEL_1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0.f, 100.f);
+		configParam(PARAM_LEVEL_2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0.f, 100.f);
 
-		configInput(INPUT_LEVEL1, "Level 1");
-		configInput(INPUT_LEVEL2, "Level 2");
+		configInput(INPUT_LEVEL_1, "Level 1");
+		configInput(INPUT_LEVEL_2, "Level 2");
 		configInput(INPUT_ALGORITHM, "Algorithm");
 		configInput(INPUT_TIMBRE, "Timbre");
 		configInput(INPUT_CARRIER, "Carrier");
@@ -116,8 +116,7 @@ struct Mutuus : SanguineModule {
 
 			if (bLastInModeSwitch) {
 				params[PARAM_ALGORITHM].setValue(lastAlgorithmValue);
-			}
-			else {
+			} else {
 				params[PARAM_ALGORITHM].setValue(featureMode);
 			}
 
@@ -143,8 +142,7 @@ struct Mutuus : SanguineModule {
 					lights[LIGHT_ALGORITHM + i].setBrightnessSmooth(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
-		}
-		else {
+		} else {
 			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
@@ -155,8 +153,7 @@ struct Mutuus : SanguineModule {
 			if (inputs[INPUT_MODE].isConnected()) {
 				if (!bNotesModeSelection) {
 					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
-				}
-				else {
+				} else {
 					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
 				}
 			}
@@ -174,15 +171,15 @@ struct Mutuus : SanguineModule {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-				f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f, channel);
-				f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f, channel);
+				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
+				f4Voltages[1] = inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel);
 				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
 				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
 
 				f4Voltages /= 5.f;
 
-				mutuusParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
-				mutuusParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
+				mutuusParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
+				mutuusParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
 
 				mutuusParameters[channel]->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
 				mutuusParameters[channel]->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
@@ -190,8 +187,8 @@ struct Mutuus : SanguineModule {
 				mutuusParameters[channel]->raw_level[0] = mutuusParameters[channel]->channel_drive[0];
 				mutuusParameters[channel]->raw_level[1] = mutuusParameters[channel]->channel_drive[1];
 
-				mutuusParameters[channel]->raw_level_pot[0] = clamp(params[PARAM_LEVEL1].getValue(), 0.f, 1.f);
-				mutuusParameters[channel]->raw_level_pot[1] = clamp(params[PARAM_LEVEL2].getValue(), 0.f, 1.f);
+				mutuusParameters[channel]->raw_level_pot[0] = clamp(params[PARAM_LEVEL_1].getValue(), 0.f, 1.f);
+				mutuusParameters[channel]->raw_level_pot[1] = clamp(params[PARAM_LEVEL_2].getValue(), 0.f, 1.f);
 
 				if (!bModeSwitchEnabled) {
 					mutuusParameters[channel]->raw_algorithm_pot = algorithmValue;
@@ -207,8 +204,8 @@ struct Mutuus : SanguineModule {
 				mutuusParameters[channel]->raw_modulation_pot = clamp(params[PARAM_TIMBRE].getValue(), 0.f, 1.f);
 				mutuusParameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
 
-				mutuusParameters[channel]->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f
-					* inputs[INPUT_LEVEL1].getNormalVoltage(2.f, channel) + 12.f;
+				mutuusParameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
+					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				mutuusParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
 				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
@@ -242,8 +239,7 @@ struct Mutuus : SanguineModule {
 					float zone;
 					if (featureMode != mutuus::FEATURE_MODE_META) {
 						palette = paletteWarpsFreqsShift;
-					}
-					else {
+					} else {
 						palette = paletteWarpsDefault;
 					}
 
@@ -344,12 +340,12 @@ struct MutuusWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 63.862), module, Mutuus::INPUT_ALGORITHM));
 
-		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Mutuus::PARAM_LEVEL1));
-		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Mutuus::PARAM_LEVEL2));
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Mutuus::PARAM_LEVEL_1));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Mutuus::PARAM_LEVEL_2));
 		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(42.388, 79.669), module, Mutuus::PARAM_TIMBRE));
 
-		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Mutuus::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Mutuus::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Mutuus::INPUT_LEVEL_1));
+		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Mutuus::INPUT_LEVEL_2));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 96.146), module, Mutuus::INPUT_TIMBRE));
 
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.925, 112.172), module, Mutuus::INPUT_CARRIER));

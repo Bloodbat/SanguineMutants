@@ -11,14 +11,14 @@ struct Incurvationes : SanguineModule {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
 		PARAM_CARRIER,
-		PARAM_LEVEL1,
-		PARAM_LEVEL2,
+		PARAM_LEVEL_1,
+		PARAM_LEVEL_2,
 		PARAM_EASTER_EGG,
 		PARAMS_COUNT
 	};
 	enum InputIds {
-		INPUT_LEVEL1,
-		INPUT_LEVEL2,
+		INPUT_LEVEL_1,
+		INPUT_LEVEL_2,
 		INPUT_ALGORITHM,
 		INPUT_TIMBRE,
 		INPUT_CARRIER,
@@ -63,11 +63,11 @@ struct Incurvationes : SanguineModule {
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
 
-		configParam(PARAM_LEVEL1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0.f, 100.f);
-		configParam(PARAM_LEVEL2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0.f, 100.f);
+		configParam(PARAM_LEVEL_1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0.f, 100.f);
+		configParam(PARAM_LEVEL_2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0.f, 100.f);
 
-		configInput(INPUT_LEVEL1, "Level 1");
-		configInput(INPUT_LEVEL2, "Level 2");
+		configInput(INPUT_LEVEL_1, "Level 1");
+		configInput(INPUT_LEVEL_2, "Level 2");
 		configInput(INPUT_ALGORITHM, "Algorithm");
 		configInput(INPUT_TIMBRE, "Timbre");
 		configInput(INPUT_CARRIER, "Carrier");
@@ -111,15 +111,15 @@ struct Incurvationes : SanguineModule {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-				f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f, channel);
-				f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f, channel);
+				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
+				f4Voltages[1] = inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel);
 				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
 				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
 
 				f4Voltages /= 5.f;
 
-				warpsParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
-				warpsParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
+				warpsParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
+				warpsParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
 
 				warpsParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
 
@@ -129,8 +129,8 @@ struct Incurvationes : SanguineModule {
 				warpsParameters[channel]->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
 				warpsParameters[channel]->phase_shift = warpsParameters[channel]->modulation_algorithm;
 
-				warpsParameters[channel]->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f *
-					inputs[INPUT_LEVEL1].getNormalVoltage(2.f, channel) + 12.f;
+				warpsParameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f *
+					inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				warpsParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
 				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
@@ -213,11 +213,11 @@ struct IncurvationesWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 63.862), module, Incurvationes::INPUT_ALGORITHM));
 
-		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Incurvationes::PARAM_LEVEL1));
-		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Incurvationes::PARAM_LEVEL2));
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Incurvationes::PARAM_LEVEL_1));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Incurvationes::PARAM_LEVEL_2));
 
-		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Incurvationes::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Incurvationes::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Incurvationes::INPUT_LEVEL_1));
+		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Incurvationes::INPUT_LEVEL_2));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 96.146), module, Incurvationes::INPUT_TIMBRE));
 
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.925, 112.172), module, Incurvationes::INPUT_CARRIER));

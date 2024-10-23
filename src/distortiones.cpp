@@ -11,14 +11,14 @@ struct Distortiones : SanguineModule {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
 		PARAM_CARRIER,
-		PARAM_LEVEL1,
-		PARAM_LEVEL2,
+		PARAM_LEVEL_1,
+		PARAM_LEVEL_2,
 		PARAM_MODE_SWITCH,
 		PARAMS_COUNT
 	};
 	enum InputIds {
-		INPUT_LEVEL1,
-		INPUT_LEVEL2,
+		INPUT_LEVEL_1,
+		INPUT_LEVEL_2,
 		INPUT_ALGORITHM,
 		INPUT_TIMBRE,
 		INPUT_CARRIER,
@@ -71,11 +71,11 @@ struct Distortiones : SanguineModule {
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0, 100);
 
-		configParam(PARAM_LEVEL1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
-		configParam(PARAM_LEVEL2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0, 100);
+		configParam(PARAM_LEVEL_1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
+		configParam(PARAM_LEVEL_2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0, 100);
 
-		configInput(INPUT_LEVEL1, "Level 1");
-		configInput(INPUT_LEVEL2, "Level 2");
+		configInput(INPUT_LEVEL_1, "Level 1");
+		configInput(INPUT_LEVEL_2, "Level 2");
 		configInput(INPUT_ALGORITHM, "Algorithm");
 		configInput(INPUT_TIMBRE, "Timbre");
 		configInput(INPUT_CARRIER, "Carrier");
@@ -110,8 +110,7 @@ struct Distortiones : SanguineModule {
 
 			if (bLastInModeSwitch) {
 				params[PARAM_ALGORITHM].setValue(lastAlgorithmValue);
-			}
-			else {
+			} else {
 				params[PARAM_ALGORITHM].setValue(featureMode);
 			}
 
@@ -137,8 +136,7 @@ struct Distortiones : SanguineModule {
 					lights[LIGHT_ALGORITHM + i].setBrightnessSmooth(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
-		}
-		else {
+		} else {
 			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
@@ -149,8 +147,7 @@ struct Distortiones : SanguineModule {
 			if (inputs[INPUT_MODE].isConnected()) {
 				if (!bNotesModeSelection) {
 					channelFeatureMode = distortiones::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
-				}
-				else {
+				} else {
 					channelFeatureMode = distortiones::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
 				}
 			}
@@ -166,15 +163,15 @@ struct Distortiones : SanguineModule {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-				f4Voltages[0] = inputs[INPUT_LEVEL1].getNormalVoltage(5.f, channel);
-				f4Voltages[1] = inputs[INPUT_LEVEL2].getNormalVoltage(5.f, channel);
+				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
+				f4Voltages[1] = inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel);
 				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
 				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
 
 				f4Voltages /= 5.f;
 
-				distortionesParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL1].getValue() * f4Voltages[0], 0.f, 1.f);
-				distortionesParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL2].getValue() * f4Voltages[1], 0.f, 1.f);
+				distortionesParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
+				distortionesParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
 
 				distortionesParameters[channel]->raw_level[0] = distortionesParameters[channel]->channel_drive[0];
 				distortionesParameters[channel]->raw_level[1] = distortionesParameters[channel]->channel_drive[1];
@@ -192,8 +189,8 @@ struct Distortiones : SanguineModule {
 
 				distortionesParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
-				distortionesParameters[channel]->note = 60.f * params[PARAM_LEVEL1].getValue() + 12.f
-					* inputs[INPUT_LEVEL1].getNormalVoltage(2.f, channel) + 12.f;
+				distortionesParameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
+					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				distortionesParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
 				distortionesModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
@@ -226,8 +223,7 @@ struct Distortiones : SanguineModule {
 				float zone;
 				if (featureMode != distortiones::FEATURE_MODE_META) {
 					palette = paletteWarpsFreqsShift;
-				}
-				else {
+				} else {
 					palette = paletteWarpsDefault;
 				}
 
@@ -324,12 +320,12 @@ struct DistortionesWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 63.862), module, Distortiones::INPUT_ALGORITHM));
 
-		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Distortiones::PARAM_LEVEL1));
-		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Distortiones::PARAM_LEVEL2));
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(8.412, 79.451), module, Distortiones::PARAM_LEVEL_1));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(25.4, 79.451), module, Distortiones::PARAM_LEVEL_2));
 		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(42.388, 79.669), module, Distortiones::PARAM_TIMBRE));
 
-		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Distortiones::INPUT_LEVEL1));
-		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Distortiones::INPUT_LEVEL2));
+		addInput(createInputCentered<BananutYellowPoly>(millimetersToPixelsVec(8.412, 96.146), module, Distortiones::INPUT_LEVEL_1));
+		addInput(createInputCentered<BananutBluePoly>(millimetersToPixelsVec(25.4, 96.146), module, Distortiones::INPUT_LEVEL_2));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(42.388, 96.146), module, Distortiones::INPUT_TIMBRE));
 
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.925, 112.172), module, Distortiones::INPUT_CARRIER));
