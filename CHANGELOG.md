@@ -1,3 +1,10 @@
+# 2.5.2
+
+## Fixes
+
+- Marmora X clock source tooltips.
+
+
 # 2.5.1
 
 ## Changes
