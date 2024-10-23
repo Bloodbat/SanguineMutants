@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "sanguinecomponents.hpp"
 
@@ -207,10 +207,10 @@ static const std::vector<std::string> marmoraScaleLabels = {
 };
 
 static const std::vector<std::string> marmoraInternalClockLabels = {
-    "t? ? X?, T? ? X?, T? ? X?",
-    "t? ? X?, X?, X?",
-    "t? ? X?, X?, X?",
-    "t? ? X?, X?, X?",
+    "t₁ → X₁, T₂ → X₂, T₃ → X₃",
+    "t₁ → X₁, X₂, X₃",
+    "t₂ → X₁, X₂, X₃",
+    "t₃ → X₁, X₂, X₃",
 };
 
 static const std::vector<std::string> marmoraLockLabels = {
