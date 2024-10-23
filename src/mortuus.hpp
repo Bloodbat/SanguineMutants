@@ -115,7 +115,7 @@ static const std::vector<KnobLabels> mortuusKnobLabelsTwinMode{
     { "Frequency", "Var. Prob.", "Noise", "Distortion" }
 };
 
-static const LightModes lightStates[FUNCTION_LAST][4]{
+static const LightModes lightStates[FUNCTION_LAST][kNumFunctionLights]{
     { LIGHT_ON,  LIGHT_OFF, LIGHT_OFF, LIGHT_OFF }, // Envelope
     { LIGHT_OFF, LIGHT_ON, LIGHT_OFF, LIGHT_OFF }, // LFO
     { LIGHT_OFF, LIGHT_OFF, LIGHT_ON, LIGHT_OFF }, // TAP LFO

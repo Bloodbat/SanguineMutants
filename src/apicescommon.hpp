@@ -32,6 +32,8 @@ struct KnobLabels {
 
 static const size_t kNumBlocks = 2;
 static const size_t kNumChannels = 2;
+static const size_t kNumKnobs = 4;
+static const size_t kNumFunctionLights = 4;
 static const size_t kBlockSize = 4;
 static const uint8_t kNumAdcChannels = 4;
 static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
