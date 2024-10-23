@@ -255,8 +255,8 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void processSwitch(uint16_t id) {
-		switch (id) {
+	void processSwitch(uint16_t switchId) {
+		switch (switchId) {
 		case SWITCH_TWIN_MODE:
 			if (editMode <= EDIT_MODE_SPLIT) {
 				editMode = static_cast<EditMode>(EDIT_MODE_SPLIT - editMode);
@@ -316,27 +316,27 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void onPotChanged(uint16_t id, uint16_t value) {
+	void onPotChanged(uint16_t knobId, uint16_t value) {
 		switch (editMode) {
 		case EDIT_MODE_TWIN:
-			processors[0].set_parameter(id, value);
-			processors[1].set_parameter(id, value);
-			potValue[id] = value >> 8;
+			processors[0].set_parameter(knobId, value);
+			processors[1].set_parameter(knobId, value);
+			potValue[knobId] = value >> 8;
 			break;
 
 		case EDIT_MODE_SPLIT:
-			if (id < 2) {
-				processors[0].set_parameter(id, value);
+			if (knobId < 2) {
+				processors[0].set_parameter(knobId, value);
 			} else {
-				processors[1].set_parameter(id - 2, value);
+				processors[1].set_parameter(knobId - 2, value);
 			}
-			potValue[id] = value >> 8;
+			potValue[knobId] = value >> 8;
 			break;
 
 		case EDIT_MODE_FIRST:
 		case EDIT_MODE_SECOND:
 			uint8_t index;
-			index = id + (editMode - EDIT_MODE_FIRST) * 4;
+			index = knobId + (editMode - EDIT_MODE_FIRST) * 4;
 			peaks::Processors* processor;
 			processor = &processors[editMode - EDIT_MODE_FIRST];
 
@@ -346,10 +346,10 @@ struct Apices : SanguineModule {
 				delta = -delta;
 			}
 
-			if (!bSnapMode || bSnapped[id] || delta <= 2) {
-				processor->set_parameter(id, value);
+			if (!bSnapMode || bSnapped[knobId] || delta <= 2) {
+				processor->set_parameter(knobId, value);
 				potValue[index] = value >> 8;
-				bSnapped[id] = true;
+				bSnapped[knobId] = true;
 			}
 			break;
 		case EDIT_MODE_LAST:
@@ -489,9 +489,9 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		bool channel1IsStation = processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
-		bool channel2IsStation = processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
-		if (channel1IsStation || channel2IsStation) {
+		bool bIsChannel1Station = processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+		bool bIsChannel2Station = processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+		if (bIsChannel1Station || bIsChannel2Station) {
 			if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; ++i) {
@@ -500,23 +500,23 @@ struct Apices : SanguineModule {
 				}
 			}
 			// Hacky but animates the lights!
-			else if (editMode == EDIT_MODE_FIRST && channel1IsStation) {
+			else if (editMode == EDIT_MODE_FIRST && bIsChannel1Station) {
 				int digit = processors[0].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
 					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.f : 0.f);
 				}
 			}
 			// Ibid
-			else if (editMode == EDIT_MODE_SECOND && channel2IsStation) {
+			else if (editMode == EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t i = 0; i < 4; i++) {
 					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.f : 0.f);
 				}
 			}
-			if (channel1IsStation) {
+			if (bIsChannel1Station) {
 				buttonBrightness[0] = processors[0].number_station().gate() ? 255 : 0;
 			}
-			if (channel2IsStation) {
+			if (bIsChannel2Station) {
 				buttonBrightness[1] = processors[1].number_station().gate() ? 255 : 0;
 			}
 		}
