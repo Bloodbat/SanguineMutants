@@ -177,12 +177,11 @@ struct Anuli : SanguineModule {
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			if (bHaveModeCable) {
-				if (!bNotesModeSelection) {
-					modeNum = static_cast<int>(inputs[INPUT_MODE].getVoltage(channel));
-				} else {
-					modeNum = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f));
+				float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
+				if (bNotesModeSelection) {
+					modeVoltage = roundf(modeVoltage * 12.f);
 				}
-				modeNum = clamp(modeNum, 0, 6);
+				modeNum = clamp(static_cast<int>(modeVoltage), 0, 6);
 			}
 
 			bEasterEgg[channel] = modeNum >= 6;
