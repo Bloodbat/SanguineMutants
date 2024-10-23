@@ -62,16 +62,9 @@ struct Nebulae : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	enum LedModes {
-		LEDS_INPUT,
-		LEDS_OUTPUT,
-		LEDS_PARAMETERS,
-		LEDS_MOMENTARY,
-		LEDS_QUALITY_MOMENTARY,
-		LEDS_MODE_MOMENTARY
-	} ledMode = LEDS_INPUT;
+	NebulaeLedModes ledMode = LEDS_INPUT;
 
-	LedModes lastLedMode = LEDS_INPUT;
+	NebulaeLedModes lastLedMode = LEDS_INPUT;
 
 	std::string textMode = nebulaeModeList[0].display;
 	std::string textFreeze = nebulaeModeDisplays[0].labelFreeze;
@@ -297,14 +290,12 @@ struct Nebulae : SanguineModule {
 					ledMode = LEDS_OUTPUT;
 					lastLedMode = LEDS_OUTPUT;
 				}
-			}
-			else if (!frozen && bLastFrozen) {
+			} else if (!frozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
 					ledMode = LEDS_INPUT;
 					lastLedMode = LEDS_INPUT;
-				}
-				else {
+				} else {
 					bDisplaySwitched = false;
 				}
 			}
@@ -432,7 +423,7 @@ struct Nebulae : SanguineModule {
 			}
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = LedModes((ledMode + 1) % 3);
+				ledMode = NebulaeLedModes((ledMode + 1) % 3);
 				lastLedMode = ledMode;
 				displayTimeout = 0;
 				lastBlend = params[PARAM_BLEND].getValue();

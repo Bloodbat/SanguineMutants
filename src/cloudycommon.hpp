@@ -30,3 +30,12 @@ static const std::vector<std::string> nebulaeButtonTexts{
 	"Blends",
 	"Momentary"
 };
+
+enum NebulaeLedModes {
+	LEDS_INPUT,
+	LEDS_OUTPUT,
+	LEDS_PARAMETERS,
+	LEDS_MOMENTARY,
+	LEDS_QUALITY_MOMENTARY,
+	LEDS_MODE_MOMENTARY
+};
