@@ -47,7 +47,7 @@ struct Apices : SanguineModule {
 	};
 
 	EditMode editMode = EDIT_MODE_TWIN;
-	ApicesProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
+	ApicesProcessorFunction processorFunction[kNumChannels] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
 	Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -59,7 +59,7 @@ struct Apices : SanguineModule {
 	int32_t adcValue[kNumAdcChannels] = { 0, 0, 0, 0 };
 	int32_t adcThreshold[kNumAdcChannels] = { 0, 0, 0, 0 };
 
-	peaks::Processors processors[2] = {};
+	peaks::Processors processors[kNumAdcChannels] = {};
 
 	int16_t output[kBlockSize] = {};
 	int16_t brightness[kNumChannels] = { 0, 0 };
@@ -70,7 +70,7 @@ struct Apices : SanguineModule {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	peaks::GateFlags gateFlags[2] = { 0, 0 };
+	peaks::GateFlags gateFlags[kNumChannels] = { 0, 0 };
 
 	dsp::SampleRateConverter<2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
@@ -98,7 +98,7 @@ struct Apices : SanguineModule {
 	std::string oledText3 = "";
 	std::string oledText4 = "";
 
-	const peaks::ProcessorFunction processorFunctionTable[FUNCTION_LAST][2] = {
+	const peaks::ProcessorFunction processorFunctionTable[FUNCTION_LAST][kNumChannels] = {
 		{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
 		{ peaks::PROCESSOR_FUNCTION_LFO, peaks::PROCESSOR_FUNCTION_LFO },
 		{ peaks::PROCESSOR_FUNCTION_TAP_LFO, peaks::PROCESSOR_FUNCTION_TAP_LFO },
@@ -135,7 +135,7 @@ struct Apices : SanguineModule {
 		settings.processorFunction[1] = FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
 
-		for (int i = 0; i < 2; i++)
+		for (size_t i = 0; i < kNumChannels; ++i)
 		{
 			memset(&processors[i], 0, sizeof(peaks::Processors));
 			processors[i].Init(i);
@@ -465,8 +465,8 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		uint8_t buttonBrightness[2];
-		for (uint8_t i = 0; i < 2; ++i) {
+		uint8_t buttonBrightness[kNumChannels];
+		for (uint8_t i = 0; i < kNumChannels; ++i) {
 			switch (processorFunction[i]) {
 			case FUNCTION_DRUM_GENERATOR:
 			case FUNCTION_FM_DRUM_GENERATOR:

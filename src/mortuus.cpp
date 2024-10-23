@@ -47,7 +47,7 @@ struct Mortuus : SanguineModule {
 	};
 
 	EditMode editMode = EDIT_MODE_TWIN;
-	MortuusProcessorFunction processorFunction[2] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
+	MortuusProcessorFunction processorFunction[kNumChannels] = { FUNCTION_ENVELOPE, FUNCTION_ENVELOPE };
 	Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -59,7 +59,7 @@ struct Mortuus : SanguineModule {
 	int32_t adcValue[kNumAdcChannels] = { 0, 0, 0, 0 };
 	int32_t adcThreshold[kNumAdcChannels] = { 0, 0, 0, 0 };
 
-	deadman::Processors processors[2] = {};
+	deadman::Processors processors[kNumChannels] = {};
 
 	int16_t output[kBlockSize] = {};
 	int16_t brightness[kNumChannels] = { 0, 0 };
@@ -70,7 +70,7 @@ struct Mortuus : SanguineModule {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	deadman::GateFlags gateFlags[2] = { 0, 0 };
+	deadman::GateFlags gateFlags[kNumChannels] = { 0, 0 };
 
 	dsp::SampleRateConverter<2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
@@ -98,7 +98,7 @@ struct Mortuus : SanguineModule {
 	std::string oledText3 = "";
 	std::string oledText4 = "";
 
-	const deadman::ProcessorFunction processorFunctionTable[FUNCTION_LAST][2] = {
+	const deadman::ProcessorFunction processorFunctionTable[FUNCTION_LAST][kNumChannels] = {
 		{ deadman::PROCESSOR_FUNCTION_ENVELOPE, deadman::PROCESSOR_FUNCTION_ENVELOPE },
 		{ deadman::PROCESSOR_FUNCTION_LFO, deadman::PROCESSOR_FUNCTION_LFO },
 		{ deadman::PROCESSOR_FUNCTION_TAP_LFO, deadman::PROCESSOR_FUNCTION_TAP_LFO },
@@ -148,7 +148,7 @@ struct Mortuus : SanguineModule {
 		settings.processorFunction[1] = FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
 
-		for (int i = 0; i < 2; i++)
+		for (size_t i = 0; i < kNumChannels; ++i)
 		{
 			memset(&processors[i], 0, sizeof(deadman::Processors));
 			processors[i].Init(i);
@@ -480,8 +480,8 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		uint8_t buttonBrightness[2];
-		for (uint8_t i = 0; i < 2; ++i) {
+		uint8_t buttonBrightness[kNumChannels];
+		for (uint8_t i = 0; i < kNumChannels; ++i) {
 			switch (processorFunction[i]) {
 			case FUNCTION_DRUM_GENERATOR:
 			case FUNCTION_FM_DRUM_GENERATOR:
