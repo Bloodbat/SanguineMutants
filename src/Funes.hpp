@@ -70,3 +70,9 @@ static const std::vector<std::string> funesModelLabels = {
     "Analog snare drum",
     "Analog hi-hat"
 };
+
+enum FunesLEDModes {
+  LEDNormal,
+  LEDLPG,
+  LEDOctave
+};

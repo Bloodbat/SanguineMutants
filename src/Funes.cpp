@@ -50,12 +50,6 @@ struct Funes : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	enum LEDsMode {
-		LEDNormal,
-		LEDLPG,
-		LEDOctave
-	};
-
 	plaits::Voice voice[16];
 	plaits::Patch patch = {};
 	plaits::UserData user_data;
@@ -90,7 +84,7 @@ struct Funes : SanguineModule {
 
 	bool bNotesModelSelection = false;
 
-	LEDsMode ledsMode = LEDNormal;
+	FunesLEDModes ledsMode = LEDNormal;
 
 	std::string displayText = "";
 
