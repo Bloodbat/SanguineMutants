@@ -21,20 +21,20 @@ struct Apices : SanguineModule {
 		PARAMS_COUNT
 	};
 	enum InputIds {
-		GATE_1_INPUT,
-		GATE_2_INPUT,
+		INPUT_GATE_1,
+		INPUT_GATE_2,
 		INPUTS_COUNT
 	};
 	enum OutputIds {
-		OUT_1_OUTPUT,
-		OUT_2_OUTPUT,
+		OUTPUT_OUT_1,
+		OUTPUT_OUT_2,
 		OUTPUTS_COUNT
 	};
 	enum LightIds {
 		LIGHT_TRIGGER_1,
 		LIGHT_TRIGGER_2,
-		LIGHT_CHANNEL1,
-		LIGHT_CHANNEL2,
+		LIGHT_CHANNEL_1,
+		LIGHT_CHANNEL_2,
 		ENUMS(LIGHT_CHANNEL_SELECT, 1 * 2),
 		LIGHT_SPLIT_MODE,
 		LIGHT_EXPERT_MODE,
@@ -169,8 +169,8 @@ struct Apices : SanguineModule {
 			}
 
 			uint32_t gateTriggers = 0;
-			gateTriggers |= inputs[GATE_1_INPUT].getVoltage() >= 0.7f ? 1 : 0;
-			gateTriggers |= inputs[GATE_2_INPUT].getVoltage() >= 0.7f ? 2 : 0;
+			gateTriggers |= inputs[INPUT_GATE_1].getVoltage() >= 0.7f ? 1 : 0;
+			gateTriggers |= inputs[INPUT_GATE_2].getVoltage() >= 0.7f ? 2 : 0;
 
 			uint32_t buttons = 0;
 			buttons |= (params[PARAM_TRIGGER_1].getValue() ? 1 : 0);
@@ -213,8 +213,8 @@ struct Apices : SanguineModule {
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
 			// TODO Check the output values against an actual device.
-			outputs[OUT_1_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
-			outputs[OUT_2_OUTPUT].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
+			outputs[OUTPUT_OUT_1].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
+			outputs[OUTPUT_OUT_2].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
 	}
 
@@ -387,8 +387,8 @@ struct Apices : SanguineModule {
 		int currentLight;
 		switch (editMode) {
 		case EDIT_MODE_FIRST:
-			lights[LIGHT_CHANNEL1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_CHANNEL2].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (int i = 0; i < 4; i++) {
@@ -399,8 +399,8 @@ struct Apices : SanguineModule {
 			}
 			break;
 		case EDIT_MODE_SECOND:
-			lights[LIGHT_CHANNEL1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.75f, sampleTime);
 			for (int i = 0; i < 4; i++) {
@@ -411,8 +411,8 @@ struct Apices : SanguineModule {
 			}
 			break;
 		case EDIT_MODE_TWIN:
-			lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
-			lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (int i = 0; i < 4; i++) {
@@ -423,8 +423,8 @@ struct Apices : SanguineModule {
 			}
 			break;
 		case EDIT_MODE_SPLIT:
-			lights[LIGHT_CHANNEL1].setBrightnessSmooth(1.f, sampleTime);
-			lights[LIGHT_CHANNEL2].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(1.f, sampleTime);
+			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (int i = 0; i < 2; i++) {
@@ -727,8 +727,8 @@ struct ApicesWidget : SanguineModuleWidget {
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(91.652, 42.136), module, Apices::LIGHT_FUNCTION_3));
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(107.402, 42.136), module, Apices::LIGHT_FUNCTION_4));
 
-		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(16.113, 27.965), module, Apices::LIGHT_CHANNEL1));
-		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(16.113, 40.557), module, Apices::LIGHT_CHANNEL2));
+		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(16.113, 27.965), module, Apices::LIGHT_CHANNEL_1));
+		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(16.113, 40.557), module, Apices::LIGHT_CHANNEL_2));
 
 		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(30.264, 62.728), module, Apices::PARAM_KNOB_1));
 		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(81.759, 62.728), module, Apices::PARAM_KNOB_2));
@@ -740,11 +740,11 @@ struct ApicesWidget : SanguineModuleWidget {
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(41.987, 96.558), module, Apices::LIGHT_KNOBS_MODE + 2 * 3));
 		addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(69.978, 96.558), module, Apices::LIGHT_KNOBS_MODE + 3 * 3));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(10.375, 84.976), module, Apices::GATE_1_INPUT));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(10.375, 100.593), module, Apices::GATE_2_INPUT));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(10.375, 84.976), module, Apices::INPUT_GATE_1));
+		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(10.375, 100.593), module, Apices::INPUT_GATE_2));
 
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 100.846), module, Apices::OUT_1_OUTPUT));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Apices::OUT_2_OUTPUT));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 100.846), module, Apices::OUTPUT_OUT_1));
+		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Apices::OUTPUT_OUT_2));
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		apicesFrambuffer->addChild(oledDisplay1);
