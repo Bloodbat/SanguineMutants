@@ -41,11 +41,11 @@ struct Aleae : SanguineModule {
 	int channelCount = 0;
 
 
-	dsp::BooleanTrigger btGateTriggers[kMaxModuleSections][16];
+	dsp::BooleanTrigger btGateTriggers[kMaxModuleSections][PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
 
-	RollResults rollResults[kMaxModuleSections][16] = {};
-	RollResults lastRollResults[kMaxModuleSections][16] = {};
+	RollResults rollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	RollResults lastRollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	RollModes rollModes[kMaxModuleSections] = { ROLL_DIRECT, ROLL_DIRECT };
 	OutModes outModes[kMaxModuleSections] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
@@ -53,7 +53,7 @@ struct Aleae : SanguineModule {
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		for (int section = 0; section < kMaxModuleSections; section++) {
+		for (int section = 0; section < kMaxModuleSections; ++section) {
 			configParam(PARAM_THRESHOLD_1 + section, 0.f, 1.f, 0.5f, string::f("Channel %d probability", section + 1), "%", 0, 100);
 			configSwitch(PARAM_ROLL_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", section + 1), { "Direct", "Toggle" });
 			configSwitch(PARAM_OUT_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d out mode", section + 1), { "Trigger", "Latch" });
@@ -61,7 +61,7 @@ struct Aleae : SanguineModule {
 			configInput(INPUT_P_1 + section, string::f("Channel %d probability", section + 1));
 			configOutput(OUTPUT_OUT_1A + section, string::f("Channel %d A", section + 1));
 			configOutput(OUTPUT_OUT_1B + section, string::f("Channel %d B", section + 1));
-			for (int channel = 0; channel < 16; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				lastRollResults[section][channel] = ROLL_HEADS;
 			}
 			lightsDivider.setDivision(kLightFrequency);
@@ -76,7 +76,7 @@ struct Aleae : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
-		for (int section = 0; section < kMaxModuleSections; section++) {
+		for (int section = 0; section < kMaxModuleSections; ++section) {
 			// Get input.
 			Input* input = &inputs[INPUT_IN_1 + section];
 			// 2nd input is normalized to 1st.
@@ -92,7 +92,7 @@ struct Aleae : SanguineModule {
 			bool lightBActive = false;
 
 			// Process triggers.
-			for (int channel = 0; channel < channelCount; channel++) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				bool gatePresent = input->getVoltage(channel) >= 2.f;
 				if (btGateTriggers[section][channel].process(gatePresent)) {
 					// Trigger.
@@ -151,10 +151,10 @@ struct Aleae : SanguineModule {
 
 
 	void onReset() override {
-		for (int section = 0; section < kMaxModuleSections; section++) {
+		for (int section = 0; section < kMaxModuleSections; ++section) {
 			params[PARAM_ROLL_MODE_1 + section].setValue(0);
 			params[PARAM_OUT_MODE_1 + section].setValue(0);
-			for (int channel = 0; channel < 16; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				lastRollResults[section][channel] = ROLL_HEADS;
 			}
 		}
@@ -229,7 +229,7 @@ struct AleaeWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; i++) {
+		for (int i = 0; i < module->channelCount; ++i) {
 			availableChannels.push_back(channelNumbers[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("LEDs channel", availableChannels,
