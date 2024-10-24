@@ -50,10 +50,10 @@ struct Funes : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	plaits::Voice voice[16];
+	plaits::Voice voice[PORT_MAX_CHANNELS];
 	plaits::Patch patch = {};
 	plaits::UserData user_data;
-	char shared_buffer[16][16384] = {};
+	char shared_buffer[PORT_MAX_CHANNELS][16384] = {};
 
 	float triPhase = 0.f;
 	float lastLPGColor = 0.5f;
@@ -73,8 +73,8 @@ struct Funes : SanguineModule {
 	uint32_t displayTimeout = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
-	dsp::SampleRateConverter<16 * 2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<16 * 2>, 256> outputBuffer;
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> outputSrc;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> outputBuffer;
 
 	bool bLowCpu = false;
 
@@ -119,9 +119,9 @@ struct Funes : SanguineModule {
 		configOutput(OUTPUT_OUT, "Main");
 		configOutput(OUTPUT_AUX, "Auxiliary");
 
-		for (int i = 0; i < 16; i++) {
-			stmlib::BufferAllocator allocator(shared_buffer[i], sizeof(shared_buffer[i]));
-			voice[i].Init(&allocator, &user_data);
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			stmlib::BufferAllocator allocator(shared_buffer[channel], sizeof(shared_buffer[channel]));
+			voice[channel].Init(&allocator, &user_data);
 		}
 
 		octaveQuantizer.Init(9, 0.01f, false);
@@ -193,13 +193,13 @@ struct Funes : SanguineModule {
 				displayTimeout--;
 			}
 
-			bool activeLights[16] = {};
+			bool activeLights[PORT_MAX_CHANNELS] = {};
 
 			bool pulse = false;
 
 			// Render output buffer for each voice
-			dsp::Frame<16 * 2> outputFrames[blockSize];
-			for (int channel = 0; channel < channelCount; channel++) {
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[blockSize];
+			for (int channel = 0; channel < channelCount; ++channel) {
 				// Construct modulations
 				plaits::Modulations modulations;
 				if (!bNotesModelSelection) {
@@ -225,9 +225,9 @@ struct Funes : SanguineModule {
 				voice[channel].Render(patch, modulations, output, blockSize);
 
 				// Convert output to frames
-				for (int i = 0; i < blockSize; i++) {
-					outputFrames[i].samples[channel * 2 + 0] = output[i].out / 32768.f;
-					outputFrames[i].samples[channel * 2 + 1] = output[i].aux / 32768.f;
+				for (int blockNum = 0; blockNum < blockSize; ++blockNum) {
+					outputFrames[blockNum].samples[channel * 2 + 0] = output[blockNum].out / 32768.f;
+					outputFrames[blockNum].samples[channel * 2 + 1] = output[blockNum].aux / 32768.f;
 				}
 
 				if (displayChannel == channel) {
@@ -236,7 +236,7 @@ struct Funes : SanguineModule {
 
 				if (ledsMode == LEDNormal) {
 					// Model lights
-					// Get the active engines for currnet channel.
+					// Get the active engines for current channel.
 					int currentLight;
 					int clampedEngine;
 					int activeEngine = voice[channel].active_engine();
@@ -308,12 +308,12 @@ struct Funes : SanguineModule {
 			case LEDNormal: {
 				// Set model lights.
 				int clampedEngine = patch.engine % 8;
-				for (int i = 0; i < 8; i++) {
-					int currentLight = i * 2;
+				for (int led = 0; led < 8; ++led) {
+					int currentLight = led * 2;
 					float brightnessRed = activeLights[currentLight + 1];
 					float brightnessGreen = activeLights[currentLight];
 
-					if (pulse && clampedEngine == i) {
+					if (pulse && clampedEngine == led) {
 						switch (patch.engine) {
 						case 0:
 						case 1:
@@ -347,7 +347,7 @@ struct Funes : SanguineModule {
 				break;
 			}
 			case LEDLPG: {
-				for (int parameter = 0; parameter < 2; parameter++) {
+				for (int parameter = 0; parameter < 2; ++parameter) {
 					float value = parameter == 0 ? params[PARAM_LPG_COLOR].getValue() : params[PARAM_LPG_DECAY].getValue();
 					value *= 100;
 					int startLight = (parameter * 4 + 3) * 2;
@@ -374,21 +374,21 @@ struct Funes : SanguineModule {
 			}
 			case LEDOctave: {
 				int octave = params[PARAM_FREQ_MODE].getValue();
-				for (int i = 0; i < 8; i++) {
+				for (int led = 0; led < 8; ++led) {
 					float ledValue = 0.f;
 					int triangle = tri;
 
 					if (octave == 0) {
-						ledValue = i == (triangle >> 1) ? 0.f : 1.f;
+						ledValue = led == (triangle >> 1) ? 0.f : 1.f;
 					} else if (octave == 10) {
 						ledValue = 1.f;
 					} else if (octave == 9) {
-						ledValue = (i & 1) == ((triangle >> 3) & 1) ? 0.f : 1.f;
+						ledValue = (led & 1) == ((triangle >> 3) & 1) ? 0.f : 1.f;
 					} else {
-						ledValue = (octave - 1) == i ? 1.f : 0.f;
+						ledValue = (octave - 1) == led ? 1.f : 0.f;
 					}
-					lights[(LIGHT_MODEL + 7 * 2) - i * 2 + 0].setBrightness(ledValue);
-					lights[(LIGHT_MODEL + 7 * 2) - i * 2 + 1].setBrightness(ledValue);
+					lights[(LIGHT_MODEL + 7 * 2) - led * 2 + 0].setBrightness(ledValue);
+					lights[(LIGHT_MODEL + 7 * 2) - led * 2 + 1].setBrightness(ledValue);
 				}
 				break;
 			}
@@ -396,7 +396,7 @@ struct Funes : SanguineModule {
 		}
 
 		if (ledsMode != LEDNormal) {
-			displayTimeout++;
+			++displayTimeout;
 		}
 		if (displayTimeout > args.sampleRate * 3) {
 			ledsMode = LEDNormal;
@@ -408,11 +408,11 @@ struct Funes : SanguineModule {
 
 		// Set output
 		if (!outputBuffer.empty()) {
-			dsp::Frame<16 * 2> outputFrame = outputBuffer.shift();
-			for (int c = 0; c < channelCount; c++) {
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrame = outputBuffer.shift();
+			for (int channel = 0; channel < channelCount; ++channel) {
 				// Inverting op-amp on outputs
-				outputs[OUTPUT_OUT].setVoltage(-outputFrame.samples[c * 2 + 0] * 5.f, c);
-				outputs[OUTPUT_AUX].setVoltage(-outputFrame.samples[c * 2 + 1] * 5.f, c);
+				outputs[OUTPUT_OUT].setVoltage(-outputFrame.samples[channel * 2 + 0] * 5.f, channel);
+				outputs[OUTPUT_AUX].setVoltage(-outputFrame.samples[channel * 2 + 1] * 5.f, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
@@ -491,8 +491,8 @@ struct Funes : SanguineModule {
 	void customDataReset() {
 		bool success = user_data.Save(nullptr, patch.engine);
 		if (success) {
-			for (int c = 0; c < 16; c++) {
-				voice[c].ReloadUserData();
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				voice[channel].ReloadUserData();
 			}
 		}
 	}
@@ -511,8 +511,8 @@ struct Funes : SanguineModule {
 			uint8_t* rx_buffer = buffer.data();
 			bool success = user_data.Save(rx_buffer, patch.engine);
 			if (success) {
-				for (int c = 0; c < 16; c++) {
-					voice[c].ReloadUserData();
+				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+					voice[channel].ReloadUserData();
 				}
 			}
 		}
@@ -549,7 +549,7 @@ struct Funes : SanguineModule {
 			waveDir = system::getDirectory(path);
 			customDataLoad(path);
 			});
-#endif			
+#endif
 	}
 
 	void setEngine(int newModelNum) {
@@ -654,7 +654,7 @@ struct FunesWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createSubmenuItem("New synthesis models", "", [=](Menu* menu) {
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < 8; ++i) {
 				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
 					[=]() { return module->patch.engine == i; },
 					[=]() {	module->setEngine(i); }
@@ -663,7 +663,7 @@ struct FunesWidget : SanguineModuleWidget {
 			}));
 
 		menu->addChild(createSubmenuItem("Pitched models", "", [=](Menu* menu) {
-			for (int i = 8; i < 16; i++) {
+			for (int i = 8; i < 16; ++i) {
 				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
 					[=]() { return module->patch.engine == i; },
 					[=]() {	module->setEngine(i); }
@@ -672,7 +672,7 @@ struct FunesWidget : SanguineModuleWidget {
 			}));
 
 		menu->addChild(createSubmenuItem("Noise/percussive models", "", [=](Menu* menu) {
-			for (int i = 16; i < 24; i++) {
+			for (int i = 16; i < 24; ++i) {
 				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
 					[=]() { return module->patch.engine == i; },
 					[=]() { module->setEngine(i); }
@@ -696,7 +696,7 @@ struct FunesWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; i++) {
+		for (int i = 0; i < module->channelCount; ++i) {
 			availableChannels.push_back(channelNumbers[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
