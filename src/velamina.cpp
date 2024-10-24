@@ -115,10 +115,8 @@ struct Velamina : SanguineModule {
 					float_4 isAbove10 = simd::abs(outVoltages[currentChannel]) > 10.f;
 
 					outVoltages[currentChannel] = simd::ifelse(isAbove10, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
-					portVoltages[channel][currentChannel] = outVoltages[currentChannel];
-				} else {
-					portVoltages[channel][currentChannel] = outVoltages[currentChannel];
 				}
+				portVoltages[channel][currentChannel] = outVoltages[currentChannel];
 
 
 				if (outputs[OUTPUT_1 + channel].isConnected()) {
