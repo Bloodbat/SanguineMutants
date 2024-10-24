@@ -124,7 +124,7 @@ struct Vimina : SanguineModule {
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		for (int section = 0; section < kMaxModuleSections; section++) {
+		for (int section = 0; section < kMaxModuleSections; ++section) {
 			configParam(PARAM_FACTOR_1 + section, 0.f, kMaxParamValue, 0.5f, string::f("Channel %d factor", section + 1));
 			configSwitch(PARAM_RESET_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d reset", section + 1));
 
@@ -165,7 +165,7 @@ struct Vimina : SanguineModule {
 
 		bool resetButtons[kMaxModuleSections] = {};
 
-		for (int section = 0; section < kMaxModuleSections; section++) {
+		for (int section = 0; section < kMaxModuleSections; ++section) {
 			resetButtons[section] = btReset[section].process(params[PARAM_RESET_1 + section].getValue());
 		}
 
@@ -174,7 +174,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT_2A].setChannels(channelCount);
 		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
-		for (int channel = 0; channel < channelCount; channel++) {
+		for (int channel = 0; channel < channelCount; ++channel) {
 			tmrModuleClock[channel].process(kClockSpeed * args.sampleTime);
 
 			bool bIsTrigger = false;
@@ -198,7 +198,7 @@ struct Vimina : SanguineModule {
 				bIsReset = isRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage(channel) >= 2.f, channel);
 			}
 
-			for (uint8_t section = 0; section < kMaxModuleSections; section++) {
+			for (uint8_t section = 0; section < kMaxModuleSections; ++section) {
 				channelFunction[section] = SectionFunctions(params[PARAM_MODE_1 + section].getValue());
 
 				if (resetButtons[section]) {
@@ -232,7 +232,7 @@ struct Vimina : SanguineModule {
 			}
 		}
 		if (bIsLightsTurn) {
-			for (int section = 0; section < kMaxModuleSections; section++) {
+			for (int section = 0; section < kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_MODE + section * 2;
 				lights[currentLight + 0].setBrightnessSmooth(channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.75f : 0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.75f : 0.f, sampleTime);
@@ -314,7 +314,7 @@ struct Vimina : SanguineModule {
 	}
 
 	void init() {
-		for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = 0;
 			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = 0;
 			pulseTrackerRecordedCount[channel] = 0;
