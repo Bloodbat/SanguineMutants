@@ -547,8 +547,8 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 1.f), sampleTime);
-		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 1.f), sampleTime);
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
 	}
 
 	void onReset() override {
