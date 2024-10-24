@@ -288,7 +288,7 @@ struct Temulenti : SanguineModule {
 				lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantize & 2 ? 1.f : 0.f, sampleTime);
 				lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantize & 4 ? 1.f : 0.f, sampleTime);
 			} else {
-				for (int i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; ++i) {
 					lights[LIGHT_QUANTIZER1 + i].setBrightnessSmooth(0.f, sampleTime);
 				}
 			}
