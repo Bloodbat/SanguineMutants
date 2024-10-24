@@ -148,10 +148,10 @@ struct Mortuus : SanguineModule {
 		settings.processorFunction[1] = FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
 
-		for (size_t i = 0; i < kNumChannels; ++i)
+		for (size_t channel = 0; channel < kNumChannels; ++channel)
 		{
-			memset(&processors[i], 0, sizeof(deadman::Processors));
-			processors[i].Init(i);
+			memset(&processors[channel], 0, sizeof(deadman::Processors));
+			processors[channel].Init(channel);
 		}
 
 		clockDivider.setDivision(kClockUpdateFrequency);
@@ -200,14 +200,14 @@ struct Mortuus : SanguineModule {
 			dsp::Frame<2> frame[kBlockSize];
 
 			// Process an entire block of data from the IOBuffer.
-			for (size_t k = 0; k < kBlockSize; ++k) {
+			for (size_t blockNum = 0; blockNum < kBlockSize; ++blockNum) {
 
 				Slice slice = NextSlice(1);
 
-				for (size_t i = 0; i < kNumChannels; ++i) {
-					gateFlags[i] = deadman::ExtractGateFlags(gateFlags[i], gateInputs & (1 << i));
+				for (size_t channel = 0; channel < kNumChannels; ++channel) {
+					gateFlags[channel] = deadman::ExtractGateFlags(gateFlags[channel], gateInputs & (1 << channel));
 
-					frame[k].samples[i] = slice.block->output[i][slice.frame_index];
+					frame[blockNum].samples[channel] = slice.block->output[channel][slice.frame_index];
 				}
 
 				/* A hack to make channel 1 aware of what's going on in channel 2. Used to
@@ -234,8 +234,8 @@ struct Mortuus : SanguineModule {
 
 	void changeControlMode() {
 		uint16_t parameters[kNumKnobs];
-		for (size_t i = 0; i < kNumKnobs; ++i) {
-			parameters[i] = adcValue[i];
+		for (size_t knob = 0; knob < kNumKnobs; ++knob) {
+			parameters[knob] = adcValue[knob];
 		}
 
 		switch (editMode) {
@@ -318,14 +318,14 @@ struct Mortuus : SanguineModule {
 	}
 
 	void pollPots() {
-		for (uint8_t i = 0; i < kNumAdcChannels; ++i) {
-			adcLp[i] = (static_cast<int32_t>(params[PARAM_KNOB_1 + i].getValue()) + adcLp[i] * 7) >> 3;
-			int32_t value = adcLp[i];
-			int32_t current_value = adcValue[i];
-			if (value >= current_value + adcThreshold[i] || value <= current_value - adcThreshold[i] || !adcThreshold[i]) {
-				onPotChanged(i, value);
-				adcValue[i] = value;
-				adcThreshold[i] = kAdcThresholdUnlocked;
+		for (uint8_t knob = 0; knob < kNumAdcChannels; ++knob) {
+			adcLp[knob] = (static_cast<int32_t>(params[PARAM_KNOB_1 + knob].getValue()) + adcLp[knob] * 7) >> 3;
+			int32_t value = adcLp[knob];
+			int32_t current_value = adcValue[knob];
+			if (value >= current_value + adcThreshold[knob] || value <= current_value - adcThreshold[knob] || !adcThreshold[knob]) {
+				onPotChanged(knob, value);
+				adcValue[knob] = value;
+				adcThreshold[knob] = kAdcThresholdUnlocked;
 			}
 		}
 	}
@@ -373,9 +373,9 @@ struct Mortuus : SanguineModule {
 	}
 
 	void pollSwitches(const ProcessArgs& args) {
-		for (uint8_t i = 0; i < kButtonCount; ++i) {
-			if (stSwitches[i].process(params[PARAM_EDIT_MODE + i].getValue())) {
-				processSwitch(SWITCH_TWIN_MODE + i);
+		for (uint8_t button = 0; button < kButtonCount; ++button) {
+			if (stSwitches[button].process(params[PARAM_EDIT_MODE + button].getValue())) {
+				processSwitch(SWITCH_TWIN_MODE + button);
 			}
 		}
 		refreshLeds(args);
@@ -406,8 +406,8 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (size_t i = 0; i < kNumKnobs; ++i) {
-				currentLight = LIGHT_KNOBS_MODE + i * 3;
+			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
+				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
@@ -418,8 +418,8 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.75f, sampleTime);
-			for (size_t i = 0; i < kNumKnobs; ++i) {
-				currentLight = LIGHT_KNOBS_MODE + i * 3;
+			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
+				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
@@ -430,8 +430,8 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (size_t i = 0; i < kNumKnobs; ++i) {
-				currentLight = LIGHT_KNOBS_MODE + i * 3;
+			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
+				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
@@ -442,14 +442,14 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (int i = 0; i < 2; ++i) {
-				currentLight = LIGHT_KNOBS_MODE + i * 3;
+			for (int knob = 0; knob < 2; ++knob) {
+				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
-			for (size_t i = 2; i < kNumKnobs; ++i) {
-				currentLight = LIGHT_KNOBS_MODE + i * 3;
+			for (size_t knob = 2; knob < kNumKnobs; ++knob) {
+				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
@@ -463,9 +463,9 @@ struct Mortuus : SanguineModule {
 		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.75f : 0.f, sampleTime);
 
 		MortuusProcessorFunction currentProcessorFunction = getProcessorFunction();
-		for (size_t i = 0; i < kNumFunctionLights; ++i) {
-			currentLight = LIGHT_FUNCTION_1 + i;
-			switch (lightStates[currentProcessorFunction][i]) {
+		for (size_t light = 0; light < kNumFunctionLights; ++light) {
+			currentLight = LIGHT_FUNCTION_1 + light;
+			switch (lightStates[currentProcessorFunction][light]) {
 			case LIGHT_ON:
 				lights[currentLight].setBrightnessSmooth(1.f, sampleTime);
 				break;
@@ -481,14 +481,14 @@ struct Mortuus : SanguineModule {
 		}
 
 		uint8_t buttonBrightness[kNumChannels];
-		for (uint8_t i = 0; i < kNumChannels; ++i) {
-			switch (processorFunction[i]) {
+		for (uint8_t channel = 0; channel < kNumChannels; ++channel) {
+			switch (processorFunction[channel]) {
 			case FUNCTION_DRUM_GENERATOR:
 			case FUNCTION_FM_DRUM_GENERATOR:
 			case FUNCTION_RANDOMISED_DRUMS:
 			case FUNCTION_RANDOM_HI_HAT:
-				buttonBrightness[i] = static_cast<int16_t>(abs(brightness[i]) >> 8);
-				buttonBrightness[i] = buttonBrightness[i] >= 255 ? 255 : buttonBrightness[i];
+				buttonBrightness[channel] = static_cast<int16_t>(abs(brightness[channel]) >> 8);
+				buttonBrightness[channel] = buttonBrightness[channel] >= 255 ? 255 : buttonBrightness[channel];
 				break;
 			case FUNCTION_LFO:
 			case FUNCTION_TAP_LFO:
@@ -500,17 +500,17 @@ struct Mortuus : SanguineModule {
 			case FUNCTION_MINI_SEQUENCER:
 			case FUNCTION_MOD_SEQUENCER:
 				int32_t brightnessVal;
-				brightnessVal = static_cast<int32_t>(brightness[i]) * 409 >> 8;
+				brightnessVal = static_cast<int32_t>(brightness[channel]) * 409 >> 8;
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
 				CONSTRAIN(brightnessVal, 0, 255);
-				buttonBrightness[i] = brightnessVal;
+				buttonBrightness[channel] = brightnessVal;
 				break;
 			case FUNCTION_TURING_MACHINE:
-				buttonBrightness[i] = static_cast<uint16_t>(brightness[i]) >> 5;
+				buttonBrightness[channel] = static_cast<uint16_t>(brightness[channel]) >> 5;
 				break;
 			default:
-				buttonBrightness[i] = brightness[i] >> 7;
+				buttonBrightness[channel] = brightness[channel] >> 7;
 				break;
 			}
 		}
@@ -520,23 +520,23 @@ struct Mortuus : SanguineModule {
 		if (bIsChannel1Station || bIsChannel2Station) {
 			if (editMode == EDIT_MODE_SPLIT || editMode == EDIT_MODE_TWIN) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
-				for (size_t i = 0; i < kNumFunctionLights; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightness((pattern & 1) ? 1.f : 0.f);
+				for (size_t light = 0; light < kNumFunctionLights; ++light) {
+					lights[LIGHT_FUNCTION_1 + light].setBrightness((pattern & 1) ? 1.f : 0.f);
 					pattern = pattern >> 1;
 				}
 			}
 			// Hacky but animates the lights!
 			else if (editMode == EDIT_MODE_FIRST && bIsChannel1Station) {
 				int digit = processors[0].number_station().digit();
-				for (size_t i = 0; i < kNumFunctionLights; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.f : 0.f);
+				for (size_t light = 0; light < kNumFunctionLights; ++light) {
+					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
 			// Ibid
 			else if (editMode == EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
-				for (size_t i = 0; i < kNumFunctionLights; ++i) {
-					lights[LIGHT_FUNCTION_1 + i].setBrightness((i & digit) ? 1.f : 0.f);
+				for (size_t light = 0; light < kNumFunctionLights; ++light) {
+					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
 			if (bIsChannel1Station) {
@@ -570,9 +570,9 @@ struct Mortuus : SanguineModule {
 
 		if (editMode == EDIT_MODE_FIRST || editMode == EDIT_MODE_SECOND) {
 			lockPots();
-			for (uint8_t i = 0; i < kNumKnobs; ++i) {
-				processors[0].set_parameter(i, static_cast<uint16_t>(potValue[i]) << 8);
-				processors[1].set_parameter(i, static_cast<uint16_t>(potValue[i + kNumKnobs]) << 8);
+			for (uint8_t knob = 0; knob < kNumKnobs; ++knob) {
+				processors[0].set_parameter(knob, static_cast<uint16_t>(potValue[knob]) << 8);
+				processors[1].set_parameter(knob, static_cast<uint16_t>(potValue[knob + kNumKnobs]) << 8);
 			}
 		}
 
@@ -623,9 +623,9 @@ struct Mortuus : SanguineModule {
 		json_object_set_new(rootJ, "fcn_channel_2", json_integer(static_cast<int>(settings.processorFunction[1])));
 
 		json_t* potValuesJ = json_array();
-		for (int p : potValue) {
-			json_t* pJ = json_integer(p);
-			json_array_append_new(potValuesJ, pJ);
+		for (int pot : potValue) {
+			json_t* potJ = json_integer(pot);
+			json_array_append_new(potValuesJ, potJ);
 		}
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
@@ -692,14 +692,14 @@ struct Mortuus : SanguineModule {
 	}
 
 	inline void processChannels(Block* block, size_t size) {
-		for (size_t i = 0; i < kNumChannels; ++i) {
-			processors[i].Process(block->input[i], output, size);
-			setLedBrightness(i, output[0]);
-			for (size_t j = 0; j < size; ++j) {
+		for (size_t channel = 0; channel < kNumChannels; ++channel) {
+			processors[channel].Process(block->input[channel], output, size);
+			setLedBrightness(channel, output[0]);
+			for (size_t blockNum = 0; blockNum < size; ++blockNum) {
 				// From calibration_data.h, shifting signed to unsigned values.
-				int32_t shiftedValue = 32767 + static_cast<int32_t>(output[j]);
+				int32_t shiftedValue = 32767 + static_cast<int32_t>(output[blockNum]);
 				CONSTRAIN(shiftedValue, 0, 65535);
-				block->output[i][j] = static_cast<uint16_t>(shiftedValue);
+				block->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
 	}
