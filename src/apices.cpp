@@ -480,7 +480,7 @@ struct Apices : SanguineModule {
 				brightnessVal = static_cast<int32_t>(brightness[channel]) * 409 >> 8;
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
-				CONSTRAIN(brightnessVal, 0, 255);
+				clamp(brightnessVal, 0, 255);
 				buttonBrightness[channel] = brightnessVal;
 				break;
 			default:
@@ -672,7 +672,7 @@ struct Apices : SanguineModule {
 			for (size_t blockNum = 0; blockNum < size; ++blockNum) {
 				// From calibration_data.h, shifting signed to unsigned values.
 				int32_t shiftedValue = 32767 + static_cast<int32_t>(output[blockNum]);
-				CONSTRAIN(shiftedValue, 0, 65535);
+				clamp(shiftedValue, 0, 65535);
 				block->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
