@@ -52,8 +52,8 @@ struct Explorator : SanguineModule {
 
 	const int kLightFrequency = 128;
 	dsp::ClockDivider lightsDivider;
-	dsp::SchmittTrigger stSampleAndHold[16];
-	float voltagesSampleAndHold[16] = {};
+	dsp::SchmittTrigger stSampleAndHold[PORT_MAX_CHANNELS];
+	float voltagesSampleAndHold[PORT_MAX_CHANNELS] = {};
 	int lastSampleAndHoldChannels = 0;
 
 	Explorator() {
