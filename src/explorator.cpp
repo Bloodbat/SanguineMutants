@@ -52,8 +52,8 @@ struct Explorator : SanguineModule {
 
 	const int kLightFrequency = 128;
 	dsp::ClockDivider lightsDivider;
-	dsp::SchmittTrigger stSampleAndHold[16];
-	float voltagesSampleAndHold[16] = {};
+	dsp::SchmittTrigger stSampleAndHold[PORT_MAX_CHANNELS];
+	float voltagesSampleAndHold[PORT_MAX_CHANNELS] = {};
 	int lastSampleAndHoldChannels = 0;
 
 	Explorator() {
@@ -202,12 +202,11 @@ struct Explorator : SanguineModule {
 		}
 
 		if (triggerConnected) {
-			for (int channel = 0; channel < lastSampleAndHoldChannels; channel++) {
+			for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
 				if (stSampleAndHold[channel].process(inputs[INPUT_SH_TRIGGER].getVoltage(channel))) {
 					if (inputVoltageConnected) {
 						voltagesSampleAndHold[channel] = inputs[INPUT_SH_VOLTAGE].getVoltage(channel);
-					}
-					else {
+					} else {
 						voltagesSampleAndHold[channel] = noise;
 					}
 				}
@@ -244,8 +243,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
 				lights[LIGHT_1_TO_3 + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_1_TO_3 + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
+			} else {
 				voltage1to3Sum = clamp(inputs[INPUT_1_TO_3].getVoltageSum() / channels1to3, -10.f, 10.f);
 				float rescaledLight = math::rescale(voltage1to3Sum, 0.f, 10.f, 0.f, 1.f);
 				lights[LIGHT_1_TO_3 + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
@@ -264,8 +262,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_SIGN + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
 				lights[LIGHT_SIGN + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_SIGN + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
+			} else {
 				voltageSignSum = clamp(inputs[INPUT_SIGN].getVoltageSum() / channelsSign, -10.f, 10.f);
 				float rescaledLight = math::rescale(voltageSignSum, 0.f, 10.f, 0.f, 1.f);
 				lights[LIGHT_SIGN + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
@@ -284,8 +281,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
 				lights[LIGHT_2_TO_2 + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_2_TO_2 + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
+			} else {
 				voltage2to2Sum = (clamp((inputs[INPUT_2_TO_2_A].getVoltageSum() + inputs[INPUT_2_TO_2_B].getVoltageSum()) / channels2to2, -10.f, 10.f));
 				float rescaledLight = math::rescale(voltage2to2Sum, 0.f, 10.f, 0.f, 1.f);
 				lights[LIGHT_2_TO_2 + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
@@ -304,8 +300,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_LOGIC + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
 				lights[LIGHT_LOGIC + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_LOGIC + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
+			} else {
 				voltageLogicSum = clamp((inputs[INPUT_LOGIC_A].getVoltageSum() + inputs[INPUT_LOGIC_B].getVoltageSum()) / channelsLogic, -10.f, 10.f);
 				float rescaledLight = math::rescale(voltageLogicSum, 0.f, 10.f, 0.f, 1.f);
 				lights[LIGHT_LOGIC + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
@@ -320,8 +315,7 @@ struct Explorator : SanguineModule {
 				if (channels3to1 > 0) {
 					if (!attenuate3to1) {
 						voltage3to1Out = clamp(inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() + inputs[INPUT_3_TO_1_C].getVoltage(), -10.f, 10.f);
-					}
-					else {
+					} else {
 						voltage3to1Out = clamp((inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() + inputs[INPUT_3_TO_1_C].getVoltage()) / 3.f, -10.f, 10.f);
 					}
 				}
@@ -329,12 +323,10 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_3_TO_1 + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
 				lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
-			else {
+			} else {
 				if (!attenuate3to1) {
 					voltage3to1Out = inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum();
-				}
-				else {
+				} else {
 					voltage3to1Out = (inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum()) / 3;
 				}
 
@@ -360,9 +352,8 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_SH + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
 				lights[LIGHT_SH + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_SH + 2].setBrightnessSmooth(0.f, sampleAndHoldVoltageSum);
-			}
-			else {
-				for (int i = 0; i < lastSampleAndHoldChannels; i++) {
+			} else {
+				for (int i = 0; i < lastSampleAndHoldChannels; ++i) {
 					sampleAndHoldVoltageSum += voltagesSampleAndHold[i];
 				}
 
