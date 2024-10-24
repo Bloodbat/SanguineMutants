@@ -79,12 +79,10 @@ struct Temulenti : SanguineModule {
 						return aestusModeMenuLabels[moduleTemulenti->generator.mode()];
 						break;
 					}
-				}
-				else {
+				} else {
 					assert(false);
 				}
-			}
-			else {
+			} else {
 				return "";
 			}
 			return "";
@@ -97,12 +95,10 @@ struct Temulenti : SanguineModule {
 				Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
 				if (paramId == PARAM_RANGE) {
 					return aestusRangeMenuLabels[moduleTemulenti->generator.range()];
-				}
-				else {
+				} else {
 					assert(false);
 				}
-			}
-			else {
+			} else {
 				return "";
 			}
 			return "";
@@ -185,8 +181,9 @@ struct Temulenti : SanguineModule {
 
 			pitchParam += 60.f;
 			// This is probably not original but seems useful to keep the same frequency as in normal mode.
-			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC)
+			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 				pitchParam -= 12.f;
+			}
 
 			// This is equivalent to shifting left by 7 bits.
 			int16_t pitch = static_cast<int16_t>(pitchParam * 128);
@@ -203,8 +200,7 @@ struct Temulenti : SanguineModule {
 
 			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 				generator.set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
-			}
-			else {
+			} else {
 				generator.set_pitch(clamp(pitch, -32768, 32767), fm);
 			}
 
@@ -232,18 +228,24 @@ struct Temulenti : SanguineModule {
 		}
 
 		uint8_t gate = 0;
-		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f)
+		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f) {
 			gate |= bumps::CONTROL_FREEZE;
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f)
+		}
+		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f) {
 			gate |= bumps::CONTROL_GATE;
-		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f)
+		}
+		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f) {
 			gate |= bumps::CONTROL_CLOCK;
-		if (!(lastGate & bumps::CONTROL_CLOCK) && (gate & bumps::CONTROL_CLOCK))
+		}
+		if (!(lastGate & bumps::CONTROL_CLOCK) && (gate & bumps::CONTROL_CLOCK)) {
 			gate |= bumps::CONTROL_CLOCK_RISING;
-		if (!(lastGate & bumps::CONTROL_GATE) && (gate & bumps::CONTROL_GATE))
+		}
+		if (!(lastGate & bumps::CONTROL_GATE) && (gate & bumps::CONTROL_GATE)) {
 			gate |= bumps::CONTROL_GATE_RISING;
-		if ((lastGate & bumps::CONTROL_GATE) && !(gate & bumps::CONTROL_GATE))
+		}
+		if ((lastGate & bumps::CONTROL_GATE) && !(gate & bumps::CONTROL_GATE)) {
 			gate |= bumps::CONTROL_GATE_FALLING;
+		}
 		lastGate = gate;
 
 		const bumps::GeneratorSample& sample = generator.Process(gate);
@@ -272,8 +274,9 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_LOW ? 0.75f : 0.f, sampleTime);
 			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_HIGH ? 0.75f : 0.f, sampleTime);
 
-			if (sample.flags & bumps::FLAG_END_OF_ATTACK)
+			if (sample.flags & bumps::FLAG_END_OF_ATTACK) {
 				unipolarFlag *= -1.f;
+			}
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
@@ -284,8 +287,7 @@ struct Temulenti : SanguineModule {
 				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantize & 1 ? 1.f : 0.f, sampleTime);
 				lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantize & 2 ? 1.f : 0.f, sampleTime);
 				lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantize & 4 ? 1.f : 0.f, sampleTime);
-			}
-			else {
+			} else {
 				for (int i = 0; i < 3; i++) {
 					lights[LIGHT_QUANTIZER1 + i].setBrightnessSmooth(0.f, sampleTime);
 				}
@@ -380,8 +382,9 @@ struct TemulentiWidget : SanguineModuleWidget {
 		temulentiFrameBuffer->addChild(displayModel);
 		displayModel->fallbackString = temulentiDisplayModels[0];
 
-		if (module)
+		if (module) {
 			displayModel->values.displayText = &module->displayModel;
+		}
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.56, 19.002), module, Temulenti::PARAM_QUANTIZER));
 		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 16.496), module, Temulenti::LIGHT_QUANTIZER1));

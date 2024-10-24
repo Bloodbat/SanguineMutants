@@ -61,16 +61,13 @@ struct Aestus : SanguineModule {
 				if (paramId == PARAM_MODE) {
 					if (!moduleAestus->bSheep) {
 						return aestusModeMenuLabels[moduleAestus->generator.mode()];
-					}
-					else {
+					} else {
 						return aestusSheepMenuLabels[moduleAestus->generator.mode()];
 					}
-				}
-				else {
+				} else {
 					assert(false);
 				}
-			}
-			else {
+			} else {
 				return "";
 			}
 			return"";
@@ -83,12 +80,10 @@ struct Aestus : SanguineModule {
 				Aestus* moduleAestus = static_cast<Aestus*>(module);
 				if (paramId == PARAM_RANGE) {
 					return aestusRangeMenuLabels[moduleAestus->generator.range()];
-				}
-				else {
+				} else {
 					assert(false);
 				}
-			}
-			else {
+			} else {
 				return "";
 			}
 			return "";
@@ -199,18 +194,24 @@ struct Aestus : SanguineModule {
 		}
 
 		uint8_t gate = 0;
-		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f)
+		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f) {
 			gate |= tides::CONTROL_FREEZE;
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f)
+		}
+		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f) {
 			gate |= tides::CONTROL_GATE;
-		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f)
+		}
+		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f) {
 			gate |= tides::CONTROL_CLOCK;
-		if (!(lastGate & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK))
+		}
+		if (!(lastGate & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK)) {
 			gate |= tides::CONTROL_CLOCK_RISING;
-		if (!(lastGate & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE))
+		}
+		if (!(lastGate & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE)) {
 			gate |= tides::CONTROL_GATE_RISING;
-		if ((lastGate & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE))
+		}
+		if ((lastGate & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE)) {
 			gate |= tides::CONTROL_GATE_FALLING;
+		}
 		lastGate = gate;
 
 		const tides::GeneratorSample& sample = generator.Process(gate);
@@ -236,8 +237,9 @@ struct Aestus : SanguineModule {
 			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ? 0.75f : 0.f, sampleTime);
 			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ? 0.75f : 0.f, sampleTime);
 
-			if (sample.flags & tides::FLAG_END_OF_ATTACK)
+			if (sample.flags & tides::FLAG_END_OF_ATTACK) {
 				unipolarFlag *= -1.f;
+			}
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
@@ -248,8 +250,7 @@ struct Aestus : SanguineModule {
 
 			if (!bSheep) {
 				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[0];
-			}
-			else {
+			} else {
 				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[1];
 			}
 		}
@@ -323,8 +324,9 @@ struct AestusWidget : SanguineModuleWidget {
 		aestusFrameBuffer->addChild(displayModel);
 		displayModel->fallbackString = aestusDisplayModels[0];
 
-		if (module)
+		if (module) {
 			displayModel->values.displayText = &module->displayModel;
+		}
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(59.142, 19.002), module,
 			Aestus::PARAM_SYNC, Aestus::LIGHT_SYNC));
@@ -380,8 +382,7 @@ struct AestusWidget : SanguineModuleWidget {
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
-		}
-		else {
+		} else {
 			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[1], aestusSheepMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
