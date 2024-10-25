@@ -7,6 +7,8 @@
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Mutuus : SanguineModule {
+	static const int kModeCount = 9;
+
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -37,7 +39,7 @@ struct Mutuus : SanguineModule {
 		ENUMS(LIGHT_ALGORITHM, 3),
 		LIGHT_MODE_SWITCH,
 		LIGHT_STEREO,
-		ENUMS(LIGHT_MODE, 9),
+		ENUMS(LIGHT_MODE, kModeCount),
 		ENUMS(LIGHT_CHANNEL_MODE, PORT_MAX_CHANNELS * 3),
 		LIGHTS_COUNT
 	};
@@ -94,10 +96,10 @@ struct Mutuus : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
-			memset(&mutuusModulator[i], 0, sizeof(mutuus::MutuusModulator));
-			mutuusModulator[i].Init(96000.f, reverbBuffer[i]);
-			mutuusParameters[i] = mutuusModulator[i].mutable_parameters();
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			memset(&mutuusModulator[channel], 0, sizeof(mutuus::MutuusModulator));
+			mutuusModulator[channel].Init(96000.f, reverbBuffer[channel]);
+			mutuusParameters[channel] = mutuusModulator[channel].mutable_parameters();
 		}
 
 		featureMode = mutuus::FEATURE_MODE_META;
@@ -138,8 +140,9 @@ struct Mutuus : SanguineModule {
 				int8_t ramp = systemTimeMs & 127;
 				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
 
-				for (int i = 0; i < 3; i++) {
-					lights[LIGHT_ALGORITHM + i].setBrightnessSmooth(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f, sampleTime);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
+						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
 		} else {
@@ -147,7 +150,7 @@ struct Mutuus : SanguineModule {
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
 
-		for (int channel = 0; channel < channelCount; channel++) {
+		for (int channel = 0; channel < channelCount; ++channel) {
 			mutuus::FeatureMode channelFeatureMode = mutuus::FeatureMode(featureMode);
 
 			if (inputs[INPUT_MODE].isConnected()) {
@@ -231,8 +234,8 @@ struct Mutuus : SanguineModule {
 
 			lights[LIGHT_STEREO].setBrightness(mutuusModulator[0].alt_feature_mode() ? 0.75f : 0.f);
 
-			for (int i = 0; i < 9; i++) {
-				lights[LIGHT_MODE + i].setBrightnessSmooth(featureMode == i ? 1.f : 0.f, sampleTime);
+			for (int mode = 0; mode < kModeCount; ++mode) {
+				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);
 
 				if (!bModeSwitchEnabled) {
 					const uint8_t(*palette)[3];
@@ -246,25 +249,26 @@ struct Mutuus : SanguineModule {
 					zone = 8.f * mutuusParameters[0]->modulation_algorithm;
 					MAKE_INTEGRAL_FRACTIONAL(zone);
 					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-					for (int i = 0; i < 3; i++) {
-						int a = palette[zone_integral][i];
-						int b = palette[zone_integral + 1][i];
-						lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+						int a = palette[zone_integral][rgbComponent];
+						int b = palette[zone_integral + 1][rgbComponent];
+						lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
 					}
 				}
 			}
 
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
-				for (int i = 0; i < 3; i++) {
-					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
 				}
 
 				if (channel < channelCount) {
-					for (int i = 0; i < 3; i++) {
-						lights[currentLight + i].setBrightnessSmooth((paletteWarpsParasiteFeatureMode[mutuusModulator[channel].feature_mode()][i]) / 255.f, sampleTime);
+					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+						lights[currentLight + rgbComponent].setBrightnessSmooth(
+							(paletteWarpsParasiteFeatureMode[mutuusModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
 					}
 				}
 			}

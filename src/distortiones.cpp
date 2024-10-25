@@ -7,6 +7,8 @@
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Distortiones : SanguineModule {
+	static const int kModeCount = 9;
+
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -35,7 +37,7 @@ struct Distortiones : SanguineModule {
 		ENUMS(LIGHT_CARRIER, 2),
 		ENUMS(LIGHT_ALGORITHM, 3),
 		LIGHT_MODE_SWITCH,
-		ENUMS(LIGHT_MODE, 9),
+		ENUMS(LIGHT_MODE, kModeCount),
 		ENUMS(LIGHT_CHANNEL_MODE, PORT_MAX_CHANNELS * 3),
 		LIGHTS_COUNT
 	};
@@ -43,7 +45,7 @@ struct Distortiones : SanguineModule {
 	int featureMode = 0;
 	int frame[PORT_MAX_CHANNELS] = {};
 
-	const int kLightFrequency = 128;
+	static const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
@@ -88,10 +90,10 @@ struct Distortiones : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
-			memset(&distortionesModulator[i], 0, sizeof(distortiones::DistortionesModulator));
-			distortionesModulator[i].Init(96000.f);
-			distortionesParameters[i] = distortionesModulator[i].mutable_parameters();
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			memset(&distortionesModulator[channel], 0, sizeof(distortiones::DistortionesModulator));
+			distortionesModulator[channel].Init(96000.f);
+			distortionesParameters[channel] = distortionesModulator[channel].mutable_parameters();
 		}
 
 		featureMode = distortiones::FEATURE_MODE_META;
@@ -132,8 +134,9 @@ struct Distortiones : SanguineModule {
 				int8_t ramp = systemTimeMs & 127;
 				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
 
-				for (int i = 0; i < 3; i++) {
-					lights[LIGHT_ALGORITHM + i].setBrightnessSmooth(((paletteWarpsParasiteFeatureMode[featureMode][i] * tri) >> 8) / 255.f, sampleTime);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
+						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
 		} else {
@@ -141,7 +144,7 @@ struct Distortiones : SanguineModule {
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
 
-		for (int channel = 0; channel < channelCount; channel++) {
+		for (int channel = 0; channel < channelCount; ++channel) {
 			distortiones::FeatureMode channelFeatureMode = distortiones::FeatureMode(featureMode);
 
 			if (inputs[INPUT_MODE].isConnected()) {
@@ -214,8 +217,8 @@ struct Distortiones : SanguineModule {
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 0.75f : 0.f);
 
-			for (int i = 0; i < 9; i++) {
-				lights[LIGHT_MODE + i].setBrightnessSmooth(featureMode == i ? 1.f : 0.f, sampleTime);
+			for (int mode = 0; mode < kModeCount; ++mode) {
+				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);
 			}
 
 			if (!bModeSwitchEnabled) {
@@ -230,23 +233,24 @@ struct Distortiones : SanguineModule {
 				zone = 8.f * distortionesParameters[0]->modulation_algorithm;
 				MAKE_INTEGRAL_FRACTIONAL(zone);
 				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-				for (int i = 0; i < 3; i++) {
-					int a = palette[zone_integral][i];
-					int b = palette[zone_integral + 1][i];
-					lights[LIGHT_ALGORITHM + i].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					int a = palette[zone_integral][rgbComponent];
+					int b = palette[zone_integral + 1][rgbComponent];
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
 				}
 			}
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
-				for (int i = 0; i < 3; i++) {
-					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
 				}
 
 				if (channel < channelCount) {
-					for (int i = 0; i < 3; i++) {
-						lights[currentLight + i].setBrightnessSmooth((paletteWarpsParasiteFeatureMode[distortionesModulator[channel].feature_mode()][i]) / 255.f, sampleTime);
+					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+						lights[currentLight + rgbComponent].setBrightnessSmooth(
+							(paletteWarpsParasiteFeatureMode[distortionesModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
 					}
 				}
 			}
