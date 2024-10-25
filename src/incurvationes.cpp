@@ -40,7 +40,7 @@ struct Incurvationes : SanguineModule {
 
 
 	int frame[PORT_MAX_CHANNELS] = {};
-	const int kLightFrequency = 128;
+	static const int kLightFrequency = 128;
 
 	warps::Modulator warpsModulator[PORT_MAX_CHANNELS];
 	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
@@ -78,10 +78,10 @@ struct Incurvationes : SanguineModule {
 
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
-		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
-			memset(&warpsModulator[i], 0, sizeof(warps::Modulator));
-			warpsModulator[i].Init(96000.f);
-			warpsParameters[i] = warpsModulator[i].mutable_parameters();
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			memset(&warpsModulator[channel], 0, sizeof(warps::Modulator));
+			warpsModulator[channel].Init(96000.f);
+			warpsParameters[channel] = warpsModulator[channel].mutable_parameters();
 		}
 
 		lightsDivider.setDivision(kLightFrequency);
@@ -98,7 +98,7 @@ struct Incurvationes : SanguineModule {
 
 		float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.f;
 
-		for (int channel = 0; channel < channelCount; channel++) {
+		for (int channel = 0; channel < channelCount; ++channel) {
 
 			warpsParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
 
@@ -159,11 +159,11 @@ struct Incurvationes : SanguineModule {
 			palette = bEasterEggEnabled ? paletteWarpsFreqsShift : paletteWarpsDefault;
 			float colorValues[PORT_MAX_CHANNELS][3] = {};
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_ALGORITHM + channel * 3;
 
-				for (int i = 0; i < 3; i++) {
-					lights[currentLight + i].setBrightness(0.f);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[currentLight + rgbComponent].setBrightness(0.f);
 				}
 
 				if (channel < channelCount) {
@@ -171,13 +171,13 @@ struct Incurvationes : SanguineModule {
 
 					MAKE_INTEGRAL_FRACTIONAL(zone);
 					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-					for (int i = 0; i < 3; i++) {
-						int a = palette[zone_integral][i];
-						int b = palette[zone_integral + 1][i];
+					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+						int a = palette[zone_integral][rgbComponent];
+						int b = palette[zone_integral + 1][rgbComponent];
 
-						colorValues[channel][i] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
+						colorValues[channel][rgbComponent] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
 
-						lights[currentLight + i].setBrightness(colorValues[channel][i]);
+						lights[currentLight + rgbComponent].setBrightness(colorValues[channel][rgbComponent]);
 					}
 				}
 			}
