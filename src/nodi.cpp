@@ -175,27 +175,27 @@ struct Nodi : SanguineModule {
 		configButton(PARAM_SIGN, "Toggle output imperfections");
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
-		for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
-			memset(&osc[i], 0, sizeof(braids::MacroOscillator));
-			memset(&quantizer[i], 0, sizeof(braids::Quantizer));
-			memset(&envelope[i], 0, sizeof(braids::Envelope));
-			memset(&jitterSource[i], 0, sizeof(braids::VcoJitterSource));
-			memset(&waveShaper[i], 0, sizeof(braids::SignatureWaveshaper));
-			memset(&settings[i], 0, sizeof(braids::SettingsData));
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			memset(&osc[channel], 0, sizeof(braids::MacroOscillator));
+			memset(&quantizer[channel], 0, sizeof(braids::Quantizer));
+			memset(&envelope[channel], 0, sizeof(braids::Envelope));
+			memset(&jitterSource[channel], 0, sizeof(braids::VcoJitterSource));
+			memset(&waveShaper[channel], 0, sizeof(braids::SignatureWaveshaper));
+			memset(&settings[channel], 0, sizeof(braids::SettingsData));
 
-			osc[i].Init();
-			quantizer[i].Init();
-			envelope[i].Init();
+			osc[channel].Init();
+			quantizer[channel].Init();
+			envelope[channel].Init();
 
 
-			jitterSource[i].Init();
-			waveShaper[i].Init(0x0000);
+			jitterSource[channel].Init();
+			waveShaper[channel].Init(0x0000);
 
-			bLastTrig[i] = false;
+			bLastTrig[channel] = false;
 
-			currentScale[i] = 0xff;
+			currentScale[channel] = 0xff;
 
-			previousPitch[i] = 0;
+			previousPitch[channel] = 0;
 		}
 		memset(&lastSettings, 0, sizeof(braids::SettingsData));
 
@@ -214,7 +214,7 @@ struct Nodi : SanguineModule {
 
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 
-		for (int channel = 0; channel < channelCount; channel++) {
+		for (int channel = 0; channel < channelCount; ++channel) {
 			settings[channel].quantizer_scale = params[PARAM_SCALE].getValue();
 			settings[channel].quantizer_root = params[PARAM_ROOT].getValue();
 			settings[channel].pitch_range = params[PARAM_PITCH_RANGE].getValue();
@@ -280,8 +280,7 @@ struct Nodi : SanguineModule {
 
 					// Setup oscillator from settings
 					osc[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
-				}
-				else {
+				} else {
 					osc[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
 				}
 
@@ -359,10 +358,10 @@ struct Nodi : SanguineModule {
 				}
 
 				// TODO: add a sync input buffer (must be sample rate converted)
-				uint8_t syncBuffer[24] = {};
+				uint8_t syncBuffer[kBlockSize] = {};
 
-				int16_t renderBuffer[24];
-				osc[channel].Render(syncBuffer, renderBuffer, 24);
+				int16_t renderBuffer[kBlockSize];
+				osc[channel].Render(syncBuffer, renderBuffer, kBlockSize);
 
 				// Signature waveshaping, decimation, and bit reduction
 				int16_t sample = 0;
@@ -370,42 +369,41 @@ struct Nodi : SanguineModule {
 				uint16_t bitMask = nodiBitReductionMasks[settings[channel].resolution];
 				int32_t gain = settings[channel].ad_vca > 0 ? adValue : 65535;
 				uint16_t signature = settings[channel].signature * settings[channel].signature * 4095;
-				for (size_t i = 0; i < 24; i++) {
-					if ((i % decimationFactor) == 0) {
-						sample = renderBuffer[i] & bitMask;
+				for (size_t block = 0; block < kBlockSize; ++block) {
+					if ((block % decimationFactor) == 0) {
+						sample = renderBuffer[block] & bitMask;
 					}
 					sample = sample * gainLp[channel] >> 16;
 					gainLp[channel] += (gain - gainLp[channel]) >> 4;
 					int16_t warped = waveShaper[channel].Transform(sample);
-					renderBuffer[i] = stmlib::Mix(sample, warped, signature);
+					renderBuffer[block] = stmlib::Mix(sample, warped, signature);
 				}
 
 				if (!bLowCpu) {
 					// Sample rate convert
-					dsp::Frame<1> in[24];
-					for (int i = 0; i < 24; i++) {
-						in[i].samples[0] = renderBuffer[i] / 32768.f;
+					dsp::Frame<1> in[kBlockSize];
+					for (int block = 0; block < kBlockSize; ++block) {
+						in[block].samples[0] = renderBuffer[block] / 32768.f;
 					}
 					sampleRateConverter[channel].setRates(96000, args.sampleRate);
 
-					int inLen = 24;
+					int inLen = kBlockSize;
 					int outLen = drbOutputBuffer[channel].capacity();
 					sampleRateConverter[channel].process(in, &inLen, drbOutputBuffer[channel].endData(), &outLen);
 					drbOutputBuffer[channel].endIncr(outLen);
-				}
-				else {
-					for (int i = 0; i < 24; i++) {
-						dsp::Frame<1> f;
-						f.samples[0] = renderBuffer[i] / 32768.f;
-						drbOutputBuffer[channel].push(f);
+				} else {
+					for (int block = 0; block < kBlockSize; ++block) {
+						dsp::Frame<1> inFrame;
+						inFrame.samples[0] = renderBuffer[block] / 32768.f;
+						drbOutputBuffer[channel].push(inFrame);
 					}
 				}
 			}
 
 			// Output
 			if (!drbOutputBuffer[channel].empty()) {
-				dsp::Frame<1> f = drbOutputBuffer[channel].shift();
-				outputs[OUTPUT_OUT].setVoltage(5.f * f.samples[0], channel);
+				dsp::Frame<1> outFrame = drbOutputBuffer[channel].shift();
+				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
 		} // Channels
 
@@ -419,18 +417,17 @@ struct Nodi : SanguineModule {
 				lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodiLightColors[currentModel].red, sampleTime);
 				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodiLightColors[currentModel].green, sampleTime);
 				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodiLightColors[currentModel].blue, sampleTime);
-			}
-			else {
+			} else {
 				lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodiLightColors[47].red, sampleTime);
 				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodiLightColors[47].green, sampleTime);
 				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodiLightColors[47].blue, sampleTime);
 			}
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 
-				for (int i = 0; i < 3; i++) {
-					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
+				for (int light = 0; light < 3; ++light) {
+					lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
 				}
 
 				if (channel < channelCount) {
@@ -439,8 +436,7 @@ struct Nodi : SanguineModule {
 						lights[currentLight + 0].setBrightnessSmooth(nodiLightColors[currentModel].red, sampleTime);
 						lights[currentLight + 1].setBrightnessSmooth(nodiLightColors[currentModel].green, sampleTime);
 						lights[currentLight + 2].setBrightnessSmooth(nodiLightColors[currentModel].blue, sampleTime);
-					}
-					else {
+					} else {
 						lights[currentLight + 0].setBrightnessSmooth(nodiLightColors[47].red, sampleTime);
 						lights[currentLight + 1].setBrightnessSmooth(nodiLightColors[47].green, sampleTime);
 						lights[currentLight + 2].setBrightnessSmooth(nodiLightColors[47].blue, sampleTime);
@@ -460,16 +456,12 @@ struct Nodi : SanguineModule {
 		// Display handling
 		// Display - return to model after 2s
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
-			if (!bPaques)
-			{
+			if (!bPaques) {
 				displayText = nodiDisplayLabels[settings[displayChannel].shape];
-			}
-			else
-			{
+			} else {
 				displayText = nodiDisplayLabels[47];
 			}
-		}
-		else {
+		} else {
 			int value;
 			switch (lastSettingChanged)
 			{
@@ -558,7 +550,7 @@ struct Nodi : SanguineModule {
 			}
 			}
 
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (displayTimeout > args.sampleRate) {
@@ -568,7 +560,7 @@ struct Nodi : SanguineModule {
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
 		uint8_t* arraySettings = &settings[displayChannel].shape;
-		for (int i = 0; i <= braids::SETTING_LAST_EDITABLE_SETTING; i++) {
+		for (int i = 0; i <= braids::SETTING_LAST_EDITABLE_SETTING; ++i) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
 				lastSettingChanged = static_cast<braids::Setting>(i);
@@ -641,9 +633,11 @@ struct NodiWidget : SanguineModuleWidget {
 
 		const int offset = 8;
 		float currentX = lightXBase;
-		for (int i = 0; i < 8; i++) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 20.308), module, Nodi::LIGHT_CHANNEL_MODEL + i * 3));
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308), module, Nodi::LIGHT_CHANNEL_MODEL + ((i + offset) * 3)));
+		for (int component = 0; component < 8; ++component) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 20.308),
+				module, Nodi::LIGHT_CHANNEL_MODEL + component * 3));
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308),
+				module, Nodi::LIGHT_CHANNEL_MODEL + ((component + offset) * 3)));
 			currentX += lightXDelta;
 		}
 
@@ -723,7 +717,7 @@ struct NodiWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(nodiDisplayLabels.size() - 1); i++) {
+		for (int i = 0; i < static_cast<int>(nodiDisplayLabels.size() - 1); ++i) {
 			modelLabels.push_back(nodiDisplayLabels[i] + ": " + nodiMenuLabels[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
@@ -734,7 +728,7 @@ struct NodiWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; i++) {
+		for (int i = 0; i < module->channelCount; ++i) {
 			availableChannels.push_back(channelNumbers[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,

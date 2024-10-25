@@ -213,6 +213,8 @@ static const std::string nodiFlatLabel = "FLAT";
 static const std::string nodiDriftLabel = "DRFT";
 static const std::string nodiSignLabel = "SIGN";
 
+static const int kBlockSize = 24;
+
 struct NodiDisplay : SanguineAlphaDisplay {
 	uint32_t* displayTimeout = nullptr;
 
