@@ -233,8 +233,7 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 				if (drawHalo) {
 					drawRectHalo(args, box.size, textColor, haloOpacity, 0.f);
 				}
-			}
-			else if (!module) {
+			} else if (!module) {
 				switch (displayType)
 				{
 				case DISPLAY_NUMERIC:
@@ -262,8 +261,7 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* t
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -281,8 +279,7 @@ SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, M
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -303,8 +300,7 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module*
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -322,8 +318,7 @@ SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCoun
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -341,8 +336,7 @@ Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const floa
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -391,14 +385,12 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 						for (uint32_t i = 0; (i < 8 || i < textCopy.length()); i++)
 							displayText += textCopy[i];
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
-					}
-					else {
+					} else {
 						nvgText(args.vg, textPos.x, textPos.y, oledText->c_str(), NULL);
 					}
 					//drawRectHalo(args, box.size, textColor, 55, 0.f);
 				}
-			}
-			else {
+			} else {
 				if (!module) {
 					nvgText(args.vg, textPos.x, textPos.y, fallbackString.c_str(), NULL);
 				}
@@ -647,8 +639,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 							case NSVG_PAINT_RADIAL_GRADIENT: {
 								if (innerColor && outerColor) {
 									nvgFillPaint(args.vg, getPaint(args.vg, &myGradient->shapes->fill, *innerColor, *outerColor));
-								}
-								else {
+								} else {
 									nvgFillColor(args.vg, *innerColor);
 								}
 								break;
@@ -656,8 +647,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 							}
 							nvgFill(args.vg);
 						}
-					}
-					else {
+					} else {
 						NVGcolor color = nvgRGB(0, 250, 0);
 						nvgFillColor(args.vg, color);
 						nvgFill(args.vg);
@@ -696,8 +686,7 @@ SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string sh
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -732,8 +721,7 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -747,8 +735,7 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	}
-	else
+	} else
 	{
 		box.pos = mm2px(Vec(X, Y));
 	}
@@ -870,8 +857,7 @@ void SanguineModuleWidget::makePanel() {
 	if (sanguineModule) {
 		if (!sanguineModule->bUniqueTheme) {
 			sanguineModule->setModuleTheme(faceplateTheme);
-		}
-		else {
+		} else {
 			faceplateTheme = sanguineModule->currentTheme;
 		}
 	}
