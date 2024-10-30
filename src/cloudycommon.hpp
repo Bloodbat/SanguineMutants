@@ -11,7 +11,7 @@ struct CloudyParasiteModeDisplay {
 	// Labels for parasite.
 	std::string labelBlend;
 	std::string labelSpread;
-	std::string labelFeeback;
+	std::string labelFeedback;
 	std::string labelReverb;
 };
 

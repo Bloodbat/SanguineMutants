@@ -78,7 +78,7 @@ struct Etesia : SanguineModule {
 	std::string textTrigger = etesiaModeDisplays[0].labelTrigger;
 	std::string textBlend = etesiaModeDisplays[0].labelBlend;
 	std::string textSpread = etesiaModeDisplays[0].labelSpread;
-	std::string textFeedback = etesiaModeDisplays[0].labelFeeback;
+	std::string textFeedback = etesiaModeDisplays[0].labelFeedback;
 	std::string textReverb = etesiaModeDisplays[0].labelReverb;
 
 	dsp::SampleRateConverter<2> inputSrc;
@@ -412,7 +412,7 @@ struct Etesia : SanguineModule {
 				// Parasite
 				textBlend = etesiaModeDisplays[playbackMode].labelBlend;
 				textSpread = etesiaModeDisplays[playbackMode].labelSpread;
-				textFeedback = etesiaModeDisplays[playbackMode].labelFeeback;
+				textFeedback = etesiaModeDisplays[playbackMode].labelFeedback;
 				textReverb = etesiaModeDisplays[playbackMode].labelReverb;
 
 				paramQuantities[PARAM_FREEZE]->name = etesiaModeTooltips[playbackMode].labelFreeze;
@@ -442,8 +442,8 @@ struct Etesia : SanguineModule {
 				paramQuantities[PARAM_SPREAD]->name = etesiaModeTooltips[playbackMode].labelSpread;
 				inputInfos[INPUT_SPREAD]->name = etesiaModeTooltips[playbackMode].labelSpread + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_FEEDBACK]->name = etesiaModeTooltips[playbackMode].labelFeeback;
-				inputInfos[INPUT_FEEDBACK]->name = etesiaModeTooltips[playbackMode].labelFeeback + nebulaeCVSuffix;
+				paramQuantities[PARAM_FEEDBACK]->name = etesiaModeTooltips[playbackMode].labelFeedback;
+				inputInfos[INPUT_FEEDBACK]->name = etesiaModeTooltips[playbackMode].labelFeedback + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_REVERB]->name = etesiaModeTooltips[playbackMode].labelReverb;
 				inputInfos[INPUT_REVERB]->name = etesiaModeTooltips[playbackMode].labelReverb + nebulaeCVSuffix;
@@ -677,7 +677,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
 		etesiaFramebuffer->addChild(displayFeedback);
-		displayFeedback->fallbackString = etesiaModeDisplays[0].labelFeeback;
+		displayFeedback->fallbackString = etesiaModeDisplays[0].labelFeedback;
 
 		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Etesia::PARAM_FEEDBACK));
 
