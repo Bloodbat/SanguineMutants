@@ -76,7 +76,7 @@ struct Fluctus : SanguineModule {
 	std::string textTrigger = fluctusModeDisplays[0].labelTrigger;
 	std::string textBlend = fluctusModeDisplays[0].labelBlend;
 	std::string textSpread = fluctusModeDisplays[0].labelSpread;
-	std::string textFeedback = fluctusModeDisplays[0].labelFeeback;
+	std::string textFeedback = fluctusModeDisplays[0].labelFeedback;
 	std::string textReverb = fluctusModeDisplays[0].labelReverb;
 
 	dsp::SampleRateConverter<2> inputSrc;
@@ -411,7 +411,7 @@ struct Fluctus : SanguineModule {
 				// Parasite
 				textBlend = fluctusModeDisplays[playbackMode].labelBlend;
 				textSpread = fluctusModeDisplays[playbackMode].labelSpread;
-				textFeedback = fluctusModeDisplays[playbackMode].labelFeeback;
+				textFeedback = fluctusModeDisplays[playbackMode].labelFeedback;
 				textReverb = fluctusModeDisplays[playbackMode].labelReverb;
 
 				paramQuantities[PARAM_FREEZE]->name = fluctusModeTooltips[playbackMode].labelFreeze;
@@ -441,8 +441,8 @@ struct Fluctus : SanguineModule {
 				paramQuantities[PARAM_SPREAD]->name = fluctusModeTooltips[playbackMode].labelSpread;
 				inputInfos[INPUT_SPREAD]->name = fluctusModeTooltips[playbackMode].labelSpread + nebulaeCVSuffix;
 
-				paramQuantities[PARAM_FEEDBACK]->name = fluctusModeTooltips[playbackMode].labelFeeback;
-				inputInfos[INPUT_FEEDBACK]->name = fluctusModeTooltips[playbackMode].labelFeeback + nebulaeCVSuffix;
+				paramQuantities[PARAM_FEEDBACK]->name = fluctusModeTooltips[playbackMode].labelFeedback;
+				inputInfos[INPUT_FEEDBACK]->name = fluctusModeTooltips[playbackMode].labelFeedback + nebulaeCVSuffix;
 
 				paramQuantities[PARAM_REVERB]->name = fluctusModeTooltips[playbackMode].labelReverb;
 				inputInfos[INPUT_REVERB]->name = fluctusModeTooltips[playbackMode].labelReverb + nebulaeCVSuffix;
@@ -675,7 +675,7 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
 		fluctusFramebuffer->addChild(displayFeedback);
-		displayFeedback->fallbackString = fluctusModeDisplays[0].labelFeeback;
+		displayFeedback->fallbackString = fluctusModeDisplays[0].labelFeedback;
 
 		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Fluctus::PARAM_FEEDBACK));
 
