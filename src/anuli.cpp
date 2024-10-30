@@ -339,8 +339,8 @@ struct Anuli : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
-				for (int i = 0; i < 3; ++i) {
-					lights[currentLight + i].setBrightnessSmooth(0.f, sampleTime);
+				for (int light = 0; light < 3; ++light) {
+					lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
 				}
 
 				if (channel < channelCount) {
@@ -450,11 +450,11 @@ struct AnuliWidget : SanguineModuleWidget {
 		float currentXA = 23.989f;
 		float currentXB = 56.725f;
 
-		for (int i = 0; i < 8; ++i) {
+		for (int component = 0; component < 8; ++component) {
 			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXA, 14.973),
-				module, Anuli::LIGHT_RESONATOR + i * 3));
+				module, Anuli::LIGHT_RESONATOR + component * 3));
 			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXB, 14.973),
-				module, Anuli::LIGHT_RESONATOR + ((i + lightIdOffset) * 3)));
+				module, Anuli::LIGHT_RESONATOR + ((component + lightIdOffset) * 3)));
 			currentXA += xDelta;
 			currentXB += xDelta;
 		}
