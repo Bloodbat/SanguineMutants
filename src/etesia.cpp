@@ -225,20 +225,20 @@ struct Etesia : SanguineModule {
 		if (outputBuffer.empty()) {
 			etesia::ShortFrame input[32] = {};
 			// Convert input buffer
-			{
-				inputSrc.setRates(args.sampleRate, 32000);
-				dsp::Frame<2> inputFrames[32];
-				int inLen = inputBuffer.size();
-				int outLen = 32;
-				inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
-				inputBuffer.startIncr(inLen);
 
-				// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
-				for (int i = 0; i < outLen; i++) {
-					input[i].l = clamp(inputFrames[i].samples[0] * 32767.0, -32768, 32767);
-					input[i].r = clamp(inputFrames[i].samples[1] * 32767.0, -32768, 32767);
-				}
+			inputSrc.setRates(args.sampleRate, 32000);
+			dsp::Frame<2> inputFrames[32];
+			int inLen = inputBuffer.size();
+			int outLen = 32;
+			inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
+			inputBuffer.startIncr(inLen);
+
+			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
+			for (int frame = 0; frame < outLen; ++frame) {
+				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
+				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 			}
+
 			if (currentBufferSize != bufferSize) {
 				// Re-init etesiaProcessor with new size.
 				delete etesiaProcessor;
@@ -312,9 +312,9 @@ struct Etesia : SanguineModule {
 			// Convert output buffer
 			{
 				dsp::Frame<2> outputFrames[32];
-				for (int i = 0; i < 32; i++) {
-					outputFrames[i].samples[0] = output[i].l / 32768.f;
-					outputFrames[i].samples[1] = output[i].r / 32768.f;
+				for (int frame = 0; frame < 32; ++frame) {
+					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
+					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
 				outputSrc.setRates(32000, args.sampleRate);
@@ -343,8 +343,8 @@ struct Etesia : SanguineModule {
 		// Lights
 		dsp::Frame<2> lightFrame = {};
 
-		switch (ledMode)
-		case LEDS_OUTPUT: {
+		switch (ledMode) {
+		case LEDS_OUTPUT:
 			lightFrame = outputFrame;
 			break;
 		default:
@@ -357,21 +357,21 @@ struct Etesia : SanguineModule {
 			if (ledMode != LEDS_MOMENTARY) {
 				ledMode = LEDS_MOMENTARY;
 			}
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
 			if (ledMode != LEDS_QUALITY_MOMENTARY) {
 				ledMode = LEDS_QUALITY_MOMENTARY;
 			}
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (playbackMode != lastLEDPlaybackMode) {
 			if (ledMode != LEDS_MODE_MOMENTARY) {
 				ledMode = LEDS_MODE_MOMENTARY;
 			}
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (displayTimeout > args.sampleRate * 2) {
@@ -470,8 +470,7 @@ struct Etesia : SanguineModule {
 				bDisplaySwitched = bLastFrozen;
 			}
 
-			switch (ledMode)
-			{
+			switch (ledMode) {
 			case LEDS_INPUT:
 			case LEDS_OUTPUT:
 				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
@@ -489,9 +488,9 @@ struct Etesia : SanguineModule {
 				float value;
 				int currentLight;
 
-				for (int i = 0; i < 4; i++) {
-					value = params[PARAM_BLEND + i].getValue();
-					currentLight = LIGHT_BLEND + i * 2;
+				for (int light = 0; light < 4; ++light) {
+					value = params[PARAM_BLEND + light].getValue();
+					currentLight = LIGHT_BLEND + light * 2;
 					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
 					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
@@ -611,7 +610,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Etesia::PARAM_MODE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173), module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
+			module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		etesiaFramebuffer->addChild(displayPosition);
@@ -619,7 +619,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Etesia::INPUT_POSITION));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 50.173), module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 50.173),
+			module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		etesiaFramebuffer->addChild(displayDensity);
@@ -627,7 +628,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Etesia::INPUT_DENSITY));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173), module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
+			module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		etesiaFramebuffer->addChild(displaySize);
@@ -635,7 +637,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Etesia::INPUT_SIZE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 50.173), module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 50.173),
+			module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		etesiaFramebuffer->addChild(displayTexture);
@@ -735,7 +738,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(etesiaModeList.size()); i++) {
+		for (int i = 0; i < static_cast<int>(etesiaModeList.size()); ++i) {
 			modelLabels.push_back(etesiaModeList[i].display + ": " + etesiaModeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,

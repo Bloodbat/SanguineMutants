@@ -217,20 +217,19 @@ struct Nebulae : SanguineModule {
 		if (outputBuffer.empty()) {
 			clouds::ShortFrame input[32] = {};
 			// Convert input buffer
-			{
-				inputSrc.setRates(args.sampleRate, 32000);
-				dsp::Frame<2> inputFrames[32];
-				int inLen = inputBuffer.size();
-				int outLen = 32;
-				inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
-				inputBuffer.startIncr(inLen);
+			inputSrc.setRates(args.sampleRate, 32000);
+			dsp::Frame<2> inputFrames[32];
+			int inLen = inputBuffer.size();
+			int outLen = 32;
+			inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
+			inputBuffer.startIncr(inLen);
 
-				// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
-				for (int i = 0; i < outLen; i++) {
-					input[i].l = clamp(inputFrames[i].samples[0] * 32767.0, -32768, 32767);
-					input[i].r = clamp(inputFrames[i].samples[1] * 32767.0, -32768, 32767);
-				}
+			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
+			for (int frame = 0; frame < outLen; ++frame) {
+				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
+				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 			}
+
 			if (currentBufferSize != bufferSize) {
 				// Re-init cloudsProcessor with new size.
 				delete cloudsProcessor;
@@ -303,9 +302,9 @@ struct Nebulae : SanguineModule {
 			// Convert output buffer
 			{
 				dsp::Frame<2> outputFrames[32];
-				for (int i = 0; i < 32; i++) {
-					outputFrames[i].samples[0] = output[i].l / 32768.f;
-					outputFrames[i].samples[1] = output[i].r / 32768.f;
+				for (int frame = 0; frame < 32; ++frame) {
+					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
+					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
 				outputSrc.setRates(32000, args.sampleRate);
@@ -333,8 +332,7 @@ struct Nebulae : SanguineModule {
 
 		dsp::Frame<2> lightFrame = {};
 
-		switch (ledMode)
-		{
+		switch (ledMode) {
 		case LEDS_OUTPUT:
 			lightFrame = outputFrame;
 			break;
@@ -348,21 +346,21 @@ struct Nebulae : SanguineModule {
 			if (ledMode != LEDS_MOMENTARY) {
 				ledMode = LEDS_MOMENTARY;
 			}
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
 			if (ledMode != LEDS_QUALITY_MOMENTARY) {
 				ledMode = LEDS_QUALITY_MOMENTARY;
 			}
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (playbackMode != lastLEDPlaybackMode) {
 			if (ledMode != LEDS_MODE_MOMENTARY) {
 				ledMode = LEDS_MODE_MOMENTARY;
 			}
-			displayTimeout++;
+			++displayTimeout;
 		}
 
 		if (displayTimeout > args.sampleRate * 2) {
@@ -442,8 +440,7 @@ struct Nebulae : SanguineModule {
 			}
 
 			int currentLight = 0;
-			switch (ledMode)
-			{
+			switch (ledMode) {
 			case LEDS_INPUT:
 			case LEDS_OUTPUT:
 				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
@@ -460,9 +457,9 @@ struct Nebulae : SanguineModule {
 			case LEDS_MOMENTARY:
 				float value;
 
-				for (int i = 0; i < 4; i++) {
-					value = params[PARAM_BLEND + i].getValue();
-					currentLight = LIGHT_BLEND + i * 2;
+				for (int light = 0; light < 4; ++light) {
+					value = params[PARAM_BLEND + light].getValue();
+					currentLight = LIGHT_BLEND + light * 2;
 					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
 					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
@@ -480,11 +477,11 @@ struct Nebulae : SanguineModule {
 				break;
 
 			case LEDS_MODE_MOMENTARY:
-				for (int i = 0; i < clouds::PLAYBACK_MODE_LAST; i++) {
-					currentLight = LIGHT_BLEND + i * 2;
+				for (int light = 0; light < clouds::PLAYBACK_MODE_LAST; ++light) {
+					currentLight = LIGHT_BLEND + light * 2;
 
-					lights[currentLight + 0].setBrightness(playbackMode == i ? 1.f : 0.f);
-					lights[currentLight + 1].setBrightness(playbackMode == i ? 1.f : 0.f);
+					lights[currentLight + 0].setBrightness(playbackMode == light ? 1.f : 0.f);
+					lights[currentLight + 1].setBrightness(playbackMode == light ? 1.f : 0.f);
 				}
 				break;
 			}
@@ -683,7 +680,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(nebulaeModeList.size()); i++) {
+		for (int i = 0; i < static_cast<int>(nebulaeModeList.size()); ++i) {
 			modelLabels.push_back(nebulaeModeList[i].display + ": " + nebulaeModeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
