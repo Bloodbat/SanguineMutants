@@ -203,8 +203,9 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 			nvgFillColor(args.vg, nvgTransRGBA(textColor, backgroundCharAlpha));
 			// Background of all characters
 			std::string backgroundText = "";
-			for (uint32_t i = 0; i < characterCount; i++)
+			for (uint32_t character = 0; character < characterCount; ++character) {
 				backgroundText += backgroundCharacter;
+			}
 			nvgText(args.vg, textPos.x, textPos.y, backgroundText.c_str(), NULL);
 			nvgFillColor(args.vg, textColor);
 
@@ -218,8 +219,9 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 				case DISPLAY_NUMERIC:
 					if (values.numberValue) {
 						displayValue = std::to_string(*values.numberValue);
-						if (*values.numberValue < 10 && leadingZero)
+						if (*values.numberValue < 10 && leadingZero) {
 							displayValue.insert(0, 1, '0');
+						}
 					}
 					break;
 				case DISPLAY_STRING:
@@ -238,8 +240,9 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 				{
 				case DISPLAY_NUMERIC:
 					displayValue = std::to_string(fallbackNumber);
-					if (fallbackNumber < 10 && leadingZero)
+					if (fallbackNumber < 10 && leadingZero) {
 						displayValue.insert(0, 1, '0');
+					}
 					break;
 				case DISPLAY_STRING:
 					displayValue = fallbackString;
@@ -261,8 +264,7 @@ SanguineAlphaDisplay::SanguineAlphaDisplay(uint32_t newCharacterCount, Module* t
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 
@@ -279,8 +281,7 @@ SanguineLedNumberDisplay::SanguineLedNumberDisplay(uint32_t newCharacterCount, M
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 
@@ -300,8 +301,7 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module*
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 
@@ -318,8 +318,7 @@ SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCoun
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 
@@ -336,8 +335,7 @@ Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const floa
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 }
@@ -376,14 +374,17 @@ void Sanguine96x32OLEDDisplay::drawLayer(const DrawArgs& args, int layer) {
 					bool multiLine = oledText->size() > 8;
 					if (multiLine) {
 						std::string displayText = "";
-						for (uint32_t i = 0; i < 8; i++)
-							displayText += textCopy[i];
+						static const int kCharactersPerLine = 8;
+						for (uint32_t character = 0; character < kCharactersPerLine; ++character) {
+							displayText += textCopy[character];
+						}
 						textCopy.erase(0, 8);
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
 						textPos = Vec(3.f, 14.5f);
 						displayText = "";
-						for (uint32_t i = 0; (i < 8 || i < textCopy.length()); i++)
-							displayText += textCopy[i];
+						for (uint32_t character = 0; (character < kCharactersPerLine || character < textCopy.length()); ++character) {
+							displayText += textCopy[character];
+						}
 						nvgText(args.vg, textPos.x, textPos.y, displayText.c_str(), NULL);
 					} else {
 						nvgText(args.vg, textPos.x, textPos.y, oledText->c_str(), NULL);
@@ -418,8 +419,9 @@ void SanguineLightUpSwitch::drawLayer(const DrawArgs& args, int layer) {
 		if (module && !module->isBypassed()) {
 			uint32_t frameNum = getParamQuantity()->getValue();
 			std::shared_ptr<window::Svg> svg = frames[static_cast<int>(frameNum)];
-			if (!svg)
+			if (!svg) {
 				return;
+			}
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 			rack::window::svgDraw(args.vg, svg->handle);
 			if (frameNum < halos.size()) {
@@ -526,8 +528,9 @@ float SanguineMultiColoredShapedLight::getLineCrossing(math::Vec p0, math::Vec p
 	math::Vec e = p3.minus(p2);
 	float m = d.x * e.y - d.y * e.x;
 	// Check if lines are parallel, or if either pair of points are equal
-	if (std::abs(m) < 1e-6)
+	if (std::abs(m) < 1e-6) {
 		return NAN;
+	}
 	return -(d.x * b.y - d.y * b.x) / m;
 }
 
@@ -548,10 +551,11 @@ NVGpaint SanguineMultiColoredShapedLight::getPaint(NVGcontext* vg, NSVGpaint* p,
 	nvgTransformPoint(&e.x, &e.y, inverse, 0, 1);
 
 	NVGpaint paint;
-	if (p->type == NSVG_PAINT_LINEAR_GRADIENT)
+	if (p->type == NSVG_PAINT_LINEAR_GRADIENT) {
 		paint = nvgLinearGradient(vg, s.x, s.y, e.x, e.y, innerColor, outerColor);
-	else
+	} else {
 		paint = nvgRadialGradient(vg, s.x, s.y, 0.f, 160.f, innerColor, outerColor);
+	}
 	return paint;
 };
 
@@ -564,17 +568,19 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 				NSVGimage* myGradient = svgGradient->handle;
 
 				// Iterate shape linked list
-				for (NSVGshape* shape = mySvg->shapes; shape; shape = shape->next, shapeIndex++) {
+				for (NSVGshape* shape = mySvg->shapes; shape; shape = shape->next, ++shapeIndex) {
 
 					// Visibility
-					if (!(shape->flags & NSVG_FLAGS_VISIBLE))
+					if (!(shape->flags & NSVG_FLAGS_VISIBLE)) {
 						continue;
+					}
 
 					nvgSave(args.vg);
 
 					// Opacity
-					if (shape->opacity < 1.f)
+					if (shape->opacity < 1.f) {
 						nvgAlpha(args.vg, shape->opacity);
+					}
 
 					// Build path
 					nvgBeginPath(args.vg);
@@ -589,8 +595,9 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 						}
 
 						// Close path
-						if (path->closed)
+						if (path->closed) {
 							nvgClosePath(args.vg);
+						}
 
 						// Compute whether this is a hole or a solid.
 						// Assume that no paths are crossing (usually true for normal SVG graphics).
@@ -601,12 +608,14 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 						math::Vec p1 = math::Vec(path->bounds[0] - 1.f, path->bounds[1] - 1.f);
 						// Iterate all other paths
 						for (NSVGpath* path2 = shape->paths; path2; path2 = path2->next) {
-							if (path2 == path)
+							if (path2 == path) {
 								continue;
+							}
 
 							// Iterate all lines on the path
-							if (path2->npts < 4)
+							if (path2->npts < 4) {
 								continue;
+							}
 							for (int i = 1; i < path2->npts + 3; i += 3) {
 								float* p = &path2->pts[2 * i];
 								// The previous point
@@ -616,15 +625,16 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 								float crossing = getLineCrossing(p0, p1, p2, p3);
 								float crossing2 = getLineCrossing(p2, p3, p0, p1);
 								if (0.f <= crossing && crossing < 1.f && 0.f <= crossing2) {
-									crossings++;
+									++crossings;
 								}
 							}
 						}
 
-						if (crossings % 2 == 0)
+						if (crossings % 2 == 0) {
 							nvgPathWinding(args.vg, NVG_SOLID);
-						else
+						} else {
 							nvgPathWinding(args.vg, NVG_HOLE);
+						}
 					}
 
 					// Fill shape with external gradient
@@ -686,8 +696,7 @@ SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string sh
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 }
@@ -703,8 +712,9 @@ void SanguineShapedLight::draw(const DrawArgs& args) {
 void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		//From SvgWidget::draw()
-		if (!sw->svg)
+		if (!sw->svg) {
 			return;
+		}
 		if (module && !module->isBypassed()) {
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 			rack::window::svgDraw(args.vg, sw->svg->handle);
@@ -721,8 +731,7 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 }
@@ -735,8 +744,7 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
-	} else
-	{
+	} else {
 		box.pos = mm2px(Vec(X, Y));
 	}
 }
@@ -745,8 +753,9 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 void SanguineStaticRGBLight::draw(const DrawArgs& args) {
 	// Draw lights in module browser.
 	if (!module) {
-		if (!sw->svg)
+		if (!sw->svg) {
 			return;
+		}
 
 		NSVGimage* mySvg = sw->svg->handle;
 
@@ -759,8 +768,9 @@ void SanguineStaticRGBLight::draw(const DrawArgs& args) {
 void SanguineStaticRGBLight::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		//From SvgWidget::draw()
-		if (!sw->svg)
+		if (!sw->svg) {
 			return;
+		}
 		if (module && !module->isBypassed()) {
 			NSVGimage* mySvg = sw->svg->handle;
 
@@ -939,12 +949,14 @@ void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVG
 	const unsigned char haloOpacity, const float radiusFactor) {
 	// Adapted from LightWidget
 	// Don't draw halo if rendering in a framebuffer, e.g. screenshots or Module Browser
-	if (args.fb)
+	if (args.fb) {
 		return;
+	}
 
 	const float halo = settings::haloBrightness;
-	if (halo == 0.f)
+	if (halo == 0.f) {
 		return;
+	}
 
 	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 
@@ -966,12 +978,14 @@ void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVG
 void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
 	const unsigned char haloOpacity, const float positionX) {
 	// Adapted from MindMeld & LightWidget.
-	if (args.fb)
+	if (args.fb) {
 		return;
+	}
 
 	const float halo = settings::haloBrightness;
-	if (halo == 0.f)
+	if (halo == 0.f) {
 		return;
+	}
 
 	nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 
