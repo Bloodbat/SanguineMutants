@@ -200,10 +200,10 @@ struct Marmora : SanguineModule {
 		noteFilter.Init();
 		scaleRecorder.Init();
 
-		for (int i = 0; i < MAX_SCALES; i++) {
-			marmoraScales[i].bScaleDirty = false;
-			marmoraScales[i].scale.Init();
-			copyScale(preset_scales[i], marmoraScales[i].scale);
+		for (int scale = 0; scale < MAX_SCALES; ++scale) {
+			marmoraScales[scale].bScaleDirty = false;
+			marmoraScales[scale].scale.Init();
+			copyScale(preset_scales[scale], marmoraScales[scale].scale);
 		}
 
 		onSampleRateChange();
@@ -380,8 +380,7 @@ struct Marmora : SanguineModule {
 	}
 
 	void drawLight(const int light, const LightModes lightMode, const float sampleTime, const long long systemTimeMs) {
-		switch (lightMode)
-		{
+		switch (lightMode) {
 		case LIGHT_OFF:
 			lights[light].setBrightnessSmooth(0.f, sampleTime);
 			break;
@@ -403,8 +402,7 @@ struct Marmora : SanguineModule {
 		int slowTriangle;
 		int pulseWidth;
 		int fastTriangle;
-		switch (lockMode)
-		{
+		switch (lockMode) {
 		case DEJA_VU_LOCK_ON:
 			slowTriangle = (systemTimeMs & 1023) >> 5;
 			slowTriangle = slowTriangle >= 16 ? 31 - slowTriangle : slowTriangle;
@@ -546,15 +544,15 @@ struct Marmora : SanguineModule {
 
 		// Set scales
 		if (!bModuleAdded) {
-			for (int i = 0; i < MAX_SCALES; i++) {
-				xyGenerator.LoadScale(i, preset_scales[i]);
-				copyScale(preset_scales[i], marmoraScales[i].scale);
-				marmoraScales[i].bScaleDirty = false;
+			for (int scale = 0; scale < MAX_SCALES; ++scale) {
+				xyGenerator.LoadScale(scale, preset_scales[scale]);
+				copyScale(preset_scales[scale], marmoraScales[scale].scale);
+				marmoraScales[scale].bScaleDirty = false;
 			}
 			bModuleAdded = true;
 		} else {
-			for (int i = 0; i < MAX_SCALES; i++) {
-				xyGenerator.LoadScale(i, marmoraScales[i].scale);
+			for (int scale = 0; scale < MAX_SCALES; ++scale) {
+				xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 			}
 		}
 	}
@@ -564,7 +562,7 @@ struct Marmora : SanguineModule {
 
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
 
-		for (int scale = 0; scale < MAX_SCALES; scale++) {
+		for (int scale = 0; scale < MAX_SCALES; ++scale) {
 			if (marmoraScales[scale].bScaleDirty) {
 				json_t* scaleDataVoltagesJ = json_array();
 				json_t* scaleDataWeightsJ = json_array();
@@ -576,7 +574,7 @@ struct Marmora : SanguineModule {
 				std::string scaleDataWeights = scaleHeader + "DataWeights";
 				json_object_set_new(rootJ, scaleBaseInterval.c_str(), json_real(marmoraScales[scale].scale.base_interval));
 				json_object_set_new(rootJ, scaleDegrees.c_str(), json_integer(marmoraScales[scale].scale.num_degrees));
-				for (int degree = 0; degree < marmoraScales[scale].scale.num_degrees; degree++) {
+				for (int degree = 0; degree < marmoraScales[scale].scale.num_degrees; ++degree) {
 					json_array_insert_new(scaleDataVoltagesJ, degree, json_real(marmoraScales[scale].scale.degree[degree].voltage));
 					json_array_insert_new(scaleDataWeightsJ, degree, json_integer(marmoraScales[scale].scale.degree[degree].weight));
 				}
@@ -598,7 +596,7 @@ struct Marmora : SanguineModule {
 
 		int dirtyScalesCount = 0;
 
-		for (int scale = 0; scale < MAX_SCALES; scale++) {
+		for (int scale = 0; scale < MAX_SCALES; ++scale) {
 			bool bScaleOk = false;
 
 			std::string scaleHeader = string::f("userScale%d", scale);
@@ -625,7 +623,7 @@ struct Marmora : SanguineModule {
 
 					bScaleOk = scaleDataVoltagesJ && scaleDataWeightsJ;
 					if (bScaleOk) {
-						for (int degree = 0; degree < customScale.num_degrees; degree++) {
+						for (int degree = 0; degree < customScale.num_degrees; ++degree) {
 							json_t* voltageJ = json_array_get(scaleDataVoltagesJ, degree);
 							json_t* weightJ = json_array_get(scaleDataWeightsJ, degree);
 							bScaleOk = voltageJ && weightJ;
@@ -639,12 +637,12 @@ struct Marmora : SanguineModule {
 				if (bScaleOk) {
 					copyScale(customScale, marmoraScales[scale].scale);
 					marmoraScales[scale].bScaleDirty = true;
-					dirtyScalesCount++;
+					++dirtyScalesCount;
 				}
 			}
 		} // for
 		if (dirtyScalesCount > 0) {
-			for (int scale = 0; scale < MAX_SCALES; scale++) {
+			for (int scale = 0; scale < MAX_SCALES; ++scale) {
 				if (marmoraScales[scale].bScaleDirty) {
 					xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 				}
@@ -682,7 +680,7 @@ struct Marmora : SanguineModule {
 		destination.base_interval = source.base_interval;
 		destination.num_degrees = source.num_degrees;
 
-		for (int degree = 0; degree < source.num_degrees; degree++) {
+		for (int degree = 0; degree < source.num_degrees; ++degree) {
 			destination.degree[degree].voltage = source.degree[degree].voltage;
 			destination.degree[degree].weight = source.degree[degree].weight;
 		}
