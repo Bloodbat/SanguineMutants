@@ -298,6 +298,7 @@ SanguineMatrixDisplay::SanguineMatrixDisplay(uint32_t newCharacterCount, Module*
 	fontName = "res/components/sanguinematrix.ttf";
 	box.size = mm2px(Vec(newCharacterCount * 5.70275f, 10.16f));
 	fontSize = 16.45f;
+	haloOpacity = 55;
 
 	if (createCentered) {
 		box.pos = centerWidgetInMillimeters(this, X, Y);
