@@ -128,7 +128,6 @@ struct Velamina : SanguineModule {
 			if (bIsLightsTurn) {
 				int currentLight = LIGHT_OUT_1 + channel * 3;
 				float voltageSum = 0.f;
-				float gainSum = 0.f;
 
 				if (polyChannelCount < 2) {
 					if (polyChannelCount > 0) {
@@ -143,6 +142,7 @@ struct Velamina : SanguineModule {
 					lights[(LIGHT_GAIN_1 + channel * 2) + 0].setBrightnessSmooth(0.f, sampleTime);
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gain[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
+					float gainSum = 0.f;
 					for (int offset = 0; offset < kMaxChannels; ++offset) {
 						for (int polyChannel = 0; polyChannel < kMaxChannels; ++polyChannel) {
 							voltageSum += portVoltages[polyChannel][offset][polyChannel];
