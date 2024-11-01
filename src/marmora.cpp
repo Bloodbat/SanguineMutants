@@ -96,12 +96,15 @@ struct Marmora : SanguineModule {
 	marbles::NoteFilter noteFilter;
 	marbles::ScaleRecorder scaleRecorder;
 
+	//TODO: preinit these!
 	bool bDejaVuTEnabled;
 	bool bDejaVuXEnabled;
 	bool bXClockSourceExternal = false;
 	bool bTReset;
 	bool bXReset;
 	bool bModuleAdded = false;
+	bool bMenuTReset = false;
+	bool bMenuXReset = false;
 
 	bool bScaleEditMode = false;
 	bool bNoteGate = false;
@@ -243,12 +246,14 @@ struct Marmora : SanguineModule {
 		xClockSourceInternal = params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue();
 		bXClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
 
-		bTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage());
-		bXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage());
+		bTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage()) || bMenuTReset;
+		bXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage()) || bMenuXReset;
 
 		if (!bXClockSourceExternal) {
 			bXReset |= bTReset;
 		}
+
+		bMenuTReset = bMenuXReset = false;
 
 		// Process block
 		if (++blockIndex >= BLOCK_SIZE) {
@@ -847,6 +852,16 @@ struct MarmoraWidget : SanguineModuleWidget {
 			[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue(); },
 			[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
 		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createMenuItem("Reset/reseed t generator", "", [=]() {
+			module->bMenuTReset = true;
+			}));
+
+		menu->addChild(createMenuItem("Reset X generator", "", [=]() {
+			module->bMenuXReset = true;
+			}));
 
 		menu->addChild(new MenuSeparator);
 
