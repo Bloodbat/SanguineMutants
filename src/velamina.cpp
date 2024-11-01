@@ -144,9 +144,9 @@ struct Velamina : SanguineModule {
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gain[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
 					for (int offset = 0; offset < kMaxChannels; ++offset) {
-						for (int channel = 0; channel < kMaxChannels; ++channel) {
-							voltageSum += portVoltages[channel][offset][channel];
-							gainSum += gain[offset][channel];
+						for (int polyChannel = 0; polyChannel < kMaxChannels; ++polyChannel) {
+							voltageSum += portVoltages[polyChannel][offset][polyChannel];
+							gainSum += gain[offset][polyChannel];
 						}
 					}
 
