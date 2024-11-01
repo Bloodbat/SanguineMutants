@@ -1,3 +1,14 @@
+# 2.5.3
+
+## Fixes
+
+- Funes LPG lights.
+
+## Additions
+
+- Ability to reset Marmora generators from the context menu.
+
+
 # 2.5.2
 
 ## Fixes
