@@ -179,7 +179,7 @@ struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
 	SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
-struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {	
+struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {
 	SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
@@ -217,8 +217,8 @@ struct SanguineLightUpRGBSwitch : app::SvgSwitch {
 	void addColor(unsigned int color);
 	void addHalo(NVGcolor haloColor);
 	void drawLayer(const DrawArgs& args, int layer) override;
-	void setBackground(const std::string fileName);
-	void setGlyph(const std::string fileName, const float offsetX, const float offsetY);
+	void setBackground(const std::string& fileName);
+	void setGlyph(const std::string& fileName, const float offsetX, const float offsetY);
 };
 
 struct Befaco2StepSwitch : app::SvgSwitch {
@@ -285,16 +285,16 @@ enum LightModes {
 
 struct SanguineShapedLight : SvgLight {
 	Module* module;
-	SanguineShapedLight(Module* theModule, const std::string shapeFileName, const float X, const float Y, bool createCentered = true);
+	SanguineShapedLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y, bool createCentered = true);
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
 };
 
 struct SanguineStaticRGBLight : SvgLight {
 	unsigned int lightColor;
-	SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+	SanguineStaticRGBLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y,
 		bool createCentered, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
-	SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+	SanguineStaticRGBLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y,
 		bool createCentered, unsigned int newLightColor);
 	void draw(const DrawArgs& args) override;
 	void drawLayer(const DrawArgs& args, int layer) override;
@@ -331,8 +331,8 @@ struct SanguineMutantsLogoLight : SanguineShapedLight {
 // Panels
 struct SanguinePanel : SvgPanel {
 	widget::SvgWidget* foreground;
-	SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName);
-	void addLayer(const std::string layerFileName);
+	SanguinePanel(const std::string& newBackgroundFileName, const std::string& newForegroundFileName);
+	void addLayer(const std::string& layerFileName);
 };
 
 // Modules
