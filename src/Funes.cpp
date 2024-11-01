@@ -310,8 +310,8 @@ struct Funes : SanguineModule {
 				int clampedEngine = patch.engine % 8;
 				for (int led = 0; led < 8; ++led) {
 					int currentLight = led * 2;
-					float brightnessRed = activeLights[currentLight + 1];
-					float brightnessGreen = activeLights[currentLight];
+					float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
+					float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
 					if (pulse && clampedEngine == led) {
 						switch (patch.engine) {
