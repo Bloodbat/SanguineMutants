@@ -49,7 +49,7 @@ struct Aleae : SanguineModule {
 
 	RollModes rollModes[kMaxModuleSections] = { ROLL_DIRECT, ROLL_DIRECT };
 	OutModes outModes[kMaxModuleSections] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
-	bool bOutputsConnected[OUTPUTS_COUNT];
+	bool bOutputsConnected[OUTPUTS_COUNT] = {};
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
