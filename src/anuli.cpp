@@ -298,10 +298,10 @@ struct Anuli : SanguineModule {
 					}
 
 					outputSrc[channel].setRates(48000, args.sampleRate);
-					int inLen = 24;
-					int outLen = outputBuffer[channel].capacity();
-					outputSrc[channel].process(outputFrames, &inLen, outputBuffer[channel].endData(), &outLen);
-					outputBuffer[channel].endIncr(outLen);
+					int inCount = 24;
+					int outCount = outputBuffer[channel].capacity();
+					outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
+					outputBuffer[channel].endIncr(outCount);
 				}
 			}
 
