@@ -358,7 +358,7 @@ struct Nodi : SanguineModule {
 				}
 
 				// TODO: add a sync input buffer (must be sample rate converted)
-				uint8_t syncBuffer[kBlockSize] = {};
+				const uint8_t syncBuffer[kBlockSize] = {};
 
 				int16_t renderBuffer[kBlockSize];
 				osc[channel].Render(syncBuffer, renderBuffer, kBlockSize);
@@ -559,7 +559,7 @@ struct Nodi : SanguineModule {
 		}
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
-		uint8_t* arraySettings = &settings[displayChannel].shape;
+		const uint8_t* arraySettings = &settings[displayChannel].shape;
 		for (int i = 0; i <= braids::SETTING_LAST_EDITABLE_SETTING; ++i) {
 			if (arraySettings[i] != arrayLastSettings[i]) {
 				arrayLastSettings[i] = arraySettings[i];
