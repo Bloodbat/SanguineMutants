@@ -328,8 +328,8 @@ SanguineTinyNumericDisplay::SanguineTinyNumericDisplay(uint32_t newCharacterCoun
 	kerning = 2.5f;
 };
 
-Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) {
-	fontName = "res/components/sanguinematrix.ttf";
+Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const float X, const float Y, bool createCentered) :
+	fontName("res/components/sanguinematrix.ttf") {
 	box.size = mm2px(Vec(16.298f, 5.418f));
 
 	module = theModule;
