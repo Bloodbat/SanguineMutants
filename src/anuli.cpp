@@ -208,7 +208,7 @@ struct Anuli : SanguineModule {
 				inputSrc[channel].setRates(args.sampleRate, 48000);
 				int inLen = inputBuffer[channel].size();
 				int outLen = 24;
-				inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, (dsp::Frame<1>*) in, &outLen);
+				inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
 				inputBuffer[channel].startIncr(inLen);
 
 				// Polyphony
