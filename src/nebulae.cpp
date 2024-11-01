@@ -455,10 +455,8 @@ struct Nebulae : SanguineModule {
 
 			case LEDS_PARAMETERS:
 			case LEDS_MOMENTARY:
-				float value;
-
 				for (int light = 0; light < 4; ++light) {
-					value = params[PARAM_BLEND + light].getValue();
+					float value = params[PARAM_BLEND + light].getValue();
 					currentLight = LIGHT_BLEND + light * 2;
 					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
 					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
