@@ -493,7 +493,7 @@ void SanguineLightUpRGBSwitch::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-void SanguineLightUpRGBSwitch::setBackground(const std::string fileName) {
+void SanguineLightUpRGBSwitch::setBackground(const std::string& fileName) {
 	sw->setSvg(Svg::load(asset::plugin(pluginInstance, fileName)));
 	sw->wrap();
 	box.size = sw->box.size;
@@ -503,7 +503,7 @@ void SanguineLightUpRGBSwitch::setBackground(const std::string fileName) {
 	shadow->box.pos = math::Vec(0.f, sw->box.size.y * 0.10f);
 }
 
-void SanguineLightUpRGBSwitch::setGlyph(const std::string fileName, const float offsetX, const float offsetY) {
+void SanguineLightUpRGBSwitch::setGlyph(const std::string& fileName, const float offsetX, const float offsetY) {
 	glyph->setSvg(Svg::load(asset::plugin(pluginInstance, fileName)));
 	glyph->wrap();
 	transformWidget->box.size = glyph->box.size;
@@ -690,7 +690,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 }
 
 // Decorations
-SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string shapeFileName, const float X, const float Y, bool createCentered) {
+SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y, bool createCentered) {
 	module = theModule;
 
 	setSvg(Svg::load(asset::plugin(pluginInstance, shapeFileName)));
@@ -724,7 +724,7 @@ void SanguineShapedLight::drawLayer(const DrawArgs& args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
-SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y,
 	bool createCentered, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) {
 	module = theModule;
 	setSvg(Svg::load(asset::plugin(pluginInstance, shapeFileName)));
@@ -737,7 +737,7 @@ SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::str
 	}
 }
 
-SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::string shapeFileName, const float X, const float Y,
+SanguineStaticRGBLight::SanguineStaticRGBLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y,
 	bool createCentered, unsigned int newLightColor) {
 	module = theModule;
 	setSvg(Svg::load(asset::plugin(pluginInstance, shapeFileName)));
@@ -814,14 +814,14 @@ SanguineMutantsLogoLight::SanguineMutantsLogoLight(Module* theModule, const floa
 
 // Panels
 
-SanguinePanel::SanguinePanel(const std::string newBackgroundFileName, const std::string newForegroundFileName) {
+SanguinePanel::SanguinePanel(const std::string& newBackgroundFileName, const std::string& newForegroundFileName) {
 	setBackground(Svg::load(asset::plugin(pluginInstance, newBackgroundFileName)));
 	foreground = new SvgWidget();
 	foreground->setSvg(Svg::load(asset::plugin(pluginInstance, newForegroundFileName)));
 	fb->addChildBelow(foreground, panelBorder);
 }
 
-void SanguinePanel::addLayer(const std::string layerFileName) {
+void SanguinePanel::addLayer(const std::string& layerFileName) {
 	SvgWidget* layer = new SvgWidget();
 	layer->setSvg(Svg::load(asset::plugin(pluginInstance, layerFileName)));
 	fb->addChildBelow(layer, panelBorder);
