@@ -565,7 +565,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 		if (layer == 1) {
 			if (module && !module->isBypassed()) {
 				int shapeIndex = 0;
-				NSVGimage* mySvg = svg->handle;
+				const NSVGimage* mySvg = svg->handle;
 
 				// Iterate shape linked list
 				for (NSVGshape* shape = mySvg->shapes; shape; shape = shape->next, ++shapeIndex) {
@@ -758,7 +758,7 @@ void SanguineStaticRGBLight::draw(const DrawArgs& args) {
 			return;
 		}
 
-		NSVGimage* mySvg = sw->svg->handle;
+		const NSVGimage* mySvg = sw->svg->handle;
 
 		fillSvgSolidColor(mySvg, lightColor);
 		svgDraw(args.vg, sw->svg->handle);
@@ -773,7 +773,7 @@ void SanguineStaticRGBLight::drawLayer(const DrawArgs& args, int layer) {
 			return;
 		}
 		if (module && !module->isBypassed()) {
-			NSVGimage* mySvg = sw->svg->handle;
+			const NSVGimage* mySvg = sw->svg->handle;
 
 			fillSvgSolidColor(mySvg, lightColor);
 			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
@@ -1005,7 +1005,7 @@ void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolo
 	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
 }
 
-void fillSvgSolidColor(NSVGimage* svgImage, const unsigned int fillColor) {
+void fillSvgSolidColor(const NSVGimage* svgImage, const unsigned int fillColor) {
 	for (NSVGshape* shape = svgImage->shapes; shape; shape = shape->next) {
 		shape->fill.color = fillColor;
 		shape->fill.type = NSVG_PAINT_COLOR;

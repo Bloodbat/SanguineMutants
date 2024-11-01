@@ -372,7 +372,7 @@ void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVG
 void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
 	const unsigned char haloOpacity, const float positionX);
 
-inline void fillSvgSolidColor(NSVGimage* svgImage, const unsigned int fillColor);
+inline void fillSvgSolidColor(const NSVGimage* svgImage, const unsigned int fillColor);
 
 // utils
 inline unsigned int rgbColorToInt(const uint8_t red, const uint8_t green, const uint8_t blue, const uint8_t alpha = 255) {
