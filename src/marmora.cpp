@@ -513,8 +513,8 @@ struct Marmora : SanguineModule {
 			newNoteVoltage = inputs[INPUT_X_SPREAD].getVoltage();
 			float noteCV = (newNoteVoltage / 5.f);
 			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
-			float voltage = (u - 0.5f) * 10.f;
 			if (inputs[INPUT_X_CLOCK].getVoltage() >= 0.5f) {
+				float voltage = (u - 0.5f) * 10.f;
 				if (!bLastGate) {
 					scaleRecorder.NewNote(voltage);
 					bLastGate = true;
@@ -597,13 +597,12 @@ struct Marmora : SanguineModule {
 		int dirtyScalesCount = 0;
 
 		for (int scale = 0; scale < MAX_SCALES; ++scale) {
-			bool bScaleOk = false;
-
 			std::string scaleHeader = string::f("userScale%d", scale);
 			std::string scaleBaseInterval = scaleHeader + "Interval";
 
 			json_t* scaleBaseIntervalJ = json_object_get(rootJ, scaleBaseInterval.c_str());
 			if (scaleBaseIntervalJ) {
+				bool bScaleOk = false;
 				std::string scaleDegrees = scaleHeader + "Degrees";
 				std::string scaleDataVoltages = scaleHeader + "DataVoltages";
 				std::string scaleDataWeights = scaleHeader + "DataWeights";
