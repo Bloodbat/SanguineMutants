@@ -566,7 +566,6 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 			if (module && !module->isBypassed()) {
 				int shapeIndex = 0;
 				NSVGimage* mySvg = svg->handle;
-				NSVGimage* myGradient = svgGradient->handle;
 
 				// Iterate shape linked list
 				for (NSVGshape* shape = mySvg->shapes; shape; shape = shape->next, ++shapeIndex) {
@@ -640,6 +639,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 
 					// Fill shape with external gradient
 					if (svgGradient) {
+						NSVGimage* myGradient = svgGradient->handle;
 						if (myGradient->shapes->fill.type) {
 							switch (myGradient->shapes->fill.type) {
 							case NSVG_PAINT_COLOR: {
@@ -648,7 +648,7 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 							}
 							case NSVG_PAINT_LINEAR_GRADIENT:
 							case NSVG_PAINT_RADIAL_GRADIENT: {
-								if (innerColor && outerColor) {
+								if (outerColor) {
 									nvgFillPaint(args.vg, getPaint(args.vg, &myGradient->shapes->fill, *innerColor, *outerColor));
 								} else {
 									nvgFillColor(args.vg, *innerColor);
