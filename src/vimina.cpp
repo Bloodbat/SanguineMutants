@@ -388,7 +388,7 @@ struct Vimina : SanguineModule {
 				ledState[section][channel] = CHANNEL_GENERATED;
 			}
 		} else {
-			if (triggerExtendCount[section][channel] <= 0) {
+			if (triggerExtendCount[section][channel] == 0) {
 				outputs[OUTPUT_OUT_1A + section].setVoltage(0.f, channel);
 				outputs[OUTPUT_OUT_1B + section].setVoltage(0.f, channel);
 			} else {
