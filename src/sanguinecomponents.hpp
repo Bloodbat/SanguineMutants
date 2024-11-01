@@ -179,8 +179,7 @@ struct SanguineLedNumberDisplay : SanguineBaseSegmentDisplay {
 	SanguineLedNumberDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
-struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {
-	unsigned char haloOpacity = 55;
+struct SanguineMatrixDisplay : SanguineBaseSegmentDisplay {	
 	SanguineMatrixDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered = true);
 };
 
