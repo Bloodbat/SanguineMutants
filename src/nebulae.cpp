@@ -308,10 +308,10 @@ struct Nebulae : SanguineModule {
 				}
 
 				outputSrc.setRates(32000, args.sampleRate);
-				int inLen = 32;
-				int outLen = outputBuffer.capacity();
-				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
-				outputBuffer.endIncr(outLen);
+				int inCount = 32;
+				int outCount = outputBuffer.capacity();
+				outputSrc.process(outputFrames, &inCount, outputBuffer.endData(), &outCount);
+				outputBuffer.endIncr(outCount);
 			}
 
 			bTriggered = false;
