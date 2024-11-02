@@ -110,7 +110,7 @@ struct Marmora : SanguineModule {
 	bool bNoteGate = false;
 	bool bLastGate = false;
 
-	bool bGates[BLOCK_SIZE * 2] = {};
+	bool bGates[kBlockSize * 2] = {};
 
 	DejaVuLockModes dejaVuLockModeT = DEJA_VU_LOCK_ON;
 	DejaVuLockModes dejaVuLockModeX = DEJA_VU_LOCK_ON;
@@ -126,19 +126,19 @@ struct Marmora : SanguineModule {
 	dsp::SchmittTrigger stXReset;
 
 	// Buffers
-	stmlib::GateFlags tClocks[BLOCK_SIZE] = {};
+	stmlib::GateFlags tClocks[kBlockSize] = {};
 	stmlib::GateFlags lastTClock = 0;
-	stmlib::GateFlags xyClocks[BLOCK_SIZE] = {};
+	stmlib::GateFlags xyClocks[kBlockSize] = {};
 	stmlib::GateFlags lastXYClock = 0;
 
-	float rampMaster[BLOCK_SIZE] = {};
-	float rampExternal[BLOCK_SIZE] = {};
-	float rampSlave[2][BLOCK_SIZE] = {};
-	float voltages[BLOCK_SIZE * 4] = {};
+	float rampMaster[kBlockSize] = {};
+	float rampExternal[kBlockSize] = {};
+	float rampSlave[2][kBlockSize] = {};
+	float voltages[kBlockSize * 4] = {};
 	float newNoteVoltage = 0.f;
 
 	// Storage
-	MarmoraScale marmoraScales[MAX_SCALES];
+	MarmoraScale marmoraScales[kMaxScales];
 
 	Marmora() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -202,7 +202,7 @@ struct Marmora : SanguineModule {
 		noteFilter.Init();
 		scaleRecorder.Init();
 
-		for (int scale = 0; scale < MAX_SCALES; ++scale) {
+		for (int scale = 0; scale < kMaxScales; ++scale) {
 			marmoraScales[scale].bScaleDirty = false;
 			marmoraScales[scale].scale.Init();
 			copyScale(preset_scales[scale], marmoraScales[scale].scale);
@@ -253,7 +253,7 @@ struct Marmora : SanguineModule {
 		bMenuTReset = bMenuXReset = false;
 
 		// Process block
-		if (++blockIndex >= BLOCK_SIZE) {
+		if (++blockIndex >= kBlockSize) {
 			blockIndex = 0;
 			stepBlock();
 		}
@@ -456,7 +456,7 @@ struct Marmora : SanguineModule {
 		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
 		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
 
-		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, BLOCK_SIZE);
+		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, kBlockSize);
 
 		// Set up XYGenerator
 		marbles::ClockSource xClockSource = static_cast<marbles::ClockSource>(xClockSourceInternal);
@@ -507,7 +507,7 @@ struct Marmora : SanguineModule {
 			y.ratio = y_divider_ratios[yDividerIndex];
 			y.scale_index = xScale;
 
-			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, BLOCK_SIZE);
+			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, kBlockSize);
 		} else {
 			/* Was
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
@@ -546,14 +546,14 @@ struct Marmora : SanguineModule {
 
 		// Set scales
 		if (!bModuleAdded) {
-			for (int scale = 0; scale < MAX_SCALES; ++scale) {
+			for (int scale = 0; scale < kMaxScales; ++scale) {
 				xyGenerator.LoadScale(scale, preset_scales[scale]);
 				copyScale(preset_scales[scale], marmoraScales[scale].scale);
 				marmoraScales[scale].bScaleDirty = false;
 			}
 			bModuleAdded = true;
 		} else {
-			for (int scale = 0; scale < MAX_SCALES; ++scale) {
+			for (int scale = 0; scale < kMaxScales; ++scale) {
 				xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 			}
 		}
@@ -564,7 +564,7 @@ struct Marmora : SanguineModule {
 
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
 
-		for (int scale = 0; scale < MAX_SCALES; ++scale) {
+		for (int scale = 0; scale < kMaxScales; ++scale) {
 			if (marmoraScales[scale].bScaleDirty) {
 				json_t* scaleDataVoltagesJ = json_array();
 				json_t* scaleDataWeightsJ = json_array();
@@ -598,7 +598,7 @@ struct Marmora : SanguineModule {
 
 		int dirtyScalesCount = 0;
 
-		for (int scale = 0; scale < MAX_SCALES; ++scale) {
+		for (int scale = 0; scale < kMaxScales; ++scale) {
 			std::string scaleHeader = string::f("userScale%d", scale);
 			std::string scaleBaseInterval = scaleHeader + "Interval";
 
@@ -643,7 +643,7 @@ struct Marmora : SanguineModule {
 			}
 		} // for
 		if (dirtyScalesCount > 0) {
-			for (int scale = 0; scale < MAX_SCALES; ++scale) {
+			for (int scale = 0; scale < kMaxScales; ++scale) {
 				if (marmoraScales[scale].bScaleDirty) {
 					xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 				}

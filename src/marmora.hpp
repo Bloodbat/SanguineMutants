@@ -8,11 +8,11 @@ enum DejaVuLockModes {
     DEJA_VU_SUPER_LOCK
 };
 
-static const int BLOCK_SIZE = 5;
-static const int MAX_T_MODES = 7;
-static const int MAX_SCALES = 6;
+static const int kBlockSize = 5;
+static const int kMaxTModes = 7;
+static const int kMaxScales = 6;
 
-static const marbles::Scale preset_scales[MAX_SCALES] = {
+static const marbles::Scale preset_scales[kMaxScales] = {
     // C major
     {
         1.0f,
@@ -143,7 +143,7 @@ static const marbles::Ratio y_divider_ratios[] = {
     { 1, 1 },
 };
 
-static const LightModes tModeLights[MAX_T_MODES][2]{
+static const LightModes tModeLights[kMaxTModes][2]{
     { LIGHT_ON,  LIGHT_OFF }, // T_GENERATOR_MODEL_COMPLEMENTARY_BERNOULLI
     { LIGHT_ON, LIGHT_ON }, // T_GENERATOR_MODEL_CLUSTERS
     { LIGHT_OFF, LIGHT_ON }, // T_GENERATOR_MODEL_DRUMS
@@ -153,7 +153,7 @@ static const LightModes tModeLights[MAX_T_MODES][2]{
     { LIGHT_OFF, LIGHT_BLINK_FAST }, // T_GENERATOR_MODEL_MARKOV
 };
 
-static const LightModes scaleLights[MAX_SCALES][2]{
+static const LightModes scaleLights[kMaxScales][2]{
     { LIGHT_BLINK_SLOW,  LIGHT_OFF }, // Major
     { LIGHT_BLINK_SLOW, LIGHT_BLINK_SLOW }, // Minor
     { LIGHT_OFF, LIGHT_BLINK_SLOW }, // Pentatonic
