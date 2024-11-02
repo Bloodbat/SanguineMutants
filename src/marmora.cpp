@@ -95,13 +95,13 @@ struct Marmora : SanguineModule {
 	marbles::XYGenerator xyGenerator;
 	marbles::NoteFilter noteFilter;
 	marbles::ScaleRecorder scaleRecorder;
+	marbles::ClockSource xClockSourceInternal = marbles::CLOCK_SOURCE_INTERNAL_T1_T2_T3;
 
-	//TODO: preinit these!
-	bool bDejaVuTEnabled;
-	bool bDejaVuXEnabled;
+	bool bDejaVuTEnabled = false;
+	bool bDejaVuXEnabled = false;
 	bool bXClockSourceExternal = false;
-	bool bTReset;
-	bool bXReset;
+	bool bTReset = false;
+	bool bXReset = false;
 	bool bModuleAdded = false;
 	bool bMenuTReset = false;
 	bool bMenuXReset = false;
@@ -116,8 +116,7 @@ struct Marmora : SanguineModule {
 	DejaVuLockModes dejaVuLockModeX = DEJA_VU_LOCK_ON;
 
 	int xScale = 0;
-	int yDividerIndex;
-	int xClockSourceInternal;
+	int yDividerIndex = 4;
 	int blockIndex = 0;
 
 	const int kLightDivider = 64;
@@ -214,8 +213,6 @@ struct Marmora : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		// TODO: Add reseeding! (From the manual).
-
 		// Clocks
 		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTGate);
@@ -243,7 +240,7 @@ struct Marmora : SanguineModule {
 		bDejaVuXEnabled = params[PARAM_DEJA_VU_X].getValue();
 
 		xScale = params[PARAM_SCALE].getValue();
-		xClockSourceInternal = params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue();
+		xClockSourceInternal = static_cast<marbles::ClockSource>(params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue());
 		bXClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
 
 		bTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage()) || bMenuTReset;
