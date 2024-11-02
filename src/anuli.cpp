@@ -188,7 +188,7 @@ struct Anuli : SanguineModule {
 			bDisastrousPeace = bDisastrousPeace || bEasterEgg[channel];
 			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
 
-			// TODO
+			// TODO:
 			// "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
 			// Get input
 			if (!inputBuffer[channel].full()) {
@@ -266,7 +266,7 @@ struct Anuli : SanguineModule {
 				performanceState.internal_strum = bInternalStrum;
 				performanceState.internal_note = bInternalNote;
 
-				// TODO
+				// TODO:
 				// "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
 				performanceState.strum = bStrum[channel] && !bLastStrum[channel];
 				bLastStrum[channel] = bStrum[channel];

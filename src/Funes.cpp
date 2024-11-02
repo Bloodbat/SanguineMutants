@@ -523,7 +523,7 @@ struct Funes : SanguineModule {
 
 		if (!pathC) {
 			// Fail silently
-			// TODO!!! Maybe not fail silently=
+			// TODO: Maybe don't fail silently
 			return;
 		}
 
@@ -537,7 +537,7 @@ struct Funes : SanguineModule {
 
 			if (pathC == nullptr) {
 				// Fail silently
-				// TODO!!! Maybe not fail silently=
+				// TODO: Maybe don't fail silently=
 				return;
 			}
 

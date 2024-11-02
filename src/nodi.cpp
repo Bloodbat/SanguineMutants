@@ -346,7 +346,7 @@ struct Nodi : SanguineModule {
 				// Pitch transposition
 				int16_t transposition = 0;
 
-				// TODO!!! Fix disabled LFO: disabled in hardware and prone to crashing Rack, probably needs firmware work.
+				// TODO: Fix disabled LFO: disabled in hardware and prone to crashing Rack, probably needs firmware work.
 				//transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ? -(36 << 7) : 0;
 				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
 				osc[channel].set_pitch(pitch + transposition);

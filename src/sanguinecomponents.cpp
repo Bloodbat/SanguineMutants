@@ -211,7 +211,7 @@ void SanguineBaseSegmentDisplay::drawLayer(const DrawArgs& args, int layer) {
 
 			std::string displayValue = "";
 
-			// TODO!!! Ensure we draw only characterCount chars.
+			// TODO: Ensure we draw only characterCount chars.
 
 			if (module && !module->isBypassed()) {
 				switch (displayType)
