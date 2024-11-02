@@ -214,7 +214,7 @@ struct Marmora : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		// TODO!! Add reseeding! (From the manual).
+		// TODO: Add reseeding! (From the manual).
 
 		// Clocks
 		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
@@ -471,10 +471,10 @@ struct Marmora : SanguineModule {
 			marbles::GroupSettings x;
 			x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
 			x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
-			// TODO Fix the scaling
+			// TODO: Fix the scaling
 			//  I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong: custom scales seem to behave nicely when NOT doing that...) -Bat
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
-			// TODO WTF is u? (A leftover from marbles.cc -Bat Ed.)
+			// TODO: WTF is u? (A leftover from marbles.cc -Bat Ed.)
 			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
 			x.register_mode = params[PARAM_EXTERNAL].getValue();
 			x.register_value = u;

@@ -181,7 +181,7 @@ struct Mortuus : SanguineModule {
 				renderBlock = (renderBlock + 1) % kNumBlocks;
 			}
 
-			// TODO! More PLO testing!
+			// TODO: More PLO testing!
 			uint32_t gateTriggers = 0;
 			gateTriggers |= inputs[INPUT_GATE_1].getVoltage() >= 0.7f ? 1 : 0;
 			gateTriggers |= inputs[INPUT_GATE_2].getVoltage() >= 0.7f ? 2 : 0;
@@ -226,7 +226,7 @@ struct Mortuus : SanguineModule {
 			dsp::Frame<2> frame = outputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
-			// TODO Check the output values against an actual device.
+			// TODO: Check the output values against an actual device.
 			outputs[OUTPUT_OUT_1].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
 			outputs[OUTPUT_OUT_2].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
