@@ -863,6 +863,10 @@ struct MarmoraWidget : SanguineModuleWidget {
 			module->bMenuXReset = true;
 			}));
 
+		menu->addChild(createMenuItem("Reseed rng", "", [=]() {
+			module->randomGenerator.GetWord();
+			}));
+
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createIndexSubmenuItem("Scale", marmoraScaleLabels,
