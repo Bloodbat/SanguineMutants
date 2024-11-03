@@ -41,5 +41,3 @@ struct SaturatorFloat {
 		return saturation(x);
 	}
 };
-
-const rack::simd::float_4 SaturatorFloat_4::limit = 12.f;
