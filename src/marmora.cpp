@@ -913,7 +913,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 			module->randomGenerator.GetWord();
 			}));
 
-		menu->addChild(createSubmenuItem("User seed (1 - 4294967295)", "",
+		menu->addChild(createSubmenuItem("User seed (Min: 1, Max: 4294967295, ENTER to set)", "",
 			[=](Menu* menu) {
 				menu->addChild(new TextMenuItem(&module->userSeed));
 			}
