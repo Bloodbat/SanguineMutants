@@ -6,6 +6,7 @@
 #include "marbles/note_filter.h"
 #include "marbles/scale_recorder.h"
 #include "sanguinehelpers.hpp"
+#include <string>
 
 #include "marmora.hpp"
 
@@ -118,6 +119,8 @@ struct Marmora : SanguineModule {
 	int xScale = 0;
 	int yDividerIndex = 4;
 	int blockIndex = 0;
+	uint32_t userSeed = 1;
+	uint32_t lastUserSeed = 1;
 
 	const int kLightDivider = 64;
 
@@ -197,7 +200,7 @@ struct Marmora : SanguineModule {
 		memset(&randomStream, 0, sizeof(marbles::RandomStream));
 		memset(&noteFilter, 0, sizeof(marbles::NoteFilter));
 
-		randomGenerator.Init(1);
+		randomGenerator.Init(userSeed);
 		randomStream.Init(&randomGenerator);
 		noteFilter.Init();
 		scaleRecorder.Init();
@@ -213,6 +216,11 @@ struct Marmora : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		if (lastUserSeed != userSeed) {
+			randomGenerator.Init(userSeed);
+			lastUserSeed = userSeed;
+		}
+
 		// Clocks
 		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTGate);
@@ -563,6 +571,7 @@ struct Marmora : SanguineModule {
 		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
+		json_object_set_new(rootJ, "userSeed", json_integer(userSeed));
 
 		for (int scale = 0; scale < kMaxScales; ++scale) {
 			if (marmoraScales[scale].bScaleDirty) {
@@ -590,6 +599,13 @@ struct Marmora : SanguineModule {
 
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
+
+		json_t* userSeedJ = json_object_get(rootJ, "userSeed");
+		if (userSeedJ) {
+			userSeed = json_integer_value(userSeedJ);
+			randomGenerator.Init(userSeed);
+			lastUserSeed = userSeed;
+		}
 
 		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
 		if (y_divider_indexJ) {
@@ -816,6 +832,39 @@ struct MarmoraWidget : SanguineModuleWidget {
 		addChild(mutantsLogo);
 	}
 
+	struct TextMenuItem : ui::TextField {
+		uint32_t* value;
+
+		TextMenuItem(uint32_t* TheValue) {
+			value = TheValue;
+			multiline = false;
+			box.size = Vec(150, 20);
+			text = string::f("%d", *value);
+		}
+
+		void step() override {
+			// Keep selected
+			APP->event->setSelectedWidget(this);
+			TextField::step();
+		}
+
+		void onSelectKey(const SelectKeyEvent& e) override {
+			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+				uint32_t newValue = std::stoi(text);
+				if (newValue > 0 && newValue <= UINT32_MAX) {
+					*value = newValue;
+				}
+
+				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
+				overlay->requestDelete();
+				e.consume(this);
+			}
+
+			if (!e.getTarget())
+				TextField::onSelectKey(e);
+		}
+	};
+
 	void appendContextMenu(Menu* menu) override {
 		SanguineModuleWidget::appendContextMenu(menu);
 
@@ -863,6 +912,12 @@ struct MarmoraWidget : SanguineModuleWidget {
 		menu->addChild(createMenuItem("Reseed rng", "", [=]() {
 			module->randomGenerator.GetWord();
 			}));
+
+		menu->addChild(createSubmenuItem("User seed (1 - 4294967295)", "",
+			[=](Menu* menu) {
+				menu->addChild(new TextMenuItem(&module->userSeed));
+			}
+		));
 
 		menu->addChild(new MenuSeparator);
 
