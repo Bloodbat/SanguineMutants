@@ -2,7 +2,9 @@
 
 A collection based on Mutable Instruments modules and their variants.
 
-You can find the Mutants manual [here](https://raw.githubusercontent.com/Bloodbat/SanguineModulesManuals/main/mutants_manual.pdf)
+You can find the Mutants manual [here](https://raw.githubusercontent.com/Bloodbat/SanguineModulesManuals/main/mutants_manual.pdf).
+
+You can find the Nightly builds [here](https://github.com/Bloodbat/SanguineMutants/releases/tag/Nightly).
 
 ## Modules
 
