@@ -8,6 +8,10 @@
 
 - Ability to reset Marmora generators from the context menu.
 
+- Ability to reseed Marmora random generator from the context menu.
+
+- Ability to set user defined Marmora random generator seed (state) from the context menu.
+
 
 # 2.5.2
 
