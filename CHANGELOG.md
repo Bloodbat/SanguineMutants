@@ -4,6 +4,8 @@
 
 - Funes LPG lights.
 
+- Velamina saturator threshold.
+
 ## Additions
 
 - Ability to reset Marmora generators from the context menu.

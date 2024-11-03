@@ -4,6 +4,8 @@
 #include "sanguinehelpers.hpp"
 using simd::float_4;
 
+const float_4 SaturatorFloat_4::limit = 10.f;
+
 struct Velamina : SanguineModule {
 	enum ParamIds {
 		PARAM_GAIN_1,
