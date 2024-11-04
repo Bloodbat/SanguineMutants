@@ -310,19 +310,17 @@ struct Etesia : SanguineModule {
 			}
 
 			// Convert output buffer
-			{
-				dsp::Frame<2> outputFrames[32];
-				for (int frame = 0; frame < 32; ++frame) {
-					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
-					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
-				}
-
-				outputSrc.setRates(32000, args.sampleRate);
-				int inCount = 32;
-				int outCount = outputBuffer.capacity();
-				outputSrc.process(outputFrames, &inCount, outputBuffer.endData(), &outCount);
-				outputBuffer.endIncr(outCount);
+			dsp::Frame<2> outputFrames[32];
+			for (int frame = 0; frame < 32; ++frame) {
+				outputFrames[frame].samples[0] = output[frame].l / 32768.f;
+				outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 			}
+
+			outputSrc.setRates(32000, args.sampleRate);
+			int inCount = 32;
+			int outCount = outputBuffer.capacity();
+			outputSrc.process(outputFrames, &inCount, outputBuffer.endData(), &outCount);
+			outputBuffer.endIncr(outCount);
 
 			bTriggered = false;
 		}
