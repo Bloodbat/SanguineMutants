@@ -503,7 +503,7 @@ struct Mortuus : SanguineModule {
 				brightnessVal = static_cast<int32_t>(brightness[channel]) * 409 >> 8;
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
-				clamp(brightnessVal, 0, 255);
+				brightnessVal = clamp(brightnessVal, 0, 255);
 				buttonBrightness[channel] = brightnessVal;
 				break;
 			case FUNCTION_TURING_MACHINE:
@@ -698,7 +698,7 @@ struct Mortuus : SanguineModule {
 			for (size_t blockNum = 0; blockNum < size; ++blockNum) {
 				// From calibration_data.h, shifting signed to unsigned values.
 				int32_t shiftedValue = 32767 + static_cast<int32_t>(output[blockNum]);
-				clamp(shiftedValue, 0, 65535);
+				shiftedValue = clamp(shiftedValue, 0, 65535);
 				block->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
