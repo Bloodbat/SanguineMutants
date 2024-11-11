@@ -196,10 +196,6 @@ struct Marmora : SanguineModule {
 
 		lightsDivider.setDivision(kLightDivider);
 
-		memset(&randomGenerator, 0, sizeof(marbles::RandomGenerator));
-		memset(&randomStream, 0, sizeof(marbles::RandomStream));
-		memset(&noteFilter, 0, sizeof(marbles::NoteFilter));
-
 		randomGenerator.Init(userSeed);
 		randomStream.Init(&randomGenerator);
 		noteFilter.Init();
