@@ -467,7 +467,7 @@ struct Marmora : SanguineModule {
 		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, kBlockSize);
 
 		// Set up XYGenerator
-		marbles::ClockSource xClockSource = static_cast<marbles::ClockSource>(xClockSourceInternal);
+		marbles::ClockSource xClockSource = xClockSourceInternal;
 		if (bXClockSourceExternal) {
 			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
 		}
