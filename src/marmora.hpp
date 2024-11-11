@@ -14,7 +14,7 @@ static const int kMaxScales = 6;
 static const int kLightColorPins = 2;
 static const int kMaxClockSourceTypes = 4;
 
-static const marbles::Scale preset_scales[kMaxScales] = {
+static const marbles::Scale presetScales[kMaxScales] = {
     // C major
     {
         1.0f,

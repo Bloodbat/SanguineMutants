@@ -208,7 +208,7 @@ struct Marmora : SanguineModule {
 		for (int scale = 0; scale < kMaxScales; ++scale) {
 			marmoraScales[scale].bScaleDirty = false;
 			marmoraScales[scale].scale.Init();
-			copyScale(preset_scales[scale], marmoraScales[scale].scale);
+			copyScale(presetScales[scale], marmoraScales[scale].scale);
 		}
 
 		onSampleRateChange();
@@ -555,8 +555,8 @@ struct Marmora : SanguineModule {
 		// Set scales
 		if (!bModuleAdded) {
 			for (int scale = 0; scale < kMaxScales; ++scale) {
-				xyGenerator.LoadScale(scale, preset_scales[scale]);
-				copyScale(preset_scales[scale], marmoraScales[scale].scale);
+				xyGenerator.LoadScale(scale, presetScales[scale]);
+				copyScale(presetScales[scale], marmoraScales[scale].scale);
 				marmoraScales[scale].bScaleDirty = false;
 			}
 			bModuleAdded = true;
@@ -688,7 +688,7 @@ struct Marmora : SanguineModule {
 	void resetScale() {
 		int currentScale = params[PARAM_SCALE].getValue();
 
-		copyScale(preset_scales[currentScale], marmoraScales[currentScale].scale);
+		copyScale(presetScales[currentScale], marmoraScales[currentScale].scale);
 		marmoraScales[currentScale].bScaleDirty = false;
 		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 	}
