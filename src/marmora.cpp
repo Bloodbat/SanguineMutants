@@ -156,7 +156,7 @@ struct Marmora : SanguineModule {
 			} else {
 				return "";
 			}
-			return"";
+			return "";
 		}
 	};
 
