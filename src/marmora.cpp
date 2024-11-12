@@ -143,6 +143,23 @@ struct Marmora : SanguineModule {
 	// Storage
 	MarmoraScale marmoraScales[kMaxScales];
 
+	struct LengthParam : ParamQuantity {
+		std::string getDisplayValueString() override {
+			if (module != nullptr) {
+				if (paramId == PARAM_DEJA_VU_LENGTH) {
+					float dejaVuLengthIndex = getValue() * (LENGTHOF(marmoraLoopLength) - 1);
+					int dejaVuLength = marmoraLoopLength[static_cast<int>(roundf(dejaVuLengthIndex))];
+					return (string::f("%d", dejaVuLength));
+				} else {
+					assert(false);
+				}
+			} else {
+				return "";
+			}
+			return"";
+		}
+	};
+
 	Marmora() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -153,7 +170,7 @@ struct Marmora : SanguineModule {
 		configParam(PARAM_X_SPREAD, 0.f, 1.f, 0.5f, "Probability distribution", "%", 0.f, 100.f);
 		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "T mode", marmoraTModeLabels);
 		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmoraXModeLabels);
-		configParam(PARAM_DEJA_VU_LENGTH, 0.f, 1.f, 1.f, "Loop length", "", 0.f, 100.f);
+		configParam<LengthParam>(PARAM_DEJA_VU_LENGTH, 0.f, 1.f, 1.f, "Loop length");
 		configParam(PARAM_T_BIAS, 0.f, 1.f, 0.5f, "Gate bias", "%", 0.f, 100.f);
 		configParam(PARAM_X_BIAS, 0.f, 1.f, 0.5f, "Distribution bias", "%", 0.f, 100.f);
 		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "Clock range mode", marmoraTRangeLabels);
