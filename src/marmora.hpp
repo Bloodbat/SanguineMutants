@@ -205,7 +205,7 @@ static const std::vector<std::string> marmoraScaleLabels = {
     "Pentatonic",
     "Gamelan (Pelog)",
     "Raag Bhairav That",
-    "Raag Shri",
+    "Raag Shri"
 };
 
 static const std::vector<std::string> marmoraInternalClockLabels = {
