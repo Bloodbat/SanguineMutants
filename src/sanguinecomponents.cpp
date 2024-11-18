@@ -917,14 +917,18 @@ void SanguineModuleWidget::appendContextMenu(Menu* menu) {
 
 	menu->addChild(createSubmenuItem("Sanguine Modules themes", "",
 		[=](Menu* menu) {
-			menu->addChild(createIndexSubmenuItem("Default (applies across modules)", faceplateMenuLabels,
-				[=]() { return static_cast<int>(defaultTheme); },
-				[=](int i) { setDefaultTheme(i); sanguineModule->setModuleTheme(i); }
-				));
-
-			menu->addChild(createIndexSubmenuItem("Module (applies to current module)", faceplateMenuLabels,
+			menu->addChild(createMenuLabel("Applies to current module"));
+			menu->addChild(createIndexSubmenuItem("Module", faceplateMenuLabels,
 				[=]() { return static_cast<int>(sanguineModule->currentTheme); },
 				[=](int i) { sanguineModule->setModuleTheme(i); }
+			));
+
+			menu->addChild(new MenuSeparator);
+
+			menu->addChild(createMenuLabel("Applies across Sanguine modules"));
+			menu->addChild(createIndexSubmenuItem("Default", faceplateMenuLabels,
+				[=]() { return static_cast<int>(defaultTheme); },
+				[=](int i) { setDefaultTheme(i); sanguineModule->setModuleTheme(i); }
 			));
 		}
 	));
