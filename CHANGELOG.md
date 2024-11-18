@@ -22,6 +22,8 @@
 
 - Funes: reorganize context menu.
 
+- Marmora: reorganize menu.
+
 
 # 2.5.2
 
