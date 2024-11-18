@@ -885,66 +885,89 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("T mode", marmoraTModeLabels,
-			[=]() {return module->params[Marmora::PARAM_T_MODE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_T_MODE].setValue(i); }
-		));
-
-		menu->addChild(createIndexSubmenuItem("T range", marmoraTRangeLabels,
-			[=]() {return module->params[Marmora::PARAM_T_RANGE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_T_RANGE].setValue(i); }
-		));
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createIndexSubmenuItem("X mode", marmoraXModeLabels,
-			[=]() {return module->params[Marmora::PARAM_X_MODE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_X_MODE].setValue(i); }
-		));
-
-		menu->addChild(createIndexSubmenuItem("X range", marmoraXRangeLabels,
-			[=]() {return module->params[Marmora::PARAM_X_RANGE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_X_RANGE].setValue(i); }
-		));
-
-		menu->addChild(createIndexSubmenuItem("Internal X clock source", marmoraInternalClockLabels,
-			[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
-		));
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createMenuItem("Reset/reseed t generator", "", [=]() {
-			module->bMenuTReset = true;
-			}));
-
-		menu->addChild(createMenuItem("Reset X generator", "", [=]() {
-			module->bMenuXReset = true;
-			}));
-
-		menu->addChild(createMenuItem("Reseed rng", "", [=]() {
-			module->randomGenerator.GetWord();
-			}));
-
-		menu->addChild(createSubmenuItem("User seed (Min: 1, Max: 4294967295, ENTER to set)", "",
+		menu->addChild(createSubmenuItem("t generator", "",
 			[=](Menu* menu) {
-				menu->addChild(new TextMenuItem(&module->userSeed));
+				menu->addChild(createIndexSubmenuItem("Mode", marmoraTModeLabels,
+					[=]() {return module->params[Marmora::PARAM_T_MODE].getValue(); },
+					[=](int i) {module->params[Marmora::PARAM_T_MODE].setValue(i); }
+					));
+
+				menu->addChild(createIndexSubmenuItem("Range", marmoraTRangeLabels,
+					[=]() {return module->params[Marmora::PARAM_T_RANGE].getValue(); },
+					[=](int i) {module->params[Marmora::PARAM_T_RANGE].setValue(i); }
+				));
+
+				menu->addChild(createMenuItem("Reset/reseed", "", [=]() {
+					module->bMenuTReset = true;
+					}));
+
 			}
 		));
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Scale", marmoraScaleLabels,
-			[=]() {return module->params[Marmora::PARAM_SCALE].getValue(); },
-			[=](int i) {module->params[Marmora::PARAM_SCALE].setValue(i); }
+		menu->addChild(createSubmenuItem("X generator", "",
+			[=](Menu* menu) {
+				menu->addChild(createIndexSubmenuItem("Mode", marmoraXModeLabels,
+					[=]() {return module->params[Marmora::PARAM_X_MODE].getValue(); },
+					[=](int i) {module->params[Marmora::PARAM_X_MODE].setValue(i); }
+					));
+
+				menu->addChild(createIndexSubmenuItem("Range", marmoraXRangeLabels,
+					[=]() {return module->params[Marmora::PARAM_X_RANGE].getValue(); },
+					[=](int i) {module->params[Marmora::PARAM_X_RANGE].setValue(i); }
+				));
+
+				menu->addChild(createIndexSubmenuItem("Internal clock source", marmoraInternalClockLabels,
+					[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue(); },
+					[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
+				));
+
+				menu->addChild(createMenuItem("Reset", "", [=]() {
+					module->bMenuXReset = true;
+					}));
+			}
 		));
 
-		menu->addChild(createCheckMenuItem("Scale edit mode", "",
-			[=]() {return module->bScaleEditMode; },
-			[=]() {module->toggleScaleEdit(); }));
+		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createMenuItem("Reset current scale", "",
-			[=]() {module->resetScale(); }
+		menu->addChild(createSubmenuItem("Module seed", "",
+			[=](Menu* menu) {
+				menu->addChild(createMenuItem("Reseed rng", "", [=]() {
+					module->randomGenerator.GetWord();
+					}));
+
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createMenuLabel("Min: 1, Max: 4294967295, ENTER to set"));
+
+				menu->addChild(createSubmenuItem("User", "",
+					[=](Menu* menu) {
+						menu->addChild(new TextMenuItem(&module->userSeed));
+					}
+				));
+			}
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Scales", "",
+			[=](Menu* menu) {
+				menu->addChild(createIndexSubmenuItem("Select active", marmoraScaleLabels,
+					[=]() {return module->params[Marmora::PARAM_SCALE].getValue(); },
+					[=](int i) {module->params[Marmora::PARAM_SCALE].setValue(i); }
+					));
+
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createCheckMenuItem("Edit current", "",
+					[=]() {return module->bScaleEditMode; },
+					[=]() {module->toggleScaleEdit(); }));
+
+				menu->addChild(createMenuItem("Reset current", "",
+					[=]() {module->resetScale(); }
+				));
+			}
 		));
 	}
 };

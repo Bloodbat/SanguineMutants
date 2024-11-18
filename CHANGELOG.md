@@ -14,6 +14,14 @@
 
 - Ability to set user defined Marmora random generator seed (state) from the context menu.
 
+- Marmora shows selected loop length in the knob's tooltip.
+
+## Changes
+
+- Themes: group options under a submenu.
+
+- Marmora: reorganize menu.
+
 
 # 2.5.2
 
