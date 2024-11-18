@@ -135,6 +135,12 @@ struct Sanguine3PSRed : Rogan {
 	Sanguine3PSRed();
 };
 
+// Switches
+
+struct SanguineBlackSwitch : app::SvgSwitch {
+	SanguineBlackSwitch();
+};
+
 // Displays
 
 enum DisplayType {
