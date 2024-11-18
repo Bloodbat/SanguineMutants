@@ -16,6 +16,12 @@
 
 - Marmora shows selected loop length in the knob's tooltip.
 
+## Changes
+
+- Themes: group options under a submenu.
+
+- Funes: reorganize context menu.
+
 
 # 2.5.2
 

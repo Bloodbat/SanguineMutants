@@ -651,32 +651,36 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("New synthesis models", "", [=](Menu* menu) {
-			for (int i = 0; i < 8; ++i) {
-				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
-					[=]() { return module->patch.engine == i; },
-					[=]() {	module->setEngine(i); }
-				));
-			}
-			}));
+		menu->addChild(createSubmenuItem("Synthesis model", "",
+			[=](Menu* menu) {
+				menu->addChild(createSubmenuItem("New", "", [=](Menu* menu) {
+					for (int i = 0; i < 8; ++i) {
+						menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
+							[=]() { return module->patch.engine == i; },
+							[=]() {	module->setEngine(i); }
+						));
+					}
+					}));
 
-		menu->addChild(createSubmenuItem("Pitched models", "", [=](Menu* menu) {
-			for (int i = 8; i < 16; ++i) {
-				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
-					[=]() { return module->patch.engine == i; },
-					[=]() {	module->setEngine(i); }
-				));
-			}
-			}));
+				menu->addChild(createSubmenuItem("Pitched", "", [=](Menu* menu) {
+					for (int i = 8; i < 16; ++i) {
+						menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
+							[=]() { return module->patch.engine == i; },
+							[=]() {	module->setEngine(i); }
+						));
+					}
+					}));
 
-		menu->addChild(createSubmenuItem("Noise/percussive models", "", [=](Menu* menu) {
-			for (int i = 16; i < 24; ++i) {
-				menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
-					[=]() { return module->patch.engine == i; },
-					[=]() { module->setEngine(i); }
-				));
+				menu->addChild(createSubmenuItem("Noise/percussive", "", [=](Menu* menu) {
+					for (int i = 16; i < 24; ++i) {
+						menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
+							[=]() { return module->patch.engine == i; },
+							[=]() { module->setEngine(i); }
+						));
+					}
+					}));
 			}
-			}));
+		));
 
 		menu->addChild(new MenuSeparator);
 
@@ -687,49 +691,58 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
-			[=]() {return module->bDisplayModulatedModel; },
-			[=]() {module->toggleModulatedDisplay(); }));
+		menu->addChild(createSubmenuItem("Options", "",
+			[=](Menu* menu) {
+				menu->addChild(createCheckMenuItem("Display follows modulated Model", "",
+					[=]() {return module->bDisplayModulatedModel; },
+					[=]() {module->toggleModulatedDisplay(); }));
 
-		menu->addChild(new MenuSeparator);
+				std::vector<std::string> availableChannels;
+				for (int i = 0; i < module->channelCount; ++i) {
+					availableChannels.push_back(channelNumbers[i]);
+				}
+				menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+					[=]() {return module->displayChannel; },
+					[=](int i) {module->displayChannel = i; }
+				));
 
-		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; ++i) {
-			availableChannels.push_back(channelNumbers[i]);
-		}
-		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
-			[=]() {return module->displayChannel; },
-			[=](int i) {module->displayChannel = i; }
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createCheckMenuItem("C0 model modulation (monophonic)", "",
+					[=]() {return module->bNotesModelSelection; },
+					[=]() {module->toggleNotesModelSelection(); }));
+
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+			}
 		));
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createCheckMenuItem("C0 model modulation (monophonic)", "",
-			[=]() {return module->bNotesModelSelection; },
-			[=]() {module->toggleNotesModelSelection(); }));
+		menu->addChild(createSubmenuItem("Custom data", "",
+			[=](Menu* menu) {
 
-		menu->addChild(new MenuSeparator);
+				int engineNum = module->patch.engine;
+				if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
+					menu->addChild(createMenuItem("Load...", "", [=]() {
+						module->customDataShowLoadDialog();
+						}));
 
-		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+					menu->addChild(createMenuItem("Reset to factory default", "", [=]() {
+						module->customDataReset();
+						}));
+				} else {
+					menu->addChild(createMenuLabel("6 OP-FMx, WAVETRRN & WAVETABL only"));
+				}
 
-		menu->addChild(new MenuSeparator);
+				menu->addChild(new MenuSeparator);
 
-		menu->addChild(createMenuItem("Open custom data editors", "", [=]() {
-			system::openBrowser("https://bloodbat.github.io/Funes-Editors/");
-			}));
-
-		int engineNum = module->patch.engine;
-		if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
-			menu->addChild(new MenuSeparator);
-
-			menu->addChild(createMenuItem("Load custom data", "",
-				[=]() {module->customDataShowLoadDialog(); }
-			));
-
-			menu->addChild(createMenuItem("Reset to factory data", "",
-				[=]() {module->customDataReset(); }
-			));
-		}
+				menu->addChild(createMenuItem("Open editors in web browser...", "", [=]() {
+					system::openBrowser("https://bloodbat.github.io/Funes-Editors/");
+					}));
+			}
+		));
 	}
 };
 
