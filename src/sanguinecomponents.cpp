@@ -169,6 +169,14 @@ Sanguine3PSRed::Sanguine3PSRed() {
 	fg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/Sanguine3PSRed_fg.svg")));
 }
 
+// Switches
+
+SanguineBlackSwitch::SanguineBlackSwitch() {
+	addFrame(Svg::load(asset::plugin(pluginInstance, "res/components/SanguineSwitchBlack_0.svg")));
+	addFrame(Svg::load(asset::plugin(pluginInstance, "res/components/SanguineSwitchBlack_1.svg")));
+	addFrame(Svg::load(asset::plugin(pluginInstance, "res/components/SanguineSwitchBlack_2.svg")));
+}
+
 // Displays
 
 SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule) {
