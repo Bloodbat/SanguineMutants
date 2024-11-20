@@ -24,6 +24,8 @@
 
 - Marmora: reorganize menu.
 
+- Marmora: faceplate label tweaks.
+
 
 # 2.5.2
 
