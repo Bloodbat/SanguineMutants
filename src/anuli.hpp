@@ -29,6 +29,29 @@ static const std::vector<std::string> anuliMenuLabels = {
     "Disastrous Peace"
 };
 
+static const int kAnuliMaxModes = 7;
+
+static const LightModes anuliModeLights[kAnuliMaxModes][3] = {
+    { LIGHT_OFF, LIGHT_ON, LIGHT_OFF },
+    { LIGHT_ON, LIGHT_ON, LIGHT_OFF },
+    { LIGHT_ON, LIGHT_OFF, LIGHT_OFF },
+    { LIGHT_OFF, LIGHT_BLINK, LIGHT_OFF },
+    { LIGHT_BLINK, LIGHT_BLINK, LIGHT_OFF },
+    { LIGHT_BLINK, LIGHT_OFF, LIGHT_OFF },
+    { LIGHT_OFF, LIGHT_OFF, LIGHT_BLINK }
+};
+
+static const int kAnuliMaxFxModes = 6;
+
+static const LightModes anuliFxModeLights[kAnuliMaxFxModes][2] = {
+    { LIGHT_ON, LIGHT_OFF },
+    { LIGHT_ON, LIGHT_ON },
+    { LIGHT_OFF, LIGHT_ON },
+    { LIGHT_BLINK, LIGHT_OFF },
+    { LIGHT_BLINK, LIGHT_BLINK },
+    { LIGHT_OFF, LIGHT_BLINK }
+};
+
 static const std::vector<float> anuliFrequencyOffsets = {
     0.f,
     17.5f

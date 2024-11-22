@@ -1,5 +1,3 @@
-// TODO: clear stash if it's no longer useful!
-
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "rings/dsp/part.h"
@@ -7,6 +5,7 @@
 #include "rings/dsp/string_synth_part.h"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
+#include "array"
 
 #include "anuli.hpp"
 
@@ -84,6 +83,8 @@ struct Anuli : SanguineModule {
 	int strummingFlagInterval = 0;
 
 	int displayChannel = 0;
+
+	std::array<int, PORT_MAX_CHANNELS> channelModes;
 
 	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS];
 	rings::FxType fxModel = rings::FX_FORMANT;
@@ -178,7 +179,7 @@ struct Anuli : SanguineModule {
 
 		fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
 
-		int modeNum = static_cast<int>(params[PARAM_MODE].getValue());
+		channelModes.fill(static_cast<int>(params[PARAM_MODE].getValue()));
 
 		ParameterInfo parameterInfo = {};
 
@@ -198,12 +199,12 @@ struct Anuli : SanguineModule {
 
 		if (bHaveModeCable) {
 			if (bNotesModeSelection) {
-				processWithModeCableNotesCV(modeNum, bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+				processWithModeCableNotesCV(bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 			} else {
-				processWithModeCableDirectCV(modeNum, bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+				processWithModeCableDirectCV(bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 			}
 		} else {
-			processWithoutModeCable(modeNum, bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+			processWithoutModeCable(bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 		}
 
 		if (bDividerTurn) {
@@ -213,7 +214,7 @@ struct Anuli : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			displayText = bEasterEgg[displayChannel] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[displayChannel]];
+			displayText = anuliModeLabels[channelModes[displayChannel]];
 
 			long long systemTimeMs = getSystemTimeMs();
 
@@ -226,44 +227,24 @@ struct Anuli : SanguineModule {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
 				for (int light = 0; light < 3; ++light) {
-					lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
-				}
+					if (channel < channelCount) {
+						LightModes lightMode = anuliModeLights[channelModes[channel]][light];
 
-				if (channel < channelCount) {
-					if (bEasterEgg[channel]) {
-						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(trianglePulse ? 1.f : 0.f, sampleTime);
-
+						drawLight(currentLight + light, lightMode, trianglePulse, sampleTime);
 					} else {
-						if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
-							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-						} else {
-							lights[currentLight + 0].setBrightnessSmooth((resonatorModel[channel] & 4 &&
-								trianglePulse) ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 1].setBrightnessSmooth((resonatorModel[channel] <= 4 &&
-								trianglePulse) ? 1.f : 0.f, sampleTime);
-							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-						}
+						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
 					}
 				}
 			}
 
 			if (bDisastrousPeace) {
-				if (fxModel < rings::FX_FORMANT_2) {
-					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 0.75f : 0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 0.75f : 0.f, sampleTime);
-				} else {
-					lights[LIGHT_FX + 0].setBrightnessSmooth((fxModel <= 4 &&
-						trianglePulse) ? 0.75f : 0.f, sampleTime);
-					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 &&
-						trianglePulse) ? 0.75f : 0.f, sampleTime);
+				for (int light = 0; light < 2; ++light) {
+					drawLight(LIGHT_FX + light, anuliFxModeLights[static_cast<int>(fxModel)][light], trianglePulse, sampleTime);
 				}
 			} else {
-				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
+				for (int light = 0; light < 2; ++light) {
+					lights[LIGHT_FX + light].setBrightnessSmooth(0.f, sampleTime);
+				}
 			}
 
 			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
@@ -396,8 +377,8 @@ struct Anuli : SanguineModule {
 		inputBuffer[channel].startIncr(inLen);
 	}
 
-	void isChannelEasterEgg(const int channel, const int modeNum, bool& haveDisastrousPeace) {
-		bEasterEgg[channel] = modeNum >= 6;
+	void isChannelEasterEgg(const int channel, bool& haveDisastrousPeace) {
+		bEasterEgg[channel] = channelModes[channel] > 5;
 		haveDisastrousPeace = haveDisastrousPeace || bEasterEgg[channel];
 	}
 
@@ -414,12 +395,12 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void processWithoutModeCable(int& modeNum, bool& haveDisastrousPeace, const ParameterInfo& parameterInfo,
-		const float sampleRate, const bool withBothOutputs) {
+	void processWithoutModeCable(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
+		const bool withBothOutputs) {
 		for (int channel = 0; channel < channelCount; ++channel) {
-			isChannelEasterEgg(channel, modeNum, haveDisastrousPeace);
+			isChannelEasterEgg(channel, haveDisastrousPeace);
 
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 			getInput(channel);
 
@@ -439,15 +420,15 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void processWithModeCableDirectCV(int& modeNum, bool& haveDisastrousPeace, const ParameterInfo& parameterInfo,
-		const float sampleRate, const bool withBothOutputs) {
+	void processWithModeCableDirectCV(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
+		const bool withBothOutputs) {
 		for (int channel = 0; channel < channelCount; ++channel) {
 			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-			modeNum = clamp(static_cast<int>(modeVoltage), 0, 6);
+			channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-			isChannelEasterEgg(channel, modeNum, haveDisastrousPeace);
+			isChannelEasterEgg(channel, haveDisastrousPeace);
 
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 			getInput(channel);
 
@@ -467,16 +448,16 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void processWithModeCableNotesCV(int& modeNum, bool& haveDisastrousPeace, const ParameterInfo& parameterInfo,
-		const float sampleRate, const bool withBothOutputs) {
+	void processWithModeCableNotesCV(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
+		const bool withBothOutputs) {
 		for (int channel = 0; channel < channelCount; ++channel) {
 			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
 			modeVoltage = roundf(modeVoltage * 12.f);
-			modeNum = clamp(static_cast<int>(modeVoltage), 0, 6);
+			channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-			isChannelEasterEgg(channel, modeNum, haveDisastrousPeace);
+			isChannelEasterEgg(channel, haveDisastrousPeace);
 
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 			getInput(channel);
 
@@ -530,6 +511,27 @@ struct Anuli : SanguineModule {
 			strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
 			strummingFlagInterval = 0;
 		}
+	}
+
+	void drawLight(const int lightNum, const LightModes lightMode, const bool trianglePulse, const float sampleTime) {
+		float lightValue;
+
+		switch (lightMode)
+		{
+		case LIGHT_ON:
+			lightValue = 1.f;
+			break;
+
+		case LIGHT_BLINK:
+			lightValue = static_cast<float>(trianglePulse);
+			break;
+
+		default:
+			lightValue = 0.f;
+			break;
+		}
+
+		lights[lightNum].setBrightnessSmooth(lightValue, sampleTime);
 	}
 
 	json_t* dataToJson() override {
