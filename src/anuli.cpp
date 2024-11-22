@@ -84,9 +84,9 @@ struct Anuli : SanguineModule {
 
 	int displayChannel = 0;
 
-	std::array<int, PORT_MAX_CHANNELS> channelModes;
+	std::array<int, PORT_MAX_CHANNELS> channelModes = {};
 
-	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS];
+	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS] = {};
 	rings::FxType fxModel = rings::FX_FORMANT;
 
 	std::string displayText = "";
