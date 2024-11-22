@@ -34,6 +34,8 @@
 
 #include "rings/resources.h"
 
+#include <cmath>
+
 namespace rings {
 
 using namespace std;
@@ -64,9 +66,14 @@ int32_t Resonator::ComputeFilters() {
   float brightness_attenuation = 1.0f - structure_;
   // Reduces the range of brightness when structure is very low, to prevent
   // clipping.
+    /*
   brightness_attenuation *= brightness_attenuation;
   brightness_attenuation *= brightness_attenuation;
   brightness_attenuation *= brightness_attenuation;
+    */
+
+    brightness_attenuation = powf(brightness_attenuation, 4);
+
   float brightness = brightness_ * (1.0f - 0.2f * brightness_attenuation);
   float q_loss = brightness * (2.0f - brightness) * 0.85f + 0.15f;
   float q_loss_damping_rate = structure_ * (2.0f - structure_) * 0.1f;
