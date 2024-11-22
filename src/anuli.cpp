@@ -310,36 +310,6 @@ struct Anuli : SanguineModule {
 			0, rings::kNumChords - 1);
 	}
 
-	void processAudioRegular(const int channel, rings::PerformanceState* performanceState, rings::Patch& patch,
-		const float* in, float* out, float* aux) {
-		strummer[channel].Process(in, kAnuliBlockSize, performanceState);
-		part[channel].Process(*performanceState, patch, in, out, aux, kAnuliBlockSize);
-	}
-
-	void processAudioEasterEgg(const int channel, rings::PerformanceState& performanceState, rings::Patch& patch,
-		const float* in, float* out, float* aux) {
-		strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
-		stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
-	}
-
-	void setupModelRegular(const int channel) {
-		part[channel].set_model(resonatorModel[channel]);
-	}
-
-	void setupModelEasterEgg(const int channel) {
-		stringSynth[channel].set_fx(rings::FxType(fxModel));
-	}
-
-	void setupPolyphonyRegular(const int channel) {
-		if (part[channel].polyphony() != polyphonyMode) {
-			part[channel].set_polyphony(polyphonyMode);
-		}
-	}
-
-	void setupPolyphonyEasterEgg(const int channel) {
-		stringSynth[channel].set_polyphony(polyphonyMode);
-	}
-
 	void convertOutputBuffer(const int channel, const float* out, const float* aux, const float sampleRate) {
 		dsp::Frame<2> outputFrames[kAnuliBlockSize];
 		for (int frame = 0; frame < kAnuliBlockSize; ++frame) {
@@ -377,32 +347,11 @@ struct Anuli : SanguineModule {
 		inputBuffer[channel].startIncr(inLen);
 	}
 
-	void isChannelEasterEgg(const int channel, bool& haveDisastrousPeace) {
-		bEasterEgg[channel] = channelModes[channel] > 5;
-		haveDisastrousPeace = haveDisastrousPeace || bEasterEgg[channel];
-	}
-
-	void getInput(const int channel) {
-		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
-		if (!inputBuffer[channel].full()) {
-			dsp::Frame<1> frame;
-			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
-			inputBuffer[channel].push(frame);
-		}
-
-		if (!bStrum[channel]) {
-			bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
-		}
-	}
-
 	void processWithoutModeCable(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
 		const bool withBothOutputs) {
 		for (int channel = 0; channel < channelCount; ++channel) {
-			isChannelEasterEgg(channel, haveDisastrousPeace);
 
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
-
-			getInput(channel);
+			processCommon(channel, haveDisastrousPeace);
 
 			// Render frames
 			if (outputBuffer[channel].empty()) {
@@ -426,11 +375,7 @@ struct Anuli : SanguineModule {
 			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
 			channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-			isChannelEasterEgg(channel, haveDisastrousPeace);
-
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
-
-			getInput(channel);
+			processCommon(channel, haveDisastrousPeace);
 
 			// Render frames
 			if (outputBuffer[channel].empty()) {
@@ -455,11 +400,7 @@ struct Anuli : SanguineModule {
 			modeVoltage = roundf(modeVoltage * 12.f);
 			channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-			isChannelEasterEgg(channel, haveDisastrousPeace);
-
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
-
-			getInput(channel);
+			processCommon(channel, haveDisastrousPeace);
 
 			// Render frames
 			if (outputBuffer[channel].empty()) {
@@ -478,31 +419,62 @@ struct Anuli : SanguineModule {
 	}
 
 	void processRegularChannel(const int channel, const ParameterInfo& parameterInfo, float* in, const float sampleRate) {
-		setupPolyphonyRegular(channel);
-		setupModelRegular(channel);
+		if (part[channel].polyphony() != polyphonyMode) {
+			part[channel].set_polyphony(polyphonyMode);
+		}
+
+		part[channel].set_model(resonatorModel[channel]);
+
 		rings::Patch patch;
 		float structure;
 		setupPatch(channel, patch, structure, parameterInfo);
 		rings::PerformanceState performanceState;
 		setupPerformance(channel, performanceState, structure, parameterInfo);
+
 		float out[kAnuliBlockSize];
 		float aux[kAnuliBlockSize];
-		processAudioRegular(channel, &performanceState, patch, in, out, aux);
+		strummer[channel].Process(in, kAnuliBlockSize, &performanceState);
+		part[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
+
 		convertOutputBuffer(channel, out, aux, sampleRate);
 	}
 
 	void processEasterEggChannel(const int channel, const ParameterInfo& parameterInfo, float* in, const float sampleRate) {
-		setupPolyphonyEasterEgg(channel);
-		setupModelEasterEgg(channel);
+		stringSynth[channel].set_polyphony(polyphonyMode);
+
+		stringSynth[channel].set_fx(rings::FxType(fxModel));
+
 		rings::Patch patch;
 		float structure;
 		setupPatch(channel, patch, structure, parameterInfo);
 		rings::PerformanceState performanceState;
 		setupPerformance(channel, performanceState, structure, parameterInfo);
+
 		float out[kAnuliBlockSize];
 		float aux[kAnuliBlockSize];
-		processAudioEasterEgg(channel, performanceState, patch, in, out, aux);
+		strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
+		stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
+
 		convertOutputBuffer(channel, out, aux, sampleRate);
+	}
+
+	void processCommon(const int channel, bool& haveDisastrousPeace) {
+		bEasterEgg[channel] = channelModes[channel] > 5;
+
+		haveDisastrousPeace = haveDisastrousPeace || bEasterEgg[channel];
+
+		resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
+
+		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
+		if (!inputBuffer[channel].full()) {
+			dsp::Frame<1> frame;
+			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
+			inputBuffer[channel].push(frame);
+		}
+
+		if (!bStrum[channel]) {
+			bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+		}
 	}
 
 	void setStrummingFlag(bool flag) {
