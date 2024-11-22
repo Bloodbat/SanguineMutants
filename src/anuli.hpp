@@ -28,3 +28,8 @@ static const std::vector<std::string> anuliMenuLabels = {
     "Reverb string",
     "Disastrous Peace"
 };
+
+static const std::vector<float> anuliFrequencyOffsets = {
+    0.f,
+    17.5f
+};

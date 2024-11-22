@@ -12,13 +12,6 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-// TODO: C4 at center offsets.
-
-/*
-TODO: tuning voltage offset
-+ 17.5
-*/
-
 struct Anuli : SanguineModule {
 	enum ParamIds {
 		PARAM_FREQUENCY,
@@ -82,6 +75,8 @@ struct Anuli : SanguineModule {
 	bool bEasterEgg[PORT_MAX_CHANNELS] = {};
 
 	bool bNotesModeSelection = false;
+
+	bool bUseFrequencyOffset = true;
 
 	int channelCount = 0;
 	int polyphonyMode = 1;
@@ -307,7 +302,8 @@ struct Anuli : SanguineModule {
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
 		const ParameterInfo& parameterInfo) {
 		performanceState.note = 12.f * inputs[INPUT_PITCH].getVoltage(channel);
-		float transpose = params[PARAM_FREQUENCY].getValue();
+		float transpose = params[PARAM_FREQUENCY].getValue() +
+			anuliFrequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		// Quantize transpose if pitch input is connected
 		if (inputs[INPUT_PITCH].isConnected()) {
 			transpose = roundf(transpose);
@@ -543,6 +539,8 @@ struct Anuli : SanguineModule {
 
 		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
 
+		json_object_set_new(rootJ, "useFrequencyOffset", json_boolean(bUseFrequencyOffset));
+
 		return rootJ;
 	}
 
@@ -556,6 +554,10 @@ struct Anuli : SanguineModule {
 		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
 		if (displayChannelJ) {
 			displayChannel = json_integer_value(displayChannelJ);
+		}
+
+		if (json_t* useFrequencyOffsetJ = json_object_get(rootJ, "useFrequencyOffset")) {
+			bUseFrequencyOffset = json_boolean_value(useFrequencyOffsetJ);
 		}
 	}
 
@@ -704,13 +706,12 @@ struct AnuliWidget : SanguineModuleWidget {
 		menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
 
 		menu->addChild(new MenuSeparator);
-		/*
+
 		menu->addChild(createSubmenuItem("Existing patch compatibility options", "",
 			[=](Menu* menu) {
-
+				menu->addChild(createBoolPtrMenuItem("Frequency knob center is C", "", &module->bUseFrequencyOffset));
 			}
 		));
-		*/
 	}
 };
 
