@@ -69,6 +69,7 @@ struct Anuli : SanguineModule {
 	rings::Part part[PORT_MAX_CHANNELS];
 	rings::StringSynthPart stringSynth[PORT_MAX_CHANNELS];
 	rings::Strummer strummer[PORT_MAX_CHANNELS];
+
 	bool bStrum[PORT_MAX_CHANNELS] = {};
 	bool bLastStrum[PORT_MAX_CHANNELS] = {};
 	bool bEasterEgg[PORT_MAX_CHANNELS] = {};
@@ -161,11 +162,9 @@ struct Anuli : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		using simd::float_4;
+		bool bIsLightsTurn = clockDivider.process();
 
-		bool bDividerTurn = clockDivider.process();
-
-		bool bDisastrousPeace = false;
+		bool bWithDisastrousPeace = false;
 
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
@@ -197,15 +196,15 @@ struct Anuli : SanguineModule {
 
 		if (bHaveModeCable) {
 			if (bNotesModeSelection) {
-				processWithModeCableNotesCV(bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+				processWithModeCableNotesCV(bWithDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 			} else {
-				processWithModeCableDirectCV(bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+				processWithModeCableDirectCV(bWithDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 			}
 		} else {
-			processWithoutModeCable(bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+			processWithoutModeCable(bWithDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 		}
 
-		if (bDividerTurn) {
+		if (bIsLightsTurn) {
 			const float sampleTime = kDividerFrequency * args.sampleTime;
 
 			if (displayChannel >= channelCount) {
@@ -235,7 +234,7 @@ struct Anuli : SanguineModule {
 				}
 			}
 
-			if (bDisastrousPeace) {
+			if (bWithDisastrousPeace) {
 				for (int light = 0; light < 2; ++light) {
 					drawLight(LIGHT_FX + light, anuliFxModeLights[static_cast<int>(fxModel)][light], trianglePulse, sampleTime);
 				}
