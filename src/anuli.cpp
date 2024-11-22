@@ -1,3 +1,5 @@
+// TODO: clear stash if it's no longer useful!
+
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "rings/dsp/part.h"
@@ -9,6 +11,13 @@
 #include "anuli.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+// TODO: C4 at center offsets.
+
+/*
+TODO: tuning voltage offset
++ 17.5
+*/
 
 struct Anuli : SanguineModule {
 	enum ParamIds {
@@ -90,6 +99,21 @@ struct Anuli : SanguineModule {
 
 	const float kVoltPerOctave = 1.f / 12.f;
 
+	float transpose[PORT_MAX_CHANNELS] = {};
+
+	struct ParameterInfo {
+		float structureMod;
+		float brightnessMod;
+		float dampingMod;
+		float positionMod;
+
+		float frequencyMod;
+
+		bool useInternalExciter;
+		bool useInternalStrum;
+		bool useInternalNote;
+	};
+
 	Anuli() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -161,161 +185,30 @@ struct Anuli : SanguineModule {
 
 		int modeNum = static_cast<int>(params[PARAM_MODE].getValue());
 
-		float structureMod = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
-		float brightnessMod = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
-		float dampingMod = dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue());
-		float positionMod = dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue());
+		ParameterInfo parameterInfo = {};
 
-		float frequencyMod = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
+		parameterInfo.structureMod = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
+		parameterInfo.brightnessMod = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
+		parameterInfo.dampingMod = dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue());
+		parameterInfo.positionMod = dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue());
 
-		bool bInternalExciter = !inputs[INPUT_IN].isConnected();
-		bool bInternalStrum = !inputs[INPUT_STRUM].isConnected();
-		bool bInternalNote = !inputs[INPUT_PITCH].isConnected();
+		parameterInfo.frequencyMod = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
+
+		parameterInfo.useInternalExciter = !inputs[INPUT_IN].isConnected();
+		parameterInfo.useInternalStrum = !inputs[INPUT_STRUM].isConnected();
+		parameterInfo.useInternalNote = !inputs[INPUT_PITCH].isConnected();
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
-		for (int channel = 0; channel < channelCount; ++channel) {
-			if (bHaveModeCable) {
-				float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-				if (bNotesModeSelection) {
-					modeVoltage = roundf(modeVoltage * 12.f);
-				}
-				modeNum = clamp(static_cast<int>(modeVoltage), 0, 6);
+		if (bHaveModeCable) {
+			if (bNotesModeSelection) {
+				processWithModeCableNotesCV(modeNum, bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+			} else {
+				processWithModeCableDirectCV(modeNum, bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 			}
-
-			bEasterEgg[channel] = modeNum >= 6;
-			bDisastrousPeace = bDisastrousPeace || bEasterEgg[channel];
-			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
-
-			// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
-			// Get input
-			if (!inputBuffer[channel].full()) {
-				dsp::Frame<1> frame;
-				frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
-				inputBuffer[channel].push(frame);
-			}
-
-			if (!bStrum[channel]) {
-				bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
-			}
-
-			// Render frames
-			if (outputBuffer[channel].empty()) {
-				float in[24] = {};
-				// Convert input buffer
-				inputSrc[channel].setRates(args.sampleRate, 48000);
-				int inLen = inputBuffer[channel].size();
-				int outLen = 24;
-				inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
-				inputBuffer[channel].startIncr(inLen);
-
-				// Polyphony
-				if (part[channel].polyphony() != polyphonyMode) {
-					if (!bEasterEgg[channel]) {
-						part[channel].set_polyphony(polyphonyMode);
-					} else {
-						stringSynth[channel].set_polyphony(polyphonyMode);
-					}
-				}
-				// Model
-				if (!bEasterEgg[channel]) {
-					if (part[channel].model() != resonatorModel[channel]) {
-						part[channel].set_model(resonatorModel[channel]);
-					}
-				} else {
-					stringSynth[channel].set_fx(rings::FxType(fxModel));
-				}
-
-				// Patch
-				rings::Patch patch;
-
-				float_4 voltages;
-
-				voltages[0] = inputs[INPUT_STRUCTURE_CV].getVoltage(channel);
-				voltages[1] = inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel);
-				voltages[2] = inputs[INPUT_DAMPING_CV].getVoltage(channel);
-				voltages[3] = inputs[INPUT_POSITION_CV].getVoltage(channel);
-
-				voltages /= 5.f;
-
-				float structure = params[PARAM_STRUCTURE].getValue() + 3.3f * structureMod * voltages[0];
-				patch.structure = clamp(structure, 0.f, 0.9995f);
-				patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + 3.3f *
-					brightnessMod * voltages[1], 0.f, 1.f);
-				patch.damping = clamp(params[PARAM_DAMPING].getValue() + 3.3f *
-					dampingMod * voltages[2], 0.f, 0.9995f);
-				patch.position = clamp(params[PARAM_POSITION].getValue() + 3.3f *
-					positionMod * voltages[3], 0.f, 0.9995f);
-
-				// Performance
-				rings::PerformanceState performanceState;
-
-				performanceState.note = 12.f * inputs[INPUT_PITCH].getNormalVoltage(kVoltPerOctave, channel);
-				float transpose = params[PARAM_FREQUENCY].getValue();
-				// Quantize transpose if pitch input is connected
-				if (inputs[INPUT_PITCH].isConnected()) {
-					transpose = roundf(transpose);
-				}
-				performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
-				performanceState.fm = clamp(48.f * 3.3f * frequencyMod *
-					inputs[INPUT_FREQUENCY_CV].getNormalVoltage(1.f, channel) / 5.f, -48.f, 48.f);
-
-				performanceState.internal_exciter = bInternalExciter;
-				performanceState.internal_strum = bInternalStrum;
-				performanceState.internal_note = bInternalNote;
-
-				// TODO: "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
-				performanceState.strum = bStrum[channel] && !bLastStrum[channel];
-				bLastStrum[channel] = bStrum[channel];
-				bStrum[channel] = false;
-				if (channel == 0) {
-					setStrummingFlag(performanceState.strum);
-				}
-
-				performanceState.chord = clamp(static_cast<int>(roundf(structure *
-					(rings::kNumChords - 1))), 0, rings::kNumChords - 1);
-
-				// Process audio
-				float out[24];
-				float aux[24];
-				if (!bEasterEgg[channel]) {
-					strummer[channel].Process(in, 24, &performanceState);
-					part[channel].Process(performanceState, patch, in, out, aux, 24);
-				} else {
-					strummer[channel].Process(NULL, 24, &performanceState);
-					stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
-				}
-
-				// Convert output buffer
-				{
-					dsp::Frame<2> outputFrames[24];
-					for (int frame = 0; frame < 24; ++frame) {
-						outputFrames[frame].samples[0] = out[frame];
-						outputFrames[frame].samples[1] = aux[frame];
-					}
-
-					outputSrc[channel].setRates(48000, args.sampleRate);
-					int inCount = 24;
-					int outCount = outputBuffer[channel].capacity();
-					outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
-					outputBuffer[channel].endIncr(outCount);
-				}
-			}
-
-			// Set output
-			if (!outputBuffer[channel].empty()) {
-				dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
-				// "Note that you need to insert a jack into each output to split the signals: when only one jack is inserted, both signals are mixed together."
-				if (bHaveBothOutputs) {
-					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
-					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
-				} else {
-					float outVoltage = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
-					outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
-					outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
-				}
-			}
+		} else {
+			processWithoutModeCable(modeNum, bDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
 		}
 
 		if (bDividerTurn) {
@@ -325,7 +218,7 @@ struct Anuli : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			displayText = bEasterEgg[0] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[displayChannel]];
+			displayText = bEasterEgg[displayChannel] ? anuliModeLabels[6] : anuliModeLabels[resonatorModel[displayChannel]];
 
 			long long systemTimeMs = getSystemTimeMs();
 
@@ -342,7 +235,12 @@ struct Anuli : SanguineModule {
 				}
 
 				if (channel < channelCount) {
-					if (!bEasterEgg[channel]) {
+					if (bEasterEgg[channel]) {
+						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+						lights[currentLight + 2].setBrightnessSmooth(trianglePulse ? 1.f : 0.f, sampleTime);
+
+					} else {
 						if (resonatorModel[channel] < rings::RESONATOR_MODEL_FM_VOICE) {
 							lights[currentLight + 0].setBrightnessSmooth(resonatorModel[channel] & 3 ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 1].setBrightnessSmooth(resonatorModel[channel] <= 1 ? 1.f : 0.f, sampleTime);
@@ -354,18 +252,11 @@ struct Anuli : SanguineModule {
 								trianglePulse) ? 1.f : 0.f, sampleTime);
 							lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 						}
-					} else {
-						lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(trianglePulse ? 1.f : 0.f, sampleTime);
 					}
 				}
 			}
 
-			if (!bDisastrousPeace) {
-				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
-			} else {
+			if (bDisastrousPeace) {
 				if (fxModel < rings::FX_FORMANT_2) {
 					lights[LIGHT_FX + 0].setBrightnessSmooth(fxModel <= 1 ? 0.75f : 0.f, sampleTime);
 					lights[LIGHT_FX + 1].setBrightnessSmooth(fxModel >= 1 ? 0.75f : 0.f, sampleTime);
@@ -375,6 +266,9 @@ struct Anuli : SanguineModule {
 					lights[LIGHT_FX + 1].setBrightnessSmooth((fxModel >= 4 &&
 						trianglePulse) ? 0.75f : 0.f, sampleTime);
 				}
+			} else {
+				lights[LIGHT_FX + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_FX + 1].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
@@ -388,6 +282,250 @@ struct Anuli : SanguineModule {
 				lights[LIGHT_POLYPHONY + 1].setBrightness(0.f);
 			}
 		}
+	}
+
+	void setupPatch(const int channel, rings::Patch& patch, float& structure, const ParameterInfo& parameterInfo) {
+		using simd::float_4;
+
+		float_4 voltages;
+
+		voltages[0] = inputs[INPUT_STRUCTURE_CV].getVoltage(channel);
+		voltages[1] = inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel);
+		voltages[2] = inputs[INPUT_DAMPING_CV].getVoltage(channel);
+		voltages[3] = inputs[INPUT_POSITION_CV].getVoltage(channel);
+
+		voltages /= 5.f;
+		voltages *= 3.3f;
+
+		structure = params[PARAM_STRUCTURE].getValue() + parameterInfo.structureMod * voltages[0];
+		patch.structure = clamp(structure, 0.f, 0.9995f);
+		patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + parameterInfo.brightnessMod * voltages[1], 0.f, 1.f);
+		patch.damping = clamp(params[PARAM_DAMPING].getValue() + parameterInfo.dampingMod * voltages[2], 0.f, 0.9995f);
+		patch.position = clamp(params[PARAM_POSITION].getValue() + parameterInfo.positionMod * voltages[3], 0.f, 0.9995f);
+	}
+
+	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
+		const ParameterInfo& parameterInfo) {
+		performanceState.note = 12.f * inputs[INPUT_PITCH].getVoltage(channel);
+		float transpose = params[PARAM_FREQUENCY].getValue();
+		// Quantize transpose if pitch input is connected
+		if (inputs[INPUT_PITCH].isConnected()) {
+			transpose = roundf(transpose);
+		}
+		performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
+
+		performanceState.fm = clamp(48.f * 3.3f * parameterInfo.frequencyMod *
+			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(kVoltPerOctave, channel) / 5.f, -48.f, 48.f);
+
+		performanceState.internal_exciter = parameterInfo.useInternalExciter;
+		performanceState.internal_strum = parameterInfo.useInternalStrum;
+		performanceState.internal_note = parameterInfo.useInternalNote;
+
+		// TODO: "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
+		performanceState.strum = bStrum[channel] && !bLastStrum[channel];
+		bLastStrum[channel] = bStrum[channel];
+		bStrum[channel] = false;
+		if (channel == 0) {
+			setStrummingFlag(performanceState.strum);
+		}
+
+		performanceState.chord = clamp(static_cast<int>(roundf(structure * (rings::kNumChords - 1))),
+			0, rings::kNumChords - 1);
+	}
+
+	void processAudioRegular(const int channel, rings::PerformanceState* performanceState, rings::Patch& patch,
+		const float* in, float* out, float* aux) {
+		strummer[channel].Process(in, 24, performanceState);
+		part[channel].Process(*performanceState, patch, in, out, aux, 24);
+	}
+
+	void processAudioEasterEgg(const int channel, rings::PerformanceState& performanceState, rings::Patch& patch,
+		const float* in, float* out, float* aux) {
+		strummer[channel].Process(NULL, 24, &performanceState);
+		stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
+	}
+
+	void setupModelRegular(const int channel) {
+		part[channel].set_model(resonatorModel[channel]);
+	}
+
+	void setupModelEasterEgg(const int channel) {
+		stringSynth[channel].set_fx(rings::FxType(fxModel));
+	}
+
+	void setupPolyphonyRegular(const int channel) {
+		if (part[channel].polyphony() != polyphonyMode) {
+			part[channel].set_polyphony(polyphonyMode);
+		}
+	}
+
+	void setupPolyphonyEasterEgg(const int channel) {
+		stringSynth[channel].set_polyphony(polyphonyMode);
+	}
+
+	void convertOutputBuffer(const int channel, const float* out, const float* aux, const float sampleRate) {
+		dsp::Frame<2> outputFrames[24];
+		for (int frame = 0; frame < 24; ++frame) {
+			outputFrames[frame].samples[0] = out[frame];
+			outputFrames[frame].samples[1] = aux[frame];
+		}
+
+		outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
+		int inCount = 24;
+		int outCount = outputBuffer[channel].capacity();
+		outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
+		outputBuffer[channel].endIncr(outCount);
+	}
+
+	void setOutputs(const int channel, const bool withBothOutputs) {
+		if (!outputBuffer[channel].empty()) {
+			dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
+			// "Note that you need to insert a jack into each output to split the signals: when only one jack is inserted, both signals are mixed together."
+			if (withBothOutputs) {
+				outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
+				outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
+			} else {
+				float outVoltage = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
+				outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
+				outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
+			}
+		}
+	}
+
+	void convertInputBuffer(const int channel, const float sampleRate, float* in) {
+		inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
+		int inLen = inputBuffer[channel].size();
+		int outLen = 24;
+		inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
+		inputBuffer[channel].startIncr(inLen);
+	}
+
+	void isChannelEasterEgg(const int channel, const int modeNum, bool& haveDisastrousPeace) {
+		bEasterEgg[channel] = modeNum >= 6;
+		haveDisastrousPeace = haveDisastrousPeace || bEasterEgg[channel];
+	}
+
+	void getInput(const int channel) {
+		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
+		if (!inputBuffer[channel].full()) {
+			dsp::Frame<1> frame;
+			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
+			inputBuffer[channel].push(frame);
+		}
+
+		if (!bStrum[channel]) {
+			bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+		}
+	}
+
+	void processWithoutModeCable(int& modeNum, bool& haveDisastrousPeace, const ParameterInfo& parameterInfo,
+		const float sampleRate, const bool withBothOutputs) {
+		for (int channel = 0; channel < channelCount; ++channel) {
+			isChannelEasterEgg(channel, modeNum, haveDisastrousPeace);
+
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
+
+			getInput(channel);
+
+			// Render frames
+			if (outputBuffer[channel].empty()) {
+				float in[24] = {};
+
+				convertInputBuffer(channel, sampleRate, in);
+
+				if (bEasterEgg[channel]) {
+					processEasterEggChannel(channel, parameterInfo, in, sampleRate);
+				} else {
+					processRegularChannel(channel, parameterInfo, in, sampleRate);
+				}
+			}
+			setOutputs(channel, withBothOutputs);
+		}
+	}
+
+	void processWithModeCableDirectCV(int& modeNum, bool& haveDisastrousPeace, const ParameterInfo& parameterInfo,
+		const float sampleRate, const bool withBothOutputs) {
+		for (int channel = 0; channel < channelCount; ++channel) {
+			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
+			modeNum = clamp(static_cast<int>(modeVoltage), 0, 6);
+
+			isChannelEasterEgg(channel, modeNum, haveDisastrousPeace);
+
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
+
+			getInput(channel);
+
+			// Render frames
+			if (outputBuffer[channel].empty()) {
+				float in[24] = {};
+
+				convertInputBuffer(channel, sampleRate, in);
+
+				if (bEasterEgg[channel]) {
+					processEasterEggChannel(channel, parameterInfo, in, sampleRate);
+				} else {
+					processRegularChannel(channel, parameterInfo, in, sampleRate);
+				}
+			}
+			setOutputs(channel, withBothOutputs);
+		}
+	}
+
+	void processWithModeCableNotesCV(int& modeNum, bool& haveDisastrousPeace, const ParameterInfo& parameterInfo,
+		const float sampleRate, const bool withBothOutputs) {
+		for (int channel = 0; channel < channelCount; ++channel) {
+			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
+			modeVoltage = roundf(modeVoltage * 12.f);
+			modeNum = clamp(static_cast<int>(modeVoltage), 0, 6);
+
+			isChannelEasterEgg(channel, modeNum, haveDisastrousPeace);
+
+			resonatorModel[channel] = static_cast<rings::ResonatorModel>(clamp(rings::ResonatorModel(modeNum), 0, 6));
+
+			getInput(channel);
+
+			// Render frames
+			if (outputBuffer[channel].empty()) {
+				float in[24] = {};
+
+				convertInputBuffer(channel, sampleRate, in);
+
+				if (bEasterEgg[channel]) {
+					processEasterEggChannel(channel, parameterInfo, in, sampleRate);
+				} else {
+					processRegularChannel(channel, parameterInfo, in, sampleRate);
+				}
+			}
+			setOutputs(channel, withBothOutputs);
+		}
+	}
+
+	void processRegularChannel(const int channel, const ParameterInfo& parameterInfo, float* in, const float sampleRate) {
+		setupPolyphonyRegular(channel);
+		setupModelRegular(channel);
+		rings::Patch patch;
+		float structure;
+		setupPatch(channel, patch, structure, parameterInfo);
+		rings::PerformanceState performanceState;
+		setupPerformance(channel, performanceState, structure, parameterInfo);
+		float out[24];
+		float aux[24];
+		processAudioRegular(channel, &performanceState, patch, in, out, aux);
+		convertOutputBuffer(channel, out, aux, sampleRate);
+	}
+
+	void processEasterEggChannel(const int channel, const ParameterInfo& parameterInfo, float* in, const float sampleRate) {
+		setupPolyphonyEasterEgg(channel);
+		setupModelEasterEgg(channel);
+		rings::Patch patch;
+		float structure;
+		setupPatch(channel, patch, structure, parameterInfo);
+		rings::PerformanceState performanceState;
+		setupPerformance(channel, performanceState, structure, parameterInfo);
+		float out[24];
+		float aux[24];
+		processAudioEasterEgg(channel, performanceState, patch, in, out, aux);
+		convertOutputBuffer(channel, out, aux, sampleRate);
 	}
 
 	void setStrummingFlag(bool flag) {
@@ -404,8 +542,6 @@ struct Anuli : SanguineModule {
 		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
 
 		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
-
-		return rootJ;
 
 		return rootJ;
 	}
@@ -566,6 +702,15 @@ struct AnuliWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
+
+		menu->addChild(new MenuSeparator);
+		/*
+		menu->addChild(createSubmenuItem("Existing patch compatibility options", "",
+			[=](Menu* menu) {
+
+			}
+		));
+		*/
 	}
 };
 
