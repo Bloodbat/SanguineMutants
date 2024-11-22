@@ -33,3 +33,5 @@ static const std::vector<float> anuliFrequencyOffsets = {
     0.f,
     17.5f
 };
+
+static const int kAnuliBlockSize = 24;

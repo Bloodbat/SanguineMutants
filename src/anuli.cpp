@@ -151,7 +151,7 @@ struct Anuli : SanguineModule {
 			memset(&strummer[channel], 0, sizeof(rings::Strummer));
 			memset(&part[channel], 0, sizeof(rings::Part));
 			memset(&stringSynth[channel], 0, sizeof(rings::StringSynthPart));
-			strummer[channel].Init(0.01f, 44100.f / 24);
+			strummer[channel].Init(0.01f, 44100.f / kAnuliBlockSize);
 			part[channel].Init(reverbBuffer[channel]);
 			stringSynth[channel].Init(reverbBuffer[channel]);
 
@@ -331,14 +331,14 @@ struct Anuli : SanguineModule {
 
 	void processAudioRegular(const int channel, rings::PerformanceState* performanceState, rings::Patch& patch,
 		const float* in, float* out, float* aux) {
-		strummer[channel].Process(in, 24, performanceState);
-		part[channel].Process(*performanceState, patch, in, out, aux, 24);
+		strummer[channel].Process(in, kAnuliBlockSize, performanceState);
+		part[channel].Process(*performanceState, patch, in, out, aux, kAnuliBlockSize);
 	}
 
 	void processAudioEasterEgg(const int channel, rings::PerformanceState& performanceState, rings::Patch& patch,
 		const float* in, float* out, float* aux) {
-		strummer[channel].Process(NULL, 24, &performanceState);
-		stringSynth[channel].Process(performanceState, patch, in, out, aux, 24);
+		strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
+		stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
 	}
 
 	void setupModelRegular(const int channel) {
@@ -360,14 +360,14 @@ struct Anuli : SanguineModule {
 	}
 
 	void convertOutputBuffer(const int channel, const float* out, const float* aux, const float sampleRate) {
-		dsp::Frame<2> outputFrames[24];
-		for (int frame = 0; frame < 24; ++frame) {
+		dsp::Frame<2> outputFrames[kAnuliBlockSize];
+		for (int frame = 0; frame < kAnuliBlockSize; ++frame) {
 			outputFrames[frame].samples[0] = out[frame];
 			outputFrames[frame].samples[1] = aux[frame];
 		}
 
 		outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
-		int inCount = 24;
+		int inCount = kAnuliBlockSize;
 		int outCount = outputBuffer[channel].capacity();
 		outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
 		outputBuffer[channel].endIncr(outCount);
@@ -391,7 +391,7 @@ struct Anuli : SanguineModule {
 	void convertInputBuffer(const int channel, const float sampleRate, float* in) {
 		inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
 		int inLen = inputBuffer[channel].size();
-		int outLen = 24;
+		int outLen = kAnuliBlockSize;
 		inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
 		inputBuffer[channel].startIncr(inLen);
 	}
@@ -425,7 +425,7 @@ struct Anuli : SanguineModule {
 
 			// Render frames
 			if (outputBuffer[channel].empty()) {
-				float in[24] = {};
+				float in[kAnuliBlockSize] = {};
 
 				convertInputBuffer(channel, sampleRate, in);
 
@@ -453,7 +453,7 @@ struct Anuli : SanguineModule {
 
 			// Render frames
 			if (outputBuffer[channel].empty()) {
-				float in[24] = {};
+				float in[kAnuliBlockSize] = {};
 
 				convertInputBuffer(channel, sampleRate, in);
 
@@ -482,7 +482,7 @@ struct Anuli : SanguineModule {
 
 			// Render frames
 			if (outputBuffer[channel].empty()) {
-				float in[24] = {};
+				float in[kAnuliBlockSize] = {};
 
 				convertInputBuffer(channel, sampleRate, in);
 
@@ -504,8 +504,8 @@ struct Anuli : SanguineModule {
 		setupPatch(channel, patch, structure, parameterInfo);
 		rings::PerformanceState performanceState;
 		setupPerformance(channel, performanceState, structure, parameterInfo);
-		float out[24];
-		float aux[24];
+		float out[kAnuliBlockSize];
+		float aux[kAnuliBlockSize];
 		processAudioRegular(channel, &performanceState, patch, in, out, aux);
 		convertOutputBuffer(channel, out, aux, sampleRate);
 	}
@@ -518,8 +518,8 @@ struct Anuli : SanguineModule {
 		setupPatch(channel, patch, structure, parameterInfo);
 		rings::PerformanceState performanceState;
 		setupPerformance(channel, performanceState, structure, parameterInfo);
-		float out[24];
-		float aux[24];
+		float out[kAnuliBlockSize];
+		float aux[kAnuliBlockSize];
 		processAudioEasterEgg(channel, performanceState, patch, in, out, aux);
 		convertOutputBuffer(channel, out, aux, sampleRate);
 	}
