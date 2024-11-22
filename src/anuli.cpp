@@ -155,8 +155,6 @@ struct Anuli : SanguineModule {
 			strummer[channel].Init(0.01f, 44100.f / kAnuliBlockSize);
 			part[channel].Init(reverbBuffer[channel]);
 			stringSynth[channel].Init(reverbBuffer[channel]);
-
-			resonatorModel[channel] = rings::RESONATOR_MODEL_MODAL;
 		}
 
 		clockDivider.setDivision(kDividerFrequency);
@@ -666,22 +664,26 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; ++i) {
-			availableChannels.push_back(channelNumbers[i]);
-		}
-		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
-			[=]() {return module->displayChannel; },
-			[=](int i) {module->displayChannel = i; }
+		menu->addChild(createSubmenuItem("Options", "",
+			[=](Menu* menu) {
+				std::vector<std::string> availableChannels;
+				for (int i = 0; i < module->channelCount; ++i) {
+					availableChannels.push_back(channelNumbers[i]);
+				}
+				menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+					[=]() {return module->displayChannel; },
+					[=](int i) {module->displayChannel = i; }
+				));
+
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
+			}
 		));
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createSubmenuItem("Existing patch compatibility options", "",
+		menu->addChild(createSubmenuItem("Compatibility options", "",
 			[=](Menu* menu) {
 				menu->addChild(createBoolPtrMenuItem("Frequency knob center is C", "", &module->bUseFrequencyOffset));
 			}
