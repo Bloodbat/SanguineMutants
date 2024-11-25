@@ -531,10 +531,6 @@ struct AnuliWidget : SanguineModuleWidget {
 		anuliFrambuffer->addChild(displayModel);
 		displayModel->fallbackString = anuliModeLabels[0];
 
-		if (module) {
-			displayModel->values.displayText = &module->displayText;
-		}
-
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
@@ -554,10 +550,6 @@ struct AnuliWidget : SanguineModuleWidget {
 		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34, 54.795);
 		anuliFrambuffer->addChild(displayPolyphony);
 		displayPolyphony->fallbackNumber = 1;
-
-		if (module) {
-			displayPolyphony->values.numberValue = &module->polyphonyMode;
-		}
 
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(33.006, 72.385), module, Anuli::PARAM_BRIGHTNESS));
 
@@ -594,6 +586,11 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(84.046, 116.807), module, Anuli::OUTPUT_ODD));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(97.898, 116.807), module, Anuli::OUTPUT_EVEN));
+
+		if (module) {
+			displayModel->values.displayText = &module->displayText;
+			displayPolyphony->values.numberValue = &module->polyphonyMode;
+		}
 	}
 
 	void appendContextMenu(Menu* menu) override {
