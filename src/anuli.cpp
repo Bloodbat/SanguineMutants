@@ -196,12 +196,37 @@ struct Anuli : SanguineModule {
 
 		if (bHaveModeCable) {
 			if (bNotesModeSelection) {
-				processWithModeCableNotesCV(bWithDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+				for (int channel = 0; channel < channelCount; ++channel) {
+					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
+					modeVoltage = roundf(modeVoltage * 12.f);
+					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
+
+					setupChannel(channel, bWithDisastrousPeace);
+
+					renderFrames(channel, parameterInfo, args.sampleRate);
+
+					setOutputs(channel, bHaveBothOutputs);
+				}
 			} else {
-				processWithModeCableDirectCV(bWithDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+				for (int channel = 0; channel < channelCount; ++channel) {
+					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
+					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
+
+					setupChannel(channel, bWithDisastrousPeace);
+
+					renderFrames(channel, parameterInfo, args.sampleRate);
+
+					setOutputs(channel, bHaveBothOutputs);
+				}
 			}
 		} else {
-			processWithoutModeCable(bWithDisastrousPeace, parameterInfo, args.sampleRate, bHaveBothOutputs);
+			for (int channel = 0; channel < channelCount; ++channel) {
+				setupChannel(channel, bWithDisastrousPeace);
+
+				renderFrames(channel, parameterInfo, args.sampleRate);
+
+				setOutputs(channel, bHaveBothOutputs);
+			}
 		}
 
 		if (bIsLightsTurn) {
@@ -307,24 +332,11 @@ struct Anuli : SanguineModule {
 			0, rings::kNumChords - 1);
 	}
 
-	void convertOutputBuffer(const int channel, const float* out, const float* aux, const float sampleRate) {
-		dsp::Frame<2> outputFrames[kAnuliBlockSize];
-		for (int frame = 0; frame < kAnuliBlockSize; ++frame) {
-			outputFrames[frame].samples[0] = out[frame];
-			outputFrames[frame].samples[1] = aux[frame];
-		}
-
-		outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
-		int inCount = kAnuliBlockSize;
-		int outCount = outputBuffer[channel].capacity();
-		outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
-		outputBuffer[channel].endIncr(outCount);
-	}
-
 	void setOutputs(const int channel, const bool withBothOutputs) {
 		if (!outputBuffer[channel].empty()) {
 			dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
-			// "Note that you need to insert a jack into each output to split the signals: when only one jack is inserted, both signals are mixed together."
+			/* "Note: you need to insert a jack into each output to split the signals:
+				when only one jack is inserted, both signals are mixed together." */
 			if (withBothOutputs) {
 				outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
 				outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
@@ -336,126 +348,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void convertInputBuffer(const int channel, const float sampleRate, float* in) {
-		inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
-		int inLen = inputBuffer[channel].size();
-		int outLen = kAnuliBlockSize;
-		inputSrc[channel].process(inputBuffer[channel].startData(), &inLen, reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
-		inputBuffer[channel].startIncr(inLen);
-	}
-
-	void processWithoutModeCable(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
-		const bool withBothOutputs) {
-		for (int channel = 0; channel < channelCount; ++channel) {
-
-			processCommon(channel, haveDisastrousPeace);
-
-			// Render frames
-			if (outputBuffer[channel].empty()) {
-				float in[kAnuliBlockSize] = {};
-
-				convertInputBuffer(channel, sampleRate, in);
-
-				if (bEasterEgg[channel]) {
-					processEasterEggChannel(channel, parameterInfo, in, sampleRate);
-				} else {
-					processRegularChannel(channel, parameterInfo, in, sampleRate);
-				}
-			}
-			setOutputs(channel, withBothOutputs);
-		}
-	}
-
-	void processWithModeCableDirectCV(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
-		const bool withBothOutputs) {
-		for (int channel = 0; channel < channelCount; ++channel) {
-			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-			channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
-
-			processCommon(channel, haveDisastrousPeace);
-
-			// Render frames
-			if (outputBuffer[channel].empty()) {
-				float in[kAnuliBlockSize] = {};
-
-				convertInputBuffer(channel, sampleRate, in);
-
-				if (bEasterEgg[channel]) {
-					processEasterEggChannel(channel, parameterInfo, in, sampleRate);
-				} else {
-					processRegularChannel(channel, parameterInfo, in, sampleRate);
-				}
-			}
-			setOutputs(channel, withBothOutputs);
-		}
-	}
-
-	void processWithModeCableNotesCV(bool& haveDisastrousPeace, const ParameterInfo& parameterInfo, const float sampleRate,
-		const bool withBothOutputs) {
-		for (int channel = 0; channel < channelCount; ++channel) {
-			float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-			modeVoltage = roundf(modeVoltage * 12.f);
-			channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
-
-			processCommon(channel, haveDisastrousPeace);
-
-			// Render frames
-			if (outputBuffer[channel].empty()) {
-				float in[kAnuliBlockSize] = {};
-
-				convertInputBuffer(channel, sampleRate, in);
-
-				if (bEasterEgg[channel]) {
-					processEasterEggChannel(channel, parameterInfo, in, sampleRate);
-				} else {
-					processRegularChannel(channel, parameterInfo, in, sampleRate);
-				}
-			}
-			setOutputs(channel, withBothOutputs);
-		}
-	}
-
-	void processRegularChannel(const int channel, const ParameterInfo& parameterInfo, float* in, const float sampleRate) {
-		if (part[channel].polyphony() != polyphonyMode) {
-			part[channel].set_polyphony(polyphonyMode);
-		}
-
-		part[channel].set_model(resonatorModel[channel]);
-
-		rings::Patch patch;
-		float structure;
-		setupPatch(channel, patch, structure, parameterInfo);
-		rings::PerformanceState performanceState;
-		setupPerformance(channel, performanceState, structure, parameterInfo);
-
-		float out[kAnuliBlockSize];
-		float aux[kAnuliBlockSize];
-		strummer[channel].Process(in, kAnuliBlockSize, &performanceState);
-		part[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
-
-		convertOutputBuffer(channel, out, aux, sampleRate);
-	}
-
-	void processEasterEggChannel(const int channel, const ParameterInfo& parameterInfo, float* in, const float sampleRate) {
-		stringSynth[channel].set_polyphony(polyphonyMode);
-
-		stringSynth[channel].set_fx(rings::FxType(fxModel));
-
-		rings::Patch patch;
-		float structure;
-		setupPatch(channel, patch, structure, parameterInfo);
-		rings::PerformanceState performanceState;
-		setupPerformance(channel, performanceState, structure, parameterInfo);
-
-		float out[kAnuliBlockSize];
-		float aux[kAnuliBlockSize];
-		strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
-		stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
-
-		convertOutputBuffer(channel, out, aux, sampleRate);
-	}
-
-	void processCommon(const int channel, bool& haveDisastrousPeace) {
+	void setupChannel(const int channel, bool& haveDisastrousPeace) {
 		bEasterEgg[channel] = channelModes[channel] > 5;
 
 		haveDisastrousPeace = haveDisastrousPeace || bEasterEgg[channel];
@@ -471,6 +364,68 @@ struct Anuli : SanguineModule {
 
 		if (!bStrum[channel]) {
 			bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+		}
+	}
+
+	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const float sampleRate) {
+		if (outputBuffer[channel].empty()) {
+			float in[kAnuliBlockSize] = {};
+
+			// Convert input buffer
+			inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
+			int inLen = inputBuffer[channel].size();
+			int outLen = kAnuliBlockSize;
+			inputSrc[channel].process(inputBuffer[channel].startData(), &inLen,
+				reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
+			inputBuffer[channel].startIncr(inLen);
+
+			float out[kAnuliBlockSize];
+			float aux[kAnuliBlockSize];
+
+			if (bEasterEgg[channel]) {
+				stringSynth[channel].set_polyphony(polyphonyMode);
+
+				stringSynth[channel].set_fx(rings::FxType(fxModel));
+
+				rings::Patch patch;
+				float structure;
+				setupPatch(channel, patch, structure, parameterInfo);
+				rings::PerformanceState performanceState;
+				setupPerformance(channel, performanceState, structure, parameterInfo);
+
+				// Process audio
+				strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
+				stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
+			} else {
+				if (part[channel].polyphony() != polyphonyMode) {
+					part[channel].set_polyphony(polyphonyMode);
+				}
+
+				part[channel].set_model(resonatorModel[channel]);
+
+				rings::Patch patch;
+				float structure;
+				setupPatch(channel, patch, structure, parameterInfo);
+				rings::PerformanceState performanceState;
+				setupPerformance(channel, performanceState, structure, parameterInfo);
+
+				// Process audio
+				strummer[channel].Process(in, kAnuliBlockSize, &performanceState);
+				part[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
+			}
+
+			// Convert output buffer
+			dsp::Frame<2> outputFrames[kAnuliBlockSize];
+			for (int frame = 0; frame < kAnuliBlockSize; ++frame) {
+				outputFrames[frame].samples[0] = out[frame];
+				outputFrames[frame].samples[1] = aux[frame];
+			}
+
+			outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
+			int inCount = kAnuliBlockSize;
+			int outCount = outputBuffer[channel].capacity();
+			outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
+			outputBuffer[channel].endIncr(outCount);
 		}
 	}
 
