@@ -63,7 +63,7 @@ struct Anuli : SanguineModule {
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> inputBuffer[PORT_MAX_CHANNELS];
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer[PORT_MAX_CHANNELS];
 
-	dsp::ClockDivider clockDivider;
+	dsp::ClockDivider lightsDivider;
 
 	uint16_t reverbBuffer[PORT_MAX_CHANNELS][32768] = {};
 	rings::Part part[PORT_MAX_CHANNELS];
@@ -91,7 +91,7 @@ struct Anuli : SanguineModule {
 
 	std::string displayText = "";
 
-	const int kDividerFrequency = 64;
+	static const int kLightsFrequency = 64;
 
 	const float kVoltPerOctave = 1.f / 12.f;
 
@@ -157,11 +157,11 @@ struct Anuli : SanguineModule {
 			stringSynth[channel].Init(reverbBuffer[channel]);
 		}
 
-		clockDivider.setDivision(kDividerFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool bIsLightsTurn = clockDivider.process();
+		bool bIsLightsTurn = lightsDivider.process();
 
 		bool bWithDisastrousPeace = false;
 
@@ -230,7 +230,7 @@ struct Anuli : SanguineModule {
 		}
 
 		if (bIsLightsTurn) {
-			const float sampleTime = kDividerFrequency * args.sampleTime;
+			const float sampleTime = kLightsFrequency * args.sampleTime;
 
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
