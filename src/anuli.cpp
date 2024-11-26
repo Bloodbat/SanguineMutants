@@ -72,7 +72,6 @@ struct Anuli : SanguineModule {
 
 	bool bStrum[PORT_MAX_CHANNELS] = {};
 	bool bLastStrum[PORT_MAX_CHANNELS] = {};
-	bool bEasterEgg[PORT_MAX_CHANNELS] = {};
 
 	bool bNotesModeSelection = false;
 
@@ -193,6 +192,7 @@ struct Anuli : SanguineModule {
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
+		bool bChannelIsEasterEgg = false;
 
 		if (bHaveModeCable) {
 			if (bNotesModeSelection) {
@@ -201,9 +201,9 @@ struct Anuli : SanguineModule {
 					modeVoltage = roundf(modeVoltage * 12.f);
 					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-					setupChannel(channel, bWithDisastrousPeace);
+					setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
 
-					renderFrames(channel, parameterInfo, args.sampleRate);
+					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
@@ -212,18 +212,18 @@ struct Anuli : SanguineModule {
 					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
 					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-					setupChannel(channel, bWithDisastrousPeace);
+					setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
 
-					renderFrames(channel, parameterInfo, args.sampleRate);
+					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
 			}
 		} else {
 			for (int channel = 0; channel < channelCount; ++channel) {
-				setupChannel(channel, bWithDisastrousPeace);
+				setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
 
-				renderFrames(channel, parameterInfo, args.sampleRate);
+				renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
 
 				setOutputs(channel, bHaveBothOutputs);
 			}
@@ -348,10 +348,10 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupChannel(const int channel, bool& haveDisastrousPeace) {
-		bEasterEgg[channel] = channelModes[channel] > 5;
+	void setupChannel(const int channel, bool& haveDisastrousPeace, bool& isEasterEgg) {
+		isEasterEgg = channelModes[channel] > 5;
 
-		haveDisastrousPeace = haveDisastrousPeace || bEasterEgg[channel];
+		haveDisastrousPeace = haveDisastrousPeace || isEasterEgg;
 
 		resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
 
@@ -367,7 +367,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const float sampleRate) {
+	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const bool isEasterEgg, const float sampleRate) {
 		if (outputBuffer[channel].empty()) {
 			float in[kAnuliBlockSize] = {};
 
@@ -382,7 +382,7 @@ struct Anuli : SanguineModule {
 			float out[kAnuliBlockSize];
 			float aux[kAnuliBlockSize];
 
-			if (bEasterEgg[channel]) {
+			if (isEasterEgg) {
 				stringSynth[channel].set_polyphony(polyphonyMode);
 
 				stringSynth[channel].set_fx(rings::FxType(fxModel));
@@ -488,8 +488,8 @@ struct Anuli : SanguineModule {
 	}
 
 	void setMode(int modeNum) {
+		channelModes[0] = modeNum;
 		resonatorModel[0] = modeNum < 6 ? rings::ResonatorModel(modeNum) : resonatorModel[0];
-		bEasterEgg[0] = modeNum > 5;
 		params[PARAM_MODE].setValue(modeNum);
 	}
 };
