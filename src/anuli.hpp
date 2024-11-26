@@ -58,3 +58,5 @@ static const std::vector<float> anuliFrequencyOffsets = {
 };
 
 static const int kAnuliBlockSize = 24;
+
+static const float kAnuliVoltPerOctave = 1.f / 12.f;

@@ -93,8 +93,6 @@ struct Anuli : SanguineModule {
 
 	static const int kLightsFrequency = 64;
 
-	const float kVoltPerOctave = 1.f / 12.f;
-
 	float transpose[PORT_MAX_CHANNELS] = {};
 
 	struct ParameterInfo {
@@ -314,7 +312,7 @@ struct Anuli : SanguineModule {
 		performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
 
 		performanceState.fm = clamp(48.f * 3.3f * parameterInfo.frequencyMod *
-			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(kVoltPerOctave, channel) / 5.f, -48.f, 48.f);
+			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(kAnuliVoltPerOctave, channel) / 5.f, -48.f, 48.f);
 
 		performanceState.internal_exciter = parameterInfo.useInternalExciter;
 		performanceState.internal_strum = parameterInfo.useInternalStrum;
