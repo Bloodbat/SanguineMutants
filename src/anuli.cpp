@@ -93,8 +93,6 @@ struct Anuli : SanguineModule {
 
 	static const int kLightsFrequency = 64;
 
-	float transpose[PORT_MAX_CHANNELS] = {};
-
 	struct ParameterInfo {
 		float structureMod;
 		float brightnessMod;
