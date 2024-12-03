@@ -181,9 +181,6 @@ struct Anuli : SanguineModule {
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
 
-		outputs[OUTPUT_ODD].setChannels(channelCount);
-		outputs[OUTPUT_EVEN].setChannels(channelCount);
-
 		polyphonyMode = params[PARAM_POLYPHONY].getValue();
 
 		fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
@@ -247,6 +244,10 @@ struct Anuli : SanguineModule {
 				drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 			}
 		}
+
+		outputs[OUTPUT_ODD].setChannels(channelCount);
+
+		outputs[OUTPUT_EVEN].setChannels(channelCount);
 
 		if (bIsLightsTurn) {
 			if (displayChannel >= channelCount) {
