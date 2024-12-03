@@ -456,8 +456,7 @@ struct Anuli : SanguineModule {
 	void drawLight(const int lightNum, const LightModes lightMode, const bool trianglePulse, const float sampleTime) {
 		float lightValue;
 
-		switch (lightMode)
-		{
+		switch (lightMode) {
 		case LIGHT_ON:
 			lightValue = 1.f;
 			break;
