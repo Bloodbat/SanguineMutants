@@ -159,7 +159,9 @@ struct Anuli : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		bool bIsLightsTurn = lightsDivider.process();
 
-		bool trianglePulse = false;
+		bool bIsTrianglePulse = false;
+
+		bool bWithDisastrousPeace = false;
 
 		long long systemTimeMs;
 
@@ -173,10 +175,8 @@ struct Anuli : SanguineModule {
 			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
 			uint8_t triangle = (systemTimeMs >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
-			trianglePulse = pulseWidthModulationCounter < triangle;
+			bIsTrianglePulse = pulseWidthModulationCounter < triangle;
 		}
-
-		bool bWithDisastrousPeace = false;
 
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
@@ -220,7 +220,7 @@ struct Anuli : SanguineModule {
 
 					setOutputs(channel, bHaveBothOutputs);
 
-					drawChannelLight(channel, trianglePulse, bIsLightsTurn, sampleTime);
+					drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 				}
 			} else {
 				for (int channel = 0; channel < channelCount; ++channel) {
@@ -233,7 +233,7 @@ struct Anuli : SanguineModule {
 
 					setOutputs(channel, bHaveBothOutputs);
 
-					drawChannelLight(channel, trianglePulse, bIsLightsTurn, sampleTime);
+					drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 				}
 			}
 		} else {
@@ -244,7 +244,7 @@ struct Anuli : SanguineModule {
 
 				setOutputs(channel, bHaveBothOutputs);
 
-				drawChannelLight(channel, trianglePulse, bIsLightsTurn, sampleTime);
+				drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 			}
 		}
 
@@ -265,7 +265,7 @@ struct Anuli : SanguineModule {
 
 			if (bWithDisastrousPeace) {
 				for (int light = 0; light < 2; ++light) {
-					drawLight(LIGHT_FX + light, anuliFxModeLights[static_cast<int>(fxModel)][light], trianglePulse, sampleTime);
+					drawLight(LIGHT_FX + light, anuliFxModeLights[static_cast<int>(fxModel)][light], bIsTrianglePulse, sampleTime);
 				}
 			} else {
 				for (int light = 0; light < 2; ++light) {
@@ -275,7 +275,7 @@ struct Anuli : SanguineModule {
 
 			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
 			lights[LIGHT_POLYPHONY + 1].setBrightness((polyphonyMode != 3 && polyphonyMode & 0x06) ||
-				(polyphonyMode == 3 && trianglePulse) ? 1.f : 0.f);
+				(polyphonyMode == 3 && bIsTrianglePulse) ? 1.f : 0.f);
 
 			++strummingFlagInterval;
 			if (strummingFlagCounter) {
