@@ -309,9 +309,11 @@ struct Anuli : SanguineModule {
 
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
 		const ParameterInfo& parameterInfo) {
-		performanceState.note = 12.f * inputs[INPUT_PITCH].getVoltage(channel);
-		float transpose = params[PARAM_FREQUENCY].getValue() +
+		float note = inputs[INPUT_PITCH].getVoltage(channel) +
 			anuliFrequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
+		performanceState.note = 12.f * note;
+		
+		float transpose = params[PARAM_FREQUENCY].getValue();
 		// Quantize transpose if pitch input is connected
 		if (inputs[INPUT_PITCH].isConnected()) {
 			transpose = roundf(transpose);

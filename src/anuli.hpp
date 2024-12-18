@@ -54,7 +54,7 @@ static const LightModes anuliFxModeLights[kAnuliMaxFxModes][2] = {
 
 static const std::vector<float> anuliFrequencyOffsets = {
     0.f,
-    17.5f
+    1.501f
 };
 
 static const int kAnuliBlockSize = 24;
