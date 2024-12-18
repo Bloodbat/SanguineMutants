@@ -692,6 +692,22 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 
 					nvgRestore(args.vg);
 				}
+
+				if (haloType) {
+					switch (*haloType)
+					{
+					case HALO_CIRCULAR:
+						drawCircularHalo(args, box.size, *outerColor, haloOpacity, haloRadiusFactor);
+						break;
+
+					case HALO_RECTANGULAR:
+						drawRectHalo(args, box.size, *outerColor, haloOpacity, haloX);
+						break;
+
+					default:
+						break;
+					}
+				}
 			}
 		}
 	}
