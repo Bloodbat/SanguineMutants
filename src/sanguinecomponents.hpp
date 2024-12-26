@@ -239,7 +239,7 @@ struct SanguineMultiColoredShapedLight : SvgWidget {
 	std::shared_ptr<window::Svg> svgGradient = nullptr;
 	NVGcolor* innerColor = nullptr;
 	NVGcolor* outerColor = nullptr;
-	HaloType *haloType = nullptr;
+	HaloType* haloType = nullptr;
 	unsigned char haloOpacity = 175;
 	float haloRadiusFactor = 8.f;
 	float haloX = 0.f;

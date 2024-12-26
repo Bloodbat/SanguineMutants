@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "apices.hpp"
+#include "nix.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -43,6 +44,7 @@ struct Apices : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
+		LIGHT_EXPANDER,
 		LIGHTS_COUNT
 	};
 
@@ -54,6 +56,8 @@ struct Apices : SanguineModule {
 
 	bool bSnapMode = false;
 	bool bSnapped[kNumKnobs] = { false, false, false, false };
+
+	bool bHasExpander = false;
 
 	int32_t adcLp[kNumAdcChannels] = { 0, 0, 0, 0 };
 	int32_t adcValue[kNumAdcChannels] = { 0, 0, 0, 0 };
@@ -147,11 +151,23 @@ struct Apices : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		Module* nixExpander = getRightExpander().module;
+
+		float sampleTime = 0.f;
+
+		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix);
+
+		bool bDividerTurn = clockDivider.process();
+
 		// only update knobs / lights every 16 samples
-		if (clockDivider.process()) {
+		if (bDividerTurn) {
 			pollSwitches(args);
 			pollPots();
 			updateOleds();
+
+			sampleTime = args.sampleTime * kClockUpdateFrequency;
+
+			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? 0.5f : 0.f, sampleTime);
 		}
 
 		ApicesProcessorFunction currentFunction = getProcessorFunction();
@@ -159,6 +175,133 @@ struct Apices : SanguineModule {
 			currentFunction = static_cast<ApicesProcessorFunction>(params[PARAM_MODE].getValue());
 			setFunction(editMode - EDIT_MODE_FIRST, currentFunction);
 			saveState();
+		}
+
+		if (bHasExpander) {
+			float cvValues[kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
+			int modulatedValues[kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+			int channel2Function;
+
+			if (bDividerTurn) {
+				Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
+				Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
+				Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);
+
+				switch (editMode) {
+				case EDIT_MODE_FIRST:
+				case EDIT_MODE_SECOND:
+					channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+					switchExpanderChannel2Lights(nixExpander, true, sampleTime);
+					break;
+				case EDIT_MODE_TWIN:
+					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.5f, sampleTime);
+					switchExpanderChannel2Lights(nixExpander, false, sampleTime);
+					break;
+				case EDIT_MODE_SPLIT:
+					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+					switchExpanderChannel2Lights(nixExpander, false, sampleTime);
+					break;
+				default:
+					break;
+				}
+			}
+
+			for (int function = 0; function < kMaxFunctions; ++function) {
+				int channel1Input = Nix::INPUT_PARAM_CV_1 + function;
+
+				if (nixExpander->getInput(channel1Input).isConnected()) {
+					int channel1Attenuverter = Nix::PARAM_PARAM_CV_1 + function;
+
+					cvValues[function] = rescale(nixExpander->getInput(channel1Input).getVoltage(), -5.f, 5.f, -255.f, 255.f) *
+						nixExpander->getParam(channel1Attenuverter).getValue();
+				}
+				modulatedValues[function] = clamp((potValue[function] + static_cast<int>(cvValues[function])) << 8, 0, 65535);
+
+				if (editMode > EDIT_MODE_SPLIT) {
+					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + function;
+					channel2Function = function + kChannel2Offset;
+
+					if (nixExpander->getInput(channel2Input).isConnected()) {
+						int channel2Attenuverter = Nix::PARAM_PARAM_CV_CHANNEL_2_1 + function;
+
+						cvValues[channel2Function] = rescale(nixExpander->getInput(channel2Input).getVoltage(), -5.f, 5.f, -255.f, 255.f) *
+							nixExpander->getParam(channel2Attenuverter).getValue();
+					}
+
+					modulatedValues[channel2Function] = clamp((potValue[channel2Function] +
+						static_cast<int>(cvValues[channel2Function])) << 8, 0, 65535);
+				}
+
+				switch (editMode) {
+				case EDIT_MODE_TWIN:
+					processors[0].set_parameter(function, modulatedValues[function]);
+					processors[1].set_parameter(function, modulatedValues[function]);
+
+					if (bDividerTurn) {
+						Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
+						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
+						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+
+						currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
+						currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+					}
+					break;
+
+				case EDIT_MODE_SPLIT:
+					if (function < 2) {
+						processors[0].set_parameter(function, modulatedValues[function]);
+					} else {
+						processors[1].set_parameter(function - 2, modulatedValues[function]);
+					}
+
+					if (bDividerTurn) {
+						if (function < 2) {
+							Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
+							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
+							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+
+							currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
+							currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
+						} else {
+							Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
+							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
+							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+
+							currentLightRed.setBrightnessSmooth(0.f, sampleTime);
+							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
+							currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+						}
+					}
+					break;
+
+				case EDIT_MODE_FIRST:
+				case EDIT_MODE_SECOND:
+					processors[0].set_parameter(function, modulatedValues[function]);
+					processors[1].set_parameter(function, modulatedValues[channel2Function]);
+
+					if (bDividerTurn) {
+						Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
+						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
+						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+
+						currentLightRed.setBrightnessSmooth(0.f, sampleTime);
+						currentLightGreen.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
+					}
+					break;
+				default:
+					break;
+				}
+			}
 		}
 
 		if (outputBuffer.empty()) {
@@ -584,7 +727,14 @@ struct Apices : SanguineModule {
 			oledText3 = channelText + apicesKnobLabelsTwinMode[currentFunction].knob3;
 			oledText4 = channelText + apicesKnobLabelsTwinMode[currentFunction].knob4;
 		}
+	}
 
+	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float sampleTime) {
+		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.5f : 0.f, sampleTime);
+
+		for (int light = 0; light < kMaxFunctions; ++light) {
+			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
+		}
 	}
 
 	json_t* dataToJson() override {
@@ -693,6 +843,8 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		FramebufferWidget* apicesFrambuffer = new FramebufferWidget();
 		addChild(apicesFrambuffer);
+
+		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Apices::LIGHT_EXPANDER));
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFrambuffer->addChild(displayChannel1);

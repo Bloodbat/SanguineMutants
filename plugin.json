@@ -120,7 +120,7 @@
     {
       "slug" : "Sanguine-Mortuus",
       "name" : "Mortuus",
-      "description" : "All-around gap filler based on the Dead Man's Catch firmware, with some additions, for Mutable Instruments' Peaks.",
+      "description" : "All-around gap filler based on the Dead Man's Catch firmware, with some additions, for Mutable Instruments' Peaks",
       "tags" : [
         "Delay",
         "Drum",
@@ -281,13 +281,21 @@
     {
       "slug" : "Sanguine-Vimina",
       "name" : "Vimina",
-      "description" : "Polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for Mutable Instruments' Branches.",
+      "description" : "Polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for Mutable Instruments' Branches",
       "tags" : [
         "Clock modulator",
         "Dual",
         "Hardware clone",
         "Polyphonic",
         "Utility"
+      ]
+    },
+    {
+      "slug" : "Sanguine-Nix",
+      "name" : "Nix",
+      "description" : "Expander for Apices: adds CV modulation to function knobs",
+      "tags" : [
+        "Expander"
       ]
     }
   ]

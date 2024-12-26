@@ -1,5 +1,11 @@
 # 2.5.3
 
+## New Modules
+
+### Nix
+
+An expander for Apices that provides CV parameter modulation, inspired by the Rainier module.
+
 ## Fixes
 
 - Funes LPG lights.

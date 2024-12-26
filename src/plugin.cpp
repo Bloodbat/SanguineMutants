@@ -25,6 +25,8 @@ void init(rack::Plugin* p) {
 	p->addModel(modelAestus);
 	p->addModel(modelTemulenti);
 	p->addModel(modelVimina);
+	p->addModel(modelNix);
+	p->addModel(modelAnsa);
 
 	getDefaultTheme();
 }

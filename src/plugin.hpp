@@ -27,3 +27,5 @@ extern Model* modelVelamina;
 extern Model* modelAestus;
 extern Model* modelTemulenti;
 extern Model* modelVimina;
+extern Model* modelNix;
+extern Model* modelAnsa;
