@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "mortuus.hpp"
+#include "ansa.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -43,6 +44,7 @@ struct Mortuus : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
+		LIGHT_EXPANDER,
 		LIGHTS_COUNT
 	};
 
@@ -54,6 +56,8 @@ struct Mortuus : SanguineModule {
 
 	bool bSnapMode = false;
 	bool bSnapped[kNumKnobs] = { false, false, false, false };
+
+	bool bHasExpander = false;
 
 	int32_t adcLp[kNumAdcChannels] = { 0, 0, 0, 0 };
 	int32_t adcValue[kNumAdcChannels] = { 0, 0, 0, 0 };
@@ -160,11 +164,23 @@ struct Mortuus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		Module* ansaExpander = getRightExpander().module;
+
+		float sampleTime = 0.f;
+
+		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa);
+
+		bool bDividerTurn = clockDivider.process();
+
 		// only update knobs / lights every 16 samples
-		if (clockDivider.process()) {
+		if (bDividerTurn) {
 			pollSwitches(args);
 			pollPots();
 			updateOleds();
+
+			sampleTime = args.sampleTime * kClockUpdateFrequency;
+
+			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? 0.5f : 0.f, sampleTime);
 		}
 
 		MortuusProcessorFunction currentFunction = getProcessorFunction();
@@ -172,6 +188,134 @@ struct Mortuus : SanguineModule {
 			currentFunction = static_cast<MortuusProcessorFunction>(params[PARAM_MODE].getValue());
 			setFunction(editMode - EDIT_MODE_FIRST, currentFunction);
 			saveState();
+		}
+
+		if (bHasExpander) {
+			float cvValues[kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
+			int modulatedValues[kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+			int channel2Function;
+
+			if (bDividerTurn) {
+				Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
+				Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
+				Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
+
+				switch (editMode) {
+				case EDIT_MODE_FIRST:
+				case EDIT_MODE_SECOND:
+					channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+					switchExpanderChannel2Lights(ansaExpander, true, sampleTime);
+					break;
+				case EDIT_MODE_TWIN:
+					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.5f, sampleTime);
+					switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
+					break;
+				case EDIT_MODE_SPLIT:
+					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+					switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
+					break;
+				default:
+					break;
+				}
+			}
+
+			for (int function = 0; function < kMaxFunctions; ++function) {
+				int channel1Input = Ansa::INPUT_PARAM_CV_1 + function;
+
+				if (ansaExpander->getInput(channel1Input).isConnected()) {
+					int channel1Attenuverter = Ansa::PARAM_PARAM_CV_1 + function;
+
+					cvValues[function] = rescale(ansaExpander->getInput(channel1Input).getVoltage(), -5.f, 5.f, -255.f, 255.f) *
+						ansaExpander->getParam(channel1Attenuverter).getValue();
+				}
+
+				modulatedValues[function] = clamp((potValue[function] + static_cast<int>(cvValues[function])) << 8, 0, 65535);
+
+				if (editMode > EDIT_MODE_SPLIT) {
+					int channel2Input = Ansa::INPUT_PARAM_CV_CHANNEL_2_1 + function;
+					channel2Function = function + kChannel2Offset;
+
+					if (ansaExpander->getInput(channel2Input).isConnected()) {
+						int channel2Attenuverter = Ansa::PARAM_PARAM_CV_CHANNEL_2_1 + function;
+
+						cvValues[channel2Function] = rescale(ansaExpander->getInput(channel2Input).getVoltage(), -5.f, 5.f, -255.f, 255.f) *
+							ansaExpander->getParam(channel2Attenuverter).getValue();
+					}
+
+					modulatedValues[channel2Function] = clamp((potValue[channel2Function] +
+						static_cast<int>(cvValues[channel2Function])) << 8, 0, 65535);
+				}
+
+				switch (editMode) {
+				case EDIT_MODE_TWIN:
+					processors[0].set_parameter(function, modulatedValues[function]);
+					processors[1].set_parameter(function, modulatedValues[function]);
+
+					if (bDividerTurn) {
+						Light& currentLightRed = ansaExpander->getLight(Ansa::LIGHT_PARAM_1 + function * 3);
+						Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
+						Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
+
+						currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
+						currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+					}
+					break;
+
+				case EDIT_MODE_SPLIT:
+					if (function < 2) {
+						processors[0].set_parameter(function, modulatedValues[function]);
+					} else {
+						processors[1].set_parameter(function - 2, modulatedValues[function]);
+					}
+
+					if (bDividerTurn) {
+						if (function < 2) {
+							Light& currentLightRed = ansaExpander->getLight(Ansa::LIGHT_PARAM_1 + function * 3);
+							Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
+							Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
+
+							currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
+							currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
+						} else {
+							Light& currentLightRed = ansaExpander->getLight(Ansa::LIGHT_PARAM_1 + function * 3);
+							Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
+							Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
+
+							currentLightRed.setBrightnessSmooth(0.f, sampleTime);
+							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
+							currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+						}
+					}
+					break;
+
+				case EDIT_MODE_FIRST:
+				case EDIT_MODE_SECOND:
+					processors[0].set_parameter(function, modulatedValues[function]);
+					processors[1].set_parameter(function, modulatedValues[channel2Function]);
+
+					if (bDividerTurn) {
+						Light& currentLightRed = ansaExpander->getLight(Ansa::LIGHT_PARAM_1 + function * 3);
+						Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
+						Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
+
+						currentLightRed.setBrightnessSmooth(0.f, sampleTime);
+						currentLightGreen.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
+					}
+					break;
+				default:
+					break;
+				}
+			}
 		}
 
 		if (outputBuffer.empty()) {
@@ -613,6 +757,14 @@ struct Mortuus : SanguineModule {
 
 	}
 
+	void switchExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn, const float sampleTime) {
+		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.5f : 0.f, sampleTime);
+
+		for (int light = 0; light < kMaxFunctions; ++light) {
+			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
+		}
+	}
+
 	json_t* dataToJson() override {
 		saveState();
 
@@ -717,15 +869,17 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		FramebufferWidget* apicesFrambuffer = new FramebufferWidget();
-		addChild(apicesFrambuffer);
+		FramebufferWidget* mortuusFrambuffer = new FramebufferWidget();
+		addChild(mortuusFrambuffer);
+
+		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Mortuus::LIGHT_EXPANDER));
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
-		apicesFrambuffer->addChild(displayChannel1);
+		mortuusFrambuffer->addChild(displayChannel1);
 		displayChannel1->fallbackString = mortuusModeList[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
-		apicesFrambuffer->addChild(displayChannel2);
+		mortuusFrambuffer->addChild(displayChannel2);
 		displayChannel2->fallbackString = mortuusModeList[0];
 
 		if (module) {
@@ -773,28 +927,28 @@ struct MortuusWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Mortuus::OUTPUT_OUT_2));
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
-		apicesFrambuffer->addChild(oledDisplay1);
+		mortuusFrambuffer->addChild(oledDisplay1);
 		oledDisplay1->fallbackString = mortuusKnobLabelsTwinMode[0].knob1;
 
 		if (module)
 			oledDisplay1->oledText = &module->oledText1;
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
-		apicesFrambuffer->addChild(oledDisplay2);
+		mortuusFrambuffer->addChild(oledDisplay2);
 		oledDisplay2->fallbackString = mortuusKnobLabelsTwinMode[0].knob2;
 
 		if (module)
 			oledDisplay2->oledText = &module->oledText2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
-		apicesFrambuffer->addChild(oledDisplay3);
+		mortuusFrambuffer->addChild(oledDisplay3);
 		oledDisplay3->fallbackString = mortuusKnobLabelsTwinMode[0].knob3;
 
 		if (module)
 			oledDisplay3->oledText = &module->oledText3;
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
-		apicesFrambuffer->addChild(oledDisplay4);
+		mortuusFrambuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = mortuusKnobLabelsTwinMode[0].knob4;
 
 		if (module)

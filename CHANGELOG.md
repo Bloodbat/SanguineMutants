@@ -6,6 +6,10 @@
 
 An expander for Apices that provides CV parameter modulation, inspired by the Rainier module.
 
+### Ansa
+
+An expander for Mortuus that provides CV parameter modulation, inspired by the Rainier module.
+
 ## Fixes
 
 - Funes LPG lights.
