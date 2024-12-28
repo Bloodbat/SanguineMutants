@@ -113,7 +113,7 @@ struct Anuli : SanguineModule {
 
 		configSwitch(PARAM_FX, 0.f, 5.f, 0.f, "Disastrous peace FX", anuliFxLabels);
 
-		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Polyphony");
+		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Note polyphony");
 		paramQuantities[PARAM_POLYPHONY]->snapEnabled = true;
 
 		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency");
@@ -312,7 +312,7 @@ struct Anuli : SanguineModule {
 		float note = inputs[INPUT_PITCH].getVoltage(channel) +
 			anuliFrequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
-		
+
 		float transpose = params[PARAM_FREQUENCY].getValue();
 		// Quantize transpose if pitch input is connected
 		if (inputs[INPUT_PITCH].isConnected()) {
@@ -552,7 +552,9 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
 
-		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(53.34, 37.683), module, Anuli::PARAM_POLYPHONY));
+		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34f, 37.486f);
+		anuliFrambuffer->addChild(displayPolyphony);
+		displayPolyphony->fallbackNumber = 1;
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 35.904), module, Anuli::INPUT_STRUCTURE_CV));
 
@@ -560,17 +562,18 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(33.006, 49.715), module, Anuli::PARAM_FREQUENCY));
 
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(53.34f, 30.245f), module, Anuli::LIGHT_POLYPHONY));
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.34, 54.784), module, Anuli::PARAM_POLYPHONY));
+
 		addParam(createParamCentered<Sanguine3PSGreen>(millimetersToPixelsVec(73.674, 49.715), module, Anuli::PARAM_STRUCTURE));
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 42.833), module, Anuli::PARAM_STRUCTURE_MOD));
 
-		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34, 54.795);
-		anuliFrambuffer->addChild(displayPolyphony);
-		displayPolyphony->fallbackNumber = 1;
-
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(33.006, 72.385), module, Anuli::PARAM_BRIGHTNESS));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(53.34f, 67.085f), module, Anuli::LIGHT_POLYPHONY));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(53.34, 70.654),
+			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
 
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(73.674, 72.385), module, Anuli::PARAM_POSITION));
 
@@ -584,7 +587,7 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
 
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 22.578, 100.55);
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 32.288, 101.019);
 		addChild(bloodLogo);
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
@@ -597,9 +600,6 @@ struct AnuliWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(8.728, 116.807), module, Anuli::INPUT_STRUM));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(22.58, 116.807), module, Anuli::INPUT_PITCH));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(36.382, 116.807), module, Anuli::INPUT_IN));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(71.828, 116.609),
-			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
 
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(84.046, 116.807), module, Anuli::OUTPUT_ODD));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(97.898, 116.807), module, Anuli::OUTPUT_EVEN));

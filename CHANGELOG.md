@@ -36,6 +36,10 @@ An expander for Mortuus that provides CV parameter modulation, inspired by the R
 
 - Marmora: faceplate label tweaks.
 
+- Anuli: reorganize faceplate and make it cleaner.
+
+- Anuli: change the polyphony knob's tooltip to be congruent with the nomenclature used in the manual.
+
 
 # 2.5.2
 
