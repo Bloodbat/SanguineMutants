@@ -41,6 +41,7 @@ struct Etesia : SanguineModule {
 		INPUT_REVERB,
 		INPUT_LEFT,
 		INPUT_RIGHT,
+		INPUT_REVERSE,
 		INPUTS_COUNT
 	};
 	enum OutputIds {
@@ -124,6 +125,7 @@ struct Etesia : SanguineModule {
 		configInput(INPUT_FREEZE, "Freeze");
 		configParam(PARAM_FREEZE, 0.f, 1.f, 0.f, "Freeze");
 
+		configInput(INPUT_REVERSE, "Reverse");
 		configParam(PARAM_REVERSE, 0.f, 1.f, 0.f, "Reverse");
 
 		configButton(PARAM_LEDS_MODE, "LED display value: Input");
@@ -288,7 +290,7 @@ struct Etesia : SanguineModule {
 			etesiaParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + parameters2[1], 0.f, 1.f);
 			etesiaParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + parameters2[2], 0.f, 1.f);
 			etesiaParameters->reverb = clamp(params[PARAM_REVERB].getValue() + parameters2[3], 0.f, 1.f);
-			etesiaParameters->granular.reverse = params[PARAM_REVERSE].getValue();
+			etesiaParameters->granular.reverse = (inputs[INPUT_REVERSE].getVoltage() >= 1.f || params[PARAM_REVERSE].getValue());
 
 			etesia::ShortFrame output[32];
 			etesiaProcessor->Process(input, output, 32);
@@ -575,22 +577,25 @@ struct EtesiaWidget : SanguineModuleWidget {
 		FramebufferWidget* etesiaFramebuffer = new FramebufferWidget();
 		addChild(etesiaFramebuffer);
 
-		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
+		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 13.453, 16.419);
 		etesiaFramebuffer->addChild(displayFreeze);
 		displayFreeze->fallbackString = etesiaModeDisplays[0].labelFreeze;
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Etesia::INPUT_FREEZE));
-		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Etesia::PARAM_FREEZE);
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(20.029, 25.607), module, Etesia::INPUT_FREEZE));
+
+		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(6.177, 25.607), module, Etesia::PARAM_FREEZE);
 		freezeButton->latch = true;
 		freezeButton->momentary = false;
 		addParam(freezeButton);
-		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(21.529, 25.607), module, Etesia::LIGHT_FREEZE));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(6.177, 25.607), module, Etesia::LIGHT_FREEZE));
 
-		CKD6* reverseButton = createParamCentered<CKD6>(millimetersToPixelsVec(37.35, 25.607), module, Etesia::PARAM_REVERSE);
+		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(30.904, 25.607), module, Etesia::INPUT_REVERSE));
+
+		CKD6* reverseButton = createParamCentered<CKD6>(millimetersToPixelsVec(44.75, 25.607), module, Etesia::PARAM_REVERSE);
 		reverseButton->latch = true;
 		reverseButton->momentary = false;
 		addParam(reverseButton);
-		addChild(createLightCentered<CKD6Light<WhiteLight>>(millimetersToPixelsVec(37.35, 25.607), module, Etesia::LIGHT_REVERSE));
+		addChild(createLightCentered<CKD6Light<WhiteLight>>(millimetersToPixelsVec(44.75, 25.607), module, Etesia::LIGHT_REVERSE));
 
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.173, 12.851), module, Etesia::LIGHT_BLEND));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(85.911, 12.851), module, Etesia::LIGHT_SPREAD));

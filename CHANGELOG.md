@@ -27,6 +27,8 @@ An expander for Mortuus that provides CV parameter modulation, inspired by the R
 - Marmora shows selected loop length in the knob's tooltip.
 
 - Optionally tune Anuli to a C when frequency knob is centered.
+  
+- Etesia: CV control for Reverse parameter.
 
 ## Changes
 
