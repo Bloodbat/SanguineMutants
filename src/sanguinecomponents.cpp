@@ -713,6 +713,50 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 	}
 }
 
+void SanguineShapedAcrylicLed::draw(const DrawArgs& args) {
+	// Drawn in the background: these lights should include a background, otherwise designs show: they include transparency.
+}
+
+// drawLayer logic partially based on code by BaconPaul and Hemmer.
+void SanguineShapedAcrylicLed::drawLayer(const DrawArgs& args, int layer) {
+	if (layer == 1) {
+
+		if (!sw->svg) {
+			return;
+		}
+
+		if (module && !module->isBypassed()) {
+			// When LED is off, draw the background (grey value #1E1E1E), but if on then progressively blend away to zero.
+			float backgroundFactor = std::max(0.f, 1.f - color.a) * backgroundGrey;
+
+			if (backgroundFactor > 0.f) {
+				NVGcolor blendedColor = nvgRGBf(backgroundFactor, backgroundFactor, backgroundFactor);
+
+				const NSVGimage* mySvg = sw->svg->handle;
+				const int fillColor = rgbColorToInt(static_cast<int>(blendedColor.r * 255), static_cast<int>(blendedColor.g * 255),
+					static_cast<int>(blendedColor.b * 255), static_cast<int>(blendedColor.a * 255));
+
+				fillSvgSolidColor(mySvg, fillColor);
+
+				nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+				svgDraw(args.vg, sw->svg->handle);
+			}
+
+			// Main RGB color.
+			const NSVGimage* mySvg = sw->svg->handle;
+			const int fillColor = rgbColorToInt(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255),
+				static_cast<int>(color.b * 255), static_cast<int>(color.a * 255));
+
+			fillSvgSolidColor(mySvg, fillColor);
+
+			nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+			svgDraw(args.vg, sw->svg->handle);
+			drawHalo(args);
+		}
+	}
+	Widget::drawLayer(args, layer);
+}
+
 // Decorations
 SanguineShapedLight::SanguineShapedLight(Module* theModule, const std::string& shapeFileName, const float X, const float Y, bool createCentered) {
 	module = theModule;

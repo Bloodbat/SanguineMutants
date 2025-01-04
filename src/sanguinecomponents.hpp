@@ -284,6 +284,14 @@ struct Rogan6PSLight : Base {
 	}
 };
 
+struct SanguineShapedAcrylicLed : TSvgLight<RedGreenBlueLight> {
+	static constexpr float backgroundGrey = 30.f / 255.f;
+
+	void draw(const DrawArgs& args) override;
+
+	void drawLayer(const DrawArgs& args, int layer) override;
+};
+
 // Light states
 enum LightModes {
 	LIGHT_OFF,
