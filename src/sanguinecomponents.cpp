@@ -1081,11 +1081,4 @@ void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolo
 	nvgGlobalCompositeOperation(args.vg, NVG_SOURCE_OVER);
 }
 
-void fillSvgSolidColor(const NSVGimage* svgImage, const unsigned int fillColor) {
-	for (NSVGshape* shape = svgImage->shapes; shape; shape = shape->next) {
-		shape->fill.color = fillColor;
-		shape->fill.type = NSVG_PAINT_COLOR;
-	}
-}
-
 FaceplateThemes defaultTheme = THEME_VITRIOL;
