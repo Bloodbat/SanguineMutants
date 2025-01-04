@@ -29,3 +29,4 @@ extern Model* modelTemulenti;
 extern Model* modelVimina;
 extern Model* modelNix;
 extern Model* modelAnsa;
+extern Model* modelScalaria;

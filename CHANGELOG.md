@@ -1,4 +1,4 @@
-# 2.5.3
+# 2.6.0
 
 ## New Modules
 
@@ -9,6 +9,10 @@ An expander for Apices that provides CV parameter modulation, inspired by the Ra
 ### Ansa
 
 An expander for Mortuus that provides CV parameter modulation, inspired by the Rainier module.
+
+### Scalaria
+
+A polyphonic Moog inspired ladder filter from the original Symbiote firmware for Mutable Instruments' Warps.
 
 ## Fixes
 

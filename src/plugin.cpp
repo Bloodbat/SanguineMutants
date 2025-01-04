@@ -27,6 +27,7 @@ void init(rack::Plugin* p) {
 	p->addModel(modelVimina);
 	p->addModel(modelNix);
 	p->addModel(modelAnsa);
+	p->addModel(modelScalaria);
 
 	getDefaultTheme();
 }

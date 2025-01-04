@@ -1,7 +1,7 @@
 {
   "slug" : "SanguineMutants",
   "name" : "Sanguine Mutants",
-  "version" : "2.5.3",
+  "version" : "2.6.0",
   "license" : "GPL-3.0-or-later",
   "author" : "Bloodbat",
   "pluginUrl" : "https://github.com/Bloodbat/SanguineMutants",
@@ -304,6 +304,16 @@
       "description" : "Expander for Mortuus: adds CV modulation to function knobs",
       "tags" : [
         "Expander"
+      ]
+    },
+    {
+      "slug" : "Sanguine-Scalaria",
+      "name" : "Scalaria",
+      "description" : "A polyphonic Moog inspired ladder filter from the original Symbiote firmware for Mutable Instruments' Warps",
+      "tags" : [
+        "Filter",
+        "Oscillator",
+        "Polyphonic"
       ]
     }
   ]
