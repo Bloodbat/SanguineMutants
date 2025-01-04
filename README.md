@@ -10,7 +10,7 @@ You can find the Nightly builds [here](https://github.com/Bloodbat/SanguineMutan
 
 ![alt text](pics/mutants_modules.png)
 
-Base modules are listed in alphabetical order with their alternative firmwares immediately following.
+Base modules are listed in alphabetical order, with their alternative firmwares and expanders immediately following.
 
 - ### Aestus
 
@@ -36,9 +36,17 @@ Base modules are listed in alphabetical order with their alternative firmwares i
 
   A versatile complement to any patch, based on MI's Peaks. It exposes every control and provides access to the Bouncing Ball envelope, unavailable in unmodified hardware.
 
+  - ### Nix
+  
+    An expander for Apices that provides CV parameter modulation, inspired by the Rainier version of MI's Peaks.
+
   - ### Mortuus
 
     An all-around gap filler based on the Dead Man's Catch firmware, with some additions, for MI's Peaks.
+
+    - ### Ansa
+
+      An expander for Mortuus that provides CV parameter modulation, inspired by the Rainier version of MI's Peaks.
 
 - ### Explorator
 
@@ -89,6 +97,10 @@ Base modules are listed in alphabetical order with their alternative firmwares i
   - ### Contextus
 
     A polyphonic, multipurpose macro oscillator based on the Renaissance alternative firmware for MI's Braids. Exposes every control.
+
+- ### Scalaria
+  
+  A polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for MI's Warps.
 
 - ### Velamina
 
