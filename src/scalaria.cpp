@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+#include "warpiescommon.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -65,8 +66,8 @@ struct Scalaria : SanguineModule {
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator scalariaModulator[PORT_MAX_CHANNELS];
-    scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
-    scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
+    scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+    scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
 
     scalaria::Parameters* scalariaParameters[PORT_MAX_CHANNELS];
 
@@ -144,7 +145,7 @@ struct Scalaria : SanguineModule {
             float_4 f4Voltages;
 
             // Buffer loop
-            if (++frame[channel] >= 60) {
+            if (++frame[channel] >= kWarpsBlockSize) {
                 frame[channel] = 0;
 
                 // CHANNEL_1_LEVEL and CHANNEL_2_LEVEL are normalized values: from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -168,7 +169,7 @@ struct Scalaria : SanguineModule {
                     * inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
                 scalariaParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-                scalariaModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
+                scalariaModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
             }
 
             inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CHANNEL_1].getVoltage(channel) / 8.f * 32768),

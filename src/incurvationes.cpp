@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+#include "warpiescommon.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -43,8 +44,8 @@ struct Incurvationes : SanguineModule {
 	static const int kLightFrequency = 128;
 
 	warps::Modulator warpsModulator[PORT_MAX_CHANNELS];
-	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
-	warps::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
+	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+	warps::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
 
 	bool bEasterEggEnabled = false;
 
@@ -107,7 +108,7 @@ struct Incurvationes : SanguineModule {
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= 60) {
+			if (++frame[channel] >= kWarpsBlockSize) {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -133,7 +134,7 @@ struct Incurvationes : SanguineModule {
 					inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				warpsParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
+				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
 			}
 
 			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);

@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+#include "warpiescommon.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -52,8 +53,8 @@ struct Mutuus : SanguineModule {
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
 	mutuus::MutuusModulator mutuusModulator[PORT_MAX_CHANNELS];
-	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
-	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
+	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
 
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
@@ -170,7 +171,7 @@ struct Mutuus : SanguineModule {
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= 60) {
+			if (++frame[channel] >= kWarpsBlockSize) {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -211,7 +212,7 @@ struct Mutuus : SanguineModule {
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				mutuusParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
+				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
 			}
 
 			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);

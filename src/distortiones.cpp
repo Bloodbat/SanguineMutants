@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+#include "warpiescommon.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -50,8 +51,8 @@ struct Distortiones : SanguineModule {
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
 	distortiones::DistortionesModulator distortionesModulator[PORT_MAX_CHANNELS];
-	distortiones::ShortFrame inputFrames[PORT_MAX_CHANNELS][60] = {};
-	distortiones::ShortFrame outputFrames[PORT_MAX_CHANNELS][60] = {};
+	distortiones::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+	distortiones::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
 
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
@@ -162,7 +163,7 @@ struct Distortiones : SanguineModule {
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= 60) {
+			if (++frame[channel] >= kWarpsBlockSize) {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -196,7 +197,7 @@ struct Distortiones : SanguineModule {
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				distortionesParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				distortionesModulator[channel].Process(inputFrames[channel], outputFrames[channel], 60);
+				distortionesModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
 			}
 
 			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
