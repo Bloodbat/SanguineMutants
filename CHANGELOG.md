@@ -31,7 +31,7 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 - Marmora shows selected loop length in the knob's tooltip.
 
 - Optionally tune Anuli to a C when frequency knob is centered.
-  
+
 - Etesia: CV control for Reverse parameter.
 
 ## Changes
@@ -45,6 +45,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 - Anuli: reorganize faceplate and make it cleaner.
 
 - Anuli: change the polyphony knob's tooltip to be congruent with the nomenclature used in the manual.
+
+- Nodi family: faceplate tweaks.
 
 
 # 2.5.2

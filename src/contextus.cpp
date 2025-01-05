@@ -641,7 +641,7 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.606), module, Contextus::PARAM_ATTACK));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(23.804, 54.231), module, Contextus::PARAM_AD_TIMBRE));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(22.768, 54.231), module, Contextus::PARAM_AD_TIMBRE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(119.4, 54.231),
 			module, Contextus::PARAM_VCA, Contextus::LIGHT_VCA));
 
@@ -654,8 +654,8 @@ struct ContextusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(106.234, 67.247), module, Contextus::PARAM_SCALE));
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(132.166, 67.247), module, Contextus::PARAM_DECAY));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(23.804, 76.712), module, Contextus::PARAM_AD_COLOR));
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(119.4, 76.712), module, Contextus::PARAM_AD_MODULATION));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.345, 88.962), module, Contextus::PARAM_AD_COLOR));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(108.374, 88.962), module, Contextus::PARAM_AD_MODULATION));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 97.889), module, Contextus::INPUT_COLOR));
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(22.768, 97.889), module, Contextus::PARAM_COLOR));
