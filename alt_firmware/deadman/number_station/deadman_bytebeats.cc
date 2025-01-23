@@ -57,7 +57,7 @@ namespace deadman {
 		uint32_t p1 = 0;
 		// uint32_t p2 = 0;
 		int32_t sample = 0;
-		// temporary vars		
+		// temporary vars
 		uint8_t j = 0;
 
 		// Use floats to prevent shifting right to oblivion
@@ -109,10 +109,8 @@ namespace deadman {
 			case 1:
 				p0 = p0_ >> 11;
 				p1 = p1_ >> 11;
-				// p2 = p2_ >> 11;
 				// equation by stephth via https://www.youtube.com/watch?v=tCRPUv8V22o at 3:38
 				sample = ((((t_ * p0) & (t_ >> 4)) | ((t_ * 5) & (t_ >> 7)) | ((t_ * p1) & (t_ >> 10))) & 0xFF) << 8;
-				// sample = ((((t_*p0) & (t_>>4)) | ((t_*p2) & (t_>>7)) | ((t_*p1) & (t_>>10))) & 0xFF) << 8;
 				break;
 			case 2:
 				p0 = p0_ >> 12;
@@ -122,10 +120,11 @@ namespace deadman {
 				break;
 			case 3:
 				p0 = p0_ >> 11;
-				p1f = p1_ / 512;
 				//p1 = p1_ >> 9;
+				p1f = p1_ / 512;
 				tf = fmodf(t_, p1f);
-				// This one is the second one listed at from http://xifeng.weebly.com/bytebeats.html				
+				// This one is the second one listed at from http://xifeng.weebly.com/bytebeats.html
+				// sample = ((( (((((t_ >> p0) | t_) | (t_ >> p0)) * 10) & ((5 * t_) | (t_ >> 10)) ) | (t_ ^ (t_ % p1)) ) & 0xFF)) << 8;
 				sample = ((((((((t_ >> p0) | t_) | (t_ >> p0)) * 10) & ((5 * t_) | (t_ >> 10))) | (t_ ^ int(tf))) & 0xFF)) << 8;
 				break;
 			case 4:
@@ -135,8 +134,9 @@ namespace deadman {
 				//  BitWiz Transplant from Equation Composer Ptah bank
 				// run at twice normal sample rate
 				for (j = 0; j < 2; ++j) {
+					// sample = t_*(((t_>>p1)^((t_>>p1)-1)^1)%p0);
 					samplef = fmodf(((t_ >> p1) ^ ((t_ >> p1) - 1) ^ 1), p0f);
-					sample = t_ * samplef; // Dead man's catch            
+					sample = t_ * samplef; // Dead man's catch
 					if (j == 0) ++t_;
 				}
 				break;
@@ -152,7 +152,6 @@ namespace deadman {
 				// Arpeggiation from Equation Composer Khepri bank
 				// run at twice normal sample rate
 				/* Tries to produce some voltage anyway while preventing divisions by zero - Bloodbat */
-				//for (uint8_t j = 0; j < 2; ++j) {
 				//p = ((t_ / (1236 + p0)) % 128) & ((t_ >> (p1 >> 5)) * p1);
 
 				pf = int(fmodf((t_ / (1236 + p0f)), 128)) & int(((t_ >> int((p1f / 32))) * p1f));
@@ -183,10 +182,9 @@ namespace deadman {
 					tf = 1.f;
 				}
 
+				//  sample = (t_>>q>>(p1>>5)) + (t_/(t_>>((p1>>5)&12))>>p);
 				sample = int((t_ >> int(qf) >> (int(p1f) >> 5)) + (float(t_) / float(int(tf) >> int(pf))));
 
-				//if (j == 0) ++t_ ;
-				//}
 				break;
 			case 6:
 				//p0 = p0_ >> 9;
@@ -195,7 +193,7 @@ namespace deadman {
 				//p1 = p1_ >> 10; // was 9
 				p1f = p1_ / 1024;
 
-				// The Smoker from Equation Composer Khepri bank				
+				// The Smoker from Equation Composer Khepri bank
 				//sample = sample ^ (t_ >> (p1 >> 4)) >> ((t_ / 6988 * t_ % (p0 + 1)) + (t_ << t_ / (p1 * 4)));
 
 				sampleaf = fmodf(t_, p0f + 1);
@@ -212,10 +210,12 @@ namespace deadman {
 				// // run at twice normal sample rate
 				for (j = 0; j < 2; ++j) {
 					// Warping overtone echo drone, from BitWiz
+					// sample = ((t_ & p0) - (t_ % p1)) ^ (t_ >> 7);
 					sampleaf = fmodf(t_, p1f);
 					sample = ((t_ & p0) - int(sampleaf)) ^ (t_ >> 7);
-					// sample = t_*(((t_>>p1)^((t_>>p1)-1)^1)%p0) ;
-					if (j == 0) ++t_;
+					if (j == 0) {
+						++t_;
+					}
 				}
 				break;
 			}
