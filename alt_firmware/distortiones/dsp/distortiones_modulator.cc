@@ -109,8 +109,7 @@ namespace distortiones {
 
 			float shape = static_cast<float>(parameters_.carrier_shape - 1) * 0.5f;
 			quadrature_oscillator_.Render(shape, frequency, carrier_i, carrier_q, size);
-		}
-		else {
+		} else {
 			for (size_t i = 0; i < size; ++i) {
 				carrier[i] = static_cast<float>(input[i].l) / 32768.0f;
 			}
@@ -324,8 +323,7 @@ namespace distortiones {
 				for (size_t i = 0; i < size; ++i) {
 					carrier[i] = aux_output[i] * kXmodCarrierGain;
 				}
-			}
-			else if (vocoder_amount >= 0.5f) {
+			} else if (vocoder_amount >= 0.5f) {
 				float carrier_gain = vocoder_oscillator_.Render(
 					vocoder_shape,
 					parameters_.note,
@@ -335,8 +333,7 @@ namespace distortiones {
 				for (size_t i = 0; i < size; ++i) {
 					carrier[i] = aux_output[i] * carrier_gain;
 				}
-			}
-			else {
+			} else {
 				float balance = vocoder_amount * 2.0f;
 				xmod_oscillator_.Render(
 					xmod_shape,
@@ -387,8 +384,7 @@ namespace distortiones {
 				size * kOversampling);
 
 			src_down_.Process(oversampled_output, main_output, size * kOversampling);
-		}
-		else {
+		} else {
 			float release_time = 4.0f * (parameters_.modulation_algorithm - 0.75f);
 			CONSTRAIN(release_time, 0.0f, 1.0f);
 
@@ -610,8 +606,7 @@ namespace distortiones {
 				// invert feedback channels (ping-pong)
 				fb.l = delay_feedback_sample.r * feedback * 1.1f;
 				fb.r = delay_feedback_sample.l * feedback * 1.1f;
-			}
-			else if (parameters_.carrier_shape == 2) {
+			} else if (parameters_.carrier_shape == 2) {
 				// simulate tape hiss with a bit of noise
 				float noise1 = Random::GetFloat();
 				float noise2 = Random::GetFloat();
@@ -629,14 +624,12 @@ namespace distortiones {
 				// apply soft saturation with a bit of bias
 				fb.l = SoftLimit(fb.l * 1.4f + 0.1f) / 1.4f - SoftLimit(0.1f);
 				fb.r = SoftLimit(fb.r * 1.4f + 0.1f) / 1.4f - SoftLimit(0.1f);
-			}
-			else if (parameters_.carrier_shape == 0) {
+			} else if (parameters_.carrier_shape == 0) {
 				// open feedback loop
 				fb.l = feedback * 1.1f * in.r;
 				fb.r = delay_feedback_sample.l;
 				in.r = 0.0f;
-			}
-			else {
+			} else {
 				// classic dual delay
 				fb.l = delay_feedback_sample.l * feedback * 1.1f;
 				fb.r = delay_feedback_sample.r * feedback * 1.1f;
@@ -656,12 +649,10 @@ namespace distortiones {
 				if (delay_interpolation_ == INTERPOLATION_ZOH) {
 					s.l = mix.l;
 					s.r = mix.r;
-				}
-				else if (delay_interpolation_ == INTERPOLATION_LINEAR) {
+				} else if (delay_interpolation_ == INTERPOLATION_LINEAR) {
 					s.l = delay_previous_samples[0].l + (mix.l - delay_previous_samples[0].l) * delay_write_position;
 					s.r = delay_previous_samples[0].r + (mix.r - delay_previous_samples[0].r) * delay_write_position;
-				}
-				else if (delay_interpolation_ == INTERPOLATION_HERMITE) {
+				} else if (delay_interpolation_ == INTERPOLATION_HERMITE) {
 					FloatFrame xm1 = delay_previous_samples[2];
 					FloatFrame x0 = delay_previous_samples[1];
 					FloatFrame x1 = delay_previous_samples[0];
@@ -719,12 +710,10 @@ namespace distortiones {
 			if (delay_interpolation_ == INTERPOLATION_ZOH) {
 				wet.l = xm1.l;
 				wet.r = xm1.r;
-			}
-			else if (delay_interpolation_ == INTERPOLATION_LINEAR) {
+			} else if (delay_interpolation_ == INTERPOLATION_LINEAR) {
 				wet.l = xm1.l + (x0.l - xm1.l) * index_fractional;
 				wet.r = xm1.r + (x0.r - xm1.r) * index_fractional;
-			}
-			else if (delay_interpolation_ == INTERPOLATION_HERMITE) {
+			} else if (delay_interpolation_ == INTERPOLATION_HERMITE) {
 				FloatFrame c = { (x1.l - xm1.l) * 0.5f,
 								 (x1.r - xm1.r) * 0.5f };
 				FloatFrame v = { (float)(x0.l - x1.l), (float)(x0.r - x1.r) };
@@ -758,13 +747,11 @@ namespace distortiones {
 				in.r = static_cast<float>(input->r) / 32768.0f;
 				output->l = Clip16((fade_out * in.l + fade_in * in.r) * 32768.0f);
 				output->r = Clip16(wet.r * 32768.0f);
-			}
-			else if (parameters_.carrier_shape == 2) {
+			} else if (parameters_.carrier_shape == 2) {
 				// analog mode -> soft-clipping
 				output->l = SoftConvert((fade_out * in.l + fade_in * wet.l) * 2.0f);
 				output->r = SoftConvert((fade_out * in.r + fade_in * wet.r) * 2.0f);
-			}
-			else {
+			} else {
 				output->l = Clip16((fade_out * in.l + fade_in * wet.l) * 32768.0f);
 				output->r = Clip16((fade_out * in.r + fade_in * wet.r) * 32768.0f);
 			}
@@ -1111,32 +1098,26 @@ namespace distortiones {
 		if (x_integral == 0) {
 			y_1 = modulator + carrier;
 			y_2 = modulator < carrier ? modulator : carrier;
-		}
-		else if (x_integral == 1) {
+		} else if (x_integral == 1) {
 			y_1 = modulator < carrier ? modulator : carrier;
 			y_2 = (modulator < carrier ? fabs(carrier) : fabs(modulator)) * 2.0f - 1.0f;
-		}
-		else if (x_integral == 2) {
+		} else if (x_integral == 2) {
 			y_1 = (modulator < carrier ? fabs(carrier) : fabs(modulator)) * 2.0f - 1.0f;
 			y_2 = modulator < carrier ? -carrier : modulator;
-		}
-		else if (x_integral == 3) {
+		} else if (x_integral == 3) {
 			y_1 = modulator < carrier ? -carrier : modulator;
 			y_2 = fabs(modulator) > fabs(carrier) ? modulator : carrier;
-		}
-		else if (x_integral == 4) {
+		} else if (x_integral == 4) {
 			y_1 = fabs(modulator) > fabs(carrier) ? modulator : carrier;
 			y_2 = fabs(modulator) > fabs(carrier)
 				? fabs(modulator)
 				: -fabs(carrier);
-		}
-		else if (x_integral == 5) {
+		} else if (x_integral == 5) {
 			y_1 = fabs(modulator) > fabs(carrier)
 				? fabs(modulator)
 				: -fabs(carrier);
 			y_2 = carrier > 0.05f ? carrier : modulator;
-		}
-		else {
+		} else {
 			y_1 = carrier > 0.05f ? carrier : modulator;
 			y_2 = carrier > 0.05f ? carrier : -fabs(modulator);
 		}
