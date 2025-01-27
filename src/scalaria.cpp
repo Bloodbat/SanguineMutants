@@ -1,9 +1,9 @@
 #include "plugin.hpp"
 #include "scalaria/dsp/scalaria_modulator.h"
 #include "sanguinecomponents.hpp"
-#include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
 #include "warpiescommon.hpp"
+#include "scalaria.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -82,7 +82,7 @@ struct Scalaria : SanguineModule {
 
         configParam(PARAM_RESONANCE_CV_ATTENUVERTER, -1.f, 1.f, 0.f, "Resonance CV");
 
-        configSwitch(PARAM_INTERNAL_OSCILLATOR, 0.f, 3.f, 0.f, "Internal oscillator", { "Off", "Triangle", "Saw", "Square" });
+        configSwitch(PARAM_INTERNAL_OSCILLATOR, 0.f, 3.f, 0.f, "Internal oscillator", scalariaOscillatorNames);
 
         configParam(PARAM_CHANNEL_1_LEVEL, 0.f, 1.f, 0.66f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
         configParam(PARAM_CHANNEL_2_LEVEL, 0.f, 1.f, 0.66f, "Channel 2 amplitude", "%", 0, 100);
@@ -186,7 +186,7 @@ struct Scalaria : SanguineModule {
                 const uint8_t(*palette)[3];
                 float zone;
 
-                palette = paletteWarpsFreqsShift;
+                palette = paletteScalaria;
 
                 zone = 8.f * scalariaParameters[channel]->rawFrequency;
                 MAKE_INTEGRAL_FRACTIONAL(zone);
@@ -405,13 +405,14 @@ struct ScalariaWidget : SanguineModuleWidget {
         addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(39.556, 116.272), module, Scalaria::OUTPUT_AUX));
 
 
-        addChild(createLightCentered<AcrylicOff>(millimetersToPixelsVec(16.845, 75.573), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_OFF));
+        addChild(createLightCentered<AcrylicOff>(millimetersToPixelsVec(16.385, 75.676), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_OFF));
 
-        addChild(createLightCentered<AcrylicTriangle>(millimetersToPixelsVec(17.045, 63.436), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_TRIANGLE));
+        addChild(createLightCentered<AcrylicTriangle>(millimetersToPixelsVec(16.385, 63.997), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_TRIANGLE));
 
-        addChild(createLightCentered<AcrylicSaw>(millimetersToPixelsVec(28.647, 63.436), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SAW));
+        addChild(createLightCentered<AcrylicSaw>(millimetersToPixelsVec(29.335, 63.997), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SAW));
 
-        addChild(createLightCentered<AcrylicSquare>(millimetersToPixelsVec(28.847, 75.573), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SQUARE));
+        addChild(createLightCentered<AcrylicSquare>(millimetersToPixelsVec(29.335, 75.676), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SQUARE));
+
 
         addChild(createLightCentered<AcrylicFreq>(millimetersToPixelsVec(9.494, 93.944), module, Scalaria::LIGHT_CHANNEL_1_FREQUENCY));
 
@@ -447,7 +448,7 @@ struct ScalariaWidget : SanguineModuleWidget {
 
         addChild(createLightCentered<AcrylicChannel15>(millimetersToPixelsVec(39.77, 28.927), module, Scalaria::LIGHT_CHANNEL_15));
 
-        addChild(createLightCentered<AcrylicChannel16>(millimetersToPixelsVec(39.77, 25.927), module, Scalaria::LIGHT_CHANNEL_16));        
+        addChild(createLightCentered<AcrylicChannel16>(millimetersToPixelsVec(39.77, 25.927), module, Scalaria::LIGHT_CHANNEL_16));
 
         SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 22.86, 91.457);
         addChild(bloodLogo);

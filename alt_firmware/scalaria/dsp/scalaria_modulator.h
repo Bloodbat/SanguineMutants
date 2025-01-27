@@ -47,8 +47,6 @@ namespace scalaria {
   const size_t kMaxBlockSize = 96;
   static const size_t kMaxChannels = 2;
 
-  static MoogLadderFilter moogLadderFilter;
-
   typedef struct { short l; short r; } ShortFrame;
 
   class SaturatingAmplifier {
@@ -112,13 +110,6 @@ namespace scalaria {
     inline const Parameters& parameters() { return parameters_; }
 
   private:
-    float exponentialAmplification(float x) {
-      // Clamp x to the range [0, 1]
-      x = fminf(fmaxf(x, 0.0f), 1.0f);
-      // Compute the amplification using an exponential function
-      return (expf(3.0f * (x - 0.75f)) / 2) - 0.05f;
-    }
-
     void ApplyAmplification(ShortFrame* input, float* level, float* auxOutput, size_t size, bool rawLevel) {
       if (!parameters_.oscillatorShape || rawLevel) {
         fill(&auxOutput[0], &auxOutput[size], 0.0f);
@@ -156,6 +147,8 @@ namespace scalaria {
     Parameters parameters_;
     Parameters previousParameters_;
 
+    MoogLadderFilter moogLadderFilter;
+
     SaturatingAmplifier amplifier_[kMaxChannels];
 
     Oscillator internalOscillator_;
@@ -165,7 +158,6 @@ namespace scalaria {
 
     DISALLOW_COPY_AND_ASSIGN(ScalariaModulator);
   };
-
 }  // namespace scalaria
 
 #endif  // SCALARIA_DSP_MODULATOR_H_

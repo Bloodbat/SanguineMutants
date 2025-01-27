@@ -309,7 +309,7 @@
     {
       "slug" : "Sanguine-Scalaria",
       "name" : "Scalaria",
-      "description" : "A polyphonic Moog inspired ladder filter from the original Symbiote firmware for Mutable Instruments' Warps",
+      "description" : "A polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for Mutable Instruments' Warps",
       "tags" : [
         "Filter",
         "Oscillator",
