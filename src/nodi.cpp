@@ -214,6 +214,14 @@ struct Nodi : SanguineModule {
 
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 
+		bool bIsLightsTurn = clockDivider.process();
+
+		float sampleTime = 0.f;
+
+		if (bIsLightsTurn) {
+			sampleTime = args.sampleTime * kClockUpdateFrequency;
+		}
+
 		for (int channel = 0; channel < channelCount; ++channel) {
 			settings[channel].quantizer_scale = params[PARAM_SCALE].getValue();
 			settings[channel].quantizer_root = params[PARAM_ROOT].getValue();
@@ -405,10 +413,17 @@ struct Nodi : SanguineModule {
 				dsp::Frame<1> outFrame = drbOutputBuffer[channel].shift();
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
+
+			if (bIsLightsTurn) {
+				int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+				int selectedModel = settings[channel].shape;
+				lights[currentLight + 0].setBrightnessSmooth(nodiLightColors[selectedModel].red, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(nodiLightColors[selectedModel].green, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(nodiLightColors[selectedModel].blue, sampleTime);
+			}
 		} // Channels
 
-		if (clockDivider.process()) {
-			const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+		if (bIsLightsTurn) {
 			pollSwitches(sampleTime);
 
 			// Handle model light
@@ -423,24 +438,10 @@ struct Nodi : SanguineModule {
 				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodiLightColors[47].blue, sampleTime);
 			}
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
 				int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
-
 				for (int light = 0; light < 3; ++light) {
 					lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
-				}
-
-				if (channel < channelCount) {
-					int currentModel = settings[channel].shape;
-					if (!bPaques) {
-						lights[currentLight + 0].setBrightnessSmooth(nodiLightColors[currentModel].red, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth(nodiLightColors[currentModel].green, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(nodiLightColors[currentModel].blue, sampleTime);
-					} else {
-						lights[currentLight + 0].setBrightnessSmooth(nodiLightColors[47].red, sampleTime);
-						lights[currentLight + 1].setBrightnessSmooth(nodiLightColors[47].green, sampleTime);
-						lights[currentLight + 2].setBrightnessSmooth(nodiLightColors[47].blue, sampleTime);
-					}
 				}
 			}
 

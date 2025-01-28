@@ -48,6 +48,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Nodi family: faceplate tweaks.
 
+- Nodi family: processing tweaks.
+
 
 # 2.5.2
 
