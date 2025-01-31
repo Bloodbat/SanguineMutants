@@ -757,6 +757,79 @@ struct Mortuus : SanguineModule {
 
 	}
 
+	void setExpanderChannel1Lights(Module* ansaExpander, bool lightIsOn) {
+		Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
+		Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
+		Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
+
+		switch (editMode) {
+		case EDIT_MODE_FIRST:
+		case EDIT_MODE_SECOND:
+			channel1LightRed.setBrightness(0.f);
+			channel1LightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightBlue.setBrightness(0.f);
+			setExpanderChannel2Lights(ansaExpander, lightIsOn & true);
+			break;
+		case EDIT_MODE_TWIN:
+			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightGreen.setBrightness(0.f);
+			channel1LightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+			setExpanderChannel2Lights(ansaExpander, false);
+			break;
+		case EDIT_MODE_SPLIT:
+			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightGreen.setBrightness(0.f);
+			channel1LightBlue.setBrightness(0.f);
+			setExpanderChannel2Lights(ansaExpander, false);
+			break;
+		default:
+			break;
+		}
+
+		for (int function = 0; function < kMaxFunctions; ++function) {
+			Light& currentLightRed = ansaExpander->getLight(Ansa::LIGHT_PARAM_1 + function * 3);
+			Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
+			Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
+
+			switch (editMode) {
+			case EDIT_MODE_TWIN:
+				currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightGreen.setBrightness(0.f);
+				currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+				break;
+
+			case EDIT_MODE_SPLIT:
+				if (function < 2) {
+					currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+					currentLightGreen.setBrightness(0.f);
+					currentLightBlue.setBrightness(0.f);
+				} else {
+					currentLightRed.setBrightness(0.f);
+					currentLightGreen.setBrightness(0.f);
+					currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+				}
+				break;
+
+			case EDIT_MODE_FIRST:
+			case EDIT_MODE_SECOND:
+				currentLightRed.setBrightness(0.f);
+				currentLightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightBlue.setBrightness(0.f);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	void setExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn) {
+		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? 0.5f : 0.f);
+
+		for (int light = 0; light < kMaxFunctions; ++light) {
+			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
+		}
+	}
+
 	void switchExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn, const float sampleTime) {
 		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.5f : 0.f, sampleTime);
 
@@ -854,6 +927,24 @@ struct Mortuus : SanguineModule {
 				block->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
+	}
+
+	void onBypass(const BypassEvent& e) override {
+		if (bHasExpander) {
+			Module* ansaExpander = getRightExpander().module;
+			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(0.f);
+			setExpanderChannel1Lights(ansaExpander, false);
+		}
+		Module::onBypass(e);
+	}
+
+	void onUnBypass(const UnBypassEvent& e) override {
+		if (bHasExpander) {
+			Module* ansaExpander = getRightExpander().module;
+			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(0.5f);
+			setExpanderChannel1Lights(ansaExpander, true);
+		}
+		Module::onUnBypass(e);
 	}
 };
 

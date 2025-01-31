@@ -729,6 +729,79 @@ struct Apices : SanguineModule {
 		}
 	}
 
+	void setExpanderChannel1Lights(Module* nixExpander, bool lightIsOn) {
+		Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
+		Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
+		Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);
+
+		switch (editMode) {
+		case EDIT_MODE_FIRST:
+		case EDIT_MODE_SECOND:
+			channel1LightRed.setBrightness(0.f);
+			channel1LightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightBlue.setBrightness(0.f);
+			setExpanderChannel2Lights(nixExpander, lightIsOn & true);
+			break;
+		case EDIT_MODE_TWIN:
+			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightGreen.setBrightness(0.f);
+			channel1LightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+			setExpanderChannel2Lights(nixExpander, false);
+			break;
+		case EDIT_MODE_SPLIT:
+			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightGreen.setBrightness(0.f);
+			channel1LightBlue.setBrightness(0.f);
+			setExpanderChannel2Lights(nixExpander, false);
+			break;
+		default:
+			break;
+		}
+
+		for (int function = 0; function < kMaxFunctions; ++function) {
+			Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
+			Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
+			Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+
+			switch (editMode) {
+			case EDIT_MODE_TWIN:
+				currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightGreen.setBrightness(0.f);
+				currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+				break;
+
+			case EDIT_MODE_SPLIT:
+				if (function < 2) {
+					currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+					currentLightGreen.setBrightness(0.f);
+					currentLightBlue.setBrightness(0.f);
+				} else {
+					currentLightRed.setBrightness(0.f);
+					currentLightGreen.setBrightness(0.f);
+					currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+				}
+				break;
+
+			case EDIT_MODE_FIRST:
+			case EDIT_MODE_SECOND:
+				currentLightRed.setBrightness(0.f);
+				currentLightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightBlue.setBrightness(0.f);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	void setExpanderChannel2Lights(Module* nixExpander, bool lightIsOn) {
+		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? 0.5f : 0.f);
+
+		for (int light = 0; light < kMaxFunctions; ++light) {
+			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
+		}
+	}
+
 	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float sampleTime) {
 		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.5f : 0.f, sampleTime);
 
@@ -826,6 +899,24 @@ struct Apices : SanguineModule {
 				block->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
+	}
+
+	void onBypass(const BypassEvent& e) override {
+		if (bHasExpander) {
+			Module* nixExpander = getRightExpander().module;
+			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(0.f);
+			setExpanderChannel1Lights(nixExpander, false);
+		}
+		Module::onBypass(e);
+	}
+
+	void onUnBypass(const UnBypassEvent& e) override {
+		if (bHasExpander) {
+			Module* nixExpander = getRightExpander().module;
+			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(0.5f);
+			setExpanderChannel1Lights(nixExpander, true);
+		}
+		Module::onUnBypass(e);
 	}
 };
 
