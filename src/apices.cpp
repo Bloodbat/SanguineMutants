@@ -155,7 +155,7 @@ struct Apices : SanguineModule {
 
 		float sampleTime = 0.f;
 
-		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix);
+		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 
 		bool bDividerTurn = clockDivider.process();
 

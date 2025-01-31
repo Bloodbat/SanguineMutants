@@ -168,7 +168,7 @@ struct Mortuus : SanguineModule {
 
 		float sampleTime = 0.f;
 
-		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa);
+		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 
 		bool bDividerTurn = clockDivider.process();
 
