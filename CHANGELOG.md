@@ -20,6 +20,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Velamina saturator threshold.
 
+- Explorator Plumbago faceplate.
+
 ## Additions
 
 - Ability to reset Marmora generators from the context menu.
