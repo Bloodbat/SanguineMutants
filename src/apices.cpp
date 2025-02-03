@@ -181,7 +181,7 @@ struct Apices : SanguineModule {
 			float cvValues[kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
 			int modulatedValues[kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-			int channel2Function;
+			int channel2Function = 0;
 
 			if (bDividerTurn) {
 				Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
