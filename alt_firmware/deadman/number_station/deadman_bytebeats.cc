@@ -39,7 +39,6 @@
 namespace deadman {
 
 	const uint8_t kDownsample = 4;
-	const uint8_t kMaxEquationIndex = 1;
 
 	using namespace stmlib;
 
@@ -55,22 +54,15 @@ namespace deadman {
 	void ByteBeats::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		uint32_t p0 = 0;
 		uint32_t p1 = 0;
-		// uint32_t p2 = 0;
 		int32_t sample = 0;
 		// temporary vars
+		uint32_t p = 32678;
+		uint32_t q = 32678;
+		uint32_t q1 = 0;
+		uint32_t q2 = 0;
 		uint8_t j = 0;
-
-		// Use floats to prevent shifting right to oblivion
-		float pf;
-		float p0f;
-		float p1f;
-		float qf;
-		float q1f;
-		float q2f;
-		float samplef;
-		float sampleaf;
-		float samplebf;
-		float tf;
+		uint32_t sample1 = 32678;
+		uint32_t sample2 = 32678;
 
 		uint16_t bytepitch = (65535 - frequency_) >> 11; // was 12
 		if (bytepitch < 1) {
@@ -85,22 +77,16 @@ namespace deadman {
 			for (uint8_t i = 0; i < cycles; i++) {
 				GateFlags gate_flag = *gate_flags++;
 				if (gate_flag & GATE_FLAG_RISING) {
-					// (void)0; // noop
 					phase_ = 0;
 					t_ = 0;
-					// ++equation_index_;
-					// if (equation_index_ > kMaxEquationIndex) {
-					//   equation_index_ = 0 ;
-					// }
 				}
 			}
 
 			++phase_;
 			if (phase_ % bytepitch == 0) ++t_;
-			/* Broken: 3 and above! Due to divisions by 0... anyone want a crack at fixing them so they behave like they do in hardware?? */
 			switch (equation_index_) {
 			case 0:
-				// from http://royal-paw.com/2012/01/bytebeats-in-c-and-python-generative-symphonies-from-extremely-small-programs/
+				// From http://royal-paw.com/2012/01/bytebeats-in-c-and-python-generative-symphonies-from-extremely-small-programs/
 				// (atmospheric, hopeful)
 				p0 = p0_ >> 9; // was 9
 				p1 = p1_ >> 9; // was 11
@@ -109,110 +95,111 @@ namespace deadman {
 			case 1:
 				p0 = p0_ >> 11;
 				p1 = p1_ >> 11;
-				// equation by stephth via https://www.youtube.com/watch?v=tCRPUv8V22o at 3:38
+				// Equation by stephth via https://www.youtube.com/watch?v=tCRPUv8V22o at 3:38.
 				sample = ((((t_ * p0) & (t_ >> 4)) | ((t_ * 5) & (t_ >> 7)) | ((t_ * p1) & (t_ >> 10))) & 0xFF) << 8;
 				break;
 			case 2:
 				p0 = p0_ >> 12;
 				p1 = p1_ >> 12;
-				// This one is from http://www.reddit.com/r/bytebeat/comments/20km9l/cool_equations/ (t>>13&t)*(t>>8)
+				// This one is from http://www.reddit.com/r/bytebeat/comments/20km9l/cool_equations/
 				sample = ((((t_ >> p0) & t_) * (t_ >> p1)) & 0xFF) << 8;
 				break;
 			case 3:
 				p0 = p0_ >> 11;
-				//p1 = p1_ >> 9;
-				p1f = p1_ / 512;
-				tf = fmodf(t_, p1f);
-				// This one is the second one listed at from http://xifeng.weebly.com/bytebeats.html
-				// sample = ((( (((((t_ >> p0) | t_) | (t_ >> p0)) * 10) & ((5 * t_) | (t_ >> 10)) ) | (t_ ^ (t_ % p1)) ) & 0xFF)) << 8;
-				sample = ((((((((t_ >> p0) | t_) | (t_ >> p0)) * 10) & ((5 * t_) | (t_ >> 10))) | (t_ ^ int(tf))) & 0xFF)) << 8;
+				p1 = p1_ >> 9;
+				if (p1 == 0) {
+					p1 = p1_;
+				}
+				// This one is the second one listed at http://xifeng.weebly.com/bytebeats.html
+				sample = ((((((((t_ >> p0) | t_) | (t_ >> p0)) * 10) & ((5 * t_) | (t_ >> 10))) | (t_ ^ (t_ % p1))) & 0xFF)) << 8;
 				break;
 			case 4:
-				//p0 = p0_ >> 12; // was 9
-				p0f = float(p0_) / 4096;
+				p0 = p0_ >> 12; // was 9
+				if (p0 == 0) {
+					p0 = p0_;
+				}
 				p1 = p1_ >> 12; // was 11
-				//  BitWiz Transplant from Equation Composer Ptah bank
-				// run at twice normal sample rate
+				/* BitWiz Transplant from Equation Composer Ptah bank
+				   run at twice normal sample rate. */
 				for (j = 0; j < 2; ++j) {
-					// sample = t_*(((t_>>p1)^((t_>>p1)-1)^1)%p0);
-					samplef = fmodf(((t_ >> p1) ^ ((t_ >> p1) - 1) ^ 1), p0f);
-					sample = t_ * samplef; // Dead man's catch
-					if (j == 0) ++t_;
+					sample = t_ * (((t_ >> p1) ^ ((t_ >> p1) - 1) ^ 1) % p0);
+					if (j == 0) {
+						++t_;
+					}
 				}
 				break;
 			case 5:
-				//p0 = p0_ >> 11;
+				p0 = p0_ >> 11;
 
-				p0f = float(p0_) / 2048;
-
-				//p1 = p1_ >> 9;
-				p1f = float(p1_) / 512;
-
-
-				// Arpeggiation from Equation Composer Khepri bank
-				// run at twice normal sample rate
-				/* Tries to produce some voltage anyway while preventing divisions by zero - Bloodbat */
-				//p = ((t_ / (1236 + p0)) % 128) & ((t_ >> (p1 >> 5)) * p1);
-
-				pf = int(fmodf((t_ / (1236 + p0f)), 128)) & int(((t_ >> int((p1f / 32))) * p1f));
-
-				if (pf < 0.1) {
-					pf = 1.f;
+				if (p0 == 0) {
+					p0 = p0_;
 				}
 
-				//q1 = ((500 * p1) % 5);
+				p1 = p1_ >> 9;
 
-				q1f = fmodf((500 * p1f), 5);
-
-				//q2 = t_ / (q1 + 1);
-
-				q2f = t_ / (q1f + 1);
-
-				//q = (t_ / q2) % p;
-
-				if (q2f < 0.1) {
-					q2f = 1.f;
+				if (p1 == 0) {
+					p1 = p1_;
 				}
 
-				qf = fmodf((t_ / q2f), pf);
+				/* Arpeggiation from Equation Composer Khepri bank
+				   run at twice normal sample rate */
+				p = ((t_ / (1236 + p0)) % 128) & ((t_ >> (p1 >> 5)) * p1);
 
-				tf = (t_ >> ((int(p1f) >> 5) & 12));
-
-				if (tf > 0.1f) {
-					tf = 1.f;
+				if (p == 0) {
+					p = 0x8000;
 				}
 
-				//  sample = (t_>>q>>(p1>>5)) + (t_/(t_>>((p1>>5)&12))>>p);
-				sample = int((t_ >> int(qf) >> (int(p1f) >> 5)) + (float(t_) / float(int(tf) >> int(pf))));
+				q1 = (500 * p1) % 5;
+
+				if (q1 == 0) {
+					q1 = 0x8000;
+				}
+
+				q2 = t_ / q1 + 1;
+
+				q = (t_ / q2) % p;
+
+				sample = (t_ >> q >> (p1 >> 5)) + (t_ / (t_ >> ((p1 >> 5) & 12)) >> p);
 
 				break;
 			case 6:
-				//p0 = p0_ >> 9;
-				p0f = p0_ / 512;
+				p0 = p0_ >> 9;
 
-				//p1 = p1_ >> 10; // was 9
-				p1f = p1_ / 1024;
+				if (p0 == 0) {
+					p0 = p0_;
+				}
 
-				// The Smoker from Equation Composer Khepri bank
-				//sample = sample ^ (t_ >> (p1 >> 4)) >> ((t_ / 6988 * t_ % (p0 + 1)) + (t_ << t_ / (p1 * 4)));
+				p1 = p1_ >> 10; // was 9
 
-				sampleaf = fmodf(t_, p0f + 1);
-				samplebf = ((t_ / 6988 * sampleaf) + (t_ << int(t_ / (p1f * 4))));
-				sample = sample ^ (t_ >> (p1 >> 4)) >> int(samplebf);
+				if (p1 == 0) {
+					p1 = p1_;
+				}
+
+				// The Smoker from Equation Composer Khepri bank.
+				sample1 = p1 * 4;
+
+				sample2 = t_ << t_ / sample1;
+
+				sample = sample ^ (t_ >> (p1 >> 4)) >> ((t_ / 6988 * t_ % (p0 + 1)) + sample2);
+
 				break;
 			default:
 				p0 = p0_ >> 9;
 
-				//p1 = t_ % p1_;
+				if (p0 == 0) {
+					p0 = p0_;
+				}
 
-				p1f = fmodf(t_, p1_);
+				p1 = t_ % p1_;
 
-				// // run at twice normal sample rate
+				if (p1 == 0) {
+					p1 = p1_;
+				}
+
+				// Run at twice normal sample rate.
 				for (j = 0; j < 2; ++j) {
-					// Warping overtone echo drone, from BitWiz
-					// sample = ((t_ & p0) - (t_ % p1)) ^ (t_ >> 7);
-					sampleaf = fmodf(t_, p1f);
-					sample = ((t_ & p0) - int(sampleaf)) ^ (t_ >> 7);
+					// Warping overtone echo drone, from BitWiz.
+					sample = ((t_ & p0) - (t_ % p1)) ^ (t_ >> 7);
 					if (j == 0) {
 						++t_;
 					}

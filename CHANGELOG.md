@@ -52,6 +52,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Nodi family: processing tweaks.
 
+- Mortuus: further ByteBeats tweaks.
+
 
 # 2.5.2
 

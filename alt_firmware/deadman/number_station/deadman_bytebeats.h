@@ -39,8 +39,8 @@ namespace deadman {
 
 	class ByteBeats {
 	public:
-		ByteBeats() { }
-		~ByteBeats() { }
+		ByteBeats() {}
+		~ByteBeats() {}
 
 		void Init();
 
@@ -50,8 +50,7 @@ namespace deadman {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_frequency(parameter[0]);
 				set_p0(parameter[1]);
-			}
-			else {
+			} else {
 				set_frequency(parameter[0]);
 				set_p0(parameter[1]);
 				set_p1(parameter[2]);
@@ -64,11 +63,11 @@ namespace deadman {
 		}
 
 		inline void set_p0(uint16_t parameter) {
-			p0_ = parameter;
+			p0_ = parameter > 0 ? parameter : 1;
 		}
 
 		inline void set_p1(uint16_t parameter) {
-			p1_ = parameter;
+			p1_ = parameter > 0 ? parameter : 1;
 		}
 
 		inline void set_p2(uint16_t parameter) {
