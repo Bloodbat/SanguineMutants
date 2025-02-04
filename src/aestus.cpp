@@ -163,6 +163,10 @@ struct Aestus : SanguineModule {
 			generator.set_sync(bSync);
 
 			// Pitch
+			/*
+			  TODO: frequency knob does NOT have the range advertised in the hardware manual, nor does the oscillator
+			  reach the LFO times mentioned for Tides. Knob behavior for PLL/Clocked mode is weird, to say the least.
+			*/
 			float pitch = params[PARAM_FREQUENCY].getValue();
 			pitch += 12.f * inputs[INPUT_PITCH].getVoltage();
 			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
