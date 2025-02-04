@@ -389,32 +389,32 @@ namespace tides {
       CONSTRAIN(mid_point, min_mid_point, max_mid_point);
       CONSTRAIN(mid_point, 0x10000, 0xffff0000);
 
-    /*
-    Crash fix attempt
-    Was:
-    int32_t slope_up = static_cast<int32_t>(0xffffffff / (mid_point >> 16));
-    int32_t slope_down = static_cast<int32_t>(0xffffffff / (~mid_point >> 16));
-    */
-    float runA = mid_point / 65536;
-    float slope_upA = 0xffffffff / runA;
-    int32_t slope_up = static_cast<int32_t>(slope_upA);
-    float runB = ~mid_point / 65536;
-    float slope_downB = 0xffffffff / runB;
-    int32_t slope_down = static_cast<int32_t>(slope_downB);
+      uint32_t midpointtemp = mid_point >> 16;
+      if (midpointtemp == 0) {
+        midpointtemp = mid_point;
+      }
+      int32_t slope_up = static_cast<int32_t>(0xffffffff / midpointtemp);
+
+      midpointtemp = ~mid_point >> 16;
+      if (midpointtemp == 0) {
+        midpointtemp = ~mid_point;
+      }
+      int32_t slope_down = static_cast<int32_t>(0xffffffff / midpointtemp);
 
       int32_t this_sample = next_sample;
       next_sample = 0;
       // Process reset discontinuity.
       if (phase < phase_increment) {
         slope_up_ = true;
-      /* 
-      Crash fix attempt
-      Was:
-      uint32_t t = phase / (phase_increment >> 16);
-      */
-      float phase_incrementA = phase_increment / 65536;
-      float fPhase = phase / phase_incrementA;
-      uint32_t t = fPhase;
+
+        uint32_t phaseTemp = phase_increment >> 16;
+
+        if (phaseTemp == 0) {
+          phaseTemp = phase_increment;
+        }
+
+        uint32_t t = phase / phaseTemp;
+
         int32_t discontinuity = slope_up + slope_down;
         discontinuity = (discontinuity * (phase_increment >> 18)) >> 14;
         this_sample += ThisIntegratedBlepSample(t) * discontinuity >> 16;
@@ -423,14 +423,15 @@ namespace tides {
         // Process transition discontinuity.
         if (slope_up_ ^ (phase < mid_point)) {
           slope_up_ = phase < mid_point;
-        /*
-        Crash fix attempt
-        Was:
-        uint32_t t = (phase - mid_point) / (phase_increment >> 16);
-        */
-        float phase_incrementB = phase_increment / 65536;
-        float fPhaseB = (phase - mid_point) / phase_incrementB;
-        uint32_t t = fPhaseB;
+
+          uint32_t phaseTemp = phase_increment >> 16;
+
+          if (phaseTemp == 0) {
+            phaseTemp = phase_increment;
+          }
+
+          uint32_t t = (phase - mid_point) / phaseTemp;
+
           int32_t discontinuity = slope_up + slope_down;
           discontinuity = (discontinuity * (phase_increment >> 18)) >> 14;
           this_sample -= ThisIntegratedBlepSample(t) * discontinuity >> 16;

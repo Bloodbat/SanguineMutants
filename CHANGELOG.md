@@ -54,6 +54,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Mortuus: further ByteBeats tweaks.
 
+- Aestus: PLL/Clocked mode tweaks.
+
 
 # 2.5.2
 
