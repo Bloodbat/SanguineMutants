@@ -611,7 +611,7 @@ struct ContextusWidget : SanguineModuleWidget {
 		FramebufferWidget* nodiFrambuffer = new FramebufferWidget();
 		addChild(nodiFrambuffer);
 
-		const float lightXBase = 5.256f;
+		const float lightXBase = 6.894f;
 		const float lightXDelta = 4.0f;
 
 		const int offset = 8;
@@ -641,13 +641,13 @@ struct ContextusWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 36.606), module, Contextus::INPUT_TIMBRE));
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(22.768, 36.606), module, Contextus::PARAM_TIMBRE));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.46, 40.534), module, Contextus::PARAM_COARSE));
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(90.809, 40.534), module, Contextus::PARAM_FINE));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.46, 40.53), module, Contextus::PARAM_COARSE));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(90.809, 40.53), module, Contextus::PARAM_FINE));
 
 
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.606), module, Contextus::PARAM_ATTACK));
+		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.666), module, Contextus::PARAM_ATTACK));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(22.768, 54.231), module, Contextus::PARAM_AD_TIMBRE));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(22.768, 54.243), module, Contextus::PARAM_AD_TIMBRE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(119.4, 54.231),
 			module, Contextus::PARAM_VCA, Contextus::LIGHT_VCA));
 
@@ -660,8 +660,8 @@ struct ContextusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(106.234, 67.247), module, Contextus::PARAM_SCALE));
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(132.166, 67.247), module, Contextus::PARAM_DECAY));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.345, 88.962), module, Contextus::PARAM_AD_COLOR));
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(108.374, 88.962), module, Contextus::PARAM_AD_MODULATION));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 88.962), module, Contextus::PARAM_AD_COLOR));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(107.074, 88.962), module, Contextus::PARAM_AD_MODULATION));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 97.889), module, Contextus::INPUT_COLOR));
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(22.768, 97.889), module, Contextus::PARAM_COLOR));
@@ -683,10 +683,10 @@ struct ContextusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(79.841, 113.511), module, Contextus::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(133.968, 117.788), module, Contextus::OUTPUT_OUT));
 
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 110.323);
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 112.723);
 		addChild(bloodLogo);
 
-		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 117.256);
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 119.656);
 		addChild(mutantsLogo);
 	}
 

@@ -629,7 +629,7 @@ struct NodiWidget : SanguineModuleWidget {
 		FramebufferWidget* nodiFrambuffer = new FramebufferWidget();
 		addChild(nodiFrambuffer);
 
-		const float lightXBase = 5.256f;
+		const float lightXBase = 6.894f;
 		const float lightXDelta = 4.f;
 
 		const int offset = 8;
@@ -660,15 +660,15 @@ struct NodiWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 36.606), module, Nodi::INPUT_TIMBRE));
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(22.768, 36.606), module, Nodi::PARAM_TIMBRE));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.46, 40.534), module, Nodi::PARAM_COARSE));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.46, 40.53), module, Nodi::PARAM_COARSE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(millimetersToPixelsVec(71.12, 42.184),
 			module, Nodi::PARAM_MORSE, Nodi::LIGHT_MORSE));
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(90.809, 40.534), module, Nodi::PARAM_FINE));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(90.809, 40.53), module, Nodi::PARAM_FINE));
 
 
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.606), module, Nodi::PARAM_ATTACK));
+		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.666), module, Nodi::PARAM_ATTACK));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(22.768, 54.231), module, Nodi::PARAM_AD_TIMBRE));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(22.768, 54.243), module, Nodi::PARAM_AD_TIMBRE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(119.4, 54.231),
 			module, Nodi::PARAM_VCA, Nodi::LIGHT_VCA));
 
@@ -681,8 +681,8 @@ struct NodiWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(106.234, 67.247), module, Nodi::PARAM_SCALE));
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(132.166, 67.247), module, Nodi::PARAM_DECAY));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.345, 88.962), module, Nodi::PARAM_AD_COLOR));
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(108.374, 88.962), module, Nodi::PARAM_AD_MODULATION));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 88.962), module, Nodi::PARAM_AD_COLOR));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(107.074, 88.962), module, Nodi::PARAM_AD_MODULATION));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.222, 97.889), module, Nodi::INPUT_COLOR));
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(22.768, 97.889), module, Nodi::PARAM_COLOR));
@@ -698,15 +698,16 @@ struct NodiWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(8.222, 117.788), module, Nodi::INPUT_PITCH));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.722, 117.788), module, Nodi::INPUT_TRIGGER));
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 117.788), module, Nodi::PARAM_TRIGGER_DELAY));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(46.798, 117.788), module, Nodi::PARAM_AUTO, Nodi::LIGHT_AUTO));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(46.798, 117.788),
+			module, Nodi::PARAM_AUTO, Nodi::LIGHT_AUTO));
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(62.4, 113.511), module, Nodi::PARAM_BITS));
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(79.841, 113.511), module, Nodi::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(133.968, 117.788), module, Nodi::OUTPUT_OUT));
 
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 110.323);
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 112.723);
 		addChild(bloodLogo);
 
-		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 117.256);
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 119.656);
 		addChild(mutantsLogo);
 	}
 
