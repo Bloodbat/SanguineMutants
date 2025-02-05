@@ -211,7 +211,7 @@ struct Temulenti : SanguineModule {
 				generator.set_pulse_width(clamp(1.f - params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 32767);
 			}
 
-			// Slope, smoothness
+			// Shape, slope, smoothness
 			int16_t shape = clamp(params[PARAM_SHAPE].getValue() + inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			int16_t slope = clamp(params[PARAM_SLOPE].getValue() + inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() + inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
