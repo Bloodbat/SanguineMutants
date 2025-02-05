@@ -58,6 +58,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Aestus: PLL/Clocked mode tweaks.
 
+- Aestus family: follow hardware voltage spec where outputs are concerned.
+
 
 # 2.5.2
 

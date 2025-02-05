@@ -163,10 +163,10 @@ struct Aestus : SanguineModule {
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 			generator.set_sync(bSync);
 
-			// Pitch
+			// Pitch			
 			/*
-			  TODO: frequency knob does NOT have the range advertised in the hardware manual, nor does the oscillator
-			  reach the LFO times mentioned for Tides. Knob behavior for PLL/Clocked mode is weird, to say the least.
+			  TODO: frequency knob range has been achieved, however the oscillator still does not reach
+			  the LFO times mentioned for Tides. Knob behavior for PLL/Clocked mode is weird, to say the least.
 			*/
 			float pitch = params[PARAM_FREQUENCY].getValue();
 			pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCalibrationOffsets[bUseCalibrationOffset]);
@@ -228,8 +228,8 @@ struct Aestus : SanguineModule {
 		float unipolarFlag = static_cast<float>(uni) / 65535;
 		float bipolarFlag = static_cast<float>(bi) / 32768;
 
-		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
-		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
+		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 8.f : 0.f);
+		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 8.f : 0.f);
 		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
 		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
