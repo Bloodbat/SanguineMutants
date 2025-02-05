@@ -115,6 +115,7 @@ struct Temulenti : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulentiDisplayModels[0];
 	bool bUseCalibrationOffset = true;
+	bool bLastSync = false;
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -173,8 +174,11 @@ struct Temulenti : SanguineModule {
 		//Buffer loop
 		if (generator.writable_block()) {
 			// Sync
-			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			generator.set_sync(bSync);
+			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!			
+			if (bSync != bLastSync) {
+				generator.set_sync(bSync);
+				bLastSync = bSync;
+			}
 
 			// Pitch
 			float pitchParam = clamp(params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +

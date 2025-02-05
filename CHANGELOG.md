@@ -22,6 +22,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Explorator Plumbago faceplate.
 
+- Sync mode for the Aestus family should only be updated when it has changed in the front-end, not when processing every block.
+
 ## Additions
 
 - Ability to reset Marmora generators from the context menu.

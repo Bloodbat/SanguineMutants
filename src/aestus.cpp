@@ -92,6 +92,7 @@ struct Aestus : SanguineModule {
 
 	bool bSheep = false;
 	bool bUseCalibrationOffset = true;
+	bool bLastSync = false;
 	tides::Generator generator;
 	int frame = 0;
 	static const int kLightsFrequency = 16;
@@ -161,13 +162,12 @@ struct Aestus : SanguineModule {
 
 			// Sync
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			generator.set_sync(bSync);
+			if (bSync != bLastSync) {
+				generator.set_sync(bSync);
+				bLastSync = bSync;
+			}
 
-			// Pitch			
-			/*
-			  TODO: frequency knob range has been achieved, however the oscillator still does not reach
-			  the LFO times mentioned for Tides. Knob behavior for PLL/Clocked mode is weird, to say the least.
-			*/
+			// Pitch
 			float pitch = params[PARAM_FREQUENCY].getValue();
 			pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCalibrationOffsets[bUseCalibrationOffset]);
 			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
