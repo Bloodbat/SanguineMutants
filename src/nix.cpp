@@ -52,7 +52,7 @@ struct NixWidget : SanguineModuleWidget {
         addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(11.295, 11.455), module, Nix::LIGHT_SPLIT_CHANNEL_1));
         addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(34.43, 11.455), module, Nix::LIGHT_SPLIT_CHANNEL_2));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 20.709), module, Nix::PARAM_PARAM_CV_1));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 20.72), module, Nix::PARAM_PARAM_CV_1));
         addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(17.653, 25.113), module, Nix::LIGHT_PARAM_1));
         addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 30.518), module, Nix::INPUT_PARAM_CV_1));
 
@@ -69,7 +69,7 @@ struct NixWidget : SanguineModuleWidget {
         addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 115.742), module, Nix::INPUT_PARAM_CV_4));
 
         // Split Channel 2
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.994, 20.709), module, Nix::PARAM_PARAM_CV_CHANNEL_2_1));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.994, 20.72), module, Nix::PARAM_PARAM_CV_CHANNEL_2_1));
         addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(40.789, 25.113), module, Nix::LIGHT_PARAM_CHANNEL_2_1));
         addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.994, 30.518), module, Nix::INPUT_PARAM_CV_CHANNEL_2_1));
 
