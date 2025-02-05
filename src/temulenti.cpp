@@ -114,6 +114,7 @@ struct Temulenti : SanguineModule {
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulentiDisplayModels[0];
+	bool bUseCalibrationOffset = true;
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -176,12 +177,13 @@ struct Temulenti : SanguineModule {
 			generator.set_sync(bSync);
 
 			// Pitch
-			float pitchParam = clamp(params[PARAM_FREQUENCY].getValue() + inputs[INPUT_PITCH].getVoltage() * 12.f, -60.f, 60.f);
-			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536;
+			float pitchParam = clamp(params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
+				aestusCalibrationOffsets[bUseCalibrationOffset]) * 12.f, -60.f, 60.f);
+			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
 
 			pitchParam += 60.f;
 			// This is probably not original but seems useful to keep the same frequency as in normal mode.
-			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
+			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC && bUseCalibrationOffset) {
 				pitchParam -= 12.f;
 			}
 
@@ -209,7 +211,7 @@ struct Temulenti : SanguineModule {
 				generator.set_pulse_width(clamp(1.f - params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 32767);
 			}
 
-			// Slope, smoothness, pitch
+			// Slope, smoothness
 			int16_t shape = clamp(params[PARAM_SHAPE].getValue() + inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			int16_t slope = clamp(params[PARAM_SLOPE].getValue() + inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
 			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() + inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
@@ -325,6 +327,7 @@ struct Temulenti : SanguineModule {
 		json_t* rootJ = SanguineModule::dataToJson();
 		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
 		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
+		json_object_set_new(rootJ, "useCalibrationOffset", json_boolean(bUseCalibrationOffset));
 
 		return rootJ;
 	}
@@ -340,6 +343,11 @@ struct Temulenti : SanguineModule {
 		json_t* rangeJ = json_object_get(rootJ, "range");
 		if (rangeJ) {
 			generator.set_range(bumps::GeneratorRange(json_integer_value(rangeJ)));
+		}
+
+		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
+		if (useCalibrationOffsetJ) {
+			bUseCalibrationOffset = json_boolean(useCalibrationOffsetJ);
 		}
 	}
 
@@ -476,6 +484,14 @@ struct TemulentiWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Quantizer scale", temulentiQuantizerLabels,
 			[=]() { return module->params[Temulenti::PARAM_QUANTIZER].getValue(); },
 			[=](int i) { module->setQuantizer(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Compatibility options", "",
+			[=](Menu* menu) {
+				menu->addChild(createBoolPtrMenuItem("Frequency knob center is C4", "", &module->bUseCalibrationOffset));
+			}
 		));
 	}
 };

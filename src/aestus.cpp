@@ -91,6 +91,7 @@ struct Aestus : SanguineModule {
 	};
 
 	bool bSheep = false;
+	bool bUseCalibrationOffset = true;
 	tides::Generator generator;
 	int frame = 0;
 	static const int kLightsFrequency = 16;
@@ -168,12 +169,12 @@ struct Aestus : SanguineModule {
 			  reach the LFO times mentioned for Tides. Knob behavior for PLL/Clocked mode is weird, to say the least.
 			*/
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			pitch += 12.f * inputs[INPUT_PITCH].getVoltage();
+			pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCalibrationOffsets[bUseCalibrationOffset]);
 			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
 			pitch += 60.f;
 			// Scale to the global sample rate
 			pitch += log2f(48000.f / args.sampleRate) * 12.f;
-			generator.set_pitch(static_cast<int>(clamp(pitch * 128, static_cast<float>(-32768), static_cast<float>(32767))));
+			generator.set_pitch(static_cast<int>(clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
 
 			// Shape, slope, smoothness
 			int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
@@ -275,6 +276,7 @@ struct Aestus : SanguineModule {
 		json_t* rootJ = SanguineModule::dataToJson();
 		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
 		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
+		json_object_set_new(rootJ, "useCalibrationOffset", json_boolean(bUseCalibrationOffset));
 
 		return rootJ;
 	}
@@ -290,6 +292,11 @@ struct Aestus : SanguineModule {
 		json_t* rangeJ = json_object_get(rootJ, "range");
 		if (rangeJ) {
 			generator.set_range(tides::GeneratorRange(json_integer_value(rangeJ)));
+		}
+
+		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
+		if (useCalibrationOffsetJ) {
+			bUseCalibrationOffset = json_boolean(useCalibrationOffsetJ);
 		}
 	}
 
@@ -396,6 +403,14 @@ struct AestusWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Range", aestusRangeMenuLabels,
 			[=]() { return module->generator.range(); },
 			[=](int i) { module->setRange(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Compatibility options", "",
+			[=](Menu* menu) {
+				menu->addChild(createBoolPtrMenuItem("Frequency knob center is C4", "", &module->bUseCalibrationOffset));
+			}
 		));
 	}
 };

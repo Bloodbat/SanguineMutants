@@ -36,6 +36,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Etesia: CV control for Reverse parameter.
 
+- Aestus family: tune the modules to C4 when the Frequency knob is centered (can be disabled for compatibility).
+
 ## Changes
 
 - Themes: group options under a submenu.

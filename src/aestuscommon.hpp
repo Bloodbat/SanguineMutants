@@ -23,3 +23,8 @@ static const std::vector<std::string> aestusModelModeHeaders = {
 	"Wave table",
 	"Harmonics"
 };
+
+static const std::vector<float> aestusCalibrationOffsets = {
+	0.f,
+	-1.f
+};
