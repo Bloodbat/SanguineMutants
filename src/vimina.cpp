@@ -419,7 +419,7 @@ struct Vimina : SanguineModule {
 		case SECTION_FUNCTION_SWING:
 			channelSwing[section][channel] = channelVoltage[section][channel]
 				/ (kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
-			break;
+				break;
 		}
 	}
 
@@ -513,7 +513,7 @@ struct ViminaWidget : SanguineModuleWidget {
 		addParam(createParamCentered<VCVButton>(millimetersToPixelsVec(25.863, 16.723),
 			module, Vimina::PARAM_RESET_1));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Vimina::PARAM_FACTOR_1));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 27.904), module, Vimina::PARAM_FACTOR_1));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Vimina::INPUT_RESET));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Vimina::INPUT_CV1));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Vimina::OUTPUT_OUT_1A));
@@ -527,7 +527,7 @@ struct ViminaWidget : SanguineModuleWidget {
 		addParam(createParamCentered<VCVButton>(millimetersToPixelsVec(25.863, 74.653),
 			module, Vimina::PARAM_RESET_2));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Vimina::PARAM_FACTOR_2));
+		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 85.833), module, Vimina::PARAM_FACTOR_2));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Vimina::INPUT_CLOCK));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Vimina::INPUT_CV2));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Vimina::OUTPUT_OUT_2A));

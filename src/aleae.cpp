@@ -192,28 +192,28 @@ struct AleaeWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_TOP_LEFT | SCREW_BOTTOM_LEFT);
 
-		// Switch #1
+		// Channel 1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,
 			Aleae::PARAM_ROLL_MODE_1, Aleae::LIGHTS_ROLL_MODE + 0 * 2));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(25.863, 16.723), module,
 			Aleae::PARAM_OUT_MODE_1, Aleae::LIGHTS_OUT_MODE + 0));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 29.079), module, Aleae::PARAM_THRESHOLD_1));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 27.904), module, Aleae::PARAM_THRESHOLD_1));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Aleae::INPUT_IN_1));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Aleae::INPUT_P_1));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Aleae::OUTPUT_OUT_1A));
 		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Aleae::LIGHTS_STATE + 0 * 2));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Aleae::OUTPUT_OUT_1B));
 
-		// Switch #2
+		// Channel 2
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 74.653), module,
 			Aleae::PARAM_ROLL_MODE_2, Aleae::LIGHTS_ROLL_MODE + 1 * 2));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(25.863, 74.653), module,
 			Aleae::PARAM_OUT_MODE_2, Aleae::LIGHTS_OUT_MODE + 1));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 87.008), module, Aleae::PARAM_THRESHOLD_2));
+		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(15.24, 85.833), module, Aleae::PARAM_THRESHOLD_2));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Aleae::INPUT_IN_2));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Aleae::INPUT_P_2));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT_2A));

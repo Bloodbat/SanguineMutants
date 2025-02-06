@@ -64,6 +64,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Aestus family: faceplate tweaks.
 
+- Aleae family: faceplate tweaks.
+
 
 # 2.5.2
 
