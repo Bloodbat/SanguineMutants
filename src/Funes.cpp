@@ -486,7 +486,7 @@ struct Funes : SanguineModule {
 		}
 	}
 
-	void customDataReset() {
+	void resetCustomData() {
 		bool success = user_data.Save(nullptr, patch.engine);
 		if (success) {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
@@ -495,7 +495,7 @@ struct Funes : SanguineModule {
 		}
 	}
 
-	void customDataLoad(const std::string& path) {
+	void loadCustomData(const std::string& path) {
 		bLoading = true;
 		DEFER({ bLoading = false; });
 		// HACK Sleep 100us so DSP thread is likely to finish processing before we resize the vector
@@ -506,8 +506,8 @@ struct Funes : SanguineModule {
 		if (ext == ".bin") {
 			std::ifstream input(path, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
-			uint8_t* rx_buffer = buffer.data();
-			bool success = user_data.Save(rx_buffer, patch.engine);
+			uint8_t* dataBuffer = buffer.data();
+			bool success = user_data.Save(dataBuffer, patch.engine);
 			if (success) {
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 					voice[channel].ReloadUserData();
@@ -516,7 +516,7 @@ struct Funes : SanguineModule {
 		}
 	}
 
-	void customDataShowLoadDialog() {
+	void showCustomDataLoadDialog() {
 #ifndef USING_CARDINAL_NOT_RACK
 		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
 		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
@@ -531,7 +531,7 @@ struct Funes : SanguineModule {
 		std::free(pathC);
 
 		waveDir = system::getDirectory(path);
-		customDataLoad(path);
+		loadCustomData(path);
 #else
 		async_dialog_filebrowser(false, nullptr, waveDir.empty() ? nullptr : waveDir.c_str(), "Load custom data .bin file", [this](char* pathC) {
 
@@ -545,7 +545,7 @@ struct Funes : SanguineModule {
 			std::free(pathC);
 
 			waveDir = system::getDirectory(path);
-			customDataLoad(path);
+			loadCustomData(path);
 			});
 #endif
 	}
@@ -726,11 +726,11 @@ struct FunesWidget : SanguineModuleWidget {
 				int engineNum = module->patch.engine;
 				if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
 					menu->addChild(createMenuItem("Load...", "", [=]() {
-						module->customDataShowLoadDialog();
+						module->showCustomDataLoadDialog();
 						}));
 
 					menu->addChild(createMenuItem("Reset to factory default", "", [=]() {
-						module->customDataReset();
+						module->resetCustomData();
 						}));
 				} else {
 					menu->addChild(createMenuLabel("6 OP-FMx, WAVETRRN & WAVETABL only"));
