@@ -543,7 +543,7 @@ struct ViminaWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; i++) {
+		for (int i = 0; i < module->channelCount; ++i) {
 			availableChannels.push_back(channelNumbers[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("LEDs channel", availableChannels,
