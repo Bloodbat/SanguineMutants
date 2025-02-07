@@ -40,6 +40,12 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Aestus family: tune the modules to C4 when the Frequency knob is centered (can be disabled for compatibility).
 
+- Funes: attenuverter for Harmonics CV.
+
+- Funes: CV control with attenuverters for lowpass gate response and decay.
+
+- Funes: LED lights for custom data state.
+
 ## Changes
 
 - Themes: group options under a submenu.
@@ -65,6 +71,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 - Aestus family: faceplate tweaks.
 
 - Aleae family: faceplate tweaks.
+
+- Funes: rework faceplate to make it both more compact and more attractive.
 
 
 # 2.5.2

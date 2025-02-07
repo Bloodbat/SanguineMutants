@@ -76,3 +76,9 @@ enum FunesLEDModes {
   LEDLPG,
   LEDOctave
 };
+
+enum FunesCustomDataStates {
+  DataNotAvailable,
+  DataFactory,
+  DataCustom
+};

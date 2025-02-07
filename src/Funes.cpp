@@ -26,6 +26,9 @@ struct Funes : SanguineModule {
 		PARAM_LPG_DECAY,
 		PARAM_FREQUENCY_ROOT,
 		PARAM_FREQ_MODE,
+		PARAM_HARMONICS_CV,
+		PARAM_LPG_COLOR_CV,
+		PARAM_LPG_DECAY_CV,
 		PARAMS_COUNT
 	};
 
@@ -38,15 +41,21 @@ struct Funes : SanguineModule {
 		INPUT_TRIGGER,
 		INPUT_LEVEL,
 		INPUT_NOTE,
+		INPUT_LGP_COLOR,
+		INPUT_LPG_DECAY,
 		INPUTS_COUNT
 	};
+
 	enum OutputIds {
 		OUTPUT_OUT,
 		OUTPUT_AUX,
 		OUTPUTS_COUNT
 	};
+
 	enum LightIds {
 		ENUMS(LIGHT_MODEL, 8 * 2),
+		LIGHT_FACTORY_DATA,
+		ENUMS(LIGHT_CUSTOM_DATA, 2),
 		LIGHTS_COUNT
 	};
 
@@ -60,7 +69,9 @@ struct Funes : SanguineModule {
 	float lastLPGDecay = 0.5f;
 	float lastModelVoltage = 0.f;
 
-	static const int textUpdateFrequency = 16;
+	static const int kTextUpdateFrequency = 16;
+
+	static const int kMaxUserDataSize = 4096;
 
 	int frequencyMode = 10;
 	int lastFrequencyMode = 10;
@@ -71,6 +82,7 @@ struct Funes : SanguineModule {
 	int channelCount = 0;
 
 	uint32_t displayTimeout = 0;
+	uint32_t errorTimeOut = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
 	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> outputSrc;
@@ -90,6 +102,8 @@ struct Funes : SanguineModule {
 
 	dsp::ClockDivider clockDivider;
 
+	FunesCustomDataStates customDataStates[plaits::kMaxEngines] = {};
+
 	Funes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -106,6 +120,9 @@ struct Funes : SanguineModule {
 		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV");
 		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV");
 		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funesFrequencyModes);
+		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV");
+		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV");
+		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV");
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
@@ -115,6 +132,8 @@ struct Funes : SanguineModule {
 		configInput(INPUT_TRIGGER, "Trigger");
 		configInput(INPUT_LEVEL, "Level");
 		configInput(INPUT_NOTE, "Pitch (1V/oct)");
+		configInput(INPUT_LGP_COLOR, "Lowpass gate response");
+		configInput(INPUT_LPG_DECAY, "Lowpass gate decay");
 
 		configOutput(OUTPUT_OUT, "Main");
 		configOutput(OUTPUT_AUX, "Auxiliary");
@@ -126,7 +145,9 @@ struct Funes : SanguineModule {
 
 		octaveQuantizer.Init(9, 0.01f, false);
 
-		clockDivider.setDivision(textUpdateFrequency);
+		clockDivider.setDivision(kTextUpdateFrequency);
+
+		resetCustomDataStates();
 
 		onReset();
 	}
@@ -158,7 +179,7 @@ struct Funes : SanguineModule {
 				displayModelNum = patch.engine;
 			}
 
-			// Calculate pitch for low cpu mode if needed
+			// Calculate pitch for low cpu mode, if needed.
 			float pitch = params[PARAM_FREQUENCY].getValue();
 			if (bLowCpu) {
 				pitch += std::log2(48000.f * args.sampleTime);
@@ -167,7 +188,7 @@ struct Funes : SanguineModule {
 			// Update patch
 
 			// Similar implementation to original Plaits ui.cc code.
-			// TODO: check with low cpu mode.
+			// TODO: Check with low cpu mode.
 			if (frequencyMode == 0) {
 				patch.note = -48.37f + pitch * 15.f;
 			} else if (frequencyMode == 9) {
@@ -182,25 +203,27 @@ struct Funes : SanguineModule {
 			patch.harmonics = params[PARAM_HARMONICS].getValue();
 			patch.timbre = params[PARAM_TIMBRE].getValue();
 			patch.morph = params[PARAM_MORPH].getValue();
-			patch.lpg_colour = params[PARAM_LPG_COLOR].getValue();
-			patch.decay = params[PARAM_LPG_DECAY].getValue();
+			patch.lpg_colour = clamp(params[PARAM_LPG_COLOR].getValue() + ((inputs[INPUT_LGP_COLOR].getVoltage() / 5.f) *
+				params[PARAM_LPG_COLOR_CV].getValue()), 0.f, 1.f);
+			patch.decay = clamp(params[PARAM_LPG_DECAY].getValue() + ((inputs[INPUT_LPG_DECAY].getVoltage() / 5.f) *
+				params[PARAM_LPG_DECAY_CV].getValue()), 0.f, 1.f);
 			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
 			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
 				ledsMode = LEDLPG;
-				displayTimeout--;
+				--displayTimeout;
 			}
 
 			bool activeLights[PORT_MAX_CHANNELS] = {};
 
 			bool pulse = false;
 
-			// Render output buffer for each voice
+			// Render output buffer for each voice.
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[blockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
-				// Construct modulations
+				// Construct modulations.
 				plaits::Modulations modulations;
 				if (!bNotesModelSelection) {
 					modulations.engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
@@ -209,7 +232,8 @@ struct Funes : SanguineModule {
 				modulations.note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
 				modulations.frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
 				modulations.frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
-				modulations.harmonics = inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f;
+				modulations.harmonics = (inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f) *
+					params[PARAM_HARMONICS_CV].getValue();
 				modulations.timbre_patched = inputs[INPUT_TIMBRE].isConnected();
 				modulations.timbre = inputs[INPUT_TIMBRE].getPolyVoltage(channel) / 8.f;
 				modulations.morph_patched = inputs[INPUT_MORPH].isConnected();
@@ -264,7 +288,7 @@ struct Funes : SanguineModule {
 				}
 			}
 
-			// Update model text and frequency mode every 16 samples only.
+			// Update model text, custom data lights and frequency mode every 16 samples only.
 			if (clockDivider.process()) {
 				if (displayChannel >= channelCount) {
 					displayChannel = channelCount - 1;
@@ -278,11 +302,23 @@ struct Funes : SanguineModule {
 
 				if (frequencyMode != lastFrequencyMode) {
 					ledsMode = LEDOctave;
-					displayTimeout--;
+					--displayTimeout;
+				}
+
+				lights[LIGHT_FACTORY_DATA].setBrightness(customDataStates[patch.engine] == DataFactory && errorTimeOut == 0 ? 0.5f : 0.f);
+				lights[LIGHT_CUSTOM_DATA + 0].setBrightness(customDataStates[patch.engine] == DataCustom && errorTimeOut == 0 ? 0.5f : 0.f);
+				lights[LIGHT_CUSTOM_DATA + 1].setBrightness(customDataStates[patch.engine] == DataCustom || errorTimeOut > 0 ? 0.5f : 0.f);
+
+				if (errorTimeOut != 0) {
+					--errorTimeOut;
+
+					if (errorTimeOut <= 0) {
+						errorTimeOut = 0;
+					}
 				}
 			}
 
-			// Convert output
+			// Convert output.
 			if (!bLowCpu) {
 				outputSrc.setRates(48000, static_cast<int>(args.sampleRate));
 				int inLen = blockSize;
@@ -296,7 +332,7 @@ struct Funes : SanguineModule {
 				outputBuffer.endIncr(len);
 			}
 
-			// Pulse light at 2 Hz
+			// Pulse light at 2 Hz.
 			triPhase += 2.f * args.sampleTime * blockSize;
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
@@ -482,6 +518,10 @@ struct Funes : SanguineModule {
 			if (userDataVector.size() > 0) {
 				const uint8_t* userDataBuffer = &userDataVector[0];
 				user_data.setBuffer(userDataBuffer);
+				if (userDataBuffer[kMaxUserDataSize - 2] == 'U') {
+					resetCustomDataStates();
+					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = DataCustom;
+				}
 			}
 		}
 	}
@@ -492,19 +532,20 @@ struct Funes : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				voice[channel].ReloadUserData();
 			}
+			resetCustomDataStates();
 		}
 	}
 
-	void loadCustomData(const std::string& path) {
+	void loadCustomData(const std::string& filePath) {
 		bLoading = true;
 		DEFER({ bLoading = false; });
-		// HACK Sleep 100us so DSP thread is likely to finish processing before we resize the vector
+		// HACK: Sleep 100us so DSP thread is likely to finish processing before we resize the vector.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 
-		std::string ext = string::lowercase(system::getExtension(path));
+		std::string fileExtension = string::lowercase(system::getExtension(filePath));
 
-		if (ext == ".bin") {
-			std::ifstream input(path, std::ios::binary);
+		if (fileExtension == ".bin") {
+			std::ifstream input(filePath, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
 			uint8_t* dataBuffer = buffer.data();
 			bool success = user_data.Save(dataBuffer, patch.engine);
@@ -512,6 +553,11 @@ struct Funes : SanguineModule {
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 					voice[channel].ReloadUserData();
 				}
+				// Only 1 engine can use custom data at a time.
+				resetCustomDataStates();
+				customDataStates[patch.engine] = DataCustom;
+			} else {
+				errorTimeOut = 4;
 			}
 		}
 	}
@@ -519,33 +565,31 @@ struct Funes : SanguineModule {
 	void showCustomDataLoadDialog() {
 #ifndef USING_CARDINAL_NOT_RACK
 		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
-		char* pathC = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
+		char* dialogFilePath = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
 
-		if (!pathC) {
-			// Fail silently
-			// TODO: Maybe don't fail silently
+		if (!dialogFilePath) {
+			errorTimeOut = 4;
 			return;
 		}
 
-		std::string path = pathC;
-		std::free(pathC);
+		std::string filePath = dialogFilePath;
+		std::free(dialogFilePath);
 
-		waveDir = system::getDirectory(path);
-		loadCustomData(path);
+		waveDir = system::getDirectory(filePath);
+		loadCustomData(filePath);
 #else
-		async_dialog_filebrowser(false, nullptr, waveDir.empty() ? nullptr : waveDir.c_str(), "Load custom data .bin file", [this](char* pathC) {
+		async_dialog_filebrowser(false, nullptr, waveDir.empty() ? nullptr : waveDir.c_str(), "Load custom data .bin file", [this](char* dialogFilePath) {
 
-			if (pathC == nullptr) {
-				// Fail silently
-				// TODO: Maybe don't fail silently=
+			if (dialogFilePath == nullptr) {
+				errorTimeOut = 4;
 				return;
 			}
 
-			const std::string path = pathC;
-			std::free(pathC);
+			const std::string filePath = dialogFilePath;
+			std::free(dialogFilePath);
 
-			waveDir = system::getDirectory(path);
-			loadCustomData(path);
+			waveDir = system::getDirectory(filePath);
+			loadCustomData(filePath);
 			});
 #endif
 	}
@@ -576,6 +620,14 @@ struct Funes : SanguineModule {
 		frequencyMode = freqModeNum;
 		params[PARAM_FREQ_MODE].setValue(freqModeNum);
 	}
+
+	void resetCustomDataStates() {
+		customDataStates[2] = DataFactory;
+		customDataStates[3] = DataFactory;
+		customDataStates[4] = DataFactory;
+		customDataStates[5] = DataFactory;
+		customDataStates[13] = DataFactory;
+	}
 };
 
 struct FunesWidget : SanguineModuleWidget {
@@ -584,52 +636,31 @@ struct FunesWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "funes";
-		panelSize = SIZE_34;
+		panelSize = SIZE_27;
 		backplateColor = PLATE_PURPLE;
 
 		makePanel();
 
 		addScrews(SCREW_ALL);
 
-		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(133.8, 32.306), module, Funes::PARAM_MODEL));
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(19.083, 67.293), module, Funes::PARAM_FREQUENCY));
-		addParam(createParamCentered<Sanguine3PSGreen>(millimetersToPixelsVec(86.86, 67.293), module, Funes::PARAM_HARMONICS));
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(120.305, 55.118), module, Funes::PARAM_TIMBRE));
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(120.305, 95.975), module, Funes::PARAM_MORPH));
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(142.556, 55.106), module, Funes::PARAM_TIMBRE_CV));
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(142.556, 74.878), module, Funes::PARAM_FREQUENCY_CV));
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(142.556, 95.964), module, Funes::PARAM_MORPH_CV));
+		const float baseX = 33.9955f;
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(19.083, 89.884), module, Funes::PARAM_FREQ_MODE));
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(52.962, 89.884), module, Funes::PARAM_LPG_COLOR));
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(86.86, 89.884), module, Funes::PARAM_LPG_DECAY));
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(52.962, 67.293), module, Funes::PARAM_FREQUENCY_ROOT));
+		const float lightOffsetX = 5.f;
 
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 32.306), module, Funes::INPUT_ENGINE));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 55.118), module, Funes::INPUT_TIMBRE));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 74.89), module, Funes::INPUT_FREQUENCY));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(161.831, 95.976), module, Funes::INPUT_MORPH));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(105.51, 77.287), module, Funes::INPUT_HARMONICS));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(14.378, 116.972), module, Funes::INPUT_TRIGGER));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(27.855, 116.972), module, Funes::INPUT_LEVEL));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(41.331, 116.972), module, Funes::INPUT_NOTE));
+		float currentX = baseX;
 
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(147.979, 116.972), module, Funes::OUTPUT_OUT));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(161.831, 116.972), module, Funes::OUTPUT_AUX));
+		for (int light = 0; light < 8; ++light) {
+			addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module, Funes::LIGHT_MODEL + light * 2));
+			currentX += lightOffsetX;
+		}
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(41.489, 14.41), module, Funes::LIGHT_MODEL + 0 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(46.489, 14.41), module, Funes::LIGHT_MODEL + 1 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(51.489, 14.41), module, Funes::LIGHT_MODEL + 2 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(56.489, 14.41), module, Funes::LIGHT_MODEL + 3 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(61.489, 14.41), module, Funes::LIGHT_MODEL + 4 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(66.489, 14.41), module, Funes::LIGHT_MODEL + 5 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(71.489, 14.41), module, Funes::LIGHT_MODEL + 6 * 2));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(76.489, 14.41), module, Funes::LIGHT_MODEL + 7 * 2));
+		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(89.0271, 12.1653), module, Funes::LIGHT_FACTORY_DATA));
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(98.7319, 12.1653), module, Funes::LIGHT_CUSTOM_DATA));
 
 		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
 		addChild(funesFrambuffer);
 
-		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 59.074, 32.314);
+		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 53.122, 32.314);
 		funesFrambuffer->addChild(alphaDisplay);
 		alphaDisplay->fallbackString = funesDisplayLabels[8];
 
@@ -637,10 +668,48 @@ struct FunesWidget : SanguineModuleWidget {
 			alphaDisplay->values.displayText = &module->displayText;
 		}
 
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 76.596, 112.027);
+		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(115.088, 32.314), module, Funes::PARAM_MODEL));
+		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(126.4772, 28.3256), module, Funes::INPUT_ENGINE));
+
+		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(2.546, 50.836), module, Funes::INPUT_FREQUENCY));
+		addParam(createParam<Trimpot>(millimetersToPixelsVec(17.552, 51.836), module, Funes::PARAM_FREQUENCY_CV));
+		addParam(createParam<Sanguine3PSRed>(millimetersToPixelsVec(30.558, 46.086), module, Funes::PARAM_FREQUENCY));
+
+		addParam(createParam<Sanguine1PSRed>(millimetersToPixelsVec(61.807, 48.100), module, Funes::PARAM_FREQUENCY_ROOT));
+
+		addParam(createParam<Sanguine3PSGreen>(millimetersToPixelsVec(88.935, 46.086), module, Funes::PARAM_HARMONICS));
+		addParam(createParam<Trimpot>(millimetersToPixelsVec(113.456, 51.825), module, Funes::PARAM_HARMONICS_CV));
+		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(126.477, 50.836), module, Funes::INPUT_HARMONICS));
+
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(16.552, 71.066), module, Funes::INPUT_LGP_COLOR));
+		addParam(createParam<Trimpot>(millimetersToPixelsVec(36.308, 72.066), module, Funes::PARAM_LPG_COLOR_CV));
+		addParam(createParam<Sanguine1PSBlue>(millimetersToPixelsVec(49.243, 68.376), module, Funes::PARAM_LPG_COLOR));
+
+		addParam(createParam<Sanguine1PSBlue>(millimetersToPixelsVec(74.371, 68.376), module, Funes::PARAM_LPG_DECAY));
+		addParam(createParam<Trimpot>(millimetersToPixelsVec(94.685, 72.054), module, Funes::PARAM_LPG_DECAY_CV));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(112.456, 71.066), module, Funes::INPUT_LPG_DECAY));
+
+		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(2.546, 91.296), module, Funes::INPUT_TIMBRE));
+		addParam(createParam<Trimpot>(millimetersToPixelsVec(17.552, 92.296), module, Funes::PARAM_TIMBRE_CV));
+		addParam(createParam<Sanguine1PSRed>(millimetersToPixelsVec(32.618, 88.606), module, Funes::PARAM_TIMBRE));
+
+		addParam(createParam<Sanguine1PSPurple>(millimetersToPixelsVec(61.807, 88.606), module, Funes::PARAM_FREQ_MODE));
+
+		addParam(createParam<Sanguine1PSGreen>(millimetersToPixelsVec(91.329, 88.606), module, Funes::PARAM_MORPH));
+		addParam(createParam<Trimpot>(millimetersToPixelsVec(113.456, 92.296), module, Funes::PARAM_MORPH_CV));
+		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(126.477, 91.296), module, Funes::INPUT_MORPH));
+
+		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(3.737, 112.984), module, Funes::INPUT_TRIGGER));
+		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(17.214, 112.984), module, Funes::INPUT_LEVEL));
+		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(30.690, 112.984), module, Funes::INPUT_NOTE));
+
+		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(111.028, 112.984), module, Funes::OUTPUT_OUT));
+		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(124.880, 112.984), module, Funes::OUTPUT_AUX));
+
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.733, 113.895);
 		addChild(bloodLogo);
 
-		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 89.597, 118.96);
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.734, 120.828);
 		addChild(mutantsLogo);
 	}
 
