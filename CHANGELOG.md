@@ -74,6 +74,12 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Funes: rework faceplate to make it both more compact and more attractive.
 
+- Nebulae family: faceplate tweaks.
+
+- Incurvationes family: faceplate tweaks.
+
+- Apices family: faceplate tweaks.
+
 
 # 2.5.2
 
