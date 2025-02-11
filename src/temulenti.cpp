@@ -187,7 +187,7 @@ struct Temulenti : SanguineModule {
 
 			pitchParam += 60.f;
 			// This is probably not original but seems useful to keep the same frequency as in normal mode.
-			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC && bUseCalibrationOffset) {
+			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC && !bUseCalibrationOffset) {
 				pitchParam -= 12.f;
 			}
 
