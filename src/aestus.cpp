@@ -228,8 +228,8 @@ struct Aestus : SanguineModule {
 		float unipolarFlag = static_cast<float>(uni) / 65535;
 		float bipolarFlag = static_cast<float>(bi) / 32768;
 
-		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 8.f : 0.f);
-		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 8.f : 0.f);
+		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
+		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
 		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
 		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
