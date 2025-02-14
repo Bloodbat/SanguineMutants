@@ -163,53 +163,52 @@ struct Marmora : SanguineModule {
 	Marmora() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configButton(PARAM_DEJA_VU_T, "T deja vu");
-		configButton(PARAM_DEJA_VU_X, "X deja vu");
 		configParam(PARAM_DEJA_VU, 0.f, 1.f, 0.5f, "Deja vu probability", "%", 0.f, 100.f);
-		configParam(PARAM_T_RATE, -1.f, 1.f, 0.f, "Clock rate");
-		configParam(PARAM_X_SPREAD, 0.f, 1.f, 0.5f, "Probability distribution", "%", 0.f, 100.f);
-		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "T mode", marmoraTModeLabels);
-		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmoraXModeLabels);
 		configParam<LengthParam>(PARAM_DEJA_VU_LENGTH, 0.f, 1.f, 1.f, "Loop length");
-		configParam(PARAM_T_BIAS, 0.f, 1.f, 0.5f, "Gate bias", "%", 0.f, 100.f);
-		configParam(PARAM_X_BIAS, 0.f, 1.f, 0.5f, "Distribution bias", "%", 0.f, 100.f);
-		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "Clock range mode", marmoraTRangeLabels);
-		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "Output voltage range", marmoraXRangeLabels);
-		configButton(PARAM_EXTERNAL, "External processing mode");
-		configParam(PARAM_T_JITTER, 0.f, 1.f, 0.f, "Randomness amount", "%", 0.f, 100.f);
-		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "Smoothness", "%", 0.f, 100.f);
+		configInput(INPUT_DEJA_VU, "Deja vu");
+
+		configButton(PARAM_DEJA_VU_T, "t deja vu");
+		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t super lock", marmoraLockLabels);
+		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "t mode", marmoraTModeLabels);
+		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "t clock range mode", marmoraTRangeLabels);
+		configParam(PARAM_T_RATE, -1.f, 1.f, 0.f, "t clock rate");
+		configParam(PARAM_T_BIAS, 0.f, 1.f, 0.5f, "t gate bias", "%", 0.f, 100.f);
+		configParam(PARAM_T_JITTER, 0.f, 1.f, 0.f, "t randomness amount", "%", 0.f, 100.f);
+		configParam(PARAM_GATE_BIAS, 0.f, 1.f, 0.5f, "t gate length", "%", 0.f, 100.f);
+		configParam(PARAM_GATE_JITTER, 0.f, 1.f, 0.f, "t gate length randomness", "%", 0.f, 100.f);
+		configInput(INPUT_T_BIAS, "t bias");
+		configInput(INPUT_T_CLOCK, "t clock");
+		configInput(INPUT_T_RATE, "t rate");
+		configInput(INPUT_T_JITTER, "t jitter");
+		configInput(INPUT_T_RESET, "t reset");
+		configOutput(OUTPUT_T1, "t₁");
+		configOutput(OUTPUT_T2, "t₂");
+		configOutput(OUTPUT_T3, "t₃");
+
+		configButton(PARAM_DEJA_VU_X, "X deja vu");
+		configSwitch(PARAM_X_SUPER_LOCK, 0.f, 1.f, 0.f, "X super lock", marmoraLockLabels);
+		configParam(PARAM_X_SPREAD, 0.f, 1.f, 0.5f, "X probability distribution", "%", 0.f, 100.f);
+		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmoraXModeLabels);
+		configParam(PARAM_X_BIAS, 0.f, 1.f, 0.5f, "X distribution bias", "%", 0.f, 100.f);
+		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "X output voltage range", marmoraXRangeLabels);
+		configButton(PARAM_EXTERNAL, "X external voltage processing mode");
+		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "X smoothness", "%", 0.f, 100.f);
 		configSwitch(PARAM_SCALE, 0.f, 5.f, 0.f, "Scale", marmoraScaleLabels);
 		configSwitch(PARAM_INTERNAL_X_CLOCK_SOURCE, 0.f, 3.f, 0.f, "Internal X clock source", marmoraInternalClockLabels);
-		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t Super lock", marmoraLockLabels);
-		configSwitch(PARAM_X_SUPER_LOCK, 0.f, 1.f, 0.f, "X Super lock", marmoraLockLabels);
-
-		configInput(INPUT_T_BIAS, "T bias");
 		configInput(INPUT_X_BIAS, "X bias");
-		configInput(INPUT_T_CLOCK, "T clock");
-		configInput(INPUT_T_RATE, "T rate");
-		configInput(INPUT_T_JITTER, "T jitter");
-		configInput(INPUT_DEJA_VU, "Deja vu");
 		configInput(INPUT_X_STEPS, "X steps");
 		configInput(INPUT_X_SPREAD, "X spread");
 		configInput(INPUT_X_CLOCK, "X clock");
-		configInput(INPUT_T_RESET, "T reset");
 		configInput(INPUT_X_RESET, "X reset");
-
-		configOutput(OUTPUT_T1, "T₁");
-		configOutput(OUTPUT_T2, "T₂");
-		configOutput(OUTPUT_T3, "T₃");
-		configOutput(OUTPUT_Y, "Y");
 		configOutput(OUTPUT_X1, "X₁");
 		configOutput(OUTPUT_X2, "X₂");
 		configOutput(OUTPUT_X3, "X₃");
 
-		configParam(PARAM_Y_RATE, 0.f, 1.f, 4.5f / LENGTHOF(y_divider_ratios), "Clock divide");
-		configParam(PARAM_Y_SPREAD, 0.f, 1.f, 0.5f, "Probability distribution", "%", 0.f, 100.f);
-		configParam(PARAM_Y_BIAS, 0.f, 1.f, 0.5f, "Voltage offset", "%", 0.f, 100.f);
-		configParam(PARAM_Y_STEPS, 0.f, 1.f, 0.f, "Smoothness", "%", 0.f, 100.f);
-
-		configParam(PARAM_GATE_BIAS, 0.f, 1.f, 0.5f, "Gate length", "%", 0.f, 100.f);
-		configParam(PARAM_GATE_JITTER, 0.f, 1.f, 0.f, "Gate length randomness", "%", 0.f, 100.f);
+		configParam(PARAM_Y_RATE, 0.f, 1.f, 4.5f / LENGTHOF(y_divider_ratios), "Y clock divider");
+		configParam(PARAM_Y_SPREAD, 0.f, 1.f, 0.5f, "Y probability distribution", "%", 0.f, 100.f);
+		configParam(PARAM_Y_BIAS, 0.f, 1.f, 0.5f, "Y voltage offset", "%", 0.f, 100.f);
+		configParam(PARAM_Y_STEPS, 0.f, 1.f, 0.f, "Y smoothness", "%", 0.f, 100.f);
+		configOutput(OUTPUT_Y, "Y");
 
 		lightsDivider.setDivision(kLightDivider);
 
