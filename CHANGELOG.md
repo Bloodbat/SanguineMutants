@@ -26,15 +26,15 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 ## Additions
 
-- Ability to reset Marmora generators from the context menu.
+- Marmora: Ability to reset generators from the context menu.
 
-- Ability to reseed Marmora random generator from the context menu.
+- Marmora: Ability to reseed random generator from the context menu.
 
-- Ability to set user defined Marmora random generator seed (state) from the context menu.
+- Marmora: Ability to set user defined random generator seeds (state) from the context menu.
 
-- Marmora shows selected loop length in the knob's tooltip.
+- Marmora: show selected loop length in knob's tooltip.
 
-- Optionally tune Anuli to a C when frequency knob is centered.
+- Anuli: Optionally tune to a C when frequency knob is centered.
 
 - Etesia: CV control for Reverse parameter.
 
@@ -54,6 +54,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Marmora: faceplate label tweaks.
 
+- Marmora: rework faceplate to make usage easier.
+
 - Anuli: reorganize faceplate and make it cleaner.
 
 - Anuli: change the polyphony knob's tooltip to be congruent with the nomenclature used in the manual.
@@ -61,6 +63,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 - Nodi family: faceplate tweaks.
 
 - Nodi family: processing tweaks.
+
+- Apices family: faceplate tweaks.
 
 - Mortuus: further ByteBeats tweaks.
 
@@ -75,10 +79,6 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 - Nebulae family: faceplate tweaks.
 
 - Incurvationes family: faceplate tweaks.
-
-- Apices family: faceplate tweaks.
-
-- Marmora: rework faceplate to make usage easier.
 
 
 # 2.5.2
