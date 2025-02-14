@@ -78,6 +78,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Apices family: faceplate tweaks.
 
+- Marmora: rework faceplate to make usage easier.
+
 
 # 2.5.2
 
