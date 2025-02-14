@@ -81,7 +81,7 @@ struct Marmora : SanguineModule {
 		ENUMS(LIGHT_X2, 2),
 		ENUMS(LIGHT_X3, 2),
 		ENUMS(LIGHT_SCALE, 2),
-		ENUMS(LIGHT_INTERNAL_CLOCK_SOURCE, 3),
+		ENUMS(LIGHT_INTERNAL_X_CLOCK_SOURCE, 3),
 		LIGHTS_COUNT
 	};
 
@@ -391,13 +391,13 @@ struct Marmora : SanguineModule {
 			lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
 
 			if (!bXClockSourceExternal) {
-				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
-				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
-				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
 			} else {
-				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_INTERNAL_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 		}
 	}
@@ -729,119 +729,131 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		TL1105* buttonTSuperLock = createParamCentered<TL1105>(millimetersToPixelsVec(48.162, 13.907), module, Marmora::PARAM_T_SUPER_LOCK);
+		addParam(createParam<Sanguine1PSPurple>(millimetersToPixelsVec(64.430, 5.618), module, Marmora::PARAM_DEJA_VU));
+
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(8.677, 26.586), module,
+			Marmora::PARAM_T_MODE, Marmora::LIGHT_T_MODE));
+
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(35.582, 26.586), module,
+			Marmora::PARAM_T_RANGE, Marmora::LIGHT_T_RANGE));
+
+		CKD6* buttonDejaVuT = createParam<CKD6>(millimetersToPixelsVec(49.568, 21.610), module, Marmora::PARAM_DEJA_VU_T);
+		buttonDejaVuT->latch = true;
+		buttonDejaVuT->momentary = false;
+		addParam(buttonDejaVuT);
+		addChild(createLightCentered<CKD6Light<GreenLight>>(millimetersToPixelsVec(54.268, 26.298), module, Marmora::LIGHT_DEJA_VU_T));
+
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(67.120, 26.630), module, Marmora::INPUT_DEJA_VU));
+
+		CKD6* buttonDejaVuX = createParam<CKD6>(millimetersToPixelsVec(83.272, 21.610), module, Marmora::PARAM_DEJA_VU_X);
+		buttonDejaVuX->latch = true;
+		buttonDejaVuX->momentary = false;
+		addParam(buttonDejaVuX);
+		addChild(createLightCentered<CKD6Light<RedLight>>(millimetersToPixelsVec(87.972, 26.298), module, Marmora::LIGHT_DEJA_VU_X));
+
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(100.657, 26.586), module,
+			Marmora::PARAM_X_RANGE, Marmora::LIGHT_X_RANGE));
+
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(127.576, 26.586), module,
+			Marmora::PARAM_X_MODE, Marmora::LIGHT_X_MODE));
+
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(4.571, 37.199), module, Marmora::INPUT_T_RATE));
+
+		addParam(createParam<Sanguine3PSGreen>(millimetersToPixelsVec(16.373, 32.449), module, Marmora::PARAM_T_RATE));
+
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(37.706, 37.199), module, Marmora::INPUT_T_CLOCK));
+
+		TL1105* buttonTSuperLock = createParam<TL1105>(millimetersToPixelsVec(51.618, 34.547), module, Marmora::PARAM_T_SUPER_LOCK);
 		buttonTSuperLock->momentary = false;
 		buttonTSuperLock->latch = true;
 		addParam(buttonTSuperLock);
 
-		TL1105* buttonXSuperLock = createParamCentered<TL1105>(millimetersToPixelsVec(94.078, 13.907), module, Marmora::PARAM_X_SUPER_LOCK);
+		TL1105* buttonXSuperLock = createParam<TL1105>(millimetersToPixelsVec(85.322, 34.547), module, Marmora::PARAM_X_SUPER_LOCK);
 		buttonXSuperLock->momentary = false;
 		buttonXSuperLock->latch = true;
 		addParam(buttonXSuperLock);
 
-		CKD6* buttonDejaVuT = createParamCentered<CKD6>(millimetersToPixelsVec(38.262, 18.084), module, Marmora::PARAM_DEJA_VU_T);
-		buttonDejaVuT->latch = true;
-		buttonDejaVuT->momentary = false;
-		addParam(buttonDejaVuT);
-		addChild(createLightCentered<CKD6Light<GreenLight>>(millimetersToPixelsVec(38.262, 18.084), module, Marmora::LIGHT_DEJA_VU_T));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(96.545, 37.199), module, Marmora::INPUT_X_CLOCK));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(71.12, 16.696), module, Marmora::PARAM_DEJA_VU));
+		addParam(createParam<Sanguine3PSRed>(millimetersToPixelsVec(108.356, 32.449), module, Marmora::PARAM_X_SPREAD));
 
-		CKD6* buttonDejaVuX = createParamCentered<CKD6>(millimetersToPixelsVec(104.0, 18.084), module, Marmora::PARAM_DEJA_VU_X);
-		buttonDejaVuX->latch = true;
-		buttonDejaVuX->momentary = false;
-		addParam(buttonDejaVuX);
-		addChild(createLightCentered<CKD6Light<RedLight>>(millimetersToPixelsVec(104.0, 18.084), module, Marmora::LIGHT_DEJA_VU_X));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(129.681, 37.199), module, Marmora::INPUT_X_SPREAD));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(10.799, 29.573), module, Marmora::PARAM_T_MODE, Marmora::LIGHT_T_MODE));
+		addParam(createParam<Sanguine1PSPurple>(millimetersToPixelsVec(64.430, 41.416), module, Marmora::PARAM_DEJA_VU_LENGTH));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(25.641, 35.373), module, Marmora::PARAM_T_RANGE, Marmora::LIGHT_T_RANGE));
+		addParam(createParam<Sanguine1PSGreen>(millimetersToPixelsVec(4.981, 52.644), module, Marmora::PARAM_T_BIAS));
 
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(50.226, 37.59), module, Marmora::PARAM_GATE_BIAS));
+		addParam(createParam<Sanguine1PSGreen>(millimetersToPixelsVec(31.886, 52.644), module, Marmora::PARAM_T_JITTER));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(71.12, 37.59), module, Marmora::INPUT_DEJA_VU));
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<RedGreenBlueLight>>>(millimetersToPixelsVec(97.545, 55.875),
+			module, Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE, Marmora::LIGHT_INTERNAL_X_CLOCK_SOURCE));
 
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(71.12, 58.483), module, Marmora::PARAM_GATE_JITTER));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(116.623, 35.373), module, Marmora::PARAM_X_RANGE, Marmora::LIGHT_X_RANGE));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(131.477, 29.573), module, Marmora::PARAM_X_MODE, Marmora::LIGHT_X_MODE));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(9.671, 42.781), module, Marmora::INPUT_T_RATE));
-
-		addParam(createParamCentered<Sanguine3PSGreen>(millimetersToPixelsVec(26.663, 57.166), module, Marmora::PARAM_T_RATE));
-
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(48.445, 59.072), module, Marmora::PARAM_T_JITTER));
-
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(92.014, 37.59), module, Marmora::PARAM_DEJA_VU_LENGTH));
-
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(93.795, 59.072), module, Marmora::PARAM_X_STEPS));
-
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(115.577, 57.166), module, Marmora::PARAM_X_SPREAD));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(132.561, 42.781), module, Marmora::INPUT_X_SPREAD));
-
-		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(9.671, 70.927), module, Marmora::PARAM_T_BIAS));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(39.965, 75.619), module, Marmora::INPUT_T_JITTER));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(24.818, 93.182),
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(114.106, 55.875),
 			module, Marmora::PARAM_SCALE, Marmora::LIGHT_SCALE));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(132.561, 51.792),
+		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(130.681, 55.875),
 			module, Marmora::PARAM_EXTERNAL, Marmora::LIGHT_EXTERNAL));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(102.275, 75.619), module, Marmora::INPUT_X_STEPS));
+		addParam(createParam<Sanguine1PSBlue>(millimetersToPixelsVec(52.078, 63.529), module, Marmora::PARAM_Y_RATE));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(132.562, 70.927), module, Marmora::PARAM_X_BIAS));
+		addParam(createParam<Sanguine1PSBlue>(millimetersToPixelsVec(76.782, 63.529), module, Marmora::PARAM_Y_STEPS));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(24.818, 79.424), module, Marmora::INPUT_T_CLOCK));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(7.671, 71.519), module, Marmora::INPUT_T_BIAS));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(117.418, 79.424), module, Marmora::INPUT_X_CLOCK));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(34.576, 71.519), module, Marmora::INPUT_T_JITTER));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(9.671, 88.407), module, Marmora::INPUT_T_BIAS));
+		addParam(createParam<Sanguine1PSRed>(millimetersToPixelsVec(96.961, 69.879), module, Marmora::PARAM_X_STEPS));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(46.551, 90.444), module, Marmora::PARAM_Y_RATE));
+		addParam(createParam<Sanguine1PSRed>(millimetersToPixelsVec(123.872, 69.879), module, Marmora::PARAM_X_BIAS));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(95.69, 90.444), module, Marmora::PARAM_Y_STEPS));
+		addInput(createInput<BananutBlack>(millimetersToPixelsVec(21.123, 77.916), module, Marmora::INPUT_T_RESET));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedGreenBlueLight>>>(millimetersToPixelsVec(117.418, 93.182),
-			module, Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE, Marmora::LIGHT_INTERNAL_CLOCK_SOURCE));
+		addInput(createInput<BananutBlack>(millimetersToPixelsVec(113.106, 77.916), module, Marmora::INPUT_X_RESET));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(132.562, 88.407), module, Marmora::INPUT_X_BIAS));
+		addParam(createParam<Sanguine1PSGreen>(millimetersToPixelsVec(4.981, 84.313), module, Marmora::PARAM_GATE_BIAS));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(51.268, 110.22), module, Marmora::PARAM_Y_SPREAD));
+		addParam(createParam<Sanguine1PSGreen>(millimetersToPixelsVec(31.886, 84.313), module, Marmora::PARAM_GATE_JITTER));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(92.291, 110.22), module, Marmora::PARAM_Y_BIAS));
+		addParam(createParam<Sanguine1PSBlue>(millimetersToPixelsVec(52.078, 84.313), module, Marmora::PARAM_Y_SPREAD));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(6.567, 107.415), module, Marmora::LIGHT_T1));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(6.567, 114.238), module, Marmora::OUTPUT_T1));
+		addParam(createParam<Sanguine1PSBlue>(millimetersToPixelsVec(76.782, 84.313), module, Marmora::PARAM_Y_BIAS));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(18.989, 107.415), module, Marmora::LIGHT_T2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(18.989, 114.238), module, Marmora::OUTPUT_T2));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(99.651, 88.803), module, Marmora::INPUT_X_STEPS));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(31.411, 107.415), module, Marmora::LIGHT_T3));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(31.411, 114.238), module, Marmora::OUTPUT_T3));
+		addInput(createInput<BananutPurple>(millimetersToPixelsVec(126.562, 88.803), module, Marmora::INPUT_X_BIAS));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(71.12, 107.415), module, Marmora::LIGHT_Y));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(71.12, 114.238), module, Marmora::OUTPUT_Y));
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(5.701, 105.889), module, Marmora::LIGHT_T1));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(110.862, 107.415), module, Marmora::LIGHT_X1));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(110.862, 114.238), module, Marmora::OUTPUT_X1));
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(18.123, 105.889), module, Marmora::LIGHT_T2));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(123.277, 107.415), module, Marmora::LIGHT_X2));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(123.277, 114.238), module, Marmora::OUTPUT_X2));
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(30.545, 105.889), module, Marmora::LIGHT_T3));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(135.691, 107.415), module, Marmora::LIGHT_X3));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(135.691, 114.238), module, Marmora::OUTPUT_X3));
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(69.582, 105.889), module, Marmora::LIGHT_Y));
 
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(55.45, 73.437), module, Marmora::INPUT_T_RESET));
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(86.79, 73.437), module, Marmora::INPUT_X_RESET));
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(108.599, 105.889), module, Marmora::LIGHT_X1));
 
-		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 61.356, 89.818);
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(121.013, 105.889), module, Marmora::LIGHT_X2));
+
+		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(133.427, 105.889), module, Marmora::LIGHT_X3));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(3.240, 110.250), module, Marmora::OUTPUT_T1));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(15.662, 110.250), module, Marmora::OUTPUT_T2));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(28.084, 110.250), module, Marmora::OUTPUT_T3));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(67.120, 110.250), module, Marmora::OUTPUT_Y));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(106.137, 110.250), module, Marmora::OUTPUT_X1));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(118.551, 110.250), module, Marmora::OUTPUT_X2));
+
+		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(130.965, 110.250), module, Marmora::OUTPUT_X3));
+
+		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 41.957, 114.855);
 		addChild(bloodLogo);
 
-		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 74.358, 96.751);
+		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 94.378, 113.441);
 		addChild(mutantsLogo);
 	}
 
