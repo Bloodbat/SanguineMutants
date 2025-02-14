@@ -945,11 +945,6 @@ struct ApicesWidget : SanguineModuleWidget {
 		apicesFrambuffer->addChild(displayChannel2);
 		displayChannel2->fallbackString = apicesModeList[0];
 
-		if (module) {
-			displayChannel1->values.displayText = &module->displayText1;
-			displayChannel2->values.displayText = &module->displayText2;
-		}
-
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(99.527, 34.261), module, Apices::PARAM_MODE));
 
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(56.011, 79.582),
@@ -993,36 +988,32 @@ struct ApicesWidget : SanguineModuleWidget {
 		apicesFrambuffer->addChild(oledDisplay1);
 		oledDisplay1->fallbackString = apicesKnobLabelsTwinMode[0].knob1;
 
-		if (module)
-			oledDisplay1->oledText = &module->oledText1;
-
-
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
 		apicesFrambuffer->addChild(oledDisplay2);
 		oledDisplay2->fallbackString = apicesKnobLabelsTwinMode[0].knob2;
-
-		if (module)
-			oledDisplay2->oledText = &module->oledText2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
 		apicesFrambuffer->addChild(oledDisplay3);
 		oledDisplay3->fallbackString = apicesKnobLabelsTwinMode[0].knob3;
 
-		if (module)
-			oledDisplay3->oledText = &module->oledText3;
-
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
 		apicesFrambuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = apicesKnobLabelsTwinMode[0].knob4;
-
-		if (module)
-			oledDisplay4->oledText = &module->oledText4;
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
 		addChild(mutantsLogo);
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
+
+		if (module) {
+			displayChannel1->values.displayText = &module->displayText1;
+			displayChannel2->values.displayText = &module->displayText2;
+			oledDisplay1->oledText = &module->oledText1;
+			oledDisplay2->oledText = &module->oledText2;
+			oledDisplay3->oledText = &module->oledText3;
+			oledDisplay4->oledText = &module->oledText4;
+		}
 	}
 
 	void appendContextMenu(Menu* menu) override {
