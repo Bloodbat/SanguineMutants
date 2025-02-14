@@ -885,8 +885,9 @@ struct MarmoraWidget : SanguineModuleWidget {
 				e.consume(this);
 			}
 
-			if (!e.getTarget())
+			if (!e.getTarget()) {
 				TextField::onSelectKey(e);
+			}
 		}
 	};
 
