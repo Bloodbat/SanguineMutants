@@ -41,8 +41,10 @@ struct Contextus : SanguineModule {
 		PARAM_SCALE,
 		PARAM_ROOT,
 
-		// Unused: kept for compatibility.
+		// Unused: kept for compatibility. ----->
 		PARAM_META,
+		// <-----
+
 		PARAM_VCA,
 		PARAM_DRIFT,
 		PARAM_FLAT,
@@ -371,7 +373,7 @@ struct Contextus : SanguineModule {
 				int32_t gain = settings[channel].ad_vca > 0 ? adValue : 65535;
 				uint16_t signature = settings[channel].signature * settings[channel].signature * 4095;
 				for (size_t block = 0; block < kBlockSize; ++block) {
-					if ((block % decimationFactor) == 0) {
+					if (block % decimationFactor == 0) {
 						sample = renderBuffer[block] & bitMask;
 					}
 					sample = sample * gainLp[channel] >> 16;

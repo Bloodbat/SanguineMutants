@@ -41,8 +41,10 @@ struct Nodi : SanguineModule {
 		PARAM_SCALE,
 		PARAM_ROOT,
 
-		// Unused; but kept for compatibility with existing patches.
+		// Unused; but kept for compatibility with existing patches. ----->
 		PARAM_META,
+		// <-----
+
 		PARAM_MORSE,
 		PARAM_VCA,
 		PARAM_DRIFT,
@@ -378,7 +380,7 @@ struct Nodi : SanguineModule {
 				int32_t gain = settings[channel].ad_vca > 0 ? adValue : 65535;
 				uint16_t signature = settings[channel].signature * settings[channel].signature * 4095;
 				for (size_t block = 0; block < kBlockSize; ++block) {
-					if ((block % decimationFactor) == 0) {
+					if (block % decimationFactor == 0) {
 						sample = renderBuffer[block] & bitMask;
 					}
 					sample = sample * gainLp[channel] >> 16;
