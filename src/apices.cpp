@@ -532,7 +532,7 @@ struct Apices : SanguineModule {
 		case EDIT_MODE_FIRST:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.5f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
@@ -544,8 +544,8 @@ struct Apices : SanguineModule {
 		case EDIT_MODE_SECOND:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.75f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.5f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.5f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
@@ -587,8 +587,8 @@ struct Apices : SanguineModule {
 			break;
 		}
 
-		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.75f : 0.f, sampleTime);
-		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.5f : 0.f, sampleTime);
+		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.5f : 0.f, sampleTime);
 
 		ApicesProcessorFunction currentProcessorFunction = getProcessorFunction();
 		for (size_t light = 0; light < kNumFunctionLights; ++light) {
@@ -664,8 +664,8 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
-		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.5f), sampleTime);
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.5f), sampleTime);
 	}
 
 	void onReset() override {

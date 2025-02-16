@@ -212,11 +212,11 @@ struct Distortiones : SanguineModule {
 
 		if (isLightsTurn) {
 			lights[LIGHT_CARRIER + 0].value = (distortionesParameters[0]->carrier_shape == 1
-				|| distortionesParameters[0]->carrier_shape == 2) ? 0.75f : 0.f;
+				|| distortionesParameters[0]->carrier_shape == 2) ? 0.5f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (distortionesParameters[0]->carrier_shape == 2
-				|| distortionesParameters[0]->carrier_shape == 3) ? 0.75f : 0.f;
+				|| distortionesParameters[0]->carrier_shape == 3) ? 0.5f : 0.f;
 
-			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 0.75f : 0.f);
+			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 0.5f : 0.f);
 
 			for (int mode = 0; mode < kModeCount; ++mode) {
 				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);

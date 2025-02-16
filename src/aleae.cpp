@@ -141,10 +141,10 @@ struct Aleae : SanguineModule {
 				lights[currentLight + 0].setSmoothBrightness(lightBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + section * 2;
-				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ? 0.75f : 0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ? 0.f : 0.75f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ? 0.5f : 0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ? 0.f : 0.5f, sampleTime);
 
-				lights[LIGHTS_OUT_MODE + section].setBrightnessSmooth(outModes[section] ? 0.75 : 0.f, sampleTime);
+				lights[LIGHTS_OUT_MODE + section].setBrightnessSmooth(outModes[section] ? 0.5 : 0.f, sampleTime);
 			}
 		}
 	}

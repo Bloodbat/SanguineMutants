@@ -234,8 +234,8 @@ struct Vimina : SanguineModule {
 		if (bIsLightsTurn) {
 			for (int section = 0; section < kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_MODE + section * 2;
-				lights[currentLight + 0].setBrightnessSmooth(channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.75f : 0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.75f : 0.f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.5f : 0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.5f : 0.f, sampleTime);
 			}
 		}
 	}

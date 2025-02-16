@@ -382,7 +382,7 @@ struct Nebulae : SanguineModule {
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ? 0.5f : 0.f, sampleTime);
 
 			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
 
@@ -501,8 +501,8 @@ struct Nebulae : SanguineModule {
 			lights[LIGHT_TEXTURE_CV + 0].setBrightness(rescaledLight);
 			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-rescaledLight);
 
-			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 0.75f : 0.f, sampleTime);
-			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ? 0.5f : 0.f, sampleTime);
+			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ? 0.5f : 0.f, sampleTime);
 		} // lightsDivider
 	}
 

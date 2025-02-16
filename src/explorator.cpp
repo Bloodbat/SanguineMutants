@@ -365,7 +365,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_SH + 2].setBrightnessSmooth(sampleAndHoldVoltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 			}
 
-			lights[LIGHT_AVERAGER].setBrightnessSmooth(attenuate3to1 ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_AVERAGER].setBrightnessSmooth(attenuate3to1 ? 0.5f : 0.f, sampleTime);
 		} // Light Divider
 	}
 };
