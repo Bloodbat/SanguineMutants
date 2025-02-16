@@ -23,7 +23,7 @@ static const std::vector<uint16_t> nodiDecimationFactors = {
 	1
 };
 
-static const std::vector<std::string> nodiNumberStrings = {
+static const std::vector<std::string> nodiNumberStrings15 = {
 	"   0",
 	"   1",
 	"   2",
@@ -40,6 +40,22 @@ static const std::vector<std::string> nodiNumberStrings = {
 	"  13",
 	"  14",
 	"  15"
+};
+
+static const std::vector<std::string> nodiIntensityDisplayStrings = {
+	"OFF ",
+	"   1",
+	"   2",
+	"   3",
+	"FULL"
+};
+
+static const std::vector<std::string> nodiIntensityTooltipStrings = {
+	"OFF",
+	"1",
+	"2",
+	"3",
+	"FULL"
 };
 
 static const std::vector<std::string> nodiBitsStrings = {
@@ -210,8 +226,6 @@ static const std::vector<std::string> nodiScaleStrings = {
 static const std::string nodiAutoLabel = "AUTO";
 static const std::string nodiVCALabel = "\\VCA";
 static const std::string nodiFlatLabel = "FLAT";
-static const std::string nodiDriftLabel = "DRFT";
-static const std::string nodiSignLabel = "SIGN";
 
 static const int kBlockSize = 24;
 

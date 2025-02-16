@@ -74,9 +74,7 @@ struct Nodi : SanguineModule {
 		ENUMS(LIGHT_MODEL, 1 * 3),
 		LIGHT_MORSE,
 		LIGHT_VCA,
-		LIGHT_DRIFT,
 		LIGHT_FLAT,
-		LIGHT_SIGN,
 		LIGHT_AUTO,
 		ENUMS(LIGHT_CHANNEL_MODEL, 16 * 3),
 		LIGHTS_COUNT
@@ -90,6 +88,9 @@ struct Nodi : SanguineModule {
 	braids::Quantizer quantizer[PORT_MAX_CHANNELS];
 
 	uint8_t currentScale[PORT_MAX_CHANNELS] = {};
+
+	uint8_t waveShaperValue = 0;
+	uint8_t driftValue = 0;
 
 	int16_t previousPitch[PORT_MAX_CHANNELS] = {};
 
@@ -110,10 +111,8 @@ struct Nodi : SanguineModule {
 	bool bTriggerFlag[PORT_MAX_CHANNELS] = {};
 
 	bool bAutoTrigger = false;
-	bool bDritfEnabled = false;
 	bool bFlattenEnabled = false;
 	bool bPaques = false;
-	bool bSignatureEnabled = false;
 	bool bVCAEnabled = false;
 
 	bool bLowCpu = false;
@@ -172,9 +171,9 @@ struct Nodi : SanguineModule {
 		configButton(PARAM_META, "");
 		configButton(PARAM_MORSE, "Toggle paques (morse code secret message)");
 		configButton(PARAM_VCA, "Toggle AD VCA");
-		configButton(PARAM_DRIFT, "Toggle oscillator drift");
+		configSwitch(PARAM_DRIFT, 0.f, 4.f, 0.f, "Oscillator drift", nodiIntensityTooltipStrings);
 		configButton(PARAM_FLAT, "Toggle lower and higher frequency detuning");
-		configButton(PARAM_SIGN, "Toggle output imperfections");
+		configSwitch(PARAM_SIGN, 0.f, 4.f, 0.f, "Signature wave shaper", nodiIntensityTooltipStrings);
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
@@ -208,11 +207,11 @@ struct Nodi : SanguineModule {
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		bVCAEnabled = params[PARAM_VCA].getValue();
-		bDritfEnabled = params[PARAM_DRIFT].getValue();
 		bFlattenEnabled = params[PARAM_FLAT].getValue();
-		bSignatureEnabled = params[PARAM_SIGN].getValue();
 		bAutoTrigger = params[PARAM_AUTO].getValue();
 		bPaques = params[PARAM_MORSE].getValue();
+		waveShaperValue = params[PARAM_SIGN].getValue();
+		driftValue = params[PARAM_DRIFT].getValue();
 
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 
@@ -261,9 +260,9 @@ struct Nodi : SanguineModule {
 			// Handle switches
 			settings[channel].meta_modulation = 1;
 			settings[channel].ad_vca = bVCAEnabled;
-			settings[channel].vco_drift = bDritfEnabled;
+			settings[channel].vco_drift = driftValue;
 			settings[channel].vco_flatten = bFlattenEnabled;
-			settings[channel].signature = bSignatureEnabled;
+			settings[channel].signature = waveShaperValue;
 			settings[channel].auto_trig = bAutoTrigger;
 
 			// Quantizer
@@ -489,27 +488,27 @@ struct Nodi : SanguineModule {
 			}
 			case braids::SETTING_AD_ATTACK: {
 				value = settings[displayChannel].ad_attack;
-				displayText = nodiNumberStrings[value];
+				displayText = nodiNumberStrings15[value];
 				break;
 			}
 			case braids::SETTING_AD_DECAY: {
 				value = settings[displayChannel].ad_decay;
-				displayText = nodiNumberStrings[value];
+				displayText = nodiNumberStrings15[value];
 				break;
 			}
 			case braids::SETTING_AD_FM: {
 				value = settings[displayChannel].ad_fm;
-				displayText = nodiNumberStrings[value];
+				displayText = nodiNumberStrings15[value];
 				break;
 			}
 			case braids::SETTING_AD_TIMBRE: {
 				value = settings[displayChannel].ad_timbre;
-				displayText = nodiNumberStrings[value];
+				displayText = nodiNumberStrings15[value];
 				break;
 			}
 			case braids::SETTING_AD_COLOR: {
 				value = settings[displayChannel].ad_color;
-				displayText = nodiNumberStrings[value];
+				displayText = nodiNumberStrings15[value];
 				break;
 			}
 			case braids::SETTING_AD_VCA: {
@@ -541,11 +540,13 @@ struct Nodi : SanguineModule {
 				break;
 			}
 			case braids::SETTING_VCO_DRIFT: {
-				displayText = nodiDriftLabel;
+				value = settings[displayChannel].vco_drift;
+				displayText = nodiIntensityDisplayStrings[value];
 				break;
 			}
 			case braids::SETTING_SIGNATURE: {
-				displayText = nodiSignLabel;
+				value = settings[displayChannel].signature;
+				displayText = nodiIntensityDisplayStrings[value];
 				break;
 			}
 			default: {
@@ -576,9 +577,7 @@ struct Nodi : SanguineModule {
 		// Handle switch lights
 		lights[LIGHT_MORSE].setBrightnessSmooth(bPaques ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? 0.75f : 0.f, sampleTime);
-		lights[LIGHT_DRIFT].setBrightnessSmooth(bDritfEnabled ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? 0.75f : 0.f, sampleTime);
-		lights[LIGHT_SIGN].setBrightnessSmooth(bSignatureEnabled ? 0.75f : 0.f, sampleTime);
 		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger ? 0.75f : 0.f, sampleTime);
 	}
 
@@ -670,15 +669,16 @@ struct NodiWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.666), module, Nodi::PARAM_ATTACK));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(22.768, 54.243), module, Nodi::PARAM_AD_TIMBRE));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(119.4, 54.231),
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 45.206), module, Nodi::PARAM_AD_TIMBRE));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(107.074, 45.206),
 			module, Nodi::PARAM_VCA, Nodi::LIGHT_VCA));
 
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(10.076, 67.247), module, Nodi::PARAM_MODULATION));
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(36.032, 67.247), module, Nodi::PARAM_ROOT));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(millimetersToPixelsVec(48.572, 80.197),
-			module, Nodi::PARAM_DRIFT, Nodi::LIGHT_DRIFT));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(93.673, 80.197),
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(62.607, 105.967), module, Nodi::PARAM_DRIFT));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(71.12, 96.625),
 			module, Nodi::PARAM_FLAT, Nodi::LIGHT_FLAT));
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(106.234, 67.247), module, Nodi::PARAM_SCALE));
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(132.166, 67.247), module, Nodi::PARAM_DECAY));
@@ -690,8 +690,9 @@ struct NodiWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(22.768, 97.889), module, Nodi::PARAM_COLOR));
 
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(51.457, 93.965), module, Nodi::PARAM_PITCH_OCTAVE));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<PurpleLight>>>(millimetersToPixelsVec(71.12, 93.962),
-			module, Nodi::PARAM_SIGN, Nodi::LIGHT_SIGN));
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(79.633, 105.967), module, Nodi::PARAM_SIGN));
+
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(90.806, 93.965), module, Nodi::PARAM_PITCH_RANGE));
 
 		addParam(createParamCentered<Sanguine1PSOrange>(millimetersToPixelsVec(119.474, 97.889), module, Nodi::PARAM_FM));
@@ -702,8 +703,8 @@ struct NodiWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 117.788), module, Nodi::PARAM_TRIGGER_DELAY));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(46.798, 117.788),
 			module, Nodi::PARAM_AUTO, Nodi::LIGHT_AUTO));
-		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(62.4, 113.511), module, Nodi::PARAM_BITS));
-		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(79.841, 113.511), module, Nodi::PARAM_RATE));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(62.607, 118.103), module, Nodi::PARAM_BITS));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(79.633, 118.103), module, Nodi::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(133.968, 117.788), module, Nodi::OUTPUT_OUT));
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 112.723);

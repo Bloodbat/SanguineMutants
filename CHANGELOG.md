@@ -24,6 +24,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Sync mode for the Aestus family should only be updated when it has changed in the front-end, not when processing every block.
 
+- Nodi family: signature waveshaper and oscillator drift are not boolean settings: they have a range of values.
+
 ## Additions
 
 - Marmora: Ability to reset generators from the context menu.
