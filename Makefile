@@ -150,3 +150,7 @@ DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 RACK_DIR ?= ../..
 include $(RACK_DIR)/plugin.mk
+ifdef DEBUGBUILD
+FLAGS := $(filter-out -O3,$(FLAGS))
+FLAGS := $(filter-out -funsafe-math-optimizations,$(FLAGS))
+endif
