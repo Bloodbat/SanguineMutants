@@ -26,6 +26,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Nodi family: signature waveshaper and oscillator drift are not boolean settings: they have a range of values.
 
+- Nodi family: restore LFO modes and prevent them from crashing with divisions by zero.
+
 ## Additions
 
 - Marmora: Ability to reset generators from the context menu.
@@ -83,12 +85,16 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 - Incurvationes family: faceplate tweaks.
 
 
+---
+
 # 2.5.2
 
 ## Fixes
 
 - Marmora X clock source tooltips.
 
+
+---
 
 # 2.5.1
 
@@ -100,6 +106,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Vimina stops generating multiplied clocks when the source clock stops.
 
+
+---
 
 # 2.5.0
 

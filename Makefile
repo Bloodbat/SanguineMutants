@@ -1,5 +1,6 @@
 FLAGS += \
 	-DNOASM \
+	-DBRAIDS_LFO_FIX \
 	-I./eurorack \
 	-I./alt_firmware \
 	-Wno-unused-local-typedefs

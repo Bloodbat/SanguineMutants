@@ -147,7 +147,15 @@ namespace renaissance {
           if (phase_ < pw) {
             break;
           }
+#ifdef BRAIDS_LFO_FIX
+          uint32_t safePhaseIncrement = phase_increment >> 16;
+          if (safePhaseIncrement == 0) {
+            safePhaseIncrement = phase_increment;
+          }
+          uint32_t t = (phase_ - pw) / safePhaseIncrement;
+#else
           uint32_t t = (phase_ - pw) / (phase_increment >> 16);
+#endif
           int16_t before = discontinuity_depth_;
           int16_t after = phase_ >> 18;
           int16_t discontinuity = after - before;
@@ -161,7 +169,15 @@ namespace renaissance {
           }
           self_reset = false;
           discontinuity_depth_ = -2048 + (aux_parameter_ >> 2);
+#ifdef BRAIDS_LFO_FIX
+          uint32_t safePhaseIncrement = phase_increment >> 16;
+          if (safePhaseIncrement == 0) {
+            safePhaseIncrement = phase_increment;
+          }
+          uint32_t t = phase_ / safePhaseIncrement;
+#else
           uint32_t t = phase_ / (phase_increment >> 16);
+#endif
           int16_t before = 16383;
           int16_t after = discontinuity_depth_;
           int16_t discontinuity = after - before;
@@ -242,7 +258,15 @@ namespace renaissance {
           if (phase_ < pw) {
             break;
           }
+#ifdef BRAIDS_LFO_FIX
+          uint32_t safePhaseIncrement = phase_increment >> 16;
+          if (safePhaseIncrement == 0) {
+            safePhaseIncrement = phase_increment;
+          }
+          uint32_t t = (phase_ - pw) / safePhaseIncrement;
+#else
           uint32_t t = (phase_ - pw) / (phase_increment >> 16);
+#endif
           this_sample += ThisBlepSample(t);
           next_sample += NextBlepSample(t);
           high_ = true;
@@ -252,7 +276,15 @@ namespace renaissance {
             break;
           }
           self_reset = false;
+#ifdef BRAIDS_LFO_FIX
+          uint32_t safePhaseIncrement = phase_increment >> 16;
+          if (safePhaseIncrement == 0) {
+            safePhaseIncrement = phase_increment;
+          }
+          uint32_t t = phase_ / safePhaseIncrement;
+#else
           uint32_t t = phase_ / (phase_increment >> 16);
+#endif
           this_sample -= ThisBlepSample(t);
           next_sample -= NextBlepSample(t);
           high_ = false;
@@ -317,7 +349,15 @@ namespace renaissance {
       }
 
       if ((transition_during_reset || !sync_reset) && self_reset) {
+#ifdef BRAIDS_LFO_FIX
+        uint32_t safePhaseIncrement = phase_increment >> 16;
+        if (safePhaseIncrement == 0) {
+          safePhaseIncrement = phase_increment;
+        }
+        uint32_t t = phase_ / safePhaseIncrement;
+#else
         uint32_t t = phase_ / (phase_increment >> 16);
+#endif
         this_sample -= ThisBlepSample(t);
         next_sample -= NextBlepSample(t);
       }
@@ -391,7 +431,15 @@ namespace renaissance {
           if (phase_ < pw) {
             break;
           }
+#ifdef BRAIDS_LFO_FIX
+          uint32_t safePhaseIncrement = phase_increment >> 16;
+          if (safePhaseIncrement == 0) {
+            safePhaseIncrement = phase_increment;
+          }
+          uint32_t t = (phase_ - pw) / safePhaseIncrement;
+#else
           uint32_t t = (phase_ - pw) / (phase_increment >> 16);
+#endif
           this_sample -= ThisBlepSample(t) >> 1;
           next_sample -= NextBlepSample(t) >> 1;
           high_ = true;
@@ -401,7 +449,15 @@ namespace renaissance {
             break;
           }
           self_reset = false;
+#ifdef BRAIDS_LFO_FIX
+          uint32_t safePhaseIncrement = phase_increment >> 16;
+          if (safePhaseIncrement == 0) {
+            safePhaseIncrement = phase_increment;
+          }
+          uint32_t t = phase_ / safePhaseIncrement;
+#else
           uint32_t t = phase_ / (phase_increment >> 16);
+#endif
           this_sample -= ThisBlepSample(t) >> 1;
           next_sample -= NextBlepSample(t) >> 1;
           high_ = false;
