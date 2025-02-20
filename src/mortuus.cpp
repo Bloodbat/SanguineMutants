@@ -1051,8 +1051,17 @@ struct MortuusWidget : SanguineModuleWidget {
 		Mortuus* mortuus = dynamic_cast<Mortuus*>(this->module);
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &mortuus->bSnapMode));
-	}
 
+		menu->addChild(new MenuSeparator());
+		Module* expander = mortuus->rightExpander.module;
+		if (expander && expander->model == modelAnsa) {
+			menu->addChild(createMenuLabel("Ansa expander already connected"));
+		} else {
+			menu->addChild(createMenuItem("Add Ansa expander", "", [=]() {
+				mortuus->addExpander(modelAnsa, this);
+				}));
+		}
+	}
 };
 
 Model* modelMortuus = createModel<Mortuus, MortuusWidget>("Sanguine-Mortuus");

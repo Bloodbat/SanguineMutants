@@ -1023,8 +1023,17 @@ struct ApicesWidget : SanguineModuleWidget {
 		Apices* apices = dynamic_cast<Apices*>(this->module);
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &apices->bSnapMode));
-	}
 
+		menu->addChild(new MenuSeparator());
+		Module* expander = apices->rightExpander.module;
+		if (expander && expander->model == modelNix) {
+			menu->addChild(createMenuLabel("Nix expander already connected"));
+		} else {
+			menu->addChild(createMenuItem("Add Nix expander", "", [=]() {
+				apices->addExpander(modelNix, this);
+				}));
+		}
+	}
 };
 
 Model* modelApices = createModel<Apices, ApicesWidget>("Sanguine-Apices");
