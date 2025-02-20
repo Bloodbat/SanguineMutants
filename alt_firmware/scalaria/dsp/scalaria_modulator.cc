@@ -76,8 +76,9 @@ namespace scalaria {
       }
     } else {
       for (size_t i = 0; i < size; ++i) {
+        auxOutput[i] = channel1[i] + channel2[i];
         mainOutput[i] = moogLadderFilter.Process(channel1[i]);
-        auxOutput[i] = moogLadderFilter.Process(channel2[i]);
+        mainOutput[i] = moogLadderFilter.Process(channel2[i]);
       }
     }
 
