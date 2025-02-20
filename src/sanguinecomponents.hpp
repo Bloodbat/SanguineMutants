@@ -362,6 +362,7 @@ struct SanguineModule : Module {
 	FaceplateThemes currentTheme = THEME_VITRIOL;
 	void dataFromJson(json_t* rootJ) override;
 	json_t* dataToJson() override;
+	void addExpander(Model* model, ModuleWidget* parentModuleWidget, bool isLeftExpander = false);
 	void setModuleTheme(int themeNum);
 };
 

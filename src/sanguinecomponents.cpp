@@ -923,6 +923,19 @@ void SanguineModule::setModuleTheme(int themeNum) {
 	bUniqueTheme = true;
 }
 
+void SanguineModule::addExpander(Model* model, ModuleWidget* parentModuleWidget, bool isLeftExpander) {
+	Module* module = model->createModule();
+	APP->engine->addModule(module);
+	ModuleWidget* moduleWidget = model->createModuleWidget(module);
+	APP->scene->rack->setModulePosForce(moduleWidget, Vec(parentModuleWidget->box.pos.x +
+		(isLeftExpander ? -moduleWidget->box.size.x : parentModuleWidget->box.size.x), parentModuleWidget->box.pos.y));
+	APP->scene->rack->addModule(moduleWidget);
+	history::ModuleAdd* undoHistory = new history::ModuleAdd;
+	undoHistory->name = "add " + model->name + " expander";
+	undoHistory->setModule(moduleWidget);
+	APP->history->push(undoHistory);
+}
+
 // Module widgets
 
 void SanguineModuleWidget::makePanel() {
