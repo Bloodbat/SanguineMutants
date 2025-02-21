@@ -50,6 +50,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Funes: LED lights for custom data state.
 
+- Aleae: hint Trigger 2 is normalled to Trigger 1 in the faceplate.
+
 ## Changes
 
 - Themes: group options under a submenu.
