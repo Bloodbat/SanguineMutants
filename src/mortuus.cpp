@@ -232,7 +232,7 @@ struct Mortuus : SanguineModule {
 				if (ansaExpander->getInput(channel1Input).isConnected()) {
 					int channel1Attenuverter = Ansa::PARAM_PARAM_CV_1 + function;
 
-					cvValues[function] = (clamp(ansaExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 128.f) *
+					cvValues[function] = (clamp(ansaExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 						ansaExpander->getParam(channel1Attenuverter).getValue();
 				}
 
@@ -245,7 +245,7 @@ struct Mortuus : SanguineModule {
 					if (ansaExpander->getInput(channel2Input).isConnected()) {
 						int channel2Attenuverter = Ansa::PARAM_PARAM_CV_CHANNEL_2_1 + function;
 
-						cvValues[channel2Function] = (clamp(ansaExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 128.f) *
+						cvValues[channel2Function] = (clamp(ansaExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 							ansaExpander->getParam(channel2Attenuverter).getValue();
 					}
 

@@ -219,7 +219,7 @@ struct Apices : SanguineModule {
 				if (nixExpander->getInput(channel1Input).isConnected()) {
 					int channel1Attenuverter = Nix::PARAM_PARAM_CV_1 + function;
 
-					cvValues[function] = (clamp(nixExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 128.f) *
+					cvValues[function] = (clamp(nixExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 						nixExpander->getParam(channel1Attenuverter).getValue();
 				}
 				modulatedValues[function] = clamp((potValue[function] + static_cast<int>(cvValues[function])) << 8, 0, 65535);
@@ -231,7 +231,7 @@ struct Apices : SanguineModule {
 					if (nixExpander->getInput(channel2Input).isConnected()) {
 						int channel2Attenuverter = Nix::PARAM_PARAM_CV_CHANNEL_2_1 + function;
 
-						cvValues[channel2Function] = (clamp(nixExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 128.f) *
+						cvValues[channel2Function] = (clamp(nixExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 							nixExpander->getParam(channel2Attenuverter).getValue();
 					}
 
