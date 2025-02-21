@@ -864,7 +864,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 			value = TheValue;
 			multiline = false;
 			box.size = Vec(150, 20);
-			text = string::f("%d", *value);
+			text = string::f("%u", *value);
 		}
 
 		void step() override {
@@ -875,7 +875,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				uint32_t newValue = std::stoi(text);
+				uint32_t newValue = std::stoul(text);
 				if (newValue > 0 && newValue <= UINT32_MAX) {
 					*value = newValue;
 				}
