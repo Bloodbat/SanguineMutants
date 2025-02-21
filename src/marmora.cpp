@@ -147,8 +147,8 @@ struct Marmora : SanguineModule {
 		std::string getDisplayValueString() override {
 			if (module != nullptr) {
 				if (paramId == PARAM_DEJA_VU_LENGTH) {
-					float dejaVuLengthIndex = getValue() * (LENGTHOF(marmoraLoopLength) - 1);
-					int dejaVuLength = marmoraLoopLength[static_cast<int>(roundf(dejaVuLengthIndex))];
+					float dejaVuLengthIndex = getValue() * (LENGTHOF(marmoraLoopLengths) - 1);
+					int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
 					return (string::f("%d", dejaVuLength));
 				} else {
 					assert(false);
@@ -453,8 +453,8 @@ struct Marmora : SanguineModule {
 
 		float dejaVu = clamp(params[PARAM_DEJA_VU].getValue() + inputs[INPUT_DEJA_VU].getVoltage() / 5.f, 0.f, 1.f);
 
-		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmoraLoopLength) - 1);
-		int dejaVuLength = marmoraLoopLength[static_cast<int>(roundf(dejaVuLengthIndex))];
+		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmoraLoopLengths) - 1);
+		int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
 
 		// Setup TGenerator
 		bool bTExternalClock = inputs[INPUT_T_CLOCK].isConnected();

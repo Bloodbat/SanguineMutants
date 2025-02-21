@@ -220,7 +220,7 @@ static const std::vector<std::string> marmoraLockLabels = {
     "Locked"
 };
 
-static const int marmoraLoopLength[] = {
+static const int marmoraLoopLengths[] = {
             1, 1, 1, 2, 2,
             2, 2, 2, 3, 3,
             3, 3, 4, 4, 4,
