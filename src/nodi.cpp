@@ -117,11 +117,15 @@ struct Nodi : SanguineModule {
 
 	bool bLowCpu = false;
 
+	bool bPerInstanceSignSeed = true;
+
 	// Display stuff
 	braids::SettingsData lastSettings = {};
 	braids::Setting lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
 
 	uint32_t displayTimeout = 0;
+	uint32_t userSignSeed = 0;
+	uint32_t lastUserSignSeed = 0;
 
 	std::string displayText = "";
 
@@ -204,6 +208,11 @@ struct Nodi : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		if (userSignSeed != lastUserSignSeed) {
+			setWaveShaperSeed(userSignSeed);
+			lastUserSignSeed = userSignSeed;
+		}
+
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		bVCAEnabled = params[PARAM_VCA].getValue();
@@ -587,6 +596,12 @@ struct Nodi : SanguineModule {
 		json_t* displayChannelJ = json_integer(displayChannel);
 		json_object_set_new(rootJ, "displayChannel", displayChannelJ);
 
+		json_t* userSignSeedJ = json_integer(userSignSeed);
+		json_object_set_new(rootJ, "userSignSeed", userSignSeedJ);
+
+		json_t* perInstanceSignSeedJ = json_boolean(bPerInstanceSignSeed);
+		json_object_set_new(rootJ, "perInstanceSignSeed", perInstanceSignSeedJ);
+
 		return rootJ;
 	}
 
@@ -602,6 +617,50 @@ struct Nodi : SanguineModule {
 		if (displayChannelJ) {
 			displayChannel = json_integer_value(displayChannelJ);
 		}
+
+		json_t* userSignSeedJ = json_object_get(rootJ, "userSignSeed");
+		if (userSignSeedJ) {
+			uint32_t newUserSignSeed = json_integer_value(userSignSeedJ);
+			if (newUserSignSeed != userSignSeed) {
+				userSignSeed = newUserSignSeed;
+				setWaveShaperSeed(userSignSeed);
+				lastUserSignSeed = userSignSeed;
+			}
+		}
+
+		json_t* perInstanceSignSeedJ = json_object_get(rootJ, "perInstanceSignSeed");
+		if (perInstanceSignSeedJ) {
+			bPerInstanceSignSeed = json_boolean_value(perInstanceSignSeedJ);
+		}
+	}
+
+	void setWaveShaperSeed(uint32_t seed) {
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			waveShaper[channel].Init(seed);
+		}
+	}
+
+	uint32_t getInstanceSeed() {
+		uint64_t moduleId = getId();
+		uint32_t waveShaperSeed = static_cast<uint32_t>(moduleId ^ (moduleId >> 16));
+		return waveShaperSeed;
+	}
+
+	void togglePerInstanceSignSeed() {
+		bPerInstanceSignSeed = !bPerInstanceSignSeed;
+		if (bPerInstanceSignSeed) {
+			userSignSeed = getInstanceSeed();
+		} else {
+			userSignSeed = 0x0000;
+		}
+		setWaveShaperSeed(userSignSeed);
+		lastUserSignSeed = userSignSeed;
+	}
+
+	void onAdd(const AddEvent& e) override {
+		userSignSeed = getInstanceSeed();
+		setWaveShaperSeed(userSignSeed);
+		lastUserSignSeed = userSignSeed;
 	}
 
 	int getModelParam() {
@@ -711,6 +770,40 @@ struct NodiWidget : SanguineModuleWidget {
 		addChild(mutantsLogo);
 	}
 
+	struct TextFieldMenuItem : ui::TextField {
+		uint32_t* value;
+
+		TextFieldMenuItem(uint32_t* TheValue) {
+			value = TheValue;
+			multiline = false;
+			box.size = Vec(150, 20);
+			text = string::f("%u", *value);
+		}
+
+		void step() override {
+			// Keep selected
+			APP->event->setSelectedWidget(this);
+			TextField::step();
+		}
+
+		void onSelectKey(const SelectKeyEvent& e) override {
+			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+				uint32_t newValue = std::stoul(text);
+				if (newValue <= UINT32_MAX) {
+					*value = newValue;
+				}
+
+				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
+				overlay->requestDelete();
+				e.consume(this);
+			}
+
+			if (!e.getTarget()) {
+				TextField::onSelectKey(e);
+			}
+		}
+	};
+
 	void appendContextMenu(Menu* menu) override {
 		SanguineModuleWidget::appendContextMenu(menu);
 
@@ -741,6 +834,30 @@ struct NodiWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Signature wave shaper (SIGN)", "",
+			[=](Menu* menu) {
+				menu->addChild(createCheckMenuItem("Per instance SIGN seed", "",
+					[=]() {return module->bPerInstanceSignSeed; },
+					[=]() {module->togglePerInstanceSignSeed(); }));
+
+				menu->addChild(new MenuSeparator);
+
+				if (module->bPerInstanceSignSeed) {
+					menu->addChild(createMenuLabel("Min: 0, Max: 4294967295, ENTER to set"));
+
+					menu->addChild(createSubmenuItem("User SIGN seed", "",
+						[=](Menu* menu) {
+							menu->addChild(new TextFieldMenuItem(&module->userSignSeed));
+						}
+					));
+				} else {
+					menu->addChild(createMenuLabel("Enable \"Per instance SIGN seed\" to use custom seeds"));
+				}
+			}
+		));
 	}
 };
 

@@ -52,6 +52,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Aleae: hint Trigger 2 is normalled to Trigger 1 in the faceplate.
 
+- Nodi family: use different Signature Wave Shaper seeds per module instance (user controllable).
+
 ## Changes
 
 - Themes: group options under a submenu.
