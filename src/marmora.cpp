@@ -857,10 +857,10 @@ struct MarmoraWidget : SanguineModuleWidget {
 		addChild(mutantsLogo);
 	}
 
-	struct TextMenuItem : ui::TextField {
+	struct TextFieldMenuItem : ui::TextField {
 		uint32_t* value;
 
-		TextMenuItem(uint32_t* TheValue) {
+		TextFieldMenuItem(uint32_t* TheValue) {
 			value = TheValue;
 			multiline = false;
 			box.size = Vec(150, 20);
@@ -956,7 +956,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 				menu->addChild(createSubmenuItem("User", "",
 					[=](Menu* menu) {
-						menu->addChild(new TextMenuItem(&module->userSeed));
+						menu->addChild(new TextFieldMenuItem(&module->userSeed));
 					}
 				));
 			}
