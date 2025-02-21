@@ -797,40 +797,44 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; ++i) {
-			availableChannels.push_back(channelNumbers[i]);
-		}
-		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
-			[=]() {return module->displayChannel; },
-			[=](int i) {module->displayChannel = i; }
-		));
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
-
-		menu->addChild(new MenuSeparator);
-
-		menu->addChild(createSubmenuItem("Signature wave shaper (SIGN)", "",
+		menu->addChild(createSubmenuItem("Options", "",
 			[=](Menu* menu) {
-				menu->addChild(createCheckMenuItem("Per instance SIGN seed", "",
-					[=]() {return module->bPerInstanceSignSeed; },
-					[=]() {module->togglePerInstanceSignSeed(); }));
+				std::vector<std::string> availableChannels;
+				for (int i = 0; i < module->channelCount; ++i) {
+					availableChannels.push_back(channelNumbers[i]);
+				}
+				menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+					[=]() {return module->displayChannel; },
+					[=](int i) {module->displayChannel = i; }
+				));
 
 				menu->addChild(new MenuSeparator);
 
-				if (module->bPerInstanceSignSeed) {
-					menu->addChild(createMenuLabel("Min: 0, Max: 4294967295, ENTER to set"));
+				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
 
-					menu->addChild(createSubmenuItem("User SIGN seed", "",
-						[=](Menu* menu) {
-							menu->addChild(new TextFieldMenuItem(&module->userSignSeed));
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createSubmenuItem("Signature wave shaper (SIGN)", "",
+					[=](Menu* menu) {
+						menu->addChild(createCheckMenuItem("Per instance SIGN seed", "",
+							[=]() {return module->bPerInstanceSignSeed; },
+							[=]() {module->togglePerInstanceSignSeed(); }));
+
+						menu->addChild(new MenuSeparator);
+
+						if (module->bPerInstanceSignSeed) {
+							menu->addChild(createMenuLabel("Min: 0, Max: 4294967295, ENTER to set"));
+
+							menu->addChild(createSubmenuItem("User SIGN seed", "",
+								[=](Menu* menu) {
+									menu->addChild(new TextFieldMenuItem(&module->userSignSeed));
+								}
+							));
+						} else {
+							menu->addChild(createMenuLabel("Enable \"Per instance SIGN seed\" to use custom seeds"));
 						}
-					));
-				} else {
-					menu->addChild(createMenuLabel("Enable \"Per instance SIGN seed\" to use custom seeds"));
-				}
+					}
+				));
 			}
 		));
 	}
