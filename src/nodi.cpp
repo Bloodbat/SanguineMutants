@@ -841,7 +841,7 @@ struct NodiWidget : SanguineModuleWidget {
 
 				menu->addChild(createSubmenuItem("Signature wave shaper (SIGN)", "",
 					[=](Menu* menu) {
-						menu->addChild(createCheckMenuItem("Per instance SIGN seed", "",
+						menu->addChild(createCheckMenuItem("Instance SIGN seed", "",
 							[=]() {return module->bPerInstanceSignSeed; },
 							[=]() {module->togglePerInstanceSignSeed(); }));
 
