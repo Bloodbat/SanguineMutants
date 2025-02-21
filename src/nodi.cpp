@@ -841,7 +841,7 @@ struct NodiWidget : SanguineModuleWidget {
 
 				menu->addChild(createSubmenuItem("Signature wave shaper (SIGN)", "",
 					[=](Menu* menu) {
-						menu->addChild(createCheckMenuItem("Instance SIGN seed", "",
+						menu->addChild(createCheckMenuItem("Instance seed", "",
 							[=]() {return module->bPerInstanceSignSeed; },
 							[=]() {module->togglePerInstanceSignSeed(); }));
 
@@ -850,13 +850,13 @@ struct NodiWidget : SanguineModuleWidget {
 						if (module->bPerInstanceSignSeed) {
 							menu->addChild(createMenuLabel("Min: 0, Max: 4294967295, ENTER to set"));
 
-							menu->addChild(createSubmenuItem("User SIGN seed", "",
+							menu->addChild(createSubmenuItem("User seed", "",
 								[=](Menu* menu) {
 									menu->addChild(new TextFieldMenuItem(&module->userSignSeed));
 								}
 							));
 						} else {
-							menu->addChild(createMenuLabel("Enable \"Per instance SIGN seed\" to use custom seeds"));
+							menu->addChild(createMenuLabel("Enable \"Instance seed\" to use custom seeds"));
 						}
 					}
 				));
