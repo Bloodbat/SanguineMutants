@@ -126,7 +126,6 @@ struct Nodi : SanguineModule {
 
 	uint32_t displayTimeout = 0;
 	uint32_t userSignSeed = 0;
-	uint32_t lastUserSignSeed = 0;
 
 	std::string displayText = "";
 
@@ -193,9 +192,8 @@ struct Nodi : SanguineModule {
 			quantizer[channel].Init();
 			envelope[channel].Init();
 
-
 			jitterSource[channel].Init();
-			waveShaper[channel].Init(0x0000);
+			waveShaper[channel].Init(userSignSeed);
 
 			bLastTrig[channel] = false;
 
@@ -209,11 +207,6 @@ struct Nodi : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		if (userSignSeed != lastUserSignSeed) {
-			setWaveShaperSeed(userSignSeed);
-			lastUserSignSeed = userSignSeed;
-		}
-
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		bVCAEnabled = params[PARAM_VCA].getValue();
@@ -623,7 +616,6 @@ struct Nodi : SanguineModule {
 		if (userSignSeedJ) {
 			userSignSeed = json_integer_value(userSignSeedJ);
 			setWaveShaperSeed(userSignSeed);
-			lastUserSignSeed = userSignSeed;
 			bNeedSeed = false;
 		}
 
@@ -653,13 +645,16 @@ struct Nodi : SanguineModule {
 			userSignSeed = 0x0000;
 		}
 		setWaveShaperSeed(userSignSeed);
-		lastUserSignSeed = userSignSeed;
 	}
 
 	void randomizeSignSeed() {
 		userSignSeed = random::u32();
 		setWaveShaperSeed(userSignSeed);
-		lastUserSignSeed = userSignSeed;
+	}
+
+	void setUserSeed(uint32_t newSeed) {
+		userSignSeed = newSeed;
+		setWaveShaperSeed(userSignSeed);
 	}
 
 	void onAdd(const AddEvent& e) override {
@@ -667,7 +662,6 @@ struct Nodi : SanguineModule {
 		if (bNeedSeed) {
 			userSignSeed = newUserSignSeed;
 			setWaveShaperSeed(userSignSeed);
-			lastUserSignSeed = userSignSeed;
 		}
 	}
 
@@ -779,13 +773,15 @@ struct NodiWidget : SanguineModuleWidget {
 	}
 
 	struct TextFieldMenuItem : ui::TextField {
-		uint32_t* value;
+		uint32_t value;
+		Nodi* module;
 
-		TextFieldMenuItem(uint32_t* TheValue) {
+		TextFieldMenuItem(uint32_t TheValue, Nodi* theModule) {
 			value = TheValue;
+			module = theModule;
 			multiline = false;
 			box.size = Vec(150, 20);
-			text = string::f("%u", *value);
+			text = string::f("%u", value);
 		}
 
 		void step() override {
@@ -796,9 +792,13 @@ struct NodiWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				uint32_t newValue = std::stoul(text);
-				if (newValue <= UINT32_MAX) {
-					*value = newValue;
+				uint32_t newValue;
+				try {
+					newValue = std::stoul(text);
+					module->setUserSeed(newValue);
+				}
+				catch (...) {
+
 				}
 
 				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
@@ -866,7 +866,7 @@ struct NodiWidget : SanguineModuleWidget {
 
 							menu->addChild(createSubmenuItem("User seed", "",
 								[=](Menu* menu) {
-									menu->addChild(new TextFieldMenuItem(&module->userSignSeed));
+									menu->addChild(new TextFieldMenuItem(module->userSignSeed, module));
 								}
 							));
 						} else {
