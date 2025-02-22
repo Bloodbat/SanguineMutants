@@ -170,14 +170,14 @@ struct Marmora : SanguineModule {
 		configButton(PARAM_DEJA_VU_T, "t deja vu");
 		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t super lock", marmoraLockLabels);
 		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "t mode", marmoraTModeLabels);
-		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "t clock range mode", marmoraTRangeLabels);
+		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "t clock range", marmoraTRangeLabels);
 		configParam(PARAM_T_RATE, -1.f, 1.f, 0.f, "t clock rate");
 		configParam(PARAM_T_BIAS, 0.f, 1.f, 0.5f, "t gate bias", "%", 0.f, 100.f);
 		configParam(PARAM_T_JITTER, 0.f, 1.f, 0.f, "t randomness amount", "%", 0.f, 100.f);
 		configParam(PARAM_GATE_BIAS, 0.f, 1.f, 0.5f, "t gate length", "%", 0.f, 100.f);
 		configParam(PARAM_GATE_JITTER, 0.f, 1.f, 0.f, "t gate length randomness", "%", 0.f, 100.f);
 		configInput(INPUT_T_BIAS, "t bias");
-		configInput(INPUT_T_CLOCK, "t clock");
+		configInput(INPUT_T_CLOCK, "t external clock");
 		configInput(INPUT_T_RATE, "t rate");
 		configInput(INPUT_T_JITTER, "t jitter");
 		configInput(INPUT_T_RESET, "t reset");
@@ -198,7 +198,7 @@ struct Marmora : SanguineModule {
 		configInput(INPUT_X_BIAS, "X bias");
 		configInput(INPUT_X_STEPS, "X steps");
 		configInput(INPUT_X_SPREAD, "X spread");
-		configInput(INPUT_X_CLOCK, "X clock");
+		configInput(INPUT_X_CLOCK, "X external clock");
 		configInput(INPUT_X_RESET, "X reset");
 		configOutput(OUTPUT_X1, "X₁");
 		configOutput(OUTPUT_X2, "X₂");
