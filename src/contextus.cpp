@@ -115,6 +115,7 @@ struct Contextus : SanguineModule {
 	bool bLowCpu = false;
 
 	bool bPerInstanceSignSeed = true;
+	bool bNeedSeed = true;
 
 	// Display stuff
 	renaissance::SettingsData lastSettings = {};
@@ -602,12 +603,10 @@ struct Contextus : SanguineModule {
 
 		json_t* userSignSeedJ = json_object_get(rootJ, "userSignSeed");
 		if (userSignSeedJ) {
-			uint32_t newUserSignSeed = json_integer_value(userSignSeedJ);
-			if (newUserSignSeed != userSignSeed) {
-				userSignSeed = newUserSignSeed;
-				setWaveShaperSeed(userSignSeed);
-				lastUserSignSeed = userSignSeed;
-			}
+			userSignSeed = json_integer_value(userSignSeedJ);
+			setWaveShaperSeed(userSignSeed);
+			lastUserSignSeed = userSignSeed;
+			bNeedSeed = false;
 		}
 
 		json_t* perInstanceSignSeedJ = json_object_get(rootJ, "perInstanceSignSeed");
@@ -646,9 +645,12 @@ struct Contextus : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		userSignSeed = getInstanceSeed();
-		setWaveShaperSeed(userSignSeed);
-		lastUserSignSeed = userSignSeed;
+		uint32_t newUserSignSeed = getInstanceSeed();
+		if (bNeedSeed) {
+			userSignSeed = newUserSignSeed;
+			setWaveShaperSeed(userSignSeed);
+			lastUserSignSeed = userSignSeed;
+		}
 	}
 
 	int getModelParam() {
