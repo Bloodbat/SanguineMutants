@@ -657,6 +657,12 @@ struct Nodi : SanguineModule {
 		lastUserSignSeed = userSignSeed;
 	}
 
+	void randomizeSignSeed() {
+		userSignSeed = random::u32();
+		setWaveShaperSeed(userSignSeed);
+		lastUserSignSeed = userSignSeed;
+	}
+
 	void onAdd(const AddEvent& e) override {
 		userSignSeed = getInstanceSeed();
 		setWaveShaperSeed(userSignSeed);
@@ -848,6 +854,12 @@ struct NodiWidget : SanguineModuleWidget {
 						menu->addChild(new MenuSeparator);
 
 						if (module->bPerInstanceSignSeed) {
+							menu->addChild(createMenuItem("Random seed", "", [=]() {
+								module->randomizeSignSeed();
+								}));
+
+							menu->addChild(new MenuSeparator);
+
 							menu->addChild(createMenuLabel("Min: 0, Max: 4294967295, ENTER to set"));
 
 							menu->addChild(createSubmenuItem("User seed", "",
@@ -856,7 +868,7 @@ struct NodiWidget : SanguineModuleWidget {
 								}
 							));
 						} else {
-							menu->addChild(createMenuLabel("Enable \"Instance seed\" to use custom seeds"));
+							menu->addChild(createMenuLabel("Enable \"Instance seed\" to use random and custom seeds"));
 						}
 					}
 				));
