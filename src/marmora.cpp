@@ -120,7 +120,6 @@ struct Marmora : SanguineModule {
 	int yDividerIndex = 4;
 	int blockIndex = 0;
 	uint32_t userSeed = 1;
-	uint32_t lastUserSeed = 1;
 
 	const int kLightDivider = 64;
 
@@ -228,11 +227,6 @@ struct Marmora : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		if (lastUserSeed != userSeed) {
-			randomGenerator.Init(userSeed);
-			lastUserSeed = userSeed;
-		}
-
 		// Clocks
 		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTGate);
@@ -617,7 +611,6 @@ struct Marmora : SanguineModule {
 		if (userSeedJ) {
 			userSeed = json_integer_value(userSeedJ);
 			randomGenerator.Init(userSeed);
-			lastUserSeed = userSeed;
 		}
 
 		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
@@ -714,6 +707,11 @@ struct Marmora : SanguineModule {
 			destination.degree[degree].voltage = source.degree[degree].voltage;
 			destination.degree[degree].weight = source.degree[degree].weight;
 		}
+	}
+
+	void setUserSeed(uint32_t newSeed) {
+		userSeed = newSeed;
+		randomGenerator.Init(userSeed);
 	}
 };
 
@@ -858,13 +856,15 @@ struct MarmoraWidget : SanguineModuleWidget {
 	}
 
 	struct TextFieldMenuItem : ui::TextField {
-		uint32_t* value;
+		uint32_t value;
+		Marmora* module;
 
-		TextFieldMenuItem(uint32_t* TheValue) {
-			value = TheValue;
+		TextFieldMenuItem(uint32_t theValue, Marmora* theModule) {
+			value = theValue;
+			module = theModule;
 			multiline = false;
 			box.size = Vec(150, 20);
-			text = string::f("%u", *value);
+			text = string::f("%u", value);
 		}
 
 		void step() override {
@@ -878,7 +878,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 				try {
 					uint32_t newValue = std::stoul(text);
 					if (newValue > 0) {
-						*value = newValue;
+						module->setUserSeed(newValue);
 					}
 				}
 				catch (...) {
@@ -961,7 +961,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 				menu->addChild(createSubmenuItem("User", "",
 					[=](Menu* menu) {
-						menu->addChild(new TextFieldMenuItem(&module->userSeed));
+						menu->addChild(new TextFieldMenuItem(module->userSeed, module));
 					}
 				));
 			}
