@@ -875,9 +875,14 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				uint32_t newValue = std::stoul(text);
-				if (newValue > 0 && newValue <= UINT32_MAX) {
-					*value = newValue;
+				try {
+					uint32_t newValue = std::stoul(text);
+					if (newValue > 0) {
+						*value = newValue;
+					}
+				}
+				catch (...) {
+
 				}
 
 				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
