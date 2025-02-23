@@ -792,9 +792,8 @@ struct NodiWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				uint32_t newValue;
 				try {
-					newValue = std::stoul(text);
+					uint32_t newValue = std::stoul(text);
 					module->setUserSeed(newValue);
 				}
 				catch (...) {
