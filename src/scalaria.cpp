@@ -8,8 +8,6 @@
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Scalaria : SanguineModule {
-    static const int kModeCount = 9;
-
     enum ParamIds {
         PARAM_FREQUENCY,
         PARAM_RESONANCE,

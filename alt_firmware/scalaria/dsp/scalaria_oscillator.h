@@ -59,12 +59,9 @@ namespace scalaria {
     typedef float (Oscillator::* RenderFn)(float note, float* mod, float* out, size_t size);
 
   private:
-    float Duck(const float* internal, const float* external, float* destination, size_t size);
-
     template<OscillatorShape shape>
     float RenderPolyblep(float, float*, float*, size_t);
     float RenderSine(float, float*, float*, size_t);
-    float RenderNoise(float, float*, float*, size_t);
 
     static inline float ThisBlepSample(float t) {
       return 0.5f * t * t;

@@ -173,39 +173,12 @@ namespace scalaria {
     return shape == OSCILLATOR_SHAPE_PULSE ? 0.025f / (0.0002f + phase_increment_) : 1.0f;
   }
 
-  float Oscillator::Duck(const float* internal, const float* external, float* destination, size_t size) {
-    float level = external_input_level_;
-    for (size_t i = 0; i < size; ++i) {
-      float error = external[i] * external[i] - level;
-      level += ((error > 0.0f) ? 0.01f : 0.0001f) * error;
-      float internal_gain = 1.0f - 32.0f * level;
-      if (internal_gain <= 0.0f) {
-        internal_gain = 0.0f;
-      }
-      destination[i] = external[i] + internal_gain * (internal[i] - external[i]);
-    }
-    external_input_level_ = level;
-    return level;
-  }
-
-  float Oscillator::RenderNoise(float note, float* modulation, float* out, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-      float noise = static_cast<float>(parasites_stmlib::Random::GetWord()) * kToFloat;
-      out[i] = 2.0f * noise - 1.0f;
-    }
-    Duck(out, modulation, out, size);
-    filter_.set_f_q<FREQUENCY_ACCURATE>(midiToIncrement(note) * 4.0f, 1.0f);
-    filter_.Process<FILTER_MODE_LOW_PASS>(out, out, size);
-    return 1.0f;
-  }
-
   /* static */
   Oscillator::RenderFn Oscillator::fn_table_[] = {
     &Oscillator::RenderSine,
     &Oscillator::RenderPolyblep<OSCILLATOR_SHAPE_TRIANGLE>,
     &Oscillator::RenderPolyblep<OSCILLATOR_SHAPE_SAW>,
     &Oscillator::RenderPolyblep<OSCILLATOR_SHAPE_PULSE>,
-    &Oscillator::RenderNoise,
   };
 
 }  // namespace scalaria
