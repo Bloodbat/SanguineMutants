@@ -174,7 +174,7 @@ struct Temulenti : SanguineModule {
 		//Buffer loop
 		if (generator.writable_block()) {
 			// Sync
-			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!			
+			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 			if (bSync != bLastSync) {
 				generator.set_sync(bSync);
 				bLastSync = bSync;
@@ -211,8 +211,7 @@ struct Temulenti : SanguineModule {
 			}
 
 			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM) {
-				//TODO: should this be inverted?
-				generator.set_pulse_width(clamp(1.f - params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 32767);
+				generator.set_pulse_width(clamp(1.f - -params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 32767);
 			}
 
 			// Shape, slope, smoothness
