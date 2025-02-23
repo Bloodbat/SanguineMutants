@@ -110,7 +110,7 @@ namespace scalaria {
     inline const Parameters& parameters() { return parameters_; }
 
   private:
-    void ApplyAmplification(ShortFrame* input, float* level, float* auxOutput, size_t size, bool rawLevel) {
+    void ApplyAmplification(ShortFrame* input, const float* level, float* auxOutput, size_t size, bool rawLevel) {
       if (!parameters_.oscillatorShape || rawLevel) {
         fill(&auxOutput[0], &auxOutput[size], 0.0f);
       }

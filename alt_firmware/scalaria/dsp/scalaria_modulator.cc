@@ -56,7 +56,7 @@ namespace scalaria {
 
   void ScalariaModulator::ProcessLadderFilter(ShortFrame* input, ShortFrame* output, size_t size) {
     float* channel1 = buffer_[0];
-    float* channel2 = buffer_[1];
+    const float* channel2 = buffer_[1];
     float* mainOutput = buffer_[0];
     float* auxOutput = buffer_[2];
 
