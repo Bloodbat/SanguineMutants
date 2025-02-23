@@ -13,3 +13,5 @@ static const uint8_t paletteScalaria[10][3] = {
   { 0, 0, 255 },
   { 192, 0, 192 }
 };
+
+static const float kScalariaSampleRate = 96000.f;

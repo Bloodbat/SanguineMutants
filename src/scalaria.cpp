@@ -98,8 +98,8 @@ struct Scalaria : SanguineModule {
         configBypass(INPUT_CHANNEL_1, OUTPUT_CHANNEL_1_PLUS_2);
 
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-            memset(&scalariaModulator[channel], 0, sizeof(scalaria::ScalariaModulator));
-            scalariaModulator[channel].Init(96000.f);
+        	memset(&scalariaModulator[channel], 0, sizeof(scalaria::ScalariaModulator));
+            scalariaModulator[channel].Init(kScalariaSampleRate);
             scalariaParameters[channel] = scalariaModulator[channel].mutableParameters();
         }
 
@@ -165,7 +165,7 @@ struct Scalaria : SanguineModule {
 
                 scalariaParameters[channel]->note = 60.f * params[PARAM_CHANNEL_1_LEVEL].getValue() + 12.f
                     * inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
-                scalariaParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
+                scalariaParameters[channel]->note += log2f(kScalariaSampleRate * args.sampleTime) * 12.f;
 
                 scalariaModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
             }
