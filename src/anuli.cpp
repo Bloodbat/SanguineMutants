@@ -163,14 +163,12 @@ struct Anuli : SanguineModule {
 
 		bool bWithDisastrousPeace = false;
 
-		long long systemTimeMs;
-
 		float sampleTime = 0.f;
 
 		if (bIsLightsTurn) {
 			sampleTime = kLightsFrequency * args.sampleTime;
 
-			systemTimeMs = getSystemTimeMs();
+			long long systemTimeMs = getSystemTimeMs();
 
 			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
 			uint8_t triangle = (systemTimeMs >> 5) & 31;
