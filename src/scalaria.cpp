@@ -411,7 +411,6 @@ struct ScalariaWidget : SanguineModuleWidget {
 
         addChild(createLightCentered<AcrylicSquare>(millimetersToPixelsVec(29.335, 75.676), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SQUARE));
 
-
         addChild(createLightCentered<AcrylicFreq>(millimetersToPixelsVec(9.494, 93.944), module, Scalaria::LIGHT_CHANNEL_1_FREQUENCY));
 
         addChild(createLightCentered<AcrylicLvl1>(millimetersToPixelsVec(13.761, 93.944), module, Scalaria::LIGHT_CHANNEL_1_LEVEL));
