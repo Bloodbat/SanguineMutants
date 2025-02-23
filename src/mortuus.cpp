@@ -1053,7 +1053,7 @@ struct MortuusWidget : SanguineModuleWidget {
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &mortuus->bSnapMode));
 
 		menu->addChild(new MenuSeparator());
-		Module* expander = mortuus->rightExpander.module;
+		const Module* expander = mortuus->rightExpander.module;
 		if (expander && expander->model == modelAnsa) {
 			menu->addChild(createMenuLabel("Ansa expander already connected"));
 		} else {
