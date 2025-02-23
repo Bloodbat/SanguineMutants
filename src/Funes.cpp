@@ -80,9 +80,9 @@ struct Funes : SanguineModule {
 	int displayChannel = 0;
 
 	int channelCount = 0;
+	int errorTimeOut = 0;
 
 	uint32_t displayTimeout = 0;
-	uint32_t errorTimeOut = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
 	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> outputSrc;
