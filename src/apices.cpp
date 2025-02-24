@@ -921,7 +921,7 @@ struct Apices : SanguineModule {
 };
 
 struct ApicesWidget : SanguineModuleWidget {
-	ApicesWidget(Apices* module) {
+	explicit ApicesWidget(Apices* module) {
 		setModule(module);
 
 		moduleName = "apices";

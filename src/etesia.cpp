@@ -563,7 +563,7 @@ struct Etesia : SanguineModule {
 };
 
 struct EtesiaWidget : SanguineModuleWidget {
-	EtesiaWidget(Etesia* module) {
+	explicit EtesiaWidget(Etesia* module) {
 		setModule(module);
 
 		moduleName = "etesia";

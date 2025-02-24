@@ -949,7 +949,7 @@ struct Mortuus : SanguineModule {
 };
 
 struct MortuusWidget : SanguineModuleWidget {
-	MortuusWidget(Mortuus* module) {
+	explicit MortuusWidget(Mortuus* module) {
 		setModule(module);
 
 		moduleName = "mortuus";

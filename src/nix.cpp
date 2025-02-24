@@ -36,7 +36,7 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
 }
 
 struct NixWidget : SanguineModuleWidget {
-    NixWidget(Nix* module) {
+    explicit NixWidget(Nix* module) {
         setModule(module);
 
         moduleName = "nix";

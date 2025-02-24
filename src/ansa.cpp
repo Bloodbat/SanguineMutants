@@ -36,7 +36,7 @@ void Ansa::onExpanderChange(const ExpanderChangeEvent& e) {
 }
 
 struct AnsaWidget : SanguineModuleWidget {
-    AnsaWidget(Ansa* module) {
+    explicit AnsaWidget(Ansa* module) {
         setModule(module);
 
         moduleName = "ansa";

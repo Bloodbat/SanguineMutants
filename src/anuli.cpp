@@ -510,7 +510,7 @@ struct Anuli : SanguineModule {
 };
 
 struct AnuliWidget : SanguineModuleWidget {
-	AnuliWidget(Anuli* module) {
+	explicit AnuliWidget(Anuli* module) {
 		setModule(module);
 
 		moduleName = "anuli";

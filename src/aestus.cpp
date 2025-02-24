@@ -314,7 +314,7 @@ struct Aestus : SanguineModule {
 };
 
 struct AestusWidget : SanguineModuleWidget {
-	AestusWidget(Aestus* module) {
+	explicit AestusWidget(Aestus* module) {
 		setModule(module);
 
 		moduleName = "aestus";

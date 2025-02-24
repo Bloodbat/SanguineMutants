@@ -716,7 +716,7 @@ struct Marmora : SanguineModule {
 };
 
 struct MarmoraWidget : SanguineModuleWidget {
-	MarmoraWidget(Marmora* module) {
+	explicit MarmoraWidget(Marmora* module) {
 		setModule(module);
 
 		moduleName = "marmora";

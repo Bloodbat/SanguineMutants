@@ -180,7 +180,7 @@ struct Aleae : SanguineModule {
 };
 
 struct AleaeWidget : SanguineModuleWidget {
-	AleaeWidget(Aleae* module) {
+	explicit AleaeWidget(Aleae* module) {
 		setModule(module);
 
 		moduleName = "aleae";

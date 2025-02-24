@@ -173,7 +173,7 @@ struct Velamina : SanguineModule {
 
 
 struct VelaminaWidget : SanguineModuleWidget {
-	VelaminaWidget(Velamina* module) {
+	explicit VelaminaWidget(Velamina* module) {
 		setModule(module);
 
 		moduleName = "velamina";

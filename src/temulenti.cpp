@@ -372,7 +372,7 @@ struct Temulenti : SanguineModule {
 };
 
 struct TemulentiWidget : SanguineModuleWidget {
-	TemulentiWidget(Temulenti* module) {
+	explicit TemulentiWidget(Temulenti* module) {
 		setModule(module);
 
 		moduleName = "temulenti";

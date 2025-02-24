@@ -532,7 +532,7 @@ struct Nebulae : SanguineModule {
 };
 
 struct NebulaeWidget : SanguineModuleWidget {
-	NebulaeWidget(Nebulae* module) {
+	explicit NebulaeWidget(Nebulae* module) {
 		setModule(module);
 
 		moduleName = "nebulae";

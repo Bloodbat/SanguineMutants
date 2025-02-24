@@ -674,7 +674,7 @@ struct Nodi : SanguineModule {
 };
 
 struct NodiWidget : SanguineModuleWidget {
-	NodiWidget(Nodi* module) {
+	explicit NodiWidget(Nodi* module) {
 		setModule(module);
 
 		moduleName = "nodi";

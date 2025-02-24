@@ -191,7 +191,7 @@ struct Incurvationes : SanguineModule {
 };
 
 struct IncurvationesWidget : SanguineModuleWidget {
-	IncurvationesWidget(Incurvationes* module) {
+	explicit IncurvationesWidget(Incurvationes* module) {
 		setModule(module);
 
 		moduleName = "incurvationes";

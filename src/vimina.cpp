@@ -495,7 +495,7 @@ struct Vimina : SanguineModule {
 };
 
 struct ViminaWidget : SanguineModuleWidget {
-	ViminaWidget(Vimina* module) {
+	explicit ViminaWidget(Vimina* module) {
 		setModule(module);
 
 		moduleName = "vimina";

@@ -300,7 +300,7 @@ static const std::vector<std::string> distortionesModelLabels = {
 };
 
 struct DistortionesWidget : SanguineModuleWidget {
-	DistortionesWidget(Distortiones* module) {
+	explicit DistortionesWidget(Distortiones* module) {
 		setModule(module);
 
 		moduleName = "distortiones";

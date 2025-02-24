@@ -562,7 +562,7 @@ struct Fluctus : SanguineModule {
 };
 
 struct FluctusWidget : SanguineModuleWidget {
-	FluctusWidget(Fluctus* module) {
+	explicit FluctusWidget(Fluctus* module) {
 		setModule(module);
 
 		moduleName = "fluctus";

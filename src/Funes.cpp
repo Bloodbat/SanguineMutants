@@ -631,8 +631,7 @@ struct Funes : SanguineModule {
 };
 
 struct FunesWidget : SanguineModuleWidget {
-
-	FunesWidget(Funes* module) {
+	explicit FunesWidget(Funes* module) {
 		setModule(module);
 
 		moduleName = "funes";

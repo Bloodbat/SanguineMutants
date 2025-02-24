@@ -656,7 +656,7 @@ struct Contextus : SanguineModule {
 };
 
 struct ContextusWidget : SanguineModuleWidget {
-	ContextusWidget(Contextus* module) {
+	explicit ContextusWidget(Contextus* module) {
 		setModule(module);
 
 		moduleName = "contextus";

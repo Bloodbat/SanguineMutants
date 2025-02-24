@@ -371,7 +371,7 @@ struct Explorator : SanguineModule {
 };
 
 struct ExploratorWidget : SanguineModuleWidget {
-	ExploratorWidget(Explorator* module) {
+	explicit ExploratorWidget(Explorator* module) {
 		setModule(module);
 
 		moduleName = "explorator";

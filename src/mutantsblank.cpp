@@ -7,7 +7,7 @@ struct MutantsBlank : SanguineModule {
 };
 
 struct MutantsBlankWidget : SanguineModuleWidget {
-	MutantsBlankWidget(MutantsBlank* module) {
+	explicit MutantsBlankWidget(MutantsBlank* module) {
 		setModule(module);
 
 		moduleName = "mutants_blank";

@@ -318,7 +318,7 @@ static const std::vector<std::string> mutuusModelLabels = {
 };
 
 struct MutuusWidget : SanguineModuleWidget {
-	MutuusWidget(Mutuus* module) {
+	explicit MutuusWidget(Mutuus* module) {
 		setModule(module);
 
 		moduleName = "mutuus";

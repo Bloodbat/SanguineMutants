@@ -361,7 +361,7 @@ struct AcrylicChannel16 : SanguineShapedAcrylicLed {
 };
 
 struct ScalariaWidget : SanguineModuleWidget {
-    ScalariaWidget(Scalaria* module) {
+    explicit ScalariaWidget(Scalaria* module) {
         setModule(module);
 
         moduleName = "scalaria";
