@@ -658,9 +658,8 @@ struct Nodi : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		uint32_t newUserSignSeed = getInstanceSeed();
 		if (bNeedSeed) {
-			userSignSeed = newUserSignSeed;
+			userSignSeed = getInstanceSeed();
 			setWaveShaperSeed(userSignSeed);
 		}
 	}
