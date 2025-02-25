@@ -329,9 +329,6 @@ struct Anuli : SanguineModule {
 		performanceState.strum = bStrum[channel] && !bLastStrum[channel];
 		bLastStrum[channel] = bStrum[channel];
 		bStrum[channel] = false;
-		if (channel == 0) {
-			setStrummingFlag(performanceState.strum);
-		}
 
 		performanceState.chord = clamp(static_cast<int>(roundf(structure * (rings::kNumChords - 1))),
 			0, rings::kNumChords - 1);
@@ -401,6 +398,10 @@ struct Anuli : SanguineModule {
 				// Process audio
 				strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
 				stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
+
+				if (channel == 0) {
+					setStrummingFlag(performanceState.strum);
+				}
 			} else {
 				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
@@ -417,6 +418,10 @@ struct Anuli : SanguineModule {
 				// Process audio
 				strummer[channel].Process(in, kAnuliBlockSize, &performanceState);
 				part[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
+
+				if (channel == 0) {
+					setStrummingFlag(performanceState.strum);
+				}
 			}
 
 			// Convert output buffer
