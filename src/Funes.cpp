@@ -384,22 +384,32 @@ struct Funes : SanguineModule {
 			}
 			case LEDLPG: {
 				for (int parameter = 0; parameter < 2; ++parameter) {
-					float value = parameter == 0 ? params[PARAM_LPG_COLOR].getValue() : params[PARAM_LPG_DECAY].getValue();
+					float value;
+					int startLight;
+					int nextLight;
+					if (parameter == 0) {
+						value = params[PARAM_LPG_COLOR].getValue();
+						startLight = LIGHT_MODEL + 3 * 2;
+						nextLight = -2;
+					} else {
+						value = params[PARAM_LPG_DECAY].getValue();
+						startLight = LIGHT_MODEL + 4 * 2;
+						nextLight = 2;
+					}
+
 					value *= 100;
-					int startLight = (parameter * 4 + 3) * 2;
-					startLight = LIGHT_MODEL + startLight;
 					float lightValue = value > 0.f ? math::rescale(value, 0.f, 25.f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
-					startLight -= 2;
+					startLight += nextLight;
 					lightValue = value >= 25.1f ? math::rescale(value, 25.1f, 50.f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
-					startLight -= 2;
+					startLight += nextLight;
 					lightValue = value >= 50.1f ? math::rescale(value, 50.1f, 75.f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
-					startLight -= 2;
+					startLight += nextLight;
 					lightValue = value >= 75.1f ? math::rescale(value, 75.1f, 100.f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);

@@ -92,6 +92,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Funes: rework faceplate to make it both more compact and more attractive.
 
+- Funes: LGP LED displays start at the center lights instead of the rightmost ones (it looks prettier and makes more sense for the horizontal arrangement).
+
 - Nebulae family: faceplate tweaks.
 
 - Incurvationes family: faceplate tweaks.
