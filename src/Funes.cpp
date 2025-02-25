@@ -397,20 +397,19 @@ struct Funes : SanguineModule {
 						nextLight = 2;
 					}
 
-					value *= 100;
-					float lightValue = value > 0.f ? math::rescale(value, 0.f, 25.f, 0.f, 1.f) : 0.f;
+					float lightValue = value > 0.f ? math::rescale(value, 0.f, 0.25f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
 					startLight += nextLight;
-					lightValue = value >= 25.1f ? math::rescale(value, 25.1f, 50.f, 0.f, 1.f) : 0.f;
+					lightValue = value >= 0.251f ? math::rescale(value, 0.251f, 0.50f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
 					startLight += nextLight;
-					lightValue = value >= 50.1f ? math::rescale(value, 50.1f, 75.f, 0.f, 1.f) : 0.f;
+					lightValue = value >= 0.501f ? math::rescale(value, 0.501f, 0.75f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
 					startLight += nextLight;
-					lightValue = value >= 75.1f ? math::rescale(value, 75.1f, 100.f, 0.f, 1.f) : 0.f;
+					lightValue = value >= 0.751f ? math::rescale(value, 0.751f, 1.f, 0.f, 1.f) : 0.f;
 					lights[startLight + 0].setBrightness(lightValue);
 					lights[startLight + 1].setBrightness(lightValue);
 				}
