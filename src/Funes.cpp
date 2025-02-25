@@ -386,6 +386,7 @@ struct Funes : SanguineModule {
 				for (int parameter = 0; parameter < 2; ++parameter) {
 					float value;
 					int startLight;
+					// nextLight should be a multiple of 2: LEDs are RedGreen lights and each color is a separate "light".
 					int nextLight;
 					if (parameter == 0) {
 						value = params[PARAM_LPG_COLOR].getValue();
