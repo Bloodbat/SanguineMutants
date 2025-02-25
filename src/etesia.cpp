@@ -354,38 +354,32 @@ struct Etesia : SanguineModule {
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
-			if (ledMode != LEDS_MOMENTARY) {
-				ledMode = LEDS_MOMENTARY;
-			}
-			++displayTimeout;
+			ledMode = LEDS_MOMENTARY;
 		}
 
 		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
-			if (ledMode != LEDS_QUALITY_MOMENTARY) {
-				ledMode = LEDS_QUALITY_MOMENTARY;
-			}
-			++displayTimeout;
+			ledMode = LEDS_QUALITY_MOMENTARY;
 		}
 
 		if (playbackMode != lastLEDPlaybackMode) {
-			if (ledMode != LEDS_MODE_MOMENTARY) {
-				ledMode = LEDS_MODE_MOMENTARY;
-			}
-			++displayTimeout;
+			ledMode = LEDS_MODE_MOMENTARY;
 		}
 
-		if (displayTimeout > args.sampleRate * 2) {
-			ledMode = lastLedMode;
-			displayTimeout = 0;
-			lastBlend = params[PARAM_BLEND].getValue();
-			lastSpread = params[PARAM_SPREAD].getValue();
-			lastFeedback = params[PARAM_FEEDBACK].getValue();
-			lastReverb = params[PARAM_REVERB].getValue();
+		if (ledMode == LEDS_MOMENTARY || ledMode == LEDS_MODE_MOMENTARY || ledMode == LEDS_QUALITY_MOMENTARY) {
+			++displayTimeout;
+			if (displayTimeout >= args.sampleRate * 2) {
+				ledMode = lastLedMode;
+				displayTimeout = 0;
+				lastBlend = params[PARAM_BLEND].getValue();
+				lastSpread = params[PARAM_SPREAD].getValue();
+				lastFeedback = params[PARAM_FEEDBACK].getValue();
+				lastReverb = params[PARAM_REVERB].getValue();
 
-			lastHiFi = params[PARAM_HI_FI].getValue();
-			lastStereo = params[PARAM_STEREO].getValue();
+				lastHiFi = params[PARAM_HI_FI].getValue();
+				lastStereo = params[PARAM_STEREO].getValue();
 
-			lastLEDPlaybackMode = playbackMode;
+				lastLEDPlaybackMode = playbackMode;
+			}
 		}
 
 		if (lightsDivider.process()) { // Expensive, so call this infrequently

@@ -32,6 +32,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Anuli: don't ignore module generated strums when dealing with strum light state.
 
+- Nebulae family: LEDs sometimes getting "stuck" on temporary display modes.
+
 ## Additions
 
 - Marmora: Ability to reset generators from the context menu.
