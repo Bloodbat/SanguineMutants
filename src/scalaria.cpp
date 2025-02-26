@@ -5,8 +5,6 @@
 #include "warpiescommon.hpp"
 #include "scalaria.hpp"
 
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-
 struct Scalaria : SanguineModule {
     enum ParamIds {
         PARAM_FREQUENCY,
@@ -64,8 +62,8 @@ struct Scalaria : SanguineModule {
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator scalariaModulator[PORT_MAX_CHANNELS];
-    scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
-    scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+    scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize];
+    scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize];
 
     scalaria::Parameters* scalariaParameters[PORT_MAX_CHANNELS];
 
@@ -98,7 +96,6 @@ struct Scalaria : SanguineModule {
         configBypass(INPUT_CHANNEL_1, OUTPUT_CHANNEL_1_PLUS_2);
 
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-        	memset(&scalariaModulator[channel], 0, sizeof(scalaria::ScalariaModulator));
             scalariaModulator[channel].Init(kScalariaSampleRate);
             scalariaParameters[channel] = scalariaModulator[channel].mutableParameters();
         }

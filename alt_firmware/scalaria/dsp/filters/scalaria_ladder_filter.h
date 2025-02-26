@@ -59,9 +59,9 @@ namespace scalaria {
 		}
 
 	private:
-		float V[4];
-		float dV[4];
-		float tV[4];
+		float V[4] = {};
+		float dV[4] = {};
+		float tV[4] = {};
 
 		float x;
 		float g;
