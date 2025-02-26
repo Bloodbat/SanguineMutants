@@ -69,6 +69,7 @@ struct Anuli : SanguineModule {
 	rings::Part part[PORT_MAX_CHANNELS];
 	rings::StringSynthPart stringSynth[PORT_MAX_CHANNELS];
 	rings::Strummer strummer[PORT_MAX_CHANNELS];
+	rings::PerformanceState performanceState[PORT_MAX_CHANNELS] = {};
 
 	bool bStrum[PORT_MAX_CHANNELS] = {};
 	bool bLastStrum[PORT_MAX_CHANNELS] = {};
@@ -243,6 +244,8 @@ struct Anuli : SanguineModule {
 			}
 		}
 
+		setStrummingFlag(performanceState[displayChannel].strum);
+
 		outputs[OUTPUT_ODD].setChannels(channelCount);
 
 		outputs[OUTPUT_EVEN].setChannels(channelCount);
@@ -392,16 +395,11 @@ struct Anuli : SanguineModule {
 				rings::Patch patch;
 				float structure;
 				setupPatch(channel, patch, structure, parameterInfo);
-				rings::PerformanceState performanceState;
-				setupPerformance(channel, performanceState, structure, parameterInfo);
+				setupPerformance(channel, performanceState[channel], structure, parameterInfo);
 
 				// Process audio
-				strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState);
-				stringSynth[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
-
-				if (channel == 0) {
-					setStrummingFlag(performanceState.strum);
-				}
+				strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState[channel]);
+				stringSynth[channel].Process(performanceState[channel], patch, in, out, aux, kAnuliBlockSize);
 			} else {
 				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
@@ -412,16 +410,11 @@ struct Anuli : SanguineModule {
 				rings::Patch patch;
 				float structure;
 				setupPatch(channel, patch, structure, parameterInfo);
-				rings::PerformanceState performanceState;
-				setupPerformance(channel, performanceState, structure, parameterInfo);
+				setupPerformance(channel, performanceState[channel], structure, parameterInfo);
 
 				// Process audio
-				strummer[channel].Process(in, kAnuliBlockSize, &performanceState);
-				part[channel].Process(performanceState, patch, in, out, aux, kAnuliBlockSize);
-
-				if (channel == 0) {
-					setStrummingFlag(performanceState.strum);
-				}
+				strummer[channel].Process(in, kAnuliBlockSize, &performanceState[channel]);
+				part[channel].Process(performanceState[channel], patch, in, out, aux, kAnuliBlockSize);
 			}
 
 			// Convert output buffer
@@ -453,7 +446,8 @@ struct Anuli : SanguineModule {
 	void setStrummingFlag(bool flag) {
 		if (flag) {
 			// Make sure the LED is off for a short enough time (ui.cc).
-			strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
+			// strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
+			strummingFlagCounter = kLightsFrequency;
 			strummingFlagInterval = 0;
 		}
 	}
