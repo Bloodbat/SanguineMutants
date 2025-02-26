@@ -28,6 +28,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Nodi family: restore LFO modes and prevent them from crashing with divisions by zero.
 
+- Nodi family: quantizer scale tooltips.
+
 - Temulenti: FM knob control of Two Drunks' gate durations now works as described in the manual (it was inverted).
 
 - Anuli: don't ignore module generated strums when dealing with strum light state.
