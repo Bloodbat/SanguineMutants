@@ -130,10 +130,6 @@ struct Scalaria : SanguineModule {
 
         outputs[OUTPUT_CHANNEL_1_PLUS_2].setChannels(channelCount);
         outputs[OUTPUT_AUX].setChannels(channelCount);
-
-        bool bIsLightsTurn = lightsDivider.process();
-        const float sampleTime = kLightFrequency * args.sampleTime;
-
         float frequencyValue = params[PARAM_FREQUENCY].getValue();
 
         float frequencyAttenuverterValue = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
@@ -180,28 +176,11 @@ struct Scalaria : SanguineModule {
 
             outputs[OUTPUT_CHANNEL_1_PLUS_2].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
             outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
-
-            if (bIsLightsTurn) {
-                const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
-
-                const uint8_t(*palette)[3];
-                float zone;
-
-                palette = paletteScalaria;
-
-                zone = 8.f * scalariaParameters[channel]->rawFrequency;
-                MAKE_INTEGRAL_FRACTIONAL(zone);
-                int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-                for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-                    int a = palette[zone_integral][rgbComponent];
-                    int b = palette[zone_integral + 1][rgbComponent];
-                    const float lightValue = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
-                    lights[currentLight + rgbComponent].setBrightness(rescale(lightValue, 0.f, 1.f, 0.f, 0.5f));
-                }
-            }
         }
 
-        if (bIsLightsTurn) {
+        if (lightsDivider.process()) {
+            const float sampleTime = kLightFrequency * args.sampleTime;
+
             bool bHaveInternalOscillator = !scalariaParameters[0]->oscillatorShape == 0;
 
             lights[LIGHT_INTERNAL_OSCILLATOR_OFF + 2].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.5f, sampleTime);
@@ -217,11 +196,28 @@ struct Scalaria : SanguineModule {
 
             lights[LIGHT_CHANNEL_1_LEVEL + 1].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.5f, sampleTime);
 
-            for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+            for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
                 const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
 
-                for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-                    lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
+                if (channel < channelCount) {
+                    const uint8_t(*palette)[3];
+                    float zone;
+
+                    palette = paletteScalaria;
+
+                    zone = 8.f * scalariaParameters[channel]->rawFrequency;
+                    MAKE_INTEGRAL_FRACTIONAL(zone);
+                    int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+                    for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+                        int a = palette[zone_integral][rgbComponent];
+                        int b = palette[zone_integral + 1][rgbComponent];
+                        const float lightValue = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
+                        lights[currentLight + rgbComponent].setBrightness(rescale(lightValue, 0.f, 1.f, 0.f, 0.5f));
+                    }
+                } else {
+                    for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+                        lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
+                    }
                 }
             }
         }
