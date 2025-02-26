@@ -155,8 +155,6 @@ struct Temulenti : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool bLightsTurn = lightsDivider.process();
-
 		bumps::GeneratorMode mode = generator.mode();
 		if (stMode.process(params[PARAM_MODE].getValue())) {
 			mode = bumps::GeneratorMode((static_cast<int>(mode) + 1) % 3);
@@ -268,7 +266,7 @@ struct Temulenti : SanguineModule {
 		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
 		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
-		if (bLightsTurn) {
+		if (lightsDivider.process()) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
 			generator.feature_mode_ = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());

@@ -138,8 +138,6 @@ struct Aestus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool bLightsTurn = lightsDivider.process();
-
 		tides::GeneratorMode mode = generator.mode();
 		if (stMode.process(params[PARAM_MODE].getValue())) {
 			mode = tides::GeneratorMode((static_cast<int>(mode) + 1) % 3);
@@ -233,7 +231,7 @@ struct Aestus : SanguineModule {
 		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
 		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
-		if (bLightsTurn) {
+		if (lightsDivider.process()) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
 			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ? 0.5f : 0.f, sampleTime);
