@@ -62,6 +62,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Nodi family: use different Signature Wave Shaper seeds per module instance (user controllable).
 
+- Nodi family: ability to select scales from the context menu.
+
 ## Changes
 
 - Themes: group options under a submenu.

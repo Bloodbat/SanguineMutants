@@ -652,6 +652,14 @@ struct Contextus : SanguineModule {
 	void setModelParam(int shape) {
 		params[PARAM_MODEL].setValue(shape);
 	}
+
+	int getScaleParam() {
+		return params[PARAM_SCALE].getValue();
+	}
+
+	void setScaleParam(int scale) {
+		params[PARAM_SCALE].setValue(scale);
+	}
 };
 
 struct ContextusWidget : SanguineModuleWidget {
@@ -799,6 +807,13 @@ struct ContextusWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
 			[=](int i) {module->setModelParam(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createIndexSubmenuItem("Scale", nodiScaleStrings,
+			[=]() {return module->getScaleParam(); },
+			[=](int i) {module->setScaleParam(i); }
 		));
 
 		menu->addChild(new MenuSeparator);
