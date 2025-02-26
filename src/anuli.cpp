@@ -158,24 +158,7 @@ struct Anuli : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool bIsLightsTurn = lightsDivider.process();
-
-		bool bIsTrianglePulse = false;
-
 		bool bWithDisastrousPeace = false;
-
-		float sampleTime = 0.f;
-
-		if (bIsLightsTurn) {
-			sampleTime = kLightsFrequency * args.sampleTime;
-
-			long long systemTimeMs = getSystemTimeMs();
-
-			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
-			uint8_t triangle = (systemTimeMs >> 5) & 31;
-			triangle = triangle < 16 ? triangle : 31 - triangle;
-			bIsTrianglePulse = pulseWidthModulationCounter < triangle;
-		}
 
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
@@ -215,8 +198,6 @@ struct Anuli : SanguineModule {
 					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
-
-					drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 				}
 			} else {
 				for (int channel = 0; channel < channelCount; ++channel) {
@@ -228,8 +209,6 @@ struct Anuli : SanguineModule {
 					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
-
-					drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 				}
 			}
 		} else {
@@ -239,8 +218,6 @@ struct Anuli : SanguineModule {
 				renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
 
 				setOutputs(channel, bHaveBothOutputs);
-
-				drawChannelLight(channel, bIsTrianglePulse, bIsLightsTurn, sampleTime);
 			}
 		}
 
@@ -250,18 +227,34 @@ struct Anuli : SanguineModule {
 
 		outputs[OUTPUT_EVEN].setChannels(channelCount);
 
-		if (bIsLightsTurn) {
+		if (lightsDivider.process()) {
+			const float sampleTime = kLightsFrequency * args.sampleTime;
+
+			long long systemTimeMs = getSystemTimeMs();
+
+			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
+			uint8_t triangle = (systemTimeMs >> 5) & 31;
+			triangle = triangle < 16 ? triangle : 31 - triangle;
+			bool bIsTrianglePulse = pulseWidthModulationCounter < triangle;
+
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
 			}
 
 			displayText = anuliModeLabels[channelModes[displayChannel]];
 
-			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
-				for (int light = 0; light < 3; ++light) {
-					lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
+				if (channel < channelCount) {
+					for (int light = 0; light < 3; ++light) {
+						LightModes lightMode = anuliModeLights[channelModes[channel]][light];
+						drawLight(currentLight + light, lightMode, bIsTrianglePulse, sampleTime);
+					}
+				} else {
+					for (int light = 0; light < 3; ++light) {
+						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
+					}
 				}
 			}
 
@@ -429,17 +422,6 @@ struct Anuli : SanguineModule {
 			int outCount = outputBuffer[channel].capacity();
 			outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
 			outputBuffer[channel].endIncr(outCount);
-		}
-	}
-
-	void drawChannelLight(const int channel, const bool trianglePulse, const bool isLightsTurn, const float sampleTime) {
-		if (isLightsTurn) {
-			const int currentLight = LIGHT_RESONATOR + channel * 3;
-
-			for (int light = 0; light < 3; ++light) {
-				LightModes lightMode = anuliModeLights[channelModes[channel]][light];
-				drawLight(currentLight + light, lightMode, trianglePulse, sampleTime);
-			}
 		}
 	}
 
