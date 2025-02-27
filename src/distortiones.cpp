@@ -120,27 +120,9 @@ struct Distortiones : SanguineModule {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
-		bool isLightsTurn = lightsDivider.process();
-		const float sampleTime = kLightFrequency * args.sampleTime;
-
 		float algorithmValue = 0.f;
 
-		if (bModeSwitchEnabled) {
-			if (isLightsTurn) {
-				featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-				distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
-
-				long long systemTimeMs = getSystemTimeMs();
-
-				int8_t ramp = systemTimeMs & 127;
-				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
-
-				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
-						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
-				}
-			}
-		} else {
+		if (!bModeSwitchEnabled) {
 			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
@@ -210,7 +192,9 @@ struct Distortiones : SanguineModule {
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
-		if (isLightsTurn) {
+		if (lightsDivider.process()) {
+			const float sampleTime = kLightFrequency * args.sampleTime;
+
 			lights[LIGHT_CARRIER + 0].value = (distortionesParameters[0]->carrier_shape == 1
 				|| distortionesParameters[0]->carrier_shape == 2) ? 0.5f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (distortionesParameters[0]->carrier_shape == 2
@@ -238,6 +222,19 @@ struct Distortiones : SanguineModule {
 					int a = palette[zone_integral][rgbComponent];
 					int b = palette[zone_integral + 1][rgbComponent];
 					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+				}
+			} else {
+				featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+				distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
+
+				long long systemTimeMs = getSystemTimeMs();
+
+				int8_t ramp = systemTimeMs & 127;
+				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
+
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
+						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
 

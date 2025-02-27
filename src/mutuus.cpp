@@ -126,27 +126,9 @@ struct Mutuus : SanguineModule {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
-		bool isLightsTurn = lightsDivider.process();
-		float sampleTime = kLightFrequency * args.sampleTime;
-
 		float algorithmValue = 0.f;
 
-		if (bModeSwitchEnabled) {
-			if (isLightsTurn) {
-				featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-				mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
-
-				long long systemTimeMs = getSystemTimeMs();
-
-				int8_t ramp = systemTimeMs & 127;
-				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
-
-				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
-						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
-				}
-			}
-		} else {
+		if (!bModeSwitchEnabled) {
 			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
@@ -225,7 +207,9 @@ struct Mutuus : SanguineModule {
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
-		if (isLightsTurn) {
+		if (lightsDivider.process()) {
+			const float sampleTime = kLightFrequency * args.sampleTime;
+
 			lights[LIGHT_CARRIER + 0].value = (mutuusParameters[0]->carrier_shape == 1
 				|| mutuusParameters[0]->carrier_shape == 2) ? 0.5f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (mutuusParameters[0]->carrier_shape == 2
@@ -255,6 +239,19 @@ struct Mutuus : SanguineModule {
 					int a = palette[zone_integral][rgbComponent];
 					int b = palette[zone_integral + 1][rgbComponent];
 					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+				}
+			} else {
+				featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+				mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
+
+				long long systemTimeMs = getSystemTimeMs();
+
+				int8_t ramp = systemTimeMs & 127;
+				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
+
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
+						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
 
