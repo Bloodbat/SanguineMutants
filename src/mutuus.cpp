@@ -237,27 +237,26 @@ struct Mutuus : SanguineModule {
 
 			for (int mode = 0; mode < kModeCount; ++mode) {
 				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);
-
-				if (!bModeSwitchEnabled) {
-					const uint8_t(*palette)[3];
-					float zone;
-					if (featureMode != mutuus::FEATURE_MODE_META) {
-						palette = paletteWarpsFreqsShift;
-					} else {
-						palette = paletteWarpsDefault;
-					}
-
-					zone = 8.f * mutuusParameters[0]->modulation_algorithm;
-					MAKE_INTEGRAL_FRACTIONAL(zone);
-					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-						int a = palette[zone_integral][rgbComponent];
-						int b = palette[zone_integral + 1][rgbComponent];
-						lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
-					}
-				}
 			}
 
+			if (!bModeSwitchEnabled) {
+				const uint8_t(*palette)[3];
+				float zone;
+				if (featureMode != mutuus::FEATURE_MODE_META) {
+					palette = paletteWarpsFreqsShift;
+				} else {
+					palette = paletteWarpsDefault;
+				}
+
+				zone = 8.f * mutuusParameters[0]->modulation_algorithm;
+				MAKE_INTEGRAL_FRACTIONAL(zone);
+				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
+				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+					int a = palette[zone_integral][rgbComponent];
+					int b = palette[zone_integral + 1][rgbComponent];
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+				}
+			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
