@@ -5,6 +5,8 @@
 #include "warpiescommon.hpp"
 #include "scalaria.hpp"
 
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+
 struct Scalaria : SanguineModule {
     enum ParamIds {
         PARAM_FREQUENCY,
@@ -96,6 +98,7 @@ struct Scalaria : SanguineModule {
         configBypass(INPUT_CHANNEL_1, OUTPUT_CHANNEL_1_PLUS_2);
 
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            memset(&scalariaModulator[channel], 0, sizeof(scalaria::ScalariaModulator));
             scalariaModulator[channel].Init(kScalariaSampleRate);
             scalariaParameters[channel] = scalariaModulator[channel].mutableParameters();
         }
@@ -124,6 +127,9 @@ struct Scalaria : SanguineModule {
         using simd::float_4;
 
         int channelCount = std::max(std::max(inputs[INPUT_CHANNEL_1].getChannels(), inputs[INPUT_CHANNEL_2].getChannels()), 1);
+
+        outputs[OUTPUT_CHANNEL_1_PLUS_2].setChannels(channelCount);
+        outputs[OUTPUT_AUX].setChannels(channelCount);
 
         bool bIsLightsTurn = lightsDivider.process();
         const float sampleTime = kLightFrequency * args.sampleTime;
@@ -194,9 +200,6 @@ struct Scalaria : SanguineModule {
                 }
             }
         }
-
-        outputs[OUTPUT_CHANNEL_1_PLUS_2].setChannels(channelCount);
-        outputs[OUTPUT_AUX].setChannels(channelCount);
 
         if (bIsLightsTurn) {
             bool bHaveInternalOscillator = !scalariaParameters[0]->oscillatorShape == 0;

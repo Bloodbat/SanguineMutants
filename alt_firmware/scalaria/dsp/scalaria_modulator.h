@@ -144,8 +144,8 @@ namespace scalaria {
       }
     }
 
-    Parameters parameters_ = {};
-    Parameters previousParameters_ = {};
+    Parameters parameters_;
+    Parameters previousParameters_;
 
     MoogLadderFilter moogLadderFilter;
 
@@ -153,8 +153,8 @@ namespace scalaria {
 
     Oscillator internalOscillator_;
 
-    float internalModulation_[kMaxBlockSize] = {};
-    float buffer_[3][kMaxBlockSize] = {};
+    float internalModulation_[kMaxBlockSize];
+    float buffer_[3][kMaxBlockSize];
 
     DISALLOW_COPY_AND_ASSIGN(ScalariaModulator);
   };

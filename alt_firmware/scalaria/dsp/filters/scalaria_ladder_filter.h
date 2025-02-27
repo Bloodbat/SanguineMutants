@@ -48,20 +48,20 @@ namespace scalaria {
 			return V[3];
 		}
 
-		virtual void SetResonance(float theResonance) {
+		void SetResonance(float theResonance) {
 			resonance = theResonance;
 		}
 
-		virtual void SetFrequency(float cutoffFrequency) {
+		void SetFrequency(float cutoffFrequency) {
 			cutoff = cutoffFrequency;
 			x = (kMoogLadderPi * cutoff) / sampleRate;
 			g = 4.f * kMoogLadderPi * kLadderThermalVoltage * cutoff * (1.f - x) / (1.f + x);
 		}
 
 	private:
-		float V[4] = {};
-		float dV[4] = {};
-		float tV[4] = {};
+		float V[4];
+		float dV[4];
+		float tV[4];
 
 		float x;
 		float g;
