@@ -244,14 +244,14 @@ struct Distortiones : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
-				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-					lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
-				}
-
 				if (channel < channelCount) {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
 						lights[currentLight + rgbComponent].setBrightnessSmooth(
 							(paletteWarpsParasiteFeatureMode[distortionesModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
+					}
+				} else {
+					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
+						lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
 					}
 				}
 			}
