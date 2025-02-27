@@ -396,7 +396,7 @@ struct Vimina : SanguineModule {
 		case SECTION_FUNCTION_FACTORER:
 			int16_t factorIndex;
 			factorIndex = (channelVoltage[section][channel] /
-				(kMaxParamValue / (kFactorCount - 1))) - kFactorerBypassIndex;
+				(kMaxParamValue / kFactorCount)) - kFactorerBypassIndex;
 			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
 			if (factorIndex == 0) {
 				channelFactor[section][channel] = kFactorerBypassValue;

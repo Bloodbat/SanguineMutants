@@ -1,3 +1,12 @@
+# Next release
+
+## Fixes
+
+- Vimina: clock division factor not reaching "8".
+
+
+---
+
 # 2.6.1
 
 ## Fixes
