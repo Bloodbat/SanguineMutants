@@ -95,8 +95,6 @@ struct Incurvationes : SanguineModule {
 
 		bEasterEggEnabled = params[PARAM_EASTER_EGG].getValue();
 
-		bool isLightsTurn = lightsDivider.process();
-
 		float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.f;
 
 		for (int channel = 0; channel < channelCount; ++channel) {
@@ -147,7 +145,7 @@ struct Incurvationes : SanguineModule {
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
-		if (isLightsTurn) {
+		if (lightsDivider.process()) {
 			lights[LIGHT_CARRIER + 0].value = (warpsParameters[0]->carrier_shape == 1
 				|| warpsParameters[0]->carrier_shape == 2) ? 0.5f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (warpsParameters[0]->carrier_shape == 2
