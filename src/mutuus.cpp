@@ -211,13 +211,13 @@ struct Mutuus : SanguineModule {
 			const float sampleTime = kLightFrequency * args.sampleTime;
 
 			lights[LIGHT_CARRIER + 0].value = (mutuusParameters[0]->carrier_shape == 1
-				|| mutuusParameters[0]->carrier_shape == 2) ? 0.5f : 0.f;
+				|| mutuusParameters[0]->carrier_shape == 2) ? 0.75f : 0.f;
 			lights[LIGHT_CARRIER + 1].value = (mutuusParameters[0]->carrier_shape == 2
-				|| mutuusParameters[0]->carrier_shape == 3) ? 0.5f : 0.f;
+				|| mutuusParameters[0]->carrier_shape == 3) ? 0.75f : 0.f;
 
-			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 0.5f : 0.f);
+			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? 0.75f : 0.f);
 
-			lights[LIGHT_STEREO].setBrightness(mutuusModulator[0].alt_feature_mode() ? 0.5f : 0.f);
+			lights[LIGHT_STEREO].setBrightness(mutuusModulator[0].alt_feature_mode() ? 0.75f : 0.f);
 
 			for (int mode = 0; mode < kModeCount; ++mode) {
 				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);

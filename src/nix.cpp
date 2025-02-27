@@ -18,7 +18,7 @@ Nix::Nix() {
 void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
     Module* apicesMaster = getLeftExpander().module;
     bool bHasMaster = (apicesMaster && apicesMaster->getModel() == modelApices);
-    lights[LIGHT_MASTER_MODULE].setBrightness(bHasMaster ? 0.5f : 0.f);
+    lights[LIGHT_MASTER_MODULE].setBrightness(bHasMaster ? 0.75f : 0.f);
     lights[LIGHT_SPLIT_CHANNEL_2].setBrightness(0.f);
 
     for (int light = 0; light < 3; ++light) {

@@ -569,10 +569,10 @@ struct Nodi : SanguineModule {
 
 	inline void pollSwitches(const float sampleTime) {
 		// Handle switch lights
-		lights[LIGHT_MORSE].setBrightnessSmooth(bPaques ? 0.5f : 0.f, sampleTime);
-		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? 0.5f : 0.f, sampleTime);
-		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? 0.5f : 0.f, sampleTime);
-		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger ? 0.5f : 0.f, sampleTime);
+		lights[LIGHT_MORSE].setBrightnessSmooth(bPaques ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger ? 0.75f : 0.f, sampleTime);
 	}
 
 	json_t* dataToJson() override {

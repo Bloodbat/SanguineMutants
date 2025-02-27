@@ -167,7 +167,7 @@ struct Apices : SanguineModule {
 
 			sampleTime = args.sampleTime * kClockUpdateFrequency;
 
-			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? 0.5f : 0.f, sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? 0.75f : 0.f, sampleTime);
 		}
 
 		ApicesProcessorFunction currentFunction = getProcessorFunction();
@@ -192,18 +192,18 @@ struct Apices : SanguineModule {
 				case EDIT_MODE_FIRST:
 				case EDIT_MODE_SECOND:
 					channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightGreen.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.75f, sampleTime);
 					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
 					switchExpanderChannel2Lights(nixExpander, true, sampleTime);
 					break;
 				case EDIT_MODE_TWIN:
-					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightRed.setBrightnessSmooth(0.75f, sampleTime);
 					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightBlue.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.75f, sampleTime);
 					switchExpanderChannel2Lights(nixExpander, false, sampleTime);
 					break;
 				case EDIT_MODE_SPLIT:
-					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightRed.setBrightnessSmooth(0.75f, sampleTime);
 					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
 					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
 					switchExpanderChannel2Lights(nixExpander, false, sampleTime);
@@ -249,9 +249,9 @@ struct Apices : SanguineModule {
 						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
 						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
 
-						currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightRed.setBrightnessSmooth(0.75f, sampleTime);
 						currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
-						currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightBlue.setBrightnessSmooth(0.75f, sampleTime);
 					}
 					break;
 
@@ -268,7 +268,7 @@ struct Apices : SanguineModule {
 							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
 							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
 
-							currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+							currentLightRed.setBrightnessSmooth(0.75f, sampleTime);
 							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
 							currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
 						} else {
@@ -278,7 +278,7 @@ struct Apices : SanguineModule {
 
 							currentLightRed.setBrightnessSmooth(0.f, sampleTime);
 							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
-							currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+							currentLightBlue.setBrightnessSmooth(0.75f, sampleTime);
 						}
 					}
 					break;
@@ -294,7 +294,7 @@ struct Apices : SanguineModule {
 						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
 
 						currentLightRed.setBrightnessSmooth(0.f, sampleTime);
-						currentLightGreen.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightGreen.setBrightnessSmooth(0.75f, sampleTime);
 						currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
 					}
 					break;
@@ -532,24 +532,24 @@ struct Apices : SanguineModule {
 		case EDIT_MODE_FIRST:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.5f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			break;
 		case EDIT_MODE_SECOND:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.5f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.5f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.75f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(0.75f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			break;
@@ -560,9 +560,9 @@ struct Apices : SanguineModule {
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.75f, sampleTime);
 			}
 			break;
 		case EDIT_MODE_SPLIT:
@@ -572,7 +572,7 @@ struct Apices : SanguineModule {
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (int knob = 0; knob < 2; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
@@ -580,15 +580,15 @@ struct Apices : SanguineModule {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.75f, sampleTime);
 			}
 			break;
 		default:
 			break;
 		}
 
-		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.5f : 0.f, sampleTime);
-		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.5f : 0.f, sampleTime);
+		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.75f : 0.f, sampleTime);
 
 		ApicesProcessorFunction currentProcessorFunction = getProcessorFunction();
 		for (size_t light = 0; light < kNumFunctionLights; ++light) {
@@ -664,8 +664,8 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.5f), sampleTime);
-		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.5f), sampleTime);
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
 	}
 
 	void onReset() override {
@@ -738,18 +738,18 @@ struct Apices : SanguineModule {
 		case EDIT_MODE_FIRST:
 		case EDIT_MODE_SECOND:
 			channel1LightRed.setBrightness(0.f);
-			channel1LightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightGreen.setBrightness(lightIsOn ? 0.75f : 0.f);
 			channel1LightBlue.setBrightness(0.f);
 			setExpanderChannel2Lights(nixExpander, lightIsOn & true);
 			break;
 		case EDIT_MODE_TWIN:
-			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 			channel1LightGreen.setBrightness(0.f);
-			channel1LightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightBlue.setBrightness(lightIsOn ? 0.75f : 0.f);
 			setExpanderChannel2Lights(nixExpander, false);
 			break;
 		case EDIT_MODE_SPLIT:
-			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(0.f);
 			setExpanderChannel2Lights(nixExpander, false);
@@ -765,27 +765,27 @@ struct Apices : SanguineModule {
 
 			switch (editMode) {
 			case EDIT_MODE_TWIN:
-				currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 				currentLightGreen.setBrightness(0.f);
-				currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightBlue.setBrightness(lightIsOn ? 0.75f : 0.f);
 				break;
 
 			case EDIT_MODE_SPLIT:
 				if (function < 2) {
-					currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+					currentLightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 					currentLightGreen.setBrightness(0.f);
 					currentLightBlue.setBrightness(0.f);
 				} else {
 					currentLightRed.setBrightness(0.f);
 					currentLightGreen.setBrightness(0.f);
-					currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+					currentLightBlue.setBrightness(lightIsOn ? 0.75f : 0.f);
 				}
 				break;
 
 			case EDIT_MODE_FIRST:
 			case EDIT_MODE_SECOND:
 				currentLightRed.setBrightness(0.f);
-				currentLightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightGreen.setBrightness(lightIsOn ? 0.75f : 0.f);
 				currentLightBlue.setBrightness(0.f);
 				break;
 			default:
@@ -795,7 +795,7 @@ struct Apices : SanguineModule {
 	}
 
 	void setExpanderChannel2Lights(Module* nixExpander, bool lightIsOn) {
-		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? 0.5f : 0.f);
+		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? 0.75f : 0.f);
 
 		for (int light = 0; light < kMaxFunctions; ++light) {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
@@ -803,7 +803,7 @@ struct Apices : SanguineModule {
 	}
 
 	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float sampleTime) {
-		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.5f : 0.f, sampleTime);
+		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.75f : 0.f, sampleTime);
 
 		for (int light = 0; light < kMaxFunctions; ++light) {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
@@ -913,7 +913,7 @@ struct Apices : SanguineModule {
 	void onUnBypass(const UnBypassEvent& e) override {
 		if (bHasExpander) {
 			Module* nixExpander = getRightExpander().module;
-			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(0.5f);
+			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(0.75f);
 			setExpanderChannel1Lights(nixExpander, true);
 		}
 		Module::onUnBypass(e);

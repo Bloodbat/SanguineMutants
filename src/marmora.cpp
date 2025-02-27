@@ -315,22 +315,22 @@ struct Marmora : SanguineModule {
 			drawLight(LIGHT_T_MODE + 1, tModeLights[tMode][1], sampleTime, systemTimeMs);
 
 			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue()) % 3;
-			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? 0.5f : 0.f);
-			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2 ? 0.5f : 0.f);
+			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? 0.75f : 0.f);
+			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2 ? 0.75f : 0.f);
 
 			int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue()) % 3;
-			lights[LIGHT_T_RANGE + 0].setBrightness(tRange == 0 || tRange == 1 ? 0.5f : 0.f);
-			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2 ? 0.5f : 0.f);
+			lights[LIGHT_T_RANGE + 0].setBrightness(tRange == 0 || tRange == 1 ? 0.75f : 0.f);
+			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2 ? 0.75f : 0.f);
 
 			int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue()) % 3;
-			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? 0.5f : 0.f);
-			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? 0.5f : 0.f);
+			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? 0.75f : 0.f);
+			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? 0.75f : 0.f);
 
 			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime, systemTimeMs);
 			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime, systemTimeMs);
 
 			if (!bScaleEditMode) {
-				float lightExternalBrightness = params[PARAM_EXTERNAL].getValue() ? 0.5f : 0.f;
+				float lightExternalBrightness = params[PARAM_EXTERNAL].getValue() ? 0.75f : 0.f;
 				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 
@@ -338,7 +338,7 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_T1 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 0], sampleTime);
 				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 0], sampleTime);
 
-				lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
+				lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < 0.75f, sampleTime);
 				//lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
 
 				lights[LIGHT_T3 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
@@ -358,7 +358,7 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_X3 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
 				lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 			} else {
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
 
 				lights[LIGHT_T1 + 0].setBrightnessSmooth(bLastGate, sampleTime);
@@ -401,13 +401,13 @@ struct Marmora : SanguineModule {
 			lights[light].setBrightnessSmooth(0.f, sampleTime);
 			break;
 		case LIGHT_ON:
-			lights[light].setBrightnessSmooth(0.5f, sampleTime);
+			lights[light].setBrightnessSmooth(0.75f, sampleTime);
 			break;
 		case LIGHT_BLINK_SLOW:
-			lights[light].setBrightnessSmooth((systemTimeMs & 255) > 128 ? 0.5f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((systemTimeMs & 255) > 128 ? 0.75f : 0.f, sampleTime);
 			break;
 		case LIGHT_BLINK_FAST:
-			lights[light].setBrightnessSmooth((systemTimeMs & 127) > 64 ? 0.5f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((systemTimeMs & 127) > 64 ? 0.75f : 0.f, sampleTime);
 			break;
 		default:
 			break;
@@ -423,16 +423,16 @@ struct Marmora : SanguineModule {
 			slowTriangle = (systemTimeMs & 1023) >> 5;
 			slowTriangle = slowTriangle >= 16 ? 31 - slowTriangle : slowTriangle;
 			pulseWidth = systemTimeMs & 15;
-			lights[light].setBrightnessSmooth(slowTriangle >= pulseWidth ? 0.5f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth(slowTriangle >= pulseWidth ? 0.75f : 0.f, sampleTime);
 			break;
 		case DEJA_VU_LOCK_OFF:
-			lights[light].setBrightnessSmooth(0.5f, sampleTime);
+			lights[light].setBrightnessSmooth(0.75f, sampleTime);
 			break;
 		case DEJA_VU_SUPER_LOCK:
 			fastTriangle = (systemTimeMs & 511) >> 4;
 			fastTriangle = fastTriangle >= 16 ? 31 - fastTriangle : fastTriangle;
 			pulseWidth = systemTimeMs & 15;
-			lights[light].setBrightnessSmooth(fastTriangle >= pulseWidth ? 0.5f : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth(fastTriangle >= pulseWidth ? 0.75f : 0.f, sampleTime);
 			break;
 		}
 	}

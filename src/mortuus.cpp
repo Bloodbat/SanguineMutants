@@ -180,7 +180,7 @@ struct Mortuus : SanguineModule {
 
 			sampleTime = args.sampleTime * kClockUpdateFrequency;
 
-			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? 0.5f : 0.f, sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? 0.75f : 0.f, sampleTime);
 		}
 
 		MortuusProcessorFunction currentFunction = getProcessorFunction();
@@ -205,18 +205,18 @@ struct Mortuus : SanguineModule {
 				case EDIT_MODE_FIRST:
 				case EDIT_MODE_SECOND:
 					channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightGreen.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightGreen.setBrightnessSmooth(0.75f, sampleTime);
 					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
 					switchExpanderChannel2Lights(ansaExpander, true, sampleTime);
 					break;
 				case EDIT_MODE_TWIN:
-					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightRed.setBrightnessSmooth(0.75f, sampleTime);
 					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightBlue.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightBlue.setBrightnessSmooth(0.75f, sampleTime);
 					switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
 					break;
 				case EDIT_MODE_SPLIT:
-					channel1LightRed.setBrightnessSmooth(0.5f, sampleTime);
+					channel1LightRed.setBrightnessSmooth(0.75f, sampleTime);
 					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
 					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
 					switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
@@ -263,9 +263,9 @@ struct Mortuus : SanguineModule {
 						Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
 						Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
 
-						currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightRed.setBrightnessSmooth(0.75f, sampleTime);
 						currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
-						currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightBlue.setBrightnessSmooth(0.75f, sampleTime);
 					}
 					break;
 
@@ -282,7 +282,7 @@ struct Mortuus : SanguineModule {
 							Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
 							Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
 
-							currentLightRed.setBrightnessSmooth(0.5f, sampleTime);
+							currentLightRed.setBrightnessSmooth(0.75f, sampleTime);
 							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
 							currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
 						} else {
@@ -292,7 +292,7 @@ struct Mortuus : SanguineModule {
 
 							currentLightRed.setBrightnessSmooth(0.f, sampleTime);
 							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
-							currentLightBlue.setBrightnessSmooth(0.5f, sampleTime);
+							currentLightBlue.setBrightnessSmooth(0.75f, sampleTime);
 						}
 					}
 					break;
@@ -308,7 +308,7 @@ struct Mortuus : SanguineModule {
 						Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
 
 						currentLightRed.setBrightnessSmooth(0.f, sampleTime);
-						currentLightGreen.setBrightnessSmooth(0.5f, sampleTime);
+						currentLightGreen.setBrightnessSmooth(0.75f, sampleTime);
 						currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
 					}
 					break;
@@ -548,24 +548,24 @@ struct Mortuus : SanguineModule {
 		case EDIT_MODE_FIRST:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.5f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			break;
 		case EDIT_MODE_SECOND:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.5f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.5f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.75f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.75f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(0.75f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			break;
@@ -576,9 +576,9 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < kNumKnobs; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.75f, sampleTime);
 			}
 			break;
 		case EDIT_MODE_SPLIT:
@@ -588,7 +588,7 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (int knob = 0; knob < 2; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(0.75f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
@@ -596,15 +596,15 @@ struct Mortuus : SanguineModule {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.5f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.75f, sampleTime);
 			}
 			break;
 		default:
 			break;
 		}
 
-		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.5f : 0.f, sampleTime);
-		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.5f : 0.f, sampleTime);
+		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == EDIT_MODE_SPLIT) ? 0.75f : 0.f, sampleTime);
+		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & EDIT_MODE_FIRST) ? 0.75f : 0.f, sampleTime);
 
 		MortuusProcessorFunction currentProcessorFunction = getProcessorFunction();
 		for (size_t light = 0; light < kNumFunctionLights; ++light) {
@@ -691,8 +691,8 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.5f), sampleTime);
-		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.5f), sampleTime);
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]), 0.f, 255.f, 0.f, 0.75f), sampleTime);
 	}
 
 	void onReset() override {
@@ -766,18 +766,18 @@ struct Mortuus : SanguineModule {
 		case EDIT_MODE_FIRST:
 		case EDIT_MODE_SECOND:
 			channel1LightRed.setBrightness(0.f);
-			channel1LightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightGreen.setBrightness(lightIsOn ? 0.75f : 0.f);
 			channel1LightBlue.setBrightness(0.f);
 			setExpanderChannel2Lights(ansaExpander, lightIsOn & true);
 			break;
 		case EDIT_MODE_TWIN:
-			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 			channel1LightGreen.setBrightness(0.f);
-			channel1LightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightBlue.setBrightness(lightIsOn ? 0.75f : 0.f);
 			setExpanderChannel2Lights(ansaExpander, false);
 			break;
 		case EDIT_MODE_SPLIT:
-			channel1LightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+			channel1LightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(0.f);
 			setExpanderChannel2Lights(ansaExpander, false);
@@ -793,27 +793,27 @@ struct Mortuus : SanguineModule {
 
 			switch (editMode) {
 			case EDIT_MODE_TWIN:
-				currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 				currentLightGreen.setBrightness(0.f);
-				currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightBlue.setBrightness(lightIsOn ? 0.75f : 0.f);
 				break;
 
 			case EDIT_MODE_SPLIT:
 				if (function < 2) {
-					currentLightRed.setBrightness(lightIsOn ? 0.5f : 0.f);
+					currentLightRed.setBrightness(lightIsOn ? 0.75f : 0.f);
 					currentLightGreen.setBrightness(0.f);
 					currentLightBlue.setBrightness(0.f);
 				} else {
 					currentLightRed.setBrightness(0.f);
 					currentLightGreen.setBrightness(0.f);
-					currentLightBlue.setBrightness(lightIsOn ? 0.5f : 0.f);
+					currentLightBlue.setBrightness(lightIsOn ? 0.75f : 0.f);
 				}
 				break;
 
 			case EDIT_MODE_FIRST:
 			case EDIT_MODE_SECOND:
 				currentLightRed.setBrightness(0.f);
-				currentLightGreen.setBrightness(lightIsOn ? 0.5f : 0.f);
+				currentLightGreen.setBrightness(lightIsOn ? 0.75f : 0.f);
 				currentLightBlue.setBrightness(0.f);
 				break;
 			default:
@@ -823,7 +823,7 @@ struct Mortuus : SanguineModule {
 	}
 
 	void setExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn) {
-		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? 0.5f : 0.f);
+		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? 0.75f : 0.f);
 
 		for (int light = 0; light < kMaxFunctions; ++light) {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
@@ -831,7 +831,7 @@ struct Mortuus : SanguineModule {
 	}
 
 	void switchExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn, const float sampleTime) {
-		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.5f : 0.f, sampleTime);
+		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? 0.75f : 0.f, sampleTime);
 
 		for (int light = 0; light < kMaxFunctions; ++light) {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
@@ -941,7 +941,7 @@ struct Mortuus : SanguineModule {
 	void onUnBypass(const UnBypassEvent& e) override {
 		if (bHasExpander) {
 			Module* ansaExpander = getRightExpander().module;
-			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(0.5f);
+			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(0.75f);
 			setExpanderChannel1Lights(ansaExpander, true);
 		}
 		Module::onUnBypass(e);
