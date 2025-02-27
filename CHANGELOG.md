@@ -1,3 +1,32 @@
+# 2.6.1
+
+## Fixes
+
+- Scalaria: crashing on Apple and Linux.
+
+- Scalaria: outputs sometimes getting stuck at -5V.
+
+- Scalaria: faceplate tag did not follow the conventions of the rest of the modules.
+
+- Scalaria: imperceptible lights on Apple.
+
+- Mutuus: algorithm light was set 8 more times than it needed to be.
+
+## Additions
+
+- Anuli: strummer light now follows selected display channel.
+
+## Changes
+
+- Scalaria: darker background for shaped lights (they look better that way).
+
+- Plugin: adjust button LED intensity (it was too low).
+
+- Plugin: small performance tweaks for most modules.
+
+
+---
+
 # 2.6.0
 
 ## New Modules
