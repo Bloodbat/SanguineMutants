@@ -155,14 +155,6 @@ struct Vimina : SanguineModule {
 
 		bool bResetConnected = inputs[INPUT_RESET].isConnected();
 
-		bool bIsLightsTurn = lightsDivider.process();
-
-		float sampleTime = 0.f;
-
-		if (bIsLightsTurn) {
-			sampleTime = kLightsFrequency * args.sampleTime;
-		}
-
 		bool resetButtons[kMaxModuleSections] = {};
 
 		for (int section = 0; section < kMaxModuleSections; ++section) {
@@ -215,27 +207,25 @@ struct Vimina : SanguineModule {
 					setOutputVoltages(section, channel);
 				}
 				channelState[section][channel] = CHANNEL_REST; // Clean up.
-
-				if (bIsLightsTurn) {
-					if (ledsChannel >= channelCount) {
-						ledsChannel = channelCount - 1;
-					}
-
-					if (channel == ledsChannel) {
-						updateChannelLeds(section, sampleTime, channel);
-					}
-				}
 			}
 
 			if (tmrModuleClock[channel].time >= kTimerCounterMax) {
 				tmrModuleClock[channel].reset();
 			}
 		}
-		if (bIsLightsTurn) {
+		if (lightsDivider.process()) {
+			const float sampleTime = kLightsFrequency * args.sampleTime;
+
+			if (ledsChannel >= channelCount) {
+				ledsChannel = channelCount - 1;
+			}
+
 			for (int section = 0; section < kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_MODE + section * 2;
 				lights[currentLight + 0].setBrightnessSmooth(channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.5f : 0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ? 0.5f : 0.f, sampleTime);
+
+				updateChannelLeds(section, sampleTime, ledsChannel);
 			}
 		}
 	}
