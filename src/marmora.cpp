@@ -148,6 +148,51 @@ struct Marmora : SanguineModule {
 			int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
 			return (string::f("%d", dejaVuLength));
 		}
+
+		void setDisplayValue(float 	displayValue) override {
+			int inputValue = static_cast<int>(displayValue);
+			switch (inputValue)
+			{
+			case 1:
+				displayValue = 0.f;
+				break;
+			case 2:
+				displayValue = 0.158f;
+				break;
+			case 3:
+				displayValue = 0.308f;
+				break;
+			case 4:
+				displayValue = 0.443f;
+				break;
+			case 5:
+				displayValue = 0.5f;
+				break;
+			case 6:
+				displayValue = 0.571f;
+				break;
+			case 7:
+				displayValue = 0.633f;
+				break;
+			case 8:
+				displayValue = 0.705f;
+				break;
+			case 10:
+				displayValue = 0.771f;
+				break;
+			case 12:
+				displayValue = 0.840f;
+				break;
+			case 14:
+				displayValue = 0.912f;
+				break;
+			default:
+				displayValue = 1.f;
+				break;
+			}
+
+			setImmediateValue(displayValue);
+		}
 	};
 
 	Marmora() {

@@ -1,3 +1,12 @@
+# Next version
+
+## Fixes
+
+- Marmora: entering Length values by right clicking the knob did not follow display values.
+
+
+---
+
 # 2.6.2
 
 ## Fixes
