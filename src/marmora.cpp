@@ -144,18 +144,9 @@ struct Marmora : SanguineModule {
 
 	struct LengthParam : ParamQuantity {
 		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				if (paramId == PARAM_DEJA_VU_LENGTH) {
-					float dejaVuLengthIndex = getValue() * (LENGTHOF(marmoraLoopLengths) - 1);
-					int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
-					return (string::f("%d", dejaVuLength));
-				} else {
-					assert(false);
-				}
-			} else {
-				return "";
-			}
-			return "";
+			float dejaVuLengthIndex = getValue() * (LENGTHOF(marmoraLoopLengths) - 1);
+			int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
+			return (string::f("%d", dejaVuLength));
 		}
 	};
 
