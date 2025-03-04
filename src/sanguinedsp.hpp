@@ -41,3 +41,38 @@ struct SaturatorFloat {
 		return saturation(x);
 	}
 };
+
+struct RampGenerator {
+	float ellapsedTime = 0.f;
+	float rampLength = 0.f;
+	float rampVoltage = 1.f;
+	float resetVoltage = 1.f;
+	bool autoReset = true;
+	bool finished = true; // The output is the inverse of this.
+
+	// Immediately resets the ramp.
+	void reset() {
+		ellapsedTime = 0.f;
+		rampLength = 0.f;
+		rampVoltage = resetVoltage;
+		finished = true;
+	}
+
+	// Advances state by deltaTime.
+	void process(float deltaTime) {
+		rampVoltage = resetVoltage;
+		ellapsedTime += deltaTime;
+		if (!finished) {
+			finished = ellapsedTime >= rampLength;
+			rampVoltage = clamp(ellapsedTime / rampLength, 0.f, 1.f);
+		} else {
+			reset();
+		}
+	}
+
+	// Begins a ramp with rampLength.
+	void trigger(float theRampLength) {
+		finished = false;
+		rampLength = theRampLength;
+	}
+};
