@@ -4,6 +4,7 @@
 #include <color.hpp>
 #include "sanguinehelpers.hpp"
 #include "themes.hpp"
+#include "sanguinedrawing.hpp"
 
 using namespace rack;
 
@@ -386,24 +387,6 @@ struct SanguineModuleWidget : ModuleWidget {
 	void makePanel();
 	void step() override;
 };
-
-// Drawing utils
-void drawCircularHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
-	const unsigned char haloOpacity, const float radiusFactor);
-void drawRectHalo(const Widget::DrawArgs& args, const Vec boxSize, const NVGcolor haloColor,
-	const unsigned char haloOpacity, const float positionX);
-
-inline void fillSvgSolidColor(const NSVGimage* svgImage, const unsigned int fillColor) {
-	for (NSVGshape* shape = svgImage->shapes; shape; shape = shape->next) {
-		shape->fill.color = fillColor;
-		shape->fill.type = NSVG_PAINT_COLOR;
-	}
-}
-
-// utils
-inline unsigned int rgbColorToInt(const uint8_t red, const uint8_t green, const uint8_t blue, const uint8_t alpha = 255) {
-	return (alpha << 24) + (blue << 16) + (green << 8) + red;
-}
 
 // Light colors.
 
