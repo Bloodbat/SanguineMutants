@@ -156,6 +156,10 @@ struct SanguineBlackSwitch : app::SvgSwitch {
 	SanguineBlackSwitch();
 };
 
+struct SanguineBezel115 : app::SvgSwitch {
+	SanguineBezel115();
+};
+
 // Displays
 
 enum DisplayType {
@@ -343,6 +347,15 @@ struct SanguineShapedAcrylicLed : TSvgLight<TBase> {
 			}
 		}
 		Widget::drawLayer(args, layer);
+	}
+};
+
+template <typename TBase>
+struct SanguineBezelLight115 : TBase {
+	SanguineBezelLight115() {
+		this->borderColor = color::WHITE_TRANSPARENT;
+		this->bgColor = color::WHITE_TRANSPARENT;
+		this->box.size = mm2px(math::Vec(10.583, 10.583));
 	}
 };
 

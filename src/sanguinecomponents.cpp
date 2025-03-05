@@ -176,6 +176,10 @@ SanguineBlackSwitch::SanguineBlackSwitch() {
 	addFrame(Svg::load(asset::plugin(pluginInstance, "res/components/SanguineSwitchBlack_2.svg")));
 }
 
+SanguineBezel115::SanguineBezel115() {
+	addFrame(Svg::load(asset::plugin(pluginInstance, "res/components/SanguineButton115.svg")));
+}
+
 // Displays
 
 SanguineBaseSegmentDisplay::SanguineBaseSegmentDisplay(uint32_t newCharacterCount, Module* theModule) {
