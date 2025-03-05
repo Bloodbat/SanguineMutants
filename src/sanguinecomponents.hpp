@@ -424,12 +424,14 @@ struct SanguinePanel : SvgPanel {
 
 // Modules
 struct SanguineModule : Module {
+	enum ExpanderPositions { EXPANDER_LEFT, EXPANDER_RIGHT };
+
 	bool bUniqueTheme = false;
 	FaceplateThemes previousTheme = THEME_NONE;
 	FaceplateThemes currentTheme = THEME_VITRIOL;
 	void dataFromJson(json_t* rootJ) override;
 	json_t* dataToJson() override;
-	void addExpander(Model* model, ModuleWidget* parentModuleWidget, bool isLeftExpander = false);
+	void addExpander(Model* model, ModuleWidget* parentModuleWidget, ExpanderPositions expanderPosition = EXPANDER_RIGHT);
 	void setModuleTheme(int themeNum);
 };
 
