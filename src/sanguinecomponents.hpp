@@ -10,6 +10,18 @@ using namespace rack;
 
 enum HaloType { HALO_CIRCULAR, HALO_RECTANGULAR, HALO_NONE };
 
+// Light colors.
+
+struct RGBLightColor {
+	float red;
+	float green;
+	float blue;
+};
+
+// Color constants for decorative lights
+static const unsigned int kSanguineBlueLight = rgbColorToInt(0, 167, 255);
+static const unsigned int kSanguineYellowLight = rgbColorToInt(239, 250, 100);
+
 // Ports
 
 struct BananutBlack : app::SvgPort {
@@ -387,15 +399,3 @@ struct SanguineModuleWidget : ModuleWidget {
 	void makePanel();
 	void step() override;
 };
-
-// Light colors.
-
-struct RGBLightColor {
-	float red;
-	float green;
-	float blue;
-};
-
-// Color constants for decorative lights
-static const unsigned int kSanguineBlueLight = rgbColorToInt(0, 167, 255);
-static const unsigned int kSanguineYellowLight = rgbColorToInt(239, 250, 100);
