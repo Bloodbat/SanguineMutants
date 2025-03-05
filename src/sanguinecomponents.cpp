@@ -1,5 +1,4 @@
 ﻿#include "sanguinecomponents.hpp"
-#include <color.hpp>
 
 using namespace rack;
 
