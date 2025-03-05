@@ -224,133 +224,133 @@ struct Scalaria : SanguineModule {
     }
 };
 
-struct AcrylicOff : SanguineShapedAcrylicLed {
+struct AcrylicOff : SanguineShapedRGBAcrylicLed {
     AcrylicOff() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_off.svg")));
     }
 };
 
-struct AcrylicTriangle : SanguineShapedAcrylicLed {
+struct AcrylicTriangle : SanguineShapedRGBAcrylicLed {
     AcrylicTriangle() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_triangle.svg")));
     }
 };
 
-struct AcrylicSaw : SanguineShapedAcrylicLed {
+struct AcrylicSaw : SanguineShapedRGBAcrylicLed {
     AcrylicSaw() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_saw.svg")));
     }
 };
 
-struct AcrylicSquare : SanguineShapedAcrylicLed {
+struct AcrylicSquare : SanguineShapedRGBAcrylicLed {
     AcrylicSquare() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_square.svg")));
     }
 };
 
-struct AcrylicFreq : SanguineShapedAcrylicLed {
+struct AcrylicFreq : SanguineShapedRGBAcrylicLed {
     AcrylicFreq() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_freq.svg")));
     }
 };
 
-struct AcrylicLvl1 : SanguineShapedAcrylicLed {
+struct AcrylicLvl1 : SanguineShapedRGBAcrylicLed {
     AcrylicLvl1() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_lvl1.svg")));
     }
 };
 
-struct AcrylicChannel1 : SanguineShapedAcrylicLed {
+struct AcrylicChannel1 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel1() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_1.svg")));
     }
 };
 
-struct AcrylicChannel2 : SanguineShapedAcrylicLed {
+struct AcrylicChannel2 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel2() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_2.svg")));
     }
 };
 
-struct AcrylicChannel3 : SanguineShapedAcrylicLed {
+struct AcrylicChannel3 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel3() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_3.svg")));
     }
 };
 
-struct AcrylicChannel4 : SanguineShapedAcrylicLed {
+struct AcrylicChannel4 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel4() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_4.svg")));
     }
 };
 
-struct AcrylicChannel5 : SanguineShapedAcrylicLed {
+struct AcrylicChannel5 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel5() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_5.svg")));
     }
 };
 
-struct AcrylicChannel6 : SanguineShapedAcrylicLed {
+struct AcrylicChannel6 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel6() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_6.svg")));
     }
 };
 
-struct AcrylicChannel7 : SanguineShapedAcrylicLed {
+struct AcrylicChannel7 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel7() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_7.svg")));
     }
 };
 
-struct AcrylicChannel8 : SanguineShapedAcrylicLed {
+struct AcrylicChannel8 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel8() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_8.svg")));
     }
 };
 
-struct AcrylicChannel9 : SanguineShapedAcrylicLed {
+struct AcrylicChannel9 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel9() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_9.svg")));
     }
 };
 
-struct AcrylicChannel10 : SanguineShapedAcrylicLed {
+struct AcrylicChannel10 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel10() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_10.svg")));
     }
 };
 
-struct AcrylicChannel11 : SanguineShapedAcrylicLed {
+struct AcrylicChannel11 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel11() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_11.svg")));
     }
 };
 
-struct AcrylicChannel12 : SanguineShapedAcrylicLed {
+struct AcrylicChannel12 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel12() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_12.svg")));
     }
 };
 
-struct AcrylicChannel13 : SanguineShapedAcrylicLed {
+struct AcrylicChannel13 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel13() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_13.svg")));
     }
 };
 
-struct AcrylicChannel14 : SanguineShapedAcrylicLed {
+struct AcrylicChannel14 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel14() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_14.svg")));
     }
 };
 
-struct AcrylicChannel15 : SanguineShapedAcrylicLed {
+struct AcrylicChannel15 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel15() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_15.svg")));
     }
 };
 
-struct AcrylicChannel16 : SanguineShapedAcrylicLed {
+struct AcrylicChannel16 : SanguineShapedRGBAcrylicLed {
     AcrylicChannel16() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_16.svg")));
     }

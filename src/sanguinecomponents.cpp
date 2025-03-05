@@ -713,12 +713,12 @@ void SanguineMultiColoredShapedLight::drawLayer(const DrawArgs& args, int layer)
 	}
 }
 
-void SanguineShapedAcrylicLed::draw(const DrawArgs& args) {
+void SanguineShapedRGBAcrylicLed::draw(const DrawArgs& args) {
 	// Drawn in the background: these lights should include a background, otherwise designs show: they include transparency.
 }
 
 // drawLayer logic partially based on code by BaconPaul and Hemmer.
-void SanguineShapedAcrylicLed::drawLayer(const DrawArgs& args, int layer) {
+void SanguineShapedRGBAcrylicLed::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 
 		if (!sw->svg) {

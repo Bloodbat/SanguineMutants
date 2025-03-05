@@ -284,7 +284,7 @@ struct Rogan6PSLight : Base {
 	}
 };
 
-struct SanguineShapedAcrylicLed : TSvgLight<RedGreenBlueLight> {
+struct SanguineShapedRGBAcrylicLed : TSvgLight<RedGreenBlueLight> {
 	static constexpr float backgroundGrey = 30.f / 255.f;
 
 	void draw(const DrawArgs& args) override;
