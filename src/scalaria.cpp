@@ -33,12 +33,12 @@ struct Scalaria : SanguineModule {
         OUTPUTS_COUNT
     };
     enum LightIds {
-        ENUMS(LIGHT_INTERNAL_OSCILLATOR_OFF, 3),
-        ENUMS(LIGHT_INTERNAL_OSCILLATOR_TRIANGLE, 3),
-        ENUMS(LIGHT_INTERNAL_OSCILLATOR_SAW, 3),
-        ENUMS(LIGHT_INTERNAL_OSCILLATOR_SQUARE, 3),
-        ENUMS(LIGHT_CHANNEL_1_FREQUENCY, 3),
-        ENUMS(LIGHT_CHANNEL_1_LEVEL, 3),
+        LIGHT_INTERNAL_OSCILLATOR_OFF,
+        LIGHT_INTERNAL_OSCILLATOR_TRIANGLE,
+        LIGHT_INTERNAL_OSCILLATOR_SAW,
+        LIGHT_INTERNAL_OSCILLATOR_SQUARE,
+        LIGHT_CHANNEL_1_FREQUENCY,
+        LIGHT_CHANNEL_1_LEVEL,
         ENUMS(LIGHT_CHANNEL_1, 3),
         ENUMS(LIGHT_CHANNEL_2, 3),
         ENUMS(LIGHT_CHANNEL_3, 3),
@@ -104,23 +104,6 @@ struct Scalaria : SanguineModule {
         }
 
         lightsDivider.setDivision(kLightFrequency);
-
-        lights[LIGHT_INTERNAL_OSCILLATOR_OFF + 0].setBrightness(0.f);
-        lights[LIGHT_INTERNAL_OSCILLATOR_OFF + 1].setBrightness(0.f);
-
-        lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE + 0].setBrightness(0.f);
-        lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE + 2].setBrightness(0.f);
-
-        lights[LIGHT_INTERNAL_OSCILLATOR_SAW + 2].setBrightness(0.f);
-
-        lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE + 1].setBrightness(0.f);
-        lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE + 2].setBrightness(0.f);
-
-        lights[LIGHT_CHANNEL_1_FREQUENCY + 0].setBrightness(0.f);
-        lights[LIGHT_CHANNEL_1_FREQUENCY + 2].setBrightness(0.f);
-
-        lights[LIGHT_CHANNEL_1_LEVEL + 0].setBrightness(0.f);
-        lights[LIGHT_CHANNEL_1_LEVEL + 2].setBrightness(0.f);
     }
 
     void process(const ProcessArgs& args) override {
@@ -183,18 +166,17 @@ struct Scalaria : SanguineModule {
 
             bool bHaveInternalOscillator = !scalariaParameters[0]->oscillatorShape == 0;
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_OFF + 2].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.75f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.75f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE + 1].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 1 ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 1 ? 0.75f : 0.f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SAW + 0].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 2 ? 0.75f : 0.f, sampleTime);
-            lights[LIGHT_INTERNAL_OSCILLATOR_SAW + 1].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 2 ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 2 ? 0.75f : 0.f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE + 0].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 3 ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 3 ? 0.75f : 0.f, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_FREQUENCY + 1].setBrightnessSmooth(bHaveInternalOscillator ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator ? 0.75f : 0.f, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_LEVEL + 1].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.75f, sampleTime);
+            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.75f, sampleTime);
 
             for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
                 const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
@@ -224,133 +206,133 @@ struct Scalaria : SanguineModule {
     }
 };
 
-struct AcrylicOff : SanguineShapedRGBAcrylicLed {
+struct AcrylicOff : SanguineShapedAcrylicLed<BlueLight> {
     AcrylicOff() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_off.svg")));
     }
 };
 
-struct AcrylicTriangle : SanguineShapedRGBAcrylicLed {
+struct AcrylicTriangle : SanguineShapedAcrylicLed<GreenLight> {
     AcrylicTriangle() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_triangle.svg")));
     }
 };
 
-struct AcrylicSaw : SanguineShapedRGBAcrylicLed {
+struct AcrylicSaw : SanguineShapedAcrylicLed<YellowLight> {
     AcrylicSaw() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_saw.svg")));
     }
 };
 
-struct AcrylicSquare : SanguineShapedRGBAcrylicLed {
+struct AcrylicSquare : SanguineShapedAcrylicLed<RedLight> {
     AcrylicSquare() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_square.svg")));
     }
 };
 
-struct AcrylicFreq : SanguineShapedRGBAcrylicLed {
+struct AcrylicFreq : SanguineShapedAcrylicLed<GreenLight> {
     AcrylicFreq() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_freq.svg")));
     }
 };
 
-struct AcrylicLvl1 : SanguineShapedRGBAcrylicLed {
+struct AcrylicLvl1 : SanguineShapedAcrylicLed<GreenLight> {
     AcrylicLvl1() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_lvl1.svg")));
     }
 };
 
-struct AcrylicChannel1 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel1 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel1() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_1.svg")));
     }
 };
 
-struct AcrylicChannel2 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel2 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel2() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_2.svg")));
     }
 };
 
-struct AcrylicChannel3 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel3 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel3() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_3.svg")));
     }
 };
 
-struct AcrylicChannel4 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel4 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel4() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_4.svg")));
     }
 };
 
-struct AcrylicChannel5 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel5 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel5() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_5.svg")));
     }
 };
 
-struct AcrylicChannel6 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel6 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel6() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_6.svg")));
     }
 };
 
-struct AcrylicChannel7 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel7 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel7() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_7.svg")));
     }
 };
 
-struct AcrylicChannel8 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel8 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel8() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_8.svg")));
     }
 };
 
-struct AcrylicChannel9 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel9 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel9() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_9.svg")));
     }
 };
 
-struct AcrylicChannel10 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel10 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel10() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_10.svg")));
     }
 };
 
-struct AcrylicChannel11 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel11 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel11() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_11.svg")));
     }
 };
 
-struct AcrylicChannel12 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel12 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel12() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_12.svg")));
     }
 };
 
-struct AcrylicChannel13 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel13 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel13() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_13.svg")));
     }
 };
 
-struct AcrylicChannel14 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel14 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel14() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_14.svg")));
     }
 };
 
-struct AcrylicChannel15 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel15 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel15() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_15.svg")));
     }
 };
 
-struct AcrylicChannel16 : SanguineShapedRGBAcrylicLed {
+struct AcrylicChannel16 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
     AcrylicChannel16() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_16.svg")));
     }
