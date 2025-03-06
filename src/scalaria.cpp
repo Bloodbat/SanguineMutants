@@ -166,17 +166,23 @@ struct Scalaria : SanguineModule {
 
             bool bHaveInternalOscillator = !scalariaParameters[0]->oscillatorShape == 0;
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.75f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(bHaveInternalOscillator ?
+                0.f : kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 1 ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 1 ?
+                kSanguineButtonLightValue : 0.f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 2 ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 2 ?
+                kSanguineButtonLightValue : 0.f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 3 ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 3 ?
+                kSanguineButtonLightValue : 0.f, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator ? 0.75f : 0.f, sampleTime);
+            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator ?
+                kSanguineButtonLightValue : 0.f, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(bHaveInternalOscillator ? 0.f : 0.75f, sampleTime);
+            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(bHaveInternalOscillator ?
+                0.f : kSanguineButtonLightValue, sampleTime);
 
             for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
                 const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
@@ -194,7 +200,7 @@ struct Scalaria : SanguineModule {
                         int a = palette[zone_integral][rgbComponent];
                         int b = palette[zone_integral + 1][rgbComponent];
                         const float lightValue = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
-                        lights[currentLight + rgbComponent].setBrightness(rescale(lightValue, 0.f, 1.f, 0.f, 0.75f));
+                        lights[currentLight + rgbComponent].setBrightness(rescale(lightValue, 0.f, 1.f, 0.f, kSanguineButtonLightValue));
                     }
                 } else {
                     for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {

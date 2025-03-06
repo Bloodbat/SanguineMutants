@@ -305,9 +305,12 @@ struct Funes : SanguineModule {
 					--displayTimeout;
 				}
 
-				lights[LIGHT_FACTORY_DATA].setBrightness(customDataStates[patch.engine] == DataFactory && errorTimeOut == 0 ? 0.75f : 0.f);
-				lights[LIGHT_CUSTOM_DATA + 0].setBrightness(customDataStates[patch.engine] == DataCustom && errorTimeOut == 0 ? 0.75f : 0.f);
-				lights[LIGHT_CUSTOM_DATA + 1].setBrightness(customDataStates[patch.engine] == DataCustom || errorTimeOut > 0 ? 0.75f : 0.f);
+				lights[LIGHT_FACTORY_DATA].setBrightness(customDataStates[patch.engine] == DataFactory &&
+					errorTimeOut == 0 ? kSanguineButtonLightValue : 0.f);
+				lights[LIGHT_CUSTOM_DATA + 0].setBrightness(customDataStates[patch.engine] == DataCustom &&
+					errorTimeOut == 0 ? kSanguineButtonLightValue : 0.f);
+				lights[LIGHT_CUSTOM_DATA + 1].setBrightness(customDataStates[patch.engine] == DataCustom ||
+					errorTimeOut > 0 ? kSanguineButtonLightValue : 0.f);
 
 				if (errorTimeOut != 0) {
 					--errorTimeOut;

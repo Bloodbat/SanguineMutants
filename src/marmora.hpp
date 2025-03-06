@@ -165,10 +165,10 @@ static const LightModes scaleLights[kMaxScales][kLightColorPins]{
 };
 
 static const RGBLightColor paletteMarmoraClockSource[kMaxClockSourceTypes]{
-    { 0.f, 0.f, 0.75f },
-    { 0.f, 0.75f, 0.f },
-    { 0.75f, 0.75f, 0.f },
-    { 0.75f, 0.f, 0.f }
+    { 0.f, 0.f, kSanguineButtonLightValue },
+    { 0.f, kSanguineButtonLightValue, 0.f },
+    { kSanguineButtonLightValue, kSanguineButtonLightValue, 0.f },
+    { kSanguineButtonLightValue, 0.f, 0.f }
 };
 
 static const std::vector<std::string> marmoraTModeLabels = {

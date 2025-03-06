@@ -18,7 +18,7 @@ Ansa::Ansa() {
 void Ansa::onExpanderChange(const ExpanderChangeEvent& e) {
     Module* mortuusMaster = getLeftExpander().module;
     bool bHasMaster = (mortuusMaster && mortuusMaster->getModel() == modelMortuus);
-    lights[LIGHT_MASTER_MODULE].setBrightness(bHasMaster ? 0.75f : 0.f);
+    lights[LIGHT_MASTER_MODULE].setBrightness(bHasMaster ? kSanguineButtonLightValue : 0.f);
     lights[LIGHT_SPLIT_CHANNEL_2].setBrightness(0.f);
 
     for (int light = 0; light < 3; ++light) {

@@ -234,11 +234,15 @@ struct Aestus : SanguineModule {
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ? 0.75f : 0.f, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ? 0.75f : 0.f, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
 
 			if (sample.flags & tides::FLAG_END_OF_ATTACK) {
 				unipolarFlag *= -1.f;
@@ -246,8 +250,9 @@ struct Aestus : SanguineModule {
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ? 0.75f : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? 0.75f : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 			displayModel = aestusDisplayModels[params[PARAM_MODEL].getValue()];
 
