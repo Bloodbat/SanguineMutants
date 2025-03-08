@@ -1,8 +1,12 @@
-# Next version
+# 2.6.3
 
 ## Fixes
 
 - Marmora: entering Length values by right clicking the knob did not follow display values.
+
+## Additions
+
+- Explorator: per polyphonic channel noise generator for the S&H section, with two selectable noise generators with different CPU consumptions.
 
 
 ---

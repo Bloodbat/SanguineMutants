@@ -1,8 +1,20 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#include "pcg_random.hpp"
 
 using simd::float_4;
+
+enum ExploratorNoiseModes {
+	NOISE_WHITE,
+	NOISE_PRISM,
+	NOISE_MODES_COUNT
+};
+
+static const std::vector<std::string> exploratorNoiseModeLabels{
+	"White noise (High CPU)",
+	"Prims noise (Low CPU)"
+};
 
 struct Explorator : SanguineModule {
 	enum ParamIds {
@@ -51,10 +63,15 @@ struct Explorator : SanguineModule {
 	};
 
 	const int kLightFrequency = 128;
+	int lastSampleAndHoldChannels = 0;
+
 	dsp::ClockDivider lightsDivider;
 	dsp::SchmittTrigger stSampleAndHold[PORT_MAX_CHANNELS];
+	pcg32 pcgRng[PORT_MAX_CHANNELS];
+
 	float voltagesSampleAndHold[PORT_MAX_CHANNELS] = {};
-	int lastSampleAndHoldChannels = 0;
+
+	ExploratorNoiseModes noiseMode = NOISE_PRISM;
 
 	Explorator() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -92,6 +109,10 @@ struct Explorator : SanguineModule {
 		configButton(PARAM_AVERAGER, "3:1 hardware behavior (averager)");
 
 		lightsDivider.setDivision(kLightFrequency);
+
+		for (int noise = 0; noise < PORT_MAX_CHANNELS; ++noise) {
+			pcgRng[noise] = pcg32(std::round(system::getUnixTime() * noise * 13));
+		}
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -183,7 +204,7 @@ struct Explorator : SanguineModule {
 		}
 
 		// Sample & hold
-		float noise = 0.f;
+		float noise[PORT_MAX_CHANNELS] = {};
 		bool triggerConnected = inputs[INPUT_SH_TRIGGER].isConnected();
 		bool noiseConnected = outputs[OUTPUT_SH_NOISE].isConnected();
 		bool inputVoltageConnected = inputs[INPUT_SH_VOLTAGE].isConnected();
@@ -198,7 +219,19 @@ struct Explorator : SanguineModule {
 		outputs[OUTPUT_SH_NOISE].setChannels(channelsSampleAndHold > 0 ? channelsSampleAndHold : 1);
 
 		if (noiseConnected || (triggerConnected && !inputVoltageConnected)) {
-			noise = 2.f * random::normal();
+			switch (noiseMode)
+			{
+			case NOISE_PRISM:
+				for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
+					noise[channel] = ldexpf(pcgRng[channel](), -32) * 6.f - 3.f;
+				}
+				break;
+			case NOISE_WHITE:
+				for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
+					noise[channel] = 2.f * random::normal();
+				}
+				break;
+			}
 		}
 
 		if (triggerConnected) {
@@ -207,7 +240,7 @@ struct Explorator : SanguineModule {
 					if (inputVoltageConnected) {
 						voltagesSampleAndHold[channel] = inputs[INPUT_SH_VOLTAGE].getVoltage(channel);
 					} else {
-						voltagesSampleAndHold[channel] = noise;
+						voltagesSampleAndHold[channel] = noise[channel];
 					}
 				}
 			}
@@ -220,9 +253,8 @@ struct Explorator : SanguineModule {
 		if (noiseConnected) {
 			int channelsNoise = outputs[OUTPUT_SH_NOISE].getChannels();
 
-			for (int channel = 0; channel < channelsNoise; channel += 4) {
-				float_4 noiseVoltages = noise;
-				outputs[OUTPUT_SH_NOISE].setVoltageSimd(noiseVoltages, channel);
+			for (int channel = 0; channel < channelsNoise; ++channel) {
+				outputs[OUTPUT_SH_NOISE].setVoltage(noise[channel], channel);
 			}
 		}
 
@@ -368,6 +400,31 @@ struct Explorator : SanguineModule {
 			lights[LIGHT_AVERAGER].setBrightnessSmooth(attenuate3to1 ? kSanguineButtonLightValue : 0.f, sampleTime);
 		} // Light Divider
 	}
+
+	void setNoiseMode(int newNoiseMode) {
+		noiseMode = static_cast<ExploratorNoiseModes>(newNoiseMode);
+	}
+
+	int getNoiseMode() {
+		return static_cast<int>(noiseMode);
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = SanguineModule::dataToJson();
+
+		json_object_set_new(rootJ, "noiseMode", json_integer(static_cast<int>(noiseMode)));
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
+		json_t* noiseModeJ = json_object_get(rootJ, "noiseMode");
+		if (noiseModeJ) {
+			noiseMode = static_cast<ExploratorNoiseModes>(json_integer_value(noiseModeJ));
+		}
+	}
 };
 
 struct ExploratorWidget : SanguineModuleWidget {
@@ -432,6 +489,20 @@ struct ExploratorWidget : SanguineModuleWidget {
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(15.273, 119.127),
 			module, Explorator::PARAM_AVERAGER, Explorator::LIGHT_AVERAGER));
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		SanguineModuleWidget::appendContextMenu(menu);
+
+		Explorator* module = dynamic_cast<Explorator*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+
+
+		menu->addChild(createIndexSubmenuItem("Noise mode", exploratorNoiseModeLabels,
+			[=]() {return module->getNoiseMode(); },
+			[=](int i) {module->setNoiseMode(i); }
+		));
 	}
 };
 

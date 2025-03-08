@@ -3,6 +3,7 @@ FLAGS += \
 	-DBRAIDS_LFO_FIX \
 	-I./eurorack \
 	-I./alt_firmware \
+	-I./pcgcpp \
 	-Wno-unused-local-typedefs
 
 ifndef DEBUGBUILD
