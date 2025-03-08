@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "pcg_random.hpp"
+#include "sanguinerandom.hpp"
 
 using simd::float_4;
 
@@ -228,7 +229,7 @@ struct Explorator : SanguineModule {
 				break;
 			case NOISE_WHITE:
 				for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
-					noise[channel] = 2.f * random::normal();
+					noise[channel] = 2.f * sanguineRandom::normal();
 				}
 				break;
 			}
