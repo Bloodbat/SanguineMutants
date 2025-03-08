@@ -14,7 +14,7 @@ enum ExploratorNoiseModes {
 
 static const std::vector<std::string> exploratorNoiseModeLabels{
 	"White noise (High CPU)",
-	"Prims noise (Low CPU)"
+	"Prism noise (Low CPU)"
 };
 
 struct Explorator : SanguineModule {
