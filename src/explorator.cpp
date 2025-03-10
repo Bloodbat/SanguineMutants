@@ -227,7 +227,7 @@ struct Explorator : SanguineModule {
 					noise[channel] = ldexpf(pcgRng[channel](), -32) * 6.f - 3.f;
 				}
 				break;
-			case NOISE_WHITE:
+			default:
 				for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
 					noise[channel] = 2.f * sanguineRandom::normal();
 				}
