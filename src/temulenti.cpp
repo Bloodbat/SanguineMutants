@@ -62,46 +62,28 @@ struct Temulenti : SanguineModule {
 
 	struct ModeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-				if (paramId == PARAM_MODE) {
-					switch (moduleTemulenti->generator.feature_mode_) {
-					case bumps::Generator::FEAT_MODE_RANDOM:
-						return temulentiDrunksModeLabels[moduleTemulenti->generator.mode()];
-						break;
-					case bumps::Generator::FEAT_MODE_HARMONIC:
-						return temulentiBumpsModeLabels[moduleTemulenti->generator.mode()];
-						break;
-					case bumps::Generator::FEAT_MODE_SHEEP:
-						return aestusSheepMenuLabels[moduleTemulenti->generator.mode()];
-						break;
-					default:
-						return aestusModeMenuLabels[moduleTemulenti->generator.mode()];
-						break;
-					}
-				} else {
-					assert(false);
-				}
-			} else {
-				return "";
+			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
+			switch (moduleTemulenti->generator.feature_mode_) {
+			case bumps::Generator::FEAT_MODE_RANDOM:
+				return temulentiDrunksModeLabels[moduleTemulenti->generator.mode()];
+				break;
+			case bumps::Generator::FEAT_MODE_HARMONIC:
+				return temulentiBumpsModeLabels[moduleTemulenti->generator.mode()];
+				break;
+			case bumps::Generator::FEAT_MODE_SHEEP:
+				return aestusSheepMenuLabels[moduleTemulenti->generator.mode()];
+				break;
+			default:
+				return aestusModeMenuLabels[moduleTemulenti->generator.mode()];
+				break;
 			}
-			return "";
 		}
 	};
 
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-				if (paramId == PARAM_RANGE) {
-					return aestusRangeMenuLabels[moduleTemulenti->generator.range()];
-				} else {
-					assert(false);
-				}
-			} else {
-				return "";
-			}
-			return "";
+			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
+			return aestusRangeMenuLabels[moduleTemulenti->generator.range()];
 		}
 	};
 
