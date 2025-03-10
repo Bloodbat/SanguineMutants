@@ -56,37 +56,19 @@ struct Aestus : SanguineModule {
 
 	struct ModeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				Aestus* moduleAestus = static_cast<Aestus*>(module);
-				if (paramId == PARAM_MODE) {
-					if (!moduleAestus->bSheep) {
-						return aestusModeMenuLabels[moduleAestus->generator.mode()];
-					} else {
-						return aestusSheepMenuLabels[moduleAestus->generator.mode()];
-					}
-				} else {
-					assert(false);
-				}
+			Aestus* moduleAestus = static_cast<Aestus*>(module);
+			if (!moduleAestus->bSheep) {
+				return aestusModeMenuLabels[moduleAestus->generator.mode()];
 			} else {
-				return "";
+				return aestusSheepMenuLabels[moduleAestus->generator.mode()];
 			}
-			return "";
 		}
 	};
 
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
-			if (module != nullptr) {
-				Aestus* moduleAestus = static_cast<Aestus*>(module);
-				if (paramId == PARAM_RANGE) {
-					return aestusRangeMenuLabels[moduleAestus->generator.range()];
-				} else {
-					assert(false);
-				}
-			} else {
-				return "";
-			}
-			return "";
+			Aestus* moduleAestus = static_cast<Aestus*>(module);
+			return aestusRangeMenuLabels[moduleAestus->generator.range()];
 		}
 	};
 
