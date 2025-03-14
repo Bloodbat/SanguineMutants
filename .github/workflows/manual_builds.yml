@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  
 
 env:
-  rack-sdk-version: 2.6.0
+  rack-sdk-version: 2.6.1
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
 
 defaults:
