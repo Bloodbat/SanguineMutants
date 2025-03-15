@@ -347,6 +347,16 @@ struct SanguineShapedAcrylicLed : TSvgLight<TBase> {
 				nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
 				svgDraw(args.vg, this->sw->svg->handle);
 				this->drawHalo(args);
+			} else if (!this->module && this->color.a > 0.f) {
+				// Main RGB color.
+				const NSVGimage* mySvg = this->sw->svg->handle;
+				const int fillColor = rgbColorToInt(static_cast<int>(this->color.r * 255), static_cast<int>(this->color.g * 255),
+					static_cast<int>(this->color.b * 255), static_cast<int>(this->color.a * 255));
+
+				fillSvgSolidColor(mySvg, fillColor);
+
+				nvgGlobalCompositeBlendFunc(args.vg, NVG_ONE_MINUS_DST_COLOR, NVG_ONE);
+				svgDraw(args.vg, this->sw->svg->handle);
 			}
 		}
 		Widget::drawLayer(args, layer);
