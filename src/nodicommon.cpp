@@ -1,11 +1,11 @@
 #include "nodicommon.hpp"
 
-NodiDisplay::NodiDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
+nodiCommon::NodiDisplay::NodiDisplay(uint32_t newCharacterCount, Module* theModule, const float X, const float Y, bool createCentered) :
 	SanguineAlphaDisplay(newCharacterCount, theModule, X, Y, createCentered) {
 
 }
 
-void NodiDisplay::drawLayer(const DrawArgs& args, int layer) {
+void nodiCommon::NodiDisplay::drawLayer(const DrawArgs& args, int layer) {
 	if (layer == 1) {
 		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, fontName));
 		if (font) {

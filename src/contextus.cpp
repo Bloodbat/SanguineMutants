@@ -130,7 +130,7 @@ struct Contextus : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configSwitch(PARAM_MODEL, 0.f, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f,
-			"Model", contextusMenuLabels);
+			"Model", contextus::menuLabels);
 		configParam(PARAM_MODULATION, -1.f, 1.f, 0.f, "Modulation");
 		configParam(PARAM_COARSE, -5.f, 3.f, -1.f, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
 		configParam(PARAM_FINE, -1.f, 1.f, 0.f, "Fine frequency", " semitones");
@@ -141,8 +141,8 @@ struct Contextus : SanguineModule {
 		paramQuantities[PARAM_AD_TIMBRE]->snapEnabled = true;
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
-		configSwitch(PARAM_ROOT, 0.f, 11.f, 0.f, "Quantizer root note", nodiNoteStrings);
-		configSwitch(PARAM_SCALE, 0.f, 48.f, 0.f, "Quantizer scale", nodiScaleStrings);
+		configSwitch(PARAM_ROOT, 0.f, 11.f, 0.f, "Quantizer root note", nodiCommon::noteStrings);
+		configSwitch(PARAM_SCALE, 0.f, 48.f, 0.f, "Quantizer scale", nodiCommon::scaleStrings);
 		configParam(PARAM_DECAY, 0.f, 15.f, 7.f, "Decay");
 		paramQuantities[PARAM_DECAY]->snapEnabled = true;
 
@@ -152,14 +152,14 @@ struct Contextus : SanguineModule {
 		paramQuantities[PARAM_AD_MODULATION]->snapEnabled = true;
 
 		configParam(PARAM_COLOR, 0.f, 1.f, 0.5f, "Color", "%", 0.f, 100.f);
-		configSwitch(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", nodiOctaveStrings);
-		configSwitch(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range", nodiPitchRangeStrings);
+		configSwitch(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", nodiCommon::octaveStrings);
+		configSwitch(PARAM_PITCH_RANGE, 0.f, 4.f, 0.f, "Pitch range", nodiCommon::pitchRangeStrings);
 		configParam(PARAM_FM, -1.f, 1.f, 0.f, "FM");
 
-		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiTriggerDelayStrings);
+		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiCommon::triggerDelayStrings);
 
-		configSwitch(PARAM_BITS, 0.f, 6.f, 6.f, "Bit crusher resolution", nodiBitsStrings);
-		configSwitch(PARAM_RATE, 0.f, 6.0f, 6.0f, "Bit crusher sample rate", nodiRatesStrings);
+		configSwitch(PARAM_BITS, 0.f, 6.f, 6.f, "Bit crusher resolution", nodiCommon::bitsStrings);
+		configSwitch(PARAM_RATE, 0.f, 6.0f, 6.0f, "Bit crusher sample rate", nodiCommon::ratesStrings);
 
 		configInput(INPUT_TRIGGER, "Trigger");
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
@@ -172,9 +172,9 @@ struct Contextus : SanguineModule {
 		// Unused: kept for compatibility.
 		configButton(PARAM_META, "");
 		configButton(PARAM_VCA, "Toggle AD VCA");
-		configSwitch(PARAM_DRIFT, 0.f, 4.f, 0.f, "Oscillator drift", nodiIntensityTooltipStrings);
+		configSwitch(PARAM_DRIFT, 0.f, 4.f, 0.f, "Oscillator drift", nodiCommon::intensityTooltipStrings);
 		configButton(PARAM_FLAT, "Toggle lower and higher frequency detuning");
-		configSwitch(PARAM_SIGN, 0.f, 4.f, 0.f, "Signature wave shaper", nodiIntensityTooltipStrings);
+		configSwitch(PARAM_SIGN, 0.f, 4.f, 0.f, "Signature wave shaper", nodiCommon::intensityTooltipStrings);
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
@@ -352,18 +352,18 @@ struct Contextus : SanguineModule {
 				}
 
 				// TODO: add a sync input buffer (must be sample rate converted)
-				const uint8_t syncBuffer[kBlockSize] = {};
+				const uint8_t syncBuffer[nodiCommon::kBlockSize] = {};
 
-				int16_t renderBuffer[kBlockSize];
-				osc[channel].Render(syncBuffer, renderBuffer, kBlockSize);
+				int16_t renderBuffer[nodiCommon::kBlockSize];
+				osc[channel].Render(syncBuffer, renderBuffer, nodiCommon::kBlockSize);
 
 				// Signature waveshaping, decimation, and bit reduction
 				int16_t sample = 0;
-				size_t decimationFactor = nodiDecimationFactors[settings[channel].sample_rate];
-				uint16_t bitMask = nodiBitReductionMasks[settings[channel].resolution];
+				size_t decimationFactor = nodiCommon::decimationFactors[settings[channel].sample_rate];
+				uint16_t bitMask = nodiCommon::bitReductionMasks[settings[channel].resolution];
 				int32_t gain = settings[channel].ad_vca > 0 ? adValue : 65535;
 				uint16_t signature = settings[channel].signature * settings[channel].signature * 4095;
-				for (size_t block = 0; block < kBlockSize; ++block) {
+				for (size_t block = 0; block < nodiCommon::kBlockSize; ++block) {
 					if (block % decimationFactor == 0) {
 						sample = renderBuffer[block] & bitMask;
 					}
@@ -375,18 +375,18 @@ struct Contextus : SanguineModule {
 
 				if (!bLowCpu) {
 					// Sample rate convert
-					dsp::Frame<1> in[kBlockSize];
-					for (int block = 0; block < kBlockSize; ++block) {
+					dsp::Frame<1> in[nodiCommon::kBlockSize];
+					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						in[block].samples[0] = renderBuffer[block] / 32768.f;
 					}
 					sampleRateConverter[channel].setRates(96000, args.sampleRate);
 
-					int inLen = kBlockSize;
+					int inLen = nodiCommon::kBlockSize;
 					int outLen = drbOutputBuffer[channel].capacity();
 					sampleRateConverter[channel].process(in, &inLen, drbOutputBuffer[channel].endData(), &outLen);
 					drbOutputBuffer[channel].endIncr(outLen);
 				} else {
-					for (int block = 0; block < kBlockSize; ++block) {
+					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						dsp::Frame<1> inFrame;
 						inFrame.samples[0] = renderBuffer[block] / 32768.f;
 						drbOutputBuffer[channel].push(inFrame);
@@ -408,17 +408,17 @@ struct Contextus : SanguineModule {
 
 			// Handle model light
 			int currentModel = settings[0].shape;
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextusLightColors[currentModel].red, sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextusLightColors[currentModel].green, sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextusLightColors[currentModel].blue, sampleTime);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextus::lightColors[currentModel].red, sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[currentModel].green, sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[currentModel].blue, sampleTime);
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 				if (channel < channelCount) {
 					int selectedModel = settings[channel].shape;
-					lights[currentLight + 0].setBrightnessSmooth(contextusLightColors[selectedModel].red, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(contextusLightColors[selectedModel].green, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(contextusLightColors[selectedModel].blue, sampleTime);
+					lights[currentLight + 0].setBrightnessSmooth(contextus::lightColors[selectedModel].red, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[selectedModel].green, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[selectedModel].blue, sampleTime);
 				} else {
 					for (int light = 0; light < 3; ++light) {
 						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
@@ -438,91 +438,91 @@ struct Contextus : SanguineModule {
 		// Display handling
 		// Display - return to model after 2s
 		if (lastSettingChanged == renaissance::SETTING_OSCILLATOR_SHAPE) {
-			displayText = contextusDisplayLabels[settings[displayChannel].shape];
+			displayText = contextus::displayLabels[settings[displayChannel].shape];
 		} else {
 			int value;
 			switch (lastSettingChanged)
 			{
 			case renaissance::SETTING_RESOLUTION: {
 				value = settings[displayChannel].resolution;
-				displayText = nodiBitsStrings[value];
+				displayText = nodiCommon::bitsStrings[value];
 				break;
 			}
 			case renaissance::SETTING_SAMPLE_RATE: {
 				value = settings[displayChannel].sample_rate;
-				displayText = nodiRatesStrings[value];
+				displayText = nodiCommon::ratesStrings[value];
 				break;
 			}
 			case renaissance::SETTING_TRIG_SOURCE: {
-				displayText = nodiAutoLabel;
+				displayText = nodiCommon::autoLabel;
 				break;
 			}
 			case renaissance::SETTING_TRIG_DELAY: {
 				value = settings[displayChannel].trig_delay;
-				displayText = nodiTriggerDelayStrings[value];
+				displayText = nodiCommon::triggerDelayStrings[value];
 				break;
 			}
 			case renaissance::SETTING_AD_ATTACK: {
 				value = settings[displayChannel].ad_attack;
-				displayText = nodiNumberStrings15[value];
+				displayText = nodiCommon::numberStrings15[value];
 				break;
 			}
 			case renaissance::SETTING_AD_DECAY: {
 				value = settings[displayChannel].ad_decay;
-				displayText = nodiNumberStrings15[value];
+				displayText = nodiCommon::numberStrings15[value];
 				break;
 			}
 			case renaissance::SETTING_AD_FM: {
 				value = settings[displayChannel].ad_fm;
-				displayText = nodiNumberStrings15[value];
+				displayText = nodiCommon::numberStrings15[value];
 				break;
 			}
 			case renaissance::SETTING_AD_TIMBRE: {
 				value = settings[displayChannel].ad_timbre;
-				displayText = nodiNumberStrings15[value];
+				displayText = nodiCommon::numberStrings15[value];
 				break;
 			}
 			case renaissance::SETTING_AD_COLOR: {
 				value = settings[displayChannel].ad_color;
-				displayText = nodiNumberStrings15[value];
+				displayText = nodiCommon::numberStrings15[value];
 				break;
 			}
 			case renaissance::SETTING_AD_VCA: {
-				displayText = nodiVCALabel;
+				displayText = nodiCommon::vcaLabel;
 				break;
 			}
 			case renaissance::SETTING_PITCH_RANGE: {
 				value = settings[displayChannel].pitch_range;
-				displayText = nodiPitchRangeStrings[value];
+				displayText = nodiCommon::pitchRangeStrings[value];
 				break;
 			}
 			case renaissance::SETTING_PITCH_OCTAVE: {
 				value = settings[displayChannel].pitch_octave;
-				displayText = nodiOctaveStrings[value];
+				displayText = nodiCommon::octaveStrings[value];
 				break;
 			}
 			case renaissance::SETTING_QUANTIZER_SCALE: {
 				value = settings[displayChannel].quantizer_scale;
-				displayText = nodiQuantizationStrings[value];
+				displayText = nodiCommon::quantizationStrings[value];
 				break;
 			}
 			case renaissance::SETTING_QUANTIZER_ROOT: {
 				value = settings[displayChannel].quantizer_root;
-				displayText = nodiNoteStrings[value];
+				displayText = nodiCommon::noteStrings[value];
 				break;
 			}
 			case renaissance::SETTING_VCO_FLATTEN: {
-				displayText = nodiFlatLabel;
+				displayText = nodiCommon::flatLabel;
 				break;
 			}
 			case renaissance::SETTING_VCO_DRIFT: {
 				value = settings[displayChannel].vco_drift;
-				displayText = nodiIntensityDisplayStrings[value];
+				displayText = nodiCommon::intensityDisplayStrings[value];
 				break;
 			}
 			case renaissance::SETTING_SIGNATURE: {
 				value = settings[displayChannel].signature;
-				displayText = nodiIntensityDisplayStrings[value];
+				displayText = nodiCommon::intensityDisplayStrings[value];
 				break;
 			}
 			default: {
@@ -683,9 +683,9 @@ struct ContextusWidget : SanguineModuleWidget {
 			currentX += lightXDelta;
 		}
 
-		NodiDisplay* nodiDisplay = new NodiDisplay(4, module, 71.12, 20.996);
+		nodiCommon::NodiDisplay* nodiDisplay = new nodiCommon::NodiDisplay(4, module, 71.12, 20.996);
 		nodiFrambuffer->addChild(nodiDisplay);
-		nodiDisplay->fallbackString = contextusDisplayLabels[0];
+		nodiDisplay->fallbackString = contextus::displayLabels[0];
 
 		if (module) {
 			nodiDisplay->values.displayText = &module->displayText;
@@ -794,8 +794,8 @@ struct ContextusWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(contextusDisplayLabels.size()); ++i) {
-			modelLabels.push_back(contextusDisplayLabels[i] + ": " + contextusMenuLabels[i]);
+		for (int i = 0; i < static_cast<int>(contextus::displayLabels.size()); ++i) {
+			modelLabels.push_back(contextus::displayLabels[i] + ": " + contextus::menuLabels[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Model", modelLabels,
 			[=]() {return module->getModelParam(); },
@@ -804,7 +804,7 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Scale", nodiScaleStrings,
+		menu->addChild(createIndexSubmenuItem("Scale", nodiCommon::scaleStrings,
 			[=]() {return module->getScaleParam(); },
 			[=](int i) {module->setScaleParam(i); }
 		));
