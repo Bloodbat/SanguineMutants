@@ -374,7 +374,7 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_T1 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 0], sampleTime);
 				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 0], sampleTime);
 
-				lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < kSanguineButtonLightValue, sampleTime);
+				lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
 				//lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
 
 				lights[LIGHT_T3 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);

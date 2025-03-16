@@ -1,5 +1,9 @@
 # Next version
 
+## Fixes
+
+- Marmora: t2 light stays on for too long.
+
 ## Changes
 
 - Vimina: even out knob space distribution for clock multiplier/divider factors.
