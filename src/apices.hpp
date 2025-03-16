@@ -56,7 +56,7 @@ namespace apices {
         { "Gravity", "Bounce", "Amplitude", "Velocity" }
     };
 
-    static const LightModes lightStates[FUNCTION_LAST][apicesCommon::kNumFunctionLights]{
+    static const LightModes lightStates[FUNCTION_LAST][apicesCommon::kFunctionLightCount]{
         { LIGHT_ON,  LIGHT_OFF, LIGHT_OFF, LIGHT_OFF }, // Envelope
         { LIGHT_OFF, LIGHT_ON, LIGHT_OFF, LIGHT_OFF }, // LFO
         { LIGHT_OFF, LIGHT_OFF, LIGHT_ON, LIGHT_OFF }, // TAP LFO

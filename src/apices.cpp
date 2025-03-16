@@ -49,24 +49,24 @@ struct Apices : SanguineModule {
 	};
 
 	apicesCommon::EditModes editMode = apicesCommon::EDIT_MODE_TWIN;
-	apices::ProcessorFunctions processorFunction[apicesCommon::kNumChannels] = { apices::FUNCTION_ENVELOPE, apices::FUNCTION_ENVELOPE };
+	apices::ProcessorFunctions processorFunction[apicesCommon::kChannelCount] = { apices::FUNCTION_ENVELOPE, apices::FUNCTION_ENVELOPE };
 	apicesCommon::Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	bool bSnapMode = false;
-	bool bSnapped[apicesCommon::kNumKnobs] = { false, false, false, false };
+	bool bSnapped[apicesCommon::kKnobCount] = { false, false, false, false };
 
 	bool bHasExpander = false;
 
-	int32_t adcLp[apicesCommon::kNumAdcChannels] = { 0, 0, 0, 0 };
-	int32_t adcValue[apicesCommon::kNumAdcChannels] = { 0, 0, 0, 0 };
-	int32_t adcThreshold[apicesCommon::kNumAdcChannels] = { 0, 0, 0, 0 };
+	int32_t adcLp[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
+	int32_t adcValue[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
+	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
 
-	peaks::Processors processors[apicesCommon::kNumAdcChannels] = {};
+	peaks::Processors processors[apicesCommon::kAdcChannelCount] = {};
 
 	int16_t output[apicesCommon::kBlockSize] = {};
-	int16_t brightness[apicesCommon::kNumChannels] = { 0, 0 };
+	int16_t brightness[apicesCommon::kChannelCount] = { 0, 0 };
 
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
 
@@ -74,14 +74,14 @@ struct Apices : SanguineModule {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	peaks::GateFlags gateFlags[apicesCommon::kNumChannels] = { 0, 0 };
+	peaks::GateFlags gateFlags[apicesCommon::kChannelCount] = { 0, 0 };
 
 	dsp::SampleRateConverter<2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 
 	struct Block {
-		peaks::GateFlags input[apicesCommon::kNumChannels][apicesCommon::kBlockSize] = {};
-		uint16_t output[apicesCommon::kNumChannels][apicesCommon::kBlockSize] = {};
+		peaks::GateFlags input[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
+		uint16_t output[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
 	};
 
 	struct Slice {
@@ -89,10 +89,10 @@ struct Apices : SanguineModule {
 		size_t frame_index;
 	};
 
-	Block block[apicesCommon::kNumBlocks] = {};
+	Block block[apicesCommon::kBlockCount] = {};
 	size_t ioFrame = 0;
 	size_t ioBlock = 0;
-	size_t renderBlock = apicesCommon::kNumBlocks / 2;
+	size_t renderBlock = apicesCommon::kBlockCount / 2;
 
 	std::string displayText1 = "";
 	std::string displayText2 = "";
@@ -102,7 +102,7 @@ struct Apices : SanguineModule {
 	std::string oledText3 = "";
 	std::string oledText4 = "";
 
-	const peaks::ProcessorFunction processorFunctionTable[apices::FUNCTION_LAST][apicesCommon::kNumChannels] = {
+	const peaks::ProcessorFunction processorFunctionTable[apices::FUNCTION_LAST][apicesCommon::kChannelCount] = {
 		{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
 		{ peaks::PROCESSOR_FUNCTION_LFO, peaks::PROCESSOR_FUNCTION_LFO },
 		{ peaks::PROCESSOR_FUNCTION_TAP_LFO, peaks::PROCESSOR_FUNCTION_TAP_LFO },
@@ -139,7 +139,7 @@ struct Apices : SanguineModule {
 		settings.processorFunction[1] = apices::FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
 
-		for (size_t channel = 0; channel < apicesCommon::kNumChannels; ++channel)
+		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel)
 		{
 			memset(&processors[channel], 0, sizeof(peaks::Processors));
 			processors[channel].Init(channel);
@@ -308,7 +308,7 @@ struct Apices : SanguineModule {
 
 			while (renderBlock != ioBlock) {
 				processChannels(&block[renderBlock], apicesCommon::kBlockSize);
-				renderBlock = (renderBlock + 1) % apicesCommon::kNumBlocks;
+				renderBlock = (renderBlock + 1) % apicesCommon::kBlockCount;
 			}
 
 			uint32_t gateTriggers = 0;
@@ -333,7 +333,7 @@ struct Apices : SanguineModule {
 
 				Slice slice = NextSlice(1);
 
-				for (size_t channel = 0; channel < apicesCommon::kNumChannels; ++channel) {
+				for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 					gateFlags[channel] = peaks::ExtractGateFlags(gateFlags[channel], gateInputs & (1 << channel));
 
 					frame[blockNum].samples[channel] = slice.block->output[channel][slice.frame_index];
@@ -362,15 +362,15 @@ struct Apices : SanguineModule {
 	}
 
 	void changeControlMode() {
-		uint16_t parameters[apicesCommon::kNumKnobs];
-		for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+		uint16_t parameters[apicesCommon::kKnobCount];
+		for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 			parameters[knob] = adcValue[knob];
 		}
 
 		switch (editMode) {
 		case apicesCommon::EDIT_MODE_TWIN:
-			processors[0].CopyParameters(&parameters[0], apicesCommon::kNumKnobs);
-			processors[1].CopyParameters(&parameters[0], apicesCommon::kNumKnobs);
+			processors[0].CopyParameters(&parameters[0], apicesCommon::kKnobCount);
+			processors[1].CopyParameters(&parameters[0], apicesCommon::kKnobCount);
 			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
 			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
 			break;
@@ -443,12 +443,12 @@ struct Apices : SanguineModule {
 	}
 
 	void lockPots() {
-		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kNumAdcChannels - 1], apicesCommon::kAdcThresholdLocked);
-		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kNumAdcChannels - 1], false);
+		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount - 1], apicesCommon::kAdcThresholdLocked);
+		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
 	}
 
 	void pollPots() {
-		for (uint8_t knob = 0; knob < apicesCommon::kNumAdcChannels; ++knob) {
+		for (uint8_t knob = 0; knob < apicesCommon::kAdcChannelCount; ++knob) {
 			adcLp[knob] = (static_cast<int32_t>(params[PARAM_KNOB_1 + knob].getValue()) + adcLp[knob] * 7) >> 3;
 			int32_t value = adcLp[knob];
 			int32_t current_value = adcValue[knob];
@@ -480,7 +480,7 @@ struct Apices : SanguineModule {
 		case apicesCommon::EDIT_MODE_FIRST:
 		case apicesCommon::EDIT_MODE_SECOND:
 			uint8_t index;
-			index = knobId + (editMode - apicesCommon::EDIT_MODE_FIRST) * apicesCommon::kNumKnobs;
+			index = knobId + (editMode - apicesCommon::EDIT_MODE_FIRST) * apicesCommon::kKnobCount;
 			peaks::Processors* processor;
 			processor = &processors[editMode - apicesCommon::EDIT_MODE_FIRST];
 
@@ -535,7 +535,7 @@ struct Apices : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
@@ -547,7 +547,7 @@ struct Apices : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-			for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
@@ -559,7 +559,7 @@ struct Apices : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
@@ -577,7 +577,7 @@ struct Apices : SanguineModule {
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
-			for (size_t knob = 2; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
@@ -594,7 +594,7 @@ struct Apices : SanguineModule {
 			kSanguineButtonLightValue : 0.f, sampleTime);
 
 		apices::ProcessorFunctions currentProcessorFunction = getProcessorFunction();
-		for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+		for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 			currentLight = LIGHT_FUNCTION_1 + light;
 			switch (apices::lightStates[currentProcessorFunction][light]) {
 			case LIGHT_ON:
@@ -611,8 +611,8 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		uint8_t buttonBrightness[apicesCommon::kNumChannels];
-		for (uint8_t channel = 0; channel < apicesCommon::kNumChannels; ++channel) {
+		uint8_t buttonBrightness[apicesCommon::kChannelCount];
+		for (uint8_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			switch (processorFunction[channel]) {
 			case apices::FUNCTION_DRUM_GENERATOR:
 			case apices::FUNCTION_FM_DRUM_GENERATOR:
@@ -641,7 +641,7 @@ struct Apices : SanguineModule {
 			// TODO: can be done with a < EDIT_MODE_FIRST!
 			if (editMode == apicesCommon::EDIT_MODE_SPLIT || editMode == apicesCommon::EDIT_MODE_TWIN) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
-				for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((pattern & 1) ? 1.f : 0.f);
 					pattern = pattern >> 1;
 				}
@@ -649,14 +649,14 @@ struct Apices : SanguineModule {
 			// Hacky but animates the lights!
 			else if (editMode == apicesCommon::EDIT_MODE_FIRST && bIsChannel1Station) {
 				int digit = processors[0].number_station().digit();
-				for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
 			// Ibid
 			else if (editMode == apicesCommon::EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
-				for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
@@ -681,10 +681,10 @@ struct Apices : SanguineModule {
 	void init() {
 		std::fill(&potValue[0], &potValue[7], 0);
 		std::fill(&brightness[0], &brightness[1], 0);
-		std::fill(&adcLp[0], &adcLp[apicesCommon::kNumAdcChannels - 1], 0);
-		std::fill(&adcValue[0], &adcValue[apicesCommon::kNumAdcChannels - 1], 0);
-		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kNumAdcChannels - 1], 0);
-		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kNumAdcChannels - 1], false);
+		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount - 1], 0);
+		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount - 1], 0);
+		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount - 1], 0);
+		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
 
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
 		processorFunction[0] = static_cast<apices::ProcessorFunctions>(settings.processorFunction[0]);
@@ -694,9 +694,9 @@ struct Apices : SanguineModule {
 		// TODO: again! Can do with > EDIT_MODE_SPLIT!
 		if (editMode == apicesCommon::EDIT_MODE_FIRST || editMode == apicesCommon::EDIT_MODE_SECOND) {
 			lockPots();
-			for (uint8_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (uint8_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				processors[0].set_parameter(knob, static_cast<uint16_t>(potValue[knob]) << 8);
-				processors[1].set_parameter(knob, static_cast<uint16_t>(potValue[knob + apicesCommon::kNumKnobs]) << 8);
+				processors[1].set_parameter(knob, static_cast<uint16_t>(potValue[knob + apicesCommon::kKnobCount]) << 8);
 			}
 		}
 
@@ -883,7 +883,7 @@ struct Apices : SanguineModule {
 		ioFrame += size;
 		if (ioFrame >= apicesCommon::kBlockSize) {
 			ioFrame -= apicesCommon::kBlockSize;
-			ioBlock = (ioBlock + 1) % apicesCommon::kNumBlocks;
+			ioBlock = (ioBlock + 1) % apicesCommon::kBlockCount;
 		}
 		return s;
 	}
@@ -897,7 +897,7 @@ struct Apices : SanguineModule {
 	}
 
 	inline void processChannels(Block* block, size_t size) {
-		for (size_t channel = 0; channel < apicesCommon::kNumChannels; ++channel) {
+		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			processors[channel].Process(block->input[channel], output, size);
 			setLedBrightness(channel, output[0]);
 			for (size_t blockNum = 0; blockNum < size; ++blockNum) {

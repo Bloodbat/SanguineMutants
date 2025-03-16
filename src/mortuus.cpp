@@ -49,24 +49,24 @@ struct Mortuus : SanguineModule {
 	};
 
 	apicesCommon::EditModes editMode = apicesCommon::EDIT_MODE_TWIN;
-	mortuus::ProcessorFunctions processorFunction[apicesCommon::kNumChannels] = { mortuus::FUNCTION_ENVELOPE, mortuus::FUNCTION_ENVELOPE };
+	mortuus::ProcessorFunctions processorFunction[apicesCommon::kChannelCount] = { mortuus::FUNCTION_ENVELOPE, mortuus::FUNCTION_ENVELOPE };
 	apicesCommon::Settings settings = {};
 
 	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	bool bSnapMode = false;
-	bool bSnapped[apicesCommon::kNumKnobs] = { false, false, false, false };
+	bool bSnapped[apicesCommon::kKnobCount] = { false, false, false, false };
 
 	bool bHasExpander = false;
 
-	int32_t adcLp[apicesCommon::kNumAdcChannels] = { 0, 0, 0, 0 };
-	int32_t adcValue[apicesCommon::kNumAdcChannels] = { 0, 0, 0, 0 };
-	int32_t adcThreshold[apicesCommon::kNumAdcChannels] = { 0, 0, 0, 0 };
+	int32_t adcLp[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
+	int32_t adcValue[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
+	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
 
-	deadman::Processors processors[apicesCommon::kNumChannels] = {};
+	deadman::Processors processors[apicesCommon::kChannelCount] = {};
 
 	int16_t output[apicesCommon::kBlockSize] = {};
-	int16_t brightness[apicesCommon::kNumChannels] = { 0, 0 };
+	int16_t brightness[apicesCommon::kChannelCount] = { 0, 0 };
 
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
 
@@ -74,14 +74,14 @@ struct Mortuus : SanguineModule {
 	static const int kClockUpdateFrequency = 16;
 	dsp::ClockDivider clockDivider;
 
-	deadman::GateFlags gateFlags[apicesCommon::kNumChannels] = { 0, 0 };
+	deadman::GateFlags gateFlags[apicesCommon::kChannelCount] = { 0, 0 };
 
 	dsp::SampleRateConverter<2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
 
 	struct Block {
-		deadman::GateFlags input[apicesCommon::kNumChannels][apicesCommon::kBlockSize] = {};
-		uint16_t output[apicesCommon::kNumChannels][apicesCommon::kBlockSize] = {};
+		deadman::GateFlags input[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
+		uint16_t output[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
 	};
 
 	struct Slice {
@@ -89,10 +89,10 @@ struct Mortuus : SanguineModule {
 		size_t frame_index;
 	};
 
-	Block block[apicesCommon::kNumBlocks] = {};
+	Block block[apicesCommon::kBlockCount] = {};
 	size_t ioFrame = 0;
 	size_t ioBlock = 0;
-	size_t renderBlock = apicesCommon::kNumBlocks / 2;
+	size_t renderBlock = apicesCommon::kBlockCount / 2;
 
 	std::string displayText1 = "";
 	std::string displayText2 = "";
@@ -102,7 +102,7 @@ struct Mortuus : SanguineModule {
 	std::string oledText3 = "";
 	std::string oledText4 = "";
 
-	const deadman::ProcessorFunction processorFunctionTable[mortuus::FUNCTION_LAST][apicesCommon::kNumChannels] = {
+	const deadman::ProcessorFunction processorFunctionTable[mortuus::FUNCTION_LAST][apicesCommon::kChannelCount] = {
 		{ deadman::PROCESSOR_FUNCTION_ENVELOPE, deadman::PROCESSOR_FUNCTION_ENVELOPE },
 		{ deadman::PROCESSOR_FUNCTION_LFO, deadman::PROCESSOR_FUNCTION_LFO },
 		{ deadman::PROCESSOR_FUNCTION_TAP_LFO, deadman::PROCESSOR_FUNCTION_TAP_LFO },
@@ -152,7 +152,7 @@ struct Mortuus : SanguineModule {
 		settings.processorFunction[1] = mortuus::FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
 
-		for (size_t channel = 0; channel < apicesCommon::kNumChannels; ++channel)
+		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel)
 		{
 			memset(&processors[channel], 0, sizeof(deadman::Processors));
 			processors[channel].Init(channel);
@@ -322,7 +322,7 @@ struct Mortuus : SanguineModule {
 
 			while (renderBlock != ioBlock) {
 				processChannels(&block[renderBlock], apicesCommon::kBlockSize);
-				renderBlock = (renderBlock + 1) % apicesCommon::kNumBlocks;
+				renderBlock = (renderBlock + 1) % apicesCommon::kBlockCount;
 			}
 
 			// TODO: More PLO testing!
@@ -348,7 +348,7 @@ struct Mortuus : SanguineModule {
 
 				Slice slice = NextSlice(1);
 
-				for (size_t channel = 0; channel < apicesCommon::kNumChannels; ++channel) {
+				for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 					gateFlags[channel] = deadman::ExtractGateFlags(gateFlags[channel], gateInputs & (1 << channel));
 
 					frame[blockNum].samples[channel] = slice.block->output[channel][slice.frame_index];
@@ -377,15 +377,15 @@ struct Mortuus : SanguineModule {
 	}
 
 	void changeControlMode() {
-		uint16_t parameters[apicesCommon::kNumKnobs];
-		for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+		uint16_t parameters[apicesCommon::kKnobCount];
+		for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 			parameters[knob] = adcValue[knob];
 		}
 
 		switch (editMode) {
 		case apicesCommon::EDIT_MODE_TWIN:
-			processors[0].CopyParameters(&parameters[0], apicesCommon::kNumKnobs);
-			processors[1].CopyParameters(&parameters[0], apicesCommon::kNumKnobs);
+			processors[0].CopyParameters(&parameters[0], apicesCommon::kKnobCount);
+			processors[1].CopyParameters(&parameters[0], apicesCommon::kKnobCount);
 			processors[0].set_control_mode(deadman::CONTROL_MODE_FULL);
 			processors[1].set_control_mode(deadman::CONTROL_MODE_FULL);
 			break;
@@ -459,12 +459,12 @@ struct Mortuus : SanguineModule {
 	}
 
 	void lockPots() {
-		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kNumAdcChannels - 1], apicesCommon::kAdcThresholdLocked);
-		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kNumAdcChannels - 1], false);
+		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount - 1], apicesCommon::kAdcThresholdLocked);
+		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
 	}
 
 	void pollPots() {
-		for (uint8_t knob = 0; knob < apicesCommon::kNumAdcChannels; ++knob) {
+		for (uint8_t knob = 0; knob < apicesCommon::kAdcChannelCount; ++knob) {
 			adcLp[knob] = (static_cast<int32_t>(params[PARAM_KNOB_1 + knob].getValue()) + adcLp[knob] * 7) >> 3;
 			int32_t value = adcLp[knob];
 			int32_t current_value = adcValue[knob];
@@ -496,7 +496,7 @@ struct Mortuus : SanguineModule {
 		case apicesCommon::EDIT_MODE_FIRST:
 		case apicesCommon::EDIT_MODE_SECOND:
 			uint8_t index;
-			index = knobId + (editMode - apicesCommon::EDIT_MODE_FIRST) * apicesCommon::kNumKnobs;
+			index = knobId + (editMode - apicesCommon::EDIT_MODE_FIRST) * apicesCommon::kKnobCount;
 			deadman::Processors* processor;
 			processor = &processors[editMode - apicesCommon::EDIT_MODE_FIRST];
 
@@ -552,7 +552,7 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
@@ -564,7 +564,7 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-			for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
@@ -576,7 +576,7 @@ struct Mortuus : SanguineModule {
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
-			for (size_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
@@ -594,7 +594,7 @@ struct Mortuus : SanguineModule {
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
-			for (size_t knob = 2; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (size_t knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
 				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
@@ -611,7 +611,7 @@ struct Mortuus : SanguineModule {
 			kSanguineButtonLightValue : 0.f, sampleTime);
 
 		mortuus::ProcessorFunctions currentProcessorFunction = getProcessorFunction();
-		for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+		for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 			currentLight = LIGHT_FUNCTION_1 + light;
 			switch (mortuus::lightStates[currentProcessorFunction][light]) {
 			case LIGHT_ON:
@@ -628,8 +628,8 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		uint8_t buttonBrightness[apicesCommon::kNumChannels];
-		for (uint8_t channel = 0; channel < apicesCommon::kNumChannels; ++channel) {
+		uint8_t buttonBrightness[apicesCommon::kChannelCount];
+		for (uint8_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			switch (processorFunction[channel]) {
 			case mortuus::FUNCTION_DRUM_GENERATOR:
 			case mortuus::FUNCTION_FM_DRUM_GENERATOR:
@@ -669,7 +669,7 @@ struct Mortuus : SanguineModule {
 			// TODO: check this logic!
 			if (editMode == apicesCommon::EDIT_MODE_SPLIT || editMode == apicesCommon::EDIT_MODE_TWIN) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
-				for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((pattern & 1) ? 1.f : 0.f);
 					pattern = pattern >> 1;
 				}
@@ -677,14 +677,14 @@ struct Mortuus : SanguineModule {
 			// Hacky but animates the lights!
 			else if (editMode == apicesCommon::EDIT_MODE_FIRST && bIsChannel1Station) {
 				int digit = processors[0].number_station().digit();
-				for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
 			// Ibid
 			else if (editMode == apicesCommon::EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
-				for (size_t light = 0; light < apicesCommon::kNumFunctionLights; ++light) {
+				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
@@ -709,10 +709,10 @@ struct Mortuus : SanguineModule {
 	void init() {
 		std::fill(&potValue[0], &potValue[7], 0);
 		std::fill(&brightness[0], &brightness[1], 0);
-		std::fill(&adcLp[0], &adcLp[apicesCommon::kNumAdcChannels - 1], 0);
-		std::fill(&adcValue[0], &adcValue[apicesCommon::kNumAdcChannels - 1], 0);
-		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kNumAdcChannels - 1], 0);
-		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kNumAdcChannels - 1], false);
+		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount - 1], 0);
+		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount - 1], 0);
+		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount - 1], 0);
+		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
 
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
 		processorFunction[0] = static_cast<mortuus::ProcessorFunctions>(settings.processorFunction[0]);
@@ -722,9 +722,9 @@ struct Mortuus : SanguineModule {
 		// TODO: and another logic check!
 		if (editMode == apicesCommon::EDIT_MODE_FIRST || editMode == apicesCommon::EDIT_MODE_SECOND) {
 			lockPots();
-			for (uint8_t knob = 0; knob < apicesCommon::kNumKnobs; ++knob) {
+			for (uint8_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				processors[0].set_parameter(knob, static_cast<uint16_t>(potValue[knob]) << 8);
-				processors[1].set_parameter(knob, static_cast<uint16_t>(potValue[knob + apicesCommon::kNumKnobs]) << 8);
+				processors[1].set_parameter(knob, static_cast<uint16_t>(potValue[knob + apicesCommon::kKnobCount]) << 8);
 			}
 		}
 
@@ -914,7 +914,7 @@ struct Mortuus : SanguineModule {
 		ioFrame += size;
 		if (ioFrame >= apicesCommon::kBlockSize) {
 			ioFrame -= apicesCommon::kBlockSize;
-			ioBlock = (ioBlock + 1) % apicesCommon::kNumBlocks;
+			ioBlock = (ioBlock + 1) % apicesCommon::kBlockCount;
 		}
 		return s;
 	}
@@ -928,7 +928,7 @@ struct Mortuus : SanguineModule {
 	}
 
 	inline void processChannels(Block* block, size_t size) {
-		for (size_t channel = 0; channel < apicesCommon::kNumChannels; ++channel) {
+		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			processors[channel].Process(block->input[channel], output, size);
 			setLedBrightness(channel, output[0]);
 			for (size_t blockNum = 0; blockNum < size; ++blockNum) {
