@@ -1,4 +1,8 @@
 # Next version
+
+## Changes
+
+- Vimina: even out knob space distribution for clock multiplier/divider factors.
   
 
 ---

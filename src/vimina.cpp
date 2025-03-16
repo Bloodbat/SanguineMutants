@@ -397,8 +397,8 @@ struct Vimina : SanguineModule {
 		{
 		case SECTION_FUNCTION_FACTORER:
 			int16_t factorIndex;
-			factorIndex = (channelVoltage[section][channel] /
-				(kMaxParamValue / kFactorCount)) - kFactorerBypassIndex;
+			factorIndex = std::round(channelVoltage[section][channel] /
+				(kMaxParamValue / (kFactorCount - 1.f)) - kFactorerBypassIndex);
 			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
 			if (factorIndex == 0) {
 				channelFactor[section][channel] = kFactorerBypassValue;
@@ -409,9 +409,9 @@ struct Vimina : SanguineModule {
 			}
 			break;
 		case SECTION_FUNCTION_SWING:
-			channelSwing[section][channel] = channelVoltage[section][channel]
-				/ (kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
-				break;
+			channelSwing[section][channel] = channelVoltage[section][channel] /
+				(kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
+			break;
 		}
 	}
 
