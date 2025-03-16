@@ -65,22 +65,22 @@ struct Etesia : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	NebulaeLedModes ledMode = LEDS_INPUT;
+	cloudyCommon::LedModes ledMode = cloudyCommon::LEDS_INPUT;
 
-	NebulaeLedModes lastLedMode = LEDS_INPUT;
+	cloudyCommon::LedModes lastLedMode = cloudyCommon::LEDS_INPUT;
 
-	std::string textMode = etesiaModeList[0].display;
-	std::string textFreeze = etesiaModeDisplays[0].labelFreeze;
-	std::string textPosition = etesiaModeDisplays[0].labelPosition;
-	std::string textDensity = etesiaModeDisplays[0].labelDensity;
-	std::string textSize = etesiaModeDisplays[0].labelSize;
-	std::string textTexture = etesiaModeDisplays[0].labelTexture;
-	std::string textPitch = etesiaModeDisplays[0].labelPitch;
-	std::string textTrigger = etesiaModeDisplays[0].labelTrigger;
-	std::string textBlend = etesiaModeDisplays[0].labelBlend;
-	std::string textSpread = etesiaModeDisplays[0].labelSpread;
-	std::string textFeedback = etesiaModeDisplays[0].labelFeedback;
-	std::string textReverb = etesiaModeDisplays[0].labelReverb;
+	std::string textMode = etesia::modeList[0].display;
+	std::string textFreeze = etesia::modeDisplays[0].labelFreeze;
+	std::string textPosition = etesia::modeDisplays[0].labelPosition;
+	std::string textDensity = etesia::modeDisplays[0].labelDensity;
+	std::string textSize = etesia::modeDisplays[0].labelSize;
+	std::string textTexture = etesia::modeDisplays[0].labelTexture;
+	std::string textPitch = etesia::modeDisplays[0].labelPitch;
+	std::string textTrigger = etesia::modeDisplays[0].labelTrigger;
+	std::string textBlend = etesia::modeDisplays[0].labelBlend;
+	std::string textSpread = etesia::modeDisplays[0].labelSpread;
+	std::string textFeedback = etesia::modeDisplays[0].labelFeedback;
+	std::string textReverb = etesia::modeDisplays[0].labelReverb;
 
 	dsp::SampleRateConverter<2> inputSrc;
 	dsp::SampleRateConverter<2> outputSrc;
@@ -298,14 +298,14 @@ struct Etesia : SanguineModule {
 			if (frozen && !bLastFrozen) {
 				bLastFrozen = true;
 				if (!bDisplaySwitched) {
-					ledMode = LEDS_OUTPUT;
-					lastLedMode = LEDS_OUTPUT;
+					ledMode = cloudyCommon::LEDS_OUTPUT;
+					lastLedMode = cloudyCommon::LEDS_OUTPUT;
 				}
 			} else if (!frozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
-					ledMode = LEDS_INPUT;
-					lastLedMode = LEDS_INPUT;
+					ledMode = cloudyCommon::LEDS_INPUT;
+					lastLedMode = cloudyCommon::LEDS_INPUT;
 				} else {
 					bDisplaySwitched = false;
 				}
@@ -344,7 +344,7 @@ struct Etesia : SanguineModule {
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode) {
-		case LEDS_OUTPUT:
+		case cloudyCommon::LEDS_OUTPUT:
 			lightFrame = outputFrame;
 			break;
 		default:
@@ -354,18 +354,20 @@ struct Etesia : SanguineModule {
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
-			ledMode = LEDS_MOMENTARY;
+			ledMode = cloudyCommon::LEDS_MOMENTARY;
 		}
 
 		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
-			ledMode = LEDS_QUALITY_MOMENTARY;
+			ledMode = cloudyCommon::LEDS_QUALITY_MOMENTARY;
 		}
 
 		if (playbackMode != lastLEDPlaybackMode) {
-			ledMode = LEDS_MODE_MOMENTARY;
+			ledMode = cloudyCommon::LEDS_MODE_MOMENTARY;
 		}
 
-		if (ledMode == LEDS_MOMENTARY || ledMode == LEDS_MODE_MOMENTARY || ledMode == LEDS_QUALITY_MOMENTARY) {
+		if (ledMode == cloudyCommon::LEDS_MOMENTARY ||
+			ledMode == cloudyCommon::LEDS_MODE_MOMENTARY ||
+			ledMode == cloudyCommon::LEDS_QUALITY_MOMENTARY) {
 			++displayTimeout;
 			if (displayTimeout >= args.sampleRate * 2) {
 				ledMode = lastLedMode;
@@ -396,59 +398,59 @@ struct Etesia : SanguineModule {
 			playbackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
-				textMode = etesiaModeList[playbackMode].display;
+				textMode = etesia::modeList[playbackMode].display;
 
-				textFreeze = etesiaModeDisplays[playbackMode].labelFreeze;
-				textPosition = etesiaModeDisplays[playbackMode].labelPosition;
-				textDensity = etesiaModeDisplays[playbackMode].labelDensity;
-				textSize = etesiaModeDisplays[playbackMode].labelSize;
-				textTexture = etesiaModeDisplays[playbackMode].labelTexture;
-				textPitch = etesiaModeDisplays[playbackMode].labelPitch;
-				textTrigger = etesiaModeDisplays[playbackMode].labelTrigger;
+				textFreeze = etesia::modeDisplays[playbackMode].labelFreeze;
+				textPosition = etesia::modeDisplays[playbackMode].labelPosition;
+				textDensity = etesia::modeDisplays[playbackMode].labelDensity;
+				textSize = etesia::modeDisplays[playbackMode].labelSize;
+				textTexture = etesia::modeDisplays[playbackMode].labelTexture;
+				textPitch = etesia::modeDisplays[playbackMode].labelPitch;
+				textTrigger = etesia::modeDisplays[playbackMode].labelTrigger;
 				// Parasite
-				textBlend = etesiaModeDisplays[playbackMode].labelBlend;
-				textSpread = etesiaModeDisplays[playbackMode].labelSpread;
-				textFeedback = etesiaModeDisplays[playbackMode].labelFeedback;
-				textReverb = etesiaModeDisplays[playbackMode].labelReverb;
+				textBlend = etesia::modeDisplays[playbackMode].labelBlend;
+				textSpread = etesia::modeDisplays[playbackMode].labelSpread;
+				textFeedback = etesia::modeDisplays[playbackMode].labelFeedback;
+				textReverb = etesia::modeDisplays[playbackMode].labelReverb;
 
-				paramQuantities[PARAM_FREEZE]->name = etesiaModeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = etesiaModeTooltips[playbackMode].labelFreeze + nebulaeCVSuffix;
+				paramQuantities[PARAM_FREEZE]->name = etesia::modeTooltips[playbackMode].labelFreeze;
+				inputInfos[INPUT_FREEZE]->name = etesia::modeTooltips[playbackMode].labelFreeze + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_POSITION]->name = etesiaModeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = etesiaModeTooltips[playbackMode].labelPosition + nebulaeCVSuffix;
+				paramQuantities[PARAM_POSITION]->name = etesia::modeTooltips[playbackMode].labelPosition;
+				inputInfos[INPUT_POSITION]->name = etesia::modeTooltips[playbackMode].labelPosition + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_DENSITY]->name = etesiaModeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = etesiaModeTooltips[playbackMode].labelDensity + nebulaeCVSuffix;
+				paramQuantities[PARAM_DENSITY]->name = etesia::modeTooltips[playbackMode].labelDensity;
+				inputInfos[INPUT_DENSITY]->name = etesia::modeTooltips[playbackMode].labelDensity + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_SIZE]->name = etesiaModeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = etesiaModeTooltips[playbackMode].labelSize + nebulaeCVSuffix;
+				paramQuantities[PARAM_SIZE]->name = etesia::modeTooltips[playbackMode].labelSize;
+				inputInfos[INPUT_SIZE]->name = etesia::modeTooltips[playbackMode].labelSize + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_TEXTURE]->name = etesiaModeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = etesiaModeTooltips[playbackMode].labelTexture + nebulaeCVSuffix;
+				paramQuantities[PARAM_TEXTURE]->name = etesia::modeTooltips[playbackMode].labelTexture;
+				inputInfos[INPUT_TEXTURE]->name = etesia::modeTooltips[playbackMode].labelTexture + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_PITCH]->name = etesiaModeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = etesiaModeTooltips[playbackMode].labelPitch + nebulaeCVSuffix;
+				paramQuantities[PARAM_PITCH]->name = etesia::modeTooltips[playbackMode].labelPitch;
+				inputInfos[INPUT_PITCH]->name = etesia::modeTooltips[playbackMode].labelPitch + cloudyCommon::kCVSuffix;
 
-				inputInfos[INPUT_TRIGGER]->name = etesiaModeTooltips[playbackMode].labelTrigger;
+				inputInfos[INPUT_TRIGGER]->name = etesia::modeTooltips[playbackMode].labelTrigger;
 
 				// Parasite
-				paramQuantities[PARAM_BLEND]->name = etesiaModeTooltips[playbackMode].labelBlend;
-				inputInfos[INPUT_BLEND]->name = etesiaModeTooltips[playbackMode].labelBlend + nebulaeCVSuffix;
+				paramQuantities[PARAM_BLEND]->name = etesia::modeTooltips[playbackMode].labelBlend;
+				inputInfos[INPUT_BLEND]->name = etesia::modeTooltips[playbackMode].labelBlend + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_SPREAD]->name = etesiaModeTooltips[playbackMode].labelSpread;
-				inputInfos[INPUT_SPREAD]->name = etesiaModeTooltips[playbackMode].labelSpread + nebulaeCVSuffix;
+				paramQuantities[PARAM_SPREAD]->name = etesia::modeTooltips[playbackMode].labelSpread;
+				inputInfos[INPUT_SPREAD]->name = etesia::modeTooltips[playbackMode].labelSpread + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_FEEDBACK]->name = etesiaModeTooltips[playbackMode].labelFeedback;
-				inputInfos[INPUT_FEEDBACK]->name = etesiaModeTooltips[playbackMode].labelFeedback + nebulaeCVSuffix;
+				paramQuantities[PARAM_FEEDBACK]->name = etesia::modeTooltips[playbackMode].labelFeedback;
+				inputInfos[INPUT_FEEDBACK]->name = etesia::modeTooltips[playbackMode].labelFeedback + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_REVERB]->name = etesiaModeTooltips[playbackMode].labelReverb;
-				inputInfos[INPUT_REVERB]->name = etesiaModeTooltips[playbackMode].labelReverb + nebulaeCVSuffix;
+				paramQuantities[PARAM_REVERB]->name = etesia::modeTooltips[playbackMode].labelReverb;
+				inputInfos[INPUT_REVERB]->name = etesia::modeTooltips[playbackMode].labelReverb + cloudyCommon::kCVSuffix;
 
 				lastPlaybackMode = playbackMode;
 			}
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = NebulaeLedModes((ledMode + 1) % 3);
+				ledMode = cloudyCommon::LedModes((ledMode + 1) % 3);
 				lastLedMode = ledMode;
 				displayTimeout = 0;
 				lastBlend = params[PARAM_BLEND].getValue();
@@ -461,14 +463,15 @@ struct Etesia : SanguineModule {
 
 				lastLEDPlaybackMode = playbackMode;
 
-				paramQuantities[PARAM_LEDS_MODE]->name = nebulaeLedButtonPrefix + nebulaeButtonTexts[ledMode];
+				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
+					cloudyCommon::buttonTexts[ledMode];
 
 				bDisplaySwitched = bLastFrozen;
 			}
 
 			switch (ledMode) {
-			case LEDS_INPUT:
-			case LEDS_OUTPUT:
+			case cloudyCommon::LEDS_INPUT:
+			case cloudyCommon::LEDS_OUTPUT:
 				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
 				lights[LIGHT_BLEND + 1].setBrightness(0.f);
 				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
@@ -479,17 +482,19 @@ struct Etesia : SanguineModule {
 				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
 				break;
 
-			case LEDS_PARAMETERS:
-			case LEDS_MOMENTARY:
+			case cloudyCommon::LEDS_PARAMETERS:
+			case cloudyCommon::LEDS_MOMENTARY:
 				for (int light = 0; light < 4; ++light) {
 					float value = params[PARAM_BLEND + light].getValue();
 					int currentLight = LIGHT_BLEND + light * 2;
-					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
-					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
+					lights[currentLight + 0].setBrightness(value <= 0.66f ?
+						math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
+					lights[currentLight + 1].setBrightness(value >= 0.33f ?
+						math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
 				break;
 
-			case LEDS_QUALITY_MOMENTARY:
+			case cloudyCommon::LEDS_QUALITY_MOMENTARY:
 				lights[LIGHT_BLEND].setBrightness(0.f);
 				lights[LIGHT_BLEND + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
 				lights[LIGHT_SPREAD].setBrightness(0.f);
@@ -500,7 +505,7 @@ struct Etesia : SanguineModule {
 				lights[LIGHT_REVERB + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
 				break;
 
-			case LEDS_MODE_MOMENTARY:
+			case cloudyCommon::LEDS_MODE_MOMENTARY:
 				lights[LIGHT_BLEND].setBrightness(playbackMode == 0 || playbackMode == 5 ? 1.f : 0.f);
 				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == 0 || playbackMode == 5 ? 1.f : 0.f);
 				lights[LIGHT_SPREAD].setBrightness(playbackMode == 1 || playbackMode == 4 ? 1.f : 0.f);
@@ -577,7 +582,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 13.453, 16.419);
 		etesiaFramebuffer->addChild(displayFreeze);
-		displayFreeze->fallbackString = etesiaModeDisplays[0].labelFreeze;
+		displayFreeze->fallbackString = etesia::modeDisplays[0].labelFreeze;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(20.029, 25.607), module, Etesia::INPUT_FREEZE));
 
@@ -604,7 +609,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
 		etesiaFramebuffer->addChild(displayModel);
-		displayModel->fallbackString = etesiaModeList[0].display;
+		displayModel->fallbackString = etesia::modeList[0].display;
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Etesia::PARAM_MODE));
 
@@ -613,7 +618,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		etesiaFramebuffer->addChild(displayPosition);
-		displayPosition->fallbackString = etesiaModeDisplays[0].labelPosition;
+		displayPosition->fallbackString = etesia::modeDisplays[0].labelPosition;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Etesia::INPUT_POSITION));
 
@@ -622,7 +627,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		etesiaFramebuffer->addChild(displayDensity);
-		displayDensity->fallbackString = etesiaModeDisplays[0].labelDensity;
+		displayDensity->fallbackString = etesia::modeDisplays[0].labelDensity;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Etesia::INPUT_DENSITY));
 
@@ -631,7 +636,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		etesiaFramebuffer->addChild(displaySize);
-		displaySize->fallbackString = etesiaModeDisplays[0].labelSize;
+		displaySize->fallbackString = etesia::modeDisplays[0].labelSize;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Etesia::INPUT_SIZE));
 
@@ -640,7 +645,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		etesiaFramebuffer->addChild(displayTexture);
-		displayTexture->fallbackString = etesiaModeDisplays[0].labelTexture;
+		displayTexture->fallbackString = etesia::modeDisplays[0].labelTexture;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Etesia::INPUT_TEXTURE));
 
@@ -648,7 +653,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
 		etesiaFramebuffer->addChild(displayPitch);
-		displayPitch->fallbackString = etesiaModeDisplays[0].labelPitch;
+		displayPitch->fallbackString = etesia::modeDisplays[0].labelPitch;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Etesia::INPUT_PITCH));
 
@@ -656,13 +661,13 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay(module, 86.118, 51.174);
 		etesiaFramebuffer->addChild(displayBlend);
-		displayBlend->fallbackString = etesiaModeDisplays[0].labelBlend;
+		displayBlend->fallbackString = etesia::modeDisplays[0].labelBlend;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Etesia::INPUT_BLEND));
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
 		etesiaFramebuffer->addChild(displayTrigger);
-		displayTrigger->fallbackString = etesiaModeDisplays[0].labelTrigger;
+		displayTrigger->fallbackString = etesia::modeDisplays[0].labelTrigger;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Etesia::INPUT_TRIGGER));
 
@@ -670,7 +675,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay(module, 86.118, 86.709);
 		etesiaFramebuffer->addChild(displaySpread);
-		displaySpread->fallbackString = etesiaModeDisplays[0].labelSpread;
+		displaySpread->fallbackString = etesia::modeDisplays[0].labelSpread;
 
 		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Etesia::PARAM_SPREAD));
 
@@ -678,7 +683,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
 		etesiaFramebuffer->addChild(displayFeedback);
-		displayFeedback->fallbackString = etesiaModeDisplays[0].labelFeedback;
+		displayFeedback->fallbackString = etesia::modeDisplays[0].labelFeedback;
 
 		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Etesia::PARAM_FEEDBACK));
 
@@ -686,7 +691,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay(module, 125.214, 86.709);
 		etesiaFramebuffer->addChild(displayReverb);
-		displayReverb->fallbackString = etesiaModeDisplays[0].labelReverb;
+		displayReverb->fallbackString = etesia::modeDisplays[0].labelReverb;
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Etesia::PARAM_REVERB));
 
@@ -736,8 +741,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(etesiaModeList.size()); ++i) {
-			modelLabels.push_back(etesiaModeList[i].display + ": " + etesiaModeList[i].menuLabel);
+		for (int i = 0; i < static_cast<int>(etesia::modeList.size()); ++i) {
+			modelLabels.push_back(etesia::modeList[i].display + ": " + etesia::modeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },

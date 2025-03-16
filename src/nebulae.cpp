@@ -62,18 +62,18 @@ struct Nebulae : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	NebulaeLedModes ledMode = LEDS_INPUT;
+	cloudyCommon::LedModes ledMode = cloudyCommon::LEDS_INPUT;
 
-	NebulaeLedModes lastLedMode = LEDS_INPUT;
+	cloudyCommon::LedModes lastLedMode = cloudyCommon::LEDS_INPUT;
 
-	std::string textMode = nebulaeModeList[0].display;
-	std::string textFreeze = nebulaeModeDisplays[0].labelFreeze;
-	std::string textPosition = nebulaeModeDisplays[0].labelPosition;
-	std::string textDensity = nebulaeModeDisplays[0].labelDensity;
-	std::string textSize = nebulaeModeDisplays[0].labelSize;
-	std::string textTexture = nebulaeModeDisplays[0].labelTexture;
-	std::string textPitch = nebulaeModeDisplays[0].labelPitch;
-	std::string textTrigger = nebulaeModeDisplays[0].labelTrigger;
+	std::string textMode = nebulae::modeList[0].display;
+	std::string textFreeze = nebulae::modeDisplays[0].labelFreeze;
+	std::string textPosition = nebulae::modeDisplays[0].labelPosition;
+	std::string textDensity = nebulae::modeDisplays[0].labelDensity;
+	std::string textSize = nebulae::modeDisplays[0].labelSize;
+	std::string textTexture = nebulae::modeDisplays[0].labelTexture;
+	std::string textPitch = nebulae::modeDisplays[0].labelPitch;
+	std::string textTrigger = nebulae::modeDisplays[0].labelTrigger;
 
 	dsp::SampleRateConverter<2> inputSrc;
 	dsp::SampleRateConverter<2> outputSrc;
@@ -286,14 +286,14 @@ struct Nebulae : SanguineModule {
 			if (frozen && !bLastFrozen) {
 				bLastFrozen = true;
 				if (!bDisplaySwitched) {
-					ledMode = LEDS_OUTPUT;
-					lastLedMode = LEDS_OUTPUT;
+					ledMode = cloudyCommon::LEDS_OUTPUT;
+					lastLedMode = cloudyCommon::LEDS_OUTPUT;
 				}
 			} else if (!frozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
-					ledMode = LEDS_INPUT;
-					lastLedMode = LEDS_INPUT;
+					ledMode = cloudyCommon::LEDS_INPUT;
+					lastLedMode = cloudyCommon::LEDS_INPUT;
 				} else {
 					bDisplaySwitched = false;
 				}
@@ -333,7 +333,7 @@ struct Nebulae : SanguineModule {
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode) {
-		case LEDS_OUTPUT:
+		case cloudyCommon::LEDS_OUTPUT:
 			lightFrame = outputFrame;
 			break;
 		default:
@@ -343,18 +343,20 @@ struct Nebulae : SanguineModule {
 
 		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
 			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
-			ledMode = LEDS_MOMENTARY;
+			ledMode = cloudyCommon::LEDS_MOMENTARY;
 		}
 
 		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
-			ledMode = LEDS_QUALITY_MOMENTARY;
+			ledMode = cloudyCommon::LEDS_QUALITY_MOMENTARY;
 		}
 
 		if (playbackMode != lastLEDPlaybackMode) {
-			ledMode = LEDS_MODE_MOMENTARY;
+			ledMode = cloudyCommon::LEDS_MODE_MOMENTARY;
 		}
 
-		if (ledMode == LEDS_MOMENTARY || ledMode == LEDS_MODE_MOMENTARY || ledMode == LEDS_QUALITY_MOMENTARY) {
+		if (ledMode == cloudyCommon::LEDS_MOMENTARY ||
+			ledMode == cloudyCommon::LEDS_MODE_MOMENTARY ||
+			ledMode == cloudyCommon::LEDS_QUALITY_MOMENTARY) {
 			++displayTimeout;
 			if (displayTimeout >= args.sampleRate * 2) {
 				ledMode = lastLedMode;
@@ -382,41 +384,41 @@ struct Nebulae : SanguineModule {
 			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
 
 			if (playbackMode != lastPlaybackMode) {
-				textMode = nebulaeModeList[playbackMode].display;
+				textMode = nebulae::modeList[playbackMode].display;
 
-				textFreeze = nebulaeModeDisplays[playbackMode].labelFreeze;
-				textPosition = nebulaeModeDisplays[playbackMode].labelPosition;
-				textDensity = nebulaeModeDisplays[playbackMode].labelDensity;
-				textSize = nebulaeModeDisplays[playbackMode].labelSize;
-				textTexture = nebulaeModeDisplays[playbackMode].labelTexture;
-				textPitch = nebulaeModeDisplays[playbackMode].labelPitch;
-				textTrigger = nebulaeModeDisplays[playbackMode].labelTrigger;
+				textFreeze = nebulae::modeDisplays[playbackMode].labelFreeze;
+				textPosition = nebulae::modeDisplays[playbackMode].labelPosition;
+				textDensity = nebulae::modeDisplays[playbackMode].labelDensity;
+				textSize = nebulae::modeDisplays[playbackMode].labelSize;
+				textTexture = nebulae::modeDisplays[playbackMode].labelTexture;
+				textPitch = nebulae::modeDisplays[playbackMode].labelPitch;
+				textTrigger = nebulae::modeDisplays[playbackMode].labelTrigger;
 
-				paramQuantities[PARAM_FREEZE]->name = nebulaeModeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = nebulaeModeTooltips[playbackMode].labelFreeze + nebulaeCVSuffix;
+				paramQuantities[PARAM_FREEZE]->name = nebulae::modeTooltips[playbackMode].labelFreeze;
+				inputInfos[INPUT_FREEZE]->name = nebulae::modeTooltips[playbackMode].labelFreeze + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_POSITION]->name = nebulaeModeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = nebulaeModeTooltips[playbackMode].labelPosition + nebulaeCVSuffix;
+				paramQuantities[PARAM_POSITION]->name = nebulae::modeTooltips[playbackMode].labelPosition;
+				inputInfos[INPUT_POSITION]->name = nebulae::modeTooltips[playbackMode].labelPosition + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_DENSITY]->name = nebulaeModeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = nebulaeModeTooltips[playbackMode].labelDensity + nebulaeCVSuffix;
+				paramQuantities[PARAM_DENSITY]->name = nebulae::modeTooltips[playbackMode].labelDensity;
+				inputInfos[INPUT_DENSITY]->name = nebulae::modeTooltips[playbackMode].labelDensity + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_SIZE]->name = nebulaeModeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = nebulaeModeTooltips[playbackMode].labelSize + nebulaeCVSuffix;
+				paramQuantities[PARAM_SIZE]->name = nebulae::modeTooltips[playbackMode].labelSize;
+				inputInfos[INPUT_SIZE]->name = nebulae::modeTooltips[playbackMode].labelSize + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_TEXTURE]->name = nebulaeModeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = nebulaeModeTooltips[playbackMode].labelTexture + nebulaeCVSuffix;
+				paramQuantities[PARAM_TEXTURE]->name = nebulae::modeTooltips[playbackMode].labelTexture;
+				inputInfos[INPUT_TEXTURE]->name = nebulae::modeTooltips[playbackMode].labelTexture + cloudyCommon::kCVSuffix;
 
-				paramQuantities[PARAM_PITCH]->name = nebulaeModeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = nebulaeModeTooltips[playbackMode].labelPitch + nebulaeCVSuffix;
+				paramQuantities[PARAM_PITCH]->name = nebulae::modeTooltips[playbackMode].labelPitch;
+				inputInfos[INPUT_PITCH]->name = nebulae::modeTooltips[playbackMode].labelPitch + cloudyCommon::kCVSuffix;
 
-				inputInfos[INPUT_TRIGGER]->name = nebulaeModeTooltips[playbackMode].labelTrigger;
+				inputInfos[INPUT_TRIGGER]->name = nebulae::modeTooltips[playbackMode].labelTrigger;
 
 				lastPlaybackMode = playbackMode;
 			}
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = NebulaeLedModes((ledMode + 1) % 3);
+				ledMode = cloudyCommon::LedModes((ledMode + 1) % 3);
 				lastLedMode = ledMode;
 				displayTimeout = 0;
 				lastBlend = params[PARAM_BLEND].getValue();
@@ -429,15 +431,16 @@ struct Nebulae : SanguineModule {
 
 				lastLEDPlaybackMode = playbackMode;
 
-				paramQuantities[PARAM_LEDS_MODE]->name = nebulaeLedButtonPrefix + nebulaeButtonTexts[ledMode];
+				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
+					cloudyCommon::buttonTexts[ledMode];
 
 				bLastFrozen = bDisplaySwitched;
 			}
 
 			int currentLight = 0;
 			switch (ledMode) {
-			case LEDS_INPUT:
-			case LEDS_OUTPUT:
+			case cloudyCommon::LEDS_INPUT:
+			case cloudyCommon::LEDS_OUTPUT:
 				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
 				lights[LIGHT_BLEND + 1].setBrightness(0.f);
 				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
@@ -448,28 +451,34 @@ struct Nebulae : SanguineModule {
 				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
 				break;
 
-			case LEDS_PARAMETERS:
-			case LEDS_MOMENTARY:
+			case cloudyCommon::LEDS_PARAMETERS:
+			case cloudyCommon::LEDS_MOMENTARY:
 				for (int light = 0; light < 4; ++light) {
 					float value = params[PARAM_BLEND + light].getValue();
 					currentLight = LIGHT_BLEND + light * 2;
-					lights[currentLight + 0].setBrightness(value <= 0.66f ? math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
-					lights[currentLight + 1].setBrightness(value >= 0.33f ? math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
+					lights[currentLight + 0].setBrightness(value <= 0.66f ?
+						math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
+					lights[currentLight + 1].setBrightness(value >= 0.33f ?
+						math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
 				}
 				break;
 
-			case LEDS_QUALITY_MOMENTARY:
+			case cloudyCommon::LEDS_QUALITY_MOMENTARY:
 				lights[LIGHT_BLEND].setBrightness(0.f);
-				lights[LIGHT_BLEND + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
+				lights[LIGHT_BLEND + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 &&
+					params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
 				lights[LIGHT_SPREAD].setBrightness(0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
+				lights[LIGHT_SPREAD + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 &&
+					params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
 				lights[LIGHT_FEEDBACK].setBrightness(0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 &&
+					params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
 				lights[LIGHT_REVERB].setBrightness(0.f);
-				lights[LIGHT_REVERB + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
+				lights[LIGHT_REVERB + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 &&
+					params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
 				break;
 
-			case LEDS_MODE_MOMENTARY:
+			case cloudyCommon::LEDS_MODE_MOMENTARY:
 				for (int light = 0; light < clouds::PLAYBACK_MODE_LAST; ++light) {
 					currentLight = LIGHT_BLEND + light * 2;
 
@@ -545,7 +554,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
 		nebulaeFramebuffer->addChild(displayFreeze);
-		displayFreeze->fallbackString = nebulaeModeDisplays[0].labelFreeze;
+		displayFreeze->fallbackString = nebulae::modeDisplays[0].labelFreeze;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Nebulae::INPUT_FREEZE));
 		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Nebulae::PARAM_FREEZE);
@@ -563,7 +572,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
 		nebulaeFramebuffer->addChild(displayModel);
-		displayModel->fallbackString = nebulaeModeList[0].display;
+		displayModel->fallbackString = nebulae::modeList[0].display;
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Nebulae::PARAM_MODE));
 
@@ -572,7 +581,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
 		nebulaeFramebuffer->addChild(displayPosition);
-		displayPosition->fallbackString = nebulaeModeDisplays[0].labelPosition;
+		displayPosition->fallbackString = nebulae::modeDisplays[0].labelPosition;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Nebulae::INPUT_POSITION));
 
@@ -581,7 +590,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
 		nebulaeFramebuffer->addChild(displayDensity);
-		displayDensity->fallbackString = nebulaeModeDisplays[0].labelDensity;
+		displayDensity->fallbackString = nebulae::modeDisplays[0].labelDensity;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Nebulae::INPUT_DENSITY));
 
@@ -590,7 +599,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
 		nebulaeFramebuffer->addChild(displaySize);
-		displaySize->fallbackString = nebulaeModeDisplays[0].labelSize;
+		displaySize->fallbackString = nebulae::modeDisplays[0].labelSize;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Nebulae::INPUT_SIZE));
 
@@ -599,7 +608,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
 		nebulaeFramebuffer->addChild(displayTexture);
-		displayTexture->fallbackString = nebulaeModeDisplays[0].labelTexture;
+		displayTexture->fallbackString = nebulae::modeDisplays[0].labelTexture;
 
 		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Nebulae::INPUT_TEXTURE));
 
@@ -607,7 +616,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
 		nebulaeFramebuffer->addChild(displayPitch);
-		displayPitch->fallbackString = nebulaeModeDisplays[0].labelPitch;
+		displayPitch->fallbackString = nebulae::modeDisplays[0].labelPitch;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Nebulae::INPUT_PITCH));
 
@@ -617,7 +626,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
 		nebulaeFramebuffer->addChild(displayTrigger);
-		displayTrigger->fallbackString = nebulaeModeDisplays[0].labelTrigger;
+		displayTrigger->fallbackString = nebulae::modeDisplays[0].labelTrigger;
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Nebulae::INPUT_TRIGGER));
 
@@ -675,8 +684,8 @@ struct NebulaeWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(nebulaeModeList.size()); ++i) {
-			modelLabels.push_back(nebulaeModeList[i].display + ": " + nebulaeModeList[i].menuLabel);
+		for (int i = 0; i < static_cast<int>(nebulae::modeList.size()); ++i) {
+			modelLabels.push_back(nebulae::modeList[i].display + ": " + nebulae::modeList[i].menuLabel);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },
