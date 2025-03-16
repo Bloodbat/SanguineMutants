@@ -53,8 +53,8 @@ struct Mutuus : SanguineModule {
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
 	mutuus::MutuusModulator mutuusModulator[PORT_MAX_CHANNELS];
-	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
-	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
+	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 
 	bool bModeSwitchEnabled = false;
 	bool bLastInModeSwitch = false;
@@ -153,7 +153,7 @@ struct Mutuus : SanguineModule {
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= kWarpsBlockSize) {
+			if (++frame[channel] >= warpiescommon::kBlockSize) {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -194,7 +194,7 @@ struct Mutuus : SanguineModule {
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				mutuusParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
+				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
 			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
@@ -227,9 +227,9 @@ struct Mutuus : SanguineModule {
 				const uint8_t(*palette)[3];
 				float zone;
 				if (featureMode != mutuus::FEATURE_MODE_META) {
-					palette = paletteWarpsFreqsShift;
+					palette = warpiespals::paletteFreqsShift;
 				} else {
-					palette = paletteWarpsDefault;
+					palette = warpiespals::paletteDefault;
 				}
 
 				zone = 8.f * mutuusParameters[0]->modulation_algorithm;
@@ -251,7 +251,7 @@ struct Mutuus : SanguineModule {
 
 				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
 					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
-						(paletteWarpsParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
+						(warpiespals::paletteParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
 				}
 			}
 
@@ -261,7 +261,7 @@ struct Mutuus : SanguineModule {
 				if (channel < channelCount) {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
 						lights[currentLight + rgbComponent].setBrightnessSmooth(
-							(paletteWarpsParasiteFeatureMode[mutuusModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
+							(warpiespals::paletteParasiteFeatureMode[mutuusModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
 					}
 				} else {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {

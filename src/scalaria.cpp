@@ -64,8 +64,8 @@ struct Scalaria : SanguineModule {
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator scalariaModulator[PORT_MAX_CHANNELS];
-    scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize];
-    scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize];
+    scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize];
+    scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize];
 
     scalaria::Parameters* scalariaParameters[PORT_MAX_CHANNELS];
 
@@ -80,7 +80,7 @@ struct Scalaria : SanguineModule {
 
         configParam(PARAM_RESONANCE_CV_ATTENUVERTER, -1.f, 1.f, 0.f, "Resonance CV");
 
-        configSwitch(PARAM_INTERNAL_OSCILLATOR, 0.f, 3.f, 0.f, "Internal oscillator", scalariaOscillatorNames);
+        configSwitch(PARAM_INTERNAL_OSCILLATOR, 0.f, 3.f, 0.f, "Internal oscillator", scalaria::oscillatorNames);
 
         configParam(PARAM_CHANNEL_1_LEVEL, 0.f, 1.f, 0.66f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
         configParam(PARAM_CHANNEL_2_LEVEL, 0.f, 1.f, 0.66f, "Channel 2 amplitude", "%", 0, 100);
@@ -99,7 +99,7 @@ struct Scalaria : SanguineModule {
 
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
             memset(&scalariaModulator[channel], 0, sizeof(scalaria::ScalariaModulator));
-            scalariaModulator[channel].Init(kScalariaSampleRate);
+            scalariaModulator[channel].Init(scalaria::ksampleRate);
             scalariaParameters[channel] = scalariaModulator[channel].mutableParameters();
         }
 
@@ -125,7 +125,7 @@ struct Scalaria : SanguineModule {
             float_4 f4Voltages;
 
             // Buffer loop
-            if (++frame[channel] >= kWarpsBlockSize) {
+            if (++frame[channel] >= warpiescommon::kBlockSize) {
                 frame[channel] = 0;
 
                 // CHANNEL_1_LEVEL and CHANNEL_2_LEVEL are normalized values: from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -147,9 +147,9 @@ struct Scalaria : SanguineModule {
 
                 scalariaParameters[channel]->note = 60.f * params[PARAM_CHANNEL_1_LEVEL].getValue() + 12.f
                     * inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
-                scalariaParameters[channel]->note += log2f(kScalariaSampleRate * args.sampleTime) * 12.f;
+                scalariaParameters[channel]->note += log2f(scalaria::ksampleRate * args.sampleTime) * 12.f;
 
-                scalariaModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
+                scalariaModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
             }
 
             inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CHANNEL_1].getVoltage(channel) / 8.f * 32768),
@@ -191,7 +191,7 @@ struct Scalaria : SanguineModule {
                     const uint8_t(*palette)[3];
                     float zone;
 
-                    palette = paletteScalaria;
+                    palette = scalaria::paletteFrequencies;
 
                     zone = 8.f * scalariaParameters[channel]->rawFrequency;
                     MAKE_INTEGRAL_FRACTIONAL(zone);

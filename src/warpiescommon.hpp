@@ -1,3 +1,5 @@
 #pragma once
 
-static const int kWarpsBlockSize = 60;
+namespace warpiescommon {
+    static const int kBlockSize = 60;
+}

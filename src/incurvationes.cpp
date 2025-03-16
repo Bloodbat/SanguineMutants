@@ -44,8 +44,8 @@ struct Incurvationes : SanguineModule {
 	static const int kLightFrequency = 128;
 
 	warps::Modulator warpsModulator[PORT_MAX_CHANNELS];
-	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
-	warps::ShortFrame outputFrames[PORT_MAX_CHANNELS][kWarpsBlockSize] = {};
+	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
+	warps::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 
 	bool bEasterEggEnabled = false;
 
@@ -106,7 +106,7 @@ struct Incurvationes : SanguineModule {
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= kWarpsBlockSize) {
+			if (++frame[channel] >= warpiescommon::kBlockSize) {
 				frame[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
@@ -132,7 +132,7 @@ struct Incurvationes : SanguineModule {
 					inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				warpsParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], kWarpsBlockSize);
+				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
 			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
@@ -155,7 +155,7 @@ struct Incurvationes : SanguineModule {
 
 			const uint8_t(*palette)[3];
 
-			palette = bEasterEggEnabled ? paletteWarpsFreqsShift : paletteWarpsDefault;
+			palette = bEasterEggEnabled ? warpiespals::paletteFreqsShift : warpiespals::paletteDefault;
 			float colorValues[PORT_MAX_CHANNELS][3] = {};
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
