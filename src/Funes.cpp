@@ -96,18 +96,18 @@ struct Funes : SanguineModule {
 
 	bool bNotesModelSelection = false;
 
-	FunesLEDModes ledsMode = LEDNormal;
+	funes::LEDModes ledsMode = funes::LEDNormal;
 
 	std::string displayText = "";
 
 	dsp::ClockDivider clockDivider;
 
-	FunesCustomDataStates customDataStates[plaits::kMaxEngines] = {};
+	funes::CustomDataStates customDataStates[plaits::kMaxEngines] = {};
 
 	Funes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configSwitch(PARAM_MODEL, 0.f, 23.f, 8.f, "Model", funesModelLabels);
+		configSwitch(PARAM_MODEL, 0.f, 23.f, 8.f, "Model", funes::modelLabels);
 
 		configParam(PARAM_FREQUENCY, -4.f, 4.f, 0.f, "Frequency", " semitones", 0.f, 12.f);
 		configParam(PARAM_FREQUENCY_ROOT, -4.f, 4.f, 0.f, "Frequency Root", " semitones", 0.f, 12.f);
@@ -119,7 +119,7 @@ struct Funes : SanguineModule {
 		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV");
 		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV");
 		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV");
-		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funesFrequencyModes);
+		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funes::frequencyModes);
 		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV");
 		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV");
 		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV");
@@ -170,7 +170,7 @@ struct Funes : SanguineModule {
 					}
 				}
 			} else if (params[PARAM_MODEL].getValue() != patch.engine) {
-				ledsMode = LEDNormal;
+				ledsMode = funes::LEDNormal;
 				displayTimeout = 0;
 				lastLPGColor = params[PARAM_LPG_COLOR].getValue();
 				lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
@@ -212,7 +212,7 @@ struct Funes : SanguineModule {
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
-				ledsMode = LEDLPG;
+				ledsMode = funes::LEDLPG;
 				--displayTimeout;
 			}
 
@@ -258,7 +258,7 @@ struct Funes : SanguineModule {
 					displayModelNum = voice[channel].active_engine();
 				}
 
-				if (ledsMode == LEDNormal) {
+				if (ledsMode == funes::LEDNormal) {
 					// Model lights
 					// Get the active engines for current channel.
 					int currentLight;
@@ -295,21 +295,21 @@ struct Funes : SanguineModule {
 				}
 
 				if (bDisplayModulatedModel) {
-					displayText = funesDisplayLabels[displayModelNum];
+					displayText = funes::displayLabels[displayModelNum];
 				}
 
 				frequencyMode = params[PARAM_FREQ_MODE].getValue();
 
 				if (frequencyMode != lastFrequencyMode) {
-					ledsMode = LEDOctave;
+					ledsMode = funes::LEDOctave;
 					--displayTimeout;
 				}
 
-				lights[LIGHT_FACTORY_DATA].setBrightness(customDataStates[patch.engine] == DataFactory &&
+				lights[LIGHT_FACTORY_DATA].setBrightness(customDataStates[patch.engine] == funes::DataFactory &&
 					errorTimeOut == 0 ? kSanguineButtonLightValue : 0.f);
-				lights[LIGHT_CUSTOM_DATA + 0].setBrightness(customDataStates[patch.engine] == DataCustom &&
+				lights[LIGHT_CUSTOM_DATA + 0].setBrightness(customDataStates[patch.engine] == funes::DataCustom &&
 					errorTimeOut == 0 ? kSanguineButtonLightValue : 0.f);
-				lights[LIGHT_CUSTOM_DATA + 1].setBrightness(customDataStates[patch.engine] == DataCustom ||
+				lights[LIGHT_CUSTOM_DATA + 1].setBrightness(customDataStates[patch.engine] == funes::DataCustom ||
 					errorTimeOut > 0 ? kSanguineButtonLightValue : 0.f);
 
 				if (errorTimeOut != 0) {
@@ -344,7 +344,7 @@ struct Funes : SanguineModule {
 
 			switch (ledsMode)
 			{
-			case LEDNormal: {
+			case funes::LEDNormal: {
 				// Set model lights.
 				int clampedEngine = patch.engine % 8;
 				for (int led = 0; led < 8; ++led) {
@@ -385,7 +385,7 @@ struct Funes : SanguineModule {
 				}
 				break;
 			}
-			case LEDLPG: {
+			case funes::LEDLPG: {
 				for (int parameter = 0; parameter < 2; ++parameter) {
 					float value;
 					int startLight;
@@ -419,7 +419,7 @@ struct Funes : SanguineModule {
 				}
 				break;
 			}
-			case LEDOctave: {
+			case funes::LEDOctave: {
 				int octave = params[PARAM_FREQ_MODE].getValue();
 				for (int led = 0; led < 8; ++led) {
 					float ledValue = 0.f;
@@ -442,11 +442,11 @@ struct Funes : SanguineModule {
 			}
 		}
 
-		if (ledsMode != LEDNormal) {
+		if (ledsMode != funes::LEDNormal) {
 			++displayTimeout;
 		}
 		if (displayTimeout > args.sampleRate * 3) {
-			ledsMode = LEDNormal;
+			ledsMode = funes::LEDNormal;
 			displayTimeout = 0;
 			lastLPGColor = params[PARAM_LPG_COLOR].getValue();
 			lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
@@ -533,7 +533,7 @@ struct Funes : SanguineModule {
 				user_data.setBuffer(userDataBuffer);
 				if (userDataBuffer[kMaxUserDataSize - 2] == 'U') {
 					resetCustomDataStates();
-					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = DataCustom;
+					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = funes::DataCustom;
 				}
 			}
 		}
@@ -568,7 +568,7 @@ struct Funes : SanguineModule {
 				}
 				// Only 1 engine can use custom data at a time.
 				resetCustomDataStates();
-				customDataStates[patch.engine] = DataCustom;
+				customDataStates[patch.engine] = funes::DataCustom;
 			} else {
 				errorTimeOut = 4;
 			}
@@ -577,8 +577,8 @@ struct Funes : SanguineModule {
 
 	void showCustomDataLoadDialog() {
 #ifndef USING_CARDINAL_NOT_RACK
-		osdialog_filters* filters = osdialog_filters_parse(WAVE_FILTERS);
-		char* dialogFilePath = osdialog_file(OSDIALOG_OPEN, waveDir.empty() ? NULL : waveDir.c_str(), NULL, filters);
+		osdialog_filters* filters = osdialog_filters_parse(funes::CUSTOM_DATA_FILENAME_FILTERS);
+		char* dialogFilePath = osdialog_file(OSDIALOG_OPEN, funes::customDataDir.empty() ? NULL : funes::customDataDir.c_str(), NULL, filters);
 
 		if (!dialogFilePath) {
 			errorTimeOut = 4;
@@ -588,21 +588,21 @@ struct Funes : SanguineModule {
 		std::string filePath = dialogFilePath;
 		std::free(dialogFilePath);
 
-		waveDir = system::getDirectory(filePath);
+		funes::customDataDir = system::getDirectory(filePath);
 		loadCustomData(filePath);
 #else
-		async_dialog_filebrowser(false, nullptr, waveDir.empty() ? nullptr : waveDir.c_str(), "Load custom data .bin file", [this](char* dialogFilePath) {
+		async_dialog_filebrowser(false, nullptr, funes::customDataDir.empty() ?
+			nullptr : funes::customDataDir.c_str(), "Load custom data .bin file", [this](char* dialogFilePath) {
+				if (dialogFilePath == nullptr) {
+					errorTimeOut = 4;
+					return;
+				}
 
-			if (dialogFilePath == nullptr) {
-				errorTimeOut = 4;
-				return;
-			}
+				const std::string filePath = dialogFilePath;
+				std::free(dialogFilePath);
 
-			const std::string filePath = dialogFilePath;
-			std::free(dialogFilePath);
-
-			waveDir = system::getDirectory(filePath);
-			loadCustomData(filePath);
+				funes::customDataDir = system::getDirectory(filePath);
+				loadCustomData(filePath);
 			});
 #endif
 	}
@@ -635,11 +635,11 @@ struct Funes : SanguineModule {
 	}
 
 	void resetCustomDataStates() {
-		customDataStates[2] = DataFactory;
-		customDataStates[3] = DataFactory;
-		customDataStates[4] = DataFactory;
-		customDataStates[5] = DataFactory;
-		customDataStates[13] = DataFactory;
+		customDataStates[2] = funes::DataFactory;
+		customDataStates[3] = funes::DataFactory;
+		customDataStates[4] = funes::DataFactory;
+		customDataStates[5] = funes::DataFactory;
+		customDataStates[13] = funes::DataFactory;
 	}
 };
 
@@ -674,7 +674,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 53.122, 32.314);
 		funesFrambuffer->addChild(alphaDisplay);
-		alphaDisplay->fallbackString = funesDisplayLabels[8];
+		alphaDisplay->fallbackString = funes::displayLabels[8];
 
 		if (module) {
 			alphaDisplay->values.displayText = &module->displayText;
@@ -736,7 +736,7 @@ struct FunesWidget : SanguineModuleWidget {
 			[=](Menu* menu) {
 				menu->addChild(createSubmenuItem("New", "", [=](Menu* menu) {
 					for (int i = 0; i < 8; ++i) {
-						menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
+						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
 							[=]() { return module->patch.engine == i; },
 							[=]() {	module->setEngine(i); }
 						));
@@ -745,7 +745,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 				menu->addChild(createSubmenuItem("Pitched", "", [=](Menu* menu) {
 					for (int i = 8; i < 16; ++i) {
-						menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
+						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
 							[=]() { return module->patch.engine == i; },
 							[=]() {	module->setEngine(i); }
 						));
@@ -754,7 +754,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 				menu->addChild(createSubmenuItem("Noise/percussive", "", [=](Menu* menu) {
 					for (int i = 16; i < 24; ++i) {
-						menu->addChild(createCheckMenuItem(funesModelLabels[i], "",
+						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
 							[=]() { return module->patch.engine == i; },
 							[=]() { module->setEngine(i); }
 						));
@@ -765,7 +765,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Frequency mode", funesFrequencyModes,
+		menu->addChild(createIndexSubmenuItem("Frequency mode", funes::frequencyModes,
 			[=]() {return module->frequencyMode; },
 			[=](int i) {module->setFrequencyMode(i); }
 		));
