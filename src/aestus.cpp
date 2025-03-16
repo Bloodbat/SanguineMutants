@@ -58,9 +58,9 @@ struct Aestus : SanguineModule {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
 			if (!moduleAestus->bSheep) {
-				return aestusModeMenuLabels[moduleAestus->generator.mode()];
+				return aestusCommon::modeMenuLabels[moduleAestus->generator.mode()];
 			} else {
-				return aestusSheepMenuLabels[moduleAestus->generator.mode()];
+				return aestusCommon::sheepMenuLabels[moduleAestus->generator.mode()];
 			}
 		}
 	};
@@ -68,7 +68,7 @@ struct Aestus : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
-			return aestusRangeMenuLabels[moduleAestus->generator.range()];
+			return aestusCommon::rangeMenuLabels[moduleAestus->generator.range()];
 		}
 	};
 
@@ -82,11 +82,11 @@ struct Aestus : SanguineModule {
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
-	std::string displayModel = aestusDisplayModels[0];
+	std::string displayModel = aestus::displayModels[0];
 
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		configButton<ModeParam>(PARAM_MODE, aestusModelModeHeaders[0]);
+		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
 		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
 		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
@@ -94,7 +94,7 @@ struct Aestus : SanguineModule {
 		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope");
 		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness");
 
-		configSwitch(PARAM_MODEL, 0.f, 1.f, 0.f, "Module model", aestusMenuLabels);
+		configSwitch(PARAM_MODEL, 0.f, 1.f, 0.f, "Module model", aestus::menuLabels);
 
 		configInput(INPUT_SHAPE, "Shape");
 		configInput(INPUT_SLOPE, "Slope");
@@ -149,7 +149,7 @@ struct Aestus : SanguineModule {
 
 			// Pitch
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCalibrationOffsets[bUseCalibrationOffset]);
+			pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
 			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
 			pitch += 60.f;
 			// Scale to the global sample rate
@@ -236,12 +236,12 @@ struct Aestus : SanguineModule {
 				kSanguineButtonLightValue : 0.f, sampleTime);
 			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? kSanguineButtonLightValue : 0.f, sampleTime);
 
-			displayModel = aestusDisplayModels[params[PARAM_MODEL].getValue()];
+			displayModel = aestus::displayModels[params[PARAM_MODEL].getValue()];
 
 			if (!bSheep) {
-				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[0];
+				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
 			} else {
-				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[1];
+				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
 			}
 		}
 	}
@@ -318,7 +318,7 @@ struct AestusWidget : SanguineModuleWidget {
 		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 23.42, 17.343);
 		displayModel->displayType = DISPLAY_STRING;
 		aestusFrameBuffer->addChild(displayModel);
-		displayModel->fallbackString = aestusDisplayModels[0];
+		displayModel->fallbackString = aestus::displayModels[0];
 
 		if (module) {
 			displayModel->values.displayText = &module->displayModel;
@@ -368,24 +368,24 @@ struct AestusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Model", aestusMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Model", aestus::menuLabels,
 			[=]() { return module->params[Aestus::PARAM_MODEL].getValue(); },
 			[=](int i) { module->setModel(i); }
 		));
 
 		if (!module->bSheep) {
-			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[0], aestusModeMenuLabels,
+			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
 		} else {
-			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[1], aestusSheepMenuLabels,
+			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
 		}
 
-		menu->addChild(createIndexSubmenuItem("Range", aestusRangeMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Range", aestusCommon::rangeMenuLabels,
 			[=]() { return module->generator.range(); },
 			[=](int i) { module->setRange(i); }
 		));

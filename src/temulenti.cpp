@@ -65,16 +65,16 @@ struct Temulenti : SanguineModule {
 			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
 			switch (moduleTemulenti->generator.feature_mode_) {
 			case bumps::Generator::FEAT_MODE_RANDOM:
-				return temulentiDrunksModeLabels[moduleTemulenti->generator.mode()];
+				return temulenti::drunksModeLabels[moduleTemulenti->generator.mode()];
 				break;
 			case bumps::Generator::FEAT_MODE_HARMONIC:
-				return temulentiBumpsModeLabels[moduleTemulenti->generator.mode()];
+				return temulenti::bumpsModeLabels[moduleTemulenti->generator.mode()];
 				break;
 			case bumps::Generator::FEAT_MODE_SHEEP:
-				return aestusSheepMenuLabels[moduleTemulenti->generator.mode()];
+				return aestusCommon::sheepMenuLabels[moduleTemulenti->generator.mode()];
 				break;
 			default:
-				return aestusModeMenuLabels[moduleTemulenti->generator.mode()];
+				return aestusCommon::modeMenuLabels[moduleTemulenti->generator.mode()];
 				break;
 			}
 		}
@@ -83,7 +83,7 @@ struct Temulenti : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-			return aestusRangeMenuLabels[moduleTemulenti->generator.range()];
+			return aestusCommon::rangeMenuLabels[moduleTemulenti->generator.range()];
 		}
 	};
 
@@ -95,13 +95,13 @@ struct Temulenti : SanguineModule {
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
-	std::string displayModel = temulentiDisplayModels[0];
+	std::string displayModel = temulenti::displayModels[0];
 	bool bUseCalibrationOffset = true;
 	bool bLastSync = false;
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		configButton<ModeParam>(PARAM_MODE, aestusModelModeHeaders[0]);
+		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
 		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
 		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
@@ -109,7 +109,7 @@ struct Temulenti : SanguineModule {
 		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope");
 		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness");
 
-		configSwitch(PARAM_MODEL, 0.f, 3.f, 0.f, "Module model", temulentiMenuLabels);
+		configSwitch(PARAM_MODEL, 0.f, 3.f, 0.f, "Module model", temulenti::menuLabels);
 
 		configInput(INPUT_SHAPE, "Shape");
 		configInput(INPUT_SLOPE, "Slope");
@@ -128,7 +128,7 @@ struct Temulenti : SanguineModule {
 
 		configButton(PARAM_SYNC, "Clock sync/PLL mode");
 
-		configSwitch(PARAM_QUANTIZER, 0.f, 7.f, 0.f, "Quantizer scale", temulentiQuantizerLabels);
+		configSwitch(PARAM_QUANTIZER, 0.f, 7.f, 0.f, "Quantizer scale", temulenti::quantizerLabels);
 
 		memset(&generator, 0, sizeof(bumps::Generator));
 		generator.Init();
@@ -162,7 +162,7 @@ struct Temulenti : SanguineModule {
 
 			// Pitch
 			float pitchParam = clamp(params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
-				aestusCalibrationOffsets[bUseCalibrationOffset]) * 12.f, -60.f, 60.f);
+				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f, -60.f, 60.f);
 			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
 
 			pitchParam += 60.f;
@@ -283,18 +283,18 @@ struct Temulenti : SanguineModule {
 				}
 			}
 
-			displayModel = temulentiDisplayModels[params[PARAM_MODEL].getValue()];
+			displayModel = temulenti::displayModels[params[PARAM_MODEL].getValue()];
 
 			switch (generator.feature_mode_)
 			{
 			case bumps::Generator::FEAT_MODE_HARMONIC:
-				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[2];
+				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[2];
 				break;
 			case bumps::Generator::FEAT_MODE_SHEEP:
-				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[1];
+				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
 				break;
 			default:
-				paramQuantities[PARAM_MODE]->name = aestusModelModeHeaders[0];
+				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
 				break;
 			}
 		}
@@ -376,7 +376,7 @@ struct TemulentiWidget : SanguineModuleWidget {
 		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 23.42, 17.343);
 		displayModel->displayType = DISPLAY_STRING;
 		temulentiFrameBuffer->addChild(displayModel);
-		displayModel->fallbackString = temulentiDisplayModels[0];
+		displayModel->fallbackString = temulenti::displayModels[0];
 
 		if (module) {
 			displayModel->values.displayText = &module->displayModel;
@@ -431,7 +431,7 @@ struct TemulentiWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Model", temulentiMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Model", temulenti::menuLabels,
 			[=]() { return module->params[Temulenti::PARAM_MODEL].getValue(); },
 			[=](int i) { module->setModel(i); }
 		));
@@ -439,37 +439,37 @@ struct TemulentiWidget : SanguineModuleWidget {
 		switch (module->generator.feature_mode_)
 		{
 		case bumps::Generator::FEAT_MODE_RANDOM:
-			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[0], temulentiDrunksModeLabels,
+			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], temulenti::drunksModeLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
 			break;
 		case bumps::Generator::FEAT_MODE_HARMONIC:
-			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[2], temulentiBumpsModeLabels,
+			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[2], temulenti::bumpsModeLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
 			break;
 		case bumps::Generator::FEAT_MODE_SHEEP:
-			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[1], aestusSheepMenuLabels,
+			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
 			break;
 		default:
-			menu->addChild(createIndexSubmenuItem(aestusModelModeHeaders[0], aestusModeMenuLabels,
+			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
 			break;
 		}
 
-		menu->addChild(createIndexSubmenuItem("Range", aestusRangeMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Range", aestusCommon::rangeMenuLabels,
 			[=]() { return module->generator.range(); },
 			[=](int i) { module->setRange(i); }
 		));
 
-		menu->addChild(createIndexSubmenuItem("Quantizer scale", temulentiQuantizerLabels,
+		menu->addChild(createIndexSubmenuItem("Quantizer scale", temulenti::quantizerLabels,
 			[=]() { return module->params[Temulenti::PARAM_QUANTIZER].getValue(); },
 			[=](int i) { module->setQuantizer(i); }
 		));
