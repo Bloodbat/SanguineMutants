@@ -104,11 +104,8 @@ struct Vimina : SanguineModule {
 	// Scaling constant
 	const float kMaxParamValue = 1.f;
 
-	const float kClockSpeed = 8000.f;
-
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	float pulseTrackerBuffer[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
-
 
 	bool gateInputState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	bool multiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
@@ -167,7 +164,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; ++channel) {
-			tmrModuleClock[channel].process(kClockSpeed * args.sampleTime);
+			tmrModuleClock[channel].process(args.sampleRate * args.sampleTime);
 
 			bool bIsTrigger = false;
 
