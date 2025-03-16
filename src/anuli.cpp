@@ -110,9 +110,9 @@ struct Anuli : SanguineModule {
 	Anuli() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configSwitch(PARAM_MODE, 0.f, 6.f, 0.f, "Resonator model", anuliMenuLabels);
+		configSwitch(PARAM_MODE, 0.f, 6.f, 0.f, "Resonator model", anuli::menuModeLabels);
 
-		configSwitch(PARAM_FX, 0.f, 5.f, 0.f, "Disastrous peace FX", anuliFxLabels);
+		configSwitch(PARAM_FX, 0.f, 5.f, 0.f, "Disastrous peace FX", anuli::fxLabels);
 
 		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Note polyphony");
 		paramQuantities[PARAM_POLYPHONY]->snapEnabled = true;
@@ -149,7 +149,7 @@ struct Anuli : SanguineModule {
 			memset(&strummer[channel], 0, sizeof(rings::Strummer));
 			memset(&part[channel], 0, sizeof(rings::Part));
 			memset(&stringSynth[channel], 0, sizeof(rings::StringSynthPart));
-			strummer[channel].Init(0.01f, 44100.f / kAnuliBlockSize);
+			strummer[channel].Init(0.01f, 44100.f / anuli::kBlockSize);
 			part[channel].Init(reverbBuffer[channel]);
 			stringSynth[channel].Init(reverbBuffer[channel]);
 		}
@@ -241,14 +241,14 @@ struct Anuli : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			displayText = anuliModeLabels[channelModes[displayChannel]];
+			displayText = anuli::modeLabels[channelModes[displayChannel]];
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
 				if (channel < channelCount) {
 					for (int light = 0; light < 3; ++light) {
-						LightModes lightMode = anuliModeLights[channelModes[channel]][light];
+						LightModes lightMode = anuli::modeLights[channelModes[channel]][light];
 						drawLight(currentLight + light, lightMode, bIsTrianglePulse, sampleTime);
 					}
 				} else {
@@ -260,7 +260,8 @@ struct Anuli : SanguineModule {
 
 			if (bWithDisastrousPeace) {
 				for (int light = 0; light < 2; ++light) {
-					drawLight(LIGHT_FX + light, anuliFxModeLights[static_cast<int>(fxModel)][light], bIsTrianglePulse, sampleTime);
+					drawLight(LIGHT_FX + light,
+						anuli::fxModeLights[static_cast<int>(fxModel)][light], bIsTrianglePulse, sampleTime);
 				}
 			} else {
 				for (int light = 0; light < 2; ++light) {
@@ -304,7 +305,7 @@ struct Anuli : SanguineModule {
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
 		const ParameterInfo& parameterInfo) {
 		float note = inputs[INPUT_PITCH].getVoltage(channel) +
-			anuliFrequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
+			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
 
 		float transpose = params[PARAM_FREQUENCY].getValue();
@@ -315,7 +316,7 @@ struct Anuli : SanguineModule {
 		performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
 
 		performanceState.fm = clamp(48.f * 3.3f * parameterInfo.frequencyMod *
-			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(kAnuliVoltPerOctave, channel) / 5.f, -48.f, 48.f);
+			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(anuli::kVoltPerOctave, channel) / 5.f, -48.f, 48.f);
 
 		performanceState.internal_exciter = parameterInfo.useInternalExciter;
 		performanceState.internal_strum = parameterInfo.useInternalStrum;
@@ -367,18 +368,18 @@ struct Anuli : SanguineModule {
 
 	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const bool isEasterEgg, const float sampleRate) {
 		if (outputBuffer[channel].empty()) {
-			float in[kAnuliBlockSize] = {};
+			float in[anuli::kBlockSize] = {};
 
 			// Convert input buffer
 			inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
 			int inLen = inputBuffer[channel].size();
-			int outLen = kAnuliBlockSize;
+			int outLen = anuli::kBlockSize;
 			inputSrc[channel].process(inputBuffer[channel].startData(), &inLen,
 				reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
 			inputBuffer[channel].startIncr(inLen);
 
-			float out[kAnuliBlockSize];
-			float aux[kAnuliBlockSize];
+			float out[anuli::kBlockSize];
+			float aux[anuli::kBlockSize];
 
 			if (isEasterEgg) {
 				stringSynth[channel].set_polyphony(polyphonyMode);
@@ -391,8 +392,8 @@ struct Anuli : SanguineModule {
 				setupPerformance(channel, performanceState[channel], structure, parameterInfo);
 
 				// Process audio
-				strummer[channel].Process(NULL, kAnuliBlockSize, &performanceState[channel]);
-				stringSynth[channel].Process(performanceState[channel], patch, in, out, aux, kAnuliBlockSize);
+				strummer[channel].Process(NULL, anuli::kBlockSize, &performanceState[channel]);
+				stringSynth[channel].Process(performanceState[channel], patch, in, out, aux, anuli::kBlockSize);
 			} else {
 				if (part[channel].polyphony() != polyphonyMode) {
 					part[channel].set_polyphony(polyphonyMode);
@@ -406,19 +407,19 @@ struct Anuli : SanguineModule {
 				setupPerformance(channel, performanceState[channel], structure, parameterInfo);
 
 				// Process audio
-				strummer[channel].Process(in, kAnuliBlockSize, &performanceState[channel]);
-				part[channel].Process(performanceState[channel], patch, in, out, aux, kAnuliBlockSize);
+				strummer[channel].Process(in, anuli::kBlockSize, &performanceState[channel]);
+				part[channel].Process(performanceState[channel], patch, in, out, aux, anuli::kBlockSize);
 			}
 
 			// Convert output buffer
-			dsp::Frame<2> outputFrames[kAnuliBlockSize];
-			for (int frame = 0; frame < kAnuliBlockSize; ++frame) {
+			dsp::Frame<2> outputFrames[anuli::kBlockSize];
+			for (int frame = 0; frame < anuli::kBlockSize; ++frame) {
 				outputFrames[frame].samples[0] = out[frame];
 				outputFrames[frame].samples[1] = aux[frame];
 			}
 
 			outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
-			int inCount = kAnuliBlockSize;
+			int inCount = anuli::kBlockSize;
 			int outCount = outputBuffer[channel].capacity();
 			outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
 			outputBuffer[channel].endIncr(outCount);
@@ -525,7 +526,7 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 53.34f, 22.087f);
 		anuliFrambuffer->addChild(displayModel);
-		displayModel->fallbackString = anuliModeLabels[0];
+		displayModel->fallbackString = anuli::modeLabels[0];
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
 
@@ -597,14 +598,14 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Mode", anuliMenuLabels,
+		menu->addChild(createIndexSubmenuItem("Mode", anuli::menuModeLabels,
 			[=]() { return module->params[Anuli::PARAM_MODE].getValue(); },
 			[=](int i) { module->setMode(i); }
 		));
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Disastrous Peace FX", anuliFxLabels,
+		menu->addChild(createIndexSubmenuItem("Disastrous Peace FX", anuli::fxLabels,
 			[=]() { return module->params[Anuli::PARAM_FX].getValue(); },
 			[=](int i) { module->params[Anuli::PARAM_FX].setValue(i); }
 		));
