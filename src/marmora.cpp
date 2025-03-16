@@ -111,10 +111,10 @@ struct Marmora : SanguineModule {
 	bool bNoteGate = false;
 	bool bLastGate = false;
 
-	bool bGates[kBlockSize * 2] = {};
+	bool bGates[marmora::kBlockSize * 2] = {};
 
-	DejaVuLockModes dejaVuLockModeT = DEJA_VU_LOCK_ON;
-	DejaVuLockModes dejaVuLockModeX = DEJA_VU_LOCK_ON;
+	marmora::DejaVuLockModes dejaVuLockModeT = marmora::DEJA_VU_LOCK_ON;
+	marmora::DejaVuLockModes dejaVuLockModeX = marmora::DEJA_VU_LOCK_ON;
 
 	int xScale = 0;
 	int yDividerIndex = 4;
@@ -128,24 +128,24 @@ struct Marmora : SanguineModule {
 	dsp::SchmittTrigger stXReset;
 
 	// Buffers
-	stmlib::GateFlags tClocks[kBlockSize] = {};
+	stmlib::GateFlags tClocks[marmora::kBlockSize] = {};
 	stmlib::GateFlags lastTClock = 0;
-	stmlib::GateFlags xyClocks[kBlockSize] = {};
+	stmlib::GateFlags xyClocks[marmora::kBlockSize] = {};
 	stmlib::GateFlags lastXYClock = 0;
 
-	float rampMaster[kBlockSize] = {};
-	float rampExternal[kBlockSize] = {};
-	float rampSlave[2][kBlockSize] = {};
-	float voltages[kBlockSize * 4] = {};
+	float rampMaster[marmora::kBlockSize] = {};
+	float rampExternal[marmora::kBlockSize] = {};
+	float rampSlave[2][marmora::kBlockSize] = {};
+	float voltages[marmora::kBlockSize * 4] = {};
 	float newNoteVoltage = 0.f;
 
 	// Storage
-	MarmoraScale marmoraScales[kMaxScales];
+	MarmoraScale marmoraScales[marmora::kMaxScales];
 
 	struct LengthParam : ParamQuantity {
 		std::string getDisplayValueString() override {
-			float dejaVuLengthIndex = getValue() * (LENGTHOF(marmoraLoopLengths) - 1);
-			int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
+			float dejaVuLengthIndex = getValue() * (LENGTHOF(marmora::loopLengths) - 1);
+			int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
 			return (string::f("%d", dejaVuLength));
 		}
 
@@ -203,9 +203,9 @@ struct Marmora : SanguineModule {
 		configInput(INPUT_DEJA_VU, "Deja vu");
 
 		configButton(PARAM_DEJA_VU_T, "t deja vu");
-		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t super lock", marmoraLockLabels);
-		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "t mode", marmoraTModeLabels);
-		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "t clock range", marmoraTRangeLabels);
+		configSwitch(PARAM_T_SUPER_LOCK, 0.f, 1.f, 0.f, "t super lock", marmora::lockLabels);
+		configSwitch(PARAM_T_MODE, 0.f, 6.f, 0.f, "t mode", marmora::tModeLabels);
+		configSwitch(PARAM_T_RANGE, 0.f, 2.f, 0.f, "t clock range", marmora::tRangeLabels);
 		configParam(PARAM_T_RATE, -1.f, 1.f, 0.f, "t clock rate");
 		configParam(PARAM_T_BIAS, 0.f, 1.f, 0.5f, "t gate bias", "%", 0.f, 100.f);
 		configParam(PARAM_T_JITTER, 0.f, 1.f, 0.f, "t randomness amount", "%", 0.f, 100.f);
@@ -221,15 +221,15 @@ struct Marmora : SanguineModule {
 		configOutput(OUTPUT_T3, "t₃");
 
 		configButton(PARAM_DEJA_VU_X, "X deja vu");
-		configSwitch(PARAM_X_SUPER_LOCK, 0.f, 1.f, 0.f, "X super lock", marmoraLockLabels);
+		configSwitch(PARAM_X_SUPER_LOCK, 0.f, 1.f, 0.f, "X super lock", marmora::lockLabels);
 		configParam(PARAM_X_SPREAD, 0.f, 1.f, 0.5f, "X probability distribution", "%", 0.f, 100.f);
-		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmoraXModeLabels);
+		configSwitch(PARAM_X_MODE, 0.f, 2.f, 0.f, "X mode", marmora::xModeLabels);
 		configParam(PARAM_X_BIAS, 0.f, 1.f, 0.5f, "X distribution bias", "%", 0.f, 100.f);
-		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "X output voltage range", marmoraXRangeLabels);
+		configSwitch(PARAM_X_RANGE, 0.f, 2.f, 0.f, "X output voltage range", marmora::xRangeLabels);
 		configButton(PARAM_EXTERNAL, "X external voltage processing mode");
 		configParam(PARAM_X_STEPS, 0.f, 1.f, 0.5f, "X smoothness", "%", 0.f, 100.f);
-		configSwitch(PARAM_SCALE, 0.f, 5.f, 0.f, "Scale", marmoraScaleLabels);
-		configSwitch(PARAM_INTERNAL_X_CLOCK_SOURCE, 0.f, 3.f, 0.f, "Internal X clock source", marmoraInternalClockLabels);
+		configSwitch(PARAM_SCALE, 0.f, 5.f, 0.f, "Scale", marmora::scaleLabels);
+		configSwitch(PARAM_INTERNAL_X_CLOCK_SOURCE, 0.f, 3.f, 0.f, "Internal X clock source", marmora::internalClockLabels);
 		configInput(INPUT_X_BIAS, "X bias");
 		configInput(INPUT_X_STEPS, "X steps");
 		configInput(INPUT_X_SPREAD, "X spread");
@@ -239,7 +239,7 @@ struct Marmora : SanguineModule {
 		configOutput(OUTPUT_X2, "X₂");
 		configOutput(OUTPUT_X3, "X₃");
 
-		configParam(PARAM_Y_RATE, 0.f, 1.f, 4.5f / LENGTHOF(y_divider_ratios), "Y clock divider");
+		configParam(PARAM_Y_RATE, 0.f, 1.f, 4.5f / LENGTHOF(marmora::yDividerRatios), "Y clock divider");
 		configParam(PARAM_Y_SPREAD, 0.f, 1.f, 0.5f, "Y probability distribution", "%", 0.f, 100.f);
 		configParam(PARAM_Y_BIAS, 0.f, 1.f, 0.5f, "Y voltage offset", "%", 0.f, 100.f);
 		configParam(PARAM_Y_STEPS, 0.f, 1.f, 0.f, "Y smoothness", "%", 0.f, 100.f);
@@ -252,10 +252,10 @@ struct Marmora : SanguineModule {
 		noteFilter.Init();
 		scaleRecorder.Init();
 
-		for (int scale = 0; scale < kMaxScales; ++scale) {
+		for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 			marmoraScales[scale].bScaleDirty = false;
 			marmoraScales[scale].scale.Init();
-			copyScale(presetScales[scale], marmoraScales[scale].scale);
+			copyScale(marmora::presetScales[scale], marmoraScales[scale].scale);
 		}
 
 		onSampleRateChange();
@@ -273,17 +273,17 @@ struct Marmora : SanguineModule {
 		xyClocks[blockIndex] = lastXYClock;
 
 		// Lock modes
-		dejaVuLockModeT = params[PARAM_T_SUPER_LOCK].getValue() ? DEJA_VU_SUPER_LOCK : DEJA_VU_LOCK_OFF;
-		dejaVuLockModeX = params[PARAM_X_SUPER_LOCK].getValue() ? DEJA_VU_SUPER_LOCK : DEJA_VU_LOCK_OFF;
+		dejaVuLockModeT = params[PARAM_T_SUPER_LOCK].getValue() ? marmora::DEJA_VU_SUPER_LOCK : marmora::DEJA_VU_LOCK_OFF;
+		dejaVuLockModeX = params[PARAM_X_SUPER_LOCK].getValue() ? marmora::DEJA_VU_SUPER_LOCK : marmora::DEJA_VU_LOCK_OFF;
 
 		const float dejaVuDistance = fabsf(params[PARAM_DEJA_VU].getValue() - 0.5f);
 
-		if (dejaVuLockModeT != DEJA_VU_SUPER_LOCK && dejaVuDistance < 0.02f) {
-			dejaVuLockModeT = DEJA_VU_LOCK_ON;
+		if (dejaVuLockModeT != marmora::DEJA_VU_SUPER_LOCK && dejaVuDistance < 0.02f) {
+			dejaVuLockModeT = marmora::DEJA_VU_LOCK_ON;
 		}
 
-		if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK && dejaVuDistance < 0.02f) {
-			dejaVuLockModeX = DEJA_VU_LOCK_ON;
+		if (dejaVuLockModeX != marmora::DEJA_VU_SUPER_LOCK && dejaVuDistance < 0.02f) {
+			dejaVuLockModeX = marmora::DEJA_VU_LOCK_ON;
 		}
 
 		bDejaVuTEnabled = params[PARAM_DEJA_VU_T].getValue();
@@ -303,7 +303,7 @@ struct Marmora : SanguineModule {
 		bMenuTReset = bMenuXReset = false;
 
 		// Process block
-		if (++blockIndex >= kBlockSize) {
+		if (++blockIndex >= marmora::kBlockSize) {
 			blockIndex = 0;
 			stepBlock();
 		}
@@ -334,21 +334,21 @@ struct Marmora : SanguineModule {
 
 			const float sampleTime = kLightDivider * args.sampleTime;
 
-			if (bDejaVuTEnabled || dejaVuLockModeT == DEJA_VU_SUPER_LOCK) {
+			if (bDejaVuTEnabled || dejaVuLockModeT == marmora::DEJA_VU_SUPER_LOCK) {
 				drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime, systemTimeMs);
 			} else {
 				lights[LIGHT_DEJA_VU_T].setBrightnessSmooth(0.f, sampleTime);
 			}
 
-			if (bDejaVuXEnabled || dejaVuLockModeX == DEJA_VU_SUPER_LOCK) {
+			if (bDejaVuXEnabled || dejaVuLockModeX == marmora::DEJA_VU_SUPER_LOCK) {
 				drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime, systemTimeMs);
 			} else {
 				lights[LIGHT_DEJA_VU_X].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			int tMode = params[PARAM_T_MODE].getValue();
-			drawLight(LIGHT_T_MODE + 0, tModeLights[tMode][0], sampleTime, systemTimeMs);
-			drawLight(LIGHT_T_MODE + 1, tModeLights[tMode][1], sampleTime, systemTimeMs);
+			drawLight(LIGHT_T_MODE + 0, marmora::tModeLights[tMode][0], sampleTime, systemTimeMs);
+			drawLight(LIGHT_T_MODE + 1, marmora::tModeLights[tMode][1], sampleTime, systemTimeMs);
 
 			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue()) % 3;
 			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? kSanguineButtonLightValue : 0.f);
@@ -362,8 +362,8 @@ struct Marmora : SanguineModule {
 			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? kSanguineButtonLightValue : 0.f);
 			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? kSanguineButtonLightValue : 0.f);
 
-			drawLight(LIGHT_SCALE + 0, scaleLights[xScale][0], sampleTime, systemTimeMs);
-			drawLight(LIGHT_SCALE + 1, scaleLights[xScale][1], sampleTime, systemTimeMs);
+			drawLight(LIGHT_SCALE + 0, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
+			drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
 
 			if (!bScaleEditMode) {
 				float lightExternalBrightness = params[PARAM_EXTERNAL].getValue() ? kSanguineButtonLightValue : 0.f;
@@ -420,9 +420,9 @@ struct Marmora : SanguineModule {
 			lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
 
 			if (!bXClockSourceExternal) {
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].red, sampleTime);
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].green, sampleTime);
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(paletteMarmoraClockSource[xClockSourceInternal].blue, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].red, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].green, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].blue, sampleTime);
 			} else {
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
@@ -450,21 +450,21 @@ struct Marmora : SanguineModule {
 		}
 	}
 
-	void drawDejaVuLight(const int light, DejaVuLockModes lockMode, const float sampleTime, const long long systemTimeMs) {
+	void drawDejaVuLight(const int light, marmora::DejaVuLockModes lockMode, const float sampleTime, const long long systemTimeMs) {
 		int slowTriangle;
 		int pulseWidth;
 		int fastTriangle;
 		switch (lockMode) {
-		case DEJA_VU_LOCK_ON:
+		case marmora::DEJA_VU_LOCK_ON:
 			slowTriangle = (systemTimeMs & 1023) >> 5;
 			slowTriangle = slowTriangle >= 16 ? 31 - slowTriangle : slowTriangle;
 			pulseWidth = systemTimeMs & 15;
 			lights[light].setBrightnessSmooth(slowTriangle >= pulseWidth ? kSanguineButtonLightValue : 0.f, sampleTime);
 			break;
-		case DEJA_VU_LOCK_OFF:
+		case marmora::DEJA_VU_LOCK_OFF:
 			lights[light].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			break;
-		case DEJA_VU_SUPER_LOCK:
+		case marmora::DEJA_VU_SUPER_LOCK:
 			fastTriangle = (systemTimeMs & 511) >> 4;
 			fastTriangle = fastTriangle >= 16 ? 31 - fastTriangle : fastTriangle;
 			pulseWidth = systemTimeMs & 15;
@@ -483,8 +483,8 @@ struct Marmora : SanguineModule {
 
 		float dejaVu = clamp(params[PARAM_DEJA_VU].getValue() + inputs[INPUT_DEJA_VU].getVoltage() / 5.f, 0.f, 1.f);
 
-		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmoraLoopLengths) - 1);
-		int dejaVuLength = marmoraLoopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
+		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmora::loopLengths) - 1);
+		int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
 
 		// Setup TGenerator
 		bool bTExternalClock = inputs[INPUT_T_CLOCK].isConnected();
@@ -497,7 +497,7 @@ struct Marmora : SanguineModule {
 		tGenerator.set_bias(tBias);
 		float tJitter = clamp(params[PARAM_T_JITTER].getValue() + inputs[INPUT_T_JITTER].getVoltage() / 5.f, 0.f, 1.f);
 		tGenerator.set_jitter(tJitter);
-		if (dejaVuLockModeT != DEJA_VU_SUPER_LOCK) {
+		if (dejaVuLockModeT != marmora::DEJA_VU_SUPER_LOCK) {
 			tGenerator.set_deja_vu(bDejaVuTEnabled ? dejaVu : 0.f);
 		} else {
 			tGenerator.set_deja_vu(0.5f);
@@ -506,7 +506,7 @@ struct Marmora : SanguineModule {
 		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
 		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
 
-		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, kBlockSize);
+		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, marmora::kBlockSize);
 
 		// Set up XYGenerator
 		marbles::ClockSource xClockSource = xClockSourceInternal;
@@ -530,7 +530,7 @@ struct Marmora : SanguineModule {
 			x.spread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
 			x.bias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
 			x.steps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
-			if (dejaVuLockModeX != DEJA_VU_SUPER_LOCK) {
+			if (dejaVuLockModeX != marmora::DEJA_VU_SUPER_LOCK) {
 				x.deja_vu = bDejaVuXEnabled ? dejaVu : 0.f;
 			} else {
 				x.deja_vu = 0.5f;
@@ -551,14 +551,14 @@ struct Marmora : SanguineModule {
 			y.deja_vu = 0.f;
 			y.length = 1;
 
-			unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(y_divider_ratios);
-			if (index < LENGTHOF(y_divider_ratios)) {
+			unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(marmora::yDividerRatios);
+			if (index < LENGTHOF(marmora::yDividerRatios)) {
 				yDividerIndex = index;
 			}
-			y.ratio = y_divider_ratios[yDividerIndex];
+			y.ratio = marmora::yDividerRatios[yDividerIndex];
 			y.scale_index = xScale;
 
-			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, kBlockSize);
+			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, marmora::kBlockSize);
 		} else {
 			/* Was
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
@@ -597,14 +597,14 @@ struct Marmora : SanguineModule {
 
 		// Set scales
 		if (!bModuleAdded) {
-			for (int scale = 0; scale < kMaxScales; ++scale) {
-				xyGenerator.LoadScale(scale, presetScales[scale]);
-				copyScale(presetScales[scale], marmoraScales[scale].scale);
+			for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
+				xyGenerator.LoadScale(scale, marmora::presetScales[scale]);
+				copyScale(marmora::presetScales[scale], marmoraScales[scale].scale);
 				marmoraScales[scale].bScaleDirty = false;
 			}
 			bModuleAdded = true;
 		} else {
-			for (int scale = 0; scale < kMaxScales; ++scale) {
+			for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 				xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 			}
 		}
@@ -616,7 +616,7 @@ struct Marmora : SanguineModule {
 		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
 		json_object_set_new(rootJ, "userSeed", json_integer(userSeed));
 
-		for (int scale = 0; scale < kMaxScales; ++scale) {
+		for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 			if (marmoraScales[scale].bScaleDirty) {
 				json_t* scaleDataVoltagesJ = json_array();
 				json_t* scaleDataWeightsJ = json_array();
@@ -656,7 +656,7 @@ struct Marmora : SanguineModule {
 
 		int dirtyScalesCount = 0;
 
-		for (int scale = 0; scale < kMaxScales; ++scale) {
+		for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 			std::string scaleHeader = string::f("userScale%d", scale);
 			std::string scaleBaseInterval = scaleHeader + "Interval";
 
@@ -701,7 +701,7 @@ struct Marmora : SanguineModule {
 			}
 		} // for
 		if (dirtyScalesCount > 0) {
-			for (int scale = 0; scale < kMaxScales; ++scale) {
+			for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 				if (marmoraScales[scale].bScaleDirty) {
 					xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
 				}
@@ -730,7 +730,7 @@ struct Marmora : SanguineModule {
 	void resetScale() {
 		int currentScale = params[PARAM_SCALE].getValue();
 
-		copyScale(presetScales[currentScale], marmoraScales[currentScale].scale);
+		copyScale(marmora::presetScales[currentScale], marmoraScales[currentScale].scale);
 		marmoraScales[currentScale].bScaleDirty = false;
 		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 	}
@@ -941,12 +941,12 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		menu->addChild(createSubmenuItem("t generator", "",
 			[=](Menu* menu) {
-				menu->addChild(createIndexSubmenuItem("Mode", marmoraTModeLabels,
+				menu->addChild(createIndexSubmenuItem("Mode", marmora::tModeLabels,
 					[=]() {return module->params[Marmora::PARAM_T_MODE].getValue(); },
 					[=](int i) {module->params[Marmora::PARAM_T_MODE].setValue(i); }
 					));
 
-				menu->addChild(createIndexSubmenuItem("Range", marmoraTRangeLabels,
+				menu->addChild(createIndexSubmenuItem("Range", marmora::tRangeLabels,
 					[=]() {return module->params[Marmora::PARAM_T_RANGE].getValue(); },
 					[=](int i) {module->params[Marmora::PARAM_T_RANGE].setValue(i); }
 				));
@@ -962,17 +962,17 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		menu->addChild(createSubmenuItem("X generator", "",
 			[=](Menu* menu) {
-				menu->addChild(createIndexSubmenuItem("Mode", marmoraXModeLabels,
+				menu->addChild(createIndexSubmenuItem("Mode", marmora::xModeLabels,
 					[=]() {return module->params[Marmora::PARAM_X_MODE].getValue(); },
 					[=](int i) {module->params[Marmora::PARAM_X_MODE].setValue(i); }
 					));
 
-				menu->addChild(createIndexSubmenuItem("Range", marmoraXRangeLabels,
+				menu->addChild(createIndexSubmenuItem("Range", marmora::xRangeLabels,
 					[=]() {return module->params[Marmora::PARAM_X_RANGE].getValue(); },
 					[=](int i) {module->params[Marmora::PARAM_X_RANGE].setValue(i); }
 				));
 
-				menu->addChild(createIndexSubmenuItem("Internal clock source", marmoraInternalClockLabels,
+				menu->addChild(createIndexSubmenuItem("Internal clock source", marmora::internalClockLabels,
 					[=]() {return module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].getValue(); },
 					[=](int i) {module->params[Marmora::PARAM_INTERNAL_X_CLOCK_SOURCE].setValue(i); }
 				));
@@ -1007,7 +1007,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		menu->addChild(createSubmenuItem("Scales", "",
 			[=](Menu* menu) {
-				menu->addChild(createIndexSubmenuItem("Select active", marmoraScaleLabels,
+				menu->addChild(createIndexSubmenuItem("Select active", marmora::scaleLabels,
 					[=]() {return module->params[Marmora::PARAM_SCALE].getValue(); },
 					[=](int i) {module->params[Marmora::PARAM_SCALE].setValue(i); }
 					));
