@@ -403,8 +403,7 @@ struct Mortuus : SanguineModule {
 	}
 
 	void setFunction(uint8_t index, mortuus::ProcessorFunctions f) {
-		// TODO: check this logic!
-		if (editMode == apicesCommon::EDIT_MODE_SPLIT || editMode == apicesCommon::EDIT_MODE_TWIN) {
+		if (editMode < apicesCommon::EDIT_MODE_FIRST) {
 			processorFunction[0] = processorFunction[1] = f;
 			processors[0].set_function(processorFunctionTable[f][0]);
 			processors[1].set_function(processorFunctionTable[f][1]);
@@ -666,8 +665,7 @@ struct Mortuus : SanguineModule {
 		bool bIsChannel1Station = processors[0].function() == deadman::PROCESSOR_FUNCTION_NUMBER_STATION;
 		bool bIsChannel2Station = processors[1].function() == deadman::PROCESSOR_FUNCTION_NUMBER_STATION;
 		if (bIsChannel1Station || bIsChannel2Station) {
-			// TODO: check this logic!
-			if (editMode == apicesCommon::EDIT_MODE_SPLIT || editMode == apicesCommon::EDIT_MODE_TWIN) {
+			if (editMode < apicesCommon::EDIT_MODE_FIRST) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((pattern & 1) ? 1.f : 0.f);
@@ -719,8 +717,7 @@ struct Mortuus : SanguineModule {
 		processorFunction[1] = static_cast<mortuus::ProcessorFunctions>(settings.processorFunction[1]);
 		std::copy(&settings.potValue[0], &settings.potValue[7], &potValue[0]);
 
-		// TODO: and another logic check!
-		if (editMode == apicesCommon::EDIT_MODE_FIRST || editMode == apicesCommon::EDIT_MODE_SECOND) {
+		if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 			lockPots();
 			for (uint8_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				processors[0].set_parameter(knob, static_cast<uint16_t>(potValue[knob]) << 8);
@@ -742,14 +739,13 @@ struct Mortuus : SanguineModule {
 			oledText3 = mortuus::knobLabelsSplitMode[processorFunction[0]].knob3;
 			oledText4 = mortuus::knobLabelsSplitMode[processorFunction[0]].knob4;
 		} else {
-
 			int currentFunction = -1;
 			// same for both
 			if (editMode == apicesCommon::EDIT_MODE_TWIN) {
 				currentFunction = processorFunction[0];
 			}
 			// if expert, pick the active set of labels
-			else if (editMode == apicesCommon::EDIT_MODE_FIRST || editMode == apicesCommon::EDIT_MODE_SECOND) {
+			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 				currentFunction = processorFunction[editMode - apicesCommon::EDIT_MODE_FIRST];
 			} else {
 				return;
