@@ -191,8 +191,8 @@ struct Mortuus : SanguineModule {
 		}
 
 		if (bHasExpander) {
-			float cvValues[kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
-			int modulatedValues[kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+			float cvValues[apicesExpander::kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
+			int modulatedValues[apicesExpander::kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 			int channel2Function = 0;
 
@@ -226,7 +226,7 @@ struct Mortuus : SanguineModule {
 				}
 			}
 
-			for (int function = 0; function < kMaxFunctions; ++function) {
+			for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
 				int channel1Input = Ansa::INPUT_PARAM_CV_1 + function;
 
 				if (ansaExpander->getInput(channel1Input).isConnected()) {
@@ -240,7 +240,7 @@ struct Mortuus : SanguineModule {
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
 					int channel2Input = Ansa::INPUT_PARAM_CV_CHANNEL_2_1 + function;
-					channel2Function = function + kChannel2Offset;
+					channel2Function = function + apicesExpander::kChannel2Offset;
 
 					if (ansaExpander->getInput(channel2Input).isConnected()) {
 						int channel2Attenuverter = Ansa::PARAM_PARAM_CV_CHANNEL_2_1 + function;
@@ -791,7 +791,7 @@ struct Mortuus : SanguineModule {
 			break;
 		}
 
-		for (int function = 0; function < kMaxFunctions; ++function) {
+		for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
 			Light& currentLightRed = ansaExpander->getLight(Ansa::LIGHT_PARAM_1 + function * 3);
 			Light& currentLightGreen = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 1);
 			Light& currentLightBlue = ansaExpander->getLight((Ansa::LIGHT_PARAM_1 + function * 3) + 2);
@@ -831,7 +831,7 @@ struct Mortuus : SanguineModule {
 		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ?
 			kSanguineButtonLightValue : 0.f);
 
-		for (int light = 0; light < kMaxFunctions; ++light) {
+		for (int light = 0; light < apicesExpander::kMaxFunctions; ++light) {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
 		}
 	}
@@ -840,7 +840,7 @@ struct Mortuus : SanguineModule {
 		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ?
 			kSanguineButtonLightValue : 0.f, sampleTime);
 
-		for (int light = 0; light < kMaxFunctions; ++light) {
+		for (int light = 0; light < apicesExpander::kMaxFunctions; ++light) {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
 		}
 	}

@@ -178,8 +178,8 @@ struct Apices : SanguineModule {
 		}
 
 		if (bHasExpander) {
-			float cvValues[kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
-			int modulatedValues[kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+			float cvValues[apicesExpander::kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
+			int modulatedValues[apicesExpander::kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 			int channel2Function = 0;
 
@@ -213,7 +213,7 @@ struct Apices : SanguineModule {
 				}
 			}
 
-			for (int function = 0; function < kMaxFunctions; ++function) {
+			for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
 				int channel1Input = Nix::INPUT_PARAM_CV_1 + function;
 
 				if (nixExpander->getInput(channel1Input).isConnected()) {
@@ -226,7 +226,7 @@ struct Apices : SanguineModule {
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
 					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + function;
-					channel2Function = function + kChannel2Offset;
+					channel2Function = function + apicesExpander::kChannel2Offset;
 
 					if (nixExpander->getInput(channel2Input).isConnected()) {
 						int channel2Attenuverter = Nix::PARAM_PARAM_CV_CHANNEL_2_1 + function;
@@ -762,7 +762,7 @@ struct Apices : SanguineModule {
 			break;
 		}
 
-		for (int function = 0; function < kMaxFunctions; ++function) {
+		for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
 			Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
 			Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
 			Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
@@ -801,7 +801,7 @@ struct Apices : SanguineModule {
 	void setExpanderChannel2Lights(Module* nixExpander, bool lightIsOn) {
 		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 
-		for (int light = 0; light < kMaxFunctions; ++light) {
+		for (int light = 0; light < apicesExpander::kMaxFunctions; ++light) {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
 		}
 	}
@@ -809,7 +809,7 @@ struct Apices : SanguineModule {
 	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float sampleTime) {
 		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? kSanguineButtonLightValue : 0.f, sampleTime);
 
-		for (int light = 0; light < kMaxFunctions; ++light) {
+		for (int light = 0; light < apicesExpander::kMaxFunctions; ++light) {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
 		}
 	}

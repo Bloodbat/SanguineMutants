@@ -3,14 +3,14 @@
 Nix::Nix() {
     config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-    for (int function = 0; function < kMaxFunctions; ++function) {
+    for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
         int functionNumber = function + 1;
         configParam(PARAM_PARAM_CV_1 + function, -1.f, 1.f, 0.f, string::f("Function %d CV", functionNumber));
         configInput(INPUT_PARAM_CV_1 + function, string::f("Function %d", functionNumber));
 
-        configParam(PARAM_PARAM_CV_1 + function + kChannel2Offset, -1.f, 1.f, 0.f,
+        configParam(PARAM_PARAM_CV_1 + function + apicesExpander::kChannel2Offset, -1.f, 1.f, 0.f,
             string::f("Expert channel 2 function %d CV", functionNumber));
-        configInput(INPUT_PARAM_CV_1 + function + kChannel2Offset,
+        configInput(INPUT_PARAM_CV_1 + function + apicesExpander::kChannel2Offset,
             string::f("Expert channel 2 function %d", functionNumber));
     }
 }
@@ -26,7 +26,7 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
     }
 
     if (!bHasMaster) {
-        for (int light = 0; light < kMaxFunctions; ++light) {
+        for (int light = 0; light < apicesExpander::kMaxFunctions; ++light) {
             int currentLight = LIGHT_PARAM_1 + light * 3;
             for (int lightColor = 0; lightColor < 3; ++lightColor) {
                 lights[currentLight + lightColor].setBrightness(0.f);
