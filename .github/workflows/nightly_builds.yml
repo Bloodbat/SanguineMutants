@@ -13,7 +13,7 @@ on:
    - cron: '46 18 * * *'  # Every day at 18:46 UTC
 
 env:
-  rack-sdk-version: latest
+  rack-sdk-version: 2.5.2
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
 
 defaults:
