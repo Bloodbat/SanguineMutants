@@ -6,16 +6,12 @@
 
 using simd::float_4;
 
-enum ExploratorNoiseModes {
-	NOISE_WHITE,
-	NOISE_PRISM,
-	NOISE_MODES_COUNT
-};
-
-static const std::vector<std::string> exploratorNoiseModeLabels{
-	"White noise (High CPU)",
-	"Prism noise (Low CPU)"
-};
+namespace explorator {
+	static const std::vector<std::string> noiseModeLabels{
+		"White noise (High CPU)",
+		"Prism noise (Low CPU)"
+	};
+}
 
 struct Explorator : SanguineModule {
 	enum ParamIds {
@@ -63,6 +59,12 @@ struct Explorator : SanguineModule {
 		LIGHTS_COUNT
 	};
 
+	enum noiseModes {
+		NOISE_WHITE,
+		NOISE_PRISM,
+		NOISE_MODES_COUNT
+	};
+
 	const int kLightFrequency = 128;
 	int lastSampleAndHoldChannels = 0;
 
@@ -72,7 +74,7 @@ struct Explorator : SanguineModule {
 
 	float voltagesSampleAndHold[PORT_MAX_CHANNELS] = {};
 
-	ExploratorNoiseModes noiseMode = NOISE_PRISM;
+	noiseModes noiseMode = NOISE_PRISM;
 
 	Explorator() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -403,7 +405,7 @@ struct Explorator : SanguineModule {
 	}
 
 	void setNoiseMode(int newNoiseMode) {
-		noiseMode = static_cast<ExploratorNoiseModes>(newNoiseMode);
+		noiseMode = static_cast<noiseModes>(newNoiseMode);
 	}
 
 	int getNoiseMode() {
@@ -423,7 +425,7 @@ struct Explorator : SanguineModule {
 
 		json_t* noiseModeJ = json_object_get(rootJ, "noiseMode");
 		if (noiseModeJ) {
-			noiseMode = static_cast<ExploratorNoiseModes>(json_integer_value(noiseModeJ));
+			noiseMode = static_cast<noiseModes>(json_integer_value(noiseModeJ));
 		}
 	}
 };
@@ -500,7 +502,7 @@ struct ExploratorWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 
-		menu->addChild(createIndexSubmenuItem("Noise mode", exploratorNoiseModeLabels,
+		menu->addChild(createIndexSubmenuItem("Noise mode", explorator::noiseModeLabels,
 			[=]() {return module->getNoiseMode(); },
 			[=](int i) {module->setNoiseMode(i); }
 		));
