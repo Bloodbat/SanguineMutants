@@ -135,8 +135,8 @@ struct Vimina : SanguineModule {
 		configInput(INPUT_RESET, "Reset");
 		configInput(INPUT_CLOCK, "Clock");
 
-		configSwitch(PARAM_MODE_1, 0.f, 1.f, 1.f, "Channel 1 mode", viminaModeLabels);
-		configSwitch(PARAM_MODE_2, 0.f, 1.f, 0.f, "Channel 2 mode", viminaModeLabels);
+		configSwitch(PARAM_MODE_1, 0.f, 1.f, 1.f, "Channel 1 mode", vimina::modeLabels);
+		configSwitch(PARAM_MODE_2, 0.f, 1.f, 0.f, "Channel 2 mode", vimina::modeLabels);
 
 		configBypass(INPUT_CLOCK, OUTPUT_OUT_1A);
 		configBypass(INPUT_CLOCK, OUTPUT_OUT_1B);

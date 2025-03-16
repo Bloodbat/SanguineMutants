@@ -44,11 +44,11 @@ struct Aleae : SanguineModule {
 	dsp::BooleanTrigger btGateTriggers[kMaxModuleSections][PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
 
-	RollResults rollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	RollResults lastRollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	aleae::RollResults rollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	aleae::RollResults lastRollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	RollModes rollModes[kMaxModuleSections] = { ROLL_DIRECT, ROLL_DIRECT };
-	OutModes outModes[kMaxModuleSections] = { OUT_MODE_TRIGGER, OUT_MODE_TRIGGER };
+	aleae::RollModes rollModes[kMaxModuleSections] = { aleae::ROLL_DIRECT, aleae::ROLL_DIRECT };
+	aleae::OutModes outModes[kMaxModuleSections] = { aleae::OUT_MODE_TRIGGER, aleae::OUT_MODE_TRIGGER };
 	bool bOutputsConnected[OUTPUTS_COUNT] = {};
 
 	Aleae() {
@@ -62,7 +62,7 @@ struct Aleae : SanguineModule {
 			configOutput(OUTPUT_OUT_1A + section, string::f("Channel %d A", section + 1));
 			configOutput(OUTPUT_OUT_1B + section, string::f("Channel %d B", section + 1));
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				lastRollResults[section][channel] = ROLL_HEADS;
+				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
 			lightsDivider.setDivision(kLightFrequency);
 		}
@@ -85,8 +85,8 @@ struct Aleae : SanguineModule {
 			}
 			channelCount = std::max(input->getChannels(), 1);
 
-			rollModes[section] = static_cast<RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
-			outModes[section] = static_cast<OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
+			rollModes[section] = static_cast<aleae::RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
+			outModes[section] = static_cast<aleae::OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
 
 			bool lightAActive = false;
 			bool lightBActive = false;
@@ -97,17 +97,22 @@ struct Aleae : SanguineModule {
 				if (btGateTriggers[section][channel].process(gatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
-					float threshold = params[PARAM_THRESHOLD_1 + section].getValue() + inputs[INPUT_P_1 + section].getPolyVoltage(channel) / 10.f;
-					rollResults[section][channel] = (random::uniform() >= threshold) ? ROLL_HEADS : ROLL_TAILS;
-					if (rollModes[section] == ROLL_TOGGLE) {
-						rollResults[section][channel] = static_cast<RollResults>(lastRollResults[section][channel] ^ rollResults[section][channel]);
+					float threshold = params[PARAM_THRESHOLD_1 + section].getValue() +
+						inputs[INPUT_P_1 + section].getPolyVoltage(channel) / 10.f;
+					rollResults[section][channel] = (random::uniform() >= threshold) ?
+						aleae::ROLL_HEADS : aleae::ROLL_TAILS;
+					if (rollModes[section] == aleae::ROLL_TOGGLE) {
+						rollResults[section][channel] =
+							static_cast<aleae::RollResults>(lastRollResults[section][channel] ^ rollResults[section][channel]);
 					}
 					lastRollResults[section][channel] = rollResults[section][channel];
 				}
 
 				// Output gate logic
-				bool gateAActive = (rollResults[section][channel] == ROLL_HEADS && (outModes[section] == OUT_MODE_LATCH || gatePresent));
-				bool gateBActive = (rollResults[section][channel] == ROLL_TAILS && (outModes[section] == OUT_MODE_LATCH || gatePresent));
+				bool gateAActive = (rollResults[section][channel] == aleae::ROLL_HEADS &&
+					(outModes[section] == aleae::OUT_MODE_LATCH || gatePresent));
+				bool gateBActive = (rollResults[section][channel] == aleae::ROLL_TAILS &&
+					(outModes[section] == aleae::OUT_MODE_LATCH || gatePresent));
 
 				if (channel == ledsChannel) {
 					lightAActive = gateAActive;
@@ -141,9 +146,9 @@ struct Aleae : SanguineModule {
 				lights[currentLight + 0].setSmoothBrightness(lightBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + section * 2;
-				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ?
+				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
 					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == ROLL_DIRECT ?
+				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
 					0.f : kSanguineButtonLightValue, sampleTime);
 
 				lights[LIGHTS_OUT_MODE + section].setBrightnessSmooth(outModes[section] ? 0.5 : 0.f, sampleTime);
@@ -157,7 +162,7 @@ struct Aleae : SanguineModule {
 			params[PARAM_ROLL_MODE_1 + section].setValue(0);
 			params[PARAM_OUT_MODE_1 + section].setValue(0);
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				lastRollResults[section][channel] = ROLL_HEADS;
+				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
 		}
 	}

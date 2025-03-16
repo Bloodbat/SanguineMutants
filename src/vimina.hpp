@@ -1,6 +1,8 @@
 #pragma once
 
-static const std::vector<std::string> viminaModeLabels = {
-    "Clock multiplier/divider",
-    "Clock swing"
-};
+namespace vimina {
+    static const std::vector<std::string> modeLabels = {
+        "Clock multiplier/divider",
+        "Clock swing"
+    };
+}
