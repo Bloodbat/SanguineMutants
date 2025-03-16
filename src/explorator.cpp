@@ -1,7 +1,10 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 #include "pcg_random.hpp"
+#pragma GCC diagnostic pop
 #include "sanguinerandom.hpp"
 
 using simd::float_4;
