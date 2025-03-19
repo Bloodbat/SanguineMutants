@@ -370,12 +370,19 @@ struct Vimina : SanguineModule {
 			outputs[OUTPUT_OUT_1A + section].setVoltage(10.f, channel);
 			outputs[OUTPUT_OUT_1B + section].setVoltage(10.f, channel);
 			triggerExtendCount[section][channel] = kTriggerExtendCount;
-			if (channelState[section][channel] < CHANNEL_GENERATED) {
-				ledGateDuration[section][channel] = kLedThruGateDuration;
-				ledState[section][channel] = CHANNEL_THRU;
-			} else {
+
+			switch (channelState[section][channel])
+			{
+			case CHANNEL_GENERATED:
 				ledGateDuration[section][channel] = kLedGeneratedGateDuration;
 				ledState[section][channel] = CHANNEL_GENERATED;
+				break;
+			case CHANNEL_THRU:
+				ledGateDuration[section][channel] = kLedThruGateDuration;
+				ledState[section][channel] = CHANNEL_THRU;
+				break;
+			default:
+				break;
 			}
 		} else {
 			if (triggerExtendCount[section][channel] == 0) {
@@ -420,8 +427,8 @@ struct Vimina : SanguineModule {
 				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
 				triggerCount[section][channel] >= channelFactor[section][channel]) {
 				channelState[section][channel] = CHANNEL_GENERATED;
-				--triggerCount[section][channel];
 				multiplyDebouncing[section][channel] = true;
+				--triggerCount[section][channel];
 			}
 			break;
 		case SECTION_FUNCTION_SWING:
