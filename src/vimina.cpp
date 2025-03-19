@@ -381,7 +381,7 @@ struct Vimina : SanguineModule {
 				outputs[OUTPUT_OUT_1A + section].setVoltage(0.f, channel);
 				outputs[OUTPUT_OUT_1B + section].setVoltage(0.f, channel);
 			} else {
-				triggerExtendCount[section][channel] -= 1;
+				--triggerExtendCount[section][channel];
 			}
 		}
 	}
