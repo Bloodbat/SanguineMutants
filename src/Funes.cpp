@@ -8,7 +8,9 @@
 #include "osdialog.h"
 #include <thread>
 
+#ifndef METAMODULE
 #include <fstream>
+#endif
 
 #include "Funes.hpp"
 
@@ -557,6 +559,7 @@ struct Funes : SanguineModule {
 
 		std::string fileExtension = string::lowercase(system::getExtension(filePath));
 
+		#ifndef METAMODULE
 		if (fileExtension == ".bin") {
 			std::ifstream input(filePath, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
@@ -573,6 +576,7 @@ struct Funes : SanguineModule {
 				errorTimeOut = 4;
 			}
 		}
+		#endif
 	}
 
 	void showCustomDataLoadDialog() {

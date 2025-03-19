@@ -169,7 +169,9 @@ class FxEngine {
     
     template<typename D>
     inline void Write(D& d, int32_t offset, float scale) {
+      #ifndef METAMODULE
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
+      #endif
       T w = DataType<format>::Compress(accumulator_);
       if (offset == -1) {
         buffer_[(write_ptr_ + D::base + D::length - 1) & MASK] = w;
@@ -197,7 +199,9 @@ class FxEngine {
     
     template<typename D>
     inline void Read(D& d, int32_t offset, float scale) {
+      #ifndef METAMODULE
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
+      #endif
       T r;
       if (offset == -1) {
         r = buffer_[(write_ptr_ + D::base + D::length - 1) & MASK];
@@ -230,7 +234,9 @@ class FxEngine {
 
     template<typename D>
     inline void Interpolate(D& d, float offset, float scale) {
+      #ifndef METAMODULE
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
+      #endif
       MAKE_INTEGRAL_FRACTIONAL(offset);
       float a = DataType<format>::Decompress(
           buffer_[(write_ptr_ + offset_integral + D::base) & MASK]);
@@ -243,7 +249,9 @@ class FxEngine {
 
     template<typename D>
       inline void InterpolateHermite(D& d, float offset, float scale) {
+      #ifndef METAMODULE
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
+      #endif
       MAKE_INTEGRAL_FRACTIONAL(offset);
       float xm1 = DataType<format>::Decompress(
         buffer_[(write_ptr_ + offset_integral + D::base - 1) & MASK]);
@@ -268,7 +276,9 @@ class FxEngine {
     template<typename D>
     inline void Interpolate(
         D& d, float offset, LFOIndex index, float amplitude, float scale) {
+      #ifndef METAMODULE
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
+      #endif
       offset += amplitude * lfo_value_[index];
       MAKE_INTEGRAL_FRACTIONAL(offset);
       float a = DataType<format>::Decompress(
@@ -283,7 +293,9 @@ class FxEngine {
     template<typename D>
     inline void InterpolateHermite(
         D& d, float offset, LFOIndex index, float amplitude, float scale) {
+      #ifndef METAMODULE
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
+      #endif
       offset += amplitude * lfo_value_[index];
       MAKE_INTEGRAL_FRACTIONAL(offset);
       float xm1 = DataType<format>::Decompress(

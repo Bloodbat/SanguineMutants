@@ -51,6 +51,10 @@ enum FrequencyApproximation {
   FREQUENCY_DIRTY
 };
 
+#ifdef METAMODULE
+#define M_PI 3.14159265358979323846
+#endif
+
 #define M_PI_F float(M_PI)
 #define M_PI_POW_2 M_PI * M_PI
 #define M_PI_POW_3 M_PI_POW_2 * M_PI
