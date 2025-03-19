@@ -1,5 +1,9 @@
 # Next version
 
+## Fixes
+
+- Vimina: clock multiplier for low BPM clocks.
+
 ## Changes
 
 - Vimina: generated and through gates didn't have the same duration.

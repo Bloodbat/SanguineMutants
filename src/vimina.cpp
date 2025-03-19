@@ -51,7 +51,7 @@ struct Vimina : SanguineModule {
 
 	static const int kMaxModuleSections = 2;
 
-	static const int kTimerCounterMax = 65535;
+	static const int kTimerCounterMax = 2147483647;
 
 	// Channel ids
 	static const int kResetChannel = 0;
@@ -83,19 +83,19 @@ struct Vimina : SanguineModule {
 	int ledsChannel = 0;
 	int triggerCount[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	int16_t channelFactor[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	int16_t channelSwing[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t channelFactor[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t channelSwing[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	uint16_t pulseTrackerRecordedCount[PORT_MAX_CHANNELS];
+	uint32_t pulseTrackerRecordedCount[PORT_MAX_CHANNELS];
 
-	uint16_t ledGateDuration[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	uint32_t ledGateDuration[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	ChannelStates ledState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	ChannelStates channelState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	uint8_t triggerExtendCount[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	int8_t divisionCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	int8_t swingCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t divisionCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t swingCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	// Swing constants
 	const float kSwingFactorMin = 50.f;
@@ -172,7 +172,7 @@ struct Vimina : SanguineModule {
 				if (isRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
 					/* Pulse tracker is always recording. this should help smooth transitions
 					   between functions even though divide doesn't use it. */
-					   // Shift 
+					   // Shift
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel];
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel].time;
 					if (pulseTrackerRecordedCount[channel] < kPulseTrackerBufferSize) {
@@ -229,13 +229,13 @@ struct Vimina : SanguineModule {
 		}
 	}
 
-	uint16_t getPulseTrackerElapsed(const int channel) {
+	uint32_t getPulseTrackerElapsed(const int channel) {
 		return (tmrModuleClock[channel].time >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
 			tmrModuleClock[channel].time - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
 			tmrModuleClock[channel].time + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
 	}
 
-	uint16_t getPulseTrackerPeriod(const int channel) {
+	uint32_t getPulseTrackerPeriod(const int channel) {
 		return (pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] >= pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]) ?
 			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] :
 			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]);
@@ -323,7 +323,7 @@ struct Vimina : SanguineModule {
 		return channelFactor[section][channel] < kFactorerBypassValue;
 	}
 
-	bool isMultiplyStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
+	bool isMultiplyStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		float interval = getPulseTrackerPeriod(channel) / -channelFactor[section][channel];
 		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
 			if (!multiplyDebouncing[section][channel]) {
@@ -345,10 +345,10 @@ struct Vimina : SanguineModule {
 		return gateInputState[section][channel] && !lastGateState;
 	}
 
-	bool isSwingStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
+	bool isSwingStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		if (swingCounter[section][channel] >= 2 && channelSwing[section][channel] > kSwingFactorMin) {
-			uint16_t period = getPulseTrackerPeriod(channel);
-			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
+			uint32_t period = getPulseTrackerPeriod(channel);
+			uint32_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
 			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
 		} else {
 			// thru
