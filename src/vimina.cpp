@@ -223,10 +223,11 @@ struct Vimina : SanguineModule {
 					kSanguineButtonLightValue : 0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ?
 					kSanguineButtonLightValue : 0.f, sampleTime);
-
-				updateChannelLeds(section, sampleTime, ledsChannel);
 			}
 		}
+
+		updateChannelLeds(0, args.sampleTime, ledsChannel);
+		updateChannelLeds(1, args.sampleTime, ledsChannel);
 	}
 
 	uint32_t getPulseTrackerElapsed(const int channel) {
