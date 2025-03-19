@@ -420,7 +420,7 @@ struct Vimina : SanguineModule {
 				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
 				triggerCount[section][channel] >= channelFactor[section][channel]) {
 				channelState[section][channel] = CHANNEL_GENERATED;
-				triggerCount[section][channel]--;
+				--triggerCount[section][channel];
 				multiplyDebouncing[section][channel] = true;
 			}
 			break;
