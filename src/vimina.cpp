@@ -75,7 +75,7 @@ struct Vimina : SanguineModule {
 	static const int kFactorerBypassValue = 1;
 
 	// LED constants
-	static const int kLedThruGateDuration = 128;
+	static const int kLedThruGateDuration = 256;
 	static const int kLedGeneratedGateDuration = 128;
 	static const int kPulseTrackerBufferSize = 2;
 
