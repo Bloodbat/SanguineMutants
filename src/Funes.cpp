@@ -5,7 +5,9 @@
 #include "plaits/user_data.h"
 #include "sanguinechannels.hpp"
 
+#ifndef METAMODULE
 #include "osdialog.h"
+#endif
 #include <thread>
 
 #ifndef METAMODULE
@@ -552,6 +554,7 @@ struct Funes : SanguineModule {
 	}
 
 	void loadCustomData(const std::string& filePath) {
+		#ifndef METAMODULE
 		bLoading = true;
 		DEFER({ bLoading = false; });
 		// HACK: Sleep 100us so DSP thread is likely to finish processing before we resize the vector.
@@ -559,7 +562,6 @@ struct Funes : SanguineModule {
 
 		std::string fileExtension = string::lowercase(system::getExtension(filePath));
 
-		#ifndef METAMODULE
 		if (fileExtension == ".bin") {
 			std::ifstream input(filePath, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
@@ -580,6 +582,7 @@ struct Funes : SanguineModule {
 	}
 
 	void showCustomDataLoadDialog() {
+#ifndef METAMODULE
 #ifndef USING_CARDINAL_NOT_RACK
 		osdialog_filters* filters = osdialog_filters_parse(funes::CUSTOM_DATA_FILENAME_FILTERS);
 		char* dialogFilePath = osdialog_file(OSDIALOG_OPEN, funes::customDataDir.empty() ? NULL : funes::customDataDir.c_str(), NULL, filters);
@@ -609,6 +612,7 @@ struct Funes : SanguineModule {
 				loadCustomData(filePath);
 			});
 #endif
+#endif
 	}
 
 	void setEngine(int newModelNum) {
@@ -630,7 +634,9 @@ struct Funes : SanguineModule {
 			inputs[INPUT_ENGINE].setChannels(0);
 		}
 		// Try to wait for DSP to finish.
+		#ifndef METAMODULE
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
+		#endif
 	}
 
 	void setFrequencyMode(int freqModeNum) {
