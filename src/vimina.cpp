@@ -75,7 +75,7 @@ struct Vimina : SanguineModule {
 	static const int kFactorerBypassValue = 1;
 
 	// LED constants
-	static const int kLedThruGateDuration = 256;
+	static const int kLedThruGateDuration = 128;
 	static const int kLedGeneratedGateDuration = 128;
 	static const int kPulseTrackerBufferSize = 2;
 
@@ -170,9 +170,9 @@ struct Vimina : SanguineModule {
 
 			if (bClockConnected) {
 				if (isRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
-					// Pulse tracker is always recording. this should help smooth transitions
-					// between functions even though divide doesn't use it.
-					// Shift
+					/* Pulse tracker is always recording. this should help smooth transitions
+					   between functions even though divide doesn't use it. */
+					   // Shift 
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel];
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel].time;
 					if (pulseTrackerRecordedCount[channel] < kPulseTrackerBufferSize) {
