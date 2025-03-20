@@ -59,6 +59,9 @@ struct Apices : SanguineModule {
 
 	bool bHasExpander = false;
 
+	// update descriptions/oleds every 16 samples
+	static const int kLightsFrequency = 16;
+
 	int32_t adcLp[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
 	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
@@ -69,10 +72,7 @@ struct Apices : SanguineModule {
 	int16_t brightness[apicesCommon::kChannelCount] = { 0, 0 };
 
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
-
-	// update descriptions/oleds every 16 samples
-	static const int kClockUpdateFrequency = 16;
-	dsp::ClockDivider clockDivider;
+	dsp::ClockDivider lightsDivider;
 
 	peaks::GateFlags gateFlags[apicesCommon::kChannelCount] = { 0, 0 };
 
@@ -145,7 +145,7 @@ struct Apices : SanguineModule {
 			processors[channel].Init(channel);
 		}
 
-		clockDivider.setDivision(kClockUpdateFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 
 		init();
 	}
@@ -157,7 +157,7 @@ struct Apices : SanguineModule {
 
 		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 
-		bool bDividerTurn = clockDivider.process();
+		bool bDividerTurn = lightsDivider.process();
 
 		// only update knobs / lights every 16 samples
 		if (bDividerTurn) {
@@ -165,7 +165,7 @@ struct Apices : SanguineModule {
 			pollPots();
 			updateOleds();
 
-			sampleTime = args.sampleTime * kClockUpdateFrequency;
+			sampleTime = args.sampleTime * kLightsFrequency;
 
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
 		}
@@ -522,7 +522,7 @@ struct Apices : SanguineModule {
 	void refreshLeds(const ProcessArgs& args) {
 
 		// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
-		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+		const float sampleTime = args.sampleTime * kLightsFrequency;
 
 		long long systemTimeMs = getSystemTimeMs();
 

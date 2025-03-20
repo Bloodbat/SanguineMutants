@@ -59,6 +59,9 @@ struct Mortuus : SanguineModule {
 
 	bool bHasExpander = false;
 
+	// Update descriptions/oleds every 16 samples.
+	static const int kLightsFrequency = 16;
+
 	int32_t adcLp[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
 	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
@@ -70,9 +73,7 @@ struct Mortuus : SanguineModule {
 
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
 
-	// Update descriptions/oleds every 16 samples.
-	static const int kClockUpdateFrequency = 16;
-	dsp::ClockDivider clockDivider;
+	dsp::ClockDivider lightsDivider;
 
 	deadman::GateFlags gateFlags[apicesCommon::kChannelCount] = { 0, 0 };
 
@@ -158,7 +159,7 @@ struct Mortuus : SanguineModule {
 			processors[channel].Init(channel);
 		}
 
-		clockDivider.setDivision(kClockUpdateFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 
 		init();
 	}
@@ -170,7 +171,7 @@ struct Mortuus : SanguineModule {
 
 		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 
-		bool bDividerTurn = clockDivider.process();
+		bool bDividerTurn = lightsDivider.process();
 
 		// only update knobs / lights every 16 samples
 		if (bDividerTurn) {
@@ -178,7 +179,7 @@ struct Mortuus : SanguineModule {
 			pollPots();
 			updateOleds();
 
-			sampleTime = args.sampleTime * kClockUpdateFrequency;
+			sampleTime = args.sampleTime * kLightsFrequency;
 
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
 		}
@@ -539,7 +540,7 @@ struct Mortuus : SanguineModule {
 	void refreshLeds(const ProcessArgs& args) {
 
 		// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
-		const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+		const float sampleTime = args.sampleTime * kLightsFrequency;
 
 		long long systemTimeMs = getSystemTimeMs();
 
