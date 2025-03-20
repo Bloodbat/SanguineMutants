@@ -97,12 +97,11 @@ struct Contextus : SanguineModule {
 
 	int channelCount = 0;
 	int displayChannel = 0;
+	static const int kLightsUpdateFrequency = 16;
 
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
 	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
-
-	static const int kClockUpdateFrequency = 16;
-	dsp::ClockDivider clockDivider;
+	dsp::ClockDivider lightsDivider;
 
 	bool bFlagTriggerDetected[PORT_MAX_CHANNELS] = {};
 	bool bLastTrig[PORT_MAX_CHANNELS] = {};
@@ -200,7 +199,7 @@ struct Contextus : SanguineModule {
 		}
 		memset(&lastSettings, 0, sizeof(renaissance::SettingsData));
 
-		clockDivider.setDivision(kClockUpdateFrequency);
+		lightsDivider.setDivision(kLightsUpdateFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -401,8 +400,8 @@ struct Contextus : SanguineModule {
 			}
 		} // Channels
 
-		if (clockDivider.process()) {
-			const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+		if (lightsDivider.process()) {
+			const float sampleTime = args.sampleTime * kLightsUpdateFrequency;
 
 			pollSwitches(sampleTime);
 
