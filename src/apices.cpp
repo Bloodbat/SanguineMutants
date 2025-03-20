@@ -161,11 +161,12 @@ struct Apices : SanguineModule {
 
 		// only update knobs / lights every 16 samples
 		if (bDividerTurn) {
-			pollSwitches(args);
+			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
+			sampleTime = args.sampleTime * kLightsFrequency;
+
+			pollSwitches(args, sampleTime);
 			pollPots();
 			updateOleds();
-
-			sampleTime = args.sampleTime * kLightsFrequency;
 
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
 		}
@@ -500,13 +501,13 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void pollSwitches(const ProcessArgs& args) {
+	void pollSwitches(const ProcessArgs& args, const float& sampleTime) {
 		for (uint8_t button = 0; button < apicesCommon::kButtonCount; ++button) {
 			if (stSwitches[button].process(params[PARAM_EDIT_MODE + button].getValue())) {
 				processSwitch(apicesCommon::SWITCH_TWIN_MODE + button);
 			}
 		}
-		refreshLeds(args);
+		refreshLeds(args, sampleTime);
 	}
 
 	void saveState() {
@@ -519,11 +520,7 @@ struct Apices : SanguineModule {
 		displayText2 = apices::modeLabels[settings.processorFunction[1]];
 	}
 
-	void refreshLeds(const ProcessArgs& args) {
-
-		// refreshLeds() is only updated every N samples, so make sure setBrightnessSmooth methods account for this
-		const float sampleTime = args.sampleTime * kLightsFrequency;
-
+	void refreshLeds(const ProcessArgs& args, const float& sampleTime) {
 		long long systemTimeMs = getSystemTimeMs();
 
 		uint8_t flash = (systemTimeMs >> 7) & 7;
