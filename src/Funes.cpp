@@ -69,7 +69,7 @@ struct Funes : SanguineModule {
 	float lastLPGDecay = 0.5f;
 	float lastModelVoltage = 0.f;
 
-	static const int kTextUpdateFrequency = 16;
+	static const int kLightsUpdateFrequency = 16;
 
 	static const int kMaxUserDataSize = 4096;
 
@@ -100,7 +100,7 @@ struct Funes : SanguineModule {
 
 	std::string displayText = "";
 
-	dsp::ClockDivider clockDivider;
+	dsp::ClockDivider lightsDivider;
 
 	funes::CustomDataStates customDataStates[plaits::kMaxEngines] = {};
 
@@ -145,7 +145,7 @@ struct Funes : SanguineModule {
 
 		octaveQuantizer.Init(9, 0.01f, false);
 
-		clockDivider.setDivision(kTextUpdateFrequency);
+		lightsDivider.setDivision(kLightsUpdateFrequency);
 
 		resetCustomDataStates();
 
@@ -289,7 +289,7 @@ struct Funes : SanguineModule {
 			}
 
 			// Update model text, custom data lights and frequency mode every 16 samples only.
-			if (clockDivider.process()) {
+			if (lightsDivider.process()) {
 				if (displayChannel >= channelCount) {
 					displayChannel = channelCount - 1;
 				}
