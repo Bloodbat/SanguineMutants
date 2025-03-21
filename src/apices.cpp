@@ -49,10 +49,10 @@ struct Apices : SanguineModule {
 	};
 
 	apicesCommon::EditModes editMode = apicesCommon::EDIT_MODE_TWIN;
-	apices::ProcessorFunctions processorFunction[apicesCommon::kChannelCount] = { apices::FUNCTION_ENVELOPE, apices::FUNCTION_ENVELOPE };
+	apices::ProcessorFunctions processorFunctions[apicesCommon::kChannelCount] = { apices::FUNCTION_ENVELOPE, apices::FUNCTION_ENVELOPE };
 	apicesCommon::Settings settings = {};
 
-	uint8_t potValue[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint8_t potValues[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = { false, false, false, false };
@@ -135,8 +135,8 @@ struct Apices : SanguineModule {
 		configButton(PARAM_TRIGGER_2, "Trigger 2");
 
 		settings.editMode = apicesCommon::EDIT_MODE_TWIN;
-		settings.processorFunction[0] = apices::FUNCTION_ENVELOPE;
-		settings.processorFunction[1] = apices::FUNCTION_ENVELOPE;
+		settings.processorFunctions[0] = apices::FUNCTION_ENVELOPE;
+		settings.processorFunctions[1] = apices::FUNCTION_ENVELOPE;
 		settings.snap_mode = false;
 
 		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel)
@@ -223,7 +223,7 @@ struct Apices : SanguineModule {
 					cvValues[function] = (clamp(nixExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 						nixExpander->getParam(channel1Attenuverter).getValue();
 				}
-				modulatedValues[function] = clamp((potValue[function] + static_cast<int>(cvValues[function])) << 8, 0, 65535);
+				modulatedValues[function] = clamp((potValues[function] + static_cast<int>(cvValues[function])) << 8, 0, 65535);
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
 					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + function;
@@ -236,7 +236,7 @@ struct Apices : SanguineModule {
 							nixExpander->getParam(channel2Attenuverter).getValue();
 					}
 
-					modulatedValues[channel2Function] = clamp((potValue[channel2Function] +
+					modulatedValues[channel2Function] = clamp((potValues[channel2Function] +
 						static_cast<int>(cvValues[channel2Function])) << 8, 0, 65535);
 				}
 
@@ -390,11 +390,11 @@ struct Apices : SanguineModule {
 
 	void setFunction(uint8_t index, apices::ProcessorFunctions f) {
 		if (editMode < apicesCommon::EDIT_MODE_FIRST) {
-			processorFunction[0] = processorFunction[1] = f;
+			processorFunctions[0] = processorFunctions[1] = f;
 			processors[0].set_function(processorFunctionTable[f][0]);
 			processors[1].set_function(processorFunctionTable[f][1]);
 		} else {
-			processorFunction[index] = f;
+			processorFunctions[index] = f;
 			processors[index].set_function(processorFunctionTable[f][index]);
 		}
 	}
@@ -411,9 +411,9 @@ struct Apices : SanguineModule {
 
 		case apicesCommon::SWITCH_EXPERT:
 			editMode = static_cast<apicesCommon::EditModes>((editMode + apicesCommon::EDIT_MODE_FIRST) % apicesCommon::EDIT_MODE_LAST);
-			processorFunction[0] = processorFunction[1];
-			processors[0].set_function(processorFunctionTable[processorFunction[0]][0]);
-			processors[1].set_function(processorFunctionTable[processorFunction[0]][1]);
+			processorFunctions[0] = processorFunctions[1];
+			processors[0].set_function(processorFunctionTable[processorFunctions[0]][0]);
+			processors[1].set_function(processorFunctionTable[processorFunctions[0]][1]);
 			lockPots();
 			changeControlMode();
 			saveState();
@@ -425,10 +425,10 @@ struct Apices : SanguineModule {
 
 				switch (editMode) {
 				case apicesCommon::EDIT_MODE_FIRST:
-					params[PARAM_MODE].setValue(processorFunction[0]);
+					params[PARAM_MODE].setValue(processorFunctions[0]);
 					break;
 				case apicesCommon::EDIT_MODE_SECOND:
-					params[PARAM_MODE].setValue(processorFunction[1]);
+					params[PARAM_MODE].setValue(processorFunctions[1]);
 					break;
 				default:
 					break;
@@ -465,7 +465,7 @@ struct Apices : SanguineModule {
 		case apicesCommon::EDIT_MODE_TWIN:
 			processors[0].set_parameter(knobId, value);
 			processors[1].set_parameter(knobId, value);
-			potValue[knobId] = value >> 8;
+			potValues[knobId] = value >> 8;
 			break;
 
 		case apicesCommon::EDIT_MODE_SPLIT:
@@ -474,7 +474,7 @@ struct Apices : SanguineModule {
 			} else {
 				processors[1].set_parameter(knobId - 2, value);
 			}
-			potValue[knobId] = value >> 8;
+			potValues[knobId] = value >> 8;
 			break;
 
 		case apicesCommon::EDIT_MODE_FIRST:
@@ -485,14 +485,14 @@ struct Apices : SanguineModule {
 			processor = &processors[editMode - apicesCommon::EDIT_MODE_FIRST];
 
 			int16_t delta;
-			delta = static_cast<int16_t>(potValue[index]) - static_cast<int16_t>(value >> 8);
+			delta = static_cast<int16_t>(potValues[index]) - static_cast<int16_t>(value >> 8);
 			if (delta < 0) {
 				delta = -delta;
 			}
 
 			if (!bSnapMode || bSnapped[knobId] || delta <= 2) {
 				processor->set_parameter(knobId, value);
-				potValue[index] = value >> 8;
+				potValues[index] = value >> 8;
 				bSnapped[knobId] = true;
 			}
 			break;
@@ -512,12 +512,12 @@ struct Apices : SanguineModule {
 
 	void saveState() {
 		settings.editMode = editMode;
-		settings.processorFunction[0] = processorFunction[0];
-		settings.processorFunction[1] = processorFunction[1];
-		std::copy(&potValue[0], &potValue[7], &settings.potValue[0]);
+		settings.processorFunctions[0] = processorFunctions[0];
+		settings.processorFunctions[1] = processorFunctions[1];
+		std::copy(&potValues[0], &potValues[7], &settings.potValues[0]);
 		settings.snap_mode = bSnapMode;
-		displayText1 = apices::modeLabels[settings.processorFunction[0]];
-		displayText2 = apices::modeLabels[settings.processorFunction[1]];
+		displayText1 = apices::modeLabels[settings.processorFunctions[0]];
+		displayText2 = apices::modeLabels[settings.processorFunctions[1]];
 	}
 
 	void refreshLeds(const ProcessArgs& args, const float& sampleTime) {
@@ -609,7 +609,7 @@ struct Apices : SanguineModule {
 
 		uint8_t buttonBrightness[apicesCommon::kChannelCount];
 		for (uint8_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
-			switch (processorFunction[channel]) {
+			switch (processorFunctions[channel]) {
 			case apices::FUNCTION_DRUM_GENERATOR:
 			case apices::FUNCTION_FM_DRUM_GENERATOR:
 				buttonBrightness[channel] = static_cast<int16_t>(abs(brightness[channel]) >> 8);
@@ -674,7 +674,7 @@ struct Apices : SanguineModule {
 	}
 
 	void init() {
-		std::fill(&potValue[0], &potValue[7], 0);
+		std::fill(&potValues[0], &potValues[7], 0);
 		std::fill(&brightness[0], &brightness[1], 0);
 		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount - 1], 0);
 		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount - 1], 0);
@@ -682,40 +682,40 @@ struct Apices : SanguineModule {
 		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
 
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
-		processorFunction[0] = static_cast<apices::ProcessorFunctions>(settings.processorFunction[0]);
-		processorFunction[1] = static_cast<apices::ProcessorFunctions>(settings.processorFunction[1]);
-		std::copy(&settings.potValue[0], &settings.potValue[7], &potValue[0]);
+		processorFunctions[0] = static_cast<apices::ProcessorFunctions>(settings.processorFunctions[0]);
+		processorFunctions[1] = static_cast<apices::ProcessorFunctions>(settings.processorFunctions[1]);
+		std::copy(&settings.potValues[0], &settings.potValues[7], &potValues[0]);
 
 		if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 			lockPots();
 			for (uint8_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-				processors[0].set_parameter(knob, static_cast<uint16_t>(potValue[knob]) << 8);
-				processors[1].set_parameter(knob, static_cast<uint16_t>(potValue[knob + apicesCommon::kKnobCount]) << 8);
+				processors[0].set_parameter(knob, static_cast<uint16_t>(potValues[knob]) << 8);
+				processors[1].set_parameter(knob, static_cast<uint16_t>(potValues[knob + apicesCommon::kKnobCount]) << 8);
 			}
 		}
 
 		bSnapMode = settings.snap_mode;
 
 		changeControlMode();
-		setFunction(0, processorFunction[0]);
-		setFunction(1, processorFunction[1]);
+		setFunction(0, processorFunctions[0]);
+		setFunction(1, processorFunctions[1]);
 	}
 
 	void updateOleds() {
 		if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
-			oledText1 = apices::knobLabelsSplitMode[processorFunction[0]].knob1;
-			oledText2 = apices::knobLabelsSplitMode[processorFunction[0]].knob2;
-			oledText3 = apices::knobLabelsSplitMode[processorFunction[0]].knob3;
-			oledText4 = apices::knobLabelsSplitMode[processorFunction[0]].knob4;
+			oledText1 = apices::knobLabelsSplitMode[processorFunctions[0]].knob1;
+			oledText2 = apices::knobLabelsSplitMode[processorFunctions[0]].knob2;
+			oledText3 = apices::knobLabelsSplitMode[processorFunctions[0]].knob3;
+			oledText4 = apices::knobLabelsSplitMode[processorFunctions[0]].knob4;
 		} else {
 			int currentFunction = -1;
 			// same for both
 			if (editMode == apicesCommon::EDIT_MODE_TWIN) {
-				currentFunction = processorFunction[0];
+				currentFunction = processorFunctions[0];
 			}
 			// If expert, pick the active set of labels.
 			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
-				currentFunction = processorFunction[editMode - apicesCommon::EDIT_MODE_FIRST];
+				currentFunction = processorFunctions[editMode - apicesCommon::EDIT_MODE_FIRST];
 			} else {
 				return;
 			}
@@ -817,11 +817,11 @@ struct Apices : SanguineModule {
 		json_t* rootJ = SanguineModule::dataToJson();
 
 		json_object_set_new(rootJ, "edit_mode", json_integer(static_cast<int>(settings.editMode)));
-		json_object_set_new(rootJ, "fcn_channel_1", json_integer(static_cast<int>(settings.processorFunction[0])));
-		json_object_set_new(rootJ, "fcn_channel_2", json_integer(static_cast<int>(settings.processorFunction[1])));
+		json_object_set_new(rootJ, "fcn_channel_1", json_integer(static_cast<int>(settings.processorFunctions[0])));
+		json_object_set_new(rootJ, "fcn_channel_2", json_integer(static_cast<int>(settings.processorFunctions[1])));
 
 		json_t* potValuesJ = json_array();
-		for (int pot : potValue) {
+		for (int pot : potValues) {
 			json_t* pJ = json_integer(pot);
 			json_array_append_new(potValuesJ, pJ);
 		}
@@ -842,12 +842,12 @@ struct Apices : SanguineModule {
 
 		json_t* fcnChannel1J = json_object_get(rootJ, "fcn_channel_1");
 		if (fcnChannel1J) {
-			settings.processorFunction[0] = static_cast<apices::ProcessorFunctions>(json_integer_value(fcnChannel1J));
+			settings.processorFunctions[0] = static_cast<apices::ProcessorFunctions>(json_integer_value(fcnChannel1J));
 		}
 
 		json_t* fcnChannel2J = json_object_get(rootJ, "fcn_channel_2");
 		if (fcnChannel2J) {
-			settings.processorFunction[1] = static_cast<apices::ProcessorFunctions>(json_integer_value(fcnChannel2J));
+			settings.processorFunctions[1] = static_cast<apices::ProcessorFunctions>(json_integer_value(fcnChannel2J));
 		}
 
 		json_t* snapModeJ = json_object_get(rootJ, "snap_mode");
@@ -859,8 +859,8 @@ struct Apices : SanguineModule {
 		size_t potValueId;
 		json_t* pJ;
 		json_array_foreach(potValuesJ, potValueId, pJ) {
-			if (potValueId < sizeof(potValue) / sizeof(potValue)[0]) {
-				settings.potValue[potValueId] = json_integer_value(pJ);
+			if (potValueId < sizeof(potValues) / sizeof(potValues)[0]) {
+				settings.potValues[potValueId] = json_integer_value(pJ);
 			}
 		}
 
@@ -882,7 +882,7 @@ struct Apices : SanguineModule {
 	}
 
 	inline apices::ProcessorFunctions getProcessorFunction() const {
-		return editMode == apicesCommon::EDIT_MODE_SECOND ? processorFunction[1] : processorFunction[0];
+		return editMode == apicesCommon::EDIT_MODE_SECOND ? processorFunctions[1] : processorFunctions[0];
 	}
 
 	inline void setLedBrightness(int channel, int16_t value) {
