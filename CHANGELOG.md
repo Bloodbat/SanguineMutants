@@ -10,6 +10,8 @@
 
 - Vimina: generated and through gates didn't have the same duration.
 
+- Apices family expanders: make tooltips congruent with base module tooltips.
+
 
 ---
 
