@@ -1,5 +1,7 @@
 #pragma once
 
+#include "peakiesconsts.hpp"
+
 namespace apicesCommon {
     enum SwitchIndexes {
         SWITCH_TWIN_MODE,
@@ -16,18 +18,6 @@ namespace apicesCommon {
         EDIT_MODE_SECOND,
         EDIT_MODE_LAST
     };
-
-    static const size_t kBlockCount = 2;
-    static const size_t kChannelCount = 2;
-    static const size_t kKnobCount = 4;
-    static const size_t kFunctionLightCount = 4;
-    static const size_t kBlockSize = 4;
-    static const uint8_t kAdcChannelCount = 4;
-    static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
-    static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
-    static const int kSampleRate = 48000;
-
-    static const uint8_t kButtonCount = 3;
 
     struct Settings {
         uint8_t editMode;

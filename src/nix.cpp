@@ -3,14 +3,14 @@
 Nix::Nix() {
     config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-    for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
-        int functionNumber = function + 1;
-        configParam(PARAM_PARAM_CV_1 + function, -1.f, 1.f, 0.f, string::f("Knob %d CV", functionNumber));
-        configInput(INPUT_PARAM_CV_1 + function, string::f("Knob %d", functionNumber));
+    for (size_t parameter = 0; parameter < apicesCommon::kKnobCount; ++parameter) {
+        int functionNumber = parameter + 1;
+        configParam(PARAM_PARAM_CV_1 + parameter, -1.f, 1.f, 0.f, string::f("Knob %d CV", functionNumber));
+        configInput(INPUT_PARAM_CV_1 + parameter, string::f("Knob %d", functionNumber));
 
-        configParam(PARAM_PARAM_CV_1 + function + apicesExpander::kChannel2Offset, -1.f, 1.f, 0.f,
+        configParam(PARAM_PARAM_CV_1 + parameter + apicesCommon::kChannel2Offset, -1.f, 1.f, 0.f,
             string::f("Expert channel 2 knob %d CV", functionNumber));
-        configInput(INPUT_PARAM_CV_1 + function + apicesExpander::kChannel2Offset,
+        configInput(INPUT_PARAM_CV_1 + parameter + apicesCommon::kChannel2Offset,
             string::f("Expert channel 2 knob %d", functionNumber));
     }
 }
@@ -26,7 +26,7 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
     }
 
     if (!bHasMaster) {
-        for (int light = 0; light < apicesExpander::kMaxFunctions; ++light) {
+        for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
             int currentLight = LIGHT_PARAM_1 + light * 3;
             for (int lightColor = 0; lightColor < 3; ++lightColor) {
                 lights[currentLight + lightColor].setBrightness(0.f);
