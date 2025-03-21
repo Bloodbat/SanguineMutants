@@ -55,27 +55,27 @@ struct Mortuus : SanguineModule {
 	uint8_t potValues[apicesCommon::kKnobCount * 2] = {};
 
 	bool bSnapMode = false;
-	bool bSnapped[apicesCommon::kKnobCount] = { false, false, false, false };
+	bool bSnapped[apicesCommon::kKnobCount] = {};
 
 	bool bHasExpander = false;
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
 
-	int32_t adcLp[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
-	int32_t adcValue[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
-	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = { 0, 0, 0, 0 };
+	int32_t adcLp[apicesCommon::kAdcChannelCount] = {};
+	int32_t adcValue[apicesCommon::kAdcChannelCount] = {};
+	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = {};
 
 	deadman::Processors processors[apicesCommon::kChannelCount] = {};
 
 	int16_t output[apicesCommon::kBlockSize] = {};
-	int16_t brightness[apicesCommon::kChannelCount] = { 0, 0 };
+	int16_t brightness[apicesCommon::kChannelCount] = {};
 
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
 
 	dsp::ClockDivider lightsDivider;
 
-	deadman::GateFlags gateFlags[apicesCommon::kChannelCount] = { 0, 0 };
+	deadman::GateFlags gateFlags[apicesCommon::kChannelCount] = {};
 
 	dsp::SampleRateConverter<apicesCommon::kChannelCount> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<apicesCommon::kChannelCount>, 256> outputBuffer;
@@ -193,8 +193,8 @@ struct Mortuus : SanguineModule {
 		}
 
 		if (bHasExpander) {
-			float cvValues[apicesExpander::kMaxFunctions * 2] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
-			int modulatedValues[apicesExpander::kMaxFunctions * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+			float cvValues[apicesExpander::kMaxFunctions * 2] = {};
+			int modulatedValues[apicesExpander::kMaxFunctions * 2] = {};
 
 			int channel2Function = 0;
 
