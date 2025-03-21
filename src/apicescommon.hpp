@@ -17,10 +17,22 @@ namespace apicesCommon {
         EDIT_MODE_LAST
     };
 
+    static const size_t kBlockCount = 2;
+    static const size_t kChannelCount = 2;
+    static const size_t kKnobCount = 4;
+    static const size_t kFunctionLightCount = 4;
+    static const size_t kBlockSize = 4;
+    static const uint8_t kAdcChannelCount = 4;
+    static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
+    static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
+    static const int kSampleRate = 48000;
+
+    static const uint8_t kButtonCount = 3;
+
     struct Settings {
         uint8_t editMode;
-        uint8_t processorFunctions[2];
-        uint8_t potValues[8];
+        uint8_t processorFunctions[kChannelCount];
+        uint8_t potValues[kKnobCount * 2];
         bool snap_mode;
     };
 
@@ -30,15 +42,4 @@ namespace apicesCommon {
         std::string knob3;
         std::string knob4;
     };
-
-    static const size_t kBlockCount = 2;
-    static const size_t kChannelCount = 2;
-    static const size_t kKnobCount = 4;
-    static const size_t kFunctionLightCount = 4;
-    static const size_t kBlockSize = 4;
-    static const uint8_t kAdcChannelCount = 4;
-    static const uint16_t kAdcThresholdUnlocked = 1 << (16 - 10);  // 10 bits
-    static const uint16_t kAdcThresholdLocked = 1 << (16 - 8);  // 8 bits
-
-    static const uint8_t kButtonCount = 3;
 }

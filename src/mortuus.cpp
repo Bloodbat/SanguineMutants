@@ -36,10 +36,10 @@ struct Mortuus : SanguineModule {
 		LIGHT_TRIGGER_2,
 		LIGHT_CHANNEL_1,
 		LIGHT_CHANNEL_2,
-		ENUMS(LIGHT_CHANNEL_SELECT, 1 * 2),
+		ENUMS(LIGHT_CHANNEL_SELECT, apicesCommon::kChannelCount),
 		LIGHT_SPLIT_MODE,
 		LIGHT_EXPERT_MODE,
-		ENUMS(LIGHT_KNOBS_MODE, 4 * 3),
+		ENUMS(LIGHT_KNOBS_MODE, apicesCommon::kKnobCount * 3),
 		LIGHT_FUNCTION_1,
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
@@ -52,7 +52,7 @@ struct Mortuus : SanguineModule {
 	mortuus::ProcessorFunctions processorFunctions[apicesCommon::kChannelCount] = { mortuus::FUNCTION_ENVELOPE, mortuus::FUNCTION_ENVELOPE };
 	apicesCommon::Settings settings = {};
 
-	uint8_t potValues[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint8_t potValues[apicesCommon::kKnobCount * 2] = {};
 
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = { false, false, false, false };
@@ -77,8 +77,8 @@ struct Mortuus : SanguineModule {
 
 	deadman::GateFlags gateFlags[apicesCommon::kChannelCount] = { 0, 0 };
 
-	dsp::SampleRateConverter<2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
+	dsp::SampleRateConverter<apicesCommon::kChannelCount> outputSrc;
+	dsp::DoubleRingBuffer<dsp::Frame<apicesCommon::kChannelCount>, 256> outputBuffer;
 
 	struct Block {
 		deadman::GateFlags input[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
@@ -173,7 +173,7 @@ struct Mortuus : SanguineModule {
 
 		bool bDividerTurn = lightsDivider.process();
 
-		// only update knobs / lights every 16 samples
+		// Only update knobs / lights every 16 samples.
 		if (bDividerTurn) {
 			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
 			sampleTime = args.sampleTime * kLightsFrequency;
@@ -321,7 +321,6 @@ struct Mortuus : SanguineModule {
 		}
 
 		if (outputBuffer.empty()) {
-
 			while (renderBlock != ioBlock) {
 				processChannels(&block[renderBlock], apicesCommon::kBlockSize);
 				renderBlock = (renderBlock + 1) % apicesCommon::kBlockCount;
@@ -338,12 +337,12 @@ struct Mortuus : SanguineModule {
 
 			uint32_t gateInputs = gateTriggers | buttons;
 
-			// Prepare sample rate conversion.
-			// Peaks is sampling at 48kHZ.
-			outputSrc.setRates(48000, args.sampleRate);
+			/* Prepare sample rate conversion.
+			   Peaks is sampling at 48kHZ. */
+			outputSrc.setRates(apicesCommon::kSampleRate, args.sampleRate);
 			int inLen = apicesCommon::kBlockSize;
 			int outLen = outputBuffer.capacity();
-			dsp::Frame<2> frame[apicesCommon::kBlockSize];
+			dsp::Frame<apicesCommon::kChannelCount> frame[apicesCommon::kBlockSize];
 
 			// Process an entire block of data from the IOBuffer.
 			for (size_t blockNum = 0; blockNum < apicesCommon::kBlockSize; ++blockNum) {
@@ -369,7 +368,7 @@ struct Mortuus : SanguineModule {
 
 		// Update outputs.
 		if (!outputBuffer.empty()) {
-			dsp::Frame<2> frame = outputBuffer.shift();
+			dsp::Frame<apicesCommon::kChannelCount> frame = outputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
 			// TODO: Check the output values against an actual device.
@@ -738,11 +737,11 @@ struct Mortuus : SanguineModule {
 			oledText4 = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4;
 		} else {
 			int currentFunction = -1;
-			// same for both
+			// Same for both.
 			if (editMode == apicesCommon::EDIT_MODE_TWIN) {
 				currentFunction = processorFunctions[0];
 			}
-			// if expert, pick the active set of labels
+			// If expert, pick the active set of labels.
 			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 				currentFunction = processorFunctions[editMode - apicesCommon::EDIT_MODE_FIRST];
 			} else {
