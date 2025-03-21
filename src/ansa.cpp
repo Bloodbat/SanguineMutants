@@ -5,13 +5,13 @@ Ansa::Ansa() {
 
     for (int function = 0; function < apicesExpander::kMaxFunctions; ++function) {
         int functionNumber = function + 1;
-        configParam(PARAM_PARAM_CV_1 + function, -1.f, 1.f, 0.f, string::f("Function %d CV", functionNumber));
-        configInput(INPUT_PARAM_CV_1 + function, string::f("Function %d", functionNumber));
+        configParam(PARAM_PARAM_CV_1 + function, -1.f, 1.f, 0.f, string::f("Knob %d CV", functionNumber));
+        configInput(INPUT_PARAM_CV_1 + function, string::f("Knob %d", functionNumber));
 
         configParam(PARAM_PARAM_CV_1 + function + apicesExpander::kChannel2Offset, -1.f, 1.f, 0.f,
-            string::f("Expert channel 2 function %d CV", functionNumber));
+            string::f("Expert channel 2 knob %d CV", functionNumber));
         configInput(INPUT_PARAM_CV_1 + function + apicesExpander::kChannel2Offset,
-            string::f("Expert channel 2 function %d", functionNumber));
+            string::f("Expert channel 2 knob %d", functionNumber));
     }
 }
 
