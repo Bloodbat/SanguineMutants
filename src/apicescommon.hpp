@@ -19,8 +19,8 @@ namespace apicesCommon {
 
     struct Settings {
         uint8_t editMode;
-        uint8_t processorFunction[2];
-        uint8_t potValue[8];
+        uint8_t processorFunctions[2];
+        uint8_t potValues[8];
         bool snap_mode;
     };
 
