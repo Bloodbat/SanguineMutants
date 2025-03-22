@@ -86,7 +86,7 @@ namespace marbles {
     void Init(RandomStream* random_stream, float sr);
 
     void Process(bool use_external_clock, const stmlib::GateFlags* external_clock,
-      Ramps ramps, bool* gate, size_t size) {
+      const Ramps& ramps, bool* gate, size_t size) {
       bool reset = false;
       Process(use_external_clock, &reset, external_clock, ramps, gate, size);
     }
