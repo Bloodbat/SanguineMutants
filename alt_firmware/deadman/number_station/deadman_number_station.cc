@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -64,8 +64,7 @@ namespace deadman {
 
 		if (voice_) {
 			phase_increment = pitch_shift_;
-		}
-		else {
+		} else {
 			uint16_t frequency = tone_;
 			int32_t a = lut_lfo_increments[frequency >> 8];
 			int32_t b = lut_lfo_increments[(frequency >> 8) + 1];
@@ -77,8 +76,7 @@ namespace deadman {
 		int32_t drift_target = Random::GetSample();
 		if (drift_target > drift_) {
 			drift_ += (drift_target - drift_) >> 13;
-		}
-		else {
+		} else {
 			drift_ -= (drift_ - drift_target) >> 13;
 		}
 		int32_t slow_noise = drift_ << 5;
@@ -100,8 +98,7 @@ namespace deadman {
 				}
 				if (gate_flag & GATE_FLAG_HIGH) {
 					tone_amplitude_ += (32767 - tone_amplitude_) >> 6;
-				}
-				else {
+				} else {
 					tone_amplitude_ -= tone_amplitude_ >> 6;
 					if (tone_amplitude_ < 64 && tone_amplitude_) {
 						--tone_amplitude_;
@@ -109,7 +106,7 @@ namespace deadman {
 				}
 			}
 
-			// Generate a distorted sine wave with fluctuating frequency.    
+			// Generate a distorted sine wave with fluctuating frequency.
 			int32_t digit;
 			if (voice_) {
 				uint16_t integral = phase_ >> 16;
@@ -123,13 +120,11 @@ namespace deadman {
 					digit -= 32768;
 					phase_ += phase_increment;
 					gate_ = true;
-				}
-				else {
+				} else {
 					digit = 0;
 					gate_ = false;
 				}
-			}
-			else {
+			} else {
 				phase_ += phase_increment + (lp_noise_ << 10);
 				digit = Interpolate1022(wav_sine, phase_);
 				digit = digit * tone_amplitude_ >> 16;

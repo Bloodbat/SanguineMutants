@@ -88,12 +88,10 @@ namespace deadman {
 						uint32_t period = 0;
 						if (gate_flag & GATE_FLAG_FROM_BUTTON) {
 							period = sync_counter_;
-						}
-						else if (sync_counter_ < 1920) {
+						} else if (sync_counter_ < 1920) {
 							period = (3 * period_ + sync_counter_) >> 2;
 							reset_phase = false;
-						}
-						else {
+						} else {
 							period = pattern_predictor_.Predict(sync_counter_);
 						}
 						if (period != period_) {
@@ -119,14 +117,12 @@ namespace deadman {
 		int16_t sample;
 		if (parameter_ > 0) {
 			int32_t wf_balance = parameter_;
-			int32_t wf_gain = 2048 + \
-				(static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
+			int32_t wf_gain = 2048 + (static_cast<int32_t>(parameter_) *
+				(65535 - 2048) >> 15);
 			int32_t original = sine;
-			int32_t folded = Interpolate1022(
-				wav_fold_sine, original * wf_gain + (1UL << 31));
+			int32_t folded = Interpolate1022(wav_fold_sine, original * wf_gain + (1UL << 31));
 			sample = original + ((folded - original) * wf_balance >> 15);
-		}
-		else {
+		} else {
 			int32_t wf_balance = -parameter_;
 			int32_t original = sine;
 			phase += 1UL << 30;
@@ -143,8 +139,7 @@ namespace deadman {
 			if (slope_offset <= 1) {
 				decay_factor_ = 32768 << kSlopeBits;
 				attack_factor_ = 1 << (kSlopeBits - 1);
-			}
-			else {
+			} else {
 				decay_factor_ = (32768 << kSlopeBits) / slope_offset;
 				attack_factor_ = (32768 << kSlopeBits) / (65536 - slope_offset);
 			}
@@ -156,8 +151,7 @@ namespace deadman {
 		uint32_t skewed_phase = phase;
 		if (phase < end_of_attack_) {
 			skewed_phase = (phase >> kSlopeBits) * decay_factor_;
-		}
-		else {
+		} else {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
@@ -170,8 +164,7 @@ namespace deadman {
 		uint32_t threshold = static_cast<uint32_t>(parameter_ + 32768) << 16;
 		if (threshold < (phase_increment_ << 1)) {
 			threshold = phase_increment_ << 1;
-		}
-		else if (~threshold < (phase_increment_ << 1)) {
+		} else if (~threshold < (phase_increment_ << 1)) {
 			threshold = ~(phase_increment_ << 1);
 		}
 		return phase_ < threshold ? 32767 : -32767;
@@ -193,18 +186,17 @@ namespace deadman {
 			next_value_ = Random::GetSample();
 		}
 		int16_t sample;
-		int32_t linear_interpolation = value_ + \
-			((next_value_ - value_) * static_cast<int32_t>(phase >> 17) >> 15);
+		int32_t linear_interpolation = value_ + ((next_value_ - value_) *
+			static_cast<int32_t>(phase >> 17) >> 15);
 		if (parameter_ < 0) {
 			int32_t balance = parameter_ + 32767;
 			sample = value_ + ((linear_interpolation - value_) * balance >> 15);
-		}
-		else {
+		} else {
 			int16_t raised_cosine = Interpolate824(lut_raised_cosine, phase) >> 1;
-			int32_t smooth_interpolation = value_ + \
-				((next_value_ - value_) * raised_cosine >> 15);
-			sample = linear_interpolation + \
-				((smooth_interpolation - linear_interpolation) * parameter_ >> 15);
+			int32_t smooth_interpolation = value_ + ((next_value_ - value_) *
+				raised_cosine >> 15);
+			sample = linear_interpolation + ((smooth_interpolation - linear_interpolation) *
+				parameter_ >> 15);
 		}
 		return sample;
 	}
@@ -262,8 +254,7 @@ namespace deadman {
 			uint32_t unclipped_modulated_rate = rate_ + fm_delta_;
 			if (unclipped_modulated_rate > 65535) {
 				unclipped_modulated_rate = 65335;
-			}
-			else if (unclipped_modulated_rate <= 0) {
+			} else if (unclipped_modulated_rate <= 0) {
 				unclipped_modulated_rate = 0;
 			}
 			uint16_t modulated_rate = static_cast<uint16_t>(unclipped_modulated_rate);
@@ -289,14 +280,11 @@ namespace deadman {
 		int16_t sample;
 		if (parameter_ > 0) {
 			int32_t wf_balance = parameter_;
-			int32_t wf_gain = 2048 + \
-				(static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
+			int32_t wf_gain = 2048 + (static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
 			int32_t original = sine;
-			int32_t folded = Interpolate1022(
-				wav_fold_sine, original * wf_gain + (1UL << 31));
+			int32_t folded = Interpolate1022(wav_fold_sine, original * wf_gain + (1UL << 31));
 			sample = original + ((folded - original) * wf_balance >> 15);
-		}
-		else {
+		} else {
 			int32_t wf_balance = -parameter_;
 			int32_t original = sine;
 			phase += 1UL << 30;
@@ -313,25 +301,22 @@ namespace deadman {
 		int16_t sample;
 		if (!random_mod_) {
 			int32_t wf_balance = fm_parameter_;
-			int32_t wf_gain = 2048 + \
-				(static_cast<int32_t>(fm_parameter_) * (65535 - 2048) >> 15);
+			int32_t wf_gain = 2048 + (static_cast<int32_t>(fm_parameter_) * (65535 - 2048) >> 15);
 			int32_t original = sine;
-			int32_t folded = Interpolate1022(
-				wav_fold_sine, original * wf_gain + (1UL << 31));
+			int32_t folded = Interpolate1022(wav_fold_sine, original * wf_gain + (1UL << 31));
 			sample = original + ((folded - original) * wf_balance >> 15);
-		}
-		else {
+		} else {
 			if (phase < fm_phase_increment_) {
 				fm_value_ = fm_next_value_;
 				fm_next_value_ = Random::GetSample();
 			}
-			int32_t linear_interpolation = fm_value_ + \
-				((fm_next_value_ - fm_value_) * static_cast<int32_t>(phase >> 17) >> 15);
+			int32_t linear_interpolation = fm_value_ + ((fm_next_value_ - fm_value_) *
+				static_cast<int32_t>(phase >> 17) >> 15);
 			int16_t raised_cosine = Interpolate824(lut_raised_cosine, phase) >> 1;
-			int32_t smooth_interpolation = fm_value_ + \
-				((next_value_ - fm_value_) * raised_cosine >> 15);
-			sample = linear_interpolation + \
-				((smooth_interpolation - linear_interpolation) * fm_parameter_ >> 15);
+			int32_t smooth_interpolation = fm_value_ + ((next_value_ - fm_value_) *
+				raised_cosine >> 15);
+			sample = linear_interpolation + ((smooth_interpolation - linear_interpolation) *
+				fm_parameter_ >> 15);
 		}
 		return sample;
 	}
@@ -342,8 +327,7 @@ namespace deadman {
 			if (slope_offset <= 1) {
 				decay_factor_ = 32768 << kSlopeBits;
 				attack_factor_ = 1 << (kSlopeBits - 1);
-			}
-			else {
+			} else {
 				decay_factor_ = (32768 << kSlopeBits) / slope_offset;
 				attack_factor_ = (32768 << kSlopeBits) / (65536 - slope_offset);
 			}
@@ -355,8 +339,7 @@ namespace deadman {
 		uint32_t skewed_phase = phase;
 		if (phase < end_of_attack_) {
 			skewed_phase = (phase >> kSlopeBits) * decay_factor_;
-		}
-		else {
+		} else {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
@@ -369,8 +352,7 @@ namespace deadman {
 		uint32_t threshold = static_cast<uint32_t>(parameter_ + 32768) << 16;
 		if (threshold < (phase_increment_ << 1)) {
 			threshold = phase_increment_ << 1;
-		}
-		else if (~threshold < (phase_increment_ << 1)) {
+		} else if (~threshold < (phase_increment_ << 1)) {
 			threshold = ~(phase_increment_ << 1);
 		}
 		return phase_ < threshold ? 32767 : -32767;
@@ -392,18 +374,17 @@ namespace deadman {
 			next_value_ = Random::GetSample();
 		}
 		int16_t sample;
-		int32_t linear_interpolation = value_ + \
-			((next_value_ - value_) * static_cast<int32_t>(phase >> 17) >> 15);
+		int32_t linear_interpolation = value_ + ((next_value_ - value_) *
+			static_cast<int32_t>(phase >> 17) >> 15);
 		if (parameter_ <= 0) {
 			int32_t balance = parameter_ + 32767;
 			sample = value_ + ((linear_interpolation - value_) * balance >> 15);
-		}
-		else {
+		} else {
 			int16_t raised_cosine = Interpolate824(lut_raised_cosine, phase) >> 1;
-			int32_t smooth_interpolation = value_ + \
-				((next_value_ - value_) * raised_cosine >> 15);
-			sample = linear_interpolation + \
-				((smooth_interpolation - linear_interpolation) * parameter_ >> 15);
+			int32_t smooth_interpolation = value_ + ((next_value_ - value_) *
+				raised_cosine >> 15);
+			sample = linear_interpolation + ((smooth_interpolation - linear_interpolation) *
+				parameter_ >> 15);
 		}
 		return sample;
 	}
@@ -488,11 +469,9 @@ namespace deadman {
 		int16_t sine = Interpolate1022(wav_sine, phase);
 		int16_t sample;
 		int32_t wf_balance = (parameter_ + 32767) >> 1;
-		int32_t wf_gain = 2048 + \
-			(static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
+		int32_t wf_gain = 2048 + (static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
 		int32_t original = sine;
-		int32_t folded = Interpolate1022(
-			wav_fold_sine, original * wf_gain + (1UL << 31));
+		int32_t folded = Interpolate1022(wav_fold_sine, original * wf_gain + (1UL << 31));
 		sample = original + ((folded - original) * wf_balance >> 15);
 		return sample;
 	}
@@ -515,11 +494,10 @@ namespace deadman {
 		int16_t sine = Interpolate1022(wav_sine, phase);
 		int16_t sample;
 		int32_t wf_balance = (parameter_ + 32767) >> 1;
-		int32_t wf_gain = 2048 + \
-			(static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
+		int32_t wf_gain = 2048 + (static_cast<int32_t>(parameter_) *
+			(65535 - 2048) >> 15);
 		int32_t original = sine;
-		int32_t folded = Interpolate1022(
-			wav_overdrive, original * wf_gain + (1UL << 31));
+		int32_t folded = Interpolate1022(wav_overdrive, original * wf_gain + (1UL << 31));
 		sample = original + ((folded - original) * wf_balance >> 15);
 		return sample;
 	}
@@ -530,25 +508,23 @@ namespace deadman {
 		if (!random_mod_) {
 			int16_t sine = Interpolate1022(wav_sine, phase);
 			int32_t wf_balance = wsm_parameter_;
-			int32_t wf_gain = 2048 + \
-				(static_cast<int32_t>(wsm_parameter_) * (65535 - 2048) >> 15);
+			int32_t wf_gain = 2048 + (static_cast<int32_t>(wsm_parameter_) *
+				(65535 - 2048) >> 15);
 			int32_t original = sine;
-			int32_t folded = Interpolate1022(
-				wav_fold_sine, original * wf_gain + (1UL << 31));
+			int32_t folded = Interpolate1022(wav_fold_sine, original * wf_gain + (1UL << 31));
 			sample = original + ((folded - original) * wf_balance >> 15);
-		}
-		else {
+		} else {
 			if (phase < wsm_phase_increment_) {
 				wsm_value_ = wsm_next_value_;
 				wsm_next_value_ = Random::GetSample();
 			}
-			int32_t linear_interpolation = wsm_value_ + \
-				((wsm_next_value_ - wsm_value_) * static_cast<int32_t>(phase >> 17) >> 15);
+			int32_t linear_interpolation = wsm_value_ + ((wsm_next_value_ - wsm_value_) *
+				static_cast<int32_t>(phase >> 17) >> 15);
 			int16_t raised_cosine = Interpolate824(lut_raised_cosine, phase) >> 1;
-			int32_t smooth_interpolation = wsm_value_ + \
-				((wsm_next_value_ - wsm_value_) * raised_cosine >> 15);
-			sample = linear_interpolation + \
-				((smooth_interpolation - linear_interpolation) * wsm_parameter_ >> 15);
+			int32_t smooth_interpolation = wsm_value_ + ((wsm_next_value_ - wsm_value_) *
+				raised_cosine >> 15);
+			sample = linear_interpolation + ((smooth_interpolation - linear_interpolation) *
+				wsm_parameter_ >> 15);
 		}
 		return sample;
 	}
@@ -559,8 +535,7 @@ namespace deadman {
 			if (slope_offset <= 1) {
 				decay_factor_ = 32768 << kSlopeBits;
 				attack_factor_ = 1 << (kSlopeBits - 1);
-			}
-			else {
+			} else {
 				decay_factor_ = (32768 << kSlopeBits) / slope_offset;
 				attack_factor_ = (32768 << kSlopeBits) / (65536 - slope_offset);
 			}
@@ -572,8 +547,7 @@ namespace deadman {
 		uint32_t skewed_phase = phase;
 		if (phase < end_of_attack_) {
 			skewed_phase = (phase >> kSlopeBits) * decay_factor_;
-		}
-		else {
+		} else {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
@@ -586,8 +560,7 @@ namespace deadman {
 		uint32_t threshold = static_cast<uint32_t>(parameter_ + 32768) << 16;
 		if (threshold < (phase_increment_ << 1)) {
 			threshold = phase_increment_ << 1;
-		}
-		else if (~threshold < (phase_increment_ << 1)) {
+		} else if (~threshold < (phase_increment_ << 1)) {
 			threshold = ~(phase_increment_ << 1);
 		}
 		return phase_ < threshold ? 32767 : -32767;
@@ -600,18 +573,17 @@ namespace deadman {
 			next_value_ = Random::GetSample();
 		}
 		int16_t sample;
-		int32_t linear_interpolation = value_ + \
-			((next_value_ - value_) * static_cast<int32_t>(phase >> 17) >> 15);
+		int32_t linear_interpolation = value_ + ((next_value_ - value_) *
+			static_cast<int32_t>(phase >> 17) >> 15);
 		if (parameter_ <= 0) {
 			int32_t balance = parameter_ + 32767;
 			sample = value_ + ((linear_interpolation - value_) * balance >> 15);
-		}
-		else {
+		} else {
 			int16_t raised_cosine = Interpolate824(lut_raised_cosine, phase) >> 1;
-			int32_t smooth_interpolation = value_ + \
-				((next_value_ - value_) * raised_cosine >> 15);
-			sample = linear_interpolation + \
-				((smooth_interpolation - linear_interpolation) * parameter_ >> 15);
+			int32_t smooth_interpolation = value_ + ((next_value_ - value_) *
+				raised_cosine >> 15);
+			sample = linear_interpolation + ((smooth_interpolation - linear_interpolation) *
+				parameter_ >> 15);
 		}
 		return sample;
 	}
@@ -678,8 +650,7 @@ namespace deadman {
 					uint32_t period = 0;
 					if (sync_counter_ < 1920) {
 						period = (3 * period_ + sync_counter_) >> 2;
-					}
-					else {
+					} else {
 						period = pattern_predictor_.Predict(sync_counter_);
 					}
 					if (period != period_) {
@@ -693,8 +664,7 @@ namespace deadman {
 				sync_counter_ = 0;
 			}
 			phase_ += phase_increment_;
-			// int32_t sample = (this->*compute_sample_fn_table_[shape_])();
-			// output_buffer->Overwrite(sample);
+
 			*out++ = (this->*compute_sample_fn_table_[shape_])();
 		}
 	}
@@ -704,11 +674,10 @@ namespace deadman {
 		int16_t sine = Interpolate1022(wav_sine, phase);
 		int16_t sample;
 		int32_t wf_balance = (parameter_ + 32767) >> 1;
-		int32_t wf_gain = 2048 + \
-			(static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
+		int32_t wf_gain = 2048 + (static_cast<int32_t>(parameter_) *
+			(65535 - 2048) >> 15);
 		int32_t original = sine;
-		int32_t folded = Interpolate1022(
-			wav_fold_sine, original * wf_gain + (1UL << 31));
+		int32_t folded = Interpolate1022(wav_fold_sine, original * wf_gain + (1UL << 31));
 		sample = original + ((folded - original) * wf_balance >> 15);
 		return sample;
 	}
@@ -731,11 +700,10 @@ namespace deadman {
 		int16_t sine = Interpolate1022(wav_sine, phase);
 		int16_t sample;
 		int32_t wf_balance = (parameter_ + 32767) >> 1;
-		int32_t wf_gain = 2048 + \
-			(static_cast<int32_t>(parameter_) * (65535 - 2048) >> 15);
+		int32_t wf_gain = 2048 + (static_cast<int32_t>(parameter_) *
+			(65535 - 2048) >> 15);
 		int32_t original = sine;
-		int32_t folded = Interpolate1022(
-			wav_overdrive, original * wf_gain + (1UL << 31));
+		int32_t folded = Interpolate1022(wav_overdrive, original * wf_gain + (1UL << 31));
 		sample = original + ((folded - original) * wf_balance >> 15);
 		return sample;
 	}
@@ -752,8 +720,7 @@ namespace deadman {
 			if (slope_offset <= 1) {
 				decay_factor_ = 32768 << kSlopeBits;
 				attack_factor_ = 1 << (kSlopeBits - 1);
-			}
-			else {
+			} else {
 				decay_factor_ = (32768 << kSlopeBits) / slope_offset;
 				attack_factor_ = (32768 << kSlopeBits) / (65536 - slope_offset);
 			}
@@ -765,8 +732,7 @@ namespace deadman {
 		uint32_t skewed_phase = phase;
 		if (phase < end_of_attack_) {
 			skewed_phase = (phase >> kSlopeBits) * decay_factor_;
-		}
-		else {
+		} else {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
@@ -779,8 +745,7 @@ namespace deadman {
 		uint32_t threshold = static_cast<uint32_t>(parameter_ + 32768) << 16;
 		if (threshold < (phase_increment_ << 1)) {
 			threshold = phase_increment_ << 1;
-		}
-		else if (~threshold < (phase_increment_ << 1)) {
+		} else if (~threshold < (phase_increment_ << 1)) {
 			threshold = ~(phase_increment_ << 1);
 		}
 		return phase_ < threshold ? 32767 : -32767;
@@ -793,18 +758,17 @@ namespace deadman {
 			next_value_ = Random::GetSample();
 		}
 		int16_t sample;
-		int32_t linear_interpolation = value_ + \
-			((next_value_ - value_) * static_cast<int32_t>(phase >> 17) >> 15);
+		int32_t linear_interpolation = value_ + ((next_value_ - value_) *
+			static_cast<int32_t>(phase >> 17) >> 15);
 		if (parameter_ < 0) {
 			int32_t balance = parameter_ + 32767;
 			sample = value_ + ((linear_interpolation - value_) * balance >> 15);
-		}
-		else {
+		} else {
 			int16_t raised_cosine = Interpolate824(lut_raised_cosine, phase) >> 1;
-			int32_t smooth_interpolation = value_ + \
-				((next_value_ - value_) * raised_cosine >> 15);
-			sample = linear_interpolation + \
-				((smooth_interpolation - linear_interpolation) * parameter_ >> 15);
+			int32_t smooth_interpolation = value_ + ((next_value_ - value_) *
+				raised_cosine >> 15);
+			sample = linear_interpolation + ((smooth_interpolation - linear_interpolation) *
+				parameter_ >> 15);
 		}
 		return sample;
 	}

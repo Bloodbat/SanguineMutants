@@ -48,8 +48,8 @@ namespace deadman {
 
 	class MultistageEnvelope {
 	public:
-		MultistageEnvelope() { }
-		~MultistageEnvelope() { }
+		MultistageEnvelope() {}
+		~MultistageEnvelope() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -57,8 +57,7 @@ namespace deadman {
 		void Configure(uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_ad(parameter[0], parameter[1]);
-			}
-			else {
+			} else {
 				set_adsr(parameter[0], parameter[1], parameter[2] >> 1, parameter[3]);
 			}
 			if (segment_ > num_segments_) {
@@ -84,11 +83,7 @@ namespace deadman {
 			sustain_point_ = sustain_point;
 		}
 
-		inline void set_adsr(
-			uint16_t attack,
-			uint16_t decay,
-			uint16_t sustain,
-			uint16_t release) {
+		inline void set_adsr(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
 			num_segments_ = 3;
 			sustain_point_ = 2;
 
@@ -154,8 +149,8 @@ namespace deadman {
 	// Just copy the class and adjust it rather than trying to subclass it...
 	class DualAttackEnvelope {
 	public:
-		DualAttackEnvelope() { }
-		~DualAttackEnvelope() { }
+		DualAttackEnvelope() {}
+		~DualAttackEnvelope() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -163,8 +158,7 @@ namespace deadman {
 		void Configure(uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_ad(parameter[0], parameter[1]);
-			}
-			else {
+			} else {
 				set_adsar(parameter[0], parameter[1], parameter[2] >> 1, parameter[3]);
 			}
 			if (segment_ > num_segments_) {
@@ -207,11 +201,7 @@ namespace deadman {
 			loop_start_ = loop_end_ = 0;
 		}
 
-		inline void set_adsar(
-			uint16_t attack,
-			uint16_t decay,
-			uint16_t sustain,
-			uint16_t release) {
+		inline void set_adsar(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
 			num_segments_ = 4;
 			sustain_point_ = 2;
 
@@ -263,8 +253,8 @@ namespace deadman {
 	// And copy the class again...
 	class RepeatingAttackEnvelope {
 	public:
-		RepeatingAttackEnvelope() { }
-		~RepeatingAttackEnvelope() { }
+		RepeatingAttackEnvelope() {}
+		~RepeatingAttackEnvelope() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -272,8 +262,7 @@ namespace deadman {
 		void Configure(uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_ad_loop(parameter[0], parameter[1]);
-			}
-			else {
+			} else {
 				set_adr_loop(parameter[0], parameter[1], parameter[2] >> 1, parameter[3]);
 			}
 			if (segment_ > num_segments_) {
@@ -317,11 +306,7 @@ namespace deadman {
 			loop_end_ = 2;
 		}
 
-		inline void set_adr_loop(
-			uint16_t attack,
-			uint16_t decay,
-			uint16_t sustain,
-			uint16_t release) {
+		inline void set_adr_loop(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
 			num_segments_ = 3;
 			sustain_point_ = 0;
 
@@ -372,8 +357,8 @@ namespace deadman {
 	// And copy the class again...
 	class LoopingEnvelope {
 	public:
-		LoopingEnvelope() { }
-		~LoopingEnvelope() { }
+		LoopingEnvelope() {}
+		~LoopingEnvelope() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -381,8 +366,7 @@ namespace deadman {
 		void Configure(uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_ad_loop(parameter[0], parameter[1]);
-			}
-			else {
+			} else {
 				set_adr_loop(parameter[0], parameter[1], parameter[2] >> 1, parameter[3]);
 			}
 			if (segment_ > num_segments_) {
@@ -426,11 +410,7 @@ namespace deadman {
 			loop_end_ = 2;
 		}
 
-		inline void set_adr_loop(
-			uint16_t attack,
-			uint16_t decay,
-			uint16_t sustain,
-			uint16_t release) {
+		inline void set_adr_loop(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
 			num_segments_ = 3;
 			sustain_point_ = 0;
 
@@ -480,8 +460,8 @@ namespace deadman {
 	// randomised AD envelope class
 	class RandomisedEnvelope {
 	public:
-		RandomisedEnvelope() { }
-		~RandomisedEnvelope() { }
+		RandomisedEnvelope() {}
+		~RandomisedEnvelope() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -489,8 +469,7 @@ namespace deadman {
 		void Configure(uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_rad_half(parameter[0], parameter[1]);
-			}
-			else {
+			} else {
 				set_rad(parameter[0], parameter[1], parameter[2], parameter[3]);
 			}
 			if (segment_ > num_segments_) {
@@ -516,9 +495,7 @@ namespace deadman {
 			sustain_point_ = sustain_point;
 		}
 
-		inline void set_rad(uint16_t attack,
-			uint16_t decay,
-			uint16_t level_randomness,
+		inline void set_rad(uint16_t attack, uint16_t decay, uint16_t level_randomness,
 			uint16_t decay_randomness) {
 			num_segments_ = 2;
 			sustain_point_ = 0;
