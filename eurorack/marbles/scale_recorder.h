@@ -122,7 +122,7 @@ namespace marbles {
       scale->base_interval = 1.0f;
       scale->num_degrees = num_degrees_;
       for (int i = 0; i < num_degrees_; ++i) {
-        Degree* d = &degrees_[i];
+        const Degree* d = &degrees_[i];
         scale->degree[i].voltage = d->average_voltage;
         scale->degree[i].weight = static_cast<uint8_t>(255.0f * d->count / max_count);
         if (scale->degree[i].weight == 0) {
