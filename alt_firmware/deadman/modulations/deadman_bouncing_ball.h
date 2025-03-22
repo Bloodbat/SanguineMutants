@@ -52,7 +52,7 @@ namespace deadman {
 			initial_velocity_ = 0;
 		}
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_initial_amplitude(65535);
 				set_initial_velocity(0);
