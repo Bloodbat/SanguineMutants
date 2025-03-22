@@ -251,7 +251,7 @@ namespace deadman {
 			int32_t fm_sample = FmLfo::ComputeModulation();
 			fm_delta_ = (fm_sample * fm_depth_) >> 18;
 			// now actual LFO
-			uint32_t unclipped_modulated_rate = rate_ + fm_delta_;
+			int32_t unclipped_modulated_rate = rate_ + fm_delta_;
 			if (unclipped_modulated_rate > 65535) {
 				unclipped_modulated_rate = 65335;
 			} else if (unclipped_modulated_rate <= 0) {
