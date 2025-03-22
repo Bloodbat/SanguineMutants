@@ -62,7 +62,7 @@ namespace peaks {
       num_steps_ = num_steps;
     }
 
-    void Configure(uint16_t* parameter, ControlMode control_mode) {
+    void Configure(const uint16_t* parameter, ControlMode control_mode) {
       if (control_mode == CONTROL_MODE_HALF) {
         set_step(0, parameter[0] - 32768);
         set_step(1, parameter[1] - 32768);
