@@ -44,7 +44,7 @@ namespace peaks {
     void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
     void Morph(uint16_t x, uint16_t y);
-    void Configure(uint16_t* parameter, ControlMode control_mode) {
+    void Configure(const uint16_t* parameter, ControlMode control_mode) {
       if (control_mode == CONTROL_MODE_HALF) {
         Morph(parameter[0], parameter[1]);
       } else {
