@@ -6,6 +6,8 @@
 
 - Vimina: don't delay triggers by 16 samples.
 
+- Mortuus: rollover error on slow FM LFOs.
+
 ## Changes
 
 - Vimina: generated and through gates didn't have the same duration.
@@ -24,7 +26,7 @@
 ## Changes
 
 - Vimina: even out knob space distribution for clock multiplier/divider factors.
-  
+
 
 ---
 
