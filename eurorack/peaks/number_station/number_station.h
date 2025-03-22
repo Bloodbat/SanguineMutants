@@ -44,7 +44,7 @@ namespace peaks {
     void Init();
     void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-    void Configure(uint16_t* parameter, ControlMode control_mode) {
+    void Configure(const uint16_t* parameter, ControlMode control_mode) {
       if (control_mode == CONTROL_MODE_HALF) {
         set_tone(parameter[0]);
         set_transition_probability(parameter[1]);
