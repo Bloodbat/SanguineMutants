@@ -79,8 +79,6 @@ namespace deadman {
 		} else {
 			drift_ -= (drift_ - drift_target) >> 13;
 		}
-		int32_t slow_noise = drift_ << 5;
-		CLIP(slow_noise);
 
 		size /= kDownsample;
 		while (size--) {
