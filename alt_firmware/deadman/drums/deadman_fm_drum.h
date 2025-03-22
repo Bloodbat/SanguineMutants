@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -37,8 +37,8 @@ namespace deadman {
 
 	class FmDrum {
 	public:
-		FmDrum() { }
-		~FmDrum() { }
+		FmDrum() {}
+		~FmDrum() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -47,8 +47,7 @@ namespace deadman {
 		void Configure(uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				Morph(parameter[0], parameter[1]);
-			}
-			else {
+			} else {
 				set_frequency(parameter[0]);
 				set_fm_amount((parameter[1] >> 2) * 3);
 				set_decay(parameter[2]);
@@ -63,11 +62,9 @@ namespace deadman {
 		inline void set_frequency(uint16_t frequency) {
 			if (frequency <= 16384) {
 				aux_envelope_strength_ = 1024;
-			}
-			else if (frequency <= 32768) {
+			} else if (frequency <= 32768) {
 				aux_envelope_strength_ = 2048 - (frequency >> 4);
-			}
-			else {
+			} else {
 				aux_envelope_strength_ = 0;
 			}
 			frequency_ = (24 << 7) + ((72 << 7) * frequency >> 16);

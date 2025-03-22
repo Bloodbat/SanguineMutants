@@ -44,8 +44,8 @@ namespace deadman {
 
 	class MiniSequencer {
 	public:
-		MiniSequencer() { }
-		~MiniSequencer() { }
+		MiniSequencer() {}
+		~MiniSequencer() {}
 
 		void Init() {
 			std::fill(&steps_[0], &steps_[kMaxNumSteps], 0);
@@ -70,8 +70,7 @@ namespace deadman {
 				set_step(0, parameter[0] - 32768);
 				set_step(1, parameter[1] - 32768);
 				set_num_steps(2);
-			}
-			else {
+			} else {
 				set_step(0, parameter[0] - 32768);
 				set_step(1, parameter[1] - 32768);
 				set_step(2, parameter[2] - 32768);
@@ -112,8 +111,8 @@ namespace deadman {
 
 	class ModSequencer {
 	public:
-		ModSequencer() { }
-		~ModSequencer() { }
+		ModSequencer() {}
+		~ModSequencer() {}
 
 		void Init() {
 			std::fill(&steps_[0], &steps_[kMaxModSeqNumSteps], 0);
@@ -137,8 +136,7 @@ namespace deadman {
 				set_step(2, 32768 - parameter[0]);
 				set_step(3, 32768 - parameter[1]);
 				set_num_steps(4);
-			}
-			else {
+			} else {
 				set_step(0, parameter[0] - 32768);
 				set_step(1, parameter[1] - 32768);
 				set_step(2, parameter[2] - 32768);

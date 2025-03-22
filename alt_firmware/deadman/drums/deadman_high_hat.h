@@ -42,8 +42,8 @@ namespace deadman {
 
 	class HighHat {
 	public:
-		HighHat() { }
-		~HighHat() { }
+		HighHat() {}
+		~HighHat() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -55,8 +55,7 @@ namespace deadman {
 				set_decay(parameter[1]);
 				base_decay_ = parameter[1];
 				last_decay_ = base_decay_;
-			}
-			else {
+			} else {
 				set_frequency(parameter[0]);
 				base_frequency_ = parameter[0];
 				last_frequency_ = base_frequency_;

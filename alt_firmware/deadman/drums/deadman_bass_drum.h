@@ -42,8 +42,8 @@ namespace deadman {
 
 	class BassDrum {
 	public:
-		BassDrum() { }
-		~BassDrum() { }
+		BassDrum() {}
+		~BassDrum() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -54,8 +54,7 @@ namespace deadman {
 				set_punch(40000);
 				set_tone(8192 + (parameter[0] >> 1));
 				set_decay(parameter[1]);
-			}
-			else {
+			} else {
 				set_frequency(parameter[0] - 32768);
 				set_punch(parameter[1]);
 				set_tone(parameter[2]);
@@ -101,8 +100,8 @@ namespace deadman {
 
 	class RandomisedBassDrum {
 	public:
-		RandomisedBassDrum() { }
-		~RandomisedBassDrum() { }
+		RandomisedBassDrum() {}
+		~RandomisedBassDrum() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -116,8 +115,7 @@ namespace deadman {
 				set_tone(8192 + (parameter[0] >> 1));
 				set_decay(parameter[1]);
 				base_decay_ = parameter[1];
-			}
-			else {
+			} else {
 				set_frequency(0);
 				base_frequency_ = 0;
 				last_frequency_ = base_frequency_;

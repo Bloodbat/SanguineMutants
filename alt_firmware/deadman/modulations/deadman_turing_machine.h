@@ -44,8 +44,8 @@ namespace deadman {
 
 	class TuringMachine {
 	public:
-		TuringMachine() { }
-		~TuringMachine() { }
+		TuringMachine() {}
+		~TuringMachine() {}
 
 		void Init() {
 			turing_length_ = 8;
@@ -62,23 +62,17 @@ namespace deadman {
 		inline void set_turing_length(uint16_t value) {
 			if (value < 9362) {
 				turing_length_ = 8;
-			}
-			else if (value < 18724) {
+			} else if (value < 18724) {
 				turing_length_ = 12;
-			}
-			else if (value < 28086) {
+			} else if (value < 28086) {
 				turing_length_ = 16;
-			}
-			else if (value < 37449) {
+			} else if (value < 37449) {
 				turing_length_ = 20;
-			}
-			else if (value < 46822) {
+			} else if (value < 46822) {
 				turing_length_ = 24;
-			}
-			else if (value < 56173) {
+			} else if (value < 56173) {
 				turing_length_ = 28;
-			}
-			else {
+			} else {
 				turing_length_ = 32;
 			}
 		}
@@ -86,8 +80,7 @@ namespace deadman {
 		inline void set_turing_prob(uint16_t value) {
 			if (value > 63487) {
 				turing_prob_ = 65535;
-			}
-			else {
+			} else {
 				turing_prob_ = value >> 3;
 			}
 		}
@@ -104,8 +97,7 @@ namespace deadman {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_turing_prob(parameter[0]);
 				set_turing_span(parameter[1]);
-			}
-			else {
+			} else {
 				set_turing_prob(parameter[0]);
 				set_turing_span(parameter[1]);
 				set_turing_length(parameter[2]);
@@ -132,16 +124,14 @@ namespace deadman {
 						// add back the LSB into the MSB postion
 						if (turing_lsb_) {
 							turing_shift_register_ |= (static_cast<uint32_t>(1) << (turing_length_ - 1));
-						}
-						else {
+						} else {
 							turing_shift_register_ &= (~(static_cast<uint32_t>(1) << (turing_length_ - 1)));
 						}
 						// add back the LSB to the remainder of the shift register
 						if (turing_length_ < 32) {
 							if (turing_remainder_lsb_) {
 								turing_shift_register_ |= (static_cast<uint32_t>(1) << 31);
-							}
-							else {
+							} else {
 								turing_shift_register_ &= (~(static_cast<uint32_t>(1) << 31));
 							}
 						}
@@ -149,8 +139,7 @@ namespace deadman {
 						if (false) {
 							turing_shift_register_ = stmlib::Random::GetWord();
 							turing_lsb_ = turing_shift_register_ & static_cast<uint32_t>(1);
-						}
-						else {
+						} else {
 							// read the LSB
 							turing_lsb_ = turing_shift_register_ & static_cast<uint32_t>(1);
 							// read the LSB in the remainder of the shift register
@@ -162,16 +151,14 @@ namespace deadman {
 							// add back the LSB into the MSB postion
 							if (turing_lsb_) {
 								turing_shift_register_ |= (static_cast<uint32_t>(1) << (turing_length_ - 1));
-							}
-							else {
+							} else {
 								turing_shift_register_ &= (~(static_cast<uint32_t>(1) << (turing_length_ - 1)));
 							}
 							// add back the LSB to the remainder of the shift register
 							if (turing_length_ < 32) {
 								if (turing_remainder_lsb_) {
 									turing_shift_register_ |= (static_cast<uint32_t>(1) << 31);
-								}
-								else {
+								} else {
 									turing_shift_register_ &= (~(static_cast<uint32_t>(1) << 31));
 								}
 							}

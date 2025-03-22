@@ -44,8 +44,8 @@ namespace deadman {
 
 	class SnareDrum {
 	public:
-		SnareDrum() { }
-		~SnareDrum() { }
+		SnareDrum() {}
+		~SnareDrum() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -56,8 +56,7 @@ namespace deadman {
 				set_decay(32768);
 				set_tone(parameter[0]);
 				set_snappy(parameter[1]);
-			}
-			else {
+			} else {
 				set_frequency(parameter[0] - 32768);
 				set_tone(parameter[1]);
 				set_snappy(parameter[2]);
@@ -113,8 +112,8 @@ namespace deadman {
 	// Randomised version
 	class RandomisedSnareDrum {
 	public:
-		RandomisedSnareDrum() { }
-		~RandomisedSnareDrum() { }
+		RandomisedSnareDrum() {}
+		~RandomisedSnareDrum() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
@@ -128,8 +127,7 @@ namespace deadman {
 				// set_tone(parameter[0]);
 				set_tone(32768);
 				set_snappy(parameter[1]);
-			}
-			else {
+			} else {
 				set_frequency(parameter[0] - 32768);
 				base_frequency_ = parameter[0] - 32768;
 				last_frequency_ = base_frequency_;
