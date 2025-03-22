@@ -155,9 +155,7 @@ namespace peaks {
       CLIP(inner_sample)
 
         // And a pass of wavefolding...
-        inner_sample = Interpolate1022(
-          wav_fold_sine,
-          inner_sample * 8192 + (1UL << 31));
+        inner_sample = Interpolate1022(wav_fold_sine, inner_sample * 8192 + (1UL << 31));
 
       int32_t outer_sample;
       outer_sample = lp_.Process<SVF_MODE_LP>(
