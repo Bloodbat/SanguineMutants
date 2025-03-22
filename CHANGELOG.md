@@ -14,6 +14,8 @@
 
 - Apices family expanders: make tooltips congruent with base module tooltips.
 
+- Mortuus: performance tweaks.
+
 
 ---
 
