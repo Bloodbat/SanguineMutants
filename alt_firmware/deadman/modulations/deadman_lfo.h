@@ -72,7 +72,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				if (sync_) {
 					set_shape_integer(parameter[0]);
@@ -177,7 +177,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_rate(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
@@ -294,7 +294,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_rate(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
@@ -412,7 +412,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_pitch_coefficient(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);

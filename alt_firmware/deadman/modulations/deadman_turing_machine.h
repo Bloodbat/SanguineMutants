@@ -93,7 +93,7 @@ namespace deadman {
 			turing_span_ = value;
 		}
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_turing_prob(parameter[0]);
 				set_turing_span(parameter[1]);

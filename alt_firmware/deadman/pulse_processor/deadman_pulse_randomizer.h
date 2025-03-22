@@ -50,7 +50,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_acceptance_probability(65535);
 				set_repetition_probability(parameter[0]);

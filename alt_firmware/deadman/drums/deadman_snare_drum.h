@@ -50,7 +50,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_frequency(0);
 				set_decay(32768);
@@ -118,7 +118,7 @@ namespace deadman {
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_frequency(parameter[0] - 32768);
 				base_frequency_ = parameter[0] - 32768;
