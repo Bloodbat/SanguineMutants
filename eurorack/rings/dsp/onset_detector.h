@@ -165,7 +165,7 @@ namespace rings {
       float onset_df = 0.0f;
       float total_energy = 0.0f;
       for (int32_t i = 0; i < 3; ++i) {
-        float* s = bands_[i];
+        const float* s = bands_[i];
         float energy = 0.0f;
         float envelope = envelope_[i];
         size_t increment = 4 >> i;
