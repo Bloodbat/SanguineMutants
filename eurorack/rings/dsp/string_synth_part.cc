@@ -223,7 +223,7 @@ namespace rings {
 
 #endif  // BRYAN_CHORDS
 
-  void StringSynthPart::ProcessEnvelopes(float shape, uint8_t* flags, float* values) {
+  void StringSynthPart::ProcessEnvelopes(float shape, const uint8_t* flags, float* values) {
     float decay = shape;
     float attack = 0.0f;
     if (shape < 0.5f) {

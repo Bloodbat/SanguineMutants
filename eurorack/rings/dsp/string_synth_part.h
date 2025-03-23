@@ -98,7 +98,7 @@ namespace rings {
     }
 
   private:
-    void ProcessEnvelopes(float shape, uint8_t* flags, float* values);
+    void ProcessEnvelopes(float shape, const uint8_t* flags, float* values);
     void ComputeRegistration(float gain, float registration, float* amplitudes);
 
     void ProcessFormantFilter(float vowel, float shift, float resonance,
