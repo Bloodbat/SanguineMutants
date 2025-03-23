@@ -248,14 +248,11 @@ namespace bumps {
 
 	void Generator::FillBuffer() {
 		if (feature_mode_ == FEAT_MODE_FUNCTION) {
-			//#ifndef WAVETABLE_HACK
 			if (range_ == GENERATOR_RANGE_HIGH) {
 				FillBufferAudioRate();
 			} else {
 				FillBufferControlRate();
 			}
-			//#else
-			//#endif
 		} else if (feature_mode_ == FEAT_MODE_HARMONIC) {
 			if (mode_ == GENERATOR_MODE_LOOPING)
 				FillBufferHarmonic<GENERATOR_MODE_LOOPING>();
@@ -270,38 +267,40 @@ namespace bumps {
 		}
 	}
 
-	// There are to our knowledge three ways of generating an "asymmetric" ramp:
-	//
-	// 1. Use the difference between two parabolic waves.
-	//
-	// + Anti-aliasing is easy with wavetables of band-limited parabolic waves.
-	// + Slope modulation does not cause discontinuities.
-	// - Does not allow a different waveshape to be used for the A and D segments.
-	// - Needs gain compensation at the extreme settings of the slope parameter.
-	// - Does not traverse the full 0 .. 65535 range due to inaccuracies in gain
-	//   factor.
-	//
-	// 2. Use different phase increments for the A and D segments.
-	//
-	// + Slope modulation does not cause discontinuities.
-	// + Traverses the full 0 .. 65535 range.
-	// - Due to rounding errors, the duration of the A+D segment is not preserved
-	//   exactly when the slope is modulated.
-	// - No anti-aliasing.
-	//
-	// 3. Generate a ramp and waveshape it (phase distortion).
-	//
-	// + Duration of A+D segment is preserved.
-	// + Traverses the full 0 .. 65535 range.
-	// - No anti-aliasing.
-	// - Slope modulations causes waveform discontinuities.
-	//
-	//
-	// We use 1. for the highest range (audio rates); and 3 for the two other ranges
-	// (control rates extending into audio territory). To compensate for the slope
-	// modulation discontinuities, we low-pass filter digitally the slope value.
-	// 2. has a terrible behaviour in the audio range, because it causes audible FM
-	// when the slope parameter is modulated by a LFO.
+	/*
+	There are to our knowledge three ways of generating an "asymmetric" ramp:
+
+	1. Use the difference between two parabolic waves.
+
+	+ Anti-aliasing is easy with wavetables of band-limited parabolic waves.
+	+ Slope modulation does not cause discontinuities.
+	- Does not allow a different waveshape to be used for the A and D segments.
+	- Needs gain compensation at the extreme settings of the slope parameter.
+	- Does not traverse the full 0 .. 65535 range due to inaccuracies in gain
+	  factor.
+
+	2. Use different phase increments for the A and D segments.
+
+	+ Slope modulation does not cause discontinuities.
+	+ Traverses the full 0 .. 65535 range.
+	- Due to rounding errors, the duration of the A+D segment is not preserved
+	  exactly when the slope is modulated.
+	- No anti-aliasing.
+
+	3. Generate a ramp and waveshape it (phase distortion).
+
+	+ Duration of A+D segment is preserved.
+	+ Traverses the full 0 .. 65535 range.
+	- No anti-aliasing.
+	- Slope modulations causes waveform discontinuities.
+
+
+	We use 1. for the highest range (audio rates); and 3 for the two other ranges
+	(control rates extending into audio territory). To compensate for the slope
+	modulation discontinuities, we low-pass filter digitally the slope value.
+	2. has a terrible behaviour in the audio range, because it causes audible FM
+	when the slope parameter is modulated by a LFO.
+	*/
 
 	void Generator::FillBufferAudioRate() {
 		uint8_t size = kBlockSize;
@@ -321,7 +320,6 @@ namespace bumps {
 			pitch_ = 0;
 		}
 
-#ifndef CORE_ONLY
 		// Load wavetable pointers for bandlimiting - they depend on pitch value.
 		uint16_t xfade = pitch_ << 6;
 		uint16_t index = pitch_ >> 10;
@@ -333,14 +331,14 @@ namespace bumps {
 		const int16_t* wave_1 = waveform_table[WAV_BANDLIMITED_PARABOLA_0 + index];
 		const int16_t* wave_2 = waveform_table[WAV_BANDLIMITED_PARABOLA_0 + index + 1];
 
-		// we split the slope button into two: original slope on the first
-		// half, compression on the second
+		/* We split the slope button into two: original slope on the first
+		   half, compression on the second. */
 		int16_t compress = -slope_;
 		int16_t slope = slope_;
 		CONSTRAIN(slope, 0, 32767);
 		CONSTRAIN(compress, 0, 32767);
 
-		// adjust knob response for Slope
+		// Adjust knob response for Slope.
 		int32_t s = 32768 - slope;
 		slope = 32768 - ((s * s) >> 15);
 		CONSTRAIN(slope, 0, 32600); 	// that is a bit weird
@@ -376,12 +374,11 @@ namespace bumps {
 			wf_gain += attenuated_smoothness * (32767 - 1024) >> 14;
 			wf_balance = attenuated_smoothness;
 		}
-#endif  // CORE_ONLY
 
 		uint32_t end_of_attack = (static_cast<uint32_t>(slope + 32768) << 16);
 
-		// Load state into registers - saves some memory load/store inside the
-		// rendering loop.
+		/* Load state into registers - saves some memory load/store inside the
+		   rendering loop. */
 		uint32_t phase = phase_;
 		int32_t phase_increment = phase_increment_;
 		int32_t phase_increment_increment = (phase_increment_end - phase_increment_) / size;
@@ -399,7 +396,7 @@ namespace bumps {
 			end_of_attack = phase_increment;
 		}
 
-		// cut out the output completely when smoothness is fully off.
+		// Cut out the output completely when smoothness is fully off.
 		uint16_t final_gain_end = smoothness_ + 32768;
 		CONSTRAIN(final_gain_end, 200, (UINT16_MAX >> 3) + 200);
 		final_gain_end -= 200;
@@ -421,7 +418,7 @@ namespace bumps {
 					running_ = false;
 				}
 
-				// on clock falling edge
+				// On clock falling edge.
 				if (!(control & CONTROL_CLOCK) &&
 					previous_clock_) {
 					sub_phase_ = 0;
@@ -435,7 +432,8 @@ namespace bumps {
 					if (sync_edges_counter_ >= frequency_ratio_.q) {
 						sync_edges_counter_ = 0;
 						if (sync_counter_ < kSyncCounterMaxTime && sync_counter_) {
-							uint64_t increment = frequency_ratio_.p * static_cast<uint64_t>(0xffffffff / sync_counter_);
+							uint64_t increment = frequency_ratio_.p *
+								static_cast<uint64_t>(0xffffffff / sync_counter_);
 							if (increment > 0x80000000) {
 								increment = 0x80000000;
 							}
@@ -446,13 +444,13 @@ namespace bumps {
 					}
 				}
 				// Fast tracking of the local oscillator to the external oscillator.
-				// Potential crash!! -Bloodbat
-				local_osc_phase_increment_ +=
-					static_cast<int32_t>(target_phase_increment_ - local_osc_phase_increment_) >> 8;
+				// NOTE: Potential crash!! -Bloodbat
+				local_osc_phase_increment_ += static_cast<int32_t>(target_phase_increment_ -
+					local_osc_phase_increment_) >> 8;
 				local_osc_phase_ += local_osc_phase_increment_;
 
-				// Slow phase realignment between the master oscillator and the local
-				// oscillator.
+				/* Slow phase realignment between the master oscillator and the local
+				   oscillator. */
 				int32_t phase_error = local_osc_phase_ - phase;
 				phase_increment = local_osc_phase_increment_ + (phase_error >> 13);
 			}
@@ -469,9 +467,7 @@ namespace bumps {
 				phase = 1L << 31;
 			}
 
-#ifndef CORE_ONLY
-
-			// Clip the phase for compression
+			// Clip the phase for compression.
 			uint32_t compress_index = compress << 1;
 			compress_index = 65535 - compress_index;
 			compress_index = (compress_index * compress_index) >> 16;
@@ -527,10 +523,6 @@ namespace bumps {
 			folded = Interpolate1022(wav_unipolar_fold, original * wf_gain) << 1;
 			sample.unipolar = original + ((folded - original) * wf_balance >> 15);
 			sample.unipolar = (sample.unipolar * final_gain_) >> 16;
-#else
-			sample.bipolar = (phase >> 16) - 32768;
-			sample.unipolar = phase >> 16;
-#endif  // CORE_ONLY
 
 			sample.flags = 0;
 
@@ -577,7 +569,6 @@ namespace bumps {
 
 		GeneratorSample sample = previous_sample_;
 
-#ifndef CORE_ONLY
 		uint16_t shape = static_cast<uint16_t>(shape_ + 32768);
 		shape = (shape >> 2) * 3;
 		uint16_t wave_index = WAV_REVERSED_CONTROL + (shape >> 13);
@@ -595,10 +586,9 @@ namespace bumps {
 			wf_gain += smoothness_ * (32767 - 1024) >> 14;
 			wf_balance = smoothness_;
 		}
-#endif  // CORE_ONLY
 
-		// Load state into registers - saves some memory load/store inside the
-		// rendering loop.
+		/* Load state into registers - saves some memory load/store inside the
+		   rendering loop. */
 		uint32_t phase = phase_;
 		uint32_t phase_increment = phase_increment_;
 		bool wrap = wrap_;
@@ -682,7 +672,6 @@ namespace bumps {
 				phase = end_of_attack + 1;
 			}
 
-#ifndef CORE_ONLY
 			int32_t original, folded;
 			int32_t unipolar = Crossfade106(shape_1, shape_2, skewed_phase >> 16, shape_xfade);
 			uni_lp_state_0 += f * ((unipolar << 16) - uni_lp_state_0) >> 31;
@@ -704,11 +693,6 @@ namespace bumps {
 			folded = Interpolate1022(wav_bipolar_fold, original * wf_gain + (1UL << 31));
 			sample.bipolar = original + ((folded - original) * wf_balance >> 15);
 
-#else
-			sample.bipolar = (skewed_phase >> 16) - 32768;
-			sample.unipolar = skewed_phase >> 16;
-#endif  // CORE_ONLY
-
 			uint32_t adjusted_end_of_attack = end_of_attack;
 			if (adjusted_end_of_attack >= phase_increment) {
 				adjusted_end_of_attack -= phase_increment;
@@ -729,8 +713,8 @@ namespace bumps {
 				sample.flags |= FLAG_END_OF_RELEASE;
 				--eor_counter_;
 			}
-			// Two special cases for the "pure decay" scenario:
-			// END_OF_ATTACK is always true except at the initial trigger.
+			/* Two special cases for the "pure decay" scenario:
+			   END_OF_ATTACK is always true except at the initial trigger. */
 			if (end_of_attack == 0) {
 				sample.flags |= FLAG_END_OF_ATTACK;
 			}
@@ -775,7 +759,7 @@ namespace bumps {
 		uint32_t sub_phase = sub_phase_;
 		uint32_t phase_increment = phase_increment_;
 
-		// The grid is only 8x8 rather than 9x9 so we need to scale by 7/8.0
+		// The grid is only 8x8 rather than 9x9 so we need to scale by 7/8.0.
 		uint16_t target_x = static_cast<uint16_t>(slope_ + 32768);
 		target_x = target_x * 57344 >> 16;
 		uint16_t x = x_;
@@ -816,8 +800,8 @@ namespace bumps {
 						if (sync_edges_counter_ >= frequency_ratio_.q) {
 							sync_edges_counter_ = 0;
 							if (sync_counter_ < kSyncCounterMaxTime && sync_counter_) {
-								uint64_t increment =
-									frequency_ratio_.p * static_cast<uint64_t>(0xffffffff / sync_counter_);
+								uint64_t increment = frequency_ratio_.p *
+									static_cast<uint64_t>(0xffffffff / sync_counter_);
 								if (increment > 0x80000000) {
 									increment = 0x80000000;
 								}
@@ -855,13 +839,13 @@ namespace bumps {
 			// PLL stuff
 			if (sync_ && range_ == GENERATOR_RANGE_HIGH) {
 				// Fast tracking of the local oscillator to the external oscillator.
-				// Potential crash!!! -Bloodbat
-				local_osc_phase_increment_ +=
-					static_cast<int32_t>(target_phase_increment_ - local_osc_phase_increment_) >> 8;
+				// NOTE: Potential crash!!! -Bloodbat
+				local_osc_phase_increment_ += static_cast<int32_t>(target_phase_increment_ -
+					local_osc_phase_increment_) >> 8;
 				local_osc_phase_ += local_osc_phase_increment_;
 
-				// Slow phase realignment between the master oscillator and the local
-				// oscillator.
+				/* Slow phase realignment between the master oscillator and the local
+				   oscillator. */
 				int32_t phase_error = local_osc_phase_ - phase;
 				phase_increment = local_osc_phase_increment_ + (phase_error >> 13);
 			}
@@ -958,23 +942,23 @@ namespace bumps {
 		uint16_t envelope[kNumHarmonics];
 		uint16_t antialias[kNumHarmonics];
 
-		// pre-compute spectral envelope
+		// Pre-compute spectral envelope.
 		for (uint8_t harm = 0; harm < kNumHarmonics; harm++) {
 			uint16_t x = mode_ == GENERATOR_MODE_AR ? (harm << 16) / kNumHarmonicsPowers :
 				(harm << 16) / kNumHarmonics;
 
-			// first peak has half the width
+			// First peak has half the width.
 			uint16_t peak1 = ComputePeak(center1, width >> 1, x);
-			// second peak has half the gain
+			// Second peak has half the gain.
 			uint16_t peak2 = ComputePeak(center2, width, x) >> 1;
 
 			uint16_t a = peak1 > peak2 ? peak1 : peak2;
 			uint16_t b = 32768 - a;
-			b = (b * b) >> 16;          // wider notches
+			b = (b * b) >> 16;          // Wider notches.
 			b = b * (kNumHarmonics - harm) / kNumHarmonics;
 			envelope[harm] = b + (((a - b) * reverse) >> 16);
 
-			// Take care of harmonics which phase increment will be > Nyquist
+			// Take care of harmonics which phase increment will be > Nyquist.
 			const uint32_t kCutoffLow = UINT16_MAX / 2 - UINT16_MAX / 16;
 			const uint32_t kCutoffHigh = UINT16_MAX / 2;
 
@@ -1014,7 +998,7 @@ namespace bumps {
 				previous_freeze_ = false;
 			}
 
-			// clock input randomizes mode and range if not in PLL mode
+			// Clock input randomizes mode and range if not in PLL mode.
 			if (control & CONTROL_CLOCK_RISING && !sync_) {
 				mode_ = static_cast<GeneratorMode>(Random::GetWord() % 3);
 				range_ = static_cast<GeneratorRange>(Random::GetWord() % 3);
@@ -1043,8 +1027,8 @@ namespace bumps {
 					static_cast<int32_t>(target_phase_increment_ - local_osc_phase_increment_) >> 5;
 				local_osc_phase_ += local_osc_phase_increment_;
 
-				// Slow phase realignment between the master oscillator and the local
-				// oscillator.
+				/* Slow phase realignment between the master oscillator and the local
+				   oscillator. */
 				int32_t phase_error = local_osc_phase_ - phase_;
 				phase_increment_ = local_osc_phase_increment_ + (phase_error >> 13);
 			}
@@ -1069,7 +1053,7 @@ namespace bumps {
 				unipolar += (((tn * envelope_[harm_permut_[harm]]) >> 16) * antialias[harm]) >> 16;
 
 				int32_t t = tn;
-				if (mode_ == GENERATOR_MODE_AR) { // power of two harmonics
+				if (mode_ == GENERATOR_MODE_AR) { // Power of two harmonics.
 					if (harm == kNumHarmonicsPowers) {
 						break;
 					}
@@ -1077,12 +1061,12 @@ namespace bumps {
 						tn = Interpolate1022(wav_sine1024, phase_ << harm);
 					else
 						tn = 2 * ((tn * tn) >> 15) - 32768;
-				} else if (mode_ == GENERATOR_MODE_AD) { // odd harmonics
+				} else if (mode_ == GENERATOR_MODE_AD) { // Odd harmonics.
 					tn = ((sine * tn) >> 14) - tn1;
 					tn1 = t;
 					t = tn;
 					tn = ((sine * tn) >> 14) - tn1;
-				} else { // GENERATOR_MODE_LOOPING // all harmonics
+				} else { // GENERATOR_MODE_LOOPING // All harmonics.
 					tn = ((sine * tn) >> 14) - tn1;
 				}
 
@@ -1091,9 +1075,9 @@ namespace bumps {
 
 			GeneratorSample s;
 
-			// normalization
+			// Normalization.
 			if (gain <= 65536)
-				gain = 65536;		// avoids extreme amplifications
+				gain = 65536;		// Avoids extreme amplifications.
 			gain += 256;
 
 			s.bipolar = ((bipolar << 13) / gain) << 3;
@@ -1117,9 +1101,9 @@ namespace bumps {
 			harm_permut_[i] = i;
 		}
 		for (int i = kNumHarmonics - 1; i >= 0; --i) {
-			//generate a random number [0, n-1]
+			// Generate a random number [0, n-1].
 			int j = rand() % (i + 1);
-			//swap the last element with element at random index
+			// Swap the last element with element at random index.
 			int temp = harm_permut_[i];
 			harm_permut_[i] = harm_permut_[j];
 			harm_permut_[j] = temp;
@@ -1150,8 +1134,8 @@ namespace bumps {
 			return Crossfade115(direction ? wav_spiky_exp_control : wav_bump_exp_control,
 				wav_spiky_control, phase_ >> 17, shape_xfade);
 		} else if (idx == 2) {
-			return Crossfade115(wav_spiky_control, wav_linear_control,
-				phase_ >> 17, shape_xfade);
+			return Crossfade115(wav_spiky_control, wav_linear_control, phase_ >> 17,
+				shape_xfade);
 		} else if (idx == 3) {
 			return Crossfade115(wav_linear_control, wav_bump_control, phase_ >> 17, shape_xfade);
 		} else if (idx == 4) {
@@ -1168,7 +1152,7 @@ namespace bumps {
 	inline void Generator::RandomizeDelay() {
 		uint32_t period = UINT32_MAX / phase_increment_;
 		uint32_t delay_ratio = slope_ + 32768;
-		delay_ratio = (delay_ratio * delay_ratio) >> 16; // square knob response
+		delay_ratio = (delay_ratio * delay_ratio) >> 16; // Square knob response.
 		uint32_t max_delay = (period * delay_ratio) >> 16;
 		delay_ = ((Random::GetWord() >> 16) * max_delay) >> 11;
 		delayed_phase_increment_ = UINT32_MAX / (period + delay_);
@@ -1199,18 +1183,17 @@ namespace bumps {
 
 			uint8_t control = input_buffer_.ImmediateRead();
 
-			// on trigger
+			// On trigger.
 			if (control & CONTROL_GATE_RISING) {
 				uint16_t skip_prob = slope_ + 32768;
-				// start divided osc. after coin toss
+				// Start divided osc. after coin toss.
 				if ((Random::GetWord() >> 16) < skip_prob) {
 					running_ = true;
 					phase_ = 0;
 					divided_phase_ = 0;
 				}
 
-				// start delayed osc. after delay
-				// or ignore if ongoing delay
+				// Start delayed osc. after delay or ignore if ongoing delay.
 				if (!delay_counter_)
 					delay_counter_ = 1 + delay_;
 			}
@@ -1227,7 +1210,7 @@ namespace bumps {
 				range_ = static_cast<GeneratorRange>(Random::GetWord() % 3);
 			}
 
-			// on clock in sync mode
+			// On clock in sync mode.
 			if ((control & CONTROL_CLOCK_RISING) && sync_ && sync_counter_) {
 				if (sync_counter_ >= kSyncCounterMaxTime) {
 					phase_ = 0;
@@ -1243,23 +1226,23 @@ namespace bumps {
 				sync_counter_ = 0;
 			}
 
-			// on significant slope or pitch variation
+			// On significant slope or pitch variation.
 			if (phase_ < abs(phase_increment_) && (abs(slope_ - old_slope_) > 4096 ||
 				abs(pitch_ - old_pitch_) > 512)) {
 				old_slope_ = slope_;
 				old_pitch_ = pitch_;
 
-				// recompute delay and divider to avoid waiting for next phase
-				// to hear the changes
+				/* Recompute delay and divider to avoid waiting for next phase
+				   to hear the changes */
 				RandomizeDelay();
 				RandomizeDivider();
 			}
 
-			// on delayed phase reset
+			// On delayed phase reset.
 			if (delayed_phase_ < abs(delayed_phase_increment_)) {
 				RandomizeDelay();
 
-				// compute next threshold
+				// Compute next threshold.
 				int32_t a = pulse_width_ - (slope_ + 32768) / 2;
 				CONSTRAIN(a, 0, UINT16_MAX);
 				int32_t b = pulse_width_ + (slope_ + 32768) / 2;
@@ -1270,7 +1253,7 @@ namespace bumps {
 				CONSTRAIN(thresh, min_thresh, max_thresh);
 				delayed_threshold_ = thresh;
 
-				// compute next value for ch. 1
+				// Compute next value for ch. 1.
 				uint32_t step_max = 65536 - (smoothness_ + 32768);
 				current_value_[0] = value_[0];
 				uint16_t rnd = ((Random::GetWord() >> 16) * step_max) >> 16;
@@ -1279,11 +1262,11 @@ namespace bumps {
 				walk_direction_[0] = !walk_direction_[0];
 			}
 
-			// on divided phase reset
+			// On divided phase reset.
 			if (divided_phase_ < phase_increment_ / divider_) {
 				RandomizeDivider();
 
-				// compute next value for ch. 2
+				// Compute next value for ch. 2.
 				uint32_t step_max = smoothness_ + 32768;
 				current_value_[1] = value_[1];
 				uint16_t rnd = ((Random::GetWord() >> 16) * step_max) >> 16;
@@ -1292,7 +1275,7 @@ namespace bumps {
 				walk_direction_[1] = !walk_direction_[1];
 			}
 
-			// waveshape phase
+			// Waveshape phase.
 			uint16_t shape_1 = static_cast<uint16_t>(shape_ + 32768);
 			bool direction_1 = next_value_[0] > current_value_[0];
 			uint16_t shaped_phase_1 = walk_waveshaper(shape_1, direction_1, delayed_phase_);
@@ -1301,13 +1284,13 @@ namespace bumps {
 			bool direction_2 = next_value_[1] > current_value_[1];
 			uint16_t shaped_phase_2 = walk_waveshaper(shape_2, direction_2, divided_phase_);
 
-			// scale phase to random values
+			// Scale phase to random values.
 			value_[0] = (next_value_[0] - current_value_[0]) *
 				shaped_phase_1 / 32768 + current_value_[0];
 			value_[1] = (next_value_[1] - current_value_[1]) *
 				shaped_phase_2 / 32768 + current_value_[1];
 
-			// compute clocks
+			// Compute clocks.
 			bool clock_ch1 = (delayed_phase_ >> 16) < delayed_threshold_;
 
 			uint32_t min_pw = phase_increment_ / divider_ / 3000;
@@ -1317,31 +1300,29 @@ namespace bumps {
 			bool clock = (phase_ >> 16) < pw;
 			bool clock_ch2 = divider_counter_ == 0 && clock;
 
-			// emit sample
+			// Emit sample.
 			GeneratorSample s;
 			s.unipolar = value_[0];
 			s.bipolar = value_[1] - 32768;
-			s.flags = 0
-				| (clock_ch1 ? FLAG_END_OF_ATTACK : 0)
+			s.flags = (clock_ch1 ? FLAG_END_OF_ATTACK : 0)
 				| (clock_ch2 ? FLAG_END_OF_RELEASE : 0);
 
 			output_buffer_.Overwrite(s);
 
-			/* note: we use running_ and wrap_ to store the state
-			 * (running/stopped) of resp. the divided and the delayed
-			 * oscillator */
+			/* NOTE: We use running_ and wrap_ to store the state
+			   (running/stopped) of resp. the divided and the delayed
+			   oscillator. */
 
-			 // on main phase reset
+			   // On main phase reset.
 			if (phase_ < abs(phase_increment_)) {
 			}
 
-			// just before main phase reset
+			// Just before main phase reset.
 			if (running_ && phase_ > UINT32_MAX - phase_increment_) {
 				divider_counter_ = (divider_counter_ + 1) % divider_;
-				// stop the divided oscillator on reset
+				// Stop the divided oscillator on reset.
 				if (divider_counter_ == 0 &&
-					((mode_ == GENERATOR_MODE_AD) ||
-						(control & CONTROL_FREEZE) ||
+					((mode_ == GENERATOR_MODE_AD) || (control & CONTROL_FREEZE) ||
 						(mode_ == GENERATOR_MODE_AR && !(control & CONTROL_GATE))))
 					running_ = false;
 			}
@@ -1355,13 +1336,12 @@ namespace bumps {
 					wrap_ = false;
 			}
 
-			// restart the oscillator if needed
-			if (!(control & CONTROL_FREEZE) &&
-				((mode_ == GENERATOR_MODE_LOOPING) ||
-					(mode_ == GENERATOR_MODE_AR && (control & CONTROL_GATE))))
+			// Restart the oscillator if needed.
+			if (!(control & CONTROL_FREEZE) && ((mode_ == GENERATOR_MODE_LOOPING) ||
+				(mode_ == GENERATOR_MODE_AR && (control & CONTROL_GATE))))
 				running_ = wrap_ = true;
 
-			// increment phasors
+			// Increment phasors.
 			if (wrap_) {
 				delayed_phase_ += delayed_phase_increment_;
 			}
