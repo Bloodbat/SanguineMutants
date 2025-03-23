@@ -2,22 +2,22 @@
 
 ## Fixes
 
+- Mortuus: rollover error on slow FM LFOs.
+
 - Vimina: clock multiplier for low BPM clocks.
 
 - Vimina: don't delay triggers by 16 samples.
 
-- Mortuus: rollover error on slow FM LFOs.
-
 ## Changes
-
-- Vimina: generated and through gates didn't have the same duration.
 
 - Apices family expanders: make tooltips congruent with base module tooltips.
 
 - Apices family: performance improvements.
 
+- Vimina: generated and through gates didn't have the same duration.
 
 ---
+
 
 # 2.6.4
 
