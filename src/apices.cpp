@@ -158,10 +158,10 @@ struct Apices : SanguineModule {
 
 		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 
-		bool bDividerTurn = lightsDivider.process();
+		bool bIsLightsTurn = lightsDivider.process();
 
 		// Only update knobs / lights every 16 samples.
-		if (bDividerTurn) {
+		if (bIsLightsTurn) {
 			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
 			sampleTime = args.sampleTime * kLightsFrequency;
 
@@ -238,7 +238,7 @@ struct Apices : SanguineModule {
 					}
 				}
 
-				if (bDividerTurn) {
+				if (bIsLightsTurn) {
 					int currentLightRed = Nix::LIGHT_PARAM_1 + knob * 3;
 					int currentLightGreen = (Nix::LIGHT_PARAM_1 + knob * 3) + 1;
 					int currentLightBlue = (Nix::LIGHT_PARAM_1 + knob * 3) + 2;
@@ -274,7 +274,7 @@ struct Apices : SanguineModule {
 				}
 			}
 
-			if (bDividerTurn) {
+			if (bIsLightsTurn) {
 				Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
 				Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
 				Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);

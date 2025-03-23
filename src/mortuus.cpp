@@ -172,10 +172,10 @@ struct Mortuus : SanguineModule {
 
 		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 
-		bool bDividerTurn = lightsDivider.process();
+		bool bIsLightsTurn = lightsDivider.process();
 
 		// Only update knobs / lights every 16 samples.
-		if (bDividerTurn) {
+		if (bIsLightsTurn) {
 			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
 			sampleTime = args.sampleTime * kLightsFrequency;
 
@@ -252,7 +252,7 @@ struct Mortuus : SanguineModule {
 					}
 				}
 
-				if (bDividerTurn) {
+				if (bIsLightsTurn) {
 					int currentLightRed = Ansa::LIGHT_PARAM_1 + knob * 3;
 					int currentLightGreen = (Ansa::LIGHT_PARAM_1 + knob * 3) + 1;
 					int currentLightBlue = (Ansa::LIGHT_PARAM_1 + knob * 3) + 2;
@@ -288,7 +288,7 @@ struct Mortuus : SanguineModule {
 				}
 			}
 
-			if (bDividerTurn) {
+			if (bIsLightsTurn) {
 				Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
 				Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
 				Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
