@@ -86,7 +86,6 @@ namespace rings {
       dirty_ = true;
     }
 
-    inline ResonatorModel model() const { return model_; }
     inline void set_model(ResonatorModel model) {
       if (model != model_) {
         model_ = model;

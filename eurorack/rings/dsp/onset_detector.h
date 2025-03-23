@@ -52,10 +52,6 @@ namespace rings {
       variance_ = 0.00f;
     }
 
-    inline float Normalize(float sample) {
-      return Update(sample) / Sqrt(variance_);
-    }
-
     inline bool Test(float sample, float threshold) {
       float value = Update(sample);
       return value > Sqrt(variance_) * threshold;

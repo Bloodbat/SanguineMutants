@@ -125,8 +125,6 @@ namespace rings {
       position_ = position;
     }
 
-    inline StringDelayLine* mutable_string() { return &string_; }
-
   private:
     template<bool enable_dispersion>
     void ProcessInternal(const float* in, float* out, float* aux, size_t size);

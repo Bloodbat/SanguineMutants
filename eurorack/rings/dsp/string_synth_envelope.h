@@ -108,21 +108,6 @@ namespace rings {
       shape_[1] = ENVELOPE_SHAPE_QUARTIC;
     }
 
-    inline void set_ar(float attack, float decay) {
-      num_segments_ = 2;
-      sustain_point_ = 1;
-
-      level_[0] = 0.0f;
-      level_[1] = 1.0f;
-      level_[2] = 0.0f;
-
-      rate_[0] = attack;
-      rate_[1] = decay;
-
-      shape_[0] = ENVELOPE_SHAPE_LINEAR;
-      shape_[1] = ENVELOPE_SHAPE_LINEAR;
-    }
-
   private:
     float level_[4];
     float rate_[4];
