@@ -182,7 +182,7 @@ struct Apices : SanguineModule {
 			float cvValues[apicesCommon::kKnobCount * 2] = {};
 			int modulatedValues[apicesCommon::kKnobCount * 2] = {};
 
-			int channel2Function = 0;
+			int channel2Knob = 0;
 
 			if (bDividerTurn) {
 				Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
@@ -214,41 +214,41 @@ struct Apices : SanguineModule {
 				}
 			}
 
-			for (size_t function = 0; function < apicesCommon::kKnobCount; ++function) {
-				int channel1Input = Nix::INPUT_PARAM_CV_1 + function;
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+				int channel1Input = Nix::INPUT_PARAM_CV_1 + knob;
 
 				if (nixExpander->getInput(channel1Input).isConnected()) {
-					int channel1Attenuverter = Nix::PARAM_PARAM_CV_1 + function;
+					int channel1Attenuverter = Nix::PARAM_PARAM_CV_1 + knob;
 
-					cvValues[function] = (clamp(nixExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
+					cvValues[knob] = (clamp(nixExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 						nixExpander->getParam(channel1Attenuverter).getValue();
 				}
-				modulatedValues[function] = clamp((potValues[function] + static_cast<int>(cvValues[function])) << 8, 0, 65535);
+				modulatedValues[knob] = clamp((potValues[knob] + static_cast<int>(cvValues[knob])) << 8, 0, 65535);
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + function;
-					channel2Function = function + apicesCommon::kChannel2Offset;
+					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + knob;
+					channel2Knob = knob + apicesCommon::kChannel2Offset;
 
 					if (nixExpander->getInput(channel2Input).isConnected()) {
-						int channel2Attenuverter = Nix::PARAM_PARAM_CV_CHANNEL_2_1 + function;
+						int channel2Attenuverter = Nix::PARAM_PARAM_CV_CHANNEL_2_1 + knob;
 
-						cvValues[channel2Function] = (clamp(nixExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
+						cvValues[channel2Knob] = (clamp(nixExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
 							nixExpander->getParam(channel2Attenuverter).getValue();
 					}
 
-					modulatedValues[channel2Function] = clamp((potValues[channel2Function] +
-						static_cast<int>(cvValues[channel2Function])) << 8, 0, 65535);
+					modulatedValues[channel2Knob] = clamp((potValues[channel2Knob] +
+						static_cast<int>(cvValues[channel2Knob])) << 8, 0, 65535);
 				}
 
 				switch (editMode) {
 				case apicesCommon::EDIT_MODE_TWIN:
-					processors[0].set_parameter(function, modulatedValues[function]);
-					processors[1].set_parameter(function, modulatedValues[function]);
+					processors[0].set_parameter(knob, modulatedValues[knob]);
+					processors[1].set_parameter(knob, modulatedValues[knob]);
 
 					if (bDividerTurn) {
-						Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
-						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
-						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+						Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + knob * 3);
+						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 1);
+						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 2);
 
 						currentLightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
@@ -257,25 +257,25 @@ struct Apices : SanguineModule {
 					break;
 
 				case apicesCommon::EDIT_MODE_SPLIT:
-					if (function < 2) {
-						processors[0].set_parameter(function, modulatedValues[function]);
+					if (knob < 2) {
+						processors[0].set_parameter(knob, modulatedValues[knob]);
 					} else {
-						processors[1].set_parameter(function - 2, modulatedValues[function]);
+						processors[1].set_parameter(knob - 2, modulatedValues[knob]);
 					}
 
 					if (bDividerTurn) {
-						if (function < 2) {
-							Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
-							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
-							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+						if (knob < 2) {
+							Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + knob * 3);
+							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 1);
+							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 2);
 
 							currentLightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
 							currentLightBlue.setBrightnessSmooth(0.f, sampleTime);
 						} else {
-							Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
-							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
-							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+							Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + knob * 3);
+							Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 1);
+							Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 2);
 
 							currentLightRed.setBrightnessSmooth(0.f, sampleTime);
 							currentLightGreen.setBrightnessSmooth(0.f, sampleTime);
@@ -286,13 +286,13 @@ struct Apices : SanguineModule {
 
 				case apicesCommon::EDIT_MODE_FIRST:
 				case apicesCommon::EDIT_MODE_SECOND:
-					processors[0].set_parameter(function, modulatedValues[function]);
-					processors[1].set_parameter(function, modulatedValues[channel2Function]);
+					processors[0].set_parameter(knob, modulatedValues[knob]);
+					processors[1].set_parameter(knob, modulatedValues[channel2Knob]);
 
 					if (bDividerTurn) {
-						Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + function * 3);
-						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 1);
-						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + function * 3) + 2);
+						Light& currentLightRed = nixExpander->getLight(Nix::LIGHT_PARAM_1 + knob * 3);
+						Light& currentLightGreen = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 1);
+						Light& currentLightBlue = nixExpander->getLight((Nix::LIGHT_PARAM_1 + knob * 3) + 2);
 
 						currentLightRed.setBrightnessSmooth(0.f, sampleTime);
 						currentLightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
