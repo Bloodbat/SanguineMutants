@@ -149,7 +149,6 @@ namespace rings {
           float ac_blocking_amount = bridge_curving;
 
           bridge_curving = bridge_curving * bridge_curving * 0.01f;
-          float ap_gain = -0.618f * dispersion / (0.15f + fabs(dispersion));
 
           float delay_fm = 1.0f;
           delay_fm += dispersion_noise_ * noise_amount;
@@ -159,6 +158,7 @@ namespace rings {
           float ap_delay = delay * stretch_point;
           float main_delay = delay - ap_delay;
           if (ap_delay >= 4.0f && main_delay >= 4.0f) {
+            float ap_gain = -0.618f * dispersion / (0.15f + fabs(dispersion));
             s = string_.ReadHermite(main_delay);
             s = stretch_.Allpass(s, ap_delay, ap_gain);
           } else {
