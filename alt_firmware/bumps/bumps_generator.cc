@@ -485,7 +485,7 @@ namespace bumps {
 			saw = (ramp_b - ramp_a) * gain >> 10;
 			CLIP(saw);
 
-			// Appy shape waveshaper.
+			// Apply shape waveshaper.
 			saw = Crossfade115(shape_1, shape_2, saw + 32768, shape_xfade);
 			if (!running_ && !sustained) {
 				saw = 0;
