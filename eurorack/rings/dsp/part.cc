@@ -85,7 +85,7 @@ namespace rings {
     case RESONATOR_MODEL_SYMPATHETIC_STRING_QUANTIZED:
     case RESONATOR_MODEL_STRING_AND_REVERB:
     {
-      float lfo_frequencies[kNumStrings] = {
+      const float lfo_frequencies[kNumStrings] = {
         0.5f, 0.4f, 0.35f, 0.23f, 0.211f, 0.2f, 0.171f
       };
       for (int32_t i = 0; i < kNumStrings; ++i) {
@@ -241,16 +241,16 @@ namespace rings {
 
   void Part::ComputeSympatheticStringsNotes(float tonic, float note, float parameter, float* destination,
     size_t num_strings) {
-    float notes[9] = {
-        tonic,
-        note - 12.0f,
-        note - 7.01955f,
-        note,
-        note + 7.01955f,
-        note + 12.0f,
-        note + 19.01955f,
-        note + 24.0f,
-        note + 24.0f };
+    const float notes[9] = {
+         tonic,
+         note - 12.0f,
+         note - 7.01955f,
+         note,
+         note + 7.01955f,
+         note + 12.0f,
+         note + 19.01955f,
+         note + 24.0f,
+         note + 24.0f };
     const float detunings[4] = {
         0.013f,
         0.011f,
