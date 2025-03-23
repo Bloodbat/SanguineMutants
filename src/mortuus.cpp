@@ -58,6 +58,7 @@ struct Mortuus : SanguineModule {
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
 	bool bHasExpander = false;
+	bool bWasExpanderConnected = false;
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
@@ -193,6 +194,8 @@ struct Mortuus : SanguineModule {
 		}
 
 		if (bHasExpander) {
+			bWasExpanderConnected = true;
+
 			float cvValues[apicesCommon::kKnobCount * 2] = {};
 			int modulatedValues[apicesCommon::kKnobCount * 2] = {};
 
@@ -947,6 +950,36 @@ struct Mortuus : SanguineModule {
 			setExpanderChannel1Lights(ansaExpander, true);
 		}
 		Module::onUnBypass(e);
+	}
+
+	void onExpanderChange(const ExpanderChangeEvent& e) override {
+		if (bWasExpanderConnected) {
+			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+				switch (editMode) {
+				case apicesCommon::EDIT_MODE_TWIN:
+					processors[0].set_parameter(knob, potValues[knob] << 8);
+					processors[1].set_parameter(knob, potValues[knob] << 8);
+					break;
+
+				case apicesCommon::EDIT_MODE_SPLIT:
+					if (knob < 2) {
+						processors[0].set_parameter(knob, potValues[knob] << 8);
+					} else {
+						processors[1].set_parameter(knob, potValues[knob - 2] << 8);
+					}
+					break;
+
+				case apicesCommon::EDIT_MODE_FIRST:
+				case apicesCommon::EDIT_MODE_SECOND:
+					processors[0].set_parameter(knob, potValues[knob] << 8);
+					processors[1].set_parameter(knob, potValues[knob + apicesCommon::kChannel2Offset] << 8);
+					break;
+				default:
+					break;
+				}
+			}
+			bWasExpanderConnected = false;
+		}
 	}
 };
 

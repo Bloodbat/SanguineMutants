@@ -2,6 +2,8 @@
 
 ## Fixes
 
+- Apices family: engines should restore knob values when disconnecting expanders.
+
 - Mortuus: rollover error on slow FM LFOs.
 
 - Vimina: clock multiplier for low BPM clocks.
