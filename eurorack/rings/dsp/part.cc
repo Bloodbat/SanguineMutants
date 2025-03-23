@@ -42,8 +42,6 @@ namespace rings {
 
     fill(&note_[0], &note_[kMaxPolyphony], 0.0f);
 
-    // TODO: bypass is handled by frontend...
-    bypass_ = false;
     polyphony_ = 1;
     model_ = RESONATOR_MODEL_MODAL;
     dirty_ = true;
@@ -436,15 +434,6 @@ namespace rings {
 
   void Part::Process(const PerformanceState& performance_state, const Patch& patch,
     const float* in, float* out, float* aux, size_t size) {
-
-    //TODO: bypass is handled by frontend... -Bat
-    // Copy inputs to outputs when bypass mode is enabled.
-    if (bypass_) {
-      copy(&in[0], &in[size], &out[0]);
-      copy(&in[0], &in[size], &aux[0]);
-      return;
-    }
-
     ConfigureResonators();
 
     note_filter_.Process(performance_state.note, performance_state.strum);

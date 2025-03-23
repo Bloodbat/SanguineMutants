@@ -73,9 +73,6 @@ namespace rings {
     void Process(const PerformanceState& performance_state, const Patch& patch,
       const float* in, float* out, float* aux, size_t size);
 
-    inline bool bypass() const { return bypass_; }
-    inline void set_bypass(bool bypass) { bypass_ = bypass; }
-
     inline int32_t polyphony() const { return polyphony_; }
     inline void set_polyphony(int32_t polyphony) {
       int32_t old_polyphony = polyphony_;
@@ -128,8 +125,6 @@ namespace rings {
     void ComputeSympatheticStringsNotes(float tonic, float note, float parameter, float* destination,
       size_t num_strings);
 
-    // TODO: bypass is handled by frontend...
-    bool bypass_;
     bool dirty_;
 
     ResonatorModel model_;
