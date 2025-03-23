@@ -84,14 +84,6 @@ namespace bumps {
 
     void Init();
 
-    inline void ProcessSampleRate(const uint16_t* raw_adc_data) {
-      level_raw_ = (level_raw_ * 15 + raw_adc_data[ADC_CHANNEL_LEVEL]) >> 4;
-      level_ = -level_raw_ + calibration_data_.level_offset;
-      if (level_ < 32) {  // 2 LSB of ADC noise.
-        level_ = 0;
-      }
-    }
-
     inline void ProcessControlRate(const uint16_t* raw_adc_data) {
       int32_t scaled_value;
 
@@ -115,14 +107,11 @@ namespace bumps {
       attenuverter_ = (attenuverter_ * 15 + scaled_value) >> 4;
     }
 
-    inline uint16_t level() const { return level_; }
     inline int16_t shape() const { return shape_; }
-    inline int16_t slope() const { return slope_; }
-    inline int16_t smoothness() const { return smoothness_; }
     inline int16_t pitch() {
       if (quantize_) {
-        // Apply hysteresis and filtering to ADC reading to prevent
-        // jittery quantization.
+        /* Apply hysteresis and filtering to ADC reading to prevent
+           jittery quantization. */
         if ((v_oct_ > previous_v_oct_ + 16) ||
           (v_oct_ < previous_v_oct_ - 16)) {
           previous_v_oct_ = v_oct_;
@@ -145,34 +134,6 @@ namespace bumps {
       }
 
       return pitch;
-    }
-
-    inline int16_t fm() {
-      int32_t attenuverter_value = attenuverter_ - 32768;
-      int32_t attenuverter_sign = 1;
-      if (attenuverter_value < 0) {
-        attenuverter_value = -attenuverter_value - 1;
-        attenuverter_sign = -1;
-      }
-      attenuverter_value = attenuverter_sign * static_cast<int32_t>(
-        parasites_stmlib::Interpolate88(lut_attenuverter_curve, attenuverter_value << 1));
-      int32_t fm = (fm_ - calibration_data_.fm_offset) * calibration_data_.fm_scale >> 15;
-      fm = fm * attenuverter_value >> 16;
-
-      return fm;
-    }
-
-
-    inline uint16_t raw_attenuverter() const { return attenuverter_; }
-
-    void CaptureCalibrationValues() {
-      v_oct_c2_ = v_oct_;
-    }
-
-    void Calibrate();
-
-    inline bool can_enter_calibration() const {
-      return level_raw_ >= 49152;
     }
 
     uint8_t quantize_;

@@ -142,10 +142,6 @@ namespace bumps {
 			frequency_ratio_ = ratio;
 		}
 
-		void set_waveshaper_antialiasing(bool antialiasing) {
-			antialiasing_ = antialiasing;
-		}
-
 		void set_sync(bool sync) {
 			if (!sync_ && sync) {
 				pattern_predictor_.Init();
@@ -169,15 +165,6 @@ namespace bumps {
 
 		inline bool writable_block() const {
 			return output_buffer_.writable() >= kBlockSize;
-		}
-
-		inline bool FillBufferSafe() {
-			if (!writable_block()) {
-				return false;
-			} else {
-				FillBuffer();
-				return true;
-			}
 		}
 
 		void FillBuffer();
