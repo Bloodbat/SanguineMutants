@@ -121,10 +121,6 @@ namespace tides {
       smoothness_ = smoothness;
     }
 
-    void set_frequency_ratio(FrequencyRatio ratio) {
-      frequency_ratio_ = ratio;
-    }
-
     void set_sync(bool sync) {
       if (!sync_ && sync) {
         pattern_predictor_.Init();
@@ -135,7 +131,6 @@ namespace tides {
 
     inline GeneratorMode mode() const { return mode_; }
     inline GeneratorRange range() const { return range_; }
-    inline bool sync() const { return sync_; }
 
     inline const GeneratorSample& Process(uint8_t control) {
       input_samples_[playback_block_][current_sample_] = control;
@@ -168,10 +163,6 @@ namespace tides {
         }
         render_block_ = (render_block_ + 1) % kNumBlocks;
       }
-    }
-
-    uint32_t clock_divider() const {
-      return clock_divider_;
     }
 
   private:
