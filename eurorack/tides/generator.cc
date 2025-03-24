@@ -296,11 +296,7 @@ namespace tides {
       target_phase_increment_ = phase_increment_;
     }
 
-    attenuation_ = ComputeAntialiasAttenuation(
-      pitch_,
-      slope_,
-      shape_,
-      smoothness_);
+    attenuation_ = ComputeAntialiasAttenuation(pitch_, slope_, shape_, smoothness_);
 
     uint16_t shape = static_cast<uint16_t>((shape_ * attenuation_ >> 15) + 32768);
     uint16_t wave_index = WAV_INVERSE_TAN_AUDIO + (shape >> 14);
@@ -569,9 +565,7 @@ namespace tides {
         skewed_phase += 1L << 31;
       }
 
-      bool sustained = mode_ == GENERATOR_MODE_AR
-        && phase >= end_of_attack
-        && control & CONTROL_GATE;
+      bool sustained = mode_ == GENERATOR_MODE_AR && phase >= end_of_attack && control & CONTROL_GATE;
 
       if (sustained) {
         skewed_phase = 1L << 31;
