@@ -154,7 +154,7 @@ namespace tides {
 
     inline void Process(bool wavetableHack = false) {
       while (render_block_ != playback_block_) {
-        uint8_t* in = input_samples_[render_block_];
+        const uint8_t* in = input_samples_[render_block_];
         GeneratorSample* out = output_samples_[render_block_];
         if (!wavetableHack) {
           if (range_ == GENERATOR_RANGE_HIGH) {
