@@ -102,12 +102,12 @@ jobs:
     if: ${{ github.repository_owner == 'Bloodbat' }}
     env:
       GIT_TAG: ${{ needs.get-tag.outputs.codetag }}
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     needs:  [build, build-mac, get-tag]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          path: _artifacts               
+          path: _artifacts
       - name: Upload release assets
         uses: svenstaro/upload-release-action@v2
         with:
