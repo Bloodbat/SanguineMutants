@@ -16,10 +16,8 @@
 
 - Apices family: performance improvements.
 
-- Vimina: generated and through gates didn't have the same duration.
 
 ---
-
 
 # 2.6.4
 
