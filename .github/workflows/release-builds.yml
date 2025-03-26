@@ -1,4 +1,4 @@
-name: Release Plugin Build
+name: Build Plugin and Create Sanguine Mutants Draft Release
 
 on:
   workflow_dispatch:
@@ -19,8 +19,8 @@ jobs:
     outputs:
       codetag: ${{ steps.query-the-tag.outputs.GIT_TAG }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/cache@v4.2.3
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -43,10 +43,10 @@ jobs:
       matrix:
         platform: [win-x64, lin-x64]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
-      - uses: actions/cache@v4
+      - uses: actions/cache@v4.2.3
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -57,7 +57,7 @@ jobs:
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-${{ matrix.platform }}
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
           name: ${{ matrix.platform }}
@@ -70,10 +70,10 @@ jobs:
       matrix:
         platform: [x64, arm64]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
-      - uses: actions/cache@v4
+      - uses: actions/cache@v4.2.3
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -92,7 +92,7 @@ jobs:
           make dep
           make dist
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           path: dist/*.vcvplugin
           name: mac-${{ matrix.platform }}
@@ -105,11 +105,11 @@ jobs:
     runs-on: ubuntu-latest
     needs:  [build, build-mac, get-tag]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4.2.1
         with:
           path: _artifacts
       - name: Upload release assets
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: _artifacts/**/*.vcvplugin
