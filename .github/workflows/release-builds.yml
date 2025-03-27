@@ -19,8 +19,8 @@ jobs:
     outputs:
       codetag: ${{ steps.query-the-tag.outputs.GIT_TAG }}
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: actions/cache@v4.2.3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -43,10 +43,10 @@ jobs:
       matrix:
         platform: [win-x64, lin-x64]
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           submodules: recursive
-      - uses: actions/cache@v4.2.3
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -57,7 +57,7 @@ jobs:
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-${{ matrix.platform }}
       - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
           name: ${{ matrix.platform }}
@@ -70,10 +70,10 @@ jobs:
       matrix:
         platform: [x64, arm64]
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           submodules: recursive
-      - uses: actions/cache@v4.2.3
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -92,7 +92,7 @@ jobs:
           make dep
           make dist
       - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           path: dist/*.vcvplugin
           name: mac-${{ matrix.platform }}
@@ -105,11 +105,11 @@ jobs:
     runs-on: ubuntu-latest
     needs:  [build, build-mac, get-tag]
     steps:
-      - uses: actions/download-artifact@v4.2.1
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
         with:
           path: _artifacts
       - name: Upload release assets
-        uses: svenstaro/upload-release-action@2.9.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: _artifacts/**/*.vcvplugin
