@@ -107,8 +107,8 @@ struct Vimina : SanguineModule {
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	float pulseTrackerBuffer[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
 
-	bool gateInputState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	bool multiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
+	bool inputGateState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	bool IsMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
 	SectionFunctions channelFunction[kMaxModuleSections] = {
 		SECTION_FUNCTION_SWING,
@@ -148,14 +148,14 @@ struct Vimina : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(inputs[INPUT_CLOCK].getChannels(), 1);
 
-		bool bClockConnected = inputs[INPUT_CLOCK].isConnected();
+		bool bIsClockConnected = inputs[INPUT_CLOCK].isConnected();
 
-		bool bResetConnected = inputs[INPUT_RESET].isConnected();
+		bool bIsResetConnected = inputs[INPUT_RESET].isConnected();
 
-		bool resetButtons[kMaxModuleSections] = {};
+		bool isResetRequest[kMaxModuleSections] = {};
 
 		for (int section = 0; section < kMaxModuleSections; ++section) {
-			resetButtons[section] = btReset[section].process(params[PARAM_RESET_1 + section].getValue());
+			isResetRequest[section] = btReset[section].process(params[PARAM_RESET_1 + section].getValue());
 		}
 
 		outputs[OUTPUT_OUT_1A].setChannels(channelCount);
@@ -168,7 +168,7 @@ struct Vimina : SanguineModule {
 
 			bool bIsTrigger = false;
 
-			if (bClockConnected) {
+			if (bIsClockConnected) {
 				if (isRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
 					/* Pulse tracker is always recording. this should help smooth transitions
 					   between functions even though divide doesn't use it. */
@@ -183,18 +183,18 @@ struct Vimina : SanguineModule {
 			}
 
 			bool bIsReset = false;
-			if (bResetConnected) {
+			if (bIsResetConnected) {
 				bIsReset = isRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage(channel) >= 2.f, channel);
 			}
 
 			for (uint8_t section = 0; section < kMaxModuleSections; ++section) {
 				channelFunction[section] = SectionFunctions(params[PARAM_MODE_1 + section].getValue());
 
-				if (resetButtons[section]) {
+				if (isResetRequest[section]) {
 					handleReset(section, channel);
 				}
 
-				if (bClockConnected) {
+				if (bIsClockConnected) {
 					setupChannel(section, channel);
 
 					handleTriggers(section, bIsTrigger, bIsReset, channel);
@@ -327,11 +327,11 @@ struct Vimina : SanguineModule {
 	bool isMultiplyStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		float interval = getPulseTrackerPeriod(channel) / -channelFactor[section][channel];
 		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
-			if (!multiplyDebouncing[section][channel]) {
+			if (!IsMultiplyDebouncing[section][channel]) {
 				return true;
 			}
 		} else {
-			multiplyDebouncing[section][channel] = false;
+			IsMultiplyDebouncing[section][channel] = false;
 		}
 		return false;
 	}
@@ -341,9 +341,9 @@ struct Vimina : SanguineModule {
 	}
 
 	bool isRisingEdge(const uint8_t section, const bool voltageAboveThreshold, const int channel) {
-		bool lastGateState = gateInputState[section][channel];
-		gateInputState[section][channel] = voltageAboveThreshold;
-		return gateInputState[section][channel] && !lastGateState;
+		bool bLastGateState = inputGateState[section][channel];
+		inputGateState[section][channel] = voltageAboveThreshold;
+		return inputGateState[section][channel] && !bLastGateState;
 	}
 
 	bool isSwingStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
@@ -427,7 +427,7 @@ struct Vimina : SanguineModule {
 				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
 				triggerCount[section][channel] >= channelFactor[section][channel]) {
 				channelState[section][channel] = CHANNEL_GENERATED;
-				multiplyDebouncing[section][channel] = true;
+				IsMultiplyDebouncing[section][channel] = true;
 				--triggerCount[section][channel];
 			}
 			break;
