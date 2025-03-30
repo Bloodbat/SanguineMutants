@@ -138,7 +138,7 @@ struct Apices : SanguineModule {
 		settings.editMode = apicesCommon::EDIT_MODE_TWIN;
 		settings.processorFunctions[0] = apices::FUNCTION_ENVELOPE;
 		settings.processorFunctions[1] = apices::FUNCTION_ENVELOPE;
-		settings.snap_mode = false;
+		settings.snapMode = false;
 
 		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel)
 		{
@@ -515,7 +515,7 @@ struct Apices : SanguineModule {
 		settings.processorFunctions[0] = processorFunctions[0];
 		settings.processorFunctions[1] = processorFunctions[1];
 		std::copy(&potValues[0], &potValues[7], &settings.potValues[0]);
-		settings.snap_mode = bSnapMode;
+		settings.snapMode = bSnapMode;
 		displayText1 = apices::modeLabels[settings.processorFunctions[0]];
 		displayText2 = apices::modeLabels[settings.processorFunctions[1]];
 	}
@@ -695,7 +695,7 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		bSnapMode = settings.snap_mode;
+		bSnapMode = settings.snapMode;
 
 		changeControlMode();
 		setFunction(0, processorFunctions[0]);
@@ -828,7 +828,7 @@ struct Apices : SanguineModule {
 		}
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
-		json_object_set_new(rootJ, "snap_mode", json_boolean(settings.snap_mode));
+		json_object_set_new(rootJ, "snap_mode", json_boolean(settings.snapMode));
 
 		return rootJ;
 	}
@@ -853,7 +853,7 @@ struct Apices : SanguineModule {
 
 		json_t* snapModeJ = json_object_get(rootJ, "snap_mode");
 		if (snapModeJ) {
-			settings.snap_mode = json_boolean_value(snapModeJ);
+			settings.snapMode = json_boolean_value(snapModeJ);
 		}
 
 		json_t* potValuesJ = json_object_get(rootJ, "pot_values");
