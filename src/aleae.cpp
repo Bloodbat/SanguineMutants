@@ -88,13 +88,13 @@ struct Aleae : SanguineModule {
 			rollModes[section] = static_cast<aleae::RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
 			outModes[section] = static_cast<aleae::OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
 
-			bool lightAActive = false;
-			bool lightBActive = false;
+			bool bIsLightAActive = false;
+			bool bIsLightBActive = false;
 
 			// Process triggers.
 			for (int channel = 0; channel < channelCount; ++channel) {
-				bool gatePresent = input->getVoltage(channel) >= 2.f;
-				if (btGateTriggers[section][channel].process(gatePresent)) {
+				bool bIsGatePresent = input->getVoltage(channel) >= 2.f;
+				if (btGateTriggers[section][channel].process(bIsGatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
 					float threshold = params[PARAM_THRESHOLD_1 + section].getValue() +
@@ -109,22 +109,22 @@ struct Aleae : SanguineModule {
 				}
 
 				// Output gate logic
-				bool gateAActive = (rollResults[section][channel] == aleae::ROLL_HEADS &&
-					(outModes[section] == aleae::OUT_MODE_LATCH || gatePresent));
-				bool gateBActive = (rollResults[section][channel] == aleae::ROLL_TAILS &&
-					(outModes[section] == aleae::OUT_MODE_LATCH || gatePresent));
+				bool bIsGateAActive = (rollResults[section][channel] == aleae::ROLL_HEADS &&
+					(outModes[section] == aleae::OUT_MODE_LATCH || bIsGatePresent));
+				bool bIsGateBActive = (rollResults[section][channel] == aleae::ROLL_TAILS &&
+					(outModes[section] == aleae::OUT_MODE_LATCH || bIsGatePresent));
 
 				if (channel == ledsChannel) {
-					lightAActive = gateAActive;
-					lightBActive = gateBActive;
+					bIsLightAActive = bIsGateAActive;
+					bIsLightBActive = bIsGateBActive;
 				}
 
 				// Set output gates
 				if (bOutputsConnected[0 + section]) {
-					outputs[OUTPUT_OUT_1A + section].setVoltage(gateAActive ? 10.f : 0.f, channel);
+					outputs[OUTPUT_OUT_1A + section].setVoltage(bIsGateAActive ? 10.f : 0.f, channel);
 				}
 				if (bOutputsConnected[2 + section]) {
-					outputs[OUTPUT_OUT_1B + section].setVoltage(gateBActive ? 10.f : 0.f, channel);
+					outputs[OUTPUT_OUT_1B + section].setVoltage(bIsGateBActive ? 10.f : 0.f, channel);
 				}
 			}
 
@@ -142,8 +142,8 @@ struct Aleae : SanguineModule {
 
 				const float sampleTime = args.sampleTime * kLightFrequency;
 				int currentLight = LIGHTS_STATE + section * 2;
-				lights[currentLight + 1].setSmoothBrightness(lightAActive, sampleTime);
-				lights[currentLight + 0].setSmoothBrightness(lightBActive, sampleTime);
+				lights[currentLight + 1].setSmoothBrightness(bIsLightAActive, sampleTime);
+				lights[currentLight + 0].setSmoothBrightness(bIsLightBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + section * 2;
 				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
