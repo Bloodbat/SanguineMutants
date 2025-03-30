@@ -97,7 +97,7 @@ struct Temulenti : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulenti::displayModels[0];
 	bool bUseCalibrationOffset = true;
-	bool bLastSync = false;
+	bool bLastExternalSync = false;
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -149,15 +149,15 @@ struct Temulenti : SanguineModule {
 			generator.set_range(range);
 		}
 
-		bool bSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
 		//Buffer loop
 		if (generator.writable_block()) {
 			// Sync
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			if (bSync != bLastSync) {
-				generator.set_sync(bSync);
-				bLastSync = bSync;
+			if (bHaveExternalSync != bLastExternalSync) {
+				generator.set_sync(bHaveExternalSync);
+				bLastExternalSync = bHaveExternalSync;
 			}
 
 			// Pitch
@@ -269,9 +269,9 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ?
+			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 			if (quantize) {
 				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantize & 1 ? 1.f : 0.f, sampleTime);

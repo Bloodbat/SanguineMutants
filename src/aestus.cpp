@@ -57,7 +57,7 @@ struct Aestus : SanguineModule {
 	struct ModeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
-			if (!moduleAestus->bSheep) {
+			if (!moduleAestus->bUseSheepFirmware) {
 				return aestusCommon::modeMenuLabels[moduleAestus->generator.mode()];
 			} else {
 				return aestusCommon::sheepMenuLabels[moduleAestus->generator.mode()];
@@ -72,9 +72,9 @@ struct Aestus : SanguineModule {
 		}
 	};
 
-	bool bSheep = false;
+	bool bUseSheepFirmware = false;
 	bool bUseCalibrationOffset = true;
-	bool bLastSync = false;
+	bool bLastExternalSync = false;
 	tides::Generator generator;
 	int frame = 0;
 	static const int kLightsFrequency = 16;
@@ -132,9 +132,9 @@ struct Aestus : SanguineModule {
 			generator.set_range(range);
 		}
 
-		bSheep = static_cast<bool>(params[PARAM_MODEL].getValue());
+		bUseSheepFirmware = static_cast<bool>(params[PARAM_MODEL].getValue());
 
-		bool bSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bSheep && inputs[INPUT_CLOCK].isConnected());
+		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bUseSheepFirmware && inputs[INPUT_CLOCK].isConnected());
 
 		// Buffer loop
 		if (++frame >= 16) {
@@ -142,9 +142,9 @@ struct Aestus : SanguineModule {
 
 			// Sync
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			if (bSync != bLastSync) {
-				generator.set_sync(bSync);
-				bLastSync = bSync;
+			if (bHaveExternalSync != bLastExternalSync) {
+				generator.set_sync(bHaveExternalSync);
+				bLastExternalSync = bHaveExternalSync;
 			}
 
 			// Pitch
@@ -168,7 +168,7 @@ struct Aestus : SanguineModule {
 			generator.set_smoothness(smoothness);
 
 			// Generator
-			generator.Process(bSheep);
+			generator.Process(bUseSheepFirmware);
 		}
 
 		// Level
@@ -232,13 +232,13 @@ struct Aestus : SanguineModule {
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ?
+			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 			displayModel = aestus::displayModels[params[PARAM_MODEL].getValue()];
 
-			if (!bSheep) {
+			if (!bUseSheepFirmware) {
 				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
 			} else {
 				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
@@ -373,7 +373,7 @@ struct AestusWidget : SanguineModuleWidget {
 			[=](int i) { module->setModel(i); }
 		));
 
-		if (!module->bSheep) {
+		if (!module->bUseSheepFirmware) {
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
