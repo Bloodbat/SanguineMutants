@@ -23,7 +23,7 @@ namespace apicesCommon {
         uint8_t editMode;
         uint8_t processorFunctions[kChannelCount];
         uint8_t potValues[kKnobCount * 2];
-        bool snap_mode;
+        bool snapMode;
     };
 
     struct KnobLabels {
