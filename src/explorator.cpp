@@ -122,7 +122,7 @@ struct Explorator : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool attenuate3to1 = params[PARAM_AVERAGER].getValue();
+		bool bWantAverager = params[PARAM_AVERAGER].getValue();
 
 		// 1:3
 		int channels1to3 = inputs[INPUT_1_TO_3].getChannels();
@@ -167,7 +167,8 @@ struct Explorator : SanguineModule {
 		if (inputs[INPUT_2_TO_2_A].isConnected() || inputs[INPUT_2_TO_2_B].isConnected()) {
 			float_4 voltages2to2;
 			for (int channel = 0; channel < channels2to2; channel += 4) {
-				voltages2to2 = inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel) + inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel);
+				voltages2to2 = inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel) +
+					inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel);
 				outputs[OUTPUT_2_TO_2_A].setVoltageSimd(voltages2to2, channel);
 				outputs[OUTPUT_2_TO_2_B].setVoltageSimd(voltages2to2, channel);
 			}
@@ -189,7 +190,8 @@ struct Explorator : SanguineModule {
 		}
 
 		// 3:1
-		int channels3to1 = std::max(std::max(std::max(inputs[INPUT_3_TO_1_A].getChannels(), inputs[INPUT_3_TO_1_B].getChannels()), inputs[INPUT_3_TO_1_C].getChannels()), 0);
+		int channels3to1 = std::max(std::max(std::max(inputs[INPUT_3_TO_1_A].getChannels(), inputs[INPUT_3_TO_1_B].getChannels()),
+			inputs[INPUT_3_TO_1_C].getChannels()), 0);
 
 		outputs[OUTPUT_3_TO_1].setChannels(channels3to1);
 
@@ -201,7 +203,7 @@ struct Explorator : SanguineModule {
 
 				float_4 voltages3to1 = voltages3to1A + voltages3to1B + voltages3to1C;
 
-				if (attenuate3to1) {
+				if (bWantAverager) {
 					voltages3to1 /= 3;
 				}
 
@@ -211,9 +213,9 @@ struct Explorator : SanguineModule {
 
 		// Sample & hold
 		float noise[PORT_MAX_CHANNELS] = {};
-		bool triggerConnected = inputs[INPUT_SH_TRIGGER].isConnected();
-		bool noiseConnected = outputs[OUTPUT_SH_NOISE].isConnected();
-		bool inputVoltageConnected = inputs[INPUT_SH_VOLTAGE].isConnected();
+		bool bIsTriggerConnected = inputs[INPUT_SH_TRIGGER].isConnected();
+		bool bIsNoiseConnected = outputs[OUTPUT_SH_NOISE].isConnected();
+		bool bHaveInputVoltage = inputs[INPUT_SH_VOLTAGE].isConnected();
 
 		int channelsSampleAndHold = inputs[INPUT_SH_TRIGGER].getChannels();
 
@@ -224,7 +226,7 @@ struct Explorator : SanguineModule {
 		outputs[OUTPUT_SH_VOLTAGE].setChannels(lastSampleAndHoldChannels);
 		outputs[OUTPUT_SH_NOISE].setChannels(channelsSampleAndHold > 0 ? channelsSampleAndHold : 1);
 
-		if (noiseConnected || (triggerConnected && !inputVoltageConnected)) {
+		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
 			switch (noiseMode)
 			{
 			case NOISE_PRISM:
@@ -240,10 +242,10 @@ struct Explorator : SanguineModule {
 			}
 		}
 
-		if (triggerConnected) {
+		if (bIsTriggerConnected) {
 			for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
 				if (stSampleAndHold[channel].process(inputs[INPUT_SH_TRIGGER].getVoltage(channel))) {
-					if (inputVoltageConnected) {
+					if (bHaveInputVoltage) {
 						voltagesSampleAndHold[channel] = inputs[INPUT_SH_VOLTAGE].getVoltage(channel);
 					} else {
 						voltagesSampleAndHold[channel] = noise[channel];
@@ -256,7 +258,7 @@ struct Explorator : SanguineModule {
 			outputs[OUTPUT_SH_VOLTAGE].writeVoltages(voltagesSampleAndHold);
 		}
 
-		if (noiseConnected) {
+		if (bIsNoiseConnected) {
 			int channelsNoise = outputs[OUTPUT_SH_NOISE].getChannels();
 
 			for (int channel = 0; channel < channelsNoise; ++channel) {
@@ -351,10 +353,12 @@ struct Explorator : SanguineModule {
 
 			if (channels3to1 < 2) {
 				if (channels3to1 > 0) {
-					if (!attenuate3to1) {
-						voltage3to1Out = clamp(inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() + inputs[INPUT_3_TO_1_C].getVoltage(), -10.f, 10.f);
+					if (!bWantAverager) {
+						voltage3to1Out = clamp(inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() +
+							inputs[INPUT_3_TO_1_C].getVoltage(), -10.f, 10.f);
 					} else {
-						voltage3to1Out = clamp((inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() + inputs[INPUT_3_TO_1_C].getVoltage()) / 3.f, -10.f, 10.f);
+						voltage3to1Out = clamp((inputs[INPUT_3_TO_1_A].getVoltage() + inputs[INPUT_3_TO_1_B].getVoltage() +
+							inputs[INPUT_3_TO_1_C].getVoltage()) / 3.f, -10.f, 10.f);
 					}
 				}
 				float rescaledLight = math::rescale(voltage3to1Out, 0.f, 10.f, 0.f, 1.f);
@@ -362,10 +366,12 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_3_TO_1 + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				lights[LIGHT_3_TO_1 + 2].setBrightnessSmooth(0.f, sampleTime);
 			} else {
-				if (!attenuate3to1) {
-					voltage3to1Out = inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum();
+				if (!bWantAverager) {
+					voltage3to1Out = inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() +
+						inputs[INPUT_3_TO_1_C].getVoltageSum();
 				} else {
-					voltage3to1Out = (inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() + inputs[INPUT_3_TO_1_C].getVoltageSum()) / 3;
+					voltage3to1Out = (inputs[INPUT_3_TO_1_A].getVoltageSum() + inputs[INPUT_3_TO_1_B].getVoltageSum() +
+						inputs[INPUT_3_TO_1_C].getVoltageSum()) / 3;
 				}
 
 				voltage3to1Out = clamp(voltage3to1Out / channels3to1, -10.f, 10.f);
@@ -403,7 +409,7 @@ struct Explorator : SanguineModule {
 				lights[LIGHT_SH + 2].setBrightnessSmooth(sampleAndHoldVoltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 			}
 
-			lights[LIGHT_AVERAGER].setBrightnessSmooth(attenuate3to1 ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_AVERAGER].setBrightnessSmooth(bWantAverager ? kSanguineButtonLightValue : 0.f, sampleTime);
 		} // Light Divider
 	}
 
