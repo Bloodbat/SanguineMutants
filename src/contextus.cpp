@@ -103,20 +103,20 @@ struct Contextus : SanguineModule {
 	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
 
-	bool bFlagTriggerDetected[PORT_MAX_CHANNELS] = {};
-	bool bLastTrig[PORT_MAX_CHANNELS] = {};
-	bool bTriggerFlag[PORT_MAX_CHANNELS] = {};
+	bool bTriggerDetected[PORT_MAX_CHANNELS] = {};
+	bool bLastTrigger[PORT_MAX_CHANNELS] = {};
+	bool bTriggered[PORT_MAX_CHANNELS] = {};
 
 	bool bAutoTrigger = false;
 	bool bFlattenEnabled = false;
 	bool bVCAEnabled = false;
 
-	bool bLowCpu = false;
+	bool bWantLowCpu = false;
 
 	bool bPerInstanceSignSeed = true;
-	bool bNeedSeed = true;
+	bool bNeedSignSeed = true;
 
-	// Display stuff
+	// Display stuff.
 	renaissance::SettingsData lastSettings = {};
 	renaissance::Setting lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 
@@ -191,7 +191,7 @@ struct Contextus : SanguineModule {
 			jitterSource[channel].Init();
 			waveShaper[channel].Init(userSignSeed);
 
-			bLastTrig[channel] = false;
+			bLastTrigger[channel] = false;
 
 			currentScale[channel] = 0xff;
 
@@ -228,27 +228,27 @@ struct Contextus : SanguineModule {
 			settings[channel].ad_color = params[PARAM_AD_COLOR].getValue();
 			settings[channel].invert_encoder = false;
 
-			// Trigger
+			// Trigger.
 			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-			if (!bLastTrig[channel] && bTriggerInput) {
-				bFlagTriggerDetected[channel] = bTriggerInput;
+			if (!bLastTrigger[channel] && bTriggerInput) {
+				bTriggerDetected[channel] = bTriggerInput;
 			}
-			bLastTrig[channel] = bTriggerInput;
+			bLastTrigger[channel] = bTriggerInput;
 
-			if (bFlagTriggerDetected[channel]) {
+			if (bTriggerDetected[channel]) {
 				triggerDelay[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
 				++triggerDelay[channel];
-				bFlagTriggerDetected[channel] = false;
+				bTriggerDetected[channel] = false;
 			}
 
 			if (triggerDelay[channel]) {
 				--triggerDelay[channel];
 				if (triggerDelay[channel] == 0) {
-					bTriggerFlag[channel] = true;
+					bTriggered[channel] = true;
 				}
 			}
 
-			// Handle switches
+			// Handle switches.
 			settings[channel].meta_modulation = 1;
 			settings[channel].ad_vca = bVCAEnabled;
 			settings[channel].vco_drift = driftValue;
@@ -256,20 +256,20 @@ struct Contextus : SanguineModule {
 			settings[channel].signature = waveShaperValue;
 			settings[channel].auto_trig = bAutoTrigger;
 
-			// Quantizer
+			// Quantizer.
 			if (currentScale[channel] != settings[channel].quantizer_scale) {
 				currentScale[channel] = settings[channel].quantizer_scale;
 				quantizer[channel].Configure(renaissance::scales[currentScale[channel]]);
 			}
 
-			// Render frames
+			// Render frames.
 			if (drbOutputBuffer[channel].empty()) {
 				envelope[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
 				uint32_t adValue = envelope[channel].Render();
 
 				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
 
-				// Set model
+				// Set model.
 				int model = params[PARAM_MODEL].getValue();
 				if (inputs[INPUT_META].isConnected()) {
 					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f * renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
@@ -277,10 +277,10 @@ struct Contextus : SanguineModule {
 
 				settings[channel].shape = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
-				// Setup oscillator from settings
+				// Setup oscillator from settings.
 				osc[channel].set_shape(renaissance::MacroOscillatorShape(settings[channel].shape));
 
-				// Set timbre/modulation
+				// Set timbre/modulation.
 				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
 				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
 
@@ -291,17 +291,17 @@ struct Contextus : SanguineModule {
 				int16_t param2 = math::rescale(clamp(modulation, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
 				osc[channel].set_parameters(param1, param2);
 
-				// Set pitch
+				// Set pitch.
 				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.f;
 				pitchV += fm;
 
-				if (bLowCpu) {
+				if (bWantLowCpu) {
 					pitchV += log2f(96000.f / args.sampleRate);
 				}
 
 				int16_t pitch = (pitchV * 12.f + 60) * 128;
 
-				// pitch_range
+				// Pitch range.
 				switch (settings[channel].pitch_range)
 				{
 				case renaissance::PITCH_RANGE_EXTERNAL:
@@ -324,9 +324,9 @@ struct Contextus : SanguineModule {
 
 				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
 
-				// Check if the pitch has changed to cause an auto-retrigger
+				// Check if pitch has changed enough to cause an auto-retrigger.
 				int16_t pitchDelta = pitch - previousPitch[channel];
-				bFlagTriggerDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 || -pitchDelta >= 0x40);
+				bTriggerDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 || -pitchDelta >= 0x40);
 
 				previousPitch[channel] = pitch;
 
@@ -339,24 +339,24 @@ struct Contextus : SanguineModule {
 					pitch = renaissance::Interpolate88(renaissance::lut_vco_detune, pitch << 2);
 				}
 
-				// Pitch transposition
+				// Pitch transposition.
 				int32_t transposition = settings[channel].pitch_range == renaissance::PITCH_RANGE_LFO ? -(36 << 7) : 0;
 				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
 				osc[channel].set_pitch(pitch + transposition);
 
-				if (bTriggerFlag[channel]) {
+				if (bTriggered[channel]) {
 					osc[channel].Strike();
 					envelope[channel].Trigger(renaissance::ENV_SEGMENT_ATTACK);
-					bTriggerFlag[channel] = false;
+					bTriggered[channel] = false;
 				}
 
-				// TODO: add a sync input buffer (must be sample rate converted)
+				// TODO: Add a sync input buffer (must be sample rate converted).
 				const uint8_t syncBuffer[nodiCommon::kBlockSize] = {};
 
 				int16_t renderBuffer[nodiCommon::kBlockSize];
 				osc[channel].Render(syncBuffer, renderBuffer, nodiCommon::kBlockSize);
 
-				// Signature waveshaping, decimation, and bit reduction
+				// Signature waveshaping, decimation, and bit reduction.
 				int16_t sample = 0;
 				size_t decimationFactor = nodiCommon::decimationFactors[settings[channel].sample_rate];
 				uint16_t bitMask = nodiCommon::bitReductionMasks[settings[channel].resolution];
@@ -372,8 +372,8 @@ struct Contextus : SanguineModule {
 					renderBuffer[block] = stmlib::Mix(sample, warped, signature);
 				}
 
-				if (!bLowCpu) {
-					// Sample rate convert
+				if (!bWantLowCpu) {
+					// Sample rate convert.
 					dsp::Frame<1> in[nodiCommon::kBlockSize];
 					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						in[block].samples[0] = renderBuffer[block] / 32768.f;
@@ -393,7 +393,7 @@ struct Contextus : SanguineModule {
 				}
 			}
 
-			// Output
+			// Output.
 			if (!drbOutputBuffer[channel].empty()) {
 				dsp::Frame<1> outFrame = drbOutputBuffer[channel].shift();
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
@@ -405,7 +405,7 @@ struct Contextus : SanguineModule {
 
 			pollSwitches(sampleTime);
 
-			// Handle model light
+			// Handle model light.
 			int currentModel = settings[0].shape;
 			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextus::lightColors[currentModel].red, sampleTime);
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[currentModel].green, sampleTime);
@@ -434,8 +434,8 @@ struct Contextus : SanguineModule {
 	}
 
 	inline void handleDisplay(const ProcessArgs& args) {
-		// Display handling
-		// Display - return to model after 2s
+		// Display handling.
+		// Display: return to model after 2s.
 		if (lastSettingChanged == renaissance::SETTING_OSCILLATOR_SHAPE) {
 			displayText = contextus::displayLabels[settings[displayChannel].shape];
 		} else {
@@ -549,7 +549,7 @@ struct Contextus : SanguineModule {
 	}
 
 	inline void pollSwitches(const float sampleTime) {
-		// Handle switch lights
+		// Handle switch lights.
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
 		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger ? kSanguineButtonLightValue : 0.f, sampleTime);
@@ -558,8 +558,8 @@ struct Contextus : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_t* lowCpuJ = json_boolean(bLowCpu);
-		json_object_set_new(rootJ, "bLowCpu", lowCpuJ);
+		json_t* lowCpuJ = json_boolean(bWantLowCpu);
+		json_object_set_new(rootJ, "bWantLowCpu", lowCpuJ);
 
 		json_t* displayChannelJ = json_integer(displayChannel);
 		json_object_set_new(rootJ, "displayChannel", displayChannelJ);
@@ -576,9 +576,9 @@ struct Contextus : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* lowCpuJ = json_object_get(rootJ, "bLowCpu");
+		json_t* lowCpuJ = json_object_get(rootJ, "bWantLowCpu");
 		if (lowCpuJ) {
-			bLowCpu = json_boolean_value(lowCpuJ);
+			bWantLowCpu = json_boolean_value(lowCpuJ);
 		}
 
 		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
@@ -590,7 +590,7 @@ struct Contextus : SanguineModule {
 		if (userSignSeedJ) {
 			userSignSeed = json_integer_value(userSignSeedJ);
 			setWaveShaperSeed(userSignSeed);
-			bNeedSeed = false;
+			bNeedSignSeed = false;
 		}
 
 		json_t* perInstanceSignSeedJ = json_object_get(rootJ, "perInstanceSignSeed");
@@ -632,7 +632,7 @@ struct Contextus : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		if (bNeedSeed) {
+		if (bNeedSignSeed) {
 			userSignSeed = getInstanceSeed();
 			setWaveShaperSeed(userSignSeed);
 		}
@@ -759,7 +759,7 @@ struct ContextusWidget : SanguineModuleWidget {
 		}
 
 		void step() override {
-			// Keep selected
+			// Keep selected.
 			APP->event->setSelectedWidget(this);
 			TextField::step();
 		}
@@ -823,7 +823,7 @@ struct ContextusWidget : SanguineModuleWidget {
 
 				menu->addChild(new MenuSeparator);
 
-				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bWantLowCpu));
 
 				menu->addChild(new MenuSeparator);
 
