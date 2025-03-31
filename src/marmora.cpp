@@ -101,14 +101,13 @@ struct Marmora : SanguineModule {
 	bool bDejaVuTEnabled = false;
 	bool bDejaVuXEnabled = false;
 	bool bXClockSourceExternal = false;
-	bool bTReset = false;
-	bool bXReset = false;
+	bool bWantTReset = false;
+	bool bWantXReset = false;
 	bool bModuleAdded = false;
-	bool bMenuTReset = false;
-	bool bMenuXReset = false;
+	bool bWantMenuTReset = false;
+	bool bWantMenuXReset = false;
 
 	bool bScaleEditMode = false;
-	bool bNoteGate = false;
 	bool bLastGate = false;
 
 	bool bGates[marmora::kBlockSize * 2] = {};
@@ -127,7 +126,7 @@ struct Marmora : SanguineModule {
 	dsp::SchmittTrigger stTReset;
 	dsp::SchmittTrigger stXReset;
 
-	// Buffers
+	// Buffers.
 	stmlib::GateFlags tClocks[marmora::kBlockSize] = {};
 	stmlib::GateFlags lastTClock = 0;
 	stmlib::GateFlags xyClocks[marmora::kBlockSize] = {};
@@ -139,7 +138,7 @@ struct Marmora : SanguineModule {
 	float voltages[marmora::kBlockSize * 4] = {};
 	float newNoteVoltage = 0.f;
 
-	// Storage
+	// Storage.
 	MarmoraScale marmoraScales[marmora::kMaxScales];
 
 	struct LengthParam : ParamQuantity {
@@ -263,16 +262,16 @@ struct Marmora : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		// Clocks
-		bool bTGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
-		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTGate);
+		// Clocks.
+		bool bTClockGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
+		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTClockGate);
 		tClocks[blockIndex] = lastTClock;
 
-		bool bXGate = (inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f);
-		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, bXGate);
+		bool bXClockGate = inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f;
+		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, bXClockGate);
 		xyClocks[blockIndex] = lastXYClock;
 
-		// Lock modes
+		// Lock modes.
 		dejaVuLockModeT = params[PARAM_T_SUPER_LOCK].getValue() ? marmora::DEJA_VU_SUPER_LOCK : marmora::DEJA_VU_LOCK_OFF;
 		dejaVuLockModeX = params[PARAM_X_SUPER_LOCK].getValue() ? marmora::DEJA_VU_SUPER_LOCK : marmora::DEJA_VU_LOCK_OFF;
 
@@ -293,22 +292,22 @@ struct Marmora : SanguineModule {
 		xClockSourceInternal = static_cast<marbles::ClockSource>(params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue());
 		bXClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
 
-		bTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage()) || bMenuTReset;
-		bXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage()) || bMenuXReset;
+		bWantTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage()) || bWantMenuTReset;
+		bWantXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage()) || bWantMenuXReset;
 
 		if (!bXClockSourceExternal) {
-			bXReset |= bTReset;
+			bWantXReset |= bWantTReset;
 		}
 
-		bMenuTReset = bMenuXReset = false;
+		bWantMenuTReset = bWantMenuXReset = false;
 
-		// Process block
+		// Process block.
 		if (++blockIndex >= marmora::kBlockSize) {
 			blockIndex = 0;
 			stepBlock();
 		}
 
-		// Outputs
+		// Outputs.
 		if (!bScaleEditMode) {
 			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2 + 0] ? 10.f : 0.f);
 			outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) ? 10.f : 0.f);
@@ -328,7 +327,7 @@ struct Marmora : SanguineModule {
 		}
 		outputs[OUTPUT_Y].setVoltage(voltages[blockIndex * 4 + 3]);
 
-		// Lights
+		// Lights.
 		if (lightsDivider.process()) {
 			long long systemTimeMs = getSystemTimeMs();
 
@@ -474,7 +473,7 @@ struct Marmora : SanguineModule {
 	}
 
 	void stepBlock() {
-		// Ramps
+		// Ramps.
 		marbles::Ramps ramps;
 		ramps.master = rampMaster;
 		ramps.external = rampExternal;
@@ -486,8 +485,8 @@ struct Marmora : SanguineModule {
 		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmora::loopLengths) - 1);
 		int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
 
-		// Setup TGenerator
-		bool bTExternalClock = inputs[INPUT_T_CLOCK].isConnected();
+		// Set up TGenerator.
+		bool bTClockSourceExternal = inputs[INPUT_T_CLOCK].isConnected();
 
 		tGenerator.set_model(static_cast<marbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
 		tGenerator.set_range(static_cast<marbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
@@ -506,9 +505,9 @@ struct Marmora : SanguineModule {
 		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
 		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
 
-		tGenerator.Process(bTExternalClock, &bTReset, tClocks, ramps, bGates, marmora::kBlockSize);
+		tGenerator.Process(bTClockSourceExternal, &bWantTReset, tClocks, ramps, bGates, marmora::kBlockSize);
 
-		// Set up XYGenerator
+		// Set up XYGenerator.
 		marbles::ClockSource xClockSource = xClockSourceInternal;
 		if (bXClockSourceExternal) {
 			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
@@ -518,11 +517,11 @@ struct Marmora : SanguineModule {
 			marbles::GroupSettings x;
 			x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
 			x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
-			// TODO: Fix the scaling
+			// TODO: Fix the scaling.
 			/* I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
 			   custom scales seem to behave nicely when NOT doing that...) -Bat */
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
-			// TODO: WTF is u? (A leftover from marbles.cc -Bat Ed.)
+			// NOTE: WTF is u? (A leftover from marbles.cc -Bat Ed.)
 			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
 			x.register_mode = params[PARAM_EXTERNAL].getValue();
 			x.register_value = u;
@@ -558,7 +557,7 @@ struct Marmora : SanguineModule {
 			y.ratio = marmora::yDividerRatios[yDividerIndex];
 			y.scale_index = xScale;
 
-			xyGenerator.Process(xClockSource, x, y, &bXReset, xyClocks, ramps, voltages, marmora::kBlockSize);
+			xyGenerator.Process(xClockSource, x, y, &bWantXReset, xyClocks, ramps, voltages, marmora::kBlockSize);
 		} else {
 			/* Was
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
@@ -595,7 +594,7 @@ struct Marmora : SanguineModule {
 		tGenerator.Init(&randomStream, sampleRate);
 		xyGenerator.Init(&randomStream, sampleRate);
 
-		// Set scales
+		// Set scales.
 		if (!bModuleAdded) {
 			for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 				xyGenerator.LoadScale(scale, marmora::presetScales[scale]);
@@ -904,7 +903,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 		}
 
 		void step() override {
-			// Keep selected
+			// Keep selected.
 			APP->event->setSelectedWidget(this);
 			TextField::step();
 		}
@@ -952,7 +951,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 				));
 
 				menu->addChild(createMenuItem("Reset/reseed", "", [=]() {
-					module->bMenuTReset = true;
+					module->bWantMenuTReset = true;
 					}));
 
 			}
@@ -978,7 +977,7 @@ struct MarmoraWidget : SanguineModuleWidget {
 				));
 
 				menu->addChild(createMenuItem("Reset", "", [=]() {
-					module->bMenuXReset = true;
+					module->bWantMenuXReset = true;
 					}));
 			}
 		));
