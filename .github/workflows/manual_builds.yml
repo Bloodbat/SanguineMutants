@@ -29,7 +29,7 @@ jobs:
           echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
           cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
         # only modify plugin version if no tag was created
-        if: "! startsWith(github.ref, 'refs/tags/v')"
+        if: (! startsWith(github.ref, 'refs/tags/v'))
 
   build:
     name: ${{ matrix.platform }}
