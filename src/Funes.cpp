@@ -88,11 +88,11 @@ struct Funes : SanguineModule {
 	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> outputBuffer;
 
-	bool bLowCpu = false;
+	bool bWantLowCpu = false;
 
 	bool bDisplayModulatedModel = true;
 
-	bool bLoading = false;
+	bool bIsLoading = false;
 
 	bool bNotesModelSelection = false;
 
@@ -156,7 +156,7 @@ struct Funes : SanguineModule {
 		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		if (outputBuffer.empty()) {
-			const int blockSize = 12;
+			const int kBlockSize = 12;
 
 			// Switch models
 			if (bNotesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
@@ -181,7 +181,7 @@ struct Funes : SanguineModule {
 
 			// Calculate pitch for low cpu mode, if needed.
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			if (bLowCpu) {
+			if (bWantLowCpu) {
 				pitch += std::log2(48000.f * args.sampleTime);
 			}
 
@@ -218,10 +218,10 @@ struct Funes : SanguineModule {
 
 			bool activeLights[PORT_MAX_CHANNELS] = {};
 
-			bool pulse = false;
+			bool bPulseLight = false;
 
 			// Render output buffer for each voice.
-			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[blockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				// Construct modulations.
 				plaits::Modulations modulations;
@@ -245,11 +245,11 @@ struct Funes : SanguineModule {
 				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
 
 				// Render frames
-				plaits::Voice::Frame output[blockSize];
-				voice[channel].Render(patch, modulations, output, blockSize);
+				plaits::Voice::Frame output[kBlockSize];
+				voice[channel].Render(patch, modulations, output, kBlockSize);
 
 				// Convert output to frames
-				for (int blockNum = 0; blockNum < blockSize; ++blockNum) {
+				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
 					outputFrames[blockNum].samples[channel * 2 + 0] = output[blockNum].out / 32768.f;
 					outputFrames[blockNum].samples[channel * 2 + 1] = output[blockNum].aux / 32768.f;
 				}
@@ -262,21 +262,19 @@ struct Funes : SanguineModule {
 					// Model lights
 					// Get the active engines for current channel.
 					int currentLight;
-					int clampedEngine;
 					int activeEngine = voice[channel].active_engine();
-					clampedEngine = (activeEngine % 8) * 2;
+					int clampedEngine = (activeEngine % 8) * 2;
 
-					bool noiseModels = activeEngine & 0x10;
-					bool pitchedModels = activeEngine & 0x08;
+					bool bIsNoiseModel = activeEngine & 0x10;
+					bool bIsPitchedModel = activeEngine & 0x08;
 
-					if (noiseModels) {
+					if (bIsNoiseModel) {
 						currentLight = clampedEngine + 1;
 						activeLights[currentLight] = true;
-					} else if (pitchedModels) {
+					} else if (bIsPitchedModel) {
 						currentLight = clampedEngine;
 						activeLights[currentLight] = true;
-					} else
-					{
+					} else {
 						currentLight = clampedEngine;
 						activeLights[currentLight] = true;
 						currentLight = clampedEngine + 1;
@@ -284,7 +282,7 @@ struct Funes : SanguineModule {
 					}
 
 					// Pulse the light if at least one voice is using a different engine.
-					pulse = activeEngine != patch.engine;
+					bPulseLight = activeEngine != patch.engine;
 				}
 			}
 
@@ -322,28 +320,27 @@ struct Funes : SanguineModule {
 			}
 
 			// Convert output.
-			if (!bLowCpu) {
+			if (!bWantLowCpu) {
 				outputSrc.setRates(48000, static_cast<int>(args.sampleRate));
-				int inLen = blockSize;
+				int inLen = kBlockSize;
 				int outLen = outputBuffer.capacity();
 				outputSrc.setChannels(channelCount * 2);
 				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
 				outputBuffer.endIncr(outLen);
 			} else {
-				int len = std::min(static_cast<int>(outputBuffer.capacity()), blockSize);
+				int len = std::min(static_cast<int>(outputBuffer.capacity()), kBlockSize);
 				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
 				outputBuffer.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz.
-			triPhase += 2.f * args.sampleTime * blockSize;
+			triPhase += 2.f * args.sampleTime * kBlockSize;
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
 			}
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
-			switch (ledsMode)
-			{
+			switch (ledsMode) {
 			case funes::LEDNormal: {
 				// Set model lights.
 				int clampedEngine = patch.engine % 8;
@@ -352,7 +349,7 @@ struct Funes : SanguineModule {
 					float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 					float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
-					if (pulse && clampedEngine == led) {
+					if (bPulseLight && clampedEngine == led) {
 						switch (patch.engine) {
 						case 0:
 						case 1:
@@ -481,7 +478,7 @@ struct Funes : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
+		json_object_set_new(rootJ, "lowCpu", json_boolean(bWantLowCpu));
 		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
 		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
 		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
@@ -501,7 +498,7 @@ struct Funes : SanguineModule {
 
 		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
 		if (lowCpuJ) {
-			bLowCpu = json_boolean_value(lowCpuJ);
+			bWantLowCpu = json_boolean_value(lowCpuJ);
 		}
 
 		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
@@ -550,8 +547,8 @@ struct Funes : SanguineModule {
 	}
 
 	void loadCustomData(const std::string& filePath) {
-		bLoading = true;
-		DEFER({ bLoading = false; });
+		bIsLoading = true;
+		DEFER({ bIsLoading = false; });
 		// HACK: Sleep 100us so DSP thread is likely to finish processing before we resize the vector.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 
@@ -795,7 +792,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 				menu->addChild(new MenuSeparator);
 
-				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bWantLowCpu));
 			}
 		));
 
