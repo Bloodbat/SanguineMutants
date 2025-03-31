@@ -253,7 +253,7 @@ struct Fluctus : SanguineModule {
 			fluctusProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			fluctusProcessor->Prepare();
 
-			bool frozen = params[PARAM_FREEZE].getValue();
+			bool bFrozen = params[PARAM_FREEZE].getValue();
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};
@@ -273,7 +273,7 @@ struct Fluctus : SanguineModule {
 
 			fluctusParameters->trigger = bTriggered;
 			fluctusParameters->gate = bTriggered;
-			fluctusParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || frozen);
+			fluctusParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
 			fluctusParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
 			fluctusParameters->position = clamp(params[PARAM_POSITION].getValue() + parameters1[0], 0.f, 1.f);
 			fluctusParameters->size = clamp(params[PARAM_SIZE].getValue() + parameters1[1], 0.f, 1.f);
@@ -293,13 +293,13 @@ struct Fluctus : SanguineModule {
 			fluctus::ShortFrame output[32];
 			fluctusProcessor->Process(input, output, 32);
 
-			if (frozen && !bLastFrozen) {
+			if (bFrozen && !bLastFrozen) {
 				bLastFrozen = true;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_OUTPUT;
 					lastLedMode = cloudyCommon::LEDS_OUTPUT;
 				}
-			} else if (!frozen && bLastFrozen) {
+			} else if (!bFrozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_INPUT;
