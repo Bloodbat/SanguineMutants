@@ -249,7 +249,7 @@ struct Nebulae : SanguineModule {
 			cloudsProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			cloudsProcessor->Prepare();
 
-			bool frozen = params[PARAM_FREEZE].getValue();
+			bool bFrozen = params[PARAM_FREEZE].getValue();
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};
@@ -269,7 +269,7 @@ struct Nebulae : SanguineModule {
 
 			cloudsParameters->trigger = bTriggered;
 			cloudsParameters->gate = bTriggered;
-			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || frozen);
+			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
 			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
 			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + parameters1[0], 0.f, 1.f);
 			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + parameters1[1], 0.f, 1.f);
@@ -283,13 +283,13 @@ struct Nebulae : SanguineModule {
 			clouds::ShortFrame output[32];
 			cloudsProcessor->Process(input, output, 32);
 
-			if (frozen && !bLastFrozen) {
+			if (bFrozen && !bLastFrozen) {
 				bLastFrozen = true;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_OUTPUT;
 					lastLedMode = cloudyCommon::LEDS_OUTPUT;
 				}
-			} else if (!frozen && bLastFrozen) {
+			} else if (!bFrozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_INPUT;
