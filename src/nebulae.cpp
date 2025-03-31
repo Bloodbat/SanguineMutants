@@ -249,7 +249,7 @@ struct Nebulae : SanguineModule {
 			cloudsProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			cloudsProcessor->Prepare();
 
-			bool bFrozen = params[PARAM_FREEZE].getValue();
+			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};

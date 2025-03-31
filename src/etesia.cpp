@@ -260,7 +260,7 @@ struct Etesia : SanguineModule {
 			etesiaProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			etesiaProcessor->Prepare();
 
-			bool bFrozen = params[PARAM_FREEZE].getValue();
+			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};
@@ -290,7 +290,8 @@ struct Etesia : SanguineModule {
 			etesiaParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + parameters2[1], 0.f, 1.f);
 			etesiaParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + parameters2[2], 0.f, 1.f);
 			etesiaParameters->reverb = clamp(params[PARAM_REVERB].getValue() + parameters2[3], 0.f, 1.f);
-			etesiaParameters->granular.reverse = (inputs[INPUT_REVERSE].getVoltage() >= 1.f || params[PARAM_REVERSE].getValue());
+			etesiaParameters->granular.reverse = (inputs[INPUT_REVERSE].getVoltage() >= 1.f ||
+				static_cast<bool>(params[PARAM_REVERSE].getValue()));
 
 			etesia::ShortFrame output[32];
 			etesiaProcessor->Process(input, output, 32);
