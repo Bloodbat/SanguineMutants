@@ -1,5 +1,5 @@
 build
 dep
 dist
-/plugin.dll
+plugin.dll
 *.so
