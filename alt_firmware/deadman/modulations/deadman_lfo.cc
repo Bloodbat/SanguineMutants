@@ -241,10 +241,7 @@ namespace deadman {
 
 			GateFlags gate_flag = *gate_flags++;
 			if (gate_flag & GATE_FLAG_RISING) {
-				bool fm_reset_phase = true;
-				if (fm_reset_phase) {
-					fm_phase_ = fm_reset_phase_;
-				}
+				fm_phase_ = fm_reset_phase_;
 			}
 
 			fm_phase_ += fm_phase_increment_;
@@ -263,10 +260,7 @@ namespace deadman {
 			phase_increment_ = a + (((b - a) >> 1) * (modulated_rate & 0xff) >> 7);
 
 			if (gate_flag & GATE_FLAG_RISING) {
-				bool reset_phase = true;
-				if (reset_phase) {
-					phase_ = reset_phase_;
-				}
+				phase_ = reset_phase_;
 			}
 			phase_ += phase_increment_;
 			int32_t sample = (this->*compute_sample_fn_table_[shape_])();
@@ -439,10 +433,7 @@ namespace deadman {
 			wsm_phase_increment_ = wsm_a + (((wsm_b - wsm_a) >> 1) * (wsm_rate_ & 0xff) >> 7);
 			GateFlags gate_flag = *gate_flags++;
 			if (gate_flag & GATE_FLAG_RISING) {
-				bool wsm_reset_phase = true;
-				if (wsm_reset_phase) {
-					wsm_phase_ = wsm_reset_phase_;
-				}
+				wsm_phase_ = wsm_reset_phase_;
 			}
 			wsm_phase_ += wsm_phase_increment_;
 			int32_t wsm_sample = WsmLfo::ComputeModulation();
@@ -453,10 +444,7 @@ namespace deadman {
 			int32_t b = lut_lfo_increments[(rate_ >> 8) + 1];
 			phase_increment_ = a + (((b - a) >> 1) * (rate_ & 0xff) >> 7);
 			if (gate_flag & GATE_FLAG_RISING) {
-				bool reset_phase = true;
-				if (reset_phase) {
-					phase_ = reset_phase_;
-				}
+				phase_ = reset_phase_;
 			}
 			phase_ += phase_increment_;
 			int32_t sample = (this->*compute_sample_fn_table_[shape_])();
