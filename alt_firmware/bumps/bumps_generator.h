@@ -138,10 +138,6 @@ namespace bumps {
 			smoothness_ = smoothness;
 		}
 
-		void set_frequency_ratio(FrequencyRatio ratio) {
-			frequency_ratio_ = ratio;
-		}
-
 		void set_sync(bool sync) {
 			if (!sync_ && sync) {
 				pattern_predictor_.Init();
@@ -156,7 +152,6 @@ namespace bumps {
 
 		inline GeneratorMode mode() const { return mode_; }
 		inline GeneratorRange range() const { return range_; }
-		inline bool sync() const { return sync_; }
 
 		inline GeneratorSample Process(uint8_t control) {
 			input_buffer_.Overwrite(control);
@@ -168,10 +163,6 @@ namespace bumps {
 		}
 
 		void FillBuffer();
-
-		uint32_t clock_divider() const {
-			return clock_divider_;
-		}
 
 		enum FeatureMode {
 			FEAT_MODE_FUNCTION,
