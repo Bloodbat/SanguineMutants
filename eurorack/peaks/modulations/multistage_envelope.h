@@ -73,14 +73,6 @@ namespace peaks {
       level_[segment] = level;
     }
 
-    inline void set_num_segments(uint16_t num_segments) {
-      num_segments_ = num_segments;
-    }
-
-    inline void set_sustain_point(uint16_t sustain_point) {
-      sustain_point_ = sustain_point;
-    }
-
     inline void set_adsr(
       uint16_t attack,
       uint16_t decay,
@@ -122,69 +114,9 @@ namespace peaks {
       loop_start_ = loop_end_ = 0;
     }
 
-    inline void set_adr(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
-      num_segments_ = 3;
-      sustain_point_ = 0;
-
-      level_[0] = 0;
-      level_[1] = 32767;
-      level_[2] = sustain;
-      level_[3] = 0;
-
-      time_[0] = attack;
-      time_[1] = decay;
-      time_[2] = release;
-
-      shape_[0] = ENV_SHAPE_LINEAR;
-      shape_[1] = ENV_SHAPE_LINEAR;
-      shape_[2] = ENV_SHAPE_LINEAR;
-
-      loop_start_ = loop_end_ = 0;
-    }
-
-    inline void set_ar(uint16_t attack, uint16_t decay) {
-      num_segments_ = 2;
-      sustain_point_ = 1;
-
-      level_[0] = 0;
-      level_[1] = 32767;
-      level_[2] = 0;
-
-      time_[0] = attack;
-      time_[1] = decay;
-
-      shape_[0] = ENV_SHAPE_LINEAR;
-      shape_[1] = ENV_SHAPE_LINEAR;
-
-      loop_start_ = loop_end_ = 0;
-    }
-
     inline void set_adsar(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
       num_segments_ = 4;
       sustain_point_ = 2;
-
-      level_[0] = 0;
-      level_[1] = 32767;
-      level_[2] = sustain;
-      level_[3] = 32767;
-      level_[4] = 0;
-
-      time_[0] = attack;
-      time_[1] = decay;
-      time_[2] = attack;
-      time_[3] = release;
-
-      shape_[0] = ENV_SHAPE_LINEAR;
-      shape_[1] = ENV_SHAPE_LINEAR;
-      shape_[2] = ENV_SHAPE_LINEAR;
-      shape_[3] = ENV_SHAPE_LINEAR;
-
-      loop_start_ = loop_end_ = 0;
-    }
-
-    inline void set_adar(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
-      num_segments_ = 4;
-      sustain_point_ = 0;
 
       level_[0] = 0;
       level_[1] = 32767;
@@ -242,34 +174,6 @@ namespace peaks {
 
       loop_start_ = 0;
       loop_end_ = 3;
-    }
-
-    inline void set_adar_loop(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
-      num_segments_ = 4;
-      sustain_point_ = 0;
-
-      level_[0] = 0;
-      level_[1] = 32767;
-      level_[2] = sustain;
-      level_[3] = 32767;
-      level_[4] = 0;
-
-      time_[0] = attack;
-      time_[1] = decay;
-      time_[2] = attack;
-      time_[3] = release;
-
-      shape_[0] = ENV_SHAPE_LINEAR;
-      shape_[1] = ENV_SHAPE_LINEAR;
-      shape_[2] = ENV_SHAPE_LINEAR;
-      shape_[3] = ENV_SHAPE_LINEAR;
-
-      loop_start_ = 0;
-      loop_end_ = 4;
-    }
-
-    inline void set_hard_reset(bool hard_reset) {
-      hard_reset_ = hard_reset;
     }
 
   private:
