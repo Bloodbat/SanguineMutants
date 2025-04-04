@@ -79,10 +79,7 @@ namespace distortiones {
 		filter_[3].Init();
 	}
 
-	void DistortionesModulator::ProcessFreqShifter(
-		ShortFrame* input,
-		ShortFrame* output,
-		size_t size) {
+	void DistortionesModulator::ProcessFreqShifter(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
 		float* carrier_i = &src_buffer_[0][0];
 		float* carrier_q = &src_buffer_[0][size];
@@ -99,11 +96,9 @@ namespace distortiones {
 
 			float direction = frequency >= 0.5f ? 1.0f : -1.0f;
 			frequency = 2.0f * fabs(frequency - 0.5f);
-			frequency = frequency <= 0.4f
-				? frequency * frequency * frequency * 62.5f
-				: 4.0f * SemitonesToRatioSafe(180.0f * (frequency - 0.4f));
-			frequency *= SemitonesToRatioSafe(
-				parameters_.raw_algorithm_cv * 60.0f * \
+			frequency = frequency <= 0.4f ? frequency * frequency * frequency * 62.5f :
+				4.0f * SemitonesToRatioSafe(180.0f * (frequency - 0.4f));
+			frequency *= SemitonesToRatioSafe(parameters_.raw_algorithm_cv * 60.0f *
 				(1.0f - linear_modulation_amount) * direction);
 			frequency *= direction;
 
@@ -115,10 +110,8 @@ namespace distortiones {
 			}
 			quadrature_transform_[0].Process(carrier, carrier_i, carrier_q, size);
 
-			ParameterInterpolator phase_shift(
-				&previous_parameters_.raw_algorithm,
-				parameters_.raw_algorithm,
-				size);
+			ParameterInterpolator phase_shift(&previous_parameters_.raw_algorithm,
+				parameters_.raw_algorithm, size);
 
 			for (size_t i = 0; i < size; ++i) {
 				float x_i = carrier_i[i];
@@ -132,18 +125,12 @@ namespace distortiones {
 		}
 
 		// Setup parameter interpolation.
-		ParameterInterpolator mix(
-			&previous_parameters_.modulation_parameter,
-			parameters_.modulation_parameter,
-			size);
-		ParameterInterpolator feedback_amount(
-			&previous_parameters_.raw_level[0],
-			parameters_.raw_level[0],
-			size);
-		ParameterInterpolator dry_wet(
-			&previous_parameters_.raw_level[1],
-			parameters_.raw_level[1],
-			size);
+		ParameterInterpolator mix(&previous_parameters_.modulation_parameter,
+			parameters_.modulation_parameter, size);
+		ParameterInterpolator feedback_amount(&previous_parameters_.raw_level[0],
+			parameters_.raw_level[0], size);
+		ParameterInterpolator dry_wet(&previous_parameters_.raw_level[1],
+			parameters_.raw_level[1], size);
 
 		float feedback_sample = feedback_sample_;
 		for (size_t i = 0; i < size; ++i) {
@@ -166,8 +153,7 @@ namespace distortiones {
 
 			// mic.w feedback amount tweak.
 			float max_fb = 1.0f + 2.0f * (timbre - 0.5f) * (timbre - 0.5f);
-			modulator += amount * (
-				SoftClip(modulator + max_fb * feedback_sample * amount) - modulator);
+			modulator += amount * (SoftClip(modulator + max_fb * feedback_sample * amount) - modulator);
 
 			quadrature_transform_[1].Process(modulator, &modulator_i, &modulator_q);
 
@@ -198,10 +184,7 @@ namespace distortiones {
 		previous_parameters_ = parameters_;
 	}
 
-	void DistortionesModulator::ProcessVocoder(
-		ShortFrame* input,
-		ShortFrame* output,
-		size_t size) {
+	void DistortionesModulator::ProcessVocoder(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
 		float* modulator = buffer_[1];
 		float* main_output = buffer_[0];
@@ -214,14 +197,8 @@ namespace distortiones {
 		// Convert audio inputs to float and apply VCA/saturation (5.8% per channel)
 		short* input_samples = &input->l;
 		for (int32_t i = parameters_.carrier_shape ? 1 : 0; i < 2; ++i) {
-			amplifier_[i].Process(
-				parameters_.channel_drive[i],
-				1.0f,
-				input_samples + i,
-				buffer_[i],
-				aux_output,
-				2,
-				size);
+			amplifier_[i].Process(parameters_.channel_drive[i], 1.0f, input_samples + i,
+				buffer_[i], aux_output, 2, size);
 		}
 
 		// If necessary, render carrier. Otherwise, sum signals 1 and 2 for aux out.
@@ -230,17 +207,12 @@ namespace distortiones {
 			for (size_t i = 0; i < size; ++i) {
 				internal_modulation_[i] = static_cast<float>(input[i].l) / 32768.0f;
 			}
-			OscillatorShape vocoder_shape = static_cast<OscillatorShape>(
-				parameters_.carrier_shape + 1);
+			OscillatorShape vocoder_shape = static_cast<OscillatorShape>(parameters_.carrier_shape + 1);
 
 			// Outside of the transition zone between the cross-modulation and vocoding
 			// algorithm, we need to render only one of the two oscillators.
-			float carrier_gain = vocoder_oscillator_.Render(
-				vocoder_shape,
-				parameters_.note,
-				internal_modulation_,
-				aux_output,
-				size);
+			float carrier_gain = vocoder_oscillator_.Render(vocoder_shape, parameters_.note,
+				internal_modulation_, aux_output, size);
 			for (size_t i = 0; i < size; ++i) {
 				carrier[i] = aux_output[i] * carrier_gain;
 			}
@@ -264,10 +236,7 @@ namespace distortiones {
 
 
 
-	void DistortionesModulator::ProcessMeta(
-		ShortFrame* input,
-		ShortFrame* output,
-		size_t size) {
+	void DistortionesModulator::ProcessMeta(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
 		float* modulator = buffer_[1];
 		float* main_output = buffer_[0];
@@ -277,8 +246,7 @@ namespace distortiones {
 		float* oversampled_output = src_buffer_[0];
 
 		// 0.0: use cross-modulation algorithms. 1.0f: use vocoder.
-		float vocoder_amount = (
-			parameters_.modulation_algorithm - 0.7f) * 20.0f + 0.5f;
+		float vocoder_amount = (parameters_.modulation_algorithm - 0.7f) * 20.0f + 0.5f;
 		CONSTRAIN(vocoder_amount, 0.0f, 1.0f);
 
 		if (!parameters_.carrier_shape) {
@@ -288,14 +256,8 @@ namespace distortiones {
 		// Convert audio inputs to float and apply VCA/saturation (5.8% per channel)
 		short* input_samples = &input->l;
 		for (int32_t i = parameters_.carrier_shape ? 1 : 0; i < 2; ++i) {
-			amplifier_[i].Process(
-				parameters_.channel_drive[i],
-				1.0f - vocoder_amount,
-				input_samples + i,
-				buffer_[i],
-				aux_output,
-				2,
-				size);
+			amplifier_[i].Process(parameters_.channel_drive[i], 1.0f - vocoder_amount, input_samples + i,
+				buffer_[i], aux_output, 2, size);
 		}
 
 		// If necessary, render carrier. Otherwise, sum signals 1 and 2 for aux out.
@@ -306,47 +268,27 @@ namespace distortiones {
 			}
 			// Xmod: sine, triangle saw.
 			// Vocoder: saw, pulse, noise.
-			OscillatorShape xmod_shape = static_cast<OscillatorShape>(
-				parameters_.carrier_shape - 1);
-			OscillatorShape vocoder_shape = static_cast<OscillatorShape>(
-				parameters_.carrier_shape + 1);
+			OscillatorShape xmod_shape = static_cast<OscillatorShape>(parameters_.carrier_shape - 1);
+			OscillatorShape vocoder_shape = static_cast<OscillatorShape>(parameters_.carrier_shape + 1);
 
-			// Outside of the transition zone between the cross-modulation and vocoding
-			// algorithm, we need to render only one of the two oscillators.
+			/* Outside of transition zone between the cross-modulation and vocoding
+			   algorithm, we need to render only one of the two oscillators. */
 			if (vocoder_amount == 0.0f) {
-				xmod_oscillator_.Render(
-					xmod_shape,
-					parameters_.note,
-					internal_modulation_,
-					aux_output,
-					size);
+				xmod_oscillator_.Render(xmod_shape, parameters_.note, internal_modulation_, aux_output, size);
 				for (size_t i = 0; i < size; ++i) {
 					carrier[i] = aux_output[i] * kXmodCarrierGain;
 				}
 			} else if (vocoder_amount >= 0.5f) {
-				float carrier_gain = vocoder_oscillator_.Render(
-					vocoder_shape,
-					parameters_.note,
-					internal_modulation_,
-					aux_output,
-					size);
+				float carrier_gain = vocoder_oscillator_.Render(vocoder_shape, parameters_.note,
+					internal_modulation_, aux_output, size);
 				for (size_t i = 0; i < size; ++i) {
 					carrier[i] = aux_output[i] * carrier_gain;
 				}
 			} else {
 				float balance = vocoder_amount * 2.0f;
-				xmod_oscillator_.Render(
-					xmod_shape,
-					parameters_.note,
-					internal_modulation_,
-					carrier,
-					size);
-				float carrier_gain = vocoder_oscillator_.Render(
-					vocoder_shape,
-					parameters_.note,
-					internal_modulation_,
-					aux_output,
-					size);
+				xmod_oscillator_.Render(xmod_shape, parameters_.note, internal_modulation_, carrier, size);
+				float carrier_gain = vocoder_oscillator_.Render(vocoder_shape, parameters_.note,
+					internal_modulation_, aux_output, size);
 				for (size_t i = 0; i < size; ++i) {
 					float a = carrier[i];
 					float b = aux_output[i];
@@ -363,8 +305,7 @@ namespace distortiones {
 			src_up_[1].Process(modulator, oversampled_modulator, size);
 
 			float algorithm = min(parameters_.modulation_algorithm * 8.0f, 5.999f);
-			float previous_algorithm = min(
-				previous_parameters_.modulation_algorithm * 8.0f, 5.999f);
+			float previous_algorithm = min(previous_parameters_.modulation_algorithm * 8.0f, 5.999f);
 
 			MAKE_INTEGRAL_FRACTIONAL(algorithm);
 			MAKE_INTEGRAL_FRACTIONAL(previous_algorithm);
@@ -373,15 +314,9 @@ namespace distortiones {
 				previous_algorithm_fractional = algorithm_fractional;
 			}
 
-			(this->*xmod_table_[algorithm_integral])(
-				previous_algorithm_fractional,
-				algorithm_fractional,
-				previous_parameters_.skewed_modulation_parameter(),
-				parameters_.skewed_modulation_parameter(),
-				oversampled_modulator,
-				oversampled_carrier,
-				oversampled_output,
-				size * kOversampling);
+			(this->*xmod_table_[algorithm_integral])(previous_algorithm_fractional, algorithm_fractional,
+				previous_parameters_.skewed_modulation_parameter(), parameters_.skewed_modulation_parameter(),
+				oversampled_modulator, oversampled_carrier, oversampled_output, size * kOversampling);
 
 			src_down_.Process(oversampled_output, main_output, size * kOversampling);
 		} else {
@@ -393,11 +328,10 @@ namespace distortiones {
 			vocoder_.Process(modulator, carrier, main_output, size);
 		}
 
-		// Cross-fade to raw modulator for the transition between cross-modulation
-		// algorithms and vocoding algorithms.
-		float transition_gain = 2.0f * (vocoder_amount < 0.5f
-			? vocoder_amount
-			: 1.0f - vocoder_amount);
+		/* Cross-fade to raw modulator for the transition between cross-modulation
+		   algorithms and vocoding algorithms. */
+		float transition_gain = 2.0f * (vocoder_amount < 0.5f ? vocoder_amount :
+			1.0f - vocoder_amount);
 		if (transition_gain != 0.0f) {
 			for (size_t i = 0; i < size; ++i) {
 				main_output[i] += transition_gain * (modulator[i] - main_output[i]);
@@ -433,14 +367,8 @@ namespace distortiones {
 		// Convert audio inputs to float and apply VCA/saturation (5.8% per channel)
 		short* input_samples = &input->l;
 		for (int32_t i = parameters_.carrier_shape ? 1 : 0; i < 2; ++i) {
-			amplifier_[i].Process(
-				parameters_.channel_drive[i],
-				1.0f,
-				input_samples + i,
-				buffer_[i],
-				aux_output,
-				2,
-				size);
+			amplifier_[i].Process(parameters_.channel_drive[i], 1.0f, input_samples + i, buffer_[i],
+				aux_output, 2, size);
 		}
 
 		// If necessary, render carrier. Otherwise, sum signals 1 and 2 for aux out.
@@ -450,14 +378,8 @@ namespace distortiones {
 				internal_modulation_[i] = static_cast<float>(input[i].l) / 32768.0f;
 			}
 
-			OscillatorShape xmod_shape = static_cast<OscillatorShape>(
-				parameters_.carrier_shape - 1);
-			xmod_oscillator_.Render(
-				xmod_shape,
-				parameters_.note,
-				internal_modulation_,
-				aux_output,
-				size);
+			OscillatorShape xmod_shape = static_cast<OscillatorShape>(parameters_.carrier_shape - 1);
+			xmod_oscillator_.Render(xmod_shape, parameters_.note, internal_modulation_, aux_output, size);
 			for (size_t i = 0; i < size; ++i) {
 				carrier[i] = aux_output[i] * kXmodCarrierGain;
 			}
@@ -466,15 +388,9 @@ namespace distortiones {
 		src_up2_[0].Process(carrier, oversampled_carrier, size);
 		src_up2_[1].Process(modulator, oversampled_modulator, size);
 
-		ProcessXmod<algorithm>(
-			previous_parameters_.modulation_algorithm,
-			parameters_.modulation_algorithm,
-			previous_parameters_.skewed_modulation_parameter(),
-			parameters_.skewed_modulation_parameter(),
-			oversampled_modulator,
-			oversampled_carrier,
-			oversampled_output,
-			size * kLessOversampling);
+		ProcessXmod<algorithm>(previous_parameters_.modulation_algorithm, parameters_.modulation_algorithm,
+			previous_parameters_.skewed_modulation_parameter(), parameters_.skewed_modulation_parameter(),
+			oversampled_modulator, oversampled_carrier, oversampled_output, size * kLessOversampling);
 
 		src_down2_[0].Process(oversampled_output, main_output, size * kLessOversampling);
 
@@ -502,14 +418,8 @@ namespace distortiones {
 		// Convert audio inputs to float and apply VCA/saturation (5.8% per channel)
 		short* input_samples = &input->l;
 		for (int32_t i = parameters_.carrier_shape ? 1 : 0; i < 2; ++i) {
-			amplifier_[i].Process(
-				parameters_.channel_drive[i],
-				1.0f,
-				input_samples + i,
-				buffer_[i],
-				aux_output,
-				2,
-				size);
+			amplifier_[i].Process(parameters_.channel_drive[i], 1.0f, input_samples + i, buffer_[i],
+				aux_output, 2, size);
 		}
 
 		// If necessary, render carrier. Otherwise, sum signals 1 and 2 for aux out.
@@ -519,35 +429,22 @@ namespace distortiones {
 				internal_modulation_[i] = static_cast<float>(input[i].l) / 32768.0f;
 			}
 
-			OscillatorShape xmod_shape = static_cast<OscillatorShape>(
-				parameters_.carrier_shape - 1);
-			xmod_oscillator_.Render(
-				xmod_shape,
-				parameters_.note,
-				internal_modulation_,
-				aux_output,
-				size);
+			OscillatorShape xmod_shape = static_cast<OscillatorShape>(parameters_.carrier_shape - 1);
+			xmod_oscillator_.Render(xmod_shape, parameters_.note, internal_modulation_, aux_output, size);
 			for (size_t i = 0; i < size; ++i) {
 				carrier[i] = aux_output[i] * kXmodCarrierGain;
 			}
 		}
 
-		// make sure it dry: parameter doesn't go to 0.0f apparently
+		// Make sure its dry: parameter doesn't go to 0.0f, apparently.
 		float mod_1 = (parameters_.modulation_parameter - 0.05f) / 0.95f;
 		float mod_2 = (previous_parameters_.modulation_parameter - 0.05f) / 0.95f;
 		CONSTRAIN(mod_1, 0.0f, 1.0f);
 		CONSTRAIN(mod_2, 0.0f, 1.0f);
 
-		ProcessXmod<ALGORITHM_BITCRUSHER>(
-			previous_parameters_.modulation_algorithm,
-			parameters_.modulation_algorithm,
-			mod_1,
-			mod_2,
-			carrier,
-			modulator,
-			main_output,
-			aux_output,
-			size);
+		ProcessXmod<ALGORITHM_BITCRUSHER>(previous_parameters_.modulation_algorithm,
+			parameters_.modulation_algorithm, mod_1, mod_2, carrier, modulator,
+			main_output, aux_output, size);
 
 		// Convert back to integer and clip.
 		while (size--) {
@@ -603,11 +500,11 @@ namespace distortiones {
 			FloatFrame fb;
 
 			if (parameters_.carrier_shape == 3) {
-				// invert feedback channels (ping-pong)
+				// Invert feedback channels (ping-pong).
 				fb.l = delay_feedback_sample.r * feedback * 1.1f;
 				fb.r = delay_feedback_sample.l * feedback * 1.1f;
 			} else if (parameters_.carrier_shape == 2) {
-				// simulate tape hiss with a bit of noise
+				// Simulate tape hiss with a bit of noise.
 				float noise1 = Random::GetFloat();
 				float noise2 = Random::GetFloat();
 				fb.l = delay_feedback_sample.l + noise1 * 0.002f;
@@ -617,33 +514,31 @@ namespace distortiones {
 				filter_[3].set_f<parasites_stmlib::FREQUENCY_FAST>(feedback / 12.0f);
 				fb.l = filter_[0].Process<parasites_stmlib::FILTER_MODE_HIGH_PASS>(fb.l);
 				fb.r = filter_[1].Process<parasites_stmlib::FILTER_MODE_HIGH_PASS>(fb.r);
-				fb.l = feedback * (2.0f - feedback) * 1.1f *
-					filter_[2].Process<parasites_stmlib::FILTER_MODE_LOW_PASS>(fb.l);
-				fb.r = feedback * (2.0f - feedback) * 1.1f *
-					filter_[3].Process<parasites_stmlib::FILTER_MODE_LOW_PASS>(fb.r);
-				// apply soft saturation with a bit of bias
+				fb.l = feedback * (2.0f - feedback) * 1.1f * filter_[2].Process<parasites_stmlib::FILTER_MODE_LOW_PASS>(fb.l);
+				fb.r = feedback * (2.0f - feedback) * 1.1f * filter_[3].Process<parasites_stmlib::FILTER_MODE_LOW_PASS>(fb.r);
+				// Apply soft saturation with a bit of bias.
 				fb.l = SoftLimit(fb.l * 1.4f + 0.1f) / 1.4f - SoftLimit(0.1f);
 				fb.r = SoftLimit(fb.r * 1.4f + 0.1f) / 1.4f - SoftLimit(0.1f);
 			} else if (parameters_.carrier_shape == 0) {
-				// open feedback loop
+				// Open feedback loop.
 				fb.l = feedback * 1.1f * in.r;
 				fb.r = delay_feedback_sample.l;
 				in.r = 0.0f;
 			} else {
-				// classic dual delay
+				// Classic dual delay.
 				fb.l = delay_feedback_sample.l * feedback * 1.1f;
 				fb.r = delay_feedback_sample.r * feedback * 1.1f;
 			}
 
-			// input + feedback
+			// Input + feedback.
 			FloatFrame mix;
 			mix.l = in.l + fb.l;
 			mix.r = in.r + fb.r;
 
-			// write to buffer
+			// Write to buffer.
 			while (delay_write_position < 1.0f) {
 
-				// read somewhere between the input and the previous input
+				// Read somewhere between the input and the previous input.
 				FloatFrame s = { 0, 0 };
 
 				if (delay_interpolation_ == INTERPOLATION_ZOH) {
@@ -658,30 +553,30 @@ namespace distortiones {
 					FloatFrame x1 = delay_previous_samples[0];
 					FloatFrame x2 = mix;
 
-					FloatFrame c = { (x1.l - xm1.l) * 0.5f,
-									 (x1.r - xm1.r) * 0.5f };
+					FloatFrame c = { (x1.l - xm1.l) * 0.5f, (x1.r - xm1.r) * 0.5f };
 					FloatFrame v = { (float)(x0.l - x1.l), (float)(x0.r - x1.r) };
 					FloatFrame w = { c.l + v.l, c.r + v.r };
-					FloatFrame a = { w.l + v.l + (x2.l - x0.l) * 0.5f,
-									 w.r + v.r + (x2.r - x0.r) * 0.5f };
+					FloatFrame a = { w.l + v.l + (x2.l - x0.l) * 0.5f, w.r + v.r +
+						 (x2.r - x0.r) * 0.5f };
 					FloatFrame b_neg = { w.l + a.l, w.r + a.r };
 					float t = delay_write_position;
 					s.l = ((((a.l * t) - b_neg.l) * t + c.l) * t + x0.l);
 					s.r = ((((a.r * t) - b_neg.r) * t + c.r) * t + x0.r);
 				}
 
-				// write this to buffer
+				// Write this to buffer.
 				buffer[delay_write_head].l = Clip16((s.l) * 32768.0f);
 				buffer[delay_write_head].r = Clip16((s.r) * 32768.0f);
 
 				delay_write_position += 1.0f / sample_rate;
 
 				delay_write_head += direction;
-				// wraparound
-				if (delay_write_head >= DELAY_SIZE)
+				// Wrap around
+				if (delay_write_head >= DELAY_SIZE) {
 					delay_write_head -= DELAY_SIZE;
-				else if (delay_write_head < 0)
+				} else if (delay_write_head < 0) {
 					delay_write_head += DELAY_SIZE;
+				}
 			}
 
 			delay_write_position--;
@@ -690,7 +585,7 @@ namespace distortiones {
 			delay_previous_samples[1] = delay_previous_samples[0];
 			delay_previous_samples[0] = mix;
 
-			// read from buffer
+			// Read from buffer.
 
 			float index = delay_write_head - delay_write_position * sample_rate * direction - delay_lp_time;
 
@@ -714,12 +609,10 @@ namespace distortiones {
 				wet.l = xm1.l + (x0.l - xm1.l) * index_fractional;
 				wet.r = xm1.r + (x0.r - xm1.r) * index_fractional;
 			} else if (delay_interpolation_ == INTERPOLATION_HERMITE) {
-				FloatFrame c = { (x1.l - xm1.l) * 0.5f,
-								 (x1.r - xm1.r) * 0.5f };
+				FloatFrame c = { (x1.l - xm1.l) * 0.5f, (x1.r - xm1.r) * 0.5f };
 				FloatFrame v = { (float)(x0.l - x1.l), (float)(x0.r - x1.r) };
 				FloatFrame w = { c.l + v.l, c.r + v.r };
-				FloatFrame a = { w.l + v.l + (x2.l - x0.l) * 0.5f,
-								 w.r + v.r + (x2.r - x0.r) * 0.5f };
+				FloatFrame a = { w.l + v.l + (x2.l - x0.l) * 0.5f, w.r + v.r + (x2.r - x0.r) * 0.5f };
 				FloatFrame b_neg = { w.l + a.l, w.r + a.r };
 				float t = index_fractional;
 				wet.l = ((((a.l * t) - b_neg.l) * t + c.l) * t + x0.l);
@@ -729,8 +622,8 @@ namespace distortiones {
 			wet.l /= 32768.0f;
 			wet.r /= 32768.0f;
 
-			// attenuate output at low sample rate to mask stupid
-			// discontinuity bug
+			/* Attenuate output at low sample rate to mask stupid
+			   discontinuity bug. */
 			float gain = sample_rate / 0.01f;
 			CONSTRAIN(gain, 0.0f, 1.0f);
 			wet.l *= gain * gain;
@@ -742,13 +635,13 @@ namespace distortiones {
 			float fade_out = Interpolate(lut_xfade_out, drywet, 256.0f);
 
 			if (parameters_.carrier_shape == 0) {
-				// if open feedback loop, AUX is the wet signal and OUT
-				// crossfades between inputs
+				/* If open feedback loop, AUX is the wet signal and OUT
+				   crossfades between inputs. */
 				in.r = static_cast<float>(input->r) / 32768.0f;
 				output->l = Clip16((fade_out * in.l + fade_in * in.r) * 32768.0f);
 				output->r = Clip16(wet.r * 32768.0f);
 			} else if (parameters_.carrier_shape == 2) {
-				// analog mode -> soft-clipping
+				// Analog mode -> soft-clipping.
 				output->l = SoftConvert((fade_out * in.l + fade_in * wet.l) * 2.0f);
 				output->r = SoftConvert((fade_out * in.r + fade_in * wet.r) * 2.0f);
 			} else {
@@ -776,9 +669,7 @@ namespace distortiones {
 		float y = previous_parameters_.modulation_parameter * 2.0f;
 		float y_end = parameters_.modulation_parameter * 2.0f;
 
-		float lfo_freq = parameters_.channel_drive[0]
-			* parameters_.channel_drive[0]
-			* 50.0f;
+		float lfo_freq = parameters_.channel_drive[0] * parameters_.channel_drive[0] * 50.0f;
 		float lfo_amplitude = parameters_.channel_drive[1];
 
 		float step = 1.0f / static_cast<float>(size);
@@ -801,20 +692,20 @@ namespace distortiones {
 
 		while (size--) {
 
-			// write input to buffer
+			// Write input to buffer.
 			buffer[doppler_cursor].l = input->l;
 			buffer[doppler_cursor].r = input->r;
 
-			// LFOs
+			// LFOs.
 			float sin = Interpolate(lut_sin, doppler_lfo_phase, 1024.0f);
 			float cos = Interpolate(lut_sin + 256, doppler_lfo_phase, 1024.0f);
 
-			float x_lfo = x + sin * lfo_amplitude + 0.05f; // offset avoids discontinuity at 0
+			float x_lfo = x + sin * lfo_amplitude + 0.05f; // Offset avoids discontinuity at 0.
 			float y_lfo = y + cos * lfo_amplitude;
 			CONSTRAIN(x_lfo, -1.0f, 1.0f);
 			CONSTRAIN(y_lfo, -1.0f, 2.0f);
 
-			// compute angular coordinates
+			// Compute angular coordinates.
 			float di = sqrtf(x_lfo * x_lfo + y_lfo * y_lfo); // 0..sqrt(5)
 			float an = Interpolate(lut_arcsin, (x_lfo / di + 1.0f) * 0.5f, 256.0f);
 			di /= 2.237;		// sqrt(5)
@@ -822,12 +713,12 @@ namespace distortiones {
 			ONE_POLE(doppler_distance, di, 0.001f);
 			ONE_POLE(doppler_angle, an, 0.001f);
 
-			// compute binaural delay
+			// Compute binaural delay.
 			float binaural_delay = doppler_angle * (96000.0f * 0.0015f); // -1.5ms..1.5ms
 			float delay_l = doppler_distance * room_size + (doppler_angle > 0 ? binaural_delay : 0);
 			float delay_r = doppler_distance * room_size + (doppler_angle < 0 ? -binaural_delay : 0);
 
-			// linear delay interpolation
+			// Linear delay interpolation.
 			MAKE_INTEGRAL_FRACTIONAL(delay_l);
 			MAKE_INTEGRAL_FRACTIONAL(delay_r);
 
@@ -921,9 +812,9 @@ namespace distortiones {
 
 	/* static */
 	inline float DistortionesModulator::Diode(float x) {
-		// Approximation of diode non-linearity from:
-		// Julian Parker - "A simple Digital model of the diode-based ring-modulator."
-		// Proc. DAFx-11
+		/* Approximation of diode non-linearity from:
+		   Julian Parker - "A simple Digital model of the diode-based ring-modulator."
+		   Proc. DAFx-11 */
 		float sign = x > 0.0f ? 1.0f : -1.0f;
 		float dead_zone = fabs(x) - 0.667f;
 		dead_zone += fabs(dead_zone);
@@ -933,16 +824,14 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_XFADE>(
-		float x_1, float x_2, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_XFADE>(float x_1, float x_2, float parameter) {
 		float fade_in = Interpolate(lut_xfade_in, parameter, 256.0f);
 		float fade_out = Interpolate(lut_xfade_out, parameter, 256.0f);
 		return x_1 * fade_in + x_2 * fade_out;
 	}
 
 	template<>
-	inline float DistortionesModulator::Mod<ALGORITHM_CHEBYSCHEV>(
-		float x, float p) {
+	inline float DistortionesModulator::Mod<ALGORITHM_CHEBYSCHEV>(float x, float p) {
 
 		const float att = 0.01f;
 		const float rel = 0.000005f;
@@ -971,8 +860,7 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_FOLD>(
-		float x_1, float x_2, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_FOLD>(float x_1, float x_2, float parameter) {
 		float sum = 0.0f;
 		sum += x_1;
 		sum += x_2;
@@ -984,8 +872,7 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_FOLD>(
-		float x_1, float x_2, float p_1, float p_2) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_FOLD>(float x_1, float x_2, float p_1, float p_2) {
 		float sum = 0.0f;
 		sum += x_1;
 		sum += x_2;
@@ -998,8 +885,8 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_ANALOG_RING_MODULATION>(
-		float modulator, float carrier, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_ANALOG_RING_MODULATION>(float modulator, float carrier,
+		float parameter) {
 		carrier *= 2.0f;
 		float ring = Diode(modulator + carrier) + Diode(modulator - carrier);
 		ring *= (4.0f + parameter * 24.0f);
@@ -1008,16 +895,16 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_DIGITAL_RING_MODULATION>(
-		float x_1, float x_2, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_DIGITAL_RING_MODULATION>(float x_1, float x_2,
+		float parameter) {
 		float ring = 4.0f * x_1 * x_2 * (1.0f + parameter * 8.0f);
 		return ring / (1.0f + fabs(ring));
 	}
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_RING_MODULATION>(
-		float x_1, float x_2, float p_1, float p_2) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_RING_MODULATION>(float x_1, float x_2, float p_1,
+		float p_2) {
 		float y_1 = Xmod<ALGORITHM_ANALOG_RING_MODULATION>(x_1, x_2, p_2);
 		float y_2 = Xmod<ALGORITHM_DIGITAL_RING_MODULATION>(x_1, x_2, p_2);
 		return y_2 + (y_1 - y_2) * p_1;
@@ -1025,8 +912,7 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_XOR>(
-		float x_1, float x_2, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_XOR>(float x_1, float x_2, float parameter) {
 		short x_1_short = Clip16(static_cast<int32_t>(x_1 * 32768.0f));
 		short x_2_short = Clip16(static_cast<int32_t>(x_2 * 32768.0f));
 		float mod = static_cast<float>(x_1_short ^ x_2_short) / 32768.0f;
@@ -1036,8 +922,8 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_BITCRUSHER>(
-		float x_1, float x_2, float p_1, float p_2, float* y_2) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_BITCRUSHER>(float x_1, float x_2, float p_1,
+		float p_2, float* y_2) {
 		short x_1_short = Clip16(static_cast<int32_t>(x_1 * 32768.0f));
 		short x_2_short = Clip16(static_cast<int32_t>(x_2 * 32768.0f));
 
@@ -1068,16 +954,14 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_COMPARATOR>(
-		float modulator, float carrier, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_COMPARATOR>(float modulator, float carrier,
+		float parameter) {
 		float x = parameter * 2.995f;
 		MAKE_INTEGRAL_FRACTIONAL(x)
 
 			float direct = modulator < carrier ? modulator : carrier;
 		float window = fabs(modulator) > fabs(carrier) ? modulator : carrier;
-		float window_2 = fabs(modulator) > fabs(carrier)
-			? fabs(modulator)
-			: -fabs(carrier);
+		float window_2 = fabs(modulator) > fabs(carrier) ? fabs(modulator) : -fabs(carrier);
 		float threshold = carrier > 0.05f ? carrier : modulator;
 
 		float sequence[4] = { direct, threshold, window, window_2 };
@@ -1089,8 +973,8 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_COMPARATOR8>(
-		float modulator, float carrier, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_COMPARATOR8>(float modulator, float carrier,
+		float parameter) {
 		float x = parameter * 6.995f;
 		MAKE_INTEGRAL_FRACTIONAL(x);
 		float y_1, y_2;
@@ -1109,13 +993,9 @@ namespace distortiones {
 			y_2 = fabs(modulator) > fabs(carrier) ? modulator : carrier;
 		} else if (x_integral == 4) {
 			y_1 = fabs(modulator) > fabs(carrier) ? modulator : carrier;
-			y_2 = fabs(modulator) > fabs(carrier)
-				? fabs(modulator)
-				: -fabs(carrier);
+			y_2 = fabs(modulator) > fabs(carrier) ? fabs(modulator) : -fabs(carrier);
 		} else if (x_integral == 5) {
-			y_1 = fabs(modulator) > fabs(carrier)
-				? fabs(modulator)
-				: -fabs(carrier);
+			y_1 = fabs(modulator) > fabs(carrier) ? fabs(modulator) : -fabs(carrier);
 			y_2 = carrier > 0.05f ? carrier : modulator;
 		} else {
 			y_1 = carrier > 0.05f ? carrier : modulator;
@@ -1127,8 +1007,8 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_COMPARATOR_CHEBYSCHEV>(
-		float x_1, float x_2, float p_1, float p_2) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_COMPARATOR_CHEBYSCHEV>(float x_1, float x_2, float p_1,
+		float p_2) {
 
 		float x = Xmod<ALGORITHM_COMPARATOR8>(x_1, x_2, p_1);
 		x = Mod<ALGORITHM_CHEBYSCHEV>(x, p_2);
@@ -1137,8 +1017,7 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_CHEBYSCHEV>(
-		float x_1, float x_2, float p_1, float p_2) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_CHEBYSCHEV>(float x_1, float x_2, float p_1, float p_2) {
 
 		float x = x_1 + x_2;
 
@@ -1169,8 +1048,7 @@ namespace distortiones {
 
 	/* static */
 	template<>
-	inline float DistortionesModulator::Xmod<ALGORITHM_NOP>(
-		float modulator, float carrier, float parameter) {
+	inline float DistortionesModulator::Xmod<ALGORITHM_NOP>(float modulator, float carrier, float parameter) {
 		return modulator;
 	}
 
