@@ -101,7 +101,7 @@ namespace mutuus {
       const float step = 1.0f / static_cast<float>(band_size);
 
       float* carrier = carrier_filter_bank_.band(i).samples;
-      float* modulator = modulator_filter_bank_.band(i).samples;
+      const float* modulator = modulator_filter_bank_.band(i).samples;
       float* envelope = tmp_;
 
       follower_[i].Process(modulator, envelope, band_size);

@@ -175,7 +175,7 @@ namespace warps {
       return;
     }
     float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
     float* oversampled_carrier = src_buffer_[0];
@@ -358,7 +358,7 @@ namespace warps {
       -fabs(carrier);
     float threshold = carrier > 0.05f ? carrier : modulator;
 
-    float sequence[4] = { direct, threshold, window, window_2 };
+    const float sequence[4] = { direct, threshold, window, window_2 };
     float a = sequence[x_integral];
     float b = sequence[x_integral + 1];
 

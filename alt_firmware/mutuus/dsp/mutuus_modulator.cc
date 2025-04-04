@@ -186,7 +186,7 @@ namespace mutuus {
 
   void MutuusModulator::ProcessMeta(ShortFrame* input, ShortFrame* output, size_t size) {
     float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
     float* oversampled_carrier = src_buffer_[0];
@@ -292,8 +292,8 @@ namespace mutuus {
   }
 
   void MutuusModulator::ProcessDualFilter(ShortFrame* input, ShortFrame* output, size_t size, FilterConfig config) {
-    float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* carrier = buffer_[0];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
 
@@ -320,7 +320,7 @@ namespace mutuus {
     }
 
     for (size_t i = 0; i < size; i++) {
-      float* out = df.Process(carrier[i], modulator[i]);
+      const float* out = df.Process(carrier[i], modulator[i]);
       main_output[i] = out[0];
       aux_output[i] = out[1];
     }
@@ -331,7 +331,7 @@ namespace mutuus {
 
   void MutuusModulator::ProcessReverb(ShortFrame* input, ShortFrame* output, size_t size) {
     float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
 
@@ -358,7 +358,7 @@ namespace mutuus {
 
   void MutuusModulator::ProcessEnsemble(ShortFrame* input, ShortFrame* output, size_t size) {
     float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
 
@@ -374,7 +374,7 @@ namespace mutuus {
     }
 
     for (size_t i = 0; i < size; i++) {
-      float* out = df.Process(carrier[i], modulator[i]);
+      const float* out = df.Process(carrier[i], modulator[i]);
       main_output[i] = out[0];
       aux_output[i] = out[1];
     }
@@ -390,7 +390,7 @@ namespace mutuus {
 
   void MutuusModulator::ProcessChebyschev(ShortFrame* input, ShortFrame* output, size_t size) {
     float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
     float* oversampled_carrier = src_buffer_[0];
@@ -425,7 +425,7 @@ namespace mutuus {
 
   void MutuusModulator::ProcessBitcrusher(ShortFrame* input, ShortFrame* output, size_t size) {
     float* carrier = buffer_[0];
-    float* modulator = buffer_[1];
+    const float* modulator = buffer_[1];
     float* main_output = buffer_[0];
     float* aux_output = buffer_[2];
 
@@ -451,7 +451,7 @@ namespace mutuus {
 
   }
 
-  void MutuusModulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size) {
+  void MutuusModulator::ProcessDelay(const ShortFrame* input, ShortFrame* output, size_t size) {
 
     ShortFrame* buffer = delay_buffer_;
 
@@ -657,7 +657,7 @@ namespace mutuus {
     previous_parameters_ = parameters_;
   }
 
-  void MutuusModulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t size) {
+  void MutuusModulator::ProcessDoppler(const ShortFrame* input, ShortFrame* output, size_t size) {
     ShortFrame* buffer = delay_buffer_;
 
     float x = previous_parameters_.raw_algorithm * 2.0f - 1.0f;
@@ -956,7 +956,7 @@ namespace mutuus {
       -fabs(carrier);
     float threshold = carrier > 0.05f ? carrier : modulator;
 
-    float sequence[4] = { direct, threshold, window, window_2 };
+    const float sequence[4] = { direct, threshold, window, window_2 };
     float a = sequence[x_integral];
     float b = sequence[x_integral + 1];
 

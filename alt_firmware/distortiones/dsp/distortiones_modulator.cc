@@ -186,7 +186,7 @@ namespace distortiones {
 
 	void DistortionesModulator::ProcessVocoder(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
-		float* modulator = buffer_[1];
+		const float* modulator = buffer_[1];
 		float* main_output = buffer_[0];
 		float* aux_output = buffer_[2];
 
@@ -238,7 +238,7 @@ namespace distortiones {
 
 	void DistortionesModulator::ProcessMeta(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
-		float* modulator = buffer_[1];
+		const float* modulator = buffer_[1];
 		float* main_output = buffer_[0];
 		float* aux_output = buffer_[2];
 		float* oversampled_carrier = src_buffer_[0];
@@ -353,7 +353,7 @@ namespace distortiones {
 	template<XmodAlgorithm algorithm>
 	void DistortionesModulator::Process1(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
-		float* modulator = buffer_[1];
+		const float* modulator = buffer_[1];
 		float* main_output = buffer_[0];
 		float* aux_output = buffer_[2];
 		float* oversampled_carrier = src_buffer_[0];
@@ -407,7 +407,7 @@ namespace distortiones {
 
 	void DistortionesModulator::ProcessBitcrusher(ShortFrame* input, ShortFrame* output, size_t size) {
 		float* carrier = buffer_[0];
-		float* modulator = buffer_[1];
+		const float* modulator = buffer_[1];
 		float* main_output = buffer_[0];
 		float* aux_output = buffer_[2];
 
@@ -458,7 +458,7 @@ namespace distortiones {
 
 	}
 
-	void DistortionesModulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size) {
+	void DistortionesModulator::ProcessDelay(const ShortFrame* input, ShortFrame* output, size_t size) {
 
 		ShortFrame* buffer = delay_buffer_;
 
@@ -660,7 +660,7 @@ namespace distortiones {
 		previous_parameters_ = parameters_;
 	}
 
-	void DistortionesModulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t size) {
+	void DistortionesModulator::ProcessDoppler(const ShortFrame* input, ShortFrame* output, size_t size) {
 		ShortFrame* buffer = delay_buffer_;
 
 		float x = previous_parameters_.raw_algorithm * 2.0f - 1.0f;
@@ -964,7 +964,7 @@ namespace distortiones {
 		float window_2 = fabs(modulator) > fabs(carrier) ? fabs(modulator) : -fabs(carrier);
 		float threshold = carrier > 0.05f ? carrier : modulator;
 
-		float sequence[4] = { direct, threshold, window, window_2 };
+		const float sequence[4] = { direct, threshold, window, window_2 };
 		float a = sequence[x_integral];
 		float b = sequence[x_integral + 1];
 
