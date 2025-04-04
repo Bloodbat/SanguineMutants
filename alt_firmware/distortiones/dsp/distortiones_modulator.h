@@ -248,18 +248,6 @@ namespace distortiones {
 		static float Xmod(float x_1, float x_2, float p_1, float p_2, float* out_2);
 
 		template<XmodAlgorithm algorithm>
-		void ProcessMod(float p, float p_end, const float* in, float* out, size_t size) {
-			float step = 1.0f / static_cast<float>(size);
-			float p_increment = (p_end - p) * step;
-			while (size) {
-				const float x = *in++;
-				*out++ = Mod<algorithm>(x, p);
-				p += p_increment;
-				size--;
-			}
-		}
-
-		template<XmodAlgorithm algorithm>
 		static float Mod(float x, float p);
 
 		static float Diode(float x);
