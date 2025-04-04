@@ -45,7 +45,7 @@ namespace mutuus {
 
     void Init() {
       envelope_ = 0.0f;
-      freeze_ = false;
+      freeze_ = static_cast<float>(false);
       attack_ = decay_ = 0.1f;
       peak_ = 0.0f;
     };
@@ -59,7 +59,7 @@ namespace mutuus {
     }
 
     void set_freeze(bool freeze) {
-      freeze_ = freeze;
+      freeze_ = static_cast<float>(freeze);
     }
 
     void Process(const float* in, float* out, size_t size) {
