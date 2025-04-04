@@ -131,14 +131,13 @@ namespace warps {
     void Init(float sample_rate);
     void Process(ShortFrame* input, ShortFrame* output, size_t size);
     void ProcessEasterEgg(ShortFrame* input, ShortFrame* output, size_t size);
-    inline Parameters* mutable_parameters() { return &parameters_; }
-    inline const Parameters& parameters() { return parameters_; }
+    inline Parameters* mutable_parameters() {
+      return &parameters_;
+    }
 
-    inline bool bypass() const { return bypass_; }
-    inline void set_bypass(bool bypass) { bypass_ = bypass; }
-
-    inline bool easter_egg() const { return easter_egg_; }
-    inline void set_easter_egg(bool easter_egg) { easter_egg_ = easter_egg; }
+    inline void set_easter_egg(bool easter_egg) {
+      easter_egg_ = easter_egg;
+    }
 
   private:
     template<XmodAlgorithm algorithm_1, XmodAlgorithm algorithm_2>
