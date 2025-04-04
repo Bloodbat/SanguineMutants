@@ -143,11 +143,11 @@ namespace mutuus {
 		void ProcessChebyschev(ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessFreqShifter(ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessBitcrusher(ShortFrame* input, ShortFrame* output, size_t size);
-		void ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size);
+		void ProcessDelay(const ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessDualFilter(ShortFrame* input, ShortFrame* output, size_t size, FilterConfig config);
 		void ProcessReverb(ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessEnsemble(ShortFrame* input, ShortFrame* output, size_t size);
-		void ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t size);
+		void ProcessDoppler(const ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessMeta(ShortFrame* input, ShortFrame* output, size_t size);
 		inline Parameters* mutable_parameters() { return &parameters_; }
 		inline const Parameters& parameters() { return parameters_; }
@@ -189,7 +189,7 @@ namespace mutuus {
 		float doppler_distance = 1.0f;
 		float doppler_angle = 1.0f;
 
-		void ApplyAmplification(ShortFrame* input, float* level, float* aux_output, size_t size, bool raw_level) {
+		void ApplyAmplification(ShortFrame* input, const float* level, float* aux_output, size_t size, bool raw_level) {
 			if (!parameters_.carrier_shape || raw_level) {
 				fill(&aux_output[0], &aux_output[size], 0.0f);
 			}
@@ -217,7 +217,7 @@ namespace mutuus {
 			}
 		}
 
-		void Convert(ShortFrame* output, float* main_output, float* aux_output, float aux_gain, size_t size) {
+		void Convert(ShortFrame* output, const float* main_output, const float* aux_output, float aux_gain, size_t size) {
 			while (size--) {
 				output->l = Clip16(static_cast<int32_t>(*main_output * 32768.0f));
 				output->r = Clip16(static_cast<int32_t>(*aux_output * aux_gain));

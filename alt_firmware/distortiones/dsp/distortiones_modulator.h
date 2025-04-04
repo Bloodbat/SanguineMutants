@@ -140,8 +140,8 @@ namespace distortiones {
 		void ProcessFreqShifter(ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessVocoder(ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessBitcrusher(ShortFrame* input, ShortFrame* output, size_t size);
-		void ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size);
-		void ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t size);
+		void ProcessDelay(const ShortFrame* input, ShortFrame* output, size_t size);
+		void ProcessDoppler(const ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessMeta(ShortFrame* input, ShortFrame* output, size_t size);
 		inline Parameters* mutable_parameters() { return &parameters_; }
 		inline const Parameters& parameters() { return parameters_; }
