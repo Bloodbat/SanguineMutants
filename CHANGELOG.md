@@ -4,6 +4,10 @@
 
 - Explorator: noise not working if the trigger input has not been connected at least once.
 
+## Changes
+
+- Explorator: produce Prism noise wave forms more akin to original implementation (Note: Prism noise is now LOUDER).
+
 ---
 
 
