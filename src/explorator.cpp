@@ -224,18 +224,19 @@ struct Explorator : SanguineModule {
 		}
 
 		outputs[OUTPUT_SH_VOLTAGE].setChannels(lastSampleAndHoldChannels);
-		outputs[OUTPUT_SH_NOISE].setChannels(channelsSampleAndHold > 0 ? channelsSampleAndHold : 1);
+		int noiseChannels = std::max(channelsSampleAndHold, 1);
+		outputs[OUTPUT_SH_NOISE].setChannels(noiseChannels);
 
 		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
 			switch (noiseMode)
 			{
 			case NOISE_PRISM:
-				for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
+				for (int channel = 0; channel < noiseChannels; ++channel) {
 					noise[channel] = ldexpf(pcgRng[channel](), -32) * 6.f - 3.f;
 				}
 				break;
 			default:
-				for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
+				for (int channel = 0; channel < noiseChannels; ++channel) {
 					noise[channel] = 2.f * sanguineRandom::normal();
 				}
 				break;
@@ -259,13 +260,10 @@ struct Explorator : SanguineModule {
 		}
 
 		if (bIsNoiseConnected) {
-			int channelsNoise = outputs[OUTPUT_SH_NOISE].getChannels();
-
-			for (int channel = 0; channel < channelsNoise; ++channel) {
+			for (int channel = 0; channel < noiseChannels; ++channel) {
 				outputs[OUTPUT_SH_NOISE].setVoltage(noise[channel], channel);
 			}
 		}
-
 
 		// Lights
 
