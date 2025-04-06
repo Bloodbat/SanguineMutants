@@ -1,3 +1,12 @@
+# Next version
+
+## Fixes
+
+- Explorator: noise not working if the trigger input has not been connected at least once.
+
+---
+
+
 # 2.6.5
 
 ## Fixes
