@@ -73,7 +73,8 @@ struct Explorator : SanguineModule {
 
 	dsp::ClockDivider lightsDivider;
 	dsp::SchmittTrigger stSampleAndHold[PORT_MAX_CHANNELS];
-	pcg32 pcgRng[PORT_MAX_CHANNELS];
+	pcg32 pcgNoise[PORT_MAX_CHANNELS];
+	pcg32 pcgMultiplier[PORT_MAX_CHANNELS];
 
 	float voltagesSampleAndHold[PORT_MAX_CHANNELS] = {};
 
@@ -117,7 +118,9 @@ struct Explorator : SanguineModule {
 		lightsDivider.setDivision(kLightFrequency);
 
 		for (int noise = 0; noise < PORT_MAX_CHANNELS; ++noise) {
-			pcgRng[noise] = pcg32(std::round(system::getUnixTime() * noise * 13));
+			uint32_t seedTime = std::round(system::getUnixTime() * noise);
+			pcgNoise[noise] = pcg32(seedTime * 13);
+			pcgMultiplier[noise] = pcg32(seedTime * 127);
 		}
 	}
 
@@ -227,12 +230,14 @@ struct Explorator : SanguineModule {
 		int noiseChannels = std::max(channelsSampleAndHold, 1);
 		outputs[OUTPUT_SH_NOISE].setChannels(noiseChannels);
 
+		float noiseMultiplier = 0.f;
 		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
 			switch (noiseMode)
 			{
 			case NOISE_PRISM:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
-					noise[channel] = ldexpf(pcgRng[channel](), -32) * 6.f - 3.f;
+					noiseMultiplier = static_cast<float>(pcgMultiplier[channel](16) + 1);
+					noise[channel] = ldexpf(pcgNoise[channel](), -32) * noiseMultiplier - (noiseMultiplier / 2.f);
 				}
 				break;
 			default:
