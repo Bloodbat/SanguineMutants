@@ -38,7 +38,7 @@ jobs:
           gitrev=`git rev-parse --short HEAD`
           pluginversion=`jq -r '.version' plugin.json`
           echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
-          cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
+          cat <<< `jq --arg VERSION "$pluginversion-$gitrev-nightly" '.version=$VERSION' plugin.json` > plugin.json
 
   build:
     name: ${{ matrix.platform }}
