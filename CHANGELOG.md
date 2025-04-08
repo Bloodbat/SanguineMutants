@@ -8,6 +8,8 @@
 
 - Explorator: produce Prism noise wave forms more akin to original implementation (Note: Prism noise is now LOUDER).
 
+- Plugin source: move common Samguine Modules sources to submodule.
+
 ---
 
 

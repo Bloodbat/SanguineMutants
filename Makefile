@@ -4,6 +4,7 @@ FLAGS += \
 	-I./eurorack \
 	-I./alt_firmware \
 	-I./pcgcpp \
+	-I./SanguineModulesCommon/src \
 	-Wno-unused-local-typedefs
 
 ifndef DEBUGBUILD
@@ -147,6 +148,10 @@ SOURCES += alt_firmware/bumps/bumps_resources.cc
 SOURCES += alt_firmware/scalaria/dsp/scalaria_modulator.cc
 SOURCES += alt_firmware/scalaria/dsp/scalaria_oscillator.cc
 SOURCES += alt_firmware/scalaria/scalaria_resources.cc
+
+SOURCES += SanguineModulesCommon/src/sanguinecomponents.cpp
+SOURCES += SanguineModulesCommon/src/sanguinehelpers.cpp
+SOURCES += SanguineModulesCommon/src/themes.cpp
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 

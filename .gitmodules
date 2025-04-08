@@ -1,0 +1,4 @@
+[submodule "SanguineModulesCommon"]
+	path = SanguineModulesCommon
+	url = https://github.com/Bloodbat/SanguineModulesCommon.git
+	branch = main
