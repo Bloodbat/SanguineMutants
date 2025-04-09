@@ -79,10 +79,10 @@ struct Fluctus : SanguineModule {
 	std::string textFeedback = fluctus::modeDisplays[0].labelFeedback;
 	std::string textReverb = fluctus::modeDisplays[0].labelReverb;
 
-	dsp::SampleRateConverter<2> inputSrc;
-	dsp::SampleRateConverter<2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> inputBuffer;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
+	dsp::SampleRateConverter<2> srcInput;
+	dsp::SampleRateConverter<2> srcOutput;
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer;
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer;
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
@@ -205,11 +205,11 @@ struct Fluctus : SanguineModule {
 		dsp::Frame<2> outputFrame = {};
 
 		// Get input
-		if (!inputBuffer.full()) {
+		if (!drbInputBuffer.full()) {
 			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
 			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
 				* params[PARAM_IN_GAIN].getValue() / 5.f : inputFrame.samples[0];
-			inputBuffer.push(inputFrame);
+			drbInputBuffer.push(inputFrame);
 		}
 
 		// Trigger
@@ -218,15 +218,15 @@ struct Fluctus : SanguineModule {
 		fluctus::Parameters* fluctusParameters = fluctusProcessor->mutable_parameters();
 
 		// Render frames
-		if (outputBuffer.empty()) {
+		if (drbOutputBuffer.empty()) {
 			fluctus::ShortFrame input[32] = {};
 			// Convert input buffer
-			inputSrc.setRates(args.sampleRate, 32000);
+			srcInput.setRates(args.sampleRate, 32000);
 			dsp::Frame<2> inputFrames[32];
-			int inLen = inputBuffer.size();
+			int inLen = drbInputBuffer.size();
 			int outLen = 32;
-			inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
-			inputBuffer.startIncr(inLen);
+			srcInput.process(drbInputBuffer.startData(), &inLen, inputFrames, &outLen);
+			drbInputBuffer.startIncr(inLen);
 
 			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
 			for (int frame = 0; frame < outLen; ++frame) {
@@ -317,19 +317,19 @@ struct Fluctus : SanguineModule {
 					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
-				outputSrc.setRates(32000, args.sampleRate);
+				srcOutput.setRates(32000, args.sampleRate);
 				int inCount = 32;
-				int outCount = outputBuffer.capacity();
-				outputSrc.process(outputFrames, &inCount, outputBuffer.endData(), &outCount);
-				outputBuffer.endIncr(outCount);
+				int outCount = drbOutputBuffer.capacity();
+				srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
+				drbOutputBuffer.endIncr(outCount);
 			}
 
 			bTriggered = false;
 		}
 
 		// Set output
-		if (!outputBuffer.empty()) {
-			outputFrame = outputBuffer.shift();
+		if (!drbOutputBuffer.empty()) {
+			outputFrame = drbOutputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
 				outputFrame.samples[0] *= params[PARAM_OUT_GAIN].getValue();
 				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
