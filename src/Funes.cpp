@@ -59,10 +59,10 @@ struct Funes : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	plaits::Voice voice[PORT_MAX_CHANNELS];
+	plaits::Voice voices[PORT_MAX_CHANNELS];
 	plaits::Patch patch = {};
-	plaits::UserData user_data;
-	char shared_buffer[PORT_MAX_CHANNELS][16384] = {};
+	plaits::UserData userData;
+	char sharedBuffers[PORT_MAX_CHANNELS][16384] = {};
 
 	float triPhase = 0.f;
 	float lastLPGColor = 0.5f;
@@ -85,8 +85,8 @@ struct Funes : SanguineModule {
 	uint32_t displayTimeout = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
-	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> outputBuffer;
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcOutputs;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> drbOutputBuffers;
 
 	bool bWantLowCpu = false;
 
@@ -139,8 +139,8 @@ struct Funes : SanguineModule {
 		configOutput(OUTPUT_AUX, "Auxiliary");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			stmlib::BufferAllocator allocator(shared_buffer[channel], sizeof(shared_buffer[channel]));
-			voice[channel].Init(&allocator, &user_data);
+			stmlib::BufferAllocator allocator(sharedBuffers[channel], sizeof(sharedBuffers[channel]));
+			voices[channel].Init(&allocator, &userData);
 		}
 
 		octaveQuantizer.Init(9, 0.01f, false);
@@ -155,7 +155,7 @@ struct Funes : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
-		if (outputBuffer.empty()) {
+		if (drbOutputBuffers.empty()) {
 			const int kBlockSize = 12;
 
 			// Switch models
@@ -246,7 +246,7 @@ struct Funes : SanguineModule {
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
-				voice[channel].Render(patch, modulations, output, kBlockSize);
+				voices[channel].Render(patch, modulations, output, kBlockSize);
 
 				// Convert output to frames
 				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
@@ -255,14 +255,14 @@ struct Funes : SanguineModule {
 				}
 
 				if (displayChannel == channel) {
-					displayModelNum = voice[channel].active_engine();
+					displayModelNum = voices[channel].active_engine();
 				}
 
 				if (ledsMode == funes::LEDNormal) {
 					// Model lights
 					// Get the active engines for current channel.
 					int currentLight;
-					int activeEngine = voice[channel].active_engine();
+					int activeEngine = voices[channel].active_engine();
 					int clampedEngine = (activeEngine % 8) * 2;
 
 					bool bIsNoiseModel = activeEngine & 0x10;
@@ -321,16 +321,16 @@ struct Funes : SanguineModule {
 
 			// Convert output.
 			if (!bWantLowCpu) {
-				outputSrc.setRates(48000, static_cast<int>(args.sampleRate));
+				srcOutputs.setRates(48000, static_cast<int>(args.sampleRate));
 				int inLen = kBlockSize;
-				int outLen = outputBuffer.capacity();
-				outputSrc.setChannels(channelCount * 2);
-				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
-				outputBuffer.endIncr(outLen);
+				int outLen = drbOutputBuffers.capacity();
+				srcOutputs.setChannels(channelCount * 2);
+				srcOutputs.process(outputFrames, &inLen, drbOutputBuffers.endData(), &outLen);
+				drbOutputBuffers.endIncr(outLen);
 			} else {
-				int len = std::min(static_cast<int>(outputBuffer.capacity()), kBlockSize);
-				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
-				outputBuffer.endIncr(len);
+				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), kBlockSize);
+				std::memcpy(drbOutputBuffers.endData(), outputFrames, len * sizeof(outputFrames[0]));
+				drbOutputBuffers.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz.
@@ -451,12 +451,12 @@ struct Funes : SanguineModule {
 		}
 
 		// Set output
-		if (!outputBuffer.empty()) {
-			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrame = outputBuffer.shift();
+		if (!drbOutputBuffers.empty()) {
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
 			for (int channel = 0; channel < channelCount; ++channel) {
 				// Inverting op-amp on outputs
-				outputs[OUTPUT_OUT].setVoltage(-outputFrame.samples[channel * 2 + 0] * 5.f, channel);
-				outputs[OUTPUT_AUX].setVoltage(-outputFrame.samples[channel * 2 + 1] * 5.f, channel);
+				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[channel * 2 + 0] * 5.f, channel);
+				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[channel * 2 + 1] * 5.f, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
@@ -484,7 +484,7 @@ struct Funes : SanguineModule {
 		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
 		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
 
-		const uint8_t* userDataBuffer = user_data.getBuffer();
+		const uint8_t* userDataBuffer = userData.getBuffer();
 		if (userDataBuffer != nullptr) {
 			std::string userDataString = rack::string::toBase64(userDataBuffer, plaits::UserData::MAX_USER_DATA_SIZE);
 			json_object_set_new(rootJ, "userData", json_string(userDataString.c_str()));
@@ -527,7 +527,7 @@ struct Funes : SanguineModule {
 			const std::vector<uint8_t> userDataVector = rack::string::fromBase64(userDataString);
 			if (userDataVector.size() > 0) {
 				const uint8_t* userDataBuffer = &userDataVector[0];
-				user_data.setBuffer(userDataBuffer);
+				userData.setBuffer(userDataBuffer);
 				if (userDataBuffer[kMaxUserDataSize - 2] == 'U') {
 					resetCustomDataStates();
 					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = funes::DataCustom;
@@ -537,10 +537,10 @@ struct Funes : SanguineModule {
 	}
 
 	void resetCustomData() {
-		bool success = user_data.Save(nullptr, patch.engine);
+		bool success = userData.Save(nullptr, patch.engine);
 		if (success) {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				voice[channel].ReloadUserData();
+				voices[channel].ReloadUserData();
 			}
 			resetCustomDataStates();
 		}
@@ -558,10 +558,10 @@ struct Funes : SanguineModule {
 			std::ifstream input(filePath, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
 			uint8_t* dataBuffer = buffer.data();
-			bool success = user_data.Save(dataBuffer, patch.engine);
+			bool success = userData.Save(dataBuffer, patch.engine);
 			if (success) {
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-					voice[channel].ReloadUserData();
+					voices[channel].ReloadUserData();
 				}
 				// Only 1 engine can use custom data at a time.
 				resetCustomDataStates();
@@ -659,7 +659,8 @@ struct FunesWidget : SanguineModuleWidget {
 		float currentX = baseX;
 
 		for (int light = 0; light < 8; ++light) {
-			addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module, Funes::LIGHT_MODEL + light * 2));
+			addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module,
+				Funes::LIGHT_MODEL + light * 2));
 			currentX += lightOffsetX;
 		}
 
@@ -729,34 +730,33 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Synthesis model", "",
-			[=](Menu* menu) {
-				menu->addChild(createSubmenuItem("New", "", [=](Menu* menu) {
-					for (int i = 0; i < 8; ++i) {
-						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
-							[=]() { return module->patch.engine == i; },
-							[=]() {	module->setEngine(i); }
-						));
-					}
-					}));
+		menu->addChild(createSubmenuItem("Synthesis model", "", [=](Menu* menu) {
+			menu->addChild(createSubmenuItem("New", "", [=](Menu* menu) {
+				for (int i = 0; i < 8; ++i) {
+					menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
+						[=]() { return module->patch.engine == i; },
+						[=]() {	module->setEngine(i); }
+					));
+				}
+				}));
 
-				menu->addChild(createSubmenuItem("Pitched", "", [=](Menu* menu) {
-					for (int i = 8; i < 16; ++i) {
-						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
-							[=]() { return module->patch.engine == i; },
-							[=]() {	module->setEngine(i); }
-						));
-					}
-					}));
+			menu->addChild(createSubmenuItem("Pitched", "", [=](Menu* menu) {
+				for (int i = 8; i < 16; ++i) {
+					menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
+						[=]() { return module->patch.engine == i; },
+						[=]() {	module->setEngine(i); }
+					));
+				}
+				}));
 
-				menu->addChild(createSubmenuItem("Noise/percussive", "", [=](Menu* menu) {
-					for (int i = 16; i < 24; ++i) {
-						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
-							[=]() { return module->patch.engine == i; },
-							[=]() { module->setEngine(i); }
-						));
-					}
-					}));
+			menu->addChild(createSubmenuItem("Noise/percussive", "", [=](Menu* menu) {
+				for (int i = 16; i < 24; ++i) {
+					menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
+						[=]() { return module->patch.engine == i; },
+						[=]() { module->setEngine(i); }
+					));
+				}
+				}));
 			}
 		));
 
