@@ -673,8 +673,8 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		FramebufferWidget* nodiFrambuffer = new FramebufferWidget();
-		addChild(nodiFrambuffer);
+		FramebufferWidget* nodiFramebuffer = new FramebufferWidget();
+		addChild(nodiFramebuffer);
 
 		const float lightXBase = 6.894f;
 		const float lightXDelta = 4.0f;
@@ -690,7 +690,7 @@ struct ContextusWidget : SanguineModuleWidget {
 		}
 
 		nodiCommon::NodiDisplay* nodiDisplay = new nodiCommon::NodiDisplay(4, module, 71.12, 20.996);
-		nodiFrambuffer->addChild(nodiDisplay);
+		nodiFramebuffer->addChild(nodiDisplay);
 		nodiDisplay->fallbackString = contextus::displayLabels[0];
 
 		if (module) {

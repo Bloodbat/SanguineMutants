@@ -964,17 +964,17 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		FramebufferWidget* apicesFrambuffer = new FramebufferWidget();
-		addChild(apicesFrambuffer);
+		FramebufferWidget* apicesFramebuffer = new FramebufferWidget();
+		addChild(apicesFramebuffer);
 
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Apices::LIGHT_EXPANDER));
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
-		apicesFrambuffer->addChild(displayChannel1);
+		apicesFramebuffer->addChild(displayChannel1);
 		displayChannel1->fallbackString = apices::modeLabels[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
-		apicesFrambuffer->addChild(displayChannel2);
+		apicesFramebuffer->addChild(displayChannel2);
 		displayChannel2->fallbackString = apices::modeLabels[0];
 
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(99.527, 34.261), module, Apices::PARAM_MODE));
@@ -1017,19 +1017,19 @@ struct ApicesWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Apices::OUTPUT_OUT_2));
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
-		apicesFrambuffer->addChild(oledDisplay1);
+		apicesFramebuffer->addChild(oledDisplay1);
 		oledDisplay1->fallbackString = apices::knobLabelsTwinMode[0].knob1;
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
-		apicesFrambuffer->addChild(oledDisplay2);
+		apicesFramebuffer->addChild(oledDisplay2);
 		oledDisplay2->fallbackString = apices::knobLabelsTwinMode[0].knob2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
-		apicesFrambuffer->addChild(oledDisplay3);
+		apicesFramebuffer->addChild(oledDisplay3);
 		oledDisplay3->fallbackString = apices::knobLabelsTwinMode[0].knob3;
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
-		apicesFrambuffer->addChild(oledDisplay4);
+		apicesFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = apices::knobLabelsTwinMode[0].knob4;
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);

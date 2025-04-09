@@ -995,17 +995,17 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		FramebufferWidget* mortuusFrambuffer = new FramebufferWidget();
-		addChild(mortuusFrambuffer);
+		FramebufferWidget* mortuusFramebuffer = new FramebufferWidget();
+		addChild(mortuusFramebuffer);
 
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Mortuus::LIGHT_EXPANDER));
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
-		mortuusFrambuffer->addChild(displayChannel1);
+		mortuusFramebuffer->addChild(displayChannel1);
 		displayChannel1->fallbackString = mortuus::modeLabels[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
-		mortuusFrambuffer->addChild(displayChannel2);
+		mortuusFramebuffer->addChild(displayChannel2);
 		displayChannel2->fallbackString = mortuus::modeLabels[0];
 
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(99.527, 34.261), module, Mortuus::PARAM_MODE));
@@ -1048,19 +1048,19 @@ struct MortuusWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Mortuus::OUTPUT_OUT_2));
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
-		mortuusFrambuffer->addChild(oledDisplay1);
+		mortuusFramebuffer->addChild(oledDisplay1);
 		oledDisplay1->fallbackString = mortuus::knobLabelsTwinMode[0].knob1;
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
-		mortuusFrambuffer->addChild(oledDisplay2);
+		mortuusFramebuffer->addChild(oledDisplay2);
 		oledDisplay2->fallbackString = mortuus::knobLabelsTwinMode[0].knob2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
-		mortuusFrambuffer->addChild(oledDisplay3);
+		mortuusFramebuffer->addChild(oledDisplay3);
 		oledDisplay3->fallbackString = mortuus::knobLabelsTwinMode[0].knob3;
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
-		mortuusFrambuffer->addChild(oledDisplay4);
+		mortuusFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = mortuus::knobLabelsTwinMode[0].knob4;
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
