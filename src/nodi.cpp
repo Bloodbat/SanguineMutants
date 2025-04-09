@@ -80,34 +80,34 @@ struct Nodi : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	braids::MacroOscillator osc[PORT_MAX_CHANNELS];
+	braids::MacroOscillator oscillators[PORT_MAX_CHANNELS];
 	braids::SettingsData settings[PORT_MAX_CHANNELS];
-	braids::VcoJitterSource jitterSource[PORT_MAX_CHANNELS];
-	braids::SignatureWaveshaper waveShaper[PORT_MAX_CHANNELS];
-	braids::Envelope envelope[PORT_MAX_CHANNELS];
-	braids::Quantizer quantizer[PORT_MAX_CHANNELS];
+	braids::VcoJitterSource jitterSources[PORT_MAX_CHANNELS];
+	braids::SignatureWaveshaper waveShapers[PORT_MAX_CHANNELS];
+	braids::Envelope envelopes[PORT_MAX_CHANNELS];
+	braids::Quantizer quantizers[PORT_MAX_CHANNELS];
 
-	uint8_t currentScale[PORT_MAX_CHANNELS] = {};
+	uint8_t selectedScales[PORT_MAX_CHANNELS] = {};
 
 	uint8_t waveShaperValue = 0;
 	uint8_t driftValue = 0;
 
-	int16_t previousPitch[PORT_MAX_CHANNELS] = {};
+	int16_t previousPitches[PORT_MAX_CHANNELS] = {};
 
-	uint16_t gainLp[PORT_MAX_CHANNELS] = {};
-	uint16_t triggerDelay[PORT_MAX_CHANNELS] = {};
+	uint16_t gainLps[PORT_MAX_CHANNELS] = {};
+	uint16_t triggerDelays[PORT_MAX_CHANNELS] = {};
 
 	int channelCount = 0;
 	int displayChannel = 0;
 	static const int kLightsUpdateFrequency = 16;
 
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<1> sampleRateConverters[PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
 
-	bool bTriggerDetected[PORT_MAX_CHANNELS] = {};
-	bool bLastTrigger[PORT_MAX_CHANNELS] = {};
-	bool bTriggered[PORT_MAX_CHANNELS] = {};
+	bool triggersDetected[PORT_MAX_CHANNELS] = {};
+	bool lastTriggers[PORT_MAX_CHANNELS] = {};
+	bool triggeredChannels[PORT_MAX_CHANNELS] = {};
 
 	bool bAutoTrigger = false;
 	bool bFlattenEnabled = false;
@@ -180,25 +180,25 @@ struct Nodi : SanguineModule {
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&osc[channel], 0, sizeof(braids::MacroOscillator));
-			memset(&quantizer[channel], 0, sizeof(braids::Quantizer));
-			memset(&envelope[channel], 0, sizeof(braids::Envelope));
-			memset(&jitterSource[channel], 0, sizeof(braids::VcoJitterSource));
-			memset(&waveShaper[channel], 0, sizeof(braids::SignatureWaveshaper));
+			memset(&oscillators[channel], 0, sizeof(braids::MacroOscillator));
+			memset(&quantizers[channel], 0, sizeof(braids::Quantizer));
+			memset(&envelopes[channel], 0, sizeof(braids::Envelope));
+			memset(&jitterSources[channel], 0, sizeof(braids::VcoJitterSource));
+			memset(&waveShapers[channel], 0, sizeof(braids::SignatureWaveshaper));
 			memset(&settings[channel], 0, sizeof(braids::SettingsData));
 
-			osc[channel].Init();
-			quantizer[channel].Init();
-			envelope[channel].Init();
+			oscillators[channel].Init();
+			quantizers[channel].Init();
+			envelopes[channel].Init();
 
-			jitterSource[channel].Init();
-			waveShaper[channel].Init(userSignSeed);
+			jitterSources[channel].Init();
+			waveShapers[channel].Init(userSignSeed);
 
-			bLastTrigger[channel] = false;
+			lastTriggers[channel] = false;
 
-			currentScale[channel] = 0xff;
+			selectedScales[channel] = 0xff;
 
-			previousPitch[channel] = 0;
+			previousPitches[channel] = 0;
 		}
 		memset(&lastSettings, 0, sizeof(braids::SettingsData));
 
@@ -233,21 +233,21 @@ struct Nodi : SanguineModule {
 
 			// Trigger.
 			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-			if (!bLastTrigger[channel] && bTriggerInput) {
-				bTriggerDetected[channel] = bTriggerInput;
+			if (!lastTriggers[channel] && bTriggerInput) {
+				triggersDetected[channel] = bTriggerInput;
 			}
-			bLastTrigger[channel] = bTriggerInput;
+			lastTriggers[channel] = bTriggerInput;
 
-			if (bTriggerDetected[channel]) {
-				triggerDelay[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
-				++triggerDelay[channel];
-				bTriggerDetected[channel] = false;
+			if (triggersDetected[channel]) {
+				triggerDelays[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
+				++triggerDelays[channel];
+				triggersDetected[channel] = false;
 			}
 
-			if (triggerDelay[channel]) {
-				--triggerDelay[channel];
-				if (triggerDelay[channel] == 0) {
-					bTriggered[channel] = true;
+			if (triggerDelays[channel]) {
+				--triggerDelays[channel];
+				if (triggerDelays[channel] == 0) {
+					triggeredChannels[channel] = true;
 				}
 			}
 
@@ -260,15 +260,15 @@ struct Nodi : SanguineModule {
 			settings[channel].auto_trig = bAutoTrigger;
 
 			// Quantizer.
-			if (currentScale[channel] != settings[channel].quantizer_scale) {
-				currentScale[channel] = settings[channel].quantizer_scale;
-				quantizer[channel].Configure(braids::scales[currentScale[channel]]);
+			if (selectedScales[channel] != settings[channel].quantizer_scale) {
+				selectedScales[channel] = settings[channel].quantizer_scale;
+				quantizers[channel].Configure(braids::scales[selectedScales[channel]]);
 			}
 
 			// Render frames.
-			if (drbOutputBuffer[channel].empty()) {
-				envelope[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
-				uint32_t adValue = envelope[channel].Render();
+			if (drbOutputBuffers[channel].empty()) {
+				envelopes[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
+				uint32_t adValue = envelopes[channel].Render();
 
 				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
 
@@ -276,19 +276,21 @@ struct Nodi : SanguineModule {
 				if (!bPaques) {
 					int model = params[PARAM_MODEL].getValue();
 					if (inputs[INPUT_META].isConnected()) {
-						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
+							braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 					}
 
 					settings[channel].shape = clamp(model, 0, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
 					// Setup oscillator from settings.
-					osc[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
+					oscillators[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
 				} else {
-					osc[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
+					oscillators[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
 				}
 
 				// Set timbre/modulation.
-				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
+				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() *
+					inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
 				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
 
 				timbre += adValue / 65535.f * settings[channel].ad_timbre / 16.f;
@@ -296,10 +298,11 @@ struct Nodi : SanguineModule {
 
 				int16_t param1 = math::rescale(clamp(timbre, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
 				int16_t param2 = math::rescale(clamp(modulation, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
-				osc[channel].set_parameters(param1, param2);
+				oscillators[channel].set_parameters(param1, param2);
 
 				// Set pitch.
-				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.f;
+				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() +
+					params[PARAM_FINE].getValue() / 12.f;
 				pitchV += fm;
 
 				if (bWantLowCpu) {
@@ -329,15 +332,16 @@ struct Nodi : SanguineModule {
 					break;
 				}
 
-				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
+				pitch = quantizers[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
 
 				// Check if pitch has changed enough to cause an auto-retrigger.
-				int16_t pitchDelta = pitch - previousPitch[channel];
-				bTriggerDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 || -pitchDelta >= 0x40);
+				int16_t pitchDelta = pitch - previousPitches[channel];
+				triggersDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 ||
+					-pitchDelta >= 0x40);
 
-				previousPitch[channel] = pitch;
+				previousPitches[channel] = pitch;
 
-				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
+				pitch += jitterSources[channel].Render(settings[channel].vco_drift);
 				pitch += adValue * settings[channel].ad_fm >> 7;
 
 				pitch = clamp(static_cast<int16_t>(pitch), 0, 16383);
@@ -347,21 +351,22 @@ struct Nodi : SanguineModule {
 				}
 
 				// Pitch transposition.
-				int32_t transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ? -(36 << 7) : 0;
+				int32_t transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ?
+					-(36 << 7) : 0;
 				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
-				osc[channel].set_pitch(pitch + transposition);
+				oscillators[channel].set_pitch(pitch + transposition);
 
-				if (bTriggered[channel]) {
-					osc[channel].Strike();
-					envelope[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
-					bTriggered[channel] = false;
+				if (triggeredChannels[channel]) {
+					oscillators[channel].Strike();
+					envelopes[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
+					triggeredChannels[channel] = false;
 				}
 
 				// TODO: Add a sync input buffer (must be sample rate converted).
 				const uint8_t syncBuffer[nodiCommon::kBlockSize] = {};
 
 				int16_t renderBuffer[nodiCommon::kBlockSize];
-				osc[channel].Render(syncBuffer, renderBuffer, nodiCommon::kBlockSize);
+				oscillators[channel].Render(syncBuffer, renderBuffer, nodiCommon::kBlockSize);
 
 				// Signature waveshaping, decimation, and bit reduction.
 				int16_t sample = 0;
@@ -373,9 +378,9 @@ struct Nodi : SanguineModule {
 					if (block % decimationFactor == 0) {
 						sample = renderBuffer[block] & bitMask;
 					}
-					sample = sample * gainLp[channel] >> 16;
-					gainLp[channel] += (gain - gainLp[channel]) >> 4;
-					int16_t warped = waveShaper[channel].Transform(sample);
+					sample = sample * gainLps[channel] >> 16;
+					gainLps[channel] += (gain - gainLps[channel]) >> 4;
+					int16_t warped = waveShapers[channel].Transform(sample);
 					renderBuffer[block] = stmlib::Mix(sample, warped, signature);
 				}
 
@@ -385,24 +390,25 @@ struct Nodi : SanguineModule {
 					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						in[block].samples[0] = renderBuffer[block] / 32768.f;
 					}
-					sampleRateConverter[channel].setRates(96000, args.sampleRate);
+					sampleRateConverters[channel].setRates(96000, args.sampleRate);
 
 					int inLen = nodiCommon::kBlockSize;
-					int outLen = drbOutputBuffer[channel].capacity();
-					sampleRateConverter[channel].process(in, &inLen, drbOutputBuffer[channel].endData(), &outLen);
-					drbOutputBuffer[channel].endIncr(outLen);
+					int outLen = drbOutputBuffers[channel].capacity();
+					sampleRateConverters[channel].process(in, &inLen, drbOutputBuffers[channel].endData(),
+						&outLen);
+					drbOutputBuffers[channel].endIncr(outLen);
 				} else {
 					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						dsp::Frame<1> inFrame;
 						inFrame.samples[0] = renderBuffer[block] / 32768.f;
-						drbOutputBuffer[channel].push(inFrame);
+						drbOutputBuffers[channel].push(inFrame);
 					}
 				}
 			}
 
 			// Output..
-			if (!drbOutputBuffer[channel].empty()) {
-				dsp::Frame<1> outFrame = drbOutputBuffer[channel].shift();
+			if (!drbOutputBuffers[channel].empty()) {
+				dsp::Frame<1> outFrame = drbOutputBuffers[channel].shift();
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
 		} // Channels
@@ -620,7 +626,7 @@ struct Nodi : SanguineModule {
 
 	void setWaveShaperSeed(uint32_t seed) {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			waveShaper[channel].Init(seed);
+			waveShapers[channel].Init(seed);
 		}
 	}
 
