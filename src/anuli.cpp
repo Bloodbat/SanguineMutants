@@ -352,7 +352,8 @@ struct Anuli : SanguineModule {
 
 		haveDisastrousPeace = haveDisastrousPeace || isEasterEgg;
 
-		resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
+		resonatorModel[channel] = isEasterEgg ? rings::RESONATOR_MODEL_MODAL :
+			static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
 		if (!inputBuffer[channel].full()) {
