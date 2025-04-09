@@ -78,8 +78,8 @@ struct Mortuus : SanguineModule {
 
 	deadman::GateFlags gateFlags[apicesCommon::kChannelCount] = {};
 
-	dsp::SampleRateConverter<apicesCommon::kChannelCount> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<apicesCommon::kChannelCount>, 256> outputBuffer;
+	dsp::SampleRateConverter<apicesCommon::kChannelCount> srcOutput;
+	dsp::DoubleRingBuffer<dsp::Frame<apicesCommon::kChannelCount>, 256> drbOutputBuffer;
 
 	struct Block {
 		deadman::GateFlags input[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
@@ -319,7 +319,7 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		if (outputBuffer.empty()) {
+		if (drbOutputBuffer.empty()) {
 			while (renderBlock != ioBlock) {
 				processChannels(&block[renderBlock], apicesCommon::kBlockSize);
 				renderBlock = (renderBlock + 1) % apicesCommon::kBlockCount;
@@ -338,9 +338,9 @@ struct Mortuus : SanguineModule {
 
 			/* Prepare sample rate conversion.
 			   Peaks is sampling at 48kHZ. */
-			outputSrc.setRates(apicesCommon::kSampleRate, args.sampleRate);
+			srcOutput.setRates(apicesCommon::kSampleRate, args.sampleRate);
 			int inLen = apicesCommon::kBlockSize;
-			int outLen = outputBuffer.capacity();
+			int outLen = drbOutputBuffer.capacity();
 			dsp::Frame<apicesCommon::kChannelCount> frame[apicesCommon::kBlockSize];
 
 			// Process an entire block of data from the IOBuffer.
@@ -361,13 +361,13 @@ struct Mortuus : SanguineModule {
 				slice.block->input[1][slice.frame_index] = gateFlags[1] | (buttons & 2 ? deadman::GATE_FLAG_FROM_BUTTON : 0);
 			}
 
-			outputSrc.process(frame, &inLen, outputBuffer.endData(), &outLen);
-			outputBuffer.endIncr(outLen);
+			srcOutput.process(frame, &inLen, drbOutputBuffer.endData(), &outLen);
+			drbOutputBuffer.endIncr(outLen);
 		}
 
 		// Update outputs.
-		if (!outputBuffer.empty()) {
-			dsp::Frame<apicesCommon::kChannelCount> frame = outputBuffer.shift();
+		if (!drbOutputBuffer.empty()) {
+			dsp::Frame<apicesCommon::kChannelCount> frame = drbOutputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
 			// TODO: Check the output values against an actual device.
