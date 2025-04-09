@@ -58,10 +58,10 @@ struct Anuli : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	dsp::SampleRateConverter<1> inputSrc[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<2> outputSrc[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> inputBuffer[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<1> srcInputs[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<2> srcOutputs[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbInputBuffers[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
 
 	dsp::ClockDivider lightsDivider;
 
@@ -331,8 +331,8 @@ struct Anuli : SanguineModule {
 	}
 
 	void setOutputs(const int channel, const bool withBothOutputs) {
-		if (!outputBuffer[channel].empty()) {
-			dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
+		if (!drbOutputBuffers[channel].empty()) {
+			dsp::Frame<2> outputFrame = drbOutputBuffers[channel].shift();
 			/* "Note: you need to insert a jack into each output to split the signals:
 				when only one jack is inserted, both signals are mixed together." */
 			if (withBothOutputs) {
@@ -355,10 +355,10 @@ struct Anuli : SanguineModule {
 			static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
-		if (!inputBuffer[channel].full()) {
+		if (!drbInputBuffers[channel].full()) {
 			dsp::Frame<1> frame;
 			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
-			inputBuffer[channel].push(frame);
+			drbInputBuffers[channel].push(frame);
 		}
 
 		if (!strums[channel]) {
@@ -367,16 +367,16 @@ struct Anuli : SanguineModule {
 	}
 
 	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const float sampleRate) {
-		if (outputBuffer[channel].empty()) {
+		if (drbOutputBuffers[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
 			// Convert input buffer
-			inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
-			int inLen = inputBuffer[channel].size();
+			srcInputs[channel].setRates(static_cast<int>(sampleRate), 48000);
+			int inLen = drbInputBuffers[channel].size();
 			int outLen = anuli::kBlockSize;
-			inputSrc[channel].process(inputBuffer[channel].startData(), &inLen,
+			srcInputs[channel].process(drbInputBuffers[channel].startData(), &inLen,
 				reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
-			inputBuffer[channel].startIncr(inLen);
+			drbInputBuffers[channel].startIncr(inLen);
 
 			float out[anuli::kBlockSize];
 			float aux[anuli::kBlockSize];
@@ -421,11 +421,11 @@ struct Anuli : SanguineModule {
 				outputFrames[frame].samples[1] = aux[frame];
 			}
 
-			outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
+			srcOutputs[channel].setRates(48000, static_cast<int>(sampleRate));
 			int inCount = anuli::kBlockSize;
-			int outCount = outputBuffer[channel].capacity();
-			outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
-			outputBuffer[channel].endIncr(outCount);
+			int outCount = drbOutputBuffers[channel].capacity();
+			srcOutputs[channel].process(outputFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
+			drbOutputBuffers[channel].endIncr(outCount);
 		}
 	}
 
