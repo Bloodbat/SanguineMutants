@@ -184,7 +184,6 @@ struct Anuli : SanguineModule {
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
-		bool bChannelIsEasterEgg = false;
 
 		if (bHaveModeCable) {
 			if (bNotesModeSelection) {
@@ -193,9 +192,9 @@ struct Anuli : SanguineModule {
 					modeVoltage = roundf(modeVoltage * 12.f);
 					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-					setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
+					setupChannel(channel, bWithDisastrousPeace);
 
-					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
+					renderFrames(channel, parameterInfo, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
@@ -204,18 +203,18 @@ struct Anuli : SanguineModule {
 					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
 					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-					setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
+					setupChannel(channel, bWithDisastrousPeace);
 
-					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
+					renderFrames(channel, parameterInfo, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
 			}
 		} else {
 			for (int channel = 0; channel < channelCount; ++channel) {
-				setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
+				setupChannel(channel, bWithDisastrousPeace);
 
-				renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
+				renderFrames(channel, parameterInfo, args.sampleRate);
 
 				setOutputs(channel, bHaveBothOutputs);
 			}
@@ -347,12 +346,12 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupChannel(const int channel, bool& haveDisastrousPeace, bool& isEasterEgg) {
-		isEasterEgg = channelModes[channel] > 5;
+	void setupChannel(const int channel, bool& haveDisastrousPeace) {
+		bool bIsEasterEgg = channelModes[channel] > 5;
 
-		haveDisastrousPeace = haveDisastrousPeace || isEasterEgg;
+		haveDisastrousPeace = haveDisastrousPeace || bIsEasterEgg;
 
-		resonatorModels[channel] = isEasterEgg ? rings::RESONATOR_MODEL_MODAL :
+		resonatorModels[channel] = bIsEasterEgg ? rings::RESONATOR_MODEL_MODAL :
 			static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
@@ -367,7 +366,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const bool isEasterEgg, const float sampleRate) {
+	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const float sampleRate) {
 		if (outputBuffer[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
@@ -382,34 +381,37 @@ struct Anuli : SanguineModule {
 			float out[anuli::kBlockSize];
 			float aux[anuli::kBlockSize];
 
-			if (isEasterEgg) {
+			rings::Patch patch;
+			float structure;
+
+			switch (channelModes[channel]) {
+			case 6: // Disastrous peace.
 				stringSynths[channel].set_polyphony(polyphonyMode);
 
 				stringSynths[channel].set_fx(rings::FxType(fxModel));
 
-				rings::Patch patch;
-				float structure;
 				setupPatch(channel, patch, structure, parameterInfo);
 				setupPerformance(channel, performanceStates[channel], structure, parameterInfo);
 
 				// Process audio
 				strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
 				stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
-			} else {
+				break;
+
+			default:
 				if (parts[channel].polyphony() != polyphonyMode) {
 					parts[channel].set_polyphony(polyphonyMode);
 				}
 
 				parts[channel].set_model(resonatorModels[channel]);
 
-				rings::Patch patch;
-				float structure;
 				setupPatch(channel, patch, structure, parameterInfo);
 				setupPerformance(channel, performanceStates[channel], structure, parameterInfo);
 
 				// Process audio
 				strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
 				parts[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
+				break;
 			}
 
 			// Convert output buffer
