@@ -524,11 +524,11 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(9.021, 22.087), module, Anuli::INPUT_MODE));
 
-		FramebufferWidget* anuliFrambuffer = new FramebufferWidget();
-		addChild(anuliFrambuffer);
+		FramebufferWidget* anuliFramebuffer = new FramebufferWidget();
+		addChild(anuliFramebuffer);
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 53.34f, 22.087f);
-		anuliFrambuffer->addChild(displayModel);
+		anuliFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = anuli::modeLabels[0];
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
@@ -536,7 +536,7 @@ struct AnuliWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
 
 		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34f, 37.486f);
-		anuliFrambuffer->addChild(displayPolyphony);
+		anuliFramebuffer->addChild(displayPolyphony);
 		displayPolyphony->fallbackNumber = 1;
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 35.904), module, Anuli::INPUT_STRUCTURE_CV));

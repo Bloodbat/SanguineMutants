@@ -666,11 +666,11 @@ struct FunesWidget : SanguineModuleWidget {
 		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(89.0271, 12.1653), module, Funes::LIGHT_FACTORY_DATA));
 		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(98.7319, 12.1653), module, Funes::LIGHT_CUSTOM_DATA));
 
-		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
-		addChild(funesFrambuffer);
+		FramebufferWidget* funesFramebuffer = new FramebufferWidget();
+		addChild(funesFramebuffer);
 
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 53.122, 32.314);
-		funesFrambuffer->addChild(alphaDisplay);
+		funesFramebuffer->addChild(alphaDisplay);
 		alphaDisplay->fallbackString = funes::displayLabels[8];
 
 		if (module) {
