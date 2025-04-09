@@ -44,13 +44,13 @@ struct Distortiones : SanguineModule {
 	};
 
 	int featureMode = 0;
-	int frame[PORT_MAX_CHANNELS] = {};
+	int frames[PORT_MAX_CHANNELS] = {};
 
 	static const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
-	distortiones::DistortionesModulator distortionesModulator[PORT_MAX_CHANNELS];
+	distortiones::DistortionesModulator modulators[PORT_MAX_CHANNELS];
 	distortiones::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 	distortiones::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 
@@ -61,7 +61,7 @@ struct Distortiones : SanguineModule {
 
 	float lastAlgorithmValue = 0.f;
 
-	distortiones::Parameters* distortionesParameters[PORT_MAX_CHANNELS];
+	distortiones::Parameters* parameters[PORT_MAX_CHANNELS];
 
 	Distortiones() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -92,9 +92,9 @@ struct Distortiones : SanguineModule {
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&distortionesModulator[channel], 0, sizeof(distortiones::DistortionesModulator));
-			distortionesModulator[channel].Init(96000.f);
-			distortionesParameters[channel] = distortionesModulator[channel].mutable_parameters();
+			memset(&modulators[channel], 0, sizeof(distortiones::DistortionesModulator));
+			modulators[channel].Init(96000.f);
+			parameters[channel] = modulators[channel].mutable_parameters();
 		}
 
 		featureMode = distortiones::FEATURE_MODE_META;
@@ -134,19 +134,20 @@ struct Distortiones : SanguineModule {
 				if (!bNotesModeSelection) {
 					channelFeatureMode = distortiones::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
 				} else {
-					channelFeatureMode = distortiones::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
+					channelFeatureMode = distortiones::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)),
+						0, 8));
 				}
 			}
 
-			distortionesModulator[channel].set_feature_mode(channelFeatureMode);
+			modulators[channel].set_feature_mode(channelFeatureMode);
 
-			distortionesParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+			parameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
 
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= warpiescommon::kBlockSize) {
-				frame[channel] = 0;
+			if (++frames[channel] >= warpiescommon::kBlockSize) {
+				frames[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
 				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
@@ -156,37 +157,41 @@ struct Distortiones : SanguineModule {
 
 				f4Voltages /= 5.f;
 
-				distortionesParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
-				distortionesParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
 
-				distortionesParameters[channel]->raw_level[0] = distortionesParameters[channel]->channel_drive[0];
-				distortionesParameters[channel]->raw_level[1] = distortionesParameters[channel]->channel_drive[1];
+				parameters[channel]->raw_level[0] = parameters[channel]->channel_drive[0];
+				parameters[channel]->raw_level[1] = parameters[channel]->channel_drive[1];
 
 
 
 				if (!bModeSwitchEnabled) {
-					distortionesParameters[channel]->raw_algorithm_pot = algorithmValue;
+					parameters[channel]->raw_algorithm_pot = algorithmValue;
 
-					distortionesParameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.f, 1.f);
+					parameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.f, 1.f);
 
-					distortionesParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
-					distortionesParameters[channel]->raw_algorithm = distortionesParameters[channel]->modulation_algorithm;
+					parameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
+					parameters[channel]->raw_algorithm = parameters[channel]->modulation_algorithm;
 				}
 
-				distortionesParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
-				distortionesParameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
+				parameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
-				distortionesParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
+				parameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				distortionesModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
+				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768),
+				-32768, 32767);
+			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768),
+				-32768, 32767);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
-			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
+			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) /
+				32768 * 5.f, channel);
+			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) /
+				32768 * 5.f, channel);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
@@ -195,10 +200,10 @@ struct Distortiones : SanguineModule {
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightFrequency * args.sampleTime;
 
-			lights[LIGHT_CARRIER + 0].value = (distortionesParameters[0]->carrier_shape == 1
-				|| distortionesParameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
-			lights[LIGHT_CARRIER + 1].value = (distortionesParameters[0]->carrier_shape == 2
-				|| distortionesParameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER + 0].value = (parameters[0]->carrier_shape == 1
+				|| parameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER + 1].value = (parameters[0]->carrier_shape == 2
+				|| parameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? kSanguineButtonLightValue : 0.f);
 
@@ -215,7 +220,7 @@ struct Distortiones : SanguineModule {
 					palette = warpiespals::paletteDefault;
 				}
 
-				zone = 8.f * distortionesParameters[0]->modulation_algorithm;
+				zone = 8.f * parameters[0]->modulation_algorithm;
 				MAKE_INTEGRAL_FRACTIONAL(zone);
 				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
 				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
@@ -225,7 +230,7 @@ struct Distortiones : SanguineModule {
 				}
 			} else {
 				featureMode = static_cast<distortiones::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-				distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
+				modulators[0].set_feature_mode(distortiones::FeatureMode(featureMode));
 
 				long long systemTimeMs = getSystemTimeMs();
 
@@ -244,7 +249,8 @@ struct Distortiones : SanguineModule {
 				if (channel < channelCount) {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
 						lights[currentLight + rgbComponent].setBrightnessSmooth(
-							(warpiespals::paletteParasiteFeatureMode[distortionesModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
+							(warpiespals::paletteParasiteFeatureMode[modulators[channel].feature_mode()][rgbComponent]) /
+							255.f, sampleTime);
 					}
 				} else {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
@@ -258,7 +264,7 @@ struct Distortiones : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "mode", json_integer(distortionesModulator[0].feature_mode()));
+		json_object_set_new(rootJ, "mode", json_integer(modulators[0].feature_mode()));
 
 		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
 
@@ -269,8 +275,8 @@ struct Distortiones : SanguineModule {
 		SanguineModule::dataFromJson(rootJ);
 
 		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
-			distortionesModulator[0].set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
-			featureMode = distortionesModulator[0].feature_mode();
+			modulators[0].set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
+			featureMode = modulators[0].feature_mode();
 		}
 
 		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
@@ -280,7 +286,7 @@ struct Distortiones : SanguineModule {
 
 	void setFeatureMode(int modeNumber) {
 		featureMode = modeNumber;
-		distortionesModulator[0].set_feature_mode(distortiones::FeatureMode(featureMode));
+		modulators[0].set_feature_mode(distortiones::FeatureMode(featureMode));
 	}
 };
 
@@ -345,22 +351,38 @@ struct DistortionesWidget : SanguineModuleWidget {
 		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(47.067, 47.187), module, Distortiones::LIGHT_MODE + 7));
 		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(36.952, 58.483), module, Distortiones::LIGHT_MODE + 8));
 
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 0 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 1 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 2 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 3 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 4 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 5 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 6 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module, Distortiones::LIGHT_CHANNEL_MODE + 7 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 8 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 9 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 10 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 11 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 12 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 13 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 14 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module, Distortiones::LIGHT_CHANNEL_MODE + 15 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 0 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 1 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 2 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 3 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 4 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 5 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 6 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 7 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 8 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 9 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 10 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 11 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 12 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 13 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 14 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module,
+			Distortiones::LIGHT_CHANNEL_MODE + 15 * 3));
 	}
 
 	void appendContextMenu(Menu* menu) override {

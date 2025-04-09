@@ -40,10 +40,10 @@ struct Incurvationes : SanguineModule {
 	};
 
 
-	int frame[PORT_MAX_CHANNELS] = {};
+	int frames[PORT_MAX_CHANNELS] = {};
 	static const int kLightFrequency = 128;
 
-	warps::Modulator warpsModulator[PORT_MAX_CHANNELS];
+	warps::Modulator modulators[PORT_MAX_CHANNELS];
 	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 	warps::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 
@@ -51,7 +51,7 @@ struct Incurvationes : SanguineModule {
 
 	dsp::ClockDivider lightsDivider;
 
-	warps::Parameters* warpsParameters[PORT_MAX_CHANNELS];
+	warps::Parameters* parameters[PORT_MAX_CHANNELS];
 
 	Incurvationes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -80,9 +80,9 @@ struct Incurvationes : SanguineModule {
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&warpsModulator[channel], 0, sizeof(warps::Modulator));
-			warpsModulator[channel].Init(96000.f);
-			warpsParameters[channel] = warpsModulator[channel].mutable_parameters();
+			memset(&modulators[channel], 0, sizeof(warps::Modulator));
+			modulators[channel].Init(96000.f);
+			parameters[channel] = modulators[channel].mutable_parameters();
 		}
 
 		lightsDivider.setDivision(kLightFrequency);
@@ -99,15 +99,15 @@ struct Incurvationes : SanguineModule {
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 
-			warpsParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+			parameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
 
-			warpsModulator[channel].set_easter_egg(bEasterEggEnabled);
+			modulators[channel].set_easter_egg(bEasterEggEnabled);
 
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= warpiescommon::kBlockSize) {
-				frame[channel] = 0;
+			if (++frames[channel] >= warpiescommon::kBlockSize) {
+				frames[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
 				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
@@ -117,39 +117,41 @@ struct Incurvationes : SanguineModule {
 
 				f4Voltages /= 5.f;
 
-				warpsParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
-				warpsParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
 
-				warpsParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
+				parameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
 
-				warpsParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
 
-				warpsParameters[channel]->frequency_shift_pot = algorithmValue;
-				warpsParameters[channel]->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
-				warpsParameters[channel]->phase_shift = warpsParameters[channel]->modulation_algorithm;
+				parameters[channel]->frequency_shift_pot = algorithmValue;
+				parameters[channel]->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
+				parameters[channel]->phase_shift = parameters[channel]->modulation_algorithm;
 
-				warpsParameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f *
+				parameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f *
 					inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
-				warpsParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
+				parameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				warpsModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
+				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768),
+				-32768, 32767);
+			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768),
+				-32768, 32767);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
-			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
+			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
+			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			lights[LIGHT_CARRIER + 0].value = (warpsParameters[0]->carrier_shape == 1
-				|| warpsParameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
-			lights[LIGHT_CARRIER + 1].value = (warpsParameters[0]->carrier_shape == 2
-				|| warpsParameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER + 0].value = (parameters[0]->carrier_shape == 1
+				|| parameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER + 1].value = (parameters[0]->carrier_shape == 2
+				|| parameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
 
 			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? kSanguineButtonLightValue : 0.f);
 
@@ -166,7 +168,8 @@ struct Incurvationes : SanguineModule {
 				}
 
 				if (channel < channelCount) {
-					float zone = 8.f * (bEasterEggEnabled ? warpsParameters[channel]->phase_shift : warpsParameters[channel]->modulation_algorithm);
+					float zone = 8.f * (bEasterEggEnabled ? parameters[channel]->phase_shift :
+						parameters[channel]->modulation_algorithm);
 
 					MAKE_INTEGRAL_FRACTIONAL(zone);
 					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
@@ -224,22 +227,38 @@ struct IncurvationesWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(32.044, 112.172), module, Incurvationes::OUTPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(42.896, 112.172), module, Incurvationes::OUTPUT_AUX));
 
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 0 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 1 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 2 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 3 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 4 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 5 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 6 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 7 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 8 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 9 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 10 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 11 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 12 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 13 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 14 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module, Incurvationes::LIGHT_CHANNEL_ALGORITHM + 15 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 0 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 1 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 2 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 3 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 4 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 5 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 6 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 7 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 8 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 9 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 10 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 11 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 12 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 13 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 14 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module,
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 15 * 3));
 	}
 };
 
