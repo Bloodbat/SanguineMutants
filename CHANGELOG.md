@@ -10,9 +10,12 @@
 
 ## Changes
 
+- Plugin source: move common Sanguine Modules sources to submodule.
+
 - Explorator: produce Prism noise wave forms more akin to original implementation (Note: Prism noise is now LOUDER).
 
-- Plugin source: move common Sanguine Modules sources to submodule.
+- Temulenti: remove clamping on pitch to allow reaching really low LFO frequencies.
+
 
 ---
 
