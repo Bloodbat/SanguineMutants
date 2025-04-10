@@ -333,8 +333,8 @@ namespace bumps {
 
 		/* We split the slope button into two: original slope on the first
 		   half, compression on the second. */
-		int16_t compress = -slope_;
-		int16_t slope = slope_;
+		int32_t compress = -slope_;
+		int32_t slope = slope_;
 		CONSTRAIN(slope, 0, 32767);
 		CONSTRAIN(compress, 0, 32767);
 
