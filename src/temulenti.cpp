@@ -103,11 +103,11 @@ struct Temulenti : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
-		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
-		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
-		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape");
-		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope");
-		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness");
+		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Frequency", " semitones");
+		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM attenuverter", " centitones");
+		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape", "%", 0, 100);
+		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope", "%", 0, 100);
+		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness", "%", 0, 100);
 
 		configSwitch(PARAM_MODEL, 0.f, 3.f, 0.f, "Module model", temulenti::menuLabels);
 
