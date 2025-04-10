@@ -161,8 +161,8 @@ struct Temulenti : SanguineModule {
 			}
 
 			// Pitch
-			float pitchParam = clamp(params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
-				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f, -60.f, 60.f);
+			float pitchParam = params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
+				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
 			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
 
 			pitchParam += 60.f;
