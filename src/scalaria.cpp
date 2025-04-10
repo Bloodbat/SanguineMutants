@@ -58,16 +58,16 @@ struct Scalaria : SanguineModule {
         LIGHTS_COUNT
     };
 
-    int frame[PORT_MAX_CHANNELS] = {};
+    int frames[PORT_MAX_CHANNELS] = {};
 
     static const int kLightFrequency = 128;
 
     dsp::ClockDivider lightsDivider;
-    scalaria::ScalariaModulator scalariaModulator[PORT_MAX_CHANNELS];
+    scalaria::ScalariaModulator modulators[PORT_MAX_CHANNELS];
     scalaria::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize];
     scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize];
 
-    scalaria::Parameters* scalariaParameters[PORT_MAX_CHANNELS];
+    scalaria::Parameters* parameters[PORT_MAX_CHANNELS];
 
     Scalaria() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -98,9 +98,9 @@ struct Scalaria : SanguineModule {
         configBypass(INPUT_CHANNEL_1, OUTPUT_CHANNEL_1_PLUS_2);
 
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-            memset(&scalariaModulator[channel], 0, sizeof(scalaria::ScalariaModulator));
-            scalariaModulator[channel].Init(scalaria::ksampleRate);
-            scalariaParameters[channel] = scalariaModulator[channel].mutableParameters();
+            memset(&modulators[channel], 0, sizeof(scalaria::ScalariaModulator));
+            modulators[channel].Init(scalaria::ksampleRate);
+            parameters[channel] = modulators[channel].mutableParameters();
         }
 
         lightsDivider.setDivision(kLightFrequency);
@@ -120,13 +120,13 @@ struct Scalaria : SanguineModule {
         float resonanceAttenuverterValue = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
 
         for (int channel = 0; channel < channelCount; ++channel) {
-            scalariaParameters[channel]->oscillatorShape = params[PARAM_INTERNAL_OSCILLATOR].getValue();
+            parameters[channel]->oscillatorShape = params[PARAM_INTERNAL_OSCILLATOR].getValue();
 
             float_4 f4Voltages;
 
             // Buffer loop
-            if (++frame[channel] >= warpiescommon::kBlockSize) {
-                frame[channel] = 0;
+            if (++frames[channel] >= warpiescommon::kBlockSize) {
+                frames[channel] = 0;
 
                 // CHANNEL_1_LEVEL and CHANNEL_2_LEVEL are normalized values: from cv_scaler.cc and a PR by Brian Head to AI's repository.
                 f4Voltages[0] = inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(5.f, channel);
@@ -136,46 +136,46 @@ struct Scalaria : SanguineModule {
 
                 f4Voltages /= 5.f;
 
-                scalariaParameters[channel]->channel_drive[0] = clamp(params[PARAM_CHANNEL_1_LEVEL].getValue() * f4Voltages[0], 0.f, 1.f);
-                scalariaParameters[channel]->channel_drive[1] = clamp(params[PARAM_CHANNEL_2_LEVEL].getValue() * f4Voltages[1], 0.f, 1.f);
+                parameters[channel]->channel_drive[0] = clamp(params[PARAM_CHANNEL_1_LEVEL].getValue() * f4Voltages[0], 0.f, 1.f);
+                parameters[channel]->channel_drive[1] = clamp(params[PARAM_CHANNEL_2_LEVEL].getValue() * f4Voltages[1], 0.f, 1.f);
 
-                scalariaParameters[channel]->rawFrequency = clamp(frequencyValue +
+                parameters[channel]->rawFrequency = clamp(frequencyValue +
                     (f4Voltages[2] * frequencyAttenuverterValue), 0.f, 1.f);
 
-                scalariaParameters[channel]->rawResonance = clamp(params[PARAM_RESONANCE].getValue() +
+                parameters[channel]->rawResonance = clamp(params[PARAM_RESONANCE].getValue() +
                     (f4Voltages[3] * resonanceAttenuverterValue), 0.f, 1.f);
 
-                scalariaParameters[channel]->note = 60.f * params[PARAM_CHANNEL_1_LEVEL].getValue() + 12.f
+                parameters[channel]->note = 60.f * params[PARAM_CHANNEL_1_LEVEL].getValue() + 12.f
                     * inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
-                scalariaParameters[channel]->note += log2f(scalaria::ksampleRate * args.sampleTime) * 12.f;
+                parameters[channel]->note += log2f(scalaria::ksampleRate * args.sampleTime) * 12.f;
 
-                scalariaModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
+                modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
             }
 
-            inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CHANNEL_1].getVoltage(channel) / 8.f * 32768),
+            inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(inputs[INPUT_CHANNEL_1].getVoltage(channel) / 8.f * 32768),
                 -32768, 32767);
-            inputFrames[channel][frame[channel]].r = clamp(static_cast<int>(inputs[INPUT_CHANNEL_2].getVoltage(channel) / 8.f * 32768),
+            inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(inputs[INPUT_CHANNEL_2].getVoltage(channel) / 8.f * 32768),
                 -32768, 32767);
 
-            outputs[OUTPUT_CHANNEL_1_PLUS_2].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
-            outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
+            outputs[OUTPUT_CHANNEL_1_PLUS_2].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
+            outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
         }
 
         if (lightsDivider.process()) {
             const float sampleTime = kLightFrequency * args.sampleTime;
 
-            bool bHaveInternalOscillator = !scalariaParameters[0]->oscillatorShape == 0;
+            bool bHaveInternalOscillator = !parameters[0]->oscillatorShape == 0;
 
             lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(bHaveInternalOscillator ?
                 0.f : kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 1 ?
+            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth(parameters[0]->oscillatorShape == 1 ?
                 kSanguineButtonLightValue : 0.f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 2 ?
+            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth(parameters[0]->oscillatorShape == 2 ?
                 kSanguineButtonLightValue : 0.f, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth(scalariaParameters[0]->oscillatorShape == 3 ?
+            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth(parameters[0]->oscillatorShape == 3 ?
                 kSanguineButtonLightValue : 0.f, sampleTime);
 
             lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator ?
@@ -193,7 +193,7 @@ struct Scalaria : SanguineModule {
 
                     palette = scalaria::paletteFrequencies;
 
-                    zone = 8.f * scalariaParameters[channel]->rawFrequency;
+                    zone = 8.f * parameters[channel]->rawFrequency;
                     MAKE_INTEGRAL_FRACTIONAL(zone);
                     int zone_fractional_i = static_cast<int>(zone_fractional * 256);
                     for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
