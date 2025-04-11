@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -36,13 +36,11 @@
 #include "clouds_parasite/etesia_resources.h"
 
 namespace etesia {
-
 	using namespace std;
 	using namespace parasites_stmlib;
 
-	void EtesiaGranularProcessor::Init(
-		void* large_buffer, size_t large_buffer_size,
-		void* small_buffer, size_t small_buffer_size) {
+	void EtesiaGranularProcessor::Init(void* large_buffer, size_t large_buffer_size, void* small_buffer,
+		size_t small_buffer_size) {
 		buffer_[0] = large_buffer;
 		buffer_[1] = small_buffer;
 		buffer_size_[0] = large_buffer_size;
@@ -71,18 +69,15 @@ namespace etesia {
 	}
 
 	void EtesiaGranularProcessor::ProcessGranular(FloatFrame* input, FloatFrame* output, size_t size) {
-		// At the exception of the spectral mode, all modes require the incoming
-		// audio signal to be written to the recording buffer.
-		if (playback_mode_ != PLAYBACK_MODE_SPECTRAL &&
-			playback_mode_ != PLAYBACK_MODE_RESONESTOR) {
+		/* Except for spectral and resonestor modes, all modes require the incoming
+		   audio signal to be written to the recording buffer. */
+		if (playback_mode_ != PLAYBACK_MODE_SPECTRAL && playback_mode_ != PLAYBACK_MODE_RESONESTOR) {
 			const float* input_samples = &input[0].l;
-			const bool play = !parameters_.freeze ||
-				playback_mode_ == PLAYBACK_MODE_OLIVERB;
+			const bool play = !parameters_.freeze || playback_mode_ == PLAYBACK_MODE_OLIVERB;
 			for (int32_t i = 0; i < num_channels_; ++i) {
 				if (resolution() == 8) {
 					buffer_8_[i].WriteFade(&input_samples[i], size, 2, play);
-				}
-				else {
+				} else {
 					buffer_16_[i].WriteFade(&input_samples[i], size, 2, play);
 				}
 			}
@@ -94,11 +89,9 @@ namespace etesia {
 			parameters_.granular.use_deterministic_seed = parameters_.density < 0.5f;
 			if (parameters_.density >= 0.53f) {
 				parameters_.granular.overlap = (parameters_.density - 0.53f) * 2.12f;
-			}
-			else if (parameters_.density <= 0.47f) {
+			} else if (parameters_.density <= 0.47f) {
 				parameters_.granular.overlap = (0.47f - parameters_.density) * 2.12f;
-			}
-			else {
+			} else {
 				parameters_.granular.overlap = 0.0f;
 			}
 
@@ -109,13 +102,12 @@ namespace etesia {
 #endif
 
 			// And TEXTURE too.
-			parameters_.granular.window_shape = parameters_.texture < 0.75f
-				? parameters_.texture * 1.333f : 1.0f;
+			parameters_.granular.window_shape = parameters_.texture < 0.75f ? parameters_.texture * 1.333f :
+				1.0f;
 
 			if (resolution() == 8) {
 				player_.Play(buffer_8_, parameters_, &output[0].l, size);
-			}
-			else {
+			} else {
 				player_.Play(buffer_16_, parameters_, &output[0].l, size);
 			}
 			break;
@@ -123,8 +115,7 @@ namespace etesia {
 		case PLAYBACK_MODE_STRETCH:
 			if (resolution() == 8) {
 				ws_player_.Play(buffer_8_, parameters_, &output[0].l, size);
-			}
-			else {
+			} else {
 				ws_player_.Play(buffer_16_, parameters_, &output[0].l, size);
 			}
 			break;
@@ -132,8 +123,7 @@ namespace etesia {
 		case PLAYBACK_MODE_LOOPING_DELAY:
 			if (resolution() == 8) {
 				looper_.Play(buffer_8_, parameters_, &output[0].l, size);
-			}
-			else {
+			} else {
 				looper_.Play(buffer_16_, parameters_, &output[0].l, size);
 			}
 			break;
@@ -164,7 +154,7 @@ namespace etesia {
 		{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-			// Pre-delay, controlled by position or tap tempo sync
+			// Pre-delay, controlled by position or tap tempo sync.
 			Parameters p = {
 			  ws_player_.synchronized() ?
 			  parameters_.position :
@@ -185,12 +175,11 @@ namespace etesia {
 
 			if (resolution() == 8) {
 				ws_player_.Play(buffer_8_, p, &output[0].l, size);
-			}
-			else {
+			} else {
 				ws_player_.Play(buffer_16_, p, &output[0].l, size);
 			}
 
-			// Settings of the reverb
+			// Reverb settings.
 			oliverb_.set_diffusion(0.3f + 0.5f * parameters_.stereo_spread);
 			oliverb_.set_size(0.05f + 0.94f * parameters_.size);
 			oliverb_.set_mod_rate(parameters_.feedback);
@@ -201,12 +190,8 @@ namespace etesia {
 			const float limit = 0.7f;
 			const float slew = 0.4f;
 
-			float wet =
-				x < -limit ? 1.0f :
-				x < -limit + slew ? 1.0f - (x + limit) / slew :
-				x < limit - slew ? 0.0f :
-				x < limit ? 1.0f + (x - limit) / slew :
-				1.0f;
+			float wet = x < -limit ? 1.0f : x < -limit + slew ? 1.0f - (x + limit) / slew :
+				x < limit - slew ? 0.0f : x < limit ? 1.0f + (x - limit) / slew : 1.0f;
 			oliverb_.set_pitch_shift_amount(wet);
 
 			if (parameters_.freeze) {
@@ -214,20 +199,15 @@ namespace etesia {
 				oliverb_.set_decay(1.0f);
 				oliverb_.set_lp(1.0f);
 				oliverb_.set_hp(0.0f);
-			}
-			else {
-				oliverb_.set_decay(parameters_.density * 1.3f
-					+ 0.15f * abs(parameters_.pitch) / 24.0f);
+			} else {
+				oliverb_.set_decay(parameters_.density * 1.3f +
+					0.15f * abs(parameters_.pitch) / 24.0f);
 				oliverb_.set_input_gain(0.5f);
-				float lp = parameters_.texture < 0.5f ?
-					parameters_.texture * 2.0f : 1.0f;
-				float hp = parameters_.texture > 0.5f ?
-					(parameters_.texture - 0.5f) * 2.0f : 0.0f;
+				float lp = parameters_.texture < 0.5f ? parameters_.texture * 2.0f : 1.0f;
+				float hp = parameters_.texture > 0.5f ? (parameters_.texture - 0.5f) * 2.0f : 0.0f;
 				oliverb_.set_lp(0.03f + 0.9f * lp);
-				oliverb_.set_hp(0.01f + 0.2f * hp); // the small offset
-				// gets rid of
-				// feedback of large
-				// DC offset.
+				/* The small offset gets rid of feedback of large DC offset */
+				oliverb_.set_hp(0.01f + 0.2f * hp);
 			}
 			oliverb_.Process(output, size);
 		}
@@ -244,10 +224,8 @@ namespace etesia {
 			resonestor_.set_burst_comb((1.0f - parameters_.position));
 			resonestor_.set_burst_duration((1.0f - parameters_.position));
 			resonestor_.set_spread_amount(parameters_.reverb);
-			resonestor_.set_stereo(parameters_.stereo_spread < 0.5f ? 0.0f :
-				(parameters_.stereo_spread - 0.5f) * 2.0f);
-			resonestor_.set_separation(parameters_.stereo_spread > 0.5f ? 0.0f :
-				(0.5f - parameters_.stereo_spread) * 2.0f);
+			resonestor_.set_stereo(parameters_.stereo_spread < 0.5f ? 0.0f : (parameters_.stereo_spread - 0.5f) * 2.0f);
+			resonestor_.set_separation(parameters_.stereo_spread > 0.5f ? 0.0f : (0.5f - parameters_.stereo_spread) * 2.0f);
 			resonestor_.set_freeze(parameters_.freeze);
 			resonestor_.set_harmonicity(1.0f - (parameters_.feedback * 0.5f));
 			resonestor_.set_distortion(parameters_.dry_wet);
@@ -258,8 +236,7 @@ namespace etesia {
 				float l = 1.0f - (0.5f - t) / 0.5f;
 				l = l * (1.0f - 0.08f) + 0.08f;
 				resonestor_.set_damp(l * l);
-			}
-			else {
+			} else {
 				resonestor_.set_damp(1.0f);
 				float n = (t - 0.5f) / 0.5f * 1.35f;
 				n *= n * n * n;
@@ -282,18 +259,14 @@ namespace etesia {
 		}
 	}
 
-	void EtesiaGranularProcessor::Process(
-		ShortFrame* input,
-		ShortFrame* output,
-		size_t size) {
-		// TIC
+	void EtesiaGranularProcessor::Process(ShortFrame* input, ShortFrame* output, size_t size) {
+		// TIC.
 		if (bypass_) {
 			copy(&input[0], &input[size], &output[0]);
 			return;
 		}
 
-		if (silence_ || reset_buffers_ ||
-			previous_playback_mode_ != playback_mode_) {
+		if (silence_ || reset_buffers_ || previous_playback_mode_ != playback_mode_) {
 			short* output_samples = &output[0].l;
 			fill(&output_samples[0], &output_samples[size << 1], 0);
 			return;
@@ -308,18 +281,18 @@ namespace etesia {
 		if (num_channels_ == 1) {
 			for (size_t i = 0; i < size; ++i) {
 				float xfade = 0.5f;
-				// in mono delay modes, stereo spread controls input crossfade
-				if (playback_mode_ == PLAYBACK_MODE_LOOPING_DELAY ||
-					playback_mode_ == PLAYBACK_MODE_STRETCH)
+				// In mono delay modes, stereo spread controls input crossfade.
+				if (playback_mode_ == PLAYBACK_MODE_LOOPING_DELAY || playback_mode_ == PLAYBACK_MODE_STRETCH) {
 					xfade = parameters_.stereo_spread;
+				}
 
 				in_[i].l = in_[i].l * (1.0f - xfade) + in_[i].r * xfade;
 				in_[i].r = in_[i].l;
 			}
 		}
 
-		// Apply feedback, with high-pass filtering to prevent build-ups at very
-		// low frequencies (causing large DC swings).
+		/* Apply feedback, with high-pass filtering to prevent build-ups at very
+		   low frequencies (causing large DC swings). */
 		float feedback = parameters_.feedback;
 
 		if (playback_mode_ != PLAYBACK_MODE_OLIVERB &&
@@ -332,10 +305,8 @@ namespace etesia {
 			fb_filter_[1].Process<FILTER_MODE_HIGH_PASS>(&fb_[0].r, &fb_[0].r, size, 2);
 			float fb_gain = feedback * (2.0f - feedback) * (1.0f - freeze_lp_);
 			for (size_t i = 0; i < size; ++i) {
-				in_[i].l += fb_gain * (
-					SoftLimit(fb_gain * 1.4f * fb_[i].l + in_[i].l) - in_[i].l);
-				in_[i].r += fb_gain * (
-					SoftLimit(fb_gain * 1.4f * fb_[i].r + in_[i].r) - in_[i].r);
+				in_[i].l += fb_gain * (SoftLimit(fb_gain * 1.4f * fb_[i].l + in_[i].l) - in_[i].l);
+				in_[i].r += fb_gain * (SoftLimit(fb_gain * 1.4f * fb_[i].r + in_[i].r) - in_[i].r);
 			}
 		}
 
@@ -344,8 +315,7 @@ namespace etesia {
 			src_down_.Process(in_, in_downsampled_, size);
 			ProcessGranular(in_downsampled_, out_downsampled_, downsampled_size);
 			src_up_.Process(out_downsampled_, out_, downsampled_size);
-		}
-		else {
+		} else {
 			ProcessGranular(in_, out_, size);
 		}
 
@@ -354,56 +324,44 @@ namespace etesia {
 			playback_mode_ != PLAYBACK_MODE_OLIVERB &&
 			playback_mode_ != PLAYBACK_MODE_RESONESTOR) {
 			float texture = parameters_.texture;
-			float diffusion = playback_mode_ == PLAYBACK_MODE_GRANULAR
-				? texture > 0.75f ? (texture - 0.75f) * 4.0f : 0.0f
-				: parameters_.density;
+			float diffusion = playback_mode_ == PLAYBACK_MODE_GRANULAR ? texture > 0.75f ?
+				(texture - 0.75f) * 4.0f : 0.0f : parameters_.density;
 			diffuser_.set_amount(diffusion);
 			diffuser_.Process(out_, size);
 		}
 
-		if (playback_mode_ == PLAYBACK_MODE_LOOPING_DELAY &&
-			(!parameters_.freeze || looper_.synchronized())) {
+		if (playback_mode_ == PLAYBACK_MODE_LOOPING_DELAY && (!parameters_.freeze ||
+			looper_.synchronized())) {
 			pitch_shifter_.set_ratio(SemitonesToRatio(parameters_.pitch));
 			pitch_shifter_.set_size(parameters_.size);
 			float x = parameters_.pitch;
 			const float limit = 0.7f;
 			const float slew = 0.4f;
-			float wet =
-				x < -limit ? 1.0f :
-				x < -limit + slew ? 1.0f - (x + limit) / slew :
-				x < limit - slew ? 0.0f :
-				x < limit ? 1.0f + (x - limit) / slew :
-				1.0f;
+			float wet = x < -limit ? 1.0f : x < -limit + slew ? 1.0f - (x + limit) / slew : x < limit - slew ?
+				0.0f : x < limit ? 1.0f + (x - limit) / slew : 1.0f;
 			pitch_shifter_.set_dry_wet(wet);
 			pitch_shifter_.Process(out_, size);
 		}
 
 		// Apply filters.
-		if (playback_mode_ == PLAYBACK_MODE_LOOPING_DELAY ||
-			playback_mode_ == PLAYBACK_MODE_STRETCH) {
+		if (playback_mode_ == PLAYBACK_MODE_LOOPING_DELAY || playback_mode_ == PLAYBACK_MODE_STRETCH) {
 			float cutoff = parameters_.texture;
-			float lp_cutoff = 0.5f * SemitonesToRatio(
-				(cutoff < 0.5f ? cutoff - 0.5f : 0.0f) * 216.0f);
-			float hp_cutoff = 0.25f * SemitonesToRatio(
-				(cutoff < 0.5f ? -0.5f : cutoff - 1.0f) * 216.0f);
+			float lp_cutoff = 0.5f * SemitonesToRatio((cutoff < 0.5f ? cutoff - 0.5f : 0.0f) * 216.0f);
+			float hp_cutoff = 0.25f * SemitonesToRatio((cutoff < 0.5f ? -0.5f : cutoff - 1.0f) * 216.0f);
 			CONSTRAIN(lp_cutoff, 0.0f, 0.499f);
 			CONSTRAIN(hp_cutoff, 0.0f, 0.499f);
 
 			lp_filter_[0].set_f_q<FREQUENCY_FAST>(lp_cutoff, 0.9f);
-			lp_filter_[0].Process<FILTER_MODE_LOW_PASS>(
-				&out_[0].l, &out_[0].l, size, 2);
+			lp_filter_[0].Process<FILTER_MODE_LOW_PASS>(&out_[0].l, &out_[0].l, size, 2);
 
 			lp_filter_[1].set(lp_filter_[0]);
-			lp_filter_[1].Process<FILTER_MODE_LOW_PASS>(
-				&out_[0].r, &out_[0].r, size, 2);
+			lp_filter_[1].Process<FILTER_MODE_LOW_PASS>(&out_[0].r, &out_[0].r, size, 2);
 
 			hp_filter_[0].set_f_q<FREQUENCY_FAST>(hp_cutoff, 0.9f);
-			hp_filter_[0].Process<FILTER_MODE_HIGH_PASS>(
-				&out_[0].l, &out_[0].l, size, 2);
+			hp_filter_[0].Process<FILTER_MODE_HIGH_PASS>(&out_[0].l, &out_[0].l, size, 2);
 
 			hp_filter_[1].set(hp_filter_[0]);
-			hp_filter_[1].Process<FILTER_MODE_HIGH_PASS>(
-				&out_[0].r, &out_[0].r, size, 2);
+			hp_filter_[1].Process<FILTER_MODE_HIGH_PASS>(&out_[0].r, &out_[0].r, size, 2);
 		}
 
 		// This is what is fed back. Reverb is not fed back.
@@ -424,7 +382,7 @@ namespace etesia {
 			}
 		}
 
-		// Apply the simple post-processing reverb.
+		// Apply simple post-processing reverb.
 		if (playback_mode_ != PLAYBACK_MODE_OLIVERB &&
 			playback_mode_ != PLAYBACK_MODE_RESONESTOR) {
 			float reverb_amount = parameters_.reverb;
@@ -447,16 +405,13 @@ namespace etesia {
 	}
 
 	void EtesiaGranularProcessor::PreparePersistentData() {
-		persistent_state_.write_head[0] = low_fidelity_ ?
-			buffer_8_[0].head() : buffer_16_[0].head();
-		persistent_state_.write_head[1] = low_fidelity_ ?
-			buffer_8_[1].head() : buffer_16_[1].head();
+		persistent_state_.write_head[0] = low_fidelity_ ? buffer_8_[0].head() : buffer_16_[0].head();
+		persistent_state_.write_head[1] = low_fidelity_ ? buffer_8_[1].head() : buffer_16_[1].head();
 		persistent_state_.quality = quality();
 		persistent_state_.spectral = playback_mode() == PLAYBACK_MODE_SPECTRAL;
 	}
 
-	void EtesiaGranularProcessor::GetPersistentData(
-		PersistentBlock* block, size_t* num_blocks) {
+	void EtesiaGranularProcessor::GetPersistentData(PersistentBlock* block, size_t* num_blocks) {
 		PersistentBlock* first_block = block;
 
 		block->tag = FourCC<'s', 't', 'a', 't'>::value;
@@ -475,7 +430,7 @@ namespace etesia {
 	}
 
 	bool EtesiaGranularProcessor::LoadPersistentData(const uint32_t* data) {
-		// Force a silent output while the swapping of buffers takes place.
+		// Force silent output while the swapping of buffers takes place.
 		silence_ = true;
 
 		PersistentBlock block[4];
@@ -489,8 +444,8 @@ namespace etesia {
 				return false;
 			}
 
-			// All good. Load the data. 2 words have already been used for the block tag
-			// and the block size.
+			/* All good. Load the data. 2 words have already been used for the block tag
+			   and the block size. */
 			data += 2;
 			memcpy(block[i].data, data, block[i].size);
 			data += block[i].size / sizeof(uint32_t);
@@ -500,15 +455,13 @@ namespace etesia {
 				bool currently_spectral = playback_mode_ == PLAYBACK_MODE_SPECTRAL;
 				bool requires_spectral = persistent_state_.spectral;
 				if (currently_spectral ^ requires_spectral) {
-					set_playback_mode(requires_spectral
-						? PLAYBACK_MODE_SPECTRAL
-						: PLAYBACK_MODE_GRANULAR);
+					set_playback_mode(requires_spectral ? PLAYBACK_MODE_SPECTRAL : PLAYBACK_MODE_GRANULAR);
 				}
 				set_quality(persistent_state_.quality);
 
-				// We can force a switch to this mode, and once everything has been
-				// initialized for this mode, we continue with the loop to copy the
-				// actual buffer data - with all state variables correctly initialized.
+				/* We can force a switch to this mode, and once everything has been
+				   initialized for this mode; we continue with the loop to copy the
+				   actual buffer data - with all state variables correctly initialized. */
 				Prepare();
 				GetPersistentData(block, &num_blocks);
 			}
@@ -518,8 +471,7 @@ namespace etesia {
 		if (low_fidelity_) {
 			buffer_8_[0].Resync(persistent_state_.write_head[0]);
 			buffer_8_[1].Resync(persistent_state_.write_head[1]);
-		}
-		else {
+		} else {
 			buffer_16_[0].Resync(persistent_state_.write_head[0]);
 			buffer_16_[1].Resync(persistent_state_.write_head[1]);
 		}
@@ -530,13 +482,10 @@ namespace etesia {
 
 	void EtesiaGranularProcessor::Prepare() {
 		bool playback_mode_changed = previous_playback_mode_ != playback_mode_;
-		bool benign_change = previous_playback_mode_ != PLAYBACK_MODE_SPECTRAL
-			&& playback_mode_ != PLAYBACK_MODE_SPECTRAL
-			&& playback_mode_ != PLAYBACK_MODE_RESONESTOR
-			&& previous_playback_mode_ != PLAYBACK_MODE_RESONESTOR
-			&& playback_mode_ != PLAYBACK_MODE_OLIVERB
-			&& previous_playback_mode_ != PLAYBACK_MODE_OLIVERB
-			&& previous_playback_mode_ != PLAYBACK_MODE_LAST;
+		bool benign_change = previous_playback_mode_ != PLAYBACK_MODE_SPECTRAL && playback_mode_ != PLAYBACK_MODE_SPECTRAL &&
+			playback_mode_ != PLAYBACK_MODE_RESONESTOR && previous_playback_mode_ != PLAYBACK_MODE_RESONESTOR &&
+			playback_mode_ != PLAYBACK_MODE_OLIVERB && previous_playback_mode_ != PLAYBACK_MODE_OLIVERB &&
+			previous_playback_mode_ != PLAYBACK_MODE_LAST;
 
 		if (!reset_buffers_ && playback_mode_changed && benign_change) {
 			ResetFilters();
@@ -562,8 +511,7 @@ namespace etesia {
 				buffer_size[1] = 0;
 				workspace = buffer_[1];
 				workspace_size = buffer_size_[1];
-			}
-			else {
+			} else {
 				// Large buffer: 64k of sample memory + FX workspace.
 				// small buffer: 64k of sample memory.
 				buffer_size[0] = buffer_size[1] = buffer_size_[1];
@@ -581,45 +529,30 @@ namespace etesia {
 			uint16_t* reverb_buffer = allocator.Allocate<uint16_t>(16384);
 			if (playback_mode_ == PLAYBACK_MODE_OLIVERB) {
 				oliverb_.Init(reverb_buffer);
-			}
-			else {
+			} else {
 				reverb_.Init(reverb_buffer);
 			}
 
 			size_t correlator_block_size = (kMaxWSOLASize / 32) + 2;
-			uint32_t* correlator_data = allocator.Allocate<uint32_t>(
-				correlator_block_size * 3);
-			correlator_.Init(
-				&correlator_data[0],
-				&correlator_data[correlator_block_size]);
+			uint32_t* correlator_data = allocator.Allocate<uint32_t>(correlator_block_size * 3);
+			correlator_.Init(&correlator_data[0], &correlator_data[correlator_block_size]);
 			pitch_shifter_.Init((uint16_t*)correlator_data);
 
 			if (playback_mode_ == PLAYBACK_MODE_SPECTRAL) {
-				phase_vocoder_.Init(
-					buffer, buffer_size,
-					lut_sine_window_4096, 4096,
-					num_channels_, resolution(), sr);
-			}
-			else if (playback_mode_ == PLAYBACK_MODE_RESONESTOR) {
+				phase_vocoder_.Init(buffer, buffer_size, lut_sine_window_4096, 4096, num_channels_,
+					resolution(), sr);
+			} else if (playback_mode_ == PLAYBACK_MODE_RESONESTOR) {
 				float* buf = (float*)buffer[0];
 				resonestor_.Init(buf);
-			}
-			else {
+			} else {
 				for (int32_t i = 0; i < num_channels_; ++i) {
 					if (resolution() == 8) {
-						buffer_8_[i].Init(
-							buffer[i],
-							(buffer_size[i]),
-							tail_buffer_[i]);
-					}
-					else {
-						buffer_16_[i].Init(
-							buffer[i],
-							((buffer_size[i]) >> 1),
-							tail_buffer_[i]);
+						buffer_8_[i].Init(buffer[i], (buffer_size[i]), tail_buffer_[i]);
+					} else {
+						buffer_16_[i].Init(buffer[i], ((buffer_size[i]) >> 1), tail_buffer_[i]);
 					}
 				}
-				int32_t num_grains = (num_channels_ == 1 ? 32 : 26) * \
+				int32_t num_grains = (num_channels_ == 1 ? 32 : 26) *
 					(low_fidelity_ ? 20 : 16) >> 4;
 				player_.Init(num_channels_, num_grains);
 				ws_player_.Init(&correlator_, num_channels_);
@@ -631,17 +564,13 @@ namespace etesia {
 
 		if (playback_mode_ == PLAYBACK_MODE_SPECTRAL) {
 			phase_vocoder_.Buffer();
-		}
-		else if (playback_mode_ == PLAYBACK_MODE_STRETCH ||
-			playback_mode_ == PLAYBACK_MODE_OLIVERB) {
+		} else if (playback_mode_ == PLAYBACK_MODE_STRETCH || playback_mode_ == PLAYBACK_MODE_OLIVERB) {
 			if (resolution() == 8) {
 				ws_player_.LoadCorrelator(buffer_8_);
-			}
-			else {
+			} else {
 				ws_player_.LoadCorrelator(buffer_16_);
 			}
 			correlator_.EvaluateSomeCandidates();
 		}
 	}
-
 }  // namespace etesia

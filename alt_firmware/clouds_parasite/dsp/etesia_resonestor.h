@@ -65,16 +65,17 @@ namespace etesia {
 		MAKE_INTEGRAL_FRACTIONAL(index)
 			float a = table[index_integral];
 		float b = table[index_integral + 1];
-		if (index_fractional < 1.0f / PLATEAU)
+		if (index_fractional < 1.0f / PLATEAU) {
 			return a + (b - a) * index_fractional * PLATEAU;
-		else
+		} else {
 			return b;
+		}
 	}
 
 	class Resonestor {
 	public:
-		Resonestor() { }
-		~Resonestor() { }
+		Resonestor() {}
+		~Resonestor() {}
 
 		void Init(float* buffer) {
 			engine_.Init(buffer);
@@ -96,13 +97,14 @@ namespace etesia {
 			trigger_ = previous_trigger_ = 0.0f;
 			freeze_ = previous_freeze_ = 0.0f;
 			voice_ = false;
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++) {
 				spread_delay_[i] = Random::GetFloat() * 3999;
+			}
 			burst_lp_.Init();
 			rand_lp_.Init();
 			rand_hp_.Init();
 			rand_hp_.set_f<FREQUENCY_FAST>(1.0f / 32000.0f);
-			for (int v = 0; v < 2; v++)
+			for (int v = 0; v < 2; v++) {
 				for (int p = 0; p < 4; p++) {
 					lp_[p][v].Init();
 					bp_[p][v].Init();
@@ -110,6 +112,7 @@ namespace etesia {
 					comb_period_[p][v] = 0.0f;
 					comb_feedback_[p][v] = 0.0f;
 				}
+			}
 		}
 
 #define MAX_COMB 1000
@@ -121,9 +124,9 @@ namespace etesia {
 				E::Reserve<MAX_COMB,
 				E::Reserve<MAX_COMB,
 				E::Reserve<MAX_COMB,
-				E::Reserve<200,          /* bc */
-				E::Reserve<4000,          /* bd0 */
-				E::Reserve<4000,          /* bd1 */
+				E::Reserve<200,			// bc
+				E::Reserve<4000,		// bd0
+				E::Reserve<4000,		// bd1
 				E::Reserve<MAX_COMB,
 				E::Reserve<MAX_COMB,
 				E::Reserve<MAX_COMB,
@@ -141,7 +144,7 @@ namespace etesia {
 			E::DelayLine<Memory, 10> c31;
 			E::Context c;
 
-			/* switch active voice */
+			// Switch active voice.
 			if (trigger_ && !previous_trigger_ && !freeze_) {
 				voice_ = !voice_;
 			}
@@ -151,7 +154,7 @@ namespace etesia {
 				voice_ = !voice_;
 			}
 
-			/* set comb filters pitch */
+			// Set comb filters pitch.
 			comb_period_[0][voice_] = 32000.0f / BASE_PITCH / SemitonesToRatio(pitch_[voice_]);
 			CONSTRAIN(comb_period_[0][voice_], 0, MAX_COMB);
 			for (int p = 1; p < 4; p++) {
@@ -160,7 +163,7 @@ namespace etesia {
 				CONSTRAIN(comb_period_[p][voice_], 0, MAX_COMB);
 			}
 
-			/* set LP/BP filters frequencies and feedback */
+			// Set LP/BP filters frequencies and feedback.
 			for (int p = 0; p < 4; p++) {
 				float freq = 1.0f / comb_period_[p][voice_];
 				bp_[p][voice_].set_f_q<FREQUENCY_FAST>(freq, narrow_[voice_]);
@@ -170,14 +173,15 @@ namespace etesia {
 				comb_feedback_[p][voice_] = powf(feedback_[voice_], comb_period_[p][voice_] / 32000.0f);
 			}
 
-			/* initiate burst if trigger */
+			// Initiate burst if trigger.
 			if (trigger_ && !previous_trigger_) {
 				previous_trigger_ = trigger_;
 				burst_time_ = comb_period_[0][voice_];
 				burst_time_ *= 2.0f * burst_duration_;
 
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++) {
 					spread_delay_[i] = Random::GetFloat() * (bd0.length - 1);
+				}
 			}
 
 			rand_lp_.set_f_q<FREQUENCY_FAST>(distortion_[voice_] * 0.4f, 1.0f);
@@ -189,9 +193,11 @@ namespace etesia {
 				float burst_gain = burst_time_ > 0.0f ? 1.0f : 0.0f;
 
 				float random = Random::GetFloat() * 2.0f - 1.0f;
-				/* burst noise generation */
+
+				// Burst noise generation.
 				c.Read(random, burst_gain);
-				// goes through comb and lp filters
+
+				// Goes through comb and lp filters.
 				const float comb_fb = 0.6f - burst_comb_ * 0.4f;
 				float comb_del = burst_comb_ * bc.length;
 				if (comb_del <= 1.0f) comb_del = 1.0f;
@@ -218,68 +224,59 @@ namespace etesia {
 				random = rand_lp_.Process<FILTER_MODE_LOW_PASS>(random);
 				random = rand_hp_.Process<FILTER_MODE_HIGH_PASS>(random);
 
-#define COMB(pre, part, voice, vol)                                     \
-      {                                                                 \
-        c.Load(0.0f);                                                   \
-        c.Read(bd ## voice, pre * spread_amount_, vol);                 \
-        float tap = comb_period_[part][voice] * (1.0f + random);        \
-        c.InterpolateHermite(c ## part ## voice, tap ,                  \
-                             comb_feedback_[part][voice] * 0.7f);      \
-        c.InterpolateHermite(c ## part ## voice,                        \
-                             tap * harmonicity_[voice],                 \
-                             comb_feedback_[part][voice] * 0.3f);       \
-        float acc;                                                      \
-        c.Write(acc);                                                   \
-        acc = lp_[part][voice].Process<FILTER_MODE_LOW_PASS>(acc);      \
-        acc = bp_[part][voice].Process<FILTER_MODE_BAND_PASS_NORMALIZED>(acc); \
-        c.Load(acc);                                                    \
-        c.Hp(hp_[part][voice], 10.0f / 32000.0f);                       \
-        c.Write(acc, 0.5f);                                             \
-        c.SoftLimit();                                                  \
-        c.Write(acc, 2.0f);                                             \
-        c.Write(c ## part ## voice, 0.0f);                              \
-      }                                                                 \
+#define COMB(pre, part, voice, vol) {											\
+        c.Load(0.0f);                                                   		\
+        c.Read(bd ## voice, pre * spread_amount_, vol);                 		\
+        float tap = comb_period_[part][voice] * (1.0f + random);        		\
+        c.InterpolateHermite(c ## part ## voice, tap ,                  		\
+                             comb_feedback_[part][voice] * 0.7f);     			\
+        c.InterpolateHermite(c ## part ## voice,                        		\
+                             tap * harmonicity_[voice],                 		\
+                             comb_feedback_[part][voice] * 0.3f);       		\
+        float acc;                                                      		\
+        c.Write(acc);                                                   		\
+        acc = lp_[part][voice].Process<FILTER_MODE_LOW_PASS>(acc);      		\
+        acc = bp_[part][voice].Process<FILTER_MODE_BAND_PASS_NORMALIZED>(acc);	\
+        c.Load(acc);                                                    		\
+        c.Hp(hp_[part][voice], 10.0f / 32000.0f);                       		\
+        c.Write(acc, 0.5f);                                             		\
+        c.SoftLimit();                                                  		\
+        c.Write(acc, 2.0f);                                             		\
+        c.Write(c ## part ## voice, 0.0f);                              		\
+      }                                                                 		\
 
-				/* first voice: */
+				// First voice:
 				COMB(0, 0, 0, !voice_);
 				COMB(spread_delay_[0], 1, 0, !voice_);
 				COMB(spread_delay_[1], 2, 0, !voice_);
 				COMB(spread_delay_[2], 3, 0, !voice_);
 
-				/* second voice: */
+				// Second voice:
 				COMB(0, 0, 1, voice_);
 				COMB(spread_delay_[0], 1, 1, voice_);
 				COMB(spread_delay_[1], 2, 1, voice_);
 				COMB(spread_delay_[2], 3, 1, voice_);
 
-				/* left mix */
-				c.Read(c00, (1.0f + 0.5f * narrow_[0]) *
-					0.25f * (1.0f - stereo_) * (1.0f - separation_));
-				c.Read(c10, (1.0f + 0.5f * narrow_[0]) *
-					(0.25f + 0.25f * stereo_) * (1.0f - separation_));
-				c.Read(c20, (1.0f + 0.5f * narrow_[0]) *
-					(0.25f * (1.0f - stereo_)) * (1.0f - separation_));
-				c.Read(c30, (1.0f + 0.5f * narrow_[0]) *
-					(0.25f + 0.25f * stereo_) * (1.0f - separation_));
+				// Left mix
+				c.Read(c00, (1.0f + 0.5f * narrow_[0]) * 0.25f * (1.0f - stereo_) * (1.0f - separation_));
+				c.Read(c10, (1.0f + 0.5f * narrow_[0]) * (0.25f + 0.25f * stereo_) * (1.0f - separation_));
+				c.Read(c20, (1.0f + 0.5f * narrow_[0]) * (0.25f * (1.0f - stereo_)) * (1.0f - separation_));
+				c.Read(c30, (1.0f + 0.5f * narrow_[0]) * (0.25f + 0.25f * stereo_) * (1.0f - separation_));
 				c.Read(c01, (1.0f + 0.5f * narrow_[1]) * (0.25f + 0.25f * stereo_));
 				c.Read(c11, (1.0f + 0.5f * narrow_[1]) * 0.25f * (1.0f - stereo_));
 				c.Read(c21, (1.0f + 0.5f * narrow_[1]) * (0.25f + 0.25 * stereo_));
 				c.Read(c31, (1.0f + 0.5f * narrow_[1]) * 0.25f * (1.0f - stereo_));
 				c.Write(in_out->l, 0.0f);
 
-				/* right mix */
+				// Right mix
 				c.Read(c00, (1.0f + 0.5f * narrow_[0]) * (0.25f + 0.25f * stereo_));
 				c.Read(c10, (1.0f + 0.5f * narrow_[0]) * 0.25f * (1.0f - stereo_));
 				c.Read(c20, (1.0f + 0.5f * narrow_[0]) * (0.25f + 0.25f * stereo_));
 				c.Read(c30, (1.0f + 0.5f * narrow_[0]) * 0.25f * (1.0f - stereo_));
-				c.Read(c01, (1.0f + 0.5f * narrow_[1]) *
-					0.25f * (1.0f - stereo_) * (1.0f - separation_));
-				c.Read(c11, (1.0f + 0.5f * narrow_[1]) *
-					(0.25f + 0.25f * stereo_) * (1.0f - separation_));
-				c.Read(c21, (1.0f + 0.5f * narrow_[1]) *
-					0.25f * (1.0f - stereo_) * (1.0f - separation_));
-				c.Read(c31, (1.0f + 0.5f * narrow_[1]) *
-					(0.25f + 0.25f * stereo_) * (1.0f - separation_));
+				c.Read(c01, (1.0f + 0.5f * narrow_[1]) * 0.25f * (1.0f - stereo_) * (1.0f - separation_));
+				c.Read(c11, (1.0f + 0.5f * narrow_[1]) * (0.25f + 0.25f * stereo_) * (1.0f - separation_));
+				c.Read(c21, (1.0f + 0.5f * narrow_[1]) * 0.25f * (1.0f - stereo_) * (1.0f - separation_));
+				c.Read(c31, (1.0f + 0.5f * narrow_[1]) * (0.25f + 0.25f * stereo_) * (1.0f - separation_));
 				c.Write(in_out->r, 0.0f);
 
 				++in_out;
@@ -353,7 +350,7 @@ namespace etesia {
 		typedef FxEngine<16384, FORMAT_32_BIT> E;
 		E engine_;
 
-		/* parameters: */
+		// Parameters:
 		float feedback_[2];
 		float pitch_[2];
 		float chord_[2];
@@ -371,7 +368,7 @@ namespace etesia {
 		int16_t trigger_, previous_trigger_;
 		int16_t freeze_, previous_freeze_;
 
-		/* internal states: */
+		// Internal states:
 		float spread_delay_[3];
 		float comb_period_[4][2];
 		float comb_feedback_[4][2];
@@ -388,7 +385,5 @@ namespace etesia {
 
 		DISALLOW_COPY_AND_ASSIGN(Resonestor);
 	};
-
 }  // namespace etesia
-
 #endif  // ETESIA_DSP_RESONESTOR_H_
