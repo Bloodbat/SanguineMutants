@@ -52,7 +52,7 @@ namespace fluctus {
 	private:
 		void Reset(int32_t num_textures);
 		void RectangularToPolar(float* fft_data);
-		void PolarToRectangular(float* mags, float* fft_data);
+		void PolarToRectangular(const float* mags, float* fft_data);
 
 
 		inline void fast_p2r(float magnitude, uint16_t angle, float* re, float* im) {

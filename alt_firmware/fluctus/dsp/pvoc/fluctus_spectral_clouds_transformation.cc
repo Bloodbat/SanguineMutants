@@ -163,14 +163,14 @@ namespace fluctus {
 
 	void SpectralCloudsTransformation::RectangularToPolar(float* fft_data) {
 		float* real = &fft_data[0];
-		float* imag = &fft_data[size_];
+		const float* imag = &fft_data[size_];
 		float* magnitude = &fft_data[0];
 		for (int32_t i = 1; i < size_; ++i) {
 			phases_[i] = fast_atan2r(imag[i], real[i], &magnitude[i]);
 		}
 	}
 
-	void SpectralCloudsTransformation::PolarToRectangular(float* mags, float* fft_out) {
+	void SpectralCloudsTransformation::PolarToRectangular(const float* mags, float* fft_out) {
 		float* real = &fft_out[0];
 		float* imag = &fft_out[size_];
 		for (int32_t i = 1; i < size_; ++i) {
