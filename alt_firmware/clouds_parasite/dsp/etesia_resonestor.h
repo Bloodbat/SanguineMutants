@@ -63,9 +63,9 @@ namespace etesia {
 	inline float InterpolatePlateau(const float* table, float index, float size) {
 		index *= size;
 		MAKE_INTEGRAL_FRACTIONAL(index)
-			float a = table[index_integral];
-		float b = table[index_integral + 1];
+			float b = table[index_integral + 1];
 		if (index_fractional < 1.0f / PLATEAU) {
+			float a = table[index_integral];
 			return a + (b - a) * index_fractional * PLATEAU;
 		} else {
 			return b;

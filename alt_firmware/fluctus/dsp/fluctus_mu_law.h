@@ -41,7 +41,6 @@ namespace fluctus {
   inline unsigned char Lin2MuLaw(int16_t pcm_val) {
     int16_t mask;
     int16_t seg;
-    uint8_t uval;
     pcm_val = pcm_val >> 2;
     if (pcm_val < 0) {
       pcm_val = -pcm_val;
@@ -64,7 +63,7 @@ namespace fluctus {
     if (seg >= 8)
       return static_cast<uint8_t>(0x7f ^ mask);
     else {
-      uval = static_cast<uint8_t>((seg << 4) | ((pcm_val >> (seg + 1)) & 0x0f));
+      uint8_t uval = static_cast<uint8_t>((seg << 4) | ((pcm_val >> (seg + 1)) & 0x0f));
       return (uval ^ mask);
     }
   }
