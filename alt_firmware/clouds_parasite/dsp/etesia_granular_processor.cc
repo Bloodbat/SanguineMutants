@@ -536,13 +536,13 @@ namespace etesia {
 			size_t correlator_block_size = (kMaxWSOLASize / 32) + 2;
 			uint32_t* correlator_data = allocator.Allocate<uint32_t>(correlator_block_size * 3);
 			correlator_.Init(&correlator_data[0], &correlator_data[correlator_block_size]);
-			pitch_shifter_.Init((uint16_t*)correlator_data);
+			pitch_shifter_.Init(reinterpret_cast<uint16_t*>(correlator_data));
 
 			if (playback_mode_ == PLAYBACK_MODE_SPECTRAL) {
 				phase_vocoder_.Init(buffer, buffer_size, lut_sine_window_4096, 4096, num_channels_,
 					resolution(), sr);
 			} else if (playback_mode_ == PLAYBACK_MODE_RESONESTOR) {
-				float* buf = (float*)buffer[0];
+				float* buf = static_cast<float*>(buffer[0]);
 				resonestor_.Init(buf);
 			} else {
 				for (int32_t i = 0; i < num_channels_; ++i) {
