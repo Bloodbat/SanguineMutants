@@ -45,7 +45,7 @@ namespace clouds {
         PhaseVocoder() {}
         ~PhaseVocoder() {}
 
-        void Init(void** buffer, size_t* buffer_size, const float* large_window_lut, size_t largest_fft_size, int32_t num_channels,
+        void Init(void** buffer, const size_t* buffer_size, const float* large_window_lut, size_t largest_fft_size, int32_t num_channels,
             int32_t resolution, float sample_rate);
 
         void Process(const Parameters& parameters, const FloatFrame* input, FloatFrame* output, size_t size);

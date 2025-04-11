@@ -49,8 +49,8 @@ namespace clouds {
     uint32_t num_words = size_ >> 5;
     uint32_t offset_words = candidate_ >> 5;
     uint32_t offset_bits = candidate_ & 0x1f;
-    uint32_t* source = &source_[0];
-    uint32_t* destination = &destination_[offset_words];
+    const uint32_t* source = &source_[0];
+    const uint32_t* destination = &destination_[offset_words];
 
     uint32_t xcorr = 0;
     for (uint32_t i = 0; i < num_words; ++i) {

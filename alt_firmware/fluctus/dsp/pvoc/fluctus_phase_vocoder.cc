@@ -37,7 +37,7 @@ namespace fluctus {
   using namespace std;
   using namespace stmlib;
 
-  void PhaseVocoder::Init(void** buffer, size_t* buffer_size, const float* large_window_lut, size_t largest_fft_size,
+  void PhaseVocoder::Init(void** buffer, const size_t* buffer_size, const float* large_window_lut, size_t largest_fft_size,
     int32_t num_channels, int32_t resolution, float sample_rate) {
     num_channels_ = num_channels;
 

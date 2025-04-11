@@ -98,7 +98,7 @@ namespace etesia {
 
   void FrameTransformation::RectangularToPolar(float* fft_data) {
     float* real = &fft_data[0];
-    float* imag = &fft_data[fft_size_ >> 1];
+    const float* imag = &fft_data[fft_size_ >> 1];
     float* magnitude = &fft_data[0];
     for (int32_t i = 1; i < size_; ++i) {
       uint16_t angle = fast_atan2r(imag[i], real[i], &magnitude[i]);
@@ -220,7 +220,7 @@ namespace etesia {
     { -7.3333f, +9.5f, -2.416667f, 0.25f },
   };
 
-  void FrameTransformation::WarpMagnitudes(float* source, float* xf_polar, float amount) {
+  void FrameTransformation::WarpMagnitudes(const float* source, float* xf_polar, float amount) {
     float bin_width = 1.0f / static_cast<float>(size_);
     float f = 0.0;
 
@@ -270,7 +270,7 @@ namespace etesia {
     copy(&temp[0], &temp[size_], &destination[0]);
   }
 
-  void FrameTransformation::StoreMagnitudes(float* xf_polar, float position, float feedback) {
+  void FrameTransformation::StoreMagnitudes(const float* xf_polar, float position, float feedback) {
     // Write into magnitude buffers.
     float index_float = position * float(num_textures_ - 1);
     int32_t index_int = static_cast<int32_t>(index_float);
@@ -322,8 +322,8 @@ namespace etesia {
     float index_float = position * float(num_textures_ - 1);
     int32_t index_int = static_cast<int32_t>(index_float);
     float index_fractional = index_float - static_cast<float>(index_int);
-    float* a = textures_[index_int];
-    float* b = textures_[index_int + (position == 1.0f ? 0 : 1)];
+    const float* a = textures_[index_int];
+    const float* b = textures_[index_int + (position == 1.0f ? 0 : 1)];
     for (int32_t i = 0; i < size_; ++i) {
       xf_polar[i] = Crossfade(a[i], b[i], index_fractional);
     }

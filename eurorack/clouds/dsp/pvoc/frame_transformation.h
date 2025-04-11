@@ -56,9 +56,9 @@ namespace clouds {
     void PolarToRectangular(float* fft_data);
     void AddGlitch(float* xf_polar);
     void ShiftMagnitudes(float* source, float* xf_polar, float pitch_ratio);
-    void WarpMagnitudes(float* source, float* xf_polar, float amount);
+    void WarpMagnitudes(const float* source, float* xf_polar, float amount);
     void QuantizeMagnitudes(float* xf_polar, float amount);
-    void StoreMagnitudes(float* xf_polar, float position, float feedback);
+    void StoreMagnitudes(const float* xf_polar, float position, float feedback);
     void SetPhases(float* destination, float diffusion, float pitch_ratio);
     void ReplayMagnitudes(float* xf_polar, float position);
     void DiffuseMagnitudes(float* xf_polar, float diffusion);
