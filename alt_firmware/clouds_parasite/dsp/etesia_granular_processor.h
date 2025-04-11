@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -47,7 +47,6 @@
 #include "clouds_parasite/dsp/etesia_wsola_sample_player.h"
 
 namespace etesia {
-
 	const int32_t kDownsamplingFactor = 2;
 
 	enum PlaybackMode {
@@ -76,14 +75,10 @@ namespace etesia {
 
 	class EtesiaGranularProcessor {
 	public:
-		EtesiaGranularProcessor() { }
-		~EtesiaGranularProcessor() { }
+		EtesiaGranularProcessor() {}
+		~EtesiaGranularProcessor() {}
 
-		void Init(
-			void* large_buffer,
-			size_t large_buffer_size,
-			void* small_buffer,
-			size_t small_buffer_size);
+		void Init(void* large_buffer, size_t large_buffer_size, void* small_buffer, size_t small_buffer_size);
 
 		void Process(ShortFrame* input, ShortFrame* output, size_t size);
 		void Prepare();
@@ -127,7 +122,9 @@ namespace etesia {
 			playback_mode_ = playback_mode;
 		}
 
-		inline PlaybackMode playback_mode() const { return playback_mode_; }
+		inline PlaybackMode playback_mode() const {
+			return playback_mode_;
+		}
 
 		inline void set_quality(int32_t quality) {
 			set_num_channels(quality & 1 ? 1 : 2);
@@ -161,8 +158,7 @@ namespace etesia {
 		}
 
 		inline float sample_rate() const {
-			return 32000.0f / \
-				(low_fidelity_ ? kDownsamplingFactor : 1);
+			return 32000.0f / (low_fidelity_ ? kDownsamplingFactor : 1);
 		}
 
 		void ResetFilters();
@@ -220,5 +216,4 @@ namespace etesia {
 	};
 
 }  // namespace etesia
-
 #endif  // ETESIA_DSP_GRANULAR_PROCESSOR_H_
