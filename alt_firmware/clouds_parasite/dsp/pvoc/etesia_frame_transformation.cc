@@ -49,7 +49,7 @@ namespace etesia {
     for (int32_t i = 0; i < num_textures; ++i) {
       textures_[i] = &buffer[i * size_];
     }
-    phases_ = static_cast<uint16_t*>((void*)(textures_[num_textures - 1]));
+    phases_ = static_cast<uint16_t*>(static_cast<void*>(textures_[num_textures - 1]));
     num_textures_ = num_textures - 1;  // Last texture is used for storing phases.
     phases_delta_ = phases_ + size_;
 
@@ -108,7 +108,7 @@ namespace etesia {
   }
 
   void FrameTransformation::SetPhases(float* destination, float phase_randomization, float pitch_ratio) {
-    uint32_t* synthesis_phase = (uint32_t*)&destination[fft_size_ >> 1];
+    uint32_t* synthesis_phase = reinterpret_cast<uint32_t*>(&destination[fft_size_ >> 1]);
     for (int32_t i = 0; i < size_; ++i) {
       synthesis_phase[i] = phases_[i];
       phases_[i] += static_cast<uint16_t>(
@@ -128,7 +128,7 @@ namespace etesia {
     float* real = &fft_data[0];
     float* imag = &fft_data[fft_size_ >> 1];
     float* magnitude = &fft_data[0];
-    uint32_t* angle = (uint32_t*)&fft_data[fft_size_ >> 1];
+    uint32_t* angle = reinterpret_cast<uint32_t*>(&fft_data[fft_size_ >> 1]);
     for (int32_t i = 1; i < size_; ++i) {
       fast_p2r(magnitude[i], angle[i], &real[i], &imag[i]);
     }

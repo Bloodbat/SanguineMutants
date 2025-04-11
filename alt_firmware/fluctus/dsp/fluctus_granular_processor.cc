@@ -433,7 +433,7 @@ namespace fluctus {
       size_t correlator_block_size = (kMaxWSOLASize / 32) + 2;
       uint32_t* correlator_data = allocator.Allocate<uint32_t>(correlator_block_size * 3);
       correlator_.Init(&correlator_data[0], &correlator_data[correlator_block_size]);
-      pitch_shifter_.Init((uint16_t*)correlator_data);
+      pitch_shifter_.Init(reinterpret_cast<uint16_t*>(correlator_data));
 
       if (playback_mode_ == PLAYBACK_MODE_SPECTRAL_CLOUD) {
         phase_vocoder_.Init(buffer, buffer_size, lut_sine_window_4096, 4096, num_channels_,

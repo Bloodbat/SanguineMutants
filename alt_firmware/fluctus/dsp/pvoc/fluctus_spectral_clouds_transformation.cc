@@ -56,10 +56,10 @@ namespace fluctus {
 		for (int32_t i = 0; i < num_textures; ++i) {
 			buffers_[i] = &buffer[i * size_];
 		}
-		phases_ = static_cast<uint16_t*>((void*)(buffers_[num_textures - 1]));
+		phases_ = static_cast<uint16_t*>(static_cast<void*>((buffers_[num_textures - 1])));
 		previous_mag_ = phases_ + size_;
 
-		band_gain_target_ = static_cast<uint16_t*>((void*)(buffers_[num_textures - 2]));
+		band_gain_target_ = static_cast<uint16_t*>(static_cast<void*>((buffers_[num_textures - 2])));
 		band_gain_state_ = band_gain_target_ + size_;
 
 		current_num_freq_bands_parameter_ = 1.0f;
