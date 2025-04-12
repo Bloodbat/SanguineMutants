@@ -69,7 +69,11 @@ void STFT::Init(
   ifft_out_ = fft_out_ = ifft_buffer;
   
   window_ = window_lut;
+#ifdef METAMODULE
+  window_stride_ = LUT_SINE_WINDOW_4096_SIZE / fft_size / 2;
+#else
   window_stride_ = LUT_SINE_WINDOW_4096_SIZE / fft_size;
+#endif
   modifier_ = modifier;
   
   parameters_ = NULL;

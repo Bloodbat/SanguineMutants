@@ -42,6 +42,10 @@ namespace clouds {
 using namespace std;
 using namespace stmlib;
 
+#ifdef METAMODULE
+float* lut_sine_window_2048;
+#endif
+
 void GranularProcessor::Init(
     void* large_buffer, size_t large_buffer_size,
     void* small_buffer, size_t small_buffer_size) {
@@ -62,6 +66,13 @@ void GranularProcessor::Init(
   previous_playback_mode_ = PLAYBACK_MODE_LAST;
   reset_buffers_ = true;
   dry_wet_ = 0.0f;
+
+  #ifdef METAMODULE
+  lut_sine_window_2048 = new float[2048];
+  for (int32_t i = 0; i < 2048; ++i) {
+    lut_sine_window_2048[i] = lut_sine_window_4096[i * 2];
+  }
+  #endif
 }
 
 void GranularProcessor::ResetFilters() {
@@ -424,7 +435,11 @@ void GranularProcessor::Prepare() {
     if (playback_mode_ == PLAYBACK_MODE_SPECTRAL) {
       phase_vocoder_.Init(
           buffer, buffer_size,
+          #ifdef METAMODULE
+          lut_sine_window_2048, 2048,
+          #else
           lut_sine_window_4096, 4096,
+          #endif
           num_channels_, resolution(), sr);
     } else {
       for (int32_t i = 0; i < num_channels_; ++i) {

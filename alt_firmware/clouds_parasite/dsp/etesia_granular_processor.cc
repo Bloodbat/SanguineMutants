@@ -40,6 +40,10 @@ namespace etesia {
 	using namespace std;
 	using namespace parasites_stmlib;
 
+	#ifdef METAMODULE
+	float* lut_sine_window_2048;
+	#endif
+
 	void EtesiaGranularProcessor::Init(
 		void* large_buffer, size_t large_buffer_size,
 		void* small_buffer, size_t small_buffer_size) {
@@ -60,6 +64,13 @@ namespace etesia {
 		previous_playback_mode_ = PLAYBACK_MODE_LAST;
 		reset_buffers_ = true;
 		dry_wet_ = 0.0f;
+
+		#ifdef METAMODULE
+		lut_sine_window_2048 = new float[2048];
+		for (int32_t i = 0; i < 2048; ++i) {
+			lut_sine_window_2048[i] = lut_sine_window_4096[i * 2];
+		}
+		#endif
 	}
 
 	void EtesiaGranularProcessor::ResetFilters() {
@@ -597,7 +608,11 @@ namespace etesia {
 			if (playback_mode_ == PLAYBACK_MODE_SPECTRAL) {
 				phase_vocoder_.Init(
 					buffer, buffer_size,
+					#ifdef METAMODULE
+					lut_sine_window_2048, 2048,
+					#else
 					lut_sine_window_4096, 4096,
+					#endif
 					num_channels_, resolution(), sr);
 			}
 			else if (playback_mode_ == PLAYBACK_MODE_RESONESTOR) {
