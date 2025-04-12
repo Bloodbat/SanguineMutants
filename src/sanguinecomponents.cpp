@@ -368,7 +368,7 @@ Sanguine96x32OLEDDisplay::Sanguine96x32OLEDDisplay(Module* theModule, const floa
 
 	#ifdef METAMODULE
 	// Offset the y pos by a few pixels
-	box.pos = Vec(box.pos.x, box.pos.y + 10);
+	box.pos = Vec(box.pos.x, box.pos.y + 6);
 	#endif
 }
 
