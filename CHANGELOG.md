@@ -2,6 +2,8 @@
 
 ## Fixes
 
+- Plugin: faceplate colors.
+
 - Explorator: noise not working if the trigger input has not been connected at least once.
 
 ## Additions
@@ -9,6 +11,8 @@
 - Aestus family: measurement units and numbers friendlier to humans.
 
 ## Changes
+
+- Plugin: faceplate color tweaks.
 
 - Plugin source: move common Sanguine Modules sources to submodule.
 
