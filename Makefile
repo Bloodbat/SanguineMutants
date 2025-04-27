@@ -141,6 +141,7 @@ SOURCES += eurorack/rings/resources.cc
 
 SOURCES += eurorack/tides/generator.cc
 SOURCES += eurorack/tides/resources.cc
+SOURCES += eurorack/tides/plotter.cc
 
 SOURCES += alt_firmware/bumps/bumps_generator.cc
 SOURCES += alt_firmware/bumps/bumps_resources.cc

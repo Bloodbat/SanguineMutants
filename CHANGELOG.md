@@ -12,6 +12,8 @@
 
 - Aestus family: measurement units and numbers friendlier to humans.
 
+- Aestus: restore the peacocks plotter easter egg (it can be accessed using the context menu).
+
 ## Changes
 
 - Plugin: faceplate color tweaks.

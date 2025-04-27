@@ -2,6 +2,9 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "tides/generator.h"
+
+#include "tides/plotter.h"
+
 #include "aestuscommon.hpp"
 #include "aestus.hpp"
 
@@ -75,7 +78,9 @@ struct Aestus : SanguineModule {
 	bool bUseSheepFirmware = false;
 	bool bUseCalibrationOffset = true;
 	bool bLastExternalSync = false;
+	bool bWantPeacocks = false;
 	tides::Generator generator;
+	tides::Plotter plotter;
 	int frame = 0;
 	static const int kLightsFrequency = 16;
 	uint8_t lastGate = 0;
@@ -115,133 +120,163 @@ struct Aestus : SanguineModule {
 
 		memset(&generator, 0, sizeof(tides::Generator));
 		generator.Init();
+		plotter.Init(tides::plotInstructions, sizeof(tides::plotInstructions) / sizeof(tides::PlotInstruction));
 		lightsDivider.setDivision(kLightsFrequency);
 		onReset();
 	}
 
 	void process(const ProcessArgs& args) override {
-		tides::GeneratorMode mode = generator.mode();
-		if (stMode.process(params[PARAM_MODE].getValue())) {
-			mode = tides::GeneratorMode((static_cast<int>(mode) + 1) % 3);
-			generator.set_mode(mode);
-		}
+		bool bIsLightsTurn = lightsDivider.process();
 
-		tides::GeneratorRange range = generator.range();
-		if (stRange.process(params[PARAM_RANGE].getValue())) {
-			range = tides::GeneratorRange((static_cast<int>(range) - 1 + 3) % 3);
-			generator.set_range(range);
-		}
-
-		bUseSheepFirmware = static_cast<bool>(params[PARAM_MODEL].getValue());
-
-		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bUseSheepFirmware && inputs[INPUT_CLOCK].isConnected());
-
-		// Buffer loop
-		if (++frame >= 16) {
-			frame = 0;
-
-			// Sync
-			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			if (bHaveExternalSync != bLastExternalSync) {
-				generator.set_sync(bHaveExternalSync);
-				bLastExternalSync = bHaveExternalSync;
+		if (!bWantPeacocks) {
+			tides::GeneratorMode mode = generator.mode();
+			if (stMode.process(params[PARAM_MODE].getValue())) {
+				mode = tides::GeneratorMode((static_cast<int>(mode) + 1) % 3);
+				generator.set_mode(mode);
 			}
 
-			// Pitch
-			float pitch = params[PARAM_FREQUENCY].getValue();
-			pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
-			pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
-			pitch += 60.f;
-			// Scale to the global sample rate
-			pitch += log2f(48000.f / args.sampleRate) * 12.f;
-			generator.set_pitch(static_cast<int>(clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
-
-			// Shape, slope, smoothness
-			int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
-				inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-			int16_t slope = clamp(params[PARAM_SLOPE].getValue() +
-				inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() +
-				inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-			generator.set_shape(shape);
-			generator.set_slope(slope);
-			generator.set_smoothness(smoothness);
-
-			// Generator
-			generator.Process(bUseSheepFirmware);
-		}
-
-		// Level
-		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f)
-			* 65535;
-		if (level < 32) {
-			level = 0;
-		}
-
-		uint8_t gate = 0;
-		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f) {
-			gate |= tides::CONTROL_FREEZE;
-		}
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f) {
-			gate |= tides::CONTROL_GATE;
-		}
-		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f) {
-			gate |= tides::CONTROL_CLOCK;
-		}
-		if (!(lastGate & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK)) {
-			gate |= tides::CONTROL_CLOCK_RISING;
-		}
-		if (!(lastGate & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE)) {
-			gate |= tides::CONTROL_GATE_RISING;
-		}
-		if ((lastGate & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE)) {
-			gate |= tides::CONTROL_GATE_FALLING;
-		}
-		lastGate = gate;
-
-		const tides::GeneratorSample& sample = generator.Process(gate);
-		uint32_t uni = sample.unipolar;
-		int32_t bi = sample.bipolar;
-
-		uni = uni * level >> 16;
-		bi = -bi * level >> 16;
-		float unipolarFlag = static_cast<float>(uni) / 65535;
-		float bipolarFlag = static_cast<float>(bi) / 32768;
-
-		outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
-		outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
-		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
-		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
-
-		if (lightsDivider.process()) {
-			const float sampleTime = kLightsFrequency * args.sampleTime;
-
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-
-			if (sample.flags & tides::FLAG_END_OF_ATTACK) {
-				unipolarFlag *= -1.f;
+			tides::GeneratorRange range = generator.range();
+			if (stRange.process(params[PARAM_RANGE].getValue())) {
+				range = tides::GeneratorRange((static_cast<int>(range) - 1 + 3) % 3);
+				generator.set_range(range);
 			}
-			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
-			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			bUseSheepFirmware = static_cast<bool>(params[PARAM_MODEL].getValue());
 
-			displayModel = aestus::displayModels[params[PARAM_MODEL].getValue()];
+			bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bUseSheepFirmware && inputs[INPUT_CLOCK].isConnected());
 
-			if (!bUseSheepFirmware) {
-				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
-			} else {
-				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
+			// Buffer loop
+			if (++frame >= 16) {
+				frame = 0;
+
+				// Sync
+				// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
+				if (bHaveExternalSync != bLastExternalSync) {
+					generator.set_sync(bHaveExternalSync);
+					bLastExternalSync = bHaveExternalSync;
+				}
+
+				// Pitch
+				float pitch = params[PARAM_FREQUENCY].getValue();
+				pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
+				pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
+				pitch += 60.f;
+				// Scale to the global sample rate
+				pitch += log2f(48000.f / args.sampleRate) * 12.f;
+				generator.set_pitch(static_cast<int>(clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
+
+				// Shape, slope, smoothness
+				int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
+					inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
+				int16_t slope = clamp(params[PARAM_SLOPE].getValue() +
+					inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
+				int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() +
+					inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
+				generator.set_shape(shape);
+				generator.set_slope(slope);
+				generator.set_smoothness(smoothness);
+
+				// Generator
+				generator.Process(bUseSheepFirmware);
+			}
+
+			// Level
+			uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f)
+				* 65535;
+			if (level < 32) {
+				level = 0;
+			}
+
+			uint8_t gate = 0;
+			if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f) {
+				gate |= tides::CONTROL_FREEZE;
+			}
+			if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f) {
+				gate |= tides::CONTROL_GATE;
+			}
+			if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f) {
+				gate |= tides::CONTROL_CLOCK;
+			}
+			if (!(lastGate & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK)) {
+				gate |= tides::CONTROL_CLOCK_RISING;
+			}
+			if (!(lastGate & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE)) {
+				gate |= tides::CONTROL_GATE_RISING;
+			}
+			if ((lastGate & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE)) {
+				gate |= tides::CONTROL_GATE_FALLING;
+			}
+			lastGate = gate;
+
+			const tides::GeneratorSample& sample = generator.Process(gate);
+			uint32_t uni = sample.unipolar;
+			int32_t bi = sample.bipolar;
+
+			uni = uni * level >> 16;
+			bi = -bi * level >> 16;
+			float unipolarFlag = static_cast<float>(uni) / 65535;
+			float bipolarFlag = static_cast<float>(bi) / 32768;
+
+			outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
+			outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
+			outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
+			outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
+
+			if (bIsLightsTurn) {
+				const float sampleTime = kLightsFrequency * args.sampleTime;
+
+				lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+
+				lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+
+				if (sample.flags & tides::FLAG_END_OF_ATTACK) {
+					unipolarFlag *= -1.f;
+				}
+				lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
+				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
+
+				lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+
+				displayModel = aestus::displayModels[params[PARAM_MODEL].getValue()];
+
+				if (!bUseSheepFirmware) {
+					paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
+				} else {
+					paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
+				}
+			}
+		} else {
+			if (++frame >= 16) {
+				frame = 0;
+				plotter.Run();
+				outputs[OUTPUT_UNI].setVoltage((static_cast<float>(plotter.x()) / static_cast<float>(UINT16_MAX)) * 8);
+				outputs[OUTPUT_BI].setVoltage((static_cast<float>(-plotter.y()) / static_cast<float>(UINT16_MAX)) * 8);
+			}
+
+			if (bIsLightsTurn) {
+				const float sampleTime = kLightsFrequency * args.sampleTime;
+
+				lights[LIGHT_MODE + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_MODE + 1].setBrightnessSmooth(1.f, sampleTime);
+
+				lights[LIGHT_RANGE + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth(1.f, sampleTime);
+
+				lights[LIGHT_PHASE + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_PHASE + 1].setBrightnessSmooth(1.f, sampleTime);
+
+				lights[LIGHT_SYNC + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_SYNC + 1].setBrightnessSmooth(0.f, sampleTime);
+
+				displayModel = aestus::displayModels[aestus::kPeacocksString];
 			}
 		}
 	}
@@ -262,6 +297,7 @@ struct Aestus : SanguineModule {
 		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
 		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
 		json_object_set_new(rootJ, "useCalibrationOffset", json_boolean(bUseCalibrationOffset));
+		json_object_set_new(rootJ, "wantPeacocksEgg", json_boolean(bWantPeacocks));
 
 		return rootJ;
 	}
@@ -282,6 +318,11 @@ struct Aestus : SanguineModule {
 		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
 		if (useCalibrationOffsetJ) {
 			bUseCalibrationOffset = json_boolean(useCalibrationOffsetJ);
+		}
+
+		json_t* wantPeacocksEggJ = json_object_get(rootJ, "wantPeacocksEgg");
+		if (wantPeacocksEggJ) {
+			bWantPeacocks = json_boolean(wantPeacocksEggJ);
 		}
 	}
 
@@ -364,39 +405,45 @@ struct AestusWidget : SanguineModuleWidget {
 		SanguineModuleWidget::appendContextMenu(menu);
 
 		Aestus* module = dynamic_cast<Aestus*>(this->module);
-		assert(module);
+		if (!module->bWantPeacocks) {
+			assert(module);
 
-		menu->addChild(new MenuSeparator);
+			menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Model", aestus::menuLabels,
-			[=]() { return module->params[Aestus::PARAM_MODEL].getValue(); },
-			[=](int i) { module->setModel(i); }
-		));
-
-		if (!module->bUseSheepFirmware) {
-			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
-				[=]() { return module->generator.mode(); },
-				[=](int i) { module->setMode(i); }
+			menu->addChild(createIndexSubmenuItem("Model", aestus::menuLabels,
+				[=]() { return module->params[Aestus::PARAM_MODEL].getValue(); },
+				[=](int i) { module->setModel(i); }
 			));
-		} else {
-			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
-				[=]() { return module->generator.mode(); },
-				[=](int i) { module->setMode(i); }
+
+			if (!module->bUseSheepFirmware) {
+				menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
+					[=]() { return module->generator.mode(); },
+					[=](int i) { module->setMode(i); }
+				));
+			} else {
+				menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
+					[=]() { return module->generator.mode(); },
+					[=](int i) { module->setMode(i); }
+				));
+			}
+
+			menu->addChild(createIndexSubmenuItem("Range", aestusCommon::rangeMenuLabels,
+				[=]() { return module->generator.range(); },
+				[=](int i) { module->setRange(i); }
+			));
+
+			menu->addChild(new MenuSeparator);
+
+			menu->addChild(createSubmenuItem("Compatibility options", "",
+				[=](Menu* menu) {
+					menu->addChild(createBoolPtrMenuItem("Frequency knob center is C4", "", &module->bUseCalibrationOffset));
+				}
 			));
 		}
 
-		menu->addChild(createIndexSubmenuItem("Range", aestusCommon::rangeMenuLabels,
-			[=]() { return module->generator.range(); },
-			[=](int i) { module->setRange(i); }
-		));
-
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Compatibility options", "",
-			[=](Menu* menu) {
-				menu->addChild(createBoolPtrMenuItem("Frequency knob center is C4", "", &module->bUseCalibrationOffset));
-			}
-		));
+		menu->addChild(createBoolPtrMenuItem("Peacocks easter-egg", "", &module->bWantPeacocks));
 	}
 };
 
