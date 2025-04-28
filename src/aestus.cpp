@@ -257,8 +257,8 @@ struct Aestus : SanguineModule {
 			if (++frame >= 16) {
 				frame = 0;
 				plotter.Run();
-				outputs[OUTPUT_UNI].setVoltage(rescale(static_cast<float>(plotter.x()), 0.f, UINT16_MAX, -10.f, 10.f));
-				outputs[OUTPUT_BI].setVoltage(rescale(static_cast<float>(plotter.y()), 0.f, UINT16_MAX, 10.f, -10.f));
+				outputs[OUTPUT_UNI].setVoltage(rescale(static_cast<float>(plotter.x()), 0.f, UINT16_MAX, -8.f, 8.f));
+				outputs[OUTPUT_BI].setVoltage(rescale(static_cast<float>(plotter.y()), 0.f, UINT16_MAX, 8.f, -8.f));
 			}
 
 			if (bIsLightsTurn) {
