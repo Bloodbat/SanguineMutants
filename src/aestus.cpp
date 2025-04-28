@@ -443,7 +443,7 @@ struct AestusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createBoolPtrMenuItem("Peacocks easter-egg", "", &module->bWantPeacocks));
+		menu->addChild(createBoolPtrMenuItem("Peacocks easter egg", "", &module->bWantPeacocks));
 	}
 };
 
