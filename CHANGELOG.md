@@ -6,6 +6,8 @@
 
 - Plugin: work around Rack's SVG rendering defiencies.
 
+- Aestus family: restore "Frequency knob center is C4" user preference properly.
+
 - Explorator: noise not working if the trigger input has not been connected at least once.
 
 ## Additions

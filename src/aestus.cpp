@@ -317,12 +317,12 @@ struct Aestus : SanguineModule {
 
 		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
 		if (useCalibrationOffsetJ) {
-			bUseCalibrationOffset = json_boolean(useCalibrationOffsetJ);
+			bUseCalibrationOffset = json_boolean_value(useCalibrationOffsetJ);
 		}
 
 		json_t* wantPeacocksEggJ = json_object_get(rootJ, "wantPeacocksEgg");
 		if (wantPeacocksEggJ) {
-			bWantPeacocks = json_boolean(wantPeacocksEggJ);
+			bWantPeacocks = json_boolean_value(wantPeacocksEggJ);
 		}
 	}
 

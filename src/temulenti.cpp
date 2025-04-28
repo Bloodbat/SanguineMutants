@@ -335,7 +335,7 @@ struct Temulenti : SanguineModule {
 
 		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
 		if (useCalibrationOffsetJ) {
-			bUseCalibrationOffset = json_boolean(useCalibrationOffsetJ);
+			bUseCalibrationOffset = json_boolean_value(useCalibrationOffsetJ);
 		}
 	}
 
