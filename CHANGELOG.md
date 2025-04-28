@@ -1,4 +1,4 @@
-# Next version
+# 2.6.6
 
 ## Fixes
 
