@@ -1,5 +1,9 @@
 # Next release
 
+## Fixes
+
+- Nodi family: properly restore the "Low CPU" option when it is enabled in either module in really old patches.
+
 
 ---
 

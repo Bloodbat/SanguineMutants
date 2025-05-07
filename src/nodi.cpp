@@ -601,6 +601,13 @@ struct Nodi : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
+		/* Readded for compatibility with really old patches due to my
+		   overzealousness when renaming vars. */
+		json_t* lowCpuJs = json_object_get(rootJ, "bLowCpu");
+		if (lowCpuJs) {
+			bWantLowCpu = json_boolean_value(lowCpuJs);
+		}
+
 		json_t* lowCpuJ = json_object_get(rootJ, "bWantLowCpu");
 		if (lowCpuJ) {
 			bWantLowCpu = json_boolean_value(lowCpuJ);
