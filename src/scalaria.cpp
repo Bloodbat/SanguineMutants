@@ -1,7 +1,9 @@
 #include "plugin.hpp"
-#include "scalaria/dsp/scalaria_modulator.h"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+
+#include "scalaria/dsp/scalaria_modulator.h"
+
 #include "warpiescommon.hpp"
 #include "scalaria.hpp"
 

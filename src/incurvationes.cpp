@@ -1,9 +1,11 @@
 #include "plugin.hpp"
-#include "warps/dsp/modulator.h"
 #include "sanguinecomponents.hpp"
-#include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+
+#include "warps/dsp/modulator.h"
+
 #include "warpiescommon.hpp"
+#include "warpiespals.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 

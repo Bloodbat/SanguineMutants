@@ -1,7 +1,7 @@
 #pragma once
 
-#include "sanguinecomponents.hpp"
 #include "plugin.hpp"
+#include "sanguinecomponents.hpp"
 
 namespace nodiCommon {
 	static const std::vector<uint16_t> bitReductionMasks = {
