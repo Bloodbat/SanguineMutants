@@ -1,7 +1,10 @@
 ﻿#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
-#include "fluctus/dsp/fluctus_granular_processor.h"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include "fluctus/dsp/fluctus_granular_processor.h"
+
 #include "fluctus.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
@@ -541,16 +544,18 @@ struct Fluctus : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "buffersize", json_integer(bufferSize));
+		setJsonInt(rootJ, "buffersize", bufferSize);
+
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* buffersizeJ = json_object_get(rootJ, "buffersize");
-		if (buffersizeJ) {
-			bufferSize = json_integer_value(buffersizeJ);
+		json_int_t intValue;
+
+		if (getJsonInt(rootJ, "buffersize", intValue)) {
+			bufferSize = intValue;
 		}
 	}
 

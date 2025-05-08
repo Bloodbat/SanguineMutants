@@ -1,10 +1,13 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
+#include "sanguinehelpers.hpp"
+#include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
+
 #include "rings/dsp/part.h"
 #include "rings/dsp/strummer.h"
 #include "rings/dsp/string_synth_part.h"
-#include "sanguinehelpers.hpp"
-#include "sanguinechannels.hpp"
+
 #include "array"
 
 #include "anuli.hpp"
@@ -461,11 +464,9 @@ struct Anuli : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
-
-		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
-
-		json_object_set_new(rootJ, "useFrequencyOffset", json_boolean(bUseFrequencyOffset));
+		setJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
+		setJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
 
 		return rootJ;
 	}
@@ -473,17 +474,13 @@ struct Anuli : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
-			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
-		}
+		getJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
+		getJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
 
-		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ) {
-			displayChannel = json_integer_value(displayChannelJ);
-		}
+		json_int_t intValue;
 
-		if (json_t* useFrequencyOffsetJ = json_object_get(rootJ, "useFrequencyOffset")) {
-			bUseFrequencyOffset = json_boolean_value(useFrequencyOffsetJ);
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
 		}
 	}
 

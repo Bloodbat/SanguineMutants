@@ -1,14 +1,15 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
-#include "plaits/dsp/voice.h"
-#include "plaits/user_data.h"
 #include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
 
 #include "osdialog.h"
 #include <thread>
-
 #include <fstream>
+
+#include "plaits/dsp/voice.h"
+#include "plaits/user_data.h"
 
 #include "Funes.hpp"
 
@@ -478,16 +479,16 @@ struct Funes : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "lowCpu", json_boolean(bWantLowCpu));
-		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
-		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
-		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
-		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
+		setJsonBoolean(rootJ, "lowCpu", bWantLowCpu);
+		setJsonBoolean(rootJ, "displayModulatedModel", bDisplayModulatedModel);
+		setJsonInt(rootJ, "frequencyMode", frequencyMode);
+		setJsonBoolean(rootJ, "notesModelSelection", bNotesModelSelection);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
 
 		const uint8_t* userDataBuffer = userData.getBuffer();
 		if (userDataBuffer != nullptr) {
 			std::string userDataString = rack::string::toBase64(userDataBuffer, plaits::UserData::MAX_USER_DATA_SIZE);
-			json_object_set_new(rootJ, "userData", json_string(userDataString.c_str()));
+			setJsonString(rootJ, "userData", userDataString.c_str());
 		}
 
 		return rootJ;
@@ -496,34 +497,22 @@ struct Funes : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
-		if (lowCpuJ) {
-			bWantLowCpu = json_boolean_value(lowCpuJ);
+		json_int_t intValue = 0;
+
+		getJsonBoolean(rootJ, "lowCpu", bWantLowCpu);
+		getJsonBoolean(rootJ, "displayModulatedModel", bDisplayModulatedModel);
+		getJsonBoolean(rootJ, "notesModelSelection", bNotesModelSelection);
+
+		if (getJsonInt(rootJ, "frequencyMode", intValue)) {
+			setFrequencyMode(intValue);
+		}
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
 		}
 
-		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
-		if (displayModulatedModelJ) {
-			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
-		}
+		std::string userDataString;
 
-		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
-		if (notesModelSelectionJ) {
-			bNotesModelSelection = json_boolean_value(notesModelSelectionJ);
-		}
-
-		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
-		if (frequencyModeJ) {
-			setFrequencyMode(json_integer_value(frequencyModeJ));
-		}
-
-		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ) {
-			displayChannel = json_integer_value(displayChannelJ);
-		}
-
-		json_t* userDataJ = json_object_get(rootJ, "userData");
-		if (userDataJ) {
-			std::string userDataString = json_string_value(userDataJ);
+		if (getJsonString(rootJ, "userData", userDataString)) {
 			const std::vector<uint8_t> userDataVector = rack::string::fromBase64(userDataString);
 			if (userDataVector.size() > 0) {
 				const uint8_t* userDataBuffer = &userDataVector[0];

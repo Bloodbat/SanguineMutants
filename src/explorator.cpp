@@ -1,11 +1,13 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinerandom.hpp"
+#include "sanguinejson.hpp"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 #include "pcg_random.hpp"
 #pragma GCC diagnostic pop
-#include "sanguinerandom.hpp"
 
 using simd::float_4;
 
@@ -429,7 +431,7 @@ struct Explorator : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "noiseMode", json_integer(static_cast<int>(noiseMode)));
+		setJsonInt(rootJ, "noiseMode", static_cast<int>(noiseMode));
 
 		return rootJ;
 	}
@@ -437,9 +439,10 @@ struct Explorator : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* noiseModeJ = json_object_get(rootJ, "noiseMode");
-		if (noiseModeJ) {
-			noiseMode = static_cast<noiseModes>(json_integer_value(noiseModeJ));
+		json_int_t intValue;
+
+		if (getJsonInt(rootJ, "noiseMode", intValue)) {
+			noiseMode = static_cast<noiseModes>(intValue);
 		}
 	}
 };

@@ -1,8 +1,9 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
-#include "tides/generator.h"
+#include "sanguinejson.hpp"
 
+#include "tides/generator.h"
 #include "tides/plotter.h"
 
 #include "aestuscommon.hpp"
@@ -294,10 +295,11 @@ struct Aestus : SanguineModule {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
-		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
-		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
-		json_object_set_new(rootJ, "useCalibrationOffset", json_boolean(bUseCalibrationOffset));
-		json_object_set_new(rootJ, "wantPeacocksEgg", json_boolean(bWantPeacocks));
+
+		setJsonInt(rootJ, "mode", static_cast<int>(generator.mode()));
+		setJsonInt(rootJ, "range", static_cast<int>(generator.range()));
+		setJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
+		setJsonBoolean(rootJ, "wantPeacocksEgg", bWantPeacocks);
 
 		return rootJ;
 	}
@@ -305,25 +307,18 @@ struct Aestus : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* modeJ = json_object_get(rootJ, "mode");
-		if (modeJ) {
-			generator.set_mode(tides::GeneratorMode(json_integer_value(modeJ)));
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "mode", intValue)) {
+			generator.set_mode(static_cast<tides::GeneratorMode>(intValue));
 		}
 
-		json_t* rangeJ = json_object_get(rootJ, "range");
-		if (rangeJ) {
-			generator.set_range(tides::GeneratorRange(json_integer_value(rangeJ)));
+		if (getJsonInt(rootJ, "range", intValue)) {
+			generator.set_range(static_cast<tides::GeneratorRange>(intValue));
 		}
 
-		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
-		if (useCalibrationOffsetJ) {
-			bUseCalibrationOffset = json_boolean_value(useCalibrationOffsetJ);
-		}
-
-		json_t* wantPeacocksEggJ = json_object_get(rootJ, "wantPeacocksEgg");
-		if (wantPeacocksEggJ) {
-			bWantPeacocks = json_boolean_value(wantPeacocksEggJ);
-		}
+		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
+		getJsonBoolean(rootJ, "wantPeacocksEgg", bWantPeacocks);
 	}
 
 	void setModel(int modelNum) {

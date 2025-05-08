@@ -1,12 +1,15 @@
 ﻿#include "plugin.hpp"
+#include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include <string>
+
 #include "marbles/random/random_generator.h"
 #include "marbles/random/random_stream.h"
 #include "marbles/random/t_generator.h"
 #include "marbles/random/x_y_generator.h"
 #include "marbles/note_filter.h"
 #include "marbles/scale_recorder.h"
-#include "sanguinehelpers.hpp"
-#include <string>
 
 #include "marmora.hpp"
 
@@ -612,8 +615,8 @@ struct Marmora : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "y_divider_index", json_integer(yDividerIndex));
-		json_object_set_new(rootJ, "userSeed", json_integer(userSeed));
+		setJsonInt(rootJ, "y_divider_index", yDividerIndex);
+		setJsonInt(rootJ, "userSeed", userSeed);
 
 		for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 			if (marmoraScales[scale].bScaleDirty) {
@@ -625,8 +628,9 @@ struct Marmora : SanguineModule {
 				std::string scaleDegrees = scaleHeader + "Degrees";
 				std::string scaleDataVoltages = scaleHeader + "DataVoltages";
 				std::string scaleDataWeights = scaleHeader + "DataWeights";
-				json_object_set_new(rootJ, scaleBaseInterval.c_str(), json_real(marmoraScales[scale].scale.base_interval));
-				json_object_set_new(rootJ, scaleDegrees.c_str(), json_integer(marmoraScales[scale].scale.num_degrees));
+				setJsonFloat(rootJ, scaleBaseInterval.c_str(), marmoraScales[scale].scale.base_interval);
+				setJsonInt(rootJ, scaleDegrees.c_str(), marmoraScales[scale].scale.num_degrees);
+
 				for (int degree = 0; degree < marmoraScales[scale].scale.num_degrees; ++degree) {
 					json_array_insert_new(scaleDataVoltagesJ, degree, json_real(marmoraScales[scale].scale.degree[degree].voltage));
 					json_array_insert_new(scaleDataWeightsJ, degree, json_integer(marmoraScales[scale].scale.degree[degree].weight));
@@ -642,15 +646,15 @@ struct Marmora : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* userSeedJ = json_object_get(rootJ, "userSeed");
-		if (userSeedJ) {
-			userSeed = json_integer_value(userSeedJ);
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "userSeed", intValue)) {
+			userSeed = intValue;
 			randomGenerator.Init(userSeed);
 		}
 
-		json_t* y_divider_indexJ = json_object_get(rootJ, "y_divider_index");
-		if (y_divider_indexJ) {
-			yDividerIndex = json_integer_value(y_divider_indexJ);
+		if (getJsonInt(rootJ, "y_divider_index", intValue)) {
+			yDividerIndex = intValue;
 		}
 
 		int dirtyScalesCount = 0;

@@ -1,7 +1,9 @@
 #include <string.h>
 
 #include "plugin.hpp"
-#include "nodicommon.hpp"
+#include "sanguinehelpers.hpp"
+#include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
 
 #include "braids/macro_oscillator.h"
 #include "braids/signature_waveshaper.h"
@@ -10,9 +12,7 @@
 #include "braids/quantizer.h"
 #include "braids/quantizer_scales.h"
 
-#include "sanguinehelpers.hpp"
-
-#include "sanguinechannels.hpp"
+#include "nodicommon.hpp"
 
 #include "nodi.hpp"
 
@@ -583,17 +583,10 @@ struct Nodi : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_t* lowCpuJ = json_boolean(bWantLowCpu);
-		json_object_set_new(rootJ, "bWantLowCpu", lowCpuJ);
-
-		json_t* displayChannelJ = json_integer(displayChannel);
-		json_object_set_new(rootJ, "displayChannel", displayChannelJ);
-
-		json_t* userSignSeedJ = json_integer(userSignSeed);
-		json_object_set_new(rootJ, "userSignSeed", userSignSeedJ);
-
-		json_t* perInstanceSignSeedJ = json_boolean(bPerInstanceSignSeed);
-		json_object_set_new(rootJ, "perInstanceSignSeed", perInstanceSignSeedJ);
+		setJsonBoolean(rootJ, "bWantLowCpu", bWantLowCpu);
+		setJsonBoolean(rootJ, "perInstanceSignSeed", bPerInstanceSignSeed);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
+		setJsonInt(rootJ, "userSignSeed", userSignSeed);
 
 		return rootJ;
 	}
@@ -601,33 +594,22 @@ struct Nodi : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
+		json_int_t intValue = 0;
+
 		/* Readded for compatibility with really old patches due to my
 		   overzealousness when renaming vars. */
-		json_t* lowCpuJs = json_object_get(rootJ, "bLowCpu");
-		if (lowCpuJs) {
-			bWantLowCpu = json_boolean_value(lowCpuJs);
+		getJsonBoolean(rootJ, "bLowCpu", bWantLowCpu);
+		getJsonBoolean(rootJ, "bWantLowCpu", bWantLowCpu);
+		getJsonBoolean(rootJ, "perInstanceSignSeed", bPerInstanceSignSeed);
+
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
 		}
 
-		json_t* lowCpuJ = json_object_get(rootJ, "bWantLowCpu");
-		if (lowCpuJ) {
-			bWantLowCpu = json_boolean_value(lowCpuJ);
-		}
-
-		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ) {
-			displayChannel = json_integer_value(displayChannelJ);
-		}
-
-		json_t* userSignSeedJ = json_object_get(rootJ, "userSignSeed");
-		if (userSignSeedJ) {
-			userSignSeed = json_integer_value(userSignSeedJ);
+		if (getJsonInt(rootJ, "userSignSeed", intValue)) {
+			userSignSeed = intValue;
 			setWaveShaperSeed(userSignSeed);
 			bNeedSignSeed = false;
-		}
-
-		json_t* perInstanceSignSeedJ = json_object_get(rootJ, "perInstanceSignSeed");
-		if (perInstanceSignSeedJ) {
-			bPerInstanceSignSeed = json_boolean_value(perInstanceSignSeedJ);
 		}
 	}
 

@@ -2,6 +2,8 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
+
 #include "aleae.hpp"
 
 struct Aleae : SanguineModule {
@@ -170,8 +172,7 @@ struct Aleae : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_t* ledsChannelJ = json_integer(ledsChannel);
-		json_object_set_new(rootJ, "ledsChannel", ledsChannelJ);
+		setJsonInt(rootJ, "ledsChannel", ledsChannel);
 
 		return rootJ;
 	}
@@ -179,9 +180,10 @@ struct Aleae : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* ledsChannelJ = json_object_get(rootJ, "ledsChannel");
-		if (ledsChannelJ) {
-			ledsChannel = json_integer_value(ledsChannelJ);
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "ledsChannel", intValue)) {
+			ledsChannel = intValue;
 		}
 	}
 };

@@ -1,9 +1,13 @@
 #include "plugin.hpp"
-#include "distortiones/dsp/distortiones_modulator.h"
 #include "sanguinecomponents.hpp"
-#include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include "distortiones/dsp/distortiones_modulator.h"
+
 #include "warpiescommon.hpp"
+
+#include "warpiespals.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -264,9 +268,8 @@ struct Distortiones : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "mode", json_integer(modulators[0].feature_mode()));
-
-		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
+		setJsonInt(rootJ, "mode", modulators[0].feature_mode());
+		setJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 
 		return rootJ;
 	}
@@ -274,14 +277,14 @@ struct Distortiones : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
-			modulators[0].set_feature_mode(static_cast<distortiones::FeatureMode>(json_integer_value(modeJ)));
+		json_int_t intValue;
+
+		if (getJsonInt(rootJ, "mode", intValue)) {
+			modulators[0].set_feature_mode(static_cast<distortiones::FeatureMode>(intValue));
 			featureMode = modulators[0].feature_mode();
 		}
 
-		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
-			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
-		}
+		getJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 	}
 
 	void setFeatureMode(int modeNumber) {

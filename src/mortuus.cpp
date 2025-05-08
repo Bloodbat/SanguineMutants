@@ -1,7 +1,10 @@
 #include "plugin.hpp"
-#include "deadman/deadman_processors.h"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include "deadman/deadman_processors.h"
+
 #include "mortuus.hpp"
 #include "ansa.hpp"
 
@@ -848,9 +851,10 @@ struct Mortuus : SanguineModule {
 
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "edit_mode", json_integer(static_cast<int>(settings.editMode)));
-		json_object_set_new(rootJ, "fcn_channel_1", json_integer(static_cast<int>(settings.processorFunctions[0])));
-		json_object_set_new(rootJ, "fcn_channel_2", json_integer(static_cast<int>(settings.processorFunctions[1])));
+		setJsonInt(rootJ, "edit_mode", static_cast<int>(settings.editMode));
+		setJsonInt(rootJ, "fcn_channel_1", static_cast<int>(settings.processorFunctions[0]));
+		setJsonInt(rootJ, "fcn_channel_2", static_cast<int>(settings.processorFunctions[1]));
+		setJsonBoolean(rootJ, "snap_mode", settings.snapMode);
 
 		json_t* potValuesJ = json_array();
 		for (int pot : potValues) {
@@ -859,33 +863,27 @@ struct Mortuus : SanguineModule {
 		}
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
-		json_object_set_new(rootJ, "snap_mode", json_boolean(settings.snapMode));
-
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* editModeJ = json_object_get(rootJ, "edit_mode");
-		if (editModeJ) {
-			settings.editMode = static_cast<apicesCommon::EditModes>(json_integer_value(editModeJ));
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "edit_mode", intValue)) {
+			settings.editMode = static_cast<apicesCommon::EditModes>(intValue);
 		}
 
-		json_t* fcnChannel1J = json_object_get(rootJ, "fcn_channel_1");
-		if (fcnChannel1J) {
-			settings.processorFunctions[0] = static_cast<mortuus::ProcessorFunctions>(json_integer_value(fcnChannel1J));
+		if (getJsonInt(rootJ, "fcn_channel_1", intValue)) {
+			settings.processorFunctions[0] = static_cast<mortuus::ProcessorFunctions>(intValue);
 		}
 
-		json_t* fcnChannel2J = json_object_get(rootJ, "fcn_channel_2");
-		if (fcnChannel2J) {
-			settings.processorFunctions[1] = static_cast<mortuus::ProcessorFunctions>(json_integer_value(fcnChannel2J));
+		if (getJsonInt(rootJ, "fcn_channel_2", intValue)) {
+			settings.processorFunctions[1] = static_cast<mortuus::ProcessorFunctions>(intValue);
 		}
 
-		json_t* snapModeJ = json_object_get(rootJ, "snap_mode");
-		if (snapModeJ) {
-			settings.snapMode = json_boolean_value(snapModeJ);
-		}
+		getJsonBoolean(rootJ, "snap_mode", settings.snapMode);
 
 		json_t* potValuesJ = json_object_get(rootJ, "pot_values");
 		size_t potValueId;

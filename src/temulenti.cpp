@@ -1,8 +1,11 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
 #include "bumps/bumps_generator.h"
 #include "bumps/bumps_cv_scaler.h"
+
 #include "aestuscommon.hpp"
 #include "temulenti.hpp"
 
@@ -313,9 +316,10 @@ struct Temulenti : SanguineModule {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
-		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
-		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
-		json_object_set_new(rootJ, "useCalibrationOffset", json_boolean(bUseCalibrationOffset));
+
+		setJsonInt(rootJ, "mode", static_cast<int>(generator.mode()));
+		setJsonInt(rootJ, "range", static_cast<int>(generator.range()));
+		setJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 
 		return rootJ;
 	}
@@ -323,20 +327,17 @@ struct Temulenti : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* modeJ = json_object_get(rootJ, "mode");
-		if (modeJ) {
-			generator.set_mode(bumps::GeneratorMode(json_integer_value(modeJ)));
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "mode", intValue)) {
+			generator.set_mode(bumps::GeneratorMode(intValue));
 		}
 
-		json_t* rangeJ = json_object_get(rootJ, "range");
-		if (rangeJ) {
-			generator.set_range(bumps::GeneratorRange(json_integer_value(rangeJ)));
+		if (getJsonInt(rootJ, "range", intValue)) {
+			generator.set_range(bumps::GeneratorRange(intValue));
 		}
 
-		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
-		if (useCalibrationOffsetJ) {
-			bUseCalibrationOffset = json_boolean_value(useCalibrationOffsetJ);
-		}
+		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 	}
 
 	void setModel(int modelNum) {
