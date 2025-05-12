@@ -1,3 +1,8 @@
+# Next Release
+
+
+---
+
 # 2.6.7
 
 ## Fixes
