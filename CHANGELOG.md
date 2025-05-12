@@ -18,6 +18,8 @@
 
 - Funes: trimpot display values friendlier to humans.
 
+- Marmora: actual X2 division factor to Y rate tooltip.
+
 
 ---
 

@@ -430,6 +430,8 @@ struct Marmora : SanguineModule {
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
+
+			getParamQuantity(PARAM_Y_RATE)->description = marmora::yDividerDescriptions[yDividerIndex];
 		}
 	}
 
