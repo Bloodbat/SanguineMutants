@@ -452,10 +452,10 @@ struct Vimina : SanguineModule {
 			break;
 		case CHANNEL_THRU:
 			lights[currentLight + 0].setBrightnessSmooth(1.f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+			lights[currentLight + 1].setBrightness(0.f);
 			break;
 		case CHANNEL_GENERATED:
-			lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+			lights[currentLight + 0].setBrightness(0.f);
 			lights[currentLight + 1].setBrightnessSmooth(1.f, sampleTime);
 			break;
 		}

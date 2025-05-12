@@ -6,6 +6,8 @@
 
 - Vimina: timer manipulation stops working after about 10 minutes.
 
+- Vimina: wrong light colors under certain circumstances.
+
 
 ---
 
