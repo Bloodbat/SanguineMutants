@@ -120,16 +120,16 @@ struct Anuli : SanguineModule {
 		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Note polyphony");
 		paramQuantities[PARAM_POLYPHONY]->snapEnabled = true;
 
-		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency");
-		configParam(PARAM_STRUCTURE, 0.f, 1.f, 0.5f, "Structure");
-		configParam(PARAM_BRIGHTNESS, 0.f, 1.f, 0.5f, "Brightness");
-		configParam(PARAM_DAMPING, 0.f, 1.f, 0.5f, "Damping");
-		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Position");
-		configParam(PARAM_BRIGHTNESS_MOD, -1.f, 1.f, 0.f, "Brightness CV");
-		configParam(PARAM_FREQUENCY_MOD, -1.f, 1.f, 0.f, "Frequency CV");
-		configParam(PARAM_DAMPING_MOD, -1.f, 1.f, 0.f, "Damping CV");
-		configParam(PARAM_STRUCTURE_MOD, -1.f, 1.f, 0.f, "Structure CV");
-		configParam(PARAM_POSITION_MOD, -1.f, 1.f, 0.f, "Position CV");
+		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency", " semitones", 0.f, 1.f, -30.f);
+		configParam(PARAM_STRUCTURE, 0.f, 1.f, 0.5f, "Structure", "%", 0.f, 100.f);
+		configParam(PARAM_BRIGHTNESS, 0.f, 1.f, 0.5f, "Brightness", "%", 0.f, 100.f);
+		configParam(PARAM_DAMPING, 0.f, 1.f, 0.5f, "Damping", "%", 0.f, 100.f);
+		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Position", "%", 0.f, 100.f);
+		configParam(PARAM_BRIGHTNESS_MOD, -1.f, 1.f, 0.f, "Brightness CV", "%", 0.f, 100.f);
+		configParam(PARAM_FREQUENCY_MOD, -1.f, 1.f, 0.f, "Frequency CV", "%", 0.f, 100.f);
+		configParam(PARAM_DAMPING_MOD, -1.f, 1.f, 0.f, "Damping CV", "%", 0.f, 100.f);
+		configParam(PARAM_STRUCTURE_MOD, -1.f, 1.f, 0.f, "Structure CV", "%", 0.f, 100.f);
+		configParam(PARAM_POSITION_MOD, -1.f, 1.f, 0.f, "Position CV", "%", 0.f, 100.f);
 
 		configInput(INPUT_BRIGHTNESS_CV, "Brightness");
 		configInput(INPUT_FREQUENCY_CV, "Frequency");

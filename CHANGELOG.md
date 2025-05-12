@@ -10,6 +10,12 @@
 
 - Vimina: wrong light colors under certain circumstances.
 
+## Additions
+
+- Anuli: frequency knob units and display values that reflect what the knob actually controls (semi-tones).
+
+- Anuli: knob units and display values friendlier to humans.
+
 
 ---
 
