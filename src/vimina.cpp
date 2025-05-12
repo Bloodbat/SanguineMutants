@@ -52,8 +52,6 @@ struct Vimina : SanguineModule {
 
 	static const int kMaxModuleSections = 2;
 
-	static const int kTimerCounterMax = 2147483647;
-
 	// Channel ids
 	static const int kResetChannel = 0;
 	static const int kClockChannel = 1;
@@ -98,6 +96,8 @@ struct Vimina : SanguineModule {
 	int32_t divisionCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	int32_t swingCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
+	uint32_t pulseTrackerBuffer[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
+
 	// Swing constants
 	const float kSwingFactorMin = 50.f;
 	const float kSwingFactorMax = 70.f; // Maximum swing amount can be set up to 99.
@@ -106,7 +106,6 @@ struct Vimina : SanguineModule {
 	const float kMaxParamValue = 1.f;
 
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	float pulseTrackerBuffer[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
 
 	bool inputGateState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	bool IsMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
@@ -118,7 +117,8 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
-	dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
+	//dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
+	uint32_t tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -165,8 +165,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; ++channel) {
-			tmrModuleClock[channel].process(args.sampleRate * args.sampleTime);
-
+			tmrModuleClock[channel] += 1;
 			bool bIsTrigger = false;
 
 			if (bIsClockConnected) {
@@ -175,7 +174,7 @@ struct Vimina : SanguineModule {
 					   between functions even though divide doesn't use it. */
 					   // Shift
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel];
-					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel].time;
+					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel];
 					if (pulseTrackerRecordedCount[channel] < kPulseTrackerBufferSize) {
 						pulseTrackerRecordedCount[channel] += 1;
 					}
@@ -206,10 +205,6 @@ struct Vimina : SanguineModule {
 				}
 				channelState[section][channel] = CHANNEL_REST; // Clean up.
 			}
-
-			if (tmrModuleClock[channel].time >= kTimerCounterMax) {
-				tmrModuleClock[channel].reset();
-			}
 		}
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
@@ -232,15 +227,15 @@ struct Vimina : SanguineModule {
 	}
 
 	uint32_t getPulseTrackerElapsed(const int channel) {
-		return (tmrModuleClock[channel].time >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
-			tmrModuleClock[channel].time - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
-			tmrModuleClock[channel].time + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
+		return (tmrModuleClock[channel] >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
+			tmrModuleClock[channel] - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
+			tmrModuleClock[channel] + (INT16_MAX - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
 	}
 
 	uint32_t getPulseTrackerPeriod(const int channel) {
 		return (pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] >= pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]) ?
 			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] :
-			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]);
+			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] + (INT16_MAX - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]);
 	}
 
 	void handleReset(const uint8_t section, const int channel) {
@@ -313,7 +308,7 @@ struct Vimina : SanguineModule {
 			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
 				triggerExtendCount[i][channel] = 0;
 			}
-			tmrModuleClock[channel].reset();
+			tmrModuleClock[channel] = 0;
 		}
 	}
 
