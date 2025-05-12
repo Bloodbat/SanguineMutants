@@ -16,6 +16,8 @@
 
 - Anuli: knob units and display values friendlier to humans.
 
+- Funes: trimpot display values friendlier to humans.
+
 
 ---
 

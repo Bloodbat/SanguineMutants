@@ -117,13 +117,13 @@ struct Funes : SanguineModule {
 		configParam(PARAM_LPG_COLOR, 0.f, 1.f, 0.5f, "Lowpass gate response", "%", 0.f, 100.f);
 		configParam(PARAM_MORPH, 0.f, 1.f, 0.5f, "Morph", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY, 0.f, 1.f, 0.5f, "Lowpass gate decay", "%", 0.f, 100.f);
-		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV");
-		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV");
-		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV");
+		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV", "%", 0.f, 100.f);
+		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV", "%", 0.f, 100.f);
+		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV", "%", 0.f, 100.f);
 		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funes::frequencyModes);
-		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV");
-		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV");
-		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV");
+		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
