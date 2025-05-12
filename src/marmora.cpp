@@ -241,7 +241,7 @@ struct Marmora : SanguineModule {
 		configOutput(OUTPUT_X2, "X₂");
 		configOutput(OUTPUT_X3, "X₃");
 
-		configParam(PARAM_Y_RATE, 0.f, 1.f, 4.5f / LENGTHOF(marmora::yDividerRatios), "Y clock divider");
+		configParam(PARAM_Y_RATE, 0.f, 1.f, 0.375f, "Y clock divider");
 		configParam(PARAM_Y_SPREAD, 0.f, 1.f, 0.5f, "Y probability distribution", "%", 0.f, 100.f);
 		configParam(PARAM_Y_BIAS, 0.f, 1.f, 0.5f, "Y voltage offset", "%", 0.f, 100.f);
 		configParam(PARAM_Y_STEPS, 0.f, 1.f, 0.f, "Y smoothness", "%", 0.f, 100.f);
