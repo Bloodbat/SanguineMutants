@@ -2,6 +2,8 @@
 
 ## Fixes
 
+- Anuli: prevent the module from going to limbo when specific models are selected and extreme (and I do mean extreme) negative voltages are sent to the V/Oct input.
+
 - Nodi family: properly restore the "Low CPU" option when it is enabled in either module in really old patches.
 
 - Vimina: timer manipulation stops working after about 10 minutes.

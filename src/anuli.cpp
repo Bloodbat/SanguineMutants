@@ -306,7 +306,7 @@ struct Anuli : SanguineModule {
 
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
 		const ParameterInfo& parameterInfo) {
-		float note = inputs[INPUT_PITCH].getVoltage(channel) +
+		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
 
