@@ -117,7 +117,6 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
-	//dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
 	uint32_t tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
 
 	Vimina() {
@@ -255,7 +254,7 @@ struct Vimina : SanguineModule {
 			case SECTION_FUNCTION_FACTORER:
 				if (isDivideEnabled(section, channel)) {
 					if (divisionCounter[section][channel] <= 0) {
-						channelState[section][channel] = CHANNEL_GENERATED; // divide converts thru to exec on every division
+						channelState[section][channel] = CHANNEL_GENERATED; // Divide converts thru to exec on every division.
 					}
 					// Deal with counter.
 					if (divisionCounter[section][channel] >= channelFactor[section][channel] - 1) {
@@ -271,7 +270,7 @@ struct Vimina : SanguineModule {
 				break;
 			case SECTION_FUNCTION_SWING:
 				switch (swingCounter[section][channel]) {
-				case 0: // thru beat
+				case 0: // Thru beat.
 					channelState[section][channel] = CHANNEL_THRU;
 					swingCounter[section][channel] = 1;
 					break;
@@ -348,7 +347,7 @@ struct Vimina : SanguineModule {
 			uint32_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
 			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
 		} else {
-			// thru
+			// Thru.
 			return false;
 		}
 	}
