@@ -82,21 +82,25 @@ struct Vimina : SanguineModule {
 	int ledsChannel = 0;
 	int triggerCounts[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	int32_t channelFactors[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	int32_t channelSwings[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-
 	uint32_t pulseTrackerRecordedCounts[PORT_MAX_CHANNELS];
 
 	uint32_t ledGateDurations[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	ChannelStates ledStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	ChannelStates channelStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	uint8_t triggerExtendCounts[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-
-	int32_t divisionCounters[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	int32_t swingCounters[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	uint32_t swingCounters[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	uint32_t pulseTrackerBuffers[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
+
+	uint32_t tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
+
+	int32_t divisionCounters[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+
+	int32_t channelFactors[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t channelSwings[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+
+	ChannelStates channelStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	ChannelStates ledStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+
+	uint8_t triggerExtendCounts[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	// Swing constants
 	const float kSwingFactorMin = 50.f;
@@ -117,7 +121,6 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
-	uint32_t tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -228,13 +231,13 @@ struct Vimina : SanguineModule {
 	uint32_t getPulseTrackerElapsed(const int channel) {
 		return (tmrModuleClock[channel] >= pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel]) ?
 			tmrModuleClock[channel] - pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] :
-			tmrModuleClock[channel] + (INT16_MAX - pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel]);
+			tmrModuleClock[channel] + (UINT32_MAX - pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel]);
 	}
 
 	uint32_t getPulseTrackerPeriod(const int channel) {
 		return (pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] >= pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel]) ?
 			pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] - pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel] :
-			pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] + (INT16_MAX - pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel]);
+			pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] + (UINT32_MAX - pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel]);
 	}
 
 	void handleReset(const uint8_t section, const int channel) {
