@@ -1,4 +1,4 @@
-#include "plugin.hpp"
+﻿#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
@@ -108,6 +108,9 @@ struct Vimina : SanguineModule {
 
 	// Scaling constant
 	const float kMaxParamValue = 1.f;
+
+	const float swingConversionFactor = kMaxParamValue / (kSwingFactorMax - kSwingFactorMin);
+	const float factorerConversionFactor = kMaxParamValue / (kFactorCount - 1.f);
 
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
@@ -401,7 +404,7 @@ struct Vimina : SanguineModule {
 		case SECTION_FUNCTION_FACTORER:
 			int16_t factorIndex;
 			factorIndex = std::round(channelVoltage[section][channel] /
-				(kMaxParamValue / (kFactorCount - 1.f)) - kFactorerBypassIndex);
+				factorerConversionFactor - kFactorerBypassIndex);
 			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
 			if (factorIndex == 0) {
 				channelFactors[section][channel] = kFactorerBypassValue;
@@ -413,7 +416,7 @@ struct Vimina : SanguineModule {
 			break;
 		case SECTION_FUNCTION_SWING:
 			channelSwings[section][channel] = channelVoltage[section][channel] /
-				(kMaxParamValue / (kSwingFactorMax - kSwingFactorMin)) + kSwingFactorMin;
+				swingConversionFactor + kSwingFactorMin;
 			break;
 		}
 	}
