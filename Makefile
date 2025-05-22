@@ -7,12 +7,6 @@ FLAGS += \
 	-I./SanguineModulesCommon/src \
 	-Wno-unused-local-typedefs
 
-ifndef DEBUGBUILD
-EXTRA_FLAGS =
-else
-EXTRA_FLAGS = -Og
-endif
-
 SOURCES += $(wildcard src/*.cpp)
 
 SOURCES += eurorack/stmlib/utils/random.cc
@@ -161,4 +155,5 @@ include $(RACK_DIR)/plugin.mk
 ifdef DEBUGBUILD
 FLAGS := $(filter-out -O3,$(FLAGS))
 FLAGS := $(filter-out -funsafe-math-optimizations,$(FLAGS))
+FLAGS += -Og
 endif
