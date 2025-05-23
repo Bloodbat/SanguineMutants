@@ -1,5 +1,9 @@
 # Next Release
 
+## Additions
+
+- Vimina: show current swing or active clock division or multiplication factors in the knob's tooltip using the description field.
+
 
 ---
 
