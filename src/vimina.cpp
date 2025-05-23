@@ -114,6 +114,8 @@ struct Vimina : SanguineModule {
 
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
+	float lastSectionFactors[kMaxModuleSections] = { 0.5f, 0.5f };
+
 	bool inputGateState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	bool IsMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
@@ -124,6 +126,11 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
+
+	std::string sectionTooltips[kMaxModuleSections] = {
+		vimina::clockPrefix + "Swing 60.00%",
+		vimina::clockPrefix + vimina::factorLabels[0]
+	};
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -224,6 +231,35 @@ struct Vimina : SanguineModule {
 					kSanguineButtonLightValue : 0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ?
 					kSanguineButtonLightValue : 0.f, sampleTime);
+
+				float sectionFactor = params[PARAM_FACTOR_1 + section].getValue();
+
+				if (lastSectionFactors[section] != sectionFactor) {
+					float swingFactor = 0.f;
+					int factorIndex = 0;
+
+					switch (channelFunction[section]) {
+					case SECTION_FUNCTION_SWING:
+						swingFactor = params[PARAM_FACTOR_1 + section].getValue() / swingConversionFactor + kSwingFactorMin;
+
+						sectionTooltips[section] = vimina::clockPrefix + string::f("Swing %.2f%%", swingFactor);
+						break;
+
+					case SECTION_FUNCTION_FACTORER:
+						factorIndex = static_cast<int16_t>(std::round(params[PARAM_FACTOR_1 + section].getValue() /
+							factorerConversionFactor - kFactorerBypassIndex));
+
+						if (factorIndex < 0) {
+							factorIndex = -factorIndex; // abs
+						} else if (factorIndex > 0) {
+							factorIndex += kFactorerBypassIndex;
+						}
+						sectionTooltips[section] = vimina::clockPrefix + vimina::factorLabels[factorIndex];
+						break;
+					}
+					lastSectionFactors[section] = sectionFactor;
+				}
+				getParamQuantity(PARAM_FACTOR_1 + section)->description = sectionTooltips[section];
 			}
 		}
 
