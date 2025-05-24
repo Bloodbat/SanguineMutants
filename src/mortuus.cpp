@@ -177,9 +177,9 @@ struct Mortuus : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
-		// Only update knobs / lights every 16 samples.
+		// Update knobs / lights every 16 samples only.
 		if (bIsLightsTurn) {
-			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
+			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
 			sampleTime = args.sampleTime * kLightsFrequency;
 
 			pollSwitches(args, sampleTime);
@@ -374,6 +374,7 @@ struct Mortuus : SanguineModule {
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
 			// TODO: Check the output values against an actual device.
+			// TODO: Respect the stated voltage values!
 			outputs[OUTPUT_OUT_1].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
 			outputs[OUTPUT_OUT_2].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
@@ -679,7 +680,7 @@ struct Mortuus : SanguineModule {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
-			// Ibid
+			// Ibid.
 			else if (editMode == apicesCommon::EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
