@@ -373,8 +373,6 @@ struct Mortuus : SanguineModule {
 			dsp::Frame<apicesCommon::kChannelCount> frame = drbOutputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
-			// TODO: Check the output values against an actual device.
-			// TODO: Respect the stated voltage values!
 			outputs[OUTPUT_OUT_1].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
 			outputs[OUTPUT_OUT_2].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
