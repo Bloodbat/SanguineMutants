@@ -674,7 +674,9 @@ namespace pcg_detail {
     {
         if (lhs.multiplier() != rhs.multiplier()
             || lhs.increment() != rhs.increment())
+#ifndef METAMODULE
             throw std::logic_error("incomparable generators");
+#endif
         return rhs.distance(lhs.state_);
     }
 

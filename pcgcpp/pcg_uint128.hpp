@@ -292,17 +292,6 @@ namespace pcg_extras {
             return w.v0;
         }
 
-        typedef typename std::conditional<std::is_same<uint64_t,
-            unsigned long>::value,
-            unsigned long long,
-            unsigned long>::type
-            uint_missing_t;
-
-        explicit constexpr operator uint_missing_t() const
-        {
-            return d.v01;
-        }
-
         explicit constexpr operator bool() const
         {
             return d.v01 || d.v23;
