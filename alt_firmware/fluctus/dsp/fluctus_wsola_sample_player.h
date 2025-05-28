@@ -47,7 +47,11 @@
 
 namespace fluctus {
 
+#ifndef METAMODULE
   const int32_t kMaxWSOLASize = 4096;
+#else
+  const int32_t kMaxWSOLASize = 2048;
+#endif
 
   using namespace stmlib;
 
@@ -286,5 +290,4 @@ namespace fluctus {
   };
 
 }  // namespace fluctus
-
 #endif  // FLUCTUS_DSP_WSOLA_SAMPLE_PLAYER_H_
