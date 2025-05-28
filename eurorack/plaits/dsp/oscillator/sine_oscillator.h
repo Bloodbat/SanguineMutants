@@ -38,6 +38,10 @@
 
 #include "plaits/resources.h"
 
+#ifdef METAMODULE
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace plaits {
 
   const float kSineLUTSize = 512.0f;

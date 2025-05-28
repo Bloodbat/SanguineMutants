@@ -47,7 +47,11 @@
 
 namespace clouds {
 
+#ifndef METAMODULE
   const int32_t kMaxWSOLASize = 4096;
+#else
+  const int32_t kMaxWSOLASize = 2048;
+#endif
 
   using namespace stmlib;
 
