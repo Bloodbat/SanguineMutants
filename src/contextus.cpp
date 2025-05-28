@@ -765,6 +765,7 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+#ifndef METAMODULE
 				try {
 					uint32_t newValue = std::stoul(text);
 					module->setUserSeed(newValue);
@@ -772,6 +773,10 @@ struct ContextusWidget : SanguineModuleWidget {
 				catch (...) {
 
 				}
+#else
+				uint32_t newValue = std::stoul(text);
+				module->setUserSeed(newValue);
+#endif
 
 				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
 				overlay->requestDelete();

@@ -584,7 +584,11 @@ struct NebulaeWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Nebulae::PARAM_POSITION, Nebulae::LIGHT_POSITION_CV));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
+#else
+		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 74);
+#endif
 		nebulaeFramebuffer->addChild(displayPosition);
 		displayPosition->fallbackString = nebulae::modeDisplays[0].labelPosition;
 
@@ -602,7 +606,11 @@ struct NebulaeWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
 			module, Nebulae::PARAM_SIZE, Nebulae::LIGHT_SIZE_CV));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
+#else
+		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 72);
+#endif
 		nebulaeFramebuffer->addChild(displaySize);
 		displaySize->fallbackString = nebulae::modeDisplays[0].labelSize;
 
@@ -619,7 +627,11 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Nebulae::PARAM_PITCH));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
+#else
+		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54);
+#endif
 		nebulaeFramebuffer->addChild(displayPitch);
 		displayPitch->fallbackString = nebulae::modeDisplays[0].labelPitch;
 

@@ -622,7 +622,11 @@ struct EtesiaWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
+#else
+		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 72);
+#endif
 		etesiaFramebuffer->addChild(displayPosition);
 		displayPosition->fallbackString = etesia::modeDisplays[0].labelPosition;
 
@@ -640,7 +644,11 @@ struct EtesiaWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
 			module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
+#else
+		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 72);
+#endif
 		etesiaFramebuffer->addChild(displaySize);
 		displaySize->fallbackString = etesia::modeDisplays[0].labelSize;
 
@@ -657,7 +665,11 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Etesia::PARAM_PITCH));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
+#else
+		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54);
+#endif
 		etesiaFramebuffer->addChild(displayPitch);
 		displayPitch->fallbackString = etesia::modeDisplays[0].labelPitch;
 
@@ -687,7 +699,11 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 78.013), module, Etesia::INPUT_FEEDBACK));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
+#else
+		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 70);
+#endif
 		etesiaFramebuffer->addChild(displayFeedback);
 		displayFeedback->fallbackString = etesia::modeDisplays[0].labelFeedback;
 

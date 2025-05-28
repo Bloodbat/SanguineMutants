@@ -1037,6 +1037,10 @@ struct ApicesWidget : SanguineModuleWidget {
 		addChild(bloodLogo);
 
 		if (module) {
+#ifdef METAMODULE
+			module->displayText1 = apices::modeLabels[0];
+			module->displayText2 = apices::modeLabels[0];
+#endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;
 			oledDisplay1->oledText = &module->oledText1;
