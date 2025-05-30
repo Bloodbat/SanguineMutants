@@ -1,4 +1,4 @@
-name: Build VCV Rack Plugin
+name: Build and Upload Sanguine Mutants Nightly
 #on: [push, pull_request]
 
 on:
@@ -13,7 +13,7 @@ on:
    - cron: '46 18 * * *'  # Every day at 18:46 UTC
 
 env:
-  rack-sdk-version: 2.5.2
+  rack-sdk-version: 2.6.3
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
 
 defaults:
@@ -26,10 +26,10 @@ jobs:
     name: Modify plugin version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: mutantsdev
-      - uses: actions/cache@v4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -38,26 +38,24 @@ jobs:
           gitrev=`git rev-parse --short HEAD`
           pluginversion=`jq -r '.version' plugin.json`
           echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
-          cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
-        # only modify plugin version if no tag was created
-        # if: "! startsWith(github.ref, 'refs/tags/v')"
+          cat <<< `jq --arg VERSION "$pluginversion-$gitrev-nightly" '.version=$VERSION' plugin.json` > plugin.json
 
   build:
     name: ${{ matrix.platform }}
     needs: modify-plugin-version
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/qno/rack-plugin-toolchain-win-linux
+      image: ghcr.io/bloodbat/rack-plugin-toolchain-win-linux
       options: --user root
     strategy:
       matrix:
         platform: [win-x64, lin-x64]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           submodules: recursive
           ref: mutantsdev
-      - uses: actions/cache@v4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -68,7 +66,7 @@ jobs:
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-${{ matrix.platform }}
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
           name: ${{ matrix.platform }}
@@ -82,11 +80,11 @@ jobs:
       matrix:
         platform: [x64, arm64]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           submodules: recursive
           ref: mutantsdev
-      - uses: actions/cache@v4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: plugin-version-cache
         with:
           path: plugin.json
@@ -94,7 +92,7 @@ jobs:
       - name: Get Rack-SDK
         run: |
           pushd $HOME
-          wget -O Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-mac-x64+arm64.zip
+          wget -O Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-mac-${{ matrix.platform }}.zip
           unzip Rack-SDK.zip
       - name: Build plugin
         run: |
@@ -105,47 +103,10 @@ jobs:
           make dep
           make dist
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           path: dist/*.vcvplugin
           name: mac-${{ matrix.platform }}
-
-#  publish:
-#    name: Publish plugin
-#    # only create a release if a tag was created that is called e.g. v1.2.3
-#    # see also https://vcvrack.com/manual/Manifest#version
-#    if: startsWith(github.ref, 'refs/tags/v')
-#    runs-on: ubuntu-latest
-#    needs:  [build, build-mac]
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: FranzDiebold/github-env-vars-action@v2
-#      - name: Check if plugin version matches tag
-#        run: |
-#          pluginversion=`jq -r '.version' plugin.json`
-#          if [ "v$pluginversion" != "${{ env.CI_REF_NAME }}" ]; then
-#            echo "Plugin version from plugin.json 'v$pluginversion' doesn't match with tag version '${{ env.CI_REF_NAME }}'"
-#            exit 1
-#          fi
-#      - name: Create Release
-#        uses: softprops/action-gh-release@v2
-#        with:
-#          tag_name: ${{ github.ref }}
-#          name: Release ${{ env.CI_REF_NAME }}
-#          body: |
-#            ${{ env.CI_REPOSITORY_NAME }} VCV Rack Plugin ${{ env.CI_REF_NAME }}
-#          draft: false
-#          prerelease: false
-#      - uses: actions/download-artifact@v4
-#        with:
-#          path: _artifacts
-#      - name: Upload release assets
-#        uses: svenstaro/upload-release-action@v2
-#        with:
-#          repo_token: ${{ secrets.GITHUB_TOKEN }}
-#          file: _artifacts/**/*.vcvplugin
-#          tag: ${{ github.ref }}
-#          file_glob: true
 
   publish-nightly:
     name: Publish Nightly
@@ -154,17 +115,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, build-mac]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
         with:
           path: _artifacts
       - name: Delete old release assets
-        uses: mknejp/delete-release-assets@v1
+        uses: andreaswilli/delete-release-assets-action@cee1e4ece007d910b3555134b0c8109687469ec3
         with:
-          token: ${{ github.token }}
-          tag: Nightly # This may also be of the form 'refs/tags/staging'
-          assets: '*'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: Nightly
+          deleteOnlyFromDrafts: false
       - name: Upload release assets
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: _artifacts/**/*.vcvplugin

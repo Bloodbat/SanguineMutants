@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -50,18 +50,19 @@ namespace etesia {
 
 	class Grain {
 	public:
-		Grain() { }
-		~Grain() { }
+		Grain() {}
+		~Grain() {}
 
 		inline float InterpolatePlateau(const float* table, float index, float size) {
 			index *= size;
 			MAKE_INTEGRAL_FRACTIONAL(index)
+				float b = table[index_integral + 1];
+			if (index_fractional < 1.0f / 1.1f) {
 				float a = table[index_integral];
-			float b = table[index_integral + 1];
-			if (index_fractional < 1.0f / 1.1f)
 				return a + (b - a) * index_fractional * 1.1f;
-			else
+			} else {
 				return b;
+			}
 		}
 
 		void Init() {
@@ -69,17 +70,8 @@ namespace etesia {
 			envelope_phase_ = 2.0f;
 		}
 
-		void Start(
-			int32_t pre_delay,
-			int32_t buffer_size,
-			int32_t start,
-			int32_t width,
-			bool reverse,
-			int32_t phase_increment,
-			float window_shape,
-			float gain_l,
-			float gain_r,
-			GrainQuality recommended_quality) {
+		void Start(int32_t pre_delay, int32_t buffer_size, int32_t start, int32_t width, bool reverse,
+			int32_t phase_increment, float window_shape, float gain_l, float gain_r, GrainQuality recommended_quality) {
 			pre_delay_ = pre_delay;
 			reverse_ = reverse;
 
@@ -87,8 +79,7 @@ namespace etesia {
 			if (reverse) {
 				phase_increment_ = -phase_increment;
 				phase_ = width * phase_increment;
-			}
-			else {
+			} else {
 				phase_increment_ = phase_increment;
 				phase_ = 0;
 			}
@@ -114,9 +105,7 @@ namespace etesia {
 
 			float phase = envelope_phase_;
 			while (size--) {
-				float gain = phase <= bias ?
-					phase * slope / bias :
-					(2.0f - phase) * slope / (2.0f - bias);
+				float gain = phase <= bias ? phase * slope / bias : (2.0f - phase) * slope / (2.0f - bias);
 				if (gain > 1.0f) gain = 1.0f;
 				phase += increment;
 				if (phase >= 2.0f) {
@@ -129,17 +118,13 @@ namespace etesia {
 		}
 
 		template<int32_t num_channels, GrainQuality quality, Resolution resolution>
-		inline void OverlapAdd(
-			const AudioBuffer<resolution>* buffer,
-			float* destination,
-			float* envelope,
-			size_t size) {
+		inline void OverlapAdd(const AudioBuffer<resolution>* buffer, float* destination, float* envelope, size_t size) {
 			if (!active_) {
 				return;
 			}
-			// Rendering is done on 32-sample long blocks. The pre-delay allows grains
-			// to start at arbitrary samples within a block, rather than at block
-			// boundaries.
+			/* Rendering is done on 32-sample long blocks. The pre-delay allows grains
+			   to start at arbitrary samples within a block, rather than at block
+			   boundaries. */
 			while (pre_delay_ && size) {
 				destination += 2;
 				--size;
@@ -163,15 +148,12 @@ namespace etesia {
 					break;
 				}
 
-				float l = buffer[0].template Read<InterpolationMethod(quality)>(
-					sample_index, phase & 65535) * gain;
+				float l = buffer[0].template Read<InterpolationMethod(quality)>(sample_index, phase & 65535) * gain;
 				if (num_channels == 1) {
 					*destination++ += l * gain_l;
 					*destination++ += l * gain_r;
-				}
-				else if (num_channels == 2) {
-					float r = buffer[1].template Read<InterpolationMethod(quality)>(
-						sample_index, phase & 65535) * gain;
+				} else if (num_channels == 2) {
+					float r = buffer[1].template Read<InterpolationMethod(quality)>(sample_index, phase & 65535) * gain;
 					*destination++ += l * gain_l + r * (1.0f - gain_r);
 					*destination++ += r * gain_r + l * (1.0f - gain_l);
 				}
@@ -180,7 +162,9 @@ namespace etesia {
 			phase_ = phase;
 		}
 
-		inline bool active() { return active_; }
+		inline bool active() {
+			return active_;
+		}
 
 		inline GrainQuality recommended_quality() const {
 			return recommended_quality_;
@@ -193,7 +177,7 @@ namespace etesia {
 		int32_t pre_delay_;
 
 		float envelope_slope_;
-		float envelope_bias_;         /* asymetry of envelope: -1..1 */
+		float envelope_bias_;         // Asymmetry of envelope: -1..1
 		float envelope_phase_;
 		float envelope_phase_increment_;
 
@@ -209,5 +193,4 @@ namespace etesia {
 	};
 
 }  // namespace etesia
-
 #endif  // ETESIA_DSP_GRAIN_H_

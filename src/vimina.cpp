@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
 #include "vimina.hpp"
 
 struct Vimina : SanguineModule {
@@ -51,8 +52,6 @@ struct Vimina : SanguineModule {
 
 	static const int kMaxModuleSections = 2;
 
-	static const int kTimerCounterMax = 65535;
-
 	// Channel ids
 	static const int kResetChannel = 0;
 	static const int kClockChannel = 1;
@@ -83,19 +82,21 @@ struct Vimina : SanguineModule {
 	int ledsChannel = 0;
 	int triggerCount[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	int16_t channelFactor[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	int16_t channelSwing[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t channelFactor[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t channelSwing[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	uint16_t pulseTrackerRecordedCount[PORT_MAX_CHANNELS];
+	uint32_t pulseTrackerRecordedCount[PORT_MAX_CHANNELS];
 
-	uint16_t ledGateDuration[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	uint32_t ledGateDuration[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	ChannelStates ledState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	ChannelStates channelState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	uint8_t triggerExtendCount[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	int8_t divisionCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	int8_t swingCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t divisionCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	int32_t swingCounter[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+
+	uint32_t pulseTrackerBuffer[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
 
 	// Swing constants
 	const float kSwingFactorMin = 50.f;
@@ -105,10 +106,9 @@ struct Vimina : SanguineModule {
 	const float kMaxParamValue = 1.f;
 
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	float pulseTrackerBuffer[kPulseTrackerBufferSize][PORT_MAX_CHANNELS] = {};
 
-	bool gateInputState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	bool multiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
+	bool inputGateState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	bool IsMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
 	SectionFunctions channelFunction[kMaxModuleSections] = {
 		SECTION_FUNCTION_SWING,
@@ -117,7 +117,8 @@ struct Vimina : SanguineModule {
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
 	dsp::ClockDivider lightsDivider;
-	dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
+	//dsp::Timer tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
+	uint32_t tmrModuleClock[PORT_MAX_CHANNELS]; // Replaces the ATMega88pa's TCNT1
 
 	Vimina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -148,14 +149,14 @@ struct Vimina : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(inputs[INPUT_CLOCK].getChannels(), 1);
 
-		bool bClockConnected = inputs[INPUT_CLOCK].isConnected();
+		bool bIsClockConnected = inputs[INPUT_CLOCK].isConnected();
 
-		bool bResetConnected = inputs[INPUT_RESET].isConnected();
+		bool bIsResetConnected = inputs[INPUT_RESET].isConnected();
 
-		bool resetButtons[kMaxModuleSections] = {};
+		bool isResetRequest[kMaxModuleSections] = {};
 
 		for (int section = 0; section < kMaxModuleSections; ++section) {
-			resetButtons[section] = btReset[section].process(params[PARAM_RESET_1 + section].getValue());
+			isResetRequest[section] = btReset[section].process(params[PARAM_RESET_1 + section].getValue());
 		}
 
 		outputs[OUTPUT_OUT_1A].setChannels(channelCount);
@@ -164,17 +165,16 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; ++channel) {
-			tmrModuleClock[channel].process(args.sampleRate * args.sampleTime);
-
+			tmrModuleClock[channel] += 1;
 			bool bIsTrigger = false;
 
-			if (bClockConnected) {
+			if (bIsClockConnected) {
 				if (isRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
-					// Pulse tracker is always recording. this should help smooth transitions
-					// between functions even though divide doesn't use it.
-					// Shift
+					/* Pulse tracker is always recording. this should help smooth transitions
+					   between functions even though divide doesn't use it. */
+					   // Shift
 					pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel];
-					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel].time;
+					pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel];
 					if (pulseTrackerRecordedCount[channel] < kPulseTrackerBufferSize) {
 						pulseTrackerRecordedCount[channel] += 1;
 					}
@@ -183,18 +183,18 @@ struct Vimina : SanguineModule {
 			}
 
 			bool bIsReset = false;
-			if (bResetConnected) {
+			if (bIsResetConnected) {
 				bIsReset = isRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage(channel) >= 2.f, channel);
 			}
 
 			for (uint8_t section = 0; section < kMaxModuleSections; ++section) {
 				channelFunction[section] = SectionFunctions(params[PARAM_MODE_1 + section].getValue());
 
-				if (resetButtons[section]) {
+				if (isResetRequest[section]) {
 					handleReset(section, channel);
 				}
 
-				if (bClockConnected) {
+				if (bIsClockConnected) {
 					setupChannel(section, channel);
 
 					handleTriggers(section, bIsTrigger, bIsReset, channel);
@@ -204,10 +204,6 @@ struct Vimina : SanguineModule {
 					setOutputVoltages(section, channel);
 				}
 				channelState[section][channel] = CHANNEL_REST; // Clean up.
-			}
-
-			if (tmrModuleClock[channel].time >= kTimerCounterMax) {
-				tmrModuleClock[channel].reset();
 			}
 		}
 		if (lightsDivider.process()) {
@@ -223,22 +219,23 @@ struct Vimina : SanguineModule {
 					kSanguineButtonLightValue : 0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ?
 					kSanguineButtonLightValue : 0.f, sampleTime);
-
-				updateChannelLeds(section, sampleTime, ledsChannel);
 			}
 		}
+
+		updateChannelLeds(0, args.sampleTime, ledsChannel);
+		updateChannelLeds(1, args.sampleTime, ledsChannel);
 	}
 
-	uint16_t getPulseTrackerElapsed(const int channel) {
-		return (tmrModuleClock[channel].time >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
-			tmrModuleClock[channel].time - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
-			tmrModuleClock[channel].time + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
+	uint32_t getPulseTrackerElapsed(const int channel) {
+		return (tmrModuleClock[channel] >= pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]) ?
+			tmrModuleClock[channel] - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] :
+			tmrModuleClock[channel] + (INT16_MAX - pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel]);
 	}
 
-	uint16_t getPulseTrackerPeriod(const int channel) {
+	uint32_t getPulseTrackerPeriod(const int channel) {
 		return (pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] >= pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]) ?
 			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel] :
-			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] + (kTimerCounterMax - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]);
+			pulseTrackerBuffer[kPulseTrackerBufferSize - 1][channel] + (INT16_MAX - pulseTrackerBuffer[kPulseTrackerBufferSize - 2][channel]);
 	}
 
 	void handleReset(const uint8_t section, const int channel) {
@@ -311,7 +308,7 @@ struct Vimina : SanguineModule {
 			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
 				triggerExtendCount[i][channel] = 0;
 			}
-			tmrModuleClock[channel].reset();
+			tmrModuleClock[channel] = 0;
 		}
 	}
 
@@ -323,14 +320,14 @@ struct Vimina : SanguineModule {
 		return channelFactor[section][channel] < kFactorerBypassValue;
 	}
 
-	bool isMultiplyStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
+	bool isMultiplyStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		float interval = getPulseTrackerPeriod(channel) / -channelFactor[section][channel];
 		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
-			if (!multiplyDebouncing[section][channel]) {
+			if (!IsMultiplyDebouncing[section][channel]) {
 				return true;
 			}
 		} else {
-			multiplyDebouncing[section][channel] = false;
+			IsMultiplyDebouncing[section][channel] = false;
 		}
 		return false;
 	}
@@ -340,15 +337,15 @@ struct Vimina : SanguineModule {
 	}
 
 	bool isRisingEdge(const uint8_t section, const bool voltageAboveThreshold, const int channel) {
-		bool lastGateState = gateInputState[section][channel];
-		gateInputState[section][channel] = voltageAboveThreshold;
-		return gateInputState[section][channel] && !lastGateState;
+		bool bLastGateState = inputGateState[section][channel];
+		inputGateState[section][channel] = voltageAboveThreshold;
+		return inputGateState[section][channel] && !bLastGateState;
 	}
 
-	bool isSwingStrikeTurn(const uint8_t section, const uint16_t elapsed, const int channel) {
+	bool isSwingStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		if (swingCounter[section][channel] >= 2 && channelSwing[section][channel] > kSwingFactorMin) {
-			uint16_t period = getPulseTrackerPeriod(channel);
-			uint16_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
+			uint32_t period = getPulseTrackerPeriod(channel);
+			uint32_t interval = ((10 * (period * 2)) / (1000 / channelSwing[section][channel])) - period;
 			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
 		} else {
 			// thru
@@ -369,19 +366,26 @@ struct Vimina : SanguineModule {
 			outputs[OUTPUT_OUT_1A + section].setVoltage(10.f, channel);
 			outputs[OUTPUT_OUT_1B + section].setVoltage(10.f, channel);
 			triggerExtendCount[section][channel] = kTriggerExtendCount;
-			if (channelState[section][channel] < CHANNEL_GENERATED) {
-				ledGateDuration[section][channel] = kLedThruGateDuration;
-				ledState[section][channel] = CHANNEL_THRU;
-			} else {
+
+			switch (channelState[section][channel])
+			{
+			case CHANNEL_GENERATED:
 				ledGateDuration[section][channel] = kLedGeneratedGateDuration;
 				ledState[section][channel] = CHANNEL_GENERATED;
+				break;
+			case CHANNEL_THRU:
+				ledGateDuration[section][channel] = kLedThruGateDuration;
+				ledState[section][channel] = CHANNEL_THRU;
+				break;
+			default:
+				break;
 			}
 		} else {
 			if (triggerExtendCount[section][channel] == 0) {
 				outputs[OUTPUT_OUT_1A + section].setVoltage(0.f, channel);
 				outputs[OUTPUT_OUT_1B + section].setVoltage(0.f, channel);
 			} else {
-				triggerExtendCount[section][channel] -= 1;
+				--triggerExtendCount[section][channel];
 			}
 		}
 	}
@@ -419,8 +423,8 @@ struct Vimina : SanguineModule {
 				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
 				triggerCount[section][channel] >= channelFactor[section][channel]) {
 				channelState[section][channel] = CHANNEL_GENERATED;
-				triggerCount[section][channel]--;
-				multiplyDebouncing[section][channel] = true;
+				IsMultiplyDebouncing[section][channel] = true;
+				--triggerCount[section][channel];
 			}
 			break;
 		case SECTION_FUNCTION_SWING:
@@ -448,10 +452,10 @@ struct Vimina : SanguineModule {
 			break;
 		case CHANNEL_THRU:
 			lights[currentLight + 0].setBrightnessSmooth(1.f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+			lights[currentLight + 1].setBrightness(0.f);
 			break;
 		case CHANNEL_GENERATED:
-			lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+			lights[currentLight + 0].setBrightness(0.f);
 			lights[currentLight + 1].setBrightnessSmooth(1.f, sampleTime);
 			break;
 		}
@@ -467,8 +471,7 @@ struct Vimina : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_t* ledsChannelJ = json_integer(ledsChannel);
-		json_object_set_new(rootJ, "ledsChannel", ledsChannelJ);
+		setJsonInt(rootJ, "ledsChannel", ledsChannel);
 
 		return rootJ;
 	}
@@ -476,9 +479,10 @@ struct Vimina : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* ledsChannelJ = json_object_get(rootJ, "ledsChannel");
-		if (ledsChannelJ) {
-			ledsChannel = json_integer_value(ledsChannelJ);
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "ledsChannel", intValue)) {
+			ledsChannel = intValue;
 		}
 	}
 };

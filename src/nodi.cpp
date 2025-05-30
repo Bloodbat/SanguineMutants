@@ -1,7 +1,9 @@
 #include <string.h>
 
 #include "plugin.hpp"
-#include "nodicommon.hpp"
+#include "sanguinehelpers.hpp"
+#include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
 
 #include "braids/macro_oscillator.h"
 #include "braids/signature_waveshaper.h"
@@ -10,9 +12,7 @@
 #include "braids/quantizer.h"
 #include "braids/quantizer_scales.h"
 
-#include "sanguinehelpers.hpp"
-
-#include "sanguinechannels.hpp"
+#include "nodicommon.hpp"
 
 #include "nodi.hpp"
 
@@ -80,47 +80,46 @@ struct Nodi : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	braids::MacroOscillator osc[PORT_MAX_CHANNELS];
+	braids::MacroOscillator oscillators[PORT_MAX_CHANNELS];
 	braids::SettingsData settings[PORT_MAX_CHANNELS];
-	braids::VcoJitterSource jitterSource[PORT_MAX_CHANNELS];
-	braids::SignatureWaveshaper waveShaper[PORT_MAX_CHANNELS];
-	braids::Envelope envelope[PORT_MAX_CHANNELS];
-	braids::Quantizer quantizer[PORT_MAX_CHANNELS];
+	braids::VcoJitterSource jitterSources[PORT_MAX_CHANNELS];
+	braids::SignatureWaveshaper waveShapers[PORT_MAX_CHANNELS];
+	braids::Envelope envelopes[PORT_MAX_CHANNELS];
+	braids::Quantizer quantizers[PORT_MAX_CHANNELS];
 
-	uint8_t currentScale[PORT_MAX_CHANNELS] = {};
+	uint8_t selectedScales[PORT_MAX_CHANNELS] = {};
 
 	uint8_t waveShaperValue = 0;
 	uint8_t driftValue = 0;
 
-	int16_t previousPitch[PORT_MAX_CHANNELS] = {};
+	int16_t previousPitches[PORT_MAX_CHANNELS] = {};
 
-	uint16_t gainLp[PORT_MAX_CHANNELS] = {};
-	uint16_t triggerDelay[PORT_MAX_CHANNELS] = {};
+	uint16_t gainLps[PORT_MAX_CHANNELS] = {};
+	uint16_t triggerDelays[PORT_MAX_CHANNELS] = {};
 
 	int channelCount = 0;
 	int displayChannel = 0;
+	static const int kLightsUpdateFrequency = 16;
 
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<1> sampleRateConverter[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<1> sampleRateConverters[PORT_MAX_CHANNELS];
+	dsp::ClockDivider lightsDivider;
 
-	static const int kClockUpdateFrequency = 16;
-	dsp::ClockDivider clockDivider;
-
-	bool bFlagTriggerDetected[PORT_MAX_CHANNELS] = {};
-	bool bLastTrig[PORT_MAX_CHANNELS] = {};
-	bool bTriggerFlag[PORT_MAX_CHANNELS] = {};
+	bool triggersDetected[PORT_MAX_CHANNELS] = {};
+	bool lastTriggers[PORT_MAX_CHANNELS] = {};
+	bool triggeredChannels[PORT_MAX_CHANNELS] = {};
 
 	bool bAutoTrigger = false;
 	bool bFlattenEnabled = false;
 	bool bPaques = false;
 	bool bVCAEnabled = false;
 
-	bool bLowCpu = false;
+	bool bWantLowCpu = false;
 
 	bool bPerInstanceSignSeed = true;
-	bool bNeedSeed = true;
+	bool bNeedSignSeed = true;
 
-	// Display stuff
+	// Display stuff.
 	braids::SettingsData lastSettings = {};
 	braids::Setting lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
 
@@ -181,29 +180,29 @@ struct Nodi : SanguineModule {
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&osc[channel], 0, sizeof(braids::MacroOscillator));
-			memset(&quantizer[channel], 0, sizeof(braids::Quantizer));
-			memset(&envelope[channel], 0, sizeof(braids::Envelope));
-			memset(&jitterSource[channel], 0, sizeof(braids::VcoJitterSource));
-			memset(&waveShaper[channel], 0, sizeof(braids::SignatureWaveshaper));
+			memset(&oscillators[channel], 0, sizeof(braids::MacroOscillator));
+			memset(&quantizers[channel], 0, sizeof(braids::Quantizer));
+			memset(&envelopes[channel], 0, sizeof(braids::Envelope));
+			memset(&jitterSources[channel], 0, sizeof(braids::VcoJitterSource));
+			memset(&waveShapers[channel], 0, sizeof(braids::SignatureWaveshaper));
 			memset(&settings[channel], 0, sizeof(braids::SettingsData));
 
-			osc[channel].Init();
-			quantizer[channel].Init();
-			envelope[channel].Init();
+			oscillators[channel].Init();
+			quantizers[channel].Init();
+			envelopes[channel].Init();
 
-			jitterSource[channel].Init();
-			waveShaper[channel].Init(userSignSeed);
+			jitterSources[channel].Init();
+			waveShapers[channel].Init(userSignSeed);
 
-			bLastTrig[channel] = false;
+			lastTriggers[channel] = false;
 
-			currentScale[channel] = 0xff;
+			selectedScales[channel] = 0xff;
 
-			previousPitch[channel] = 0;
+			previousPitches[channel] = 0;
 		}
 		memset(&lastSettings, 0, sizeof(braids::SettingsData));
 
-		clockDivider.setDivision(kClockUpdateFrequency);
+		lightsDivider.setDivision(kLightsUpdateFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -232,27 +231,27 @@ struct Nodi : SanguineModule {
 			settings[channel].ad_fm = params[PARAM_AD_MODULATION].getValue();
 			settings[channel].ad_color = params[PARAM_AD_COLOR].getValue();
 
-			// Trigger
+			// Trigger.
 			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-			if (!bLastTrig[channel] && bTriggerInput) {
-				bFlagTriggerDetected[channel] = bTriggerInput;
+			if (!lastTriggers[channel] && bTriggerInput) {
+				triggersDetected[channel] = bTriggerInput;
 			}
-			bLastTrig[channel] = bTriggerInput;
+			lastTriggers[channel] = bTriggerInput;
 
-			if (bFlagTriggerDetected[channel]) {
-				triggerDelay[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
-				++triggerDelay[channel];
-				bFlagTriggerDetected[channel] = false;
+			if (triggersDetected[channel]) {
+				triggerDelays[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
+				++triggerDelays[channel];
+				triggersDetected[channel] = false;
 			}
 
-			if (triggerDelay[channel]) {
-				--triggerDelay[channel];
-				if (triggerDelay[channel] == 0) {
-					bTriggerFlag[channel] = true;
+			if (triggerDelays[channel]) {
+				--triggerDelays[channel];
+				if (triggerDelays[channel] == 0) {
+					triggeredChannels[channel] = true;
 				}
 			}
 
-			// Handle switches
+			// Handle switches.
 			settings[channel].meta_modulation = 1;
 			settings[channel].ad_vca = bVCAEnabled;
 			settings[channel].vco_drift = driftValue;
@@ -260,36 +259,38 @@ struct Nodi : SanguineModule {
 			settings[channel].signature = waveShaperValue;
 			settings[channel].auto_trig = bAutoTrigger;
 
-			// Quantizer
-			if (currentScale[channel] != settings[channel].quantizer_scale) {
-				currentScale[channel] = settings[channel].quantizer_scale;
-				quantizer[channel].Configure(braids::scales[currentScale[channel]]);
+			// Quantizer.
+			if (selectedScales[channel] != settings[channel].quantizer_scale) {
+				selectedScales[channel] = settings[channel].quantizer_scale;
+				quantizers[channel].Configure(braids::scales[selectedScales[channel]]);
 			}
 
-			// Render frames
-			if (drbOutputBuffer[channel].empty()) {
-				envelope[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
-				uint32_t adValue = envelope[channel].Render();
+			// Render frames.
+			if (drbOutputBuffers[channel].empty()) {
+				envelopes[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
+				uint32_t adValue = envelopes[channel].Render();
 
 				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
 
-				// Set model
+				// Set model.
 				if (!bPaques) {
 					int model = params[PARAM_MODEL].getValue();
 					if (inputs[INPUT_META].isConnected()) {
-						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f * braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
+							braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 					}
 
 					settings[channel].shape = clamp(model, 0, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
-					// Setup oscillator from settings
-					osc[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
+					// Setup oscillator from settings.
+					oscillators[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
 				} else {
-					osc[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
+					oscillators[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
 				}
 
-				// Set timbre/modulation
-				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
+				// Set timbre/modulation.
+				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() *
+					inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
 				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
 
 				timbre += adValue / 65535.f * settings[channel].ad_timbre / 16.f;
@@ -297,19 +298,20 @@ struct Nodi : SanguineModule {
 
 				int16_t param1 = math::rescale(clamp(timbre, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
 				int16_t param2 = math::rescale(clamp(modulation, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
-				osc[channel].set_parameters(param1, param2);
+				oscillators[channel].set_parameters(param1, param2);
 
-				// Set pitch
-				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() + params[PARAM_FINE].getValue() / 12.f;
+				// Set pitch.
+				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() +
+					params[PARAM_FINE].getValue() / 12.f;
 				pitchV += fm;
 
-				if (bLowCpu) {
+				if (bWantLowCpu) {
 					pitchV += log2f(96000.f / args.sampleRate);
 				}
 
 				int16_t pitch = (pitchV * 12.f + 60) * 128;
 
-				// pitch_range
+				// Pitch range.
 				switch (settings[channel].pitch_range)
 				{
 				case braids::PITCH_RANGE_EXTERNAL:
@@ -330,15 +332,16 @@ struct Nodi : SanguineModule {
 					break;
 				}
 
-				pitch = quantizer[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
+				pitch = quantizers[channel].Process(pitch, (60 + settings[channel].quantizer_root) << 7);
 
-				// Check if the pitch has changed to cause an auto-retrigger
-				int16_t pitchDelta = pitch - previousPitch[channel];
-				bFlagTriggerDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 || -pitchDelta >= 0x40);
+				// Check if pitch has changed enough to cause an auto-retrigger.
+				int16_t pitchDelta = pitch - previousPitches[channel];
+				triggersDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 ||
+					-pitchDelta >= 0x40);
 
-				previousPitch[channel] = pitch;
+				previousPitches[channel] = pitch;
 
-				pitch += jitterSource[channel].Render(settings[channel].vco_drift);
+				pitch += jitterSources[channel].Render(settings[channel].vco_drift);
 				pitch += adValue * settings[channel].ad_fm >> 7;
 
 				pitch = clamp(static_cast<int16_t>(pitch), 0, 16383);
@@ -347,24 +350,25 @@ struct Nodi : SanguineModule {
 					pitch = braids::Interpolate88(braids::lut_vco_detune, pitch << 2);
 				}
 
-				// Pitch transposition
-				int32_t transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ? -(36 << 7) : 0;
+				// Pitch transposition.
+				int32_t transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ?
+					-(36 << 7) : 0;
 				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
-				osc[channel].set_pitch(pitch + transposition);
+				oscillators[channel].set_pitch(pitch + transposition);
 
-				if (bTriggerFlag[channel]) {
-					osc[channel].Strike();
-					envelope[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
-					bTriggerFlag[channel] = false;
+				if (triggeredChannels[channel]) {
+					oscillators[channel].Strike();
+					envelopes[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
+					triggeredChannels[channel] = false;
 				}
 
-				// TODO: add a sync input buffer (must be sample rate converted)
+				// TODO: Add a sync input buffer (must be sample rate converted).
 				const uint8_t syncBuffer[nodiCommon::kBlockSize] = {};
 
 				int16_t renderBuffer[nodiCommon::kBlockSize];
-				osc[channel].Render(syncBuffer, renderBuffer, nodiCommon::kBlockSize);
+				oscillators[channel].Render(syncBuffer, renderBuffer, nodiCommon::kBlockSize);
 
-				// Signature waveshaping, decimation, and bit reduction
+				// Signature waveshaping, decimation, and bit reduction.
 				int16_t sample = 0;
 				size_t decimationFactor = nodiCommon::decimationFactors[settings[channel].sample_rate];
 				uint16_t bitMask = nodiCommon::bitReductionMasks[settings[channel].resolution];
@@ -374,46 +378,47 @@ struct Nodi : SanguineModule {
 					if (block % decimationFactor == 0) {
 						sample = renderBuffer[block] & bitMask;
 					}
-					sample = sample * gainLp[channel] >> 16;
-					gainLp[channel] += (gain - gainLp[channel]) >> 4;
-					int16_t warped = waveShaper[channel].Transform(sample);
+					sample = sample * gainLps[channel] >> 16;
+					gainLps[channel] += (gain - gainLps[channel]) >> 4;
+					int16_t warped = waveShapers[channel].Transform(sample);
 					renderBuffer[block] = stmlib::Mix(sample, warped, signature);
 				}
 
-				if (!bLowCpu) {
-					// Sample rate convert
+				if (!bWantLowCpu) {
+					// Convert sample rate.
 					dsp::Frame<1> in[nodiCommon::kBlockSize];
 					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						in[block].samples[0] = renderBuffer[block] / 32768.f;
 					}
-					sampleRateConverter[channel].setRates(96000, args.sampleRate);
+					sampleRateConverters[channel].setRates(96000, args.sampleRate);
 
 					int inLen = nodiCommon::kBlockSize;
-					int outLen = drbOutputBuffer[channel].capacity();
-					sampleRateConverter[channel].process(in, &inLen, drbOutputBuffer[channel].endData(), &outLen);
-					drbOutputBuffer[channel].endIncr(outLen);
+					int outLen = drbOutputBuffers[channel].capacity();
+					sampleRateConverters[channel].process(in, &inLen, drbOutputBuffers[channel].endData(),
+						&outLen);
+					drbOutputBuffers[channel].endIncr(outLen);
 				} else {
 					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						dsp::Frame<1> inFrame;
 						inFrame.samples[0] = renderBuffer[block] / 32768.f;
-						drbOutputBuffer[channel].push(inFrame);
+						drbOutputBuffers[channel].push(inFrame);
 					}
 				}
 			}
 
-			// Output
-			if (!drbOutputBuffer[channel].empty()) {
-				dsp::Frame<1> outFrame = drbOutputBuffer[channel].shift();
+			// Output..
+			if (!drbOutputBuffers[channel].empty()) {
+				dsp::Frame<1> outFrame = drbOutputBuffers[channel].shift();
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
 		} // Channels
 
-		if (clockDivider.process()) {
-			const float sampleTime = args.sampleTime * kClockUpdateFrequency;
+		if (lightsDivider.process()) {
+			const float sampleTime = args.sampleTime * kLightsUpdateFrequency;
 
 			pollSwitches(sampleTime);
 
-			// Handle model light
+			// Handle model light.
 			if (!bPaques) {
 				int currentModel = settings[0].shape;
 				lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodi::lightColors[currentModel].red, sampleTime);
@@ -449,8 +454,8 @@ struct Nodi : SanguineModule {
 	}
 
 	inline void handleDisplay(const ProcessArgs& args) {
-		// Display handling
-		// Display - return to model after 2s
+		// Display handling..
+		// Display: return to model after 2s
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
 			if (!bPaques) {
 				displayText = nodi::displayLabels[settings[displayChannel].shape];
@@ -568,7 +573,7 @@ struct Nodi : SanguineModule {
 	}
 
 	inline void pollSwitches(const float sampleTime) {
-		// Handle switch lights
+		// Handle switch lights.
 		lights[LIGHT_MORSE].setBrightnessSmooth(bPaques ? kSanguineButtonLightValue : 0.f, sampleTime);
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
@@ -578,17 +583,10 @@ struct Nodi : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_t* lowCpuJ = json_boolean(bLowCpu);
-		json_object_set_new(rootJ, "bLowCpu", lowCpuJ);
-
-		json_t* displayChannelJ = json_integer(displayChannel);
-		json_object_set_new(rootJ, "displayChannel", displayChannelJ);
-
-		json_t* userSignSeedJ = json_integer(userSignSeed);
-		json_object_set_new(rootJ, "userSignSeed", userSignSeedJ);
-
-		json_t* perInstanceSignSeedJ = json_boolean(bPerInstanceSignSeed);
-		json_object_set_new(rootJ, "perInstanceSignSeed", perInstanceSignSeedJ);
+		setJsonBoolean(rootJ, "bWantLowCpu", bWantLowCpu);
+		setJsonBoolean(rootJ, "perInstanceSignSeed", bPerInstanceSignSeed);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
+		setJsonInt(rootJ, "userSignSeed", userSignSeed);
 
 		return rootJ;
 	}
@@ -596,32 +594,28 @@ struct Nodi : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* lowCpuJ = json_object_get(rootJ, "bLowCpu");
-		if (lowCpuJ) {
-			bLowCpu = json_boolean_value(lowCpuJ);
+		json_int_t intValue = 0;
+
+		/* Readded for compatibility with really old patches due to my
+		   overzealousness when renaming vars. */
+		getJsonBoolean(rootJ, "bLowCpu", bWantLowCpu);
+		getJsonBoolean(rootJ, "bWantLowCpu", bWantLowCpu);
+		getJsonBoolean(rootJ, "perInstanceSignSeed", bPerInstanceSignSeed);
+
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
 		}
 
-		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ) {
-			displayChannel = json_integer_value(displayChannelJ);
-		}
-
-		json_t* userSignSeedJ = json_object_get(rootJ, "userSignSeed");
-		if (userSignSeedJ) {
-			userSignSeed = json_integer_value(userSignSeedJ);
+		if (getJsonInt(rootJ, "userSignSeed", intValue)) {
+			userSignSeed = intValue;
 			setWaveShaperSeed(userSignSeed);
-			bNeedSeed = false;
-		}
-
-		json_t* perInstanceSignSeedJ = json_object_get(rootJ, "perInstanceSignSeed");
-		if (perInstanceSignSeedJ) {
-			bPerInstanceSignSeed = json_boolean_value(perInstanceSignSeedJ);
+			bNeedSignSeed = false;
 		}
 	}
 
 	void setWaveShaperSeed(uint32_t seed) {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			waveShaper[channel].Init(seed);
+			waveShapers[channel].Init(seed);
 		}
 	}
 
@@ -652,7 +646,7 @@ struct Nodi : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		if (bNeedSeed) {
+		if (bNeedSignSeed) {
 			userSignSeed = getInstanceSeed();
 			setWaveShaperSeed(userSignSeed);
 		}
@@ -686,8 +680,8 @@ struct NodiWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		FramebufferWidget* nodiFrambuffer = new FramebufferWidget();
-		addChild(nodiFrambuffer);
+		FramebufferWidget* nodiFramebuffer = new FramebufferWidget();
+		addChild(nodiFramebuffer);
 
 		const float lightXBase = 6.894f;
 		const float lightXDelta = 4.f;
@@ -703,7 +697,7 @@ struct NodiWidget : SanguineModuleWidget {
 		}
 
 		nodiCommon::NodiDisplay* nodiDisplay = new nodiCommon::NodiDisplay(4, module, 71.12, 20.996);
-		nodiFrambuffer->addChild(nodiDisplay);
+		nodiFramebuffer->addChild(nodiDisplay);
 		nodiDisplay->fallbackString = nodi::displayLabels[0];
 
 		if (module) {
@@ -786,7 +780,7 @@ struct NodiWidget : SanguineModuleWidget {
 		}
 
 		void step() override {
-			// Keep selected
+			// Keep selected.
 			APP->event->setSelectedWidget(this);
 			TextField::step();
 		}
@@ -855,7 +849,7 @@ struct NodiWidget : SanguineModuleWidget {
 
 				menu->addChild(new MenuSeparator);
 
-				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bWantLowCpu));
 
 				menu->addChild(new MenuSeparator);
 

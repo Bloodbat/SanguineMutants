@@ -66,33 +66,30 @@ namespace deadman {
 	public:
 		typedef int16_t(Lfo::* ComputeSampleFn)();
 
-		Lfo() { }
-		~Lfo() { }
+		Lfo() {}
+		~Lfo() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				if (sync_) {
 					set_shape_integer(parameter[0]);
 					set_parameter(parameter[1] - 32768);
-				}
-				else {
+				} else {
 					set_rate(parameter[0]);
 					set_shape_parameter_preset(parameter[1]);
 				}
 				set_reset_phase(0);
 				set_level(40960);
-			}
-			else {
+			} else {
 				if (sync_) {
 					set_level(parameter[0]);
 					set_shape_integer(parameter[1]);
 					set_parameter(parameter[2] - 32768);
 					set_reset_phase(parameter[3] - 32768);
-				}
-				else {
+				} else {
 					set_level(40960);
 					set_rate(parameter[0]);
 					set_shape_integer(parameter[1]);
@@ -174,20 +171,19 @@ namespace deadman {
 	public:
 		typedef int16_t(FmLfo::* ComputeSampleFn)();
 
-		FmLfo() { }
-		~FmLfo() { }
+		FmLfo() {}
+		~FmLfo() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_rate(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
 				set_reset_phase(0);
 				set_level(65535);
-			}
-			else {
+			} else {
 				set_level(65535);
 				set_rate(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
@@ -218,8 +214,7 @@ namespace deadman {
 			if (fm_depth < 32768) {
 				fm_depth_ = (32767 - fm_depth) << 1;
 				fm_parameter_ = 0;
-			}
-			else {
+			} else {
 				fm_depth_ = (fm_depth - 32768) << 1;
 				fm_parameter_ = 16383;
 			}
@@ -293,20 +288,19 @@ namespace deadman {
 	public:
 		typedef int16_t(WsmLfo::* ComputeSampleFn)();
 
-		WsmLfo() { }
-		~WsmLfo() { }
+		WsmLfo() {}
+		~WsmLfo() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_rate(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
 				set_reset_phase(0);
 				set_level(65535);
-			}
-			else {
+			} else {
 				set_rate(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
 				set_reset_phase(0);
@@ -338,8 +332,7 @@ namespace deadman {
 			if (wsm_depth < 32768) {
 				wsm_depth_ = (32767 - wsm_depth) << 1;
 				wsm_parameter_ = 0;
-			}
-			else {
+			} else {
 				wsm_depth_ = (wsm_depth - 32768) << 1;
 				wsm_parameter_ = 16383;
 			}
@@ -413,19 +406,18 @@ namespace deadman {
 	public:
 		typedef int16_t(Plo::* ComputeSampleFn)();
 
-		Plo() { }
-		~Plo() { }
+		Plo() {}
+		~Plo() {}
 
 		void Init();
 		void Process(const GateFlags* gate_flags, int16_t* out, size_t size);
 
-		void Configure(uint16_t* parameter, ControlMode control_mode) {
+		void Configure(const uint16_t* parameter, ControlMode control_mode) {
 			if (control_mode == CONTROL_MODE_HALF) {
 				set_pitch_coefficient(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
 				set_level(65535);
-			}
-			else {
+			} else {
 				set_pitch_coefficient(parameter[0]);
 				set_shape_parameter_preset(parameter[1]);
 				set_level(65535);

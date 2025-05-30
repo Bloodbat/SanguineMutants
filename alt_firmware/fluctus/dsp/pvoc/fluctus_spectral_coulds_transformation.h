@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -36,52 +36,46 @@
 #include "fluctus/fluctus_resources.h"
 
 namespace fluctus {
+	const int32_t kMaxNumTextures = 7;
 
-const int32_t kMaxNumTextures = 7;
+	struct Parameters;
 
-struct Parameters;
+	class SpectralCloudsTransformation {
+	public:
+		SpectralCloudsTransformation() {}
+		~SpectralCloudsTransformation() {}
 
-class SpectralCloudsTransformation {
-public:
-	SpectralCloudsTransformation() {
-	}
-	~SpectralCloudsTransformation() {
-	}
+		void Init(float* buffer, int32_t fft_size, int32_t num_textures, float sample_rate_hz, FFT* fft);
 
-	void Init(float* buffer, int32_t fft_size, int32_t num_textures,
-			float sample_rate_hz, FFT* fft);
+		void Process(const Parameters& parameters, float* fft_out, float* ifft_in, bool trigger);
 
-	void Process(const Parameters& parameters, float* fft_out, float* ifft_in, bool trigger);
-
-private:
-	void Reset(int32_t num_textures);
-	void RectangularToPolar(float* fft_data);
-	void PolarToRectangular(float* mags, float* fft_data);
+	private:
+		void Reset(int32_t num_textures);
+		void RectangularToPolar(float* fft_data);
+		void PolarToRectangular(const float* mags, float* fft_data);
 
 
-	inline void fast_p2r(float magnitude, uint16_t angle, float* re,
-			float* im) {
-		angle >>= 6;
-		*re = magnitude * lut_sin[angle + 256];
-		*im = magnitude * lut_sin[angle];
-	}
+		inline void fast_p2r(float magnitude, uint16_t angle, float* re, float* im) {
+			angle >>= 6;
+			*re = magnitude * lut_sin[angle + 256];
+			*im = magnitude * lut_sin[angle];
+		}
 
-	FFT* fft_;
+		FFT* fft_;
 
-	int32_t size_;
+		int32_t size_;
 
-	float* buffers_[kMaxNumTextures];
+		float* buffers_[kMaxNumTextures];
 
-	uint16_t* phases_;
-	uint16_t* previous_mag_;
-	uint16_t* band_gain_target_;
-	uint16_t* band_gain_state_;
+		uint16_t* phases_;
+		uint16_t* previous_mag_;
+		uint16_t* band_gain_target_;
+		uint16_t* band_gain_state_;
 
-	float current_num_freq_bands_parameter_;
+		float current_num_freq_bands_parameter_;
 
-	DISALLOW_COPY_AND_ASSIGN (SpectralCloudsTransformation);
-};
+		DISALLOW_COPY_AND_ASSIGN(SpectralCloudsTransformation);
+	};
 
 }  // namespace fluctus
-
 #endif  // FLUCTUS_DSP_PVOC_SPECTRAL_COUDS_TRANSFORMATION_H_

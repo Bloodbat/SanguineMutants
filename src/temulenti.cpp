@@ -1,8 +1,11 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
 #include "bumps/bumps_generator.h"
 #include "bumps/bumps_cv_scaler.h"
+
 #include "aestuscommon.hpp"
 #include "temulenti.hpp"
 
@@ -97,17 +100,17 @@ struct Temulenti : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulenti::displayModels[0];
 	bool bUseCalibrationOffset = true;
-	bool bLastSync = false;
+	bool bLastExternalSync = false;
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
 		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
-		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Main frequency");
-		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM input attenuverter");
-		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape");
-		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope");
-		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness");
+		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Frequency", " semitones");
+		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM attenuverter", " centitones");
+		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape", "%", 0, 100);
+		configParam(PARAM_SLOPE, -1.f, 1.f, 0.f, "Slope", "%", 0, 100);
+		configParam(PARAM_SMOOTHNESS, -1.f, 1.f, 0.f, "Smoothness", "%", 0, 100);
 
 		configSwitch(PARAM_MODEL, 0.f, 3.f, 0.f, "Module model", temulenti::menuLabels);
 
@@ -149,20 +152,20 @@ struct Temulenti : SanguineModule {
 			generator.set_range(range);
 		}
 
-		bool bSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
 		//Buffer loop
 		if (generator.writable_block()) {
 			// Sync
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			if (bSync != bLastSync) {
-				generator.set_sync(bSync);
-				bLastSync = bSync;
+			if (bHaveExternalSync != bLastExternalSync) {
+				generator.set_sync(bHaveExternalSync);
+				bLastExternalSync = bHaveExternalSync;
 			}
 
 			// Pitch
-			float pitchParam = clamp(params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
-				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f, -60.f, 60.f);
+			float pitchParam = params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
+				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
 			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
 
 			pitchParam += 60.f;
@@ -269,9 +272,9 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bSync && !(getSystemTimeMs() & 128) ?
+			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 			if (quantize) {
 				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantize & 1 ? 1.f : 0.f, sampleTime);
@@ -313,9 +316,10 @@ struct Temulenti : SanguineModule {
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
-		json_object_set_new(rootJ, "mode", json_integer(static_cast<int>(generator.mode())));
-		json_object_set_new(rootJ, "range", json_integer(static_cast<int>(generator.range())));
-		json_object_set_new(rootJ, "useCalibrationOffset", json_boolean(bUseCalibrationOffset));
+
+		setJsonInt(rootJ, "mode", static_cast<int>(generator.mode()));
+		setJsonInt(rootJ, "range", static_cast<int>(generator.range()));
+		setJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 
 		return rootJ;
 	}
@@ -323,20 +327,17 @@ struct Temulenti : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* modeJ = json_object_get(rootJ, "mode");
-		if (modeJ) {
-			generator.set_mode(bumps::GeneratorMode(json_integer_value(modeJ)));
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "mode", intValue)) {
+			generator.set_mode(bumps::GeneratorMode(intValue));
 		}
 
-		json_t* rangeJ = json_object_get(rootJ, "range");
-		if (rangeJ) {
-			generator.set_range(bumps::GeneratorRange(json_integer_value(rangeJ)));
+		if (getJsonInt(rootJ, "range", intValue)) {
+			generator.set_range(bumps::GeneratorRange(intValue));
 		}
 
-		json_t* useCalibrationOffsetJ = json_object_get(rootJ, "useCalibrationOffset");
-		if (useCalibrationOffsetJ) {
-			bUseCalibrationOffset = json_boolean(useCalibrationOffsetJ);
-		}
+		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 	}
 
 	void setModel(int modelNum) {

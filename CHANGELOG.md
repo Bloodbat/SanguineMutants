@@ -1,3 +1,80 @@
+# 2.6.7
+
+## Fixes
+
+- Anuli: prevent the module from going to limbo when specific models are selected and extreme (and I do mean extreme) negative voltages are sent to the V/Oct input.
+
+- Nodi family: properly restore the "Low CPU" option when it is enabled in either module in really old patches.
+
+- Vimina: timer manipulation stops working after about 10 minutes.
+
+- Vimina: wrong light colors under certain circumstances.
+
+## Additions
+
+- Anuli: frequency knob units and display values that reflect what the knob actually controls (semi-tones).
+
+- Anuli: knob units and display values friendlier to humans.
+
+- Funes: trimpot display values friendlier to humans.
+
+- Marmora: actual X2 division factor to Y rate tooltip.
+
+
+---
+
+# 2.6.6
+
+## Fixes
+
+- Plugin: faceplate colors.
+
+- Plugin: work around Rack's SVG rendering defiencies.
+
+- Aestus family: restore "Frequency knob center is C4" user preference properly.
+
+- Explorator: noise not working if the trigger input has not been connected at least once.
+
+## Additions
+
+- Aestus family: measurement units and numbers friendlier to humans.
+
+- Aestus: restore the peacocks plotter easter egg (it can be accessed using the context menu).
+
+## Changes
+
+- Plugin: faceplate color tweaks.
+
+- Plugin source: move common Sanguine Modules sources to submodule.
+
+- Explorator: produce Prism noise wave forms more akin to original implementation (Note: Prism noise is now LOUDER).
+
+- Temulenti: remove clamping on pitch to allow reaching really low LFO frequencies.
+
+
+---
+
+# 2.6.5
+
+## Fixes
+
+- Apices family: engines should restore knob values when disconnecting expanders.
+
+- Mortuus: rollover error on slow FM LFOs.
+
+- Vimina: clock multiplier for low BPM clocks.
+
+- Vimina: don't delay triggers by 16 samples.
+
+## Changes
+
+- Apices family expanders: make tooltips congruent with base module tooltips.
+
+- Apices family: performance improvements.
+
+
+---
+
 # 2.6.4
 
 ## Fixes
@@ -7,7 +84,7 @@
 ## Changes
 
 - Vimina: even out knob space distribution for clock multiplier/divider factors.
-  
+
 
 ---
 

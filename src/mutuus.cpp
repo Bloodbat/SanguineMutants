@@ -1,9 +1,13 @@
 #include "plugin.hpp"
-#include "mutuus/dsp/mutuus_modulator.h"
+
 #include "sanguinecomponents.hpp"
-#include "warpiespals.hpp"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include "mutuus/dsp/mutuus_modulator.h"
+
 #include "warpiescommon.hpp"
+#include "warpiespals.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
@@ -46,13 +50,13 @@ struct Mutuus : SanguineModule {
 	};
 
 	int featureMode = 0;
-	int frame[PORT_MAX_CHANNELS] = {};
+	int frames[PORT_MAX_CHANNELS] = {};
 
 	const int kLightFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
-	mutuus::MutuusModulator mutuusModulator[PORT_MAX_CHANNELS];
+	mutuus::MutuusModulator modulators[PORT_MAX_CHANNELS];
 	mutuus::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 	mutuus::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 
@@ -63,9 +67,9 @@ struct Mutuus : SanguineModule {
 
 	float lastAlgorithmValue = 0.f;
 
-	mutuus::Parameters* mutuusParameters[PORT_MAX_CHANNELS];
+	mutuus::Parameters* parameters[PORT_MAX_CHANNELS];
 
-	uint16_t reverbBuffer[PORT_MAX_CHANNELS][32768] = {};
+	uint16_t reverbBuffers[PORT_MAX_CHANNELS][32768] = {};
 
 	Mutuus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -98,9 +102,9 @@ struct Mutuus : SanguineModule {
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&mutuusModulator[channel], 0, sizeof(mutuus::MutuusModulator));
-			mutuusModulator[channel].Init(96000.f, reverbBuffer[channel]);
-			mutuusParameters[channel] = mutuusModulator[channel].mutable_parameters();
+			memset(&modulators[channel], 0, sizeof(mutuus::MutuusModulator));
+			modulators[channel].Init(96000.f, reverbBuffers[channel]);
+			parameters[channel] = modulators[channel].mutable_parameters();
 		}
 
 		featureMode = mutuus::FEATURE_MODE_META;
@@ -140,21 +144,22 @@ struct Mutuus : SanguineModule {
 				if (!bNotesModeSelection) {
 					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
 				} else {
-					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)), 0, 8));
+					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)),
+						0, 8));
 				}
 			}
 
-			mutuusModulator[channel].set_feature_mode(channelFeatureMode);
+			modulators[channel].set_feature_mode(channelFeatureMode);
 
-			mutuusParameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+			parameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
 
-			mutuusModulator[channel].set_alt_feature_mode(static_cast<bool>(params[PARAM_STEREO].getValue()));
+			modulators[channel].set_alt_feature_mode(static_cast<bool>(params[PARAM_STEREO].getValue()));
 
 			float_4 f4Voltages;
 
 			// Buffer loop
-			if (++frame[channel] >= warpiescommon::kBlockSize) {
-				frame[channel] = 0;
+			if (++frames[channel] >= warpiescommon::kBlockSize) {
+				frames[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
 				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
@@ -164,44 +169,46 @@ struct Mutuus : SanguineModule {
 
 				f4Voltages /= 5.f;
 
-				mutuusParameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
-				mutuusParameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
 
-				mutuusParameters[channel]->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
-				mutuusParameters[channel]->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
+				parameters[channel]->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
 
-				mutuusParameters[channel]->raw_level[0] = mutuusParameters[channel]->channel_drive[0];
-				mutuusParameters[channel]->raw_level[1] = mutuusParameters[channel]->channel_drive[1];
+				parameters[channel]->raw_level[0] = parameters[channel]->channel_drive[0];
+				parameters[channel]->raw_level[1] = parameters[channel]->channel_drive[1];
 
-				mutuusParameters[channel]->raw_level_pot[0] = clamp(params[PARAM_LEVEL_1].getValue(), 0.f, 1.f);
-				mutuusParameters[channel]->raw_level_pot[1] = clamp(params[PARAM_LEVEL_2].getValue(), 0.f, 1.f);
+				parameters[channel]->raw_level_pot[0] = clamp(params[PARAM_LEVEL_1].getValue(), 0.f, 1.f);
+				parameters[channel]->raw_level_pot[1] = clamp(params[PARAM_LEVEL_2].getValue(), 0.f, 1.f);
 
 				if (!bModeSwitchEnabled) {
-					mutuusParameters[channel]->raw_algorithm_pot = algorithmValue;
+					parameters[channel]->raw_algorithm_pot = algorithmValue;
 
-					mutuusParameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.f, 1.f);
+					parameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.f, 1.f);
 
-					mutuusParameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
-					mutuusParameters[channel]->raw_algorithm = mutuusParameters[channel]->modulation_algorithm;
+					parameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
+					parameters[channel]->raw_algorithm = parameters[channel]->modulation_algorithm;
 				}
 
-				mutuusParameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
-				mutuusParameters[channel]->raw_modulation = mutuusParameters[channel]->modulation_parameter;
-				mutuusParameters[channel]->raw_modulation_pot = clamp(params[PARAM_TIMBRE].getValue(), 0.f, 1.f);
-				mutuusParameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->raw_modulation = parameters[channel]->modulation_parameter;
+				parameters[channel]->raw_modulation_pot = clamp(params[PARAM_TIMBRE].getValue(), 0.f, 1.f);
+				parameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
 
-				mutuusParameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
+				parameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
-				mutuusParameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
+				parameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
-				mutuusModulator[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
+				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
-			inputFrames[channel][frame[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768), -32768, 32767);
-			inputFrames[channel][frame[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768),
+				-32768, 32767);
+			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768),
+				-32768, 32767);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].l) / 32768 * 5.f, channel);
-			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frame[channel]].r) / 32768 * 5.f, channel);
+			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
+			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
@@ -210,14 +217,14 @@ struct Mutuus : SanguineModule {
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightFrequency * args.sampleTime;
 
-			lights[LIGHT_CARRIER + 0].value = (mutuusParameters[0]->carrier_shape == 1
-				|| mutuusParameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
-			lights[LIGHT_CARRIER + 1].value = (mutuusParameters[0]->carrier_shape == 2
-				|| mutuusParameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER + 0].value = (parameters[0]->carrier_shape == 1
+				|| parameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER + 1].value = (parameters[0]->carrier_shape == 2
+				|| parameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? kSanguineButtonLightValue : 0.f);
 
-			lights[LIGHT_STEREO].setBrightness(mutuusModulator[0].alt_feature_mode() ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_STEREO].setBrightness(modulators[0].alt_feature_mode() ? kSanguineButtonLightValue : 0.f);
 
 			for (int mode = 0; mode < kModeCount; ++mode) {
 				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);
@@ -232,17 +239,18 @@ struct Mutuus : SanguineModule {
 					palette = warpiespals::paletteDefault;
 				}
 
-				zone = 8.f * mutuusParameters[0]->modulation_algorithm;
+				zone = 8.f * parameters[0]->modulation_algorithm;
 				MAKE_INTEGRAL_FRACTIONAL(zone);
 				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
 				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
 					int a = palette[zone_integral][rgbComponent];
 					int b = palette[zone_integral + 1][rgbComponent];
-					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f);
+					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8))
+						/ 255.f);
 				}
 			} else {
 				featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
-				mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
+				modulators[0].set_feature_mode(mutuus::FeatureMode(featureMode));
 
 				long long systemTimeMs = getSystemTimeMs();
 
@@ -261,7 +269,8 @@ struct Mutuus : SanguineModule {
 				if (channel < channelCount) {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
 						lights[currentLight + rgbComponent].setBrightnessSmooth(
-							(warpiespals::paletteParasiteFeatureMode[mutuusModulator[channel].feature_mode()][rgbComponent]) / 255.f, sampleTime);
+							(warpiespals::paletteParasiteFeatureMode[modulators[channel].feature_mode()][rgbComponent]) / 255.f,
+							sampleTime);
 					}
 				} else {
 					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
@@ -275,9 +284,8 @@ struct Mutuus : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "mode", json_integer(mutuusModulator[0].feature_mode()));
-
-		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
+		setJsonInt(rootJ, "mode", static_cast<int>(modulators[0].feature_mode()));
+		setJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 
 		return rootJ;
 	}
@@ -285,19 +293,19 @@ struct Mutuus : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		if (json_t* modeJ = json_object_get(rootJ, "mode")) {
-			mutuusModulator[0].set_feature_mode(static_cast<mutuus::FeatureMode>(json_integer_value(modeJ)));
-			featureMode = mutuusModulator[0].feature_mode();
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "mode", intValue)) {
+			modulators[0].set_feature_mode(static_cast<mutuus::FeatureMode>(intValue));
+			featureMode = modulators[0].feature_mode();
 		}
 
-		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
-			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
-		}
+		getJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 	}
 
 	void setFeatureMode(int modeNumber) {
 		featureMode = modeNumber;
-		mutuusModulator[0].set_feature_mode(mutuus::FeatureMode(featureMode));
+		modulators[0].set_feature_mode(mutuus::FeatureMode(featureMode));
 	}
 };
 
@@ -364,22 +372,38 @@ struct MutuusWidget : SanguineModuleWidget {
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(47.067, 47.187), module, Mutuus::LIGHT_MODE + 7));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(36.952, 58.483), module, Mutuus::LIGHT_MODE + 8));
 
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 0 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 1 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 2 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 3 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 4 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 5 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 6 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module, Mutuus::LIGHT_CHANNEL_MODE + 7 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 8 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 9 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 10 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 11 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 12 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 13 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 14 * 3));
-		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module, Mutuus::LIGHT_CHANNEL_MODE + 15 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 0 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 1 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 2 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 3 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 4 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 5 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 6 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 62.532), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 7 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 8 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 9 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 10 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(20.633, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 11 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(30.148, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 12 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(32.265, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 13 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(34.382, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 14 * 3));
+		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(36.5, 65.191), module,
+			Mutuus::LIGHT_CHANNEL_MODE + 15 * 3));
 	}
 
 	void appendContextMenu(Menu* menu) override {

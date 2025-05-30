@@ -1,9 +1,8 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
-#include "plaits/dsp/voice.h"
-#include "plaits/user_data.h"
 #include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
 
 #ifndef METAMODULE
 #include "osdialog.h"
@@ -13,6 +12,9 @@
 #ifndef METAMODULE
 #include <fstream>
 #endif
+
+#include "plaits/dsp/voice.h"
+#include "plaits/user_data.h"
 
 #include "Funes.hpp"
 
@@ -63,17 +65,17 @@ struct Funes : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	plaits::Voice voice[PORT_MAX_CHANNELS];
+	plaits::Voice voices[PORT_MAX_CHANNELS];
 	plaits::Patch patch = {};
-	plaits::UserData user_data;
-	char shared_buffer[PORT_MAX_CHANNELS][16384] = {};
+	plaits::UserData userData;
+	char sharedBuffers[PORT_MAX_CHANNELS][16384] = {};
 
 	float triPhase = 0.f;
 	float lastLPGColor = 0.5f;
 	float lastLPGDecay = 0.5f;
 	float lastModelVoltage = 0.f;
 
-	static const int kTextUpdateFrequency = 16;
+	static const int kLightsUpdateFrequency = 16;
 
 	static const int kMaxUserDataSize = 4096;
 
@@ -89,14 +91,14 @@ struct Funes : SanguineModule {
 	uint32_t displayTimeout = 0;
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
-	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> outputBuffer;
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcOutputs;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> drbOutputBuffers;
 
-	bool bLowCpu = false;
+	bool bWantLowCpu = false;
 
 	bool bDisplayModulatedModel = true;
 
-	bool bLoading = false;
+	bool bIsLoading = false;
 
 	bool bNotesModelSelection = false;
 
@@ -104,7 +106,7 @@ struct Funes : SanguineModule {
 
 	std::string displayText = "";
 
-	dsp::ClockDivider clockDivider;
+	dsp::ClockDivider lightsDivider;
 
 	funes::CustomDataStates customDataStates[plaits::kMaxEngines] = {};
 
@@ -120,13 +122,13 @@ struct Funes : SanguineModule {
 		configParam(PARAM_LPG_COLOR, 0.f, 1.f, 0.5f, "Lowpass gate response", "%", 0.f, 100.f);
 		configParam(PARAM_MORPH, 0.f, 1.f, 0.5f, "Morph", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY, 0.f, 1.f, 0.5f, "Lowpass gate decay", "%", 0.f, 100.f);
-		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV");
-		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV");
-		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV");
+		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV", "%", 0.f, 100.f);
+		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV", "%", 0.f, 100.f);
+		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV", "%", 0.f, 100.f);
 		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funes::frequencyModes);
-		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV");
-		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV");
-		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV");
+		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
+		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
@@ -143,13 +145,13 @@ struct Funes : SanguineModule {
 		configOutput(OUTPUT_AUX, "Auxiliary");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			stmlib::BufferAllocator allocator(shared_buffer[channel], sizeof(shared_buffer[channel]));
-			voice[channel].Init(&allocator, &user_data);
+			stmlib::BufferAllocator allocator(sharedBuffers[channel], sizeof(sharedBuffers[channel]));
+			voices[channel].Init(&allocator, &userData);
 		}
 
 		octaveQuantizer.Init(9, 0.01f, false);
 
-		clockDivider.setDivision(kTextUpdateFrequency);
+		lightsDivider.setDivision(kLightsUpdateFrequency);
 
 		resetCustomDataStates();
 
@@ -159,8 +161,8 @@ struct Funes : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
-		if (outputBuffer.empty()) {
-			const int blockSize = 12;
+		if (drbOutputBuffers.empty()) {
+			const int kBlockSize = 12;
 
 			// Switch models
 			if (bNotesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
@@ -185,7 +187,7 @@ struct Funes : SanguineModule {
 
 			// Calculate pitch for low cpu mode, if needed.
 			float pitch = params[PARAM_FREQUENCY].getValue();
-			if (bLowCpu) {
+			if (bWantLowCpu) {
 				pitch += std::log2(48000.f * args.sampleTime);
 			}
 
@@ -222,10 +224,10 @@ struct Funes : SanguineModule {
 
 			bool activeLights[PORT_MAX_CHANNELS] = {};
 
-			bool pulse = false;
+			bool bPulseLight = false;
 
 			// Render output buffer for each voice.
-			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[blockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				// Construct modulations.
 				plaits::Modulations modulations;
@@ -249,38 +251,36 @@ struct Funes : SanguineModule {
 				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
 
 				// Render frames
-				plaits::Voice::Frame output[blockSize];
-				voice[channel].Render(patch, modulations, output, blockSize);
+				plaits::Voice::Frame output[kBlockSize];
+				voices[channel].Render(patch, modulations, output, kBlockSize);
 
 				// Convert output to frames
-				for (int blockNum = 0; blockNum < blockSize; ++blockNum) {
+				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
 					outputFrames[blockNum].samples[channel * 2 + 0] = output[blockNum].out / 32768.f;
 					outputFrames[blockNum].samples[channel * 2 + 1] = output[blockNum].aux / 32768.f;
 				}
 
 				if (displayChannel == channel) {
-					displayModelNum = voice[channel].active_engine();
+					displayModelNum = voices[channel].active_engine();
 				}
 
 				if (ledsMode == funes::LEDNormal) {
 					// Model lights
 					// Get the active engines for current channel.
 					int currentLight;
-					int clampedEngine;
-					int activeEngine = voice[channel].active_engine();
-					clampedEngine = (activeEngine % 8) * 2;
+					int activeEngine = voices[channel].active_engine();
+					int clampedEngine = (activeEngine % 8) * 2;
 
-					bool noiseModels = activeEngine & 0x10;
-					bool pitchedModels = activeEngine & 0x08;
+					bool bIsNoiseModel = activeEngine & 0x10;
+					bool bIsPitchedModel = activeEngine & 0x08;
 
-					if (noiseModels) {
+					if (bIsNoiseModel) {
 						currentLight = clampedEngine + 1;
 						activeLights[currentLight] = true;
-					} else if (pitchedModels) {
+					} else if (bIsPitchedModel) {
 						currentLight = clampedEngine;
 						activeLights[currentLight] = true;
-					} else
-					{
+					} else {
 						currentLight = clampedEngine;
 						activeLights[currentLight] = true;
 						currentLight = clampedEngine + 1;
@@ -288,12 +288,12 @@ struct Funes : SanguineModule {
 					}
 
 					// Pulse the light if at least one voice is using a different engine.
-					pulse = activeEngine != patch.engine;
+					bPulseLight = activeEngine != patch.engine;
 				}
 			}
 
 			// Update model text, custom data lights and frequency mode every 16 samples only.
-			if (clockDivider.process()) {
+			if (lightsDivider.process()) {
 				if (displayChannel >= channelCount) {
 					displayChannel = channelCount - 1;
 				}
@@ -326,28 +326,27 @@ struct Funes : SanguineModule {
 			}
 
 			// Convert output.
-			if (!bLowCpu) {
-				outputSrc.setRates(48000, static_cast<int>(args.sampleRate));
-				int inLen = blockSize;
-				int outLen = outputBuffer.capacity();
-				outputSrc.setChannels(channelCount * 2);
-				outputSrc.process(outputFrames, &inLen, outputBuffer.endData(), &outLen);
-				outputBuffer.endIncr(outLen);
+			if (!bWantLowCpu) {
+				srcOutputs.setRates(48000, static_cast<int>(args.sampleRate));
+				int inLen = kBlockSize;
+				int outLen = drbOutputBuffers.capacity();
+				srcOutputs.setChannels(channelCount * 2);
+				srcOutputs.process(outputFrames, &inLen, drbOutputBuffers.endData(), &outLen);
+				drbOutputBuffers.endIncr(outLen);
 			} else {
-				int len = std::min(static_cast<int>(outputBuffer.capacity()), blockSize);
-				std::memcpy(outputBuffer.endData(), outputFrames, len * sizeof(outputFrames[0]));
-				outputBuffer.endIncr(len);
+				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), kBlockSize);
+				std::memcpy(drbOutputBuffers.endData(), outputFrames, len * sizeof(outputFrames[0]));
+				drbOutputBuffers.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz.
-			triPhase += 2.f * args.sampleTime * blockSize;
+			triPhase += 2.f * args.sampleTime * kBlockSize;
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
 			}
 			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
-			switch (ledsMode)
-			{
+			switch (ledsMode) {
 			case funes::LEDNormal: {
 				// Set model lights.
 				int clampedEngine = patch.engine % 8;
@@ -356,7 +355,7 @@ struct Funes : SanguineModule {
 					float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 					float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
-					if (pulse && clampedEngine == led) {
+					if (bPulseLight && clampedEngine == led) {
 						switch (patch.engine) {
 						case 0:
 						case 1:
@@ -458,12 +457,12 @@ struct Funes : SanguineModule {
 		}
 
 		// Set output
-		if (!outputBuffer.empty()) {
-			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrame = outputBuffer.shift();
+		if (!drbOutputBuffers.empty()) {
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
 			for (int channel = 0; channel < channelCount; ++channel) {
 				// Inverting op-amp on outputs
-				outputs[OUTPUT_OUT].setVoltage(-outputFrame.samples[channel * 2 + 0] * 5.f, channel);
-				outputs[OUTPUT_AUX].setVoltage(-outputFrame.samples[channel * 2 + 1] * 5.f, channel);
+				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[channel * 2 + 0] * 5.f, channel);
+				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[channel * 2 + 1] * 5.f, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
@@ -485,16 +484,16 @@ struct Funes : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "lowCpu", json_boolean(bLowCpu));
-		json_object_set_new(rootJ, "displayModulatedModel", json_boolean(bDisplayModulatedModel));
-		json_object_set_new(rootJ, "frequencyMode", json_integer(frequencyMode));
-		json_object_set_new(rootJ, "notesModelSelection", json_boolean(bNotesModelSelection));
-		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
+		setJsonBoolean(rootJ, "lowCpu", bWantLowCpu);
+		setJsonBoolean(rootJ, "displayModulatedModel", bDisplayModulatedModel);
+		setJsonInt(rootJ, "frequencyMode", frequencyMode);
+		setJsonBoolean(rootJ, "notesModelSelection", bNotesModelSelection);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
 
-		const uint8_t* userDataBuffer = user_data.getBuffer();
+		const uint8_t* userDataBuffer = userData.getBuffer();
 		if (userDataBuffer != nullptr) {
 			std::string userDataString = rack::string::toBase64(userDataBuffer, plaits::UserData::MAX_USER_DATA_SIZE);
-			json_object_set_new(rootJ, "userData", json_string(userDataString.c_str()));
+			setJsonString(rootJ, "userData", userDataString.c_str());
 		}
 
 		return rootJ;
@@ -503,38 +502,26 @@ struct Funes : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* lowCpuJ = json_object_get(rootJ, "lowCpu");
-		if (lowCpuJ) {
-			bLowCpu = json_boolean_value(lowCpuJ);
+		json_int_t intValue = 0;
+
+		getJsonBoolean(rootJ, "lowCpu", bWantLowCpu);
+		getJsonBoolean(rootJ, "displayModulatedModel", bDisplayModulatedModel);
+		getJsonBoolean(rootJ, "notesModelSelection", bNotesModelSelection);
+
+		if (getJsonInt(rootJ, "frequencyMode", intValue)) {
+			setFrequencyMode(intValue);
+		}
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
 		}
 
-		json_t* displayModulatedModelJ = json_object_get(rootJ, "displayModulatedModel");
-		if (displayModulatedModelJ) {
-			bDisplayModulatedModel = json_boolean_value(displayModulatedModelJ);
-		}
+		std::string userDataString;
 
-		json_t* notesModelSelectionJ = json_object_get(rootJ, "notesModelSelection");
-		if (notesModelSelectionJ) {
-			bNotesModelSelection = json_boolean_value(notesModelSelectionJ);
-		}
-
-		json_t* frequencyModeJ = json_object_get(rootJ, "frequencyMode");
-		if (frequencyModeJ) {
-			setFrequencyMode(json_integer_value(frequencyModeJ));
-		}
-
-		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ) {
-			displayChannel = json_integer_value(displayChannelJ);
-		}
-
-		json_t* userDataJ = json_object_get(rootJ, "userData");
-		if (userDataJ) {
-			std::string userDataString = json_string_value(userDataJ);
+		if (getJsonString(rootJ, "userData", userDataString)) {
 			const std::vector<uint8_t> userDataVector = rack::string::fromBase64(userDataString);
 			if (userDataVector.size() > 0) {
 				const uint8_t* userDataBuffer = &userDataVector[0];
-				user_data.setBuffer(userDataBuffer);
+				userData.setBuffer(userDataBuffer);
 				if (userDataBuffer[kMaxUserDataSize - 2] == 'U') {
 					resetCustomDataStates();
 					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = funes::DataCustom;
@@ -544,10 +531,10 @@ struct Funes : SanguineModule {
 	}
 
 	void resetCustomData() {
-		bool success = user_data.Save(nullptr, patch.engine);
+		bool success = userData.Save(nullptr, patch.engine);
 		if (success) {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				voice[channel].ReloadUserData();
+				voices[channel].ReloadUserData();
 			}
 			resetCustomDataStates();
 		}
@@ -566,10 +553,10 @@ struct Funes : SanguineModule {
 			std::ifstream input(filePath, std::ios::binary);
 			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
 			uint8_t* dataBuffer = buffer.data();
-			bool success = user_data.Save(dataBuffer, patch.engine);
+			bool success = userData.Save(dataBuffer, patch.engine);
 			if (success) {
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-					voice[channel].ReloadUserData();
+					voices[channel].ReloadUserData();
 				}
 				// Only 1 engine can use custom data at a time.
 				resetCustomDataStates();
@@ -672,18 +659,19 @@ struct FunesWidget : SanguineModuleWidget {
 		float currentX = baseX;
 
 		for (int light = 0; light < 8; ++light) {
-			addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module, Funes::LIGHT_MODEL + light * 2));
+			addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module,
+				Funes::LIGHT_MODEL + light * 2));
 			currentX += lightOffsetX;
 		}
 
 		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(89.0271, 12.1653), module, Funes::LIGHT_FACTORY_DATA));
 		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(98.7319, 12.1653), module, Funes::LIGHT_CUSTOM_DATA));
 
-		FramebufferWidget* funesFrambuffer = new FramebufferWidget();
-		addChild(funesFrambuffer);
+		FramebufferWidget* funesFramebuffer = new FramebufferWidget();
+		addChild(funesFramebuffer);
 
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 53.122, 32.314);
-		funesFrambuffer->addChild(alphaDisplay);
+		funesFramebuffer->addChild(alphaDisplay);
 		alphaDisplay->fallbackString = funes::displayLabels[8];
 
 		if (module) {
@@ -742,34 +730,33 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createSubmenuItem("Synthesis model", "",
-			[=](Menu* menu) {
-				menu->addChild(createSubmenuItem("New", "", [=](Menu* menu) {
-					for (int i = 0; i < 8; ++i) {
-						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
-							[=]() { return module->patch.engine == i; },
-							[=]() {	module->setEngine(i); }
-						));
-					}
-					}));
+		menu->addChild(createSubmenuItem("Synthesis model", "", [=](Menu* menu) {
+			menu->addChild(createSubmenuItem("New", "", [=](Menu* menu) {
+				for (int i = 0; i < 8; ++i) {
+					menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
+						[=]() { return module->patch.engine == i; },
+						[=]() {	module->setEngine(i); }
+					));
+				}
+				}));
 
-				menu->addChild(createSubmenuItem("Pitched", "", [=](Menu* menu) {
-					for (int i = 8; i < 16; ++i) {
-						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
-							[=]() { return module->patch.engine == i; },
-							[=]() {	module->setEngine(i); }
-						));
-					}
-					}));
+			menu->addChild(createSubmenuItem("Pitched", "", [=](Menu* menu) {
+				for (int i = 8; i < 16; ++i) {
+					menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
+						[=]() { return module->patch.engine == i; },
+						[=]() {	module->setEngine(i); }
+					));
+				}
+				}));
 
-				menu->addChild(createSubmenuItem("Noise/percussive", "", [=](Menu* menu) {
-					for (int i = 16; i < 24; ++i) {
-						menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
-							[=]() { return module->patch.engine == i; },
-							[=]() { module->setEngine(i); }
-						));
-					}
-					}));
+			menu->addChild(createSubmenuItem("Noise/percussive", "", [=](Menu* menu) {
+				for (int i = 16; i < 24; ++i) {
+					menu->addChild(createCheckMenuItem(funes::modelLabels[i], "",
+						[=]() { return module->patch.engine == i; },
+						[=]() { module->setEngine(i); }
+					));
+				}
+				}));
 			}
 		));
 
@@ -805,7 +792,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 				menu->addChild(new MenuSeparator);
 
-				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bLowCpu));
+				menu->addChild(createBoolPtrMenuItem("Low CPU (disable resampling)", "", &module->bWantLowCpu));
 			}
 		));
 

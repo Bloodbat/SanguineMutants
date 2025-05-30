@@ -1,12 +1,5 @@
 build
 dep
 dist
-/plugin.dll
-/.settings
-/.cproject
-/.project
+plugin.dll
 *.so
-/.vscode
-/SanguineMutants.code-workspace
-/sanguine_mutants_check-cppcheck-build-dir
-/sanguine_mutants_check.cppcheck

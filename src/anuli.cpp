@@ -1,10 +1,13 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
+#include "sanguinehelpers.hpp"
+#include "sanguinechannels.hpp"
+#include "sanguinejson.hpp"
+
 #include "rings/dsp/part.h"
 #include "rings/dsp/strummer.h"
 #include "rings/dsp/string_synth_part.h"
-#include "sanguinehelpers.hpp"
-#include "sanguinechannels.hpp"
+
 #include "array"
 
 #include "anuli.hpp"
@@ -58,21 +61,21 @@ struct Anuli : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	dsp::SampleRateConverter<1> inputSrc[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<2> outputSrc[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> inputBuffer[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<1> srcInputs[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<2> srcOutputs[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbInputBuffers[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
 
 	dsp::ClockDivider lightsDivider;
 
-	uint16_t reverbBuffer[PORT_MAX_CHANNELS][32768] = {};
-	rings::Part part[PORT_MAX_CHANNELS];
-	rings::StringSynthPart stringSynth[PORT_MAX_CHANNELS];
-	rings::Strummer strummer[PORT_MAX_CHANNELS];
-	rings::PerformanceState performanceState[PORT_MAX_CHANNELS] = {};
+	uint16_t reverbBuffers[PORT_MAX_CHANNELS][32768] = {};
+	rings::Part parts[PORT_MAX_CHANNELS];
+	rings::StringSynthPart stringSynths[PORT_MAX_CHANNELS];
+	rings::Strummer strummers[PORT_MAX_CHANNELS];
+	rings::PerformanceState performanceStates[PORT_MAX_CHANNELS] = {};
 
-	bool bStrum[PORT_MAX_CHANNELS] = {};
-	bool bLastStrum[PORT_MAX_CHANNELS] = {};
+	bool strums[PORT_MAX_CHANNELS] = {};
+	bool lastStrums[PORT_MAX_CHANNELS] = {};
 
 	bool bNotesModeSelection = false;
 
@@ -87,7 +90,7 @@ struct Anuli : SanguineModule {
 
 	std::array<int, PORT_MAX_CHANNELS> channelModes = {};
 
-	rings::ResonatorModel resonatorModel[PORT_MAX_CHANNELS] = {};
+	rings::ResonatorModel resonatorModels[PORT_MAX_CHANNELS] = {};
 	rings::FxType fxModel = rings::FX_FORMANT;
 
 	std::string displayText = "";
@@ -117,16 +120,16 @@ struct Anuli : SanguineModule {
 		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Note polyphony");
 		paramQuantities[PARAM_POLYPHONY]->snapEnabled = true;
 
-		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency");
-		configParam(PARAM_STRUCTURE, 0.f, 1.f, 0.5f, "Structure");
-		configParam(PARAM_BRIGHTNESS, 0.f, 1.f, 0.5f, "Brightness");
-		configParam(PARAM_DAMPING, 0.f, 1.f, 0.5f, "Damping");
-		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Position");
-		configParam(PARAM_BRIGHTNESS_MOD, -1.f, 1.f, 0.f, "Brightness CV");
-		configParam(PARAM_FREQUENCY_MOD, -1.f, 1.f, 0.f, "Frequency CV");
-		configParam(PARAM_DAMPING_MOD, -1.f, 1.f, 0.f, "Damping CV");
-		configParam(PARAM_STRUCTURE_MOD, -1.f, 1.f, 0.f, "Structure CV");
-		configParam(PARAM_POSITION_MOD, -1.f, 1.f, 0.f, "Position CV");
+		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency", " semitones", 0.f, 1.f, -30.f);
+		configParam(PARAM_STRUCTURE, 0.f, 1.f, 0.5f, "Structure", "%", 0.f, 100.f);
+		configParam(PARAM_BRIGHTNESS, 0.f, 1.f, 0.5f, "Brightness", "%", 0.f, 100.f);
+		configParam(PARAM_DAMPING, 0.f, 1.f, 0.5f, "Damping", "%", 0.f, 100.f);
+		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Position", "%", 0.f, 100.f);
+		configParam(PARAM_BRIGHTNESS_MOD, -1.f, 1.f, 0.f, "Brightness CV", "%", 0.f, 100.f);
+		configParam(PARAM_FREQUENCY_MOD, -1.f, 1.f, 0.f, "Frequency CV", "%", 0.f, 100.f);
+		configParam(PARAM_DAMPING_MOD, -1.f, 1.f, 0.f, "Damping CV", "%", 0.f, 100.f);
+		configParam(PARAM_STRUCTURE_MOD, -1.f, 1.f, 0.f, "Structure CV", "%", 0.f, 100.f);
+		configParam(PARAM_POSITION_MOD, -1.f, 1.f, 0.f, "Position CV", "%", 0.f, 100.f);
 
 		configInput(INPUT_BRIGHTNESS_CV, "Brightness");
 		configInput(INPUT_FREQUENCY_CV, "Frequency");
@@ -146,12 +149,12 @@ struct Anuli : SanguineModule {
 		configBypass(INPUT_IN, OUTPUT_EVEN);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&strummer[channel], 0, sizeof(rings::Strummer));
-			memset(&part[channel], 0, sizeof(rings::Part));
-			memset(&stringSynth[channel], 0, sizeof(rings::StringSynthPart));
-			strummer[channel].Init(0.01f, 44100.f / anuli::kBlockSize);
-			part[channel].Init(reverbBuffer[channel]);
-			stringSynth[channel].Init(reverbBuffer[channel]);
+			memset(&strummers[channel], 0, sizeof(rings::Strummer));
+			memset(&parts[channel], 0, sizeof(rings::Part));
+			memset(&stringSynths[channel], 0, sizeof(rings::StringSynthPart));
+			strummers[channel].Init(0.01f, 44100.f / anuli::kBlockSize);
+			parts[channel].Init(reverbBuffers[channel]);
+			stringSynths[channel].Init(reverbBuffers[channel]);
 		}
 
 		lightsDivider.setDivision(kLightsFrequency);
@@ -184,7 +187,6 @@ struct Anuli : SanguineModule {
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
-		bool bChannelIsEasterEgg = false;
 
 		if (bHaveModeCable) {
 			if (bNotesModeSelection) {
@@ -193,9 +195,9 @@ struct Anuli : SanguineModule {
 					modeVoltage = roundf(modeVoltage * 12.f);
 					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-					setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
+					setupChannel(channel, bWithDisastrousPeace);
 
-					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
+					renderFrames(channel, parameterInfo, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
@@ -204,24 +206,24 @@ struct Anuli : SanguineModule {
 					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
 					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
 
-					setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
+					setupChannel(channel, bWithDisastrousPeace);
 
-					renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
+					renderFrames(channel, parameterInfo, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
 			}
 		} else {
 			for (int channel = 0; channel < channelCount; ++channel) {
-				setupChannel(channel, bWithDisastrousPeace, bChannelIsEasterEgg);
+				setupChannel(channel, bWithDisastrousPeace);
 
-				renderFrames(channel, parameterInfo, bChannelIsEasterEgg, args.sampleRate);
+				renderFrames(channel, parameterInfo, args.sampleRate);
 
 				setOutputs(channel, bHaveBothOutputs);
 			}
 		}
 
-		setStrummingFlag(performanceState[displayChannel].strum);
+		setStrummingFlag(performanceStates[displayChannel].strum);
 
 		outputs[OUTPUT_ODD].setChannels(channelCount);
 
@@ -304,7 +306,7 @@ struct Anuli : SanguineModule {
 
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
 		const ParameterInfo& parameterInfo) {
-		float note = inputs[INPUT_PITCH].getVoltage(channel) +
+		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
 
@@ -323,17 +325,17 @@ struct Anuli : SanguineModule {
 		performanceState.internal_note = parameterInfo.useInternalNote;
 
 		// TODO: "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
-		performanceState.strum = bStrum[channel] && !bLastStrum[channel];
-		bLastStrum[channel] = bStrum[channel];
-		bStrum[channel] = false;
+		performanceState.strum = strums[channel] && !lastStrums[channel];
+		lastStrums[channel] = strums[channel];
+		strums[channel] = false;
 
 		performanceState.chord = clamp(static_cast<int>(roundf(structure * (rings::kNumChords - 1))),
 			0, rings::kNumChords - 1);
 	}
 
 	void setOutputs(const int channel, const bool withBothOutputs) {
-		if (!outputBuffer[channel].empty()) {
-			dsp::Frame<2> outputFrame = outputBuffer[channel].shift();
+		if (!drbOutputBuffers[channel].empty()) {
+			dsp::Frame<2> outputFrame = drbOutputBuffers[channel].shift();
 			/* "Note: you need to insert a jack into each output to split the signals:
 				when only one jack is inserted, both signals are mixed together." */
 			if (withBothOutputs) {
@@ -347,68 +349,72 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupChannel(const int channel, bool& haveDisastrousPeace, bool& isEasterEgg) {
-		isEasterEgg = channelModes[channel] > 5;
+	void setupChannel(const int channel, bool& haveDisastrousPeace) {
+		bool bIsEasterEgg = channelModes[channel] > 5;
 
-		haveDisastrousPeace = haveDisastrousPeace || isEasterEgg;
+		haveDisastrousPeace = haveDisastrousPeace || bIsEasterEgg;
 
-		resonatorModel[channel] = static_cast<rings::ResonatorModel>(channelModes[channel]);
+		resonatorModels[channel] = bIsEasterEgg ? rings::RESONATOR_MODEL_MODAL :
+			static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
-		if (!inputBuffer[channel].full()) {
+		if (!drbInputBuffers[channel].full()) {
 			dsp::Frame<1> frame;
 			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
-			inputBuffer[channel].push(frame);
+			drbInputBuffers[channel].push(frame);
 		}
 
-		if (!bStrum[channel]) {
-			bStrum[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+		if (!strums[channel]) {
+			strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
 		}
 	}
 
-	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const bool isEasterEgg, const float sampleRate) {
-		if (outputBuffer[channel].empty()) {
+	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const float sampleRate) {
+		if (drbOutputBuffers[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
 			// Convert input buffer
-			inputSrc[channel].setRates(static_cast<int>(sampleRate), 48000);
-			int inLen = inputBuffer[channel].size();
+			srcInputs[channel].setRates(static_cast<int>(sampleRate), 48000);
+			int inLen = drbInputBuffers[channel].size();
 			int outLen = anuli::kBlockSize;
-			inputSrc[channel].process(inputBuffer[channel].startData(), &inLen,
+			srcInputs[channel].process(drbInputBuffers[channel].startData(), &inLen,
 				reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
-			inputBuffer[channel].startIncr(inLen);
+			drbInputBuffers[channel].startIncr(inLen);
 
 			float out[anuli::kBlockSize];
 			float aux[anuli::kBlockSize];
 
-			if (isEasterEgg) {
-				stringSynth[channel].set_polyphony(polyphonyMode);
+			rings::Patch patch;
+			float structure;
 
-				stringSynth[channel].set_fx(rings::FxType(fxModel));
+			switch (channelModes[channel]) {
+			case 6: // Disastrous peace.
+				stringSynths[channel].set_polyphony(polyphonyMode);
 
-				rings::Patch patch;
-				float structure;
+				stringSynths[channel].set_fx(rings::FxType(fxModel));
+
 				setupPatch(channel, patch, structure, parameterInfo);
-				setupPerformance(channel, performanceState[channel], structure, parameterInfo);
+				setupPerformance(channel, performanceStates[channel], structure, parameterInfo);
 
 				// Process audio
-				strummer[channel].Process(NULL, anuli::kBlockSize, &performanceState[channel]);
-				stringSynth[channel].Process(performanceState[channel], patch, in, out, aux, anuli::kBlockSize);
-			} else {
-				if (part[channel].polyphony() != polyphonyMode) {
-					part[channel].set_polyphony(polyphonyMode);
+				strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
+				stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
+				break;
+
+			default:
+				if (parts[channel].polyphony() != polyphonyMode) {
+					parts[channel].set_polyphony(polyphonyMode);
 				}
 
-				part[channel].set_model(resonatorModel[channel]);
+				parts[channel].set_model(resonatorModels[channel]);
 
-				rings::Patch patch;
-				float structure;
 				setupPatch(channel, patch, structure, parameterInfo);
-				setupPerformance(channel, performanceState[channel], structure, parameterInfo);
+				setupPerformance(channel, performanceStates[channel], structure, parameterInfo);
 
 				// Process audio
-				strummer[channel].Process(in, anuli::kBlockSize, &performanceState[channel]);
-				part[channel].Process(performanceState[channel], patch, in, out, aux, anuli::kBlockSize);
+				strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
+				parts[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
+				break;
 			}
 
 			// Convert output buffer
@@ -418,11 +424,11 @@ struct Anuli : SanguineModule {
 				outputFrames[frame].samples[1] = aux[frame];
 			}
 
-			outputSrc[channel].setRates(48000, static_cast<int>(sampleRate));
+			srcOutputs[channel].setRates(48000, static_cast<int>(sampleRate));
 			int inCount = anuli::kBlockSize;
-			int outCount = outputBuffer[channel].capacity();
-			outputSrc[channel].process(outputFrames, &inCount, outputBuffer[channel].endData(), &outCount);
-			outputBuffer[channel].endIncr(outCount);
+			int outCount = drbOutputBuffers[channel].capacity();
+			srcOutputs[channel].process(outputFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
+			drbOutputBuffers[channel].endIncr(outCount);
 		}
 	}
 
@@ -458,11 +464,9 @@ struct Anuli : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "NotesModeSelection", json_boolean(bNotesModeSelection));
-
-		json_object_set_new(rootJ, "displayChannel", json_integer(displayChannel));
-
-		json_object_set_new(rootJ, "useFrequencyOffset", json_boolean(bUseFrequencyOffset));
+		setJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
+		setJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
 
 		return rootJ;
 	}
@@ -470,23 +474,19 @@ struct Anuli : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		if (json_t* notesModeSelectionJ = json_object_get(rootJ, "NotesModeSelection")) {
-			bNotesModeSelection = json_boolean_value(notesModeSelectionJ);
-		}
+		getJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
+		getJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
 
-		json_t* displayChannelJ = json_object_get(rootJ, "displayChannel");
-		if (displayChannelJ) {
-			displayChannel = json_integer_value(displayChannelJ);
-		}
+		json_int_t intValue;
 
-		if (json_t* useFrequencyOffsetJ = json_object_get(rootJ, "useFrequencyOffset")) {
-			bUseFrequencyOffset = json_boolean_value(useFrequencyOffsetJ);
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
 		}
 	}
 
 	void setMode(int modeNum) {
 		channelModes[0] = modeNum;
-		resonatorModel[0] = modeNum < 6 ? rings::ResonatorModel(modeNum) : resonatorModel[0];
+		resonatorModels[0] = modeNum < 6 ? rings::ResonatorModel(modeNum) : resonatorModels[0];
 		params[PARAM_MODE].setValue(modeNum);
 	}
 };
@@ -521,11 +521,11 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(9.021, 22.087), module, Anuli::INPUT_MODE));
 
-		FramebufferWidget* anuliFrambuffer = new FramebufferWidget();
-		addChild(anuliFrambuffer);
+		FramebufferWidget* anuliFramebuffer = new FramebufferWidget();
+		addChild(anuliFramebuffer);
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 53.34f, 22.087f);
-		anuliFrambuffer->addChild(displayModel);
+		anuliFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = anuli::modeLabels[0];
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
@@ -533,7 +533,7 @@ struct AnuliWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
 
 		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34f, 37.486f);
-		anuliFrambuffer->addChild(displayPolyphony);
+		anuliFramebuffer->addChild(displayPolyphony);
 		displayPolyphony->fallbackNumber = 1;
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 35.904), module, Anuli::INPUT_STRUCTURE_CV));

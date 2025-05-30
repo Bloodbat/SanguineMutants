@@ -1,7 +1,10 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
-#include "clouds/dsp/granular_processor.h"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include "clouds/dsp/granular_processor.h"
+
 #include "nebulae.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
@@ -75,10 +78,10 @@ struct Nebulae : SanguineModule {
 	std::string textPitch = nebulae::modeDisplays[0].labelPitch;
 	std::string textTrigger = nebulae::modeDisplays[0].labelTrigger;
 
-	dsp::SampleRateConverter<2> inputSrc;
-	dsp::SampleRateConverter<2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> inputBuffer;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
+	dsp::SampleRateConverter<2> srcInput;
+	dsp::SampleRateConverter<2> srcOutput;
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer;
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer;
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
@@ -201,11 +204,11 @@ struct Nebulae : SanguineModule {
 		dsp::Frame<2> outputFrame = {};
 
 		// Get input
-		if (!inputBuffer.full()) {
+		if (!drbInputBuffer.full()) {
 			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
 			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum() *
 				params[PARAM_IN_GAIN].getValue() / 5.f : inputFrame.samples[0];
-			inputBuffer.push(inputFrame);
+			drbInputBuffer.push(inputFrame);
 		}
 
 		// Trigger
@@ -214,15 +217,15 @@ struct Nebulae : SanguineModule {
 		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
 
 		// Render frames
-		if (outputBuffer.empty()) {
+		if (drbOutputBuffer.empty()) {
 			clouds::ShortFrame input[32] = {};
 			// Convert input buffer
-			inputSrc.setRates(args.sampleRate, 32000);
+			srcInput.setRates(args.sampleRate, 32000);
 			dsp::Frame<2> inputFrames[32];
-			int inLen = inputBuffer.size();
+			int inLen = drbInputBuffer.size();
 			int outLen = 32;
-			inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
-			inputBuffer.startIncr(inLen);
+			srcInput.process(drbInputBuffer.startData(), &inLen, inputFrames, &outLen);
+			drbInputBuffer.startIncr(inLen);
 
 			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
 			for (int frame = 0; frame < outLen; ++frame) {
@@ -249,7 +252,7 @@ struct Nebulae : SanguineModule {
 			cloudsProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			cloudsProcessor->Prepare();
 
-			bool frozen = params[PARAM_FREEZE].getValue();
+			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};
@@ -269,7 +272,7 @@ struct Nebulae : SanguineModule {
 
 			cloudsParameters->trigger = bTriggered;
 			cloudsParameters->gate = bTriggered;
-			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || frozen);
+			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
 			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
 			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + parameters1[0], 0.f, 1.f);
 			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + parameters1[1], 0.f, 1.f);
@@ -283,13 +286,13 @@ struct Nebulae : SanguineModule {
 			clouds::ShortFrame output[32];
 			cloudsProcessor->Process(input, output, 32);
 
-			if (frozen && !bLastFrozen) {
+			if (bFrozen && !bLastFrozen) {
 				bLastFrozen = true;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_OUTPUT;
 					lastLedMode = cloudyCommon::LEDS_OUTPUT;
 				}
-			} else if (!frozen && bLastFrozen) {
+			} else if (!bFrozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_INPUT;
@@ -307,19 +310,19 @@ struct Nebulae : SanguineModule {
 					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
-				outputSrc.setRates(32000, args.sampleRate);
+				srcOutput.setRates(32000, args.sampleRate);
 				int inCount = 32;
-				int outCount = outputBuffer.capacity();
-				outputSrc.process(outputFrames, &inCount, outputBuffer.endData(), &outCount);
-				outputBuffer.endIncr(outCount);
+				int outCount = drbOutputBuffer.capacity();
+				srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
+				drbOutputBuffer.endIncr(outCount);
 			}
 
 			bTriggered = false;
 		}
 
 		// Set output
-		if (!outputBuffer.empty()) {
-			outputFrame = outputBuffer.shift();
+		if (!drbOutputBuffer.empty()) {
+			outputFrame = drbOutputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
 				outputFrame.samples[0] *= params[PARAM_OUT_GAIN].getValue();
 				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
@@ -516,16 +519,18 @@ struct Nebulae : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "buffersize", json_integer(bufferSize));
+		setJsonInt(rootJ, "buffersize", bufferSize);
+
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* buffersizeJ = json_object_get(rootJ, "buffersize");
-		if (buffersizeJ) {
-			bufferSize = json_integer_value(buffersizeJ);
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "buffersize", intValue)) {
+			bufferSize = intValue;
 		}
 	}
 

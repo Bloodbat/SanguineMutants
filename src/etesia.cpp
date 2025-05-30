@@ -1,7 +1,10 @@
 ﻿#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
-#include "clouds_parasite/dsp/etesia_granular_processor.h"
 #include "sanguinehelpers.hpp"
+#include "sanguinejson.hpp"
+
+#include "clouds_parasite/dsp/etesia_granular_processor.h"
+
 #include "etesia.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
@@ -82,10 +85,10 @@ struct Etesia : SanguineModule {
 	std::string textFeedback = etesia::modeDisplays[0].labelFeedback;
 	std::string textReverb = etesia::modeDisplays[0].labelReverb;
 
-	dsp::SampleRateConverter<2> inputSrc;
-	dsp::SampleRateConverter<2> outputSrc;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> inputBuffer;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> outputBuffer;
+	dsp::SampleRateConverter<2> srcInput;
+	dsp::SampleRateConverter<2> srcOutput;
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer;
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer;
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
@@ -211,11 +214,11 @@ struct Etesia : SanguineModule {
 		dsp::Frame<2> outputFrame = {};
 
 		// Get input
-		if (!inputBuffer.full()) {
+		if (!drbInputBuffer.full()) {
 			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
 			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
 				* params[PARAM_IN_GAIN].getValue() / 5.f : inputFrame.samples[0];
-			inputBuffer.push(inputFrame);
+			drbInputBuffer.push(inputFrame);
 		}
 
 		// Trigger
@@ -224,16 +227,16 @@ struct Etesia : SanguineModule {
 		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 
 		// Render frames
-		if (outputBuffer.empty()) {
+		if (drbOutputBuffer.empty()) {
 			etesia::ShortFrame input[32] = {};
 			// Convert input buffer
 
-			inputSrc.setRates(args.sampleRate, 32000);
+			srcInput.setRates(args.sampleRate, 32000);
 			dsp::Frame<2> inputFrames[32];
-			int inLen = inputBuffer.size();
+			int inLen = drbInputBuffer.size();
 			int outLen = 32;
-			inputSrc.process(inputBuffer.startData(), &inLen, inputFrames, &outLen);
-			inputBuffer.startIncr(inLen);
+			srcInput.process(drbInputBuffer.startData(), &inLen, inputFrames, &outLen);
+			drbInputBuffer.startIncr(inLen);
 
 			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
 			for (int frame = 0; frame < outLen; ++frame) {
@@ -260,7 +263,7 @@ struct Etesia : SanguineModule {
 			etesiaProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			etesiaProcessor->Prepare();
 
-			bool frozen = params[PARAM_FREEZE].getValue();
+			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};
@@ -280,7 +283,7 @@ struct Etesia : SanguineModule {
 
 			etesiaParameters->trigger = bTriggered;
 			etesiaParameters->gate = bTriggered;
-			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || frozen);
+			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
 			etesiaParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
 			etesiaParameters->position = clamp(params[PARAM_POSITION].getValue() + parameters1[0], 0.f, 1.f);
 			etesiaParameters->size = clamp(params[PARAM_SIZE].getValue() + parameters1[1], 0.f, 1.f);
@@ -290,18 +293,19 @@ struct Etesia : SanguineModule {
 			etesiaParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + parameters2[1], 0.f, 1.f);
 			etesiaParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + parameters2[2], 0.f, 1.f);
 			etesiaParameters->reverb = clamp(params[PARAM_REVERB].getValue() + parameters2[3], 0.f, 1.f);
-			etesiaParameters->granular.reverse = (inputs[INPUT_REVERSE].getVoltage() >= 1.f || params[PARAM_REVERSE].getValue());
+			etesiaParameters->granular.reverse = (inputs[INPUT_REVERSE].getVoltage() >= 1.f ||
+				static_cast<bool>(params[PARAM_REVERSE].getValue()));
 
 			etesia::ShortFrame output[32];
 			etesiaProcessor->Process(input, output, 32);
 
-			if (frozen && !bLastFrozen) {
+			if (bFrozen && !bLastFrozen) {
 				bLastFrozen = true;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_OUTPUT;
 					lastLedMode = cloudyCommon::LEDS_OUTPUT;
 				}
-			} else if (!frozen && bLastFrozen) {
+			} else if (!bFrozen && bLastFrozen) {
 				bLastFrozen = false;
 				if (!bDisplaySwitched) {
 					ledMode = cloudyCommon::LEDS_INPUT;
@@ -318,18 +322,18 @@ struct Etesia : SanguineModule {
 				outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 			}
 
-			outputSrc.setRates(32000, args.sampleRate);
+			srcOutput.setRates(32000, args.sampleRate);
 			int inCount = 32;
-			int outCount = outputBuffer.capacity();
-			outputSrc.process(outputFrames, &inCount, outputBuffer.endData(), &outCount);
-			outputBuffer.endIncr(outCount);
+			int outCount = drbOutputBuffer.capacity();
+			srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
+			drbOutputBuffer.endIncr(outCount);
 
 			bTriggered = false;
 		}
 
 		// Set output
-		if (!outputBuffer.empty()) {
-			outputFrame = outputBuffer.shift();
+		if (!drbOutputBuffer.empty()) {
+			outputFrame = drbOutputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
 				outputFrame.samples[0] *= params[PARAM_OUT_GAIN].getValue();
 				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
@@ -544,16 +548,18 @@ struct Etesia : SanguineModule {
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		json_object_set_new(rootJ, "buffersize", json_integer(bufferSize));
+		setJsonInt(rootJ, "buffersize", bufferSize);
+
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_t* buffersizeJ = json_object_get(rootJ, "buffersize");
-		if (buffersizeJ) {
-			bufferSize = json_integer_value(buffersizeJ);
+		json_int_t intValue;
+
+		if (getJsonInt(rootJ, "buffersize", intValue)) {
+			bufferSize = intValue;
 		}
 	}
 

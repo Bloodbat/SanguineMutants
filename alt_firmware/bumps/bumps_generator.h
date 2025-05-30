@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -81,17 +81,16 @@ namespace bumps {
 
 	class Generator {
 	public:
-		Generator() { }
-		~Generator() { }
+		Generator() {}
+		~Generator() {}
 
 		void Init();
 
 		void set_range(GeneratorRange range) {
 			ClearFilterState();
 			range_ = range;
-			clock_divider_ =
-				/* harmonic oscillator is sampled at 24kHz */
-				feature_mode_ == FEAT_MODE_HARMONIC ? 2 :
+			/* harmonic oscillator is sampled at 24kHz */
+			clock_divider_ = feature_mode_ == FEAT_MODE_HARMONIC ? 2 :
 				range_ == GENERATOR_RANGE_LOW ? 4 : 1;
 		}
 
@@ -126,27 +125,17 @@ namespace bumps {
 		}
 
 		void set_slope(int16_t slope) {
-			//#ifndef WAVETABLE_HACK
 			if (feature_mode_ < FEAT_MODE_SHEEP) {
 				if (range_ == GENERATOR_RANGE_HIGH &&
 					feature_mode_ != FEAT_MODE_HARMONIC) {
 					CONSTRAIN(slope, -32512, 32512);
 				}
 			}
-			//#endif  // WAVETABLE_HACK
 			slope_ = slope;
 		}
 
 		void set_smoothness(int16_t smoothness) {
 			smoothness_ = smoothness;
-		}
-
-		void set_frequency_ratio(FrequencyRatio ratio) {
-			frequency_ratio_ = ratio;
-		}
-
-		void set_waveshaper_antialiasing(bool antialiasing) {
-			antialiasing_ = antialiasing;
 		}
 
 		void set_sync(bool sync) {
@@ -163,7 +152,6 @@ namespace bumps {
 
 		inline GeneratorMode mode() const { return mode_; }
 		inline GeneratorRange range() const { return range_; }
-		inline bool sync() const { return sync_; }
 
 		inline GeneratorSample Process(uint8_t control) {
 			input_buffer_.Overwrite(control);
@@ -174,21 +162,7 @@ namespace bumps {
 			return output_buffer_.writable() >= kBlockSize;
 		}
 
-		inline bool FillBufferSafe() {
-			if (!writable_block()) {
-				return false;
-			}
-			else {
-				FillBuffer();
-				return true;
-			}
-		}
-
 		void FillBuffer();
-
-		uint32_t clock_divider() const {
-			return clock_divider_;
-		}
 
 		enum FeatureMode {
 			FEAT_MODE_FUNCTION,
