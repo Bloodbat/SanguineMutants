@@ -447,8 +447,14 @@ namespace fluctus {
       pitch_shifter_.Init(reinterpret_cast<uint16_t*>(correlator_data));
 
       if (playback_mode_ == PLAYBACK_MODE_SPECTRAL_CLOUD) {
-        phase_vocoder_.Init(buffer, buffer_size, lut_sine_window_4096, 4096, num_channels_,
-          resolution(), sr);
+        phase_vocoder_.Init(
+          buffer, buffer_size,
+          #ifdef METAMODULE
+          lut_sine_window_2048, 2048,
+          #else
+          lut_sine_window_4096, 4096,
+          #endif
+          num_channels_, resolution(), sr);
       } else {
         for (int32_t i = 0; i < num_channels_; ++i) {
           if (resolution() == 8) {
@@ -468,36 +474,12 @@ namespace fluctus {
     }
 
     if (playback_mode_ == PLAYBACK_MODE_SPECTRAL_CLOUD) {
-<<<<<<< HEAD
-      phase_vocoder_.Init(
-          buffer, buffer_size,
-          #ifdef METAMODULE
-          lut_sine_window_2048, 2048,
-          #else
-          lut_sine_window_4096, 4096,
-          #endif
-          num_channels_, resolution(), sr);
-    } else {
-      for (int32_t i = 0; i < num_channels_; ++i) {
-        if (resolution() == 8) {
-          buffer_8_[i].Init(
-              buffer[i],
-              (buffer_size[i]),
-              tail_buffer_[i]);
-        } else {
-          buffer_16_[i].Init(
-              buffer[i],
-              ((buffer_size[i]) >> 1),
-              tail_buffer_[i]);
-        }
-=======
       phase_vocoder_.Buffer();
     } else if (playback_mode_ == PLAYBACK_MODE_STRETCH) {
       if (resolution() == 8) {
         ws_player_.LoadCorrelator(buffer_8_);
       } else {
         ws_player_.LoadCorrelator(buffer_16_);
->>>>>>> main
       }
       correlator_.EvaluateSomeCandidates();
     }
