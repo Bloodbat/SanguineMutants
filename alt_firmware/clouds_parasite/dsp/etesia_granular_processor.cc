@@ -560,7 +560,7 @@ namespace etesia {
 					num_channels_, resolution(), sr);
 			}
 			else if (playback_mode_ == PLAYBACK_MODE_RESONESTOR) {
-				float* buf = (float*)buffer[0];
+				float* buf = static_cast<float*>(buffer[0]);
 				resonestor_.Init(buf);
 			} else {
 				for (int32_t i = 0; i < num_channels_; ++i) {
