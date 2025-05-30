@@ -1,8 +1,12 @@
-# Next Release
+# 2.6.8
 
 ## Additions
 
 - Vimina: show current swing or active clock division or multiplication factors in the knob's tooltip using the description field.
+
+## Changes
+
+- Vimina: slight performance improvements.
 
 
 ---
