@@ -57,10 +57,7 @@ namespace rings {
     float stiffness = Interpolate(lut_stiffness, structure_, 256.0f);
     float harmonic = frequency_;
     float stretch_factor = 1.0f;
-    float q = 500.0f * Interpolate(
-      lut_4_decades,
-      damping_,
-      256.0f);
+    float q = 500.0f * Interpolate(lut_4_decades, damping_, 256.0f);
     float brightness_attenuation = 1.0f - structure_;
     // Reduces the range of brightness when structure is very low, to prevent
     // clipping.
@@ -79,9 +76,7 @@ namespace rings {
       } else {
         num_modes = i + 1;
       }
-      f_[i].set_f_q<FREQUENCY_FAST>(
-        partial_frequency,
-        1.0f + partial_frequency * q);
+      f_[i].set_f_q<FREQUENCY_FAST>(partial_frequency, 1.0f + partial_frequency * q);
       stretch_factor += stiffness;
       if (stiffness < 0.0f) {
         // Make sure that the partials do not fold back into negative frequencies.
@@ -119,5 +114,4 @@ namespace rings {
       *aux++ = even;
     }
   }
-
 }  // namespace rings
