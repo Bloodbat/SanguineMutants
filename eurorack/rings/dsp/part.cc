@@ -396,10 +396,10 @@ namespace rings {
         damping *= (2.0f - damping);
       }
 
-      // When the internal exciter is used, string 0 is the main
-      // source, the other strings are vibrating by sympathetic resonance.
-      // When the internal exciter is not used, all strings are vibrating
-      // by sympathetic resonance.
+      /* When the internal exciter is used, string 0 is the main
+       source, the other strings are vibrating by sympathetic resonance.
+       When the internal exciter is not used, all strings are vibrating
+       by sympathetic resonance. */
       if (string > 0 && performance_state.internal_exciter) {
         brightness *= (2.0f - brightness);
         brightness *= (2.0f - brightness);
@@ -458,12 +458,11 @@ namespace rings {
       float cutoff = patch.brightness * (2.0f - patch.brightness);
       float note = note_[voice] + performance_state.tonic + performance_state.fm;
       float frequency = SemitonesToRatio(note - 69.0f) * a3;
-      float filter_cutoff_range = performance_state.internal_exciter
-        ? frequency * SemitonesToRatio((cutoff - 0.5f) * 96.0f)
-        : 0.4f * SemitonesToRatio((cutoff - 1.0f) * 108.0f);
-      float filter_cutoff = min(voice == active_voice_
-        ? filter_cutoff_range
-        : (10.0f / kSampleRate), 0.499f);
+      float filter_cutoff_range = performance_state.internal_exciter ?
+        frequency * SemitonesToRatio((cutoff - 0.5f) * 96.0f) :
+        0.4f * SemitonesToRatio((cutoff - 1.0f) * 108.0f);
+      float filter_cutoff = min(voice == active_voice_ ? filter_cutoff_range :
+        (10.0f / kSampleRate), 0.499f);
       float filter_q = performance_state.internal_exciter ? 1.5f : 0.8f;
 
       // Process input with excitation filter. Inactive voices receive silence.
