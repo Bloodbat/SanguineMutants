@@ -497,11 +497,12 @@ namespace rings {
     }
 
     if (model_ == RESONATOR_MODEL_STRING_AND_REVERB) {
+      const float patchPositionFactor = 1.0f - patch.position;
       for (size_t i = 0; i < size; ++i) {
         float l = out[i];
         float r = aux[i];
-        out[i] = l * patch.position + (1.0f - patch.position) * r;
-        aux[i] = r * patch.position + (1.0f - patch.position) * l;
+        out[i] = l * patch.position + patchPositionFactor * r;
+        aux[i] = r * patch.position + patchPositionFactor * l;
       }
       reverb_.set_amount(0.1f + patch.damping * 0.5f);
       reverb_.set_diffusion(0.625f);
