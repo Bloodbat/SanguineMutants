@@ -106,8 +106,9 @@ namespace rings {
 			// Compute envelopes.
 			float brightness_value = brightness.Next();
 			brightness_value *= brightness_value;
-			float fm_amount_min = brightness_value < 0.5f ? 0.0f : brightness_value * 2.0f - 1.0f;
-			float fm_amount_max = brightness_value < 0.5f ? 2.0f * brightness_value : 1.0f;
+			const bool bBrightnessBelowThreshold = brightness_value < 0.5f;
+			float fm_amount_min = bBrightnessBelowThreshold ? 0.0f : brightness_value * 2.0f - 1.0f;
+			float fm_amount_max = bBrightnessBelowThreshold ? 2.0f * brightness_value : 1.0f;
 			float fm_envelope = 0.5f + envelope_amount * (brightness_envelope_ - 0.5f);
 			float fm_amount = (fm_amount_min + fm_amount_max * fm_envelope) * 2.0f;
 			SLEW(fm_amount_, fm_amount, 0.005f + fm_amount_max * 0.015f);
