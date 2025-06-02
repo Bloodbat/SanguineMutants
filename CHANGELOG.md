@@ -1,5 +1,9 @@
 # Next version
 
+## Additions
+
+- Nodi family: display channel also affects the big knob's light.
+
 ## Fixes
 
 - Anuli: FX button light didn't follow plugin button light standards.
