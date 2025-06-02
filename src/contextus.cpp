@@ -424,7 +424,7 @@ struct Contextus : SanguineModule {
 			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[currentModel].blue, sampleTime);
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 				if (channel < channelCount) {
 					int selectedModel = settings[channel].shape;
 					lights[currentLight + 0].setBrightnessSmooth(contextus::lightColors[selectedModel].red, sampleTime);
