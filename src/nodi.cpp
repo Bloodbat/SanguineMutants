@@ -437,9 +437,10 @@ struct Nodi : SanguineModule {
 				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 
 				if (channel < channelCount) {
-					lights[currentLight + 0].setBrightnessSmooth(nodi::lightColors[settings[channel].shape].red, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[settings[channel].shape].green, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[settings[channel].shape].blue, sampleTime);
+					int selectedModel = bPaques != true ? settings[channel].shape : 47;
+					lights[currentLight + 0].setBrightnessSmooth(nodi::lightColors[selectedModel].red, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue, sampleTime);
 				} else {
 					for (int light = 0; light < 3; ++light) {
 						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
