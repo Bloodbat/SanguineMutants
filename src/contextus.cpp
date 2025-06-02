@@ -412,8 +412,12 @@ struct Contextus : SanguineModule {
 
 			pollSwitches(sampleTime);
 
+			if (displayChannel >= channelCount) {
+				displayChannel = channelCount - 1;
+			}
+
 			// Handle model light.
-			int currentModel = settings[0].shape;
+			int currentModel = settings[displayChannel].shape;
 			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextus::lightColors[currentModel].red, sampleTime);
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[currentModel].green, sampleTime);
 			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[currentModel].blue, sampleTime);
@@ -430,10 +434,6 @@ struct Contextus : SanguineModule {
 						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
 					}
 				}
-			}
-
-			if (displayChannel >= channelCount) {
-				displayChannel = channelCount - 1;
 			}
 		}
 
