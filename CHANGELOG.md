@@ -1,5 +1,9 @@
 # Next version
 
+## Fixes
+
+- Anuli: FX button light didn't follow plugin button light standards.
+
 
 ---
 
