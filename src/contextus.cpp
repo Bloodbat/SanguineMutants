@@ -417,18 +417,16 @@ struct Contextus : SanguineModule {
 			}
 
 			// Handle model light.
-			int currentModel = settings[displayChannel].shape;
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextus::lightColors[currentModel].red, sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[currentModel].green, sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[currentModel].blue, sampleTime);
+			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].green, sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].blue, sampleTime);
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 				if (channel < channelCount) {
-					int selectedModel = settings[channel].shape;
-					lights[currentLight + 0].setBrightnessSmooth(contextus::lightColors[selectedModel].red, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[selectedModel].green, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[selectedModel].blue, sampleTime);
+					lights[currentLight + 0].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].red, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].green, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].blue, sampleTime);
 				} else {
 					for (int light = 0; light < 3; ++light) {
 						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);

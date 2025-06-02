@@ -424,10 +424,9 @@ struct Nodi : SanguineModule {
 
 			// Handle model light.
 			if (!bPaques) {
-				int currentModel = settings[displayChannel].shape;
-				lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodi::lightColors[currentModel].red, sampleTime);
-				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[currentModel].green, sampleTime);
-				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[currentModel].blue, sampleTime);
+				lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].red, sampleTime);
+				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].green, sampleTime);
+				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].blue, sampleTime);
 			} else {
 				lights[LIGHT_MODEL + 0].setBrightnessSmooth(nodi::lightColors[47].red, sampleTime);
 				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[47].green, sampleTime);
@@ -438,10 +437,9 @@ struct Nodi : SanguineModule {
 				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 
 				if (channel < channelCount) {
-					int selectedModel = settings[channel].shape;
-					lights[currentLight + 0].setBrightnessSmooth(nodi::lightColors[selectedModel].red, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue, sampleTime);
+					lights[currentLight + 0].setBrightnessSmooth(nodi::lightColors[settings[channel].shape].red, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[settings[channel].shape].green, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[settings[channel].shape].blue, sampleTime);
 				} else {
 					for (int light = 0; light < 3; ++light) {
 						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
