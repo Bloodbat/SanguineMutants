@@ -260,17 +260,11 @@ struct Anuli : SanguineModule {
 				}
 			}
 
-			if (bWithDisastrousPeace) {
-				for (int light = 0; light < 2; ++light) {
-					float lightValue = anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_ON ||
-						(anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_BLINK && bIsTrianglePulse) ?
-						kSanguineButtonLightValue : 0.f;
-					lights[LIGHT_FX + light].setBrightnessSmooth(lightValue, sampleTime);
-				}
-			} else {
-				for (int light = 0; light < 2; ++light) {
-					lights[LIGHT_FX + light].setBrightnessSmooth(0.f, sampleTime);
-				}
+			for (int light = 0; light < 2; ++light) {
+				float lightValue = bWithDisastrousPeace && (anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_ON ||
+					(anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_BLINK && bIsTrianglePulse)) ?
+					kSanguineButtonLightValue : 0.f;
+				lights[LIGHT_FX + light].setBrightnessSmooth(lightValue, sampleTime);
 			}
 
 			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
