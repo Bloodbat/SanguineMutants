@@ -301,36 +301,34 @@ struct Mortuus : SanguineModule {
 					default:
 						break;
 					}
-				}
-			}
 
-			if (bIsLightsTurn) {
-				Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
-				Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
-				Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
+					Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
+					Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
+					Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
 
-				switch (editMode) {
-				case apicesCommon::EDIT_MODE_FIRST:
-				case apicesCommon::EDIT_MODE_SECOND:
-					channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-					switchExpanderChannel2Lights(ansaExpander, true, sampleTime);
-					break;
-				case apicesCommon::EDIT_MODE_TWIN:
-					channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-					switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
-					break;
-				case apicesCommon::EDIT_MODE_SPLIT:
-					channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-					channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-					channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-					switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
-					break;
-				default:
-					break;
+					switch (editMode) {
+					case apicesCommon::EDIT_MODE_FIRST:
+					case apicesCommon::EDIT_MODE_SECOND:
+						channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
+						channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+						switchExpanderChannel2Lights(ansaExpander, true, sampleTime);
+						break;
+					case apicesCommon::EDIT_MODE_TWIN:
+						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+						channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
+						break;
+					case apicesCommon::EDIT_MODE_SPLIT:
+						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+						switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
+						break;
+					default:
+						break;
+					}
 				}
 			}
 		}
