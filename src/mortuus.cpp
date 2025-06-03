@@ -10,6 +10,9 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
+/* TODO: MetaModule has no expander support at the moment, if it is ever implemented,
+   restore expander code! (helpfully surrounded by ifdefs/ifndefs) */
+
 struct Mortuus : SanguineModule {
 	enum ParamIds {
 		PARAM_KNOB_1,
@@ -47,7 +50,9 @@ struct Mortuus : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
+#ifndef METAMODULE
 		LIGHT_EXPANDER,
+#endif
 		LIGHTS_COUNT
 	};
 
@@ -60,8 +65,10 @@ struct Mortuus : SanguineModule {
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
+#ifndef METAMODULE
 	bool bHasExpander = false;
 	bool bWasExpanderConnected = false;
+#endif
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
@@ -169,11 +176,12 @@ struct Mortuus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+#ifndef METAMODULE
 		Module* ansaExpander = getRightExpander().module;
+		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
+#endif
 
 		float sampleTime = 0.f;
-
-		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 
 		bool bIsLightsTurn = lightsDivider.process();
 
@@ -186,7 +194,9 @@ struct Mortuus : SanguineModule {
 			pollPots();
 			updateOleds();
 
+#ifndef METAMODULE
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
+#endif
 		}
 
 		mortuus::ProcessorFunctions currentFunction = getProcessorFunction();
@@ -196,6 +206,7 @@ struct Mortuus : SanguineModule {
 			saveState();
 		}
 
+#ifndef METAMODULE
 		if (bHasExpander) {
 			bWasExpanderConnected = true;
 
@@ -321,6 +332,7 @@ struct Mortuus : SanguineModule {
 				}
 			}
 		}
+#endif
 
 		if (drbOutputBuffer.empty()) {
 			while (renderBlock != ioBlock) {
@@ -762,6 +774,7 @@ struct Mortuus : SanguineModule {
 
 	}
 
+#ifndef METAMODULE
 	void setExpanderChannel1Lights(Module* ansaExpander, bool lightIsOn) {
 		Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
 		Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
@@ -844,6 +857,7 @@ struct Mortuus : SanguineModule {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
 		}
 	}
+#endif
 
 	json_t* dataToJson() override {
 		saveState();
@@ -931,6 +945,7 @@ struct Mortuus : SanguineModule {
 		}
 	}
 
+#ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
 		if (bHasExpander) {
 			Module* ansaExpander = getRightExpander().module;
@@ -978,6 +993,7 @@ struct Mortuus : SanguineModule {
 			bWasExpanderConnected = false;
 		}
 	}
+#endif
 };
 
 struct MortuusWidget : SanguineModuleWidget {
@@ -995,7 +1011,9 @@ struct MortuusWidget : SanguineModuleWidget {
 		FramebufferWidget* mortuusFramebuffer = new FramebufferWidget();
 		addChild(mortuusFramebuffer);
 
+#ifndef METAMODULE
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Mortuus::LIGHT_EXPANDER));
+#endif
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		mortuusFramebuffer->addChild(displayChannel1);
@@ -1090,6 +1108,7 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &mortuus->bSnapMode));
 
+#ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
 		const Module* expander = mortuus->rightExpander.module;
 		if (expander && expander->model == modelAnsa) {
@@ -1099,6 +1118,7 @@ struct MortuusWidget : SanguineModuleWidget {
 				mortuus->addExpander(modelAnsa, this);
 				}));
 		}
+#endif
 	}
 };
 

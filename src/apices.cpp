@@ -11,6 +11,9 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
+/* TODO: MetaModule has no expander support at the moment, if it is ever implemented,
+   restore expander code! (helpfully surrounded by ifdefs/ifndefs) */
+
 struct Apices : SanguineModule {
 	enum ParamIds {
 		PARAM_KNOB_1,
@@ -48,7 +51,9 @@ struct Apices : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
+#ifndef metamodule
 		LIGHT_EXPANDER,
+#endif
 		LIGHTS_COUNT
 	};
 
@@ -61,8 +66,10 @@ struct Apices : SanguineModule {
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
+#ifndef METAMODULE
 	bool bHasExpander = false;
 	bool bWasExpanderConnected = false;
+#endif
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
@@ -156,11 +163,12 @@ struct Apices : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+#ifndef METAMODULE
 		Module* nixExpander = getRightExpander().module;
+		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
+#endif
 
 		float sampleTime = 0.f;
-
-		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 
 		bool bIsLightsTurn = lightsDivider.process();
 
@@ -173,7 +181,9 @@ struct Apices : SanguineModule {
 			pollPots();
 			updateOleds();
 
+#ifndef METAMODULE
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
+#endif
 		}
 
 		apices::ProcessorFunctions currentFunction = getProcessorFunction();
@@ -183,6 +193,7 @@ struct Apices : SanguineModule {
 			saveState();
 		}
 
+#ifndef METAMODULE
 		if (bHasExpander) {
 			bWasExpanderConnected = true;
 
@@ -308,6 +319,7 @@ struct Apices : SanguineModule {
 				}
 			}
 		}
+#endif
 
 		if (drbOutputBuffer.empty()) {
 			while (renderBlock != ioBlock) {
@@ -734,6 +746,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
+#ifndef METAMODULE
 	void setExpanderChannel1Lights(Module* nixExpander, bool lightIsOn) {
 		Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
 		Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
@@ -814,6 +827,7 @@ struct Apices : SanguineModule {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
 		}
 	}
+#endif
 
 	json_t* dataToJson() override {
 		saveState();
@@ -901,6 +915,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
+#ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
 		if (bHasExpander) {
 			Module* nixExpander = getRightExpander().module;
@@ -948,6 +963,7 @@ struct Apices : SanguineModule {
 			bWasExpanderConnected = false;
 		}
 	}
+#endif
 };
 
 struct ApicesWidget : SanguineModuleWidget {
@@ -965,7 +981,9 @@ struct ApicesWidget : SanguineModuleWidget {
 		FramebufferWidget* apicesFramebuffer = new FramebufferWidget();
 		addChild(apicesFramebuffer);
 
+#ifndef METAMODULE
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Apices::LIGHT_EXPANDER));
+#endif
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFramebuffer->addChild(displayChannel1);
@@ -1060,6 +1078,7 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &apices->bSnapMode));
 
+#ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
 		const Module* expander = apices->rightExpander.module;
 		if (expander && expander->model == modelNix) {
@@ -1069,6 +1088,7 @@ struct ApicesWidget : SanguineModuleWidget {
 				apices->addExpander(modelNix, this);
 				}));
 		}
+#endif
 	}
 };
 
