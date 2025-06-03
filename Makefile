@@ -3,7 +3,7 @@ FLAGS += \
 	-DBRAIDS_LFO_FIX \
 	-I./eurorack \
 	-I./alt_firmware \
-	-I./pcgcpp \
+	-I./SanguineModulesCommon/pcgcpp \
 	-I./SanguineModulesCommon/src \
 	-Wno-unused-local-typedefs
 
