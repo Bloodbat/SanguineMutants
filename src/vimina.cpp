@@ -117,7 +117,7 @@ struct Vimina : SanguineModule {
 	float lastSectionFactors[kMaxModuleSections] = { 0.5f, 0.5f };
 
 	bool inputGateState[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	bool IsMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
+	bool isMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
 	SectionFunctions channelFunction[kMaxModuleSections] = {
 		SECTION_FUNCTION_SWING,
@@ -348,7 +348,7 @@ struct Vimina : SanguineModule {
 
 			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
 				triggerExtendCounts[i][channel] = 0;
-				IsMultiplyDebouncing[i][channel] = false;
+				isMultiplyDebouncing[i][channel] = false;
 			}
 			tmrModuleClock[channel] = 0;
 		}
@@ -365,11 +365,11 @@ struct Vimina : SanguineModule {
 	bool isMultiplyStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		float interval = getPulseTrackerPeriod(channel) / -channelFactors[section][channel];
 		if (fmod(elapsed, interval) <= kTimingErrorCorrectionAmount) {
-			if (!IsMultiplyDebouncing[section][channel]) {
+			if (!isMultiplyDebouncing[section][channel]) {
 				return true;
 			}
 		} else {
-			IsMultiplyDebouncing[section][channel] = false;
+			isMultiplyDebouncing[section][channel] = false;
 		}
 		return false;
 	}
@@ -465,7 +465,7 @@ struct Vimina : SanguineModule {
 				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
 				triggerCounts[section][channel] >= channelFactors[section][channel]) {
 				channelStates[section][channel] = CHANNEL_GENERATED;
-				IsMultiplyDebouncing[section][channel] = true;
+				isMultiplyDebouncing[section][channel] = true;
 				--triggerCounts[section][channel];
 			}
 			break;
