@@ -729,11 +729,13 @@ struct EtesiaWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Etesia::INPUT_RIGHT));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
+#endif
 
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Etesia::OUTPUT_RIGHT));

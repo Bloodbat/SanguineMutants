@@ -713,11 +713,13 @@ struct FunesWidget : SanguineModuleWidget {
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(111.028, 112.984), module, Funes::OUTPUT_OUT));
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(124.880, 112.984), module, Funes::OUTPUT_AUX));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.733, 113.895);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.734, 120.828);
 		addChild(mutantsLogo);
+#endif
 	}
 
 	void appendContextMenu(Menu* menu) override {

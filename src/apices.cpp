@@ -1030,11 +1030,13 @@ struct ApicesWidget : SanguineModuleWidget {
 		apicesFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = apices::knobLabelsTwinMode[0].knob4;
 
+#ifndef METAMODULE
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
 		addChild(mutantsLogo);
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
+#endif
 
 		if (module) {
 #ifdef METAMODULE

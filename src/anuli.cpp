@@ -567,13 +567,15 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
 
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
+
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 32.288, 101.019);
 		addChild(bloodLogo);
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
-
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 94.721, 99.605);
 		addChild(mutantsLogo);
+#endif
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(53.34, 112.736), module, Anuli::INPUT_DAMPING_CV));
 

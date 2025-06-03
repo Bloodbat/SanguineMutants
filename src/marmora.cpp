@@ -889,11 +889,13 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(130.965, 110.250), module, Marmora::OUTPUT_X3));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 41.957, 114.855);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 94.378, 113.441);
 		addChild(mutantsLogo);
+#endif
 	}
 
 	struct TextFieldMenuItem : ui::TextField {

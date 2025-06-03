@@ -456,8 +456,10 @@ struct ScalariaWidget : SanguineModuleWidget {
         }
 #endif
 
+#ifndef METAMODULE
         SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 22.86, 91.457);
         addChild(bloodLogo);
+#endif
     }
 };
 

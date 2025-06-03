@@ -1060,11 +1060,13 @@ struct MortuusWidget : SanguineModuleWidget {
 		mortuusFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = mortuus::knobLabelsTwinMode[0].knob4;
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
 		addChild(mutantsLogo);
+#endif
 
 		if (module) {
 #ifdef METAMODULE

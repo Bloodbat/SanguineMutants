@@ -760,11 +760,13 @@ struct NodiWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(79.633, 118.103), module, Nodi::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(133.968, 117.788), module, Nodi::OUTPUT_OUT));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 112.723);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 119.656);
 		addChild(mutantsLogo);
+#endif
 	}
 
 	struct TextFieldMenuItem : ui::TextField {
