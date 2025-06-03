@@ -1,5 +1,8 @@
 #include "plugin.hpp"
 
+/* TODO: expanders have been disabled for MetaModule: it doesn't support them.default.
+   If MetaModule ever supports them, re-enable them here and add them to the MetaModule json manifest. */
+
 #if defined(METAMODULE_BUILTIN)
 extern Plugin* pluginInstance;
 #else
@@ -34,8 +37,10 @@ void init(rack::Plugin* p)
 	p->addModel(modelAestus);
 	p->addModel(modelTemulenti);
 	p->addModel(modelVimina);
+#ifndef METAMODULE
 	p->addModel(modelNix);
 	p->addModel(modelAnsa);
+#endif
 	p->addModel(modelScalaria);
 
 	getDefaultTheme();
