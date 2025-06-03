@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 ---
 
-#eurorack AVR (applies to AVR modules, not STM32F modules)
+# eurorack AVR (applies to AVR modules, not STM32F modules)
 
 Copyright Emilie Gillet.
 
