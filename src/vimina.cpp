@@ -350,6 +350,7 @@ struct Vimina : SanguineModule {
 
 			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
 				triggerExtendCounts[i][channel] = 0;
+				IsMultiplyDebouncing[i][channel] = false;
 			}
 			tmrModuleClock[channel] = 0;
 		}
