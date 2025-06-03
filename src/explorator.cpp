@@ -234,8 +234,8 @@ struct Explorator : SanguineModule {
 		int noiseChannels = std::max(channelsSampleAndHold, 1);
 		outputs[OUTPUT_SH_NOISE].setChannels(noiseChannels);
 
-		float noiseMultiplier = 0.f;
 		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
+			float noiseMultiplier = 0.f;
 			switch (noiseMode)
 			{
 			case NOISE_PRISM:
