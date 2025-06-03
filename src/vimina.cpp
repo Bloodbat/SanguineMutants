@@ -348,9 +348,9 @@ struct Vimina : SanguineModule {
 			pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] = 0;
 			pulseTrackerRecordedCounts[channel] = 0;
 
-			for (uint8_t i = 0; i < kMaxModuleSections; ++i) {
-				triggerExtendCounts[i][channel] = 0;
-				isMultiplyDebouncing[i][channel] = false;
+			for (uint8_t section = 0; section < kMaxModuleSections; ++section) {
+				triggerExtendCounts[section][channel] = 0;
+				isMultiplyDebouncing[section][channel] = false;
 			}
 			tmrModuleClock[channel] = 0;
 		}
