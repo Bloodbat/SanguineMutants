@@ -1,4 +1,4 @@
-# eurorack (applies to STM32F modules, not AVR modules)
+# eurorack STM32f (applies to STM32F modules, not AVR modules)
 
 Copyright 2014-2019 Emilie Gillet.
 
@@ -24,7 +24,17 @@ THE SOFTWARE.
 
 ---
 
-# The PCG Library 
+#eurorack AVR (applies to AVR modules, not STM32F modules)
+
+Copyright Emilie Gillet.
+
+Author: Emilie Gillet (emilie.o.gillet@gmail.com)
+
+Licensed as GPL v3.0 [LICENSE-GPLv3.txt](LICENSE-GPLv3.txt)
+
+---
+
+# The PCG Library (applies to the PCG family of random number generators)
 
 Copyright (c) 2014-2017 Melissa O'Neill and PCG Project contributors
 
