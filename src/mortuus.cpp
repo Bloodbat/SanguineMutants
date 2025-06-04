@@ -6,7 +6,9 @@
 #include "deadman/deadman_processors.h"
 
 #include "mortuus.hpp"
+#ifndef METAMODULE
 #include "ansa.hpp"
+#endif
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 

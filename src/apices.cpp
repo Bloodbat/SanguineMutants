@@ -6,7 +6,9 @@
 #include "peaks/processors.h"
 
 #include "apices.hpp"
+#ifndef METAMODULE
 #include "nix.hpp"
+#endif
 
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
