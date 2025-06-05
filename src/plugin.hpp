@@ -5,7 +5,7 @@
 
 using namespace rack;
 
-/* TODO: expanders have been disabled for MetaModule: it doesn't support them.default.
+/* TODO: expanders have been disabled for MetaModule: it doesn't support them.
    If MetaModule ever supports them, re-enable them here and add them to the MetaModule json manifest. */
 
 extern Plugin* pluginInstance;
