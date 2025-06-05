@@ -584,11 +584,11 @@ struct NebulaeWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Nebulae::PARAM_POSITION, Nebulae::LIGHT_POSITION_CV));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 74);
-		#endif
+#endif
 		nebulaeFramebuffer->addChild(displayPosition);
 		displayPosition->fallbackString = nebulae::modeDisplays[0].labelPosition;
 
@@ -606,11 +606,11 @@ struct NebulaeWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
 			module, Nebulae::PARAM_SIZE, Nebulae::LIGHT_SIZE_CV));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 72);
-		#endif
+#endif
 		nebulaeFramebuffer->addChild(displaySize);
 		displaySize->fallbackString = nebulae::modeDisplays[0].labelSize;
 
@@ -627,11 +627,11 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Nebulae::PARAM_PITCH));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54);
-		#endif
+#endif
 		nebulaeFramebuffer->addChild(displayPitch);
 		displayPitch->fallbackString = nebulae::modeDisplays[0].labelPitch;
 
@@ -671,11 +671,13 @@ struct NebulaeWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Nebulae::INPUT_LEFT));
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Nebulae::INPUT_RIGHT));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
+#endif
 
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Nebulae::OUTPUT_LEFT));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Nebulae::OUTPUT_RIGHT));

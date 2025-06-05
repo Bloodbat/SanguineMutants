@@ -6,12 +6,9 @@
 
 #ifndef METAMODULE
 #include "osdialog.h"
-#endif
-#include <thread>
-
-#ifndef METAMODULE
 #include <fstream>
 #endif
+#include <thread>
 
 #include "plaits/dsp/voice.h"
 #include "plaits/user_data.h"
@@ -541,9 +538,9 @@ struct Funes : SanguineModule {
 	}
 
 	void loadCustomData(const std::string& filePath) {
-		#ifndef METAMODULE
-		bLoading = true;
-		DEFER({ bLoading = false; });
+#ifndef METAMODULE
+		bIsLoading = true;
+		DEFER({ bIsLoading = false; });
 		// HACK: Sleep 100us so DSP thread is likely to finish processing before we resize the vector.
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
 
@@ -565,7 +562,7 @@ struct Funes : SanguineModule {
 				errorTimeOut = 4;
 			}
 		}
-		#endif
+#endif
 	}
 
 	void showCustomDataLoadDialog() {
@@ -621,9 +618,9 @@ struct Funes : SanguineModule {
 			inputs[INPUT_ENGINE].setChannels(0);
 		}
 		// Try to wait for DSP to finish.
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
-		#endif
+#endif
 	}
 
 	void setFrequencyMode(int freqModeNum) {
@@ -716,11 +713,13 @@ struct FunesWidget : SanguineModuleWidget {
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(111.028, 112.984), module, Funes::OUTPUT_OUT));
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(124.880, 112.984), module, Funes::OUTPUT_AUX));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.733, 113.895);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.734, 120.828);
 		addChild(mutantsLogo);
+#endif
 	}
 
 	void appendContextMenu(Menu* menu) override {

@@ -1,3 +1,20 @@
+# 2.6.8
+
+## Additions
+
+- Developers: integrate Oksami's MetaModule compatibility changes.
+
+- Scalaria: MetaModule: use special faceplate with regular LEDs.
+
+- Vimina: show current swing or active clock division or multiplication factors in the knob's tooltip using the description field.
+
+## Changes
+
+- Vimina: slight performance improvements.
+
+
+---
+
 # 2.6.7
 
 ## Fixes

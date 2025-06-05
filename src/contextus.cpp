@@ -738,11 +738,13 @@ struct ContextusWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(79.633, 118.103), module, Contextus::PARAM_RATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(133.968, 117.788), module, Contextus::OUTPUT_OUT));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 98.491, 112.723);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 111.492, 119.656);
 		addChild(mutantsLogo);
+#endif
 	}
 
 	struct TextFieldMenuItem : ui::TextField {
@@ -765,19 +767,11 @@ struct ContextusWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				#ifndef METAMODULE
-				try {
-					uint32_t newValue = std::stoul(text);
+				uint32_t newValue = 0;
+				if (strToUInt32(text.c_str(), newValue)) {
 					module->setUserSeed(newValue);
 				}
-				catch (...) {
 
-				}
-				#else
-					uint32_t newValue = std::stoul(text);
-					module->setUserSeed(newValue);
-				#endif
-				
 				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
 				overlay->requestDelete();
 				e.consume(this);
