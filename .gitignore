@@ -3,3 +3,4 @@ dep
 dist
 plugin.dll
 *.so
+.DS_Store
