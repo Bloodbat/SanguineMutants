@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -47,18 +47,18 @@
 
 namespace etesia {
 
-	#ifndef METAMODULE
+#ifndef METAMODULE
 	const int32_t kMaxWSOLASize = 4096;
-	#else
+#else
 	const int32_t kMaxWSOLASize = 2048;
-	#endif
+#endif
 
 	using namespace parasites_stmlib;
 
 	class WSOLASamplePlayer {
 	public:
-		WSOLASamplePlayer() { }
-		~WSOLASamplePlayer() { }
+		WSOLASamplePlayer() {}
+		~WSOLASamplePlayer() {}
 
 		void Init(
 			Correlator* correlator,
@@ -210,8 +210,7 @@ namespace etesia {
 					search_target_ - window_size_,
 					window_size_ * 2,
 					correlator_->destination());
-			}
-			else {
+			} else {
 				num_samples = ReadSignBits<2>(
 					buffer,
 					increment,

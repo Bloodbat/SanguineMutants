@@ -889,11 +889,13 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		addOutput(createOutput<BananutRed>(millimetersToPixelsVec(130.965, 110.250), module, Marmora::OUTPUT_X3));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 41.957, 114.855);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 94.378, 113.441);
 		addChild(mutantsLogo);
+#endif
 	}
 
 	struct TextFieldMenuItem : ui::TextField {
@@ -916,20 +918,10 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		void onSelectKey(const SelectKeyEvent& e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				#ifndef METAMODULE
-				try {
-					uint32_t newValue = std::stoul(text);
-					if (newValue > 0) {
-						module->setUserSeed(newValue);
-					}
+				uint32_t newValue = 0;
+				if (strToUInt32(text.c_str(), newValue)) {
+					module->setUserSeed(newValue);
 				}
-				catch (...) {
-
-				}
-				#else
-				uint32_t newValue = std::stoul(text);
-				module->setUserSeed(newValue);
-				#endif
 
 				ui::MenuOverlay* overlay = getAncestorOfType<ui::MenuOverlay>();
 				overlay->requestDelete();

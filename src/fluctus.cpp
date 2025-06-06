@@ -609,11 +609,11 @@ struct FluctusWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
 			module, Fluctus::PARAM_POSITION, Fluctus::LIGHT_POSITION_CV));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 72);
-		#endif
+#endif
 		fluctusFramebuffer->addChild(displayPosition);
 		displayPosition->fallbackString = fluctus::modeDisplays[0].labelPosition;
 
@@ -631,11 +631,11 @@ struct FluctusWidget : SanguineModuleWidget {
 		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
 			module, Fluctus::PARAM_SIZE, Fluctus::LIGHT_SIZE_CV));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 72);
-		#endif
+#endif
 		fluctusFramebuffer->addChild(displaySize);
 		displaySize->fallbackString = fluctus::modeDisplays[0].labelSize;
 
@@ -652,11 +652,11 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Fluctus::PARAM_PITCH));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54);
-		#endif
+#endif
 		fluctusFramebuffer->addChild(displayPitch);
 		displayPitch->fallbackString = fluctus::modeDisplays[0].labelPitch;
 
@@ -686,11 +686,11 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 78.013), module, Fluctus::INPUT_FEEDBACK));
 
-		#ifndef METAMODULE
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
-		#else
+#else
 		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 70);
-		#endif
+#endif
 		fluctusFramebuffer->addChild(displayFeedback);
 		displayFeedback->fallbackString = fluctus::modeDisplays[0].labelFeedback;
 
@@ -716,11 +716,13 @@ struct FluctusWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Fluctus::INPUT_LEFT));
 		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Fluctus::INPUT_RIGHT));
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
+#endif
 
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Fluctus::OUTPUT_LEFT));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Fluctus::OUTPUT_RIGHT));

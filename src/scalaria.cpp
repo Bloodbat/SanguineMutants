@@ -214,6 +214,7 @@ struct Scalaria : SanguineModule {
     }
 };
 
+#ifndef METAMODULE
 struct AcrylicOff : SanguineShapedAcrylicLed<BlueLight> {
     AcrylicOff() {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_off.svg")));
@@ -345,6 +346,7 @@ struct AcrylicChannel16 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
         setSvg(Svg::load(asset::plugin(pluginInstance, "res/components/sanguine_acrylic_channel_16.svg")));
     }
 };
+#endif
 
 struct ScalariaWidget : SanguineModuleWidget {
     explicit ScalariaWidget(Scalaria* module) {
@@ -388,7 +390,7 @@ struct ScalariaWidget : SanguineModuleWidget {
 
         addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(39.556, 116.272), module, Scalaria::OUTPUT_AUX));
 
-
+#ifndef METAMODULE
         addChild(createLightCentered<AcrylicOff>(millimetersToPixelsVec(16.385, 75.676), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_OFF));
 
         addChild(createLightCentered<AcrylicTriangle>(millimetersToPixelsVec(16.385, 63.997), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_TRIANGLE));
@@ -432,9 +434,32 @@ struct ScalariaWidget : SanguineModuleWidget {
         addChild(createLightCentered<AcrylicChannel15>(millimetersToPixelsVec(39.77, 28.927), module, Scalaria::LIGHT_CHANNEL_15));
 
         addChild(createLightCentered<AcrylicChannel16>(millimetersToPixelsVec(39.77, 25.927), module, Scalaria::LIGHT_CHANNEL_16));
+#else
+        addChild(createLightCentered<TinyLight<BlueLight>>(millimetersToPixelsVec(13.087, 75.676), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_OFF));
 
+        addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(13.087, 63.997), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_TRIANGLE));
+
+        addChild(createLightCentered<TinyLight<YellowLight>>(millimetersToPixelsVec(32.644, 63.997), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SAW));
+
+        addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(32.644, 75.676), module, Scalaria::LIGHT_INTERNAL_OSCILLATOR_SQUARE));
+
+        addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(6.172, 93.944), module, Scalaria::LIGHT_CHANNEL_1_FREQUENCY));
+
+        addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(17.061, 93.944), module, Scalaria::LIGHT_CHANNEL_1_LEVEL));
+
+        int lightY = 70.927;
+
+        for (int light = 0; light < PORT_MAX_CHANNELS; ++light) {
+            addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(40.759, lightY),
+                module, Scalaria::LIGHT_CHANNEL_1 + light * 3));
+            ++lightY;
+        }
+#endif
+
+#ifndef METAMODULE
         SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 22.86, 91.457);
         addChild(bloodLogo);
+#endif
     }
 };
 

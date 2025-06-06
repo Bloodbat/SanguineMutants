@@ -6,9 +6,14 @@
 #include "deadman/deadman_processors.h"
 
 #include "mortuus.hpp"
+#ifndef METAMODULE
 #include "ansa.hpp"
+#endif
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+/* TODO: MetaModule has no expander support at the moment, if it is ever implemented,
+   restore expander code! (helpfully surrounded by ifdefs/ifndefs) */
 
 struct Mortuus : SanguineModule {
 	enum ParamIds {
@@ -47,7 +52,9 @@ struct Mortuus : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
+#ifndef METAMODULE
 		LIGHT_EXPANDER,
+#endif
 		LIGHTS_COUNT
 	};
 
@@ -60,8 +67,10 @@ struct Mortuus : SanguineModule {
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
+#ifndef METAMODULE
 	bool bHasExpander = false;
 	bool bWasExpanderConnected = false;
+#endif
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
@@ -169,24 +178,27 @@ struct Mortuus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+#ifndef METAMODULE
 		Module* ansaExpander = getRightExpander().module;
+		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
+#endif
 
 		float sampleTime = 0.f;
 
-		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
-
 		bool bIsLightsTurn = lightsDivider.process();
 
-		// Only update knobs / lights every 16 samples.
+		// Update knobs / lights every 16 samples only.
 		if (bIsLightsTurn) {
-			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
+			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
 			sampleTime = args.sampleTime * kLightsFrequency;
 
 			pollSwitches(args, sampleTime);
 			pollPots();
 			updateOleds();
 
+#ifndef METAMODULE
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
+#endif
 		}
 
 		mortuus::ProcessorFunctions currentFunction = getProcessorFunction();
@@ -196,6 +208,7 @@ struct Mortuus : SanguineModule {
 			saveState();
 		}
 
+#ifndef METAMODULE
 		if (bHasExpander) {
 			bWasExpanderConnected = true;
 
@@ -321,6 +334,7 @@ struct Mortuus : SanguineModule {
 				}
 			}
 		}
+#endif
 
 		if (drbOutputBuffer.empty()) {
 			while (renderBlock != ioBlock) {
@@ -373,7 +387,6 @@ struct Mortuus : SanguineModule {
 			dsp::Frame<apicesCommon::kChannelCount> frame = drbOutputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
-			// TODO: Check the output values against an actual device.
 			outputs[OUTPUT_OUT_1].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
 			outputs[OUTPUT_OUT_2].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
@@ -679,7 +692,7 @@ struct Mortuus : SanguineModule {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
-			// Ibid
+			// Ibid.
 			else if (editMode == apicesCommon::EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
@@ -763,6 +776,7 @@ struct Mortuus : SanguineModule {
 
 	}
 
+#ifndef METAMODULE
 	void setExpanderChannel1Lights(Module* ansaExpander, bool lightIsOn) {
 		Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
 		Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
@@ -845,6 +859,7 @@ struct Mortuus : SanguineModule {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
 		}
 	}
+#endif
 
 	json_t* dataToJson() override {
 		saveState();
@@ -932,6 +947,7 @@ struct Mortuus : SanguineModule {
 		}
 	}
 
+#ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
 		if (bHasExpander) {
 			Module* ansaExpander = getRightExpander().module;
@@ -979,6 +995,7 @@ struct Mortuus : SanguineModule {
 			bWasExpanderConnected = false;
 		}
 	}
+#endif
 };
 
 struct MortuusWidget : SanguineModuleWidget {
@@ -996,7 +1013,9 @@ struct MortuusWidget : SanguineModuleWidget {
 		FramebufferWidget* mortuusFramebuffer = new FramebufferWidget();
 		addChild(mortuusFramebuffer);
 
+#ifndef METAMODULE
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Mortuus::LIGHT_EXPANDER));
+#endif
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		mortuusFramebuffer->addChild(displayChannel1);
@@ -1061,17 +1080,19 @@ struct MortuusWidget : SanguineModuleWidget {
 		mortuusFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = mortuus::knobLabelsTwinMode[0].knob4;
 
+#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
 		addChild(mutantsLogo);
+#endif
 
 		if (module) {
-			#ifdef METAMODULE
+#ifdef METAMODULE
 			module->displayText1 = mortuus::modeLabels[0];
 			module->displayText2 = mortuus::modeLabels[0];
-			#endif
+#endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;
 			oledDisplay1->oledText = &module->oledText1;
@@ -1089,6 +1110,7 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &mortuus->bSnapMode));
 
+#ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
 		const Module* expander = mortuus->rightExpander.module;
 		if (expander && expander->model == modelAnsa) {
@@ -1098,6 +1120,7 @@ struct MortuusWidget : SanguineModuleWidget {
 				mortuus->addExpander(modelAnsa, this);
 				}));
 		}
+#endif
 	}
 };
 

@@ -6,10 +6,15 @@
 #include "peaks/processors.h"
 
 #include "apices.hpp"
+#ifndef METAMODULE
 #include "nix.hpp"
+#endif
 
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+/* TODO: MetaModule has no expander support at the moment, if it is ever implemented,
+   restore expander code! (helpfully surrounded by ifdefs/ifndefs) */
 
 struct Apices : SanguineModule {
 	enum ParamIds {
@@ -48,7 +53,9 @@ struct Apices : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
+#ifndef metamodule
 		LIGHT_EXPANDER,
+#endif
 		LIGHTS_COUNT
 	};
 
@@ -61,10 +68,12 @@ struct Apices : SanguineModule {
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
+#ifndef METAMODULE
 	bool bHasExpander = false;
 	bool bWasExpanderConnected = false;
+#endif
 
-	// update descriptions/oleds every 16 samples
+	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
 
 	int32_t adcLp[apicesCommon::kAdcChannelCount] = {};
@@ -156,24 +165,27 @@ struct Apices : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+#ifndef METAMODULE
 		Module* nixExpander = getRightExpander().module;
+		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
+#endif
 
 		float sampleTime = 0.f;
 
-		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
-
 		bool bIsLightsTurn = lightsDivider.process();
 
-		// Only update knobs / lights every 16 samples.
+		// Update knobs / lights / displays every 16 samples only.
 		if (bIsLightsTurn) {
-			// For refreshLeds(): it is only updated every n samples, for correct light smoothing.
+			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
 			sampleTime = args.sampleTime * kLightsFrequency;
 
 			pollSwitches(args, sampleTime);
 			pollPots();
 			updateOleds();
 
+#ifndef METAMODULE
 			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
+#endif
 		}
 
 		apices::ProcessorFunctions currentFunction = getProcessorFunction();
@@ -183,6 +195,7 @@ struct Apices : SanguineModule {
 			saveState();
 		}
 
+#ifndef METAMODULE
 		if (bHasExpander) {
 			bWasExpanderConnected = true;
 
@@ -308,6 +321,7 @@ struct Apices : SanguineModule {
 				}
 			}
 		}
+#endif
 
 		if (drbOutputBuffer.empty()) {
 			while (renderBlock != ioBlock) {
@@ -359,7 +373,6 @@ struct Apices : SanguineModule {
 			dsp::Frame<apicesCommon::kChannelCount> frame = drbOutputBuffer.shift();
 
 			// Peaks manual says output spec is 0..8V for envelopes and 10Vpp for audio/CV.
-			// TODO: Check the output values against an actual device.
 			outputs[OUTPUT_OUT_1].setVoltage(rescale(static_cast<float>(frame.samples[0]), 0.f, 65535.f, -8.f, 8.f));
 			outputs[OUTPUT_OUT_2].setVoltage(rescale(static_cast<float>(frame.samples[1]), 0.f, 65535.f, -8.f, 8.f));
 		}
@@ -652,7 +665,7 @@ struct Apices : SanguineModule {
 					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
 				}
 			}
-			// Ibid
+			// Ibid.
 			else if (editMode == apicesCommon::EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
@@ -735,6 +748,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
+#ifndef METAMODULE
 	void setExpanderChannel1Lights(Module* nixExpander, bool lightIsOn) {
 		Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
 		Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
@@ -815,6 +829,7 @@ struct Apices : SanguineModule {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightnessSmooth(lightIsOn, sampleTime);
 		}
 	}
+#endif
 
 	json_t* dataToJson() override {
 		saveState();
@@ -902,6 +917,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
+#ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
 		if (bHasExpander) {
 			Module* nixExpander = getRightExpander().module;
@@ -949,6 +965,7 @@ struct Apices : SanguineModule {
 			bWasExpanderConnected = false;
 		}
 	}
+#endif
 };
 
 struct ApicesWidget : SanguineModuleWidget {
@@ -966,7 +983,9 @@ struct ApicesWidget : SanguineModuleWidget {
 		FramebufferWidget* apicesFramebuffer = new FramebufferWidget();
 		addChild(apicesFramebuffer);
 
+#ifndef METAMODULE
 		addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(109.052, 5.573), module, Apices::LIGHT_EXPANDER));
+#endif
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFramebuffer->addChild(displayChannel1);
@@ -1031,17 +1050,19 @@ struct ApicesWidget : SanguineModuleWidget {
 		apicesFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = apices::knobLabelsTwinMode[0].knob4;
 
+#ifndef METAMODULE
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
 		addChild(mutantsLogo);
 
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
+#endif
 
 		if (module) {
-			#ifdef METAMODULE
+#ifdef METAMODULE
 			module->displayText1 = apices::modeLabels[0];
 			module->displayText2 = apices::modeLabels[0];
-			#endif
+#endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;
 			oledDisplay1->oledText = &module->oledText1;
@@ -1059,6 +1080,7 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("Knob pickup (snap)", "", &apices->bSnapMode));
 
+#ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
 		const Module* expander = apices->rightExpander.module;
 		if (expander && expander->model == modelNix) {
@@ -1068,6 +1090,7 @@ struct ApicesWidget : SanguineModuleWidget {
 				apices->addExpander(modelNix, this);
 				}));
 		}
+#endif
 	}
 };
 

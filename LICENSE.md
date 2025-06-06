@@ -5,4 +5,4 @@ The **panel graphics** and **logos** in the `res/` folder are copyright © Blood
 The component graphics in the `res/components/` directory are copyright © VCV, modified by Bloodbat and licensed under CC BY-NC 4.0. Non-commercial use is allowed with appropriate credit and indication of the original license.
 
 **Dependencies** included in the binary distributable may have other licenses.
-See [LICENSE-dist.txt](LICENSE-dist.txt) for a full list.
+See [LICENSE-dist.md](LICENSE-dist.md) for a full list.

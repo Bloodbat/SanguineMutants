@@ -3,15 +3,9 @@ FLAGS += \
 	-DBRAIDS_LFO_FIX \
 	-I./eurorack \
 	-I./alt_firmware \
-	-I./pcgcpp \
+	-I./SanguineModulesCommon/pcgcpp \
 	-I./SanguineModulesCommon/src \
 	-Wno-unused-local-typedefs
-
-ifndef DEBUGBUILD
-EXTRA_FLAGS =
-else
-EXTRA_FLAGS = -Og
-endif
 
 SOURCES += $(wildcard src/*.cpp)
 
@@ -161,4 +155,5 @@ include $(RACK_DIR)/plugin.mk
 ifdef DEBUGBUILD
 FLAGS := $(filter-out -O3,$(FLAGS))
 FLAGS := $(filter-out -funsafe-math-optimizations,$(FLAGS))
+FLAGS += -Og
 endif

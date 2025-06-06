@@ -20,6 +20,7 @@ struct MutantsBlankWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+#ifndef METAMODULE
 		SanguineShapedLight* mutantsLight = new SanguineShapedLight(module, "res/mutants_glowy_blank.svg", 25.914, 51.81);
 		addChild(mutantsLight);
 
@@ -28,6 +29,7 @@ struct MutantsBlankWidget : SanguineModuleWidget {
 
 		SanguineShapedLight* sanguineLogo = new SanguineShapedLight(module, "res/sanguine_lit_blank.svg", 29.204, 113.209);
 		addChild(sanguineLogo);
+#endif
 	}
 };
 
