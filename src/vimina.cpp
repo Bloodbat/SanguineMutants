@@ -177,7 +177,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
 		for (int channel = 0; channel < channelCount; ++channel) {
-			tmrModuleClock[channel] += 1;
+			++tmrModuleClock[channel];
 			bool bIsTrigger = false;
 
 			if (bIsClockConnected) {
@@ -188,7 +188,7 @@ struct Vimina : SanguineModule {
 					pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel];
 					pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel];
 					if (pulseTrackerRecordedCounts[channel] < kPulseTrackerBufferSize) {
-						pulseTrackerRecordedCounts[channel] += 1;
+						++pulseTrackerRecordedCounts[channel];
 					}
 					bIsTrigger = true;
 				}
