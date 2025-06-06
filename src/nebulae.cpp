@@ -445,7 +445,6 @@ struct Nebulae : SanguineModule {
 			}
 
 			float lightBrightness = 0.f;
-			int currentLight = 0;
 			switch (ledMode) {
 			case cloudyCommon::LEDS_INPUT:
 			case cloudyCommon::LEDS_OUTPUT:
@@ -464,7 +463,7 @@ struct Nebulae : SanguineModule {
 			case cloudyCommon::LEDS_MOMENTARY:
 				for (int light = 0; light < 4; ++light) {
 					float value = params[PARAM_BLEND + light].getValue();
-					currentLight = LIGHT_BLEND + light * 2;
+					int currentLight = LIGHT_BLEND + light * 2;
 					lights[currentLight + 0].setBrightness(value <= 0.66f ?
 						math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
 					lights[currentLight + 1].setBrightness(value >= 0.33f ?
@@ -489,7 +488,7 @@ struct Nebulae : SanguineModule {
 
 			case cloudyCommon::LEDS_MODE_MOMENTARY:
 				for (int light = 0; light < clouds::PLAYBACK_MODE_LAST; ++light) {
-					currentLight = LIGHT_BLEND + light * 2;
+					int currentLight = LIGHT_BLEND + light * 2;
 
 					lights[currentLight + 0].setBrightness(playbackMode == light ? 1.f : 0.f);
 					lights[currentLight + 1].setBrightness(playbackMode == light ? 1.f : 0.f);
