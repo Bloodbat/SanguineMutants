@@ -501,13 +501,17 @@ struct Fluctus : SanguineModule {
 
 			case cloudyCommon::LEDS_QUALITY_MOMENTARY:
 				lights[LIGHT_BLEND].setBrightness(0.f);
-				lights[LIGHT_BLEND + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
+				lights[LIGHT_BLEND + 1].setBrightness(static_cast<bool>(params[PARAM_HI_FI].getValue()) &&
+					static_cast<bool>(params[PARAM_STEREO].getValue()));
 				lights[LIGHT_SPREAD].setBrightness(0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness((params[PARAM_HI_FI].getValue() > 0 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
+				lights[LIGHT_SPREAD + 1].setBrightness(static_cast<bool>(params[PARAM_HI_FI].getValue()) &&
+					!(static_cast<bool>(params[PARAM_STEREO].getValue())));
 				lights[LIGHT_FEEDBACK].setBrightness(0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() > 0) ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK + 1].setBrightness(!(static_cast<bool>(params[PARAM_HI_FI].getValue())) &&
+					static_cast<bool>(params[PARAM_STEREO].getValue()));
 				lights[LIGHT_REVERB].setBrightness(0.f);
-				lights[LIGHT_REVERB + 1].setBrightness((params[PARAM_HI_FI].getValue() < 1 && params[PARAM_STEREO].getValue() < 1) ? 1.f : 0.f);
+				lights[LIGHT_REVERB + 1].setBrightness(!(static_cast<bool>(params[PARAM_HI_FI].getValue())) &&
+					!(static_cast<bool>(params[PARAM_STEREO].getValue())));
 				break;
 
 
