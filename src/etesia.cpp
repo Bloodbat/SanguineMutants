@@ -473,6 +473,7 @@ struct Etesia : SanguineModule {
 				bDisplaySwitched = bLastFrozen;
 			}
 
+			float lightBrightness = 0.f;
 			switch (ledMode) {
 			case cloudyCommon::LEDS_INPUT:
 			case cloudyCommon::LEDS_OUTPUT:
@@ -480,8 +481,9 @@ struct Etesia : SanguineModule {
 				lights[LIGHT_BLEND + 1].setBrightness(0.f);
 				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
 				lights[LIGHT_SPREAD + 1].setBrightness(0.f);
-				lights[LIGHT_FEEDBACK].setBrightness(vuMeter.getBrightness(-12.f, -6.f));
-				lights[LIGHT_FEEDBACK + 1].setBrightness(vuMeter.getBrightness(-12.f, -6.f));
+				lightBrightness = vuMeter.getBrightness(-12.f, -6.f);
+				lights[LIGHT_FEEDBACK].setBrightness(lightBrightness);
+				lights[LIGHT_FEEDBACK + 1].setBrightness(lightBrightness);
 				lights[LIGHT_REVERB].setBrightness(0.f);
 				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
 				break;
