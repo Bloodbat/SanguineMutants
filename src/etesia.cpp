@@ -516,14 +516,20 @@ struct Etesia : SanguineModule {
 				break;
 
 			case cloudyCommon::LEDS_MODE_MOMENTARY:
-				lights[LIGHT_BLEND].setBrightness(playbackMode == 0 || playbackMode == 5 ? 1.f : 0.f);
-				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == 0 || playbackMode == 5 ? 1.f : 0.f);
-				lights[LIGHT_SPREAD].setBrightness(playbackMode == 1 || playbackMode == 4 ? 1.f : 0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness(playbackMode == 1 || playbackMode == 4 ? 1.f : 0.f);
-				lights[LIGHT_FEEDBACK].setBrightness(playbackMode == 2 || playbackMode > 3 ? 1.f : 0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(playbackMode == 2 || playbackMode > 3 ? 1.f : 0.f);
-				lights[LIGHT_REVERB].setBrightness(playbackMode >= 3 ? 1.f : 0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(playbackMode >= 3 ? 1.f : 0.f);
+				lights[LIGHT_BLEND].setBrightness(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
+					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR ? 1.f : 0.f);
+				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
+					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR ? 1.f : 0.f);
+				lights[LIGHT_SPREAD].setBrightness(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
+					playbackMode == etesia::PLAYBACK_MODE_OLIVERB ? 1.f : 0.f);
+				lights[LIGHT_SPREAD + 1].setBrightness(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
+					playbackMode == etesia::PLAYBACK_MODE_OLIVERB ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK].setBrightness(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
+					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
+				lights[LIGHT_FEEDBACK + 1].setBrightness(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
+					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
+				lights[LIGHT_REVERB].setBrightness(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
+				lights[LIGHT_REVERB + 1].setBrightness(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
 				break;
 			}
 
