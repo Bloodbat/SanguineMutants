@@ -486,8 +486,8 @@ struct Nebulae : SanguineModule {
 				for (int light = 0; light < clouds::PLAYBACK_MODE_LAST; ++light) {
 					int currentLight = LIGHT_BLEND + light * 2;
 
-					lights[currentLight + 0].setBrightness(playbackMode == light ? 1.f : 0.f);
-					lights[currentLight + 1].setBrightness(playbackMode == light ? 1.f : 0.f);
+					lights[currentLight + 0].setBrightness(static_cast<float>(playbackMode == light));
+					lights[currentLight + 1].setBrightness(static_cast<float>(playbackMode == light));
 				}
 				break;
 			}
