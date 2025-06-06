@@ -516,18 +516,18 @@ struct Fluctus : SanguineModule {
 
 
 			case cloudyCommon::LEDS_MODE_MOMENTARY:
-				lights[LIGHT_BLEND].setBrightness(playbackMode == fluctus::PLAYBACK_MODE_GRANULAR ||
-					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY ? 1.f : 0.f);
-				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == fluctus::PLAYBACK_MODE_GRANULAR ||
-					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY ? 1.f : 0.f);
-				lights[LIGHT_SPREAD].setBrightness(playbackMode == fluctus::PLAYBACK_MODE_STRETCH ||
-					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY ? 1.f : 0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness(playbackMode == fluctus::PLAYBACK_MODE_STRETCH ||
-					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY ? 1.f : 0.f);
-				lights[LIGHT_FEEDBACK].setBrightness(playbackMode >= fluctus::PLAYBACK_MODE_LOOPING_DELAY ? 1.f : 0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(playbackMode >= fluctus::PLAYBACK_MODE_LOOPING_DELAY ? 1.f : 0.f);
-				lights[LIGHT_REVERB].setBrightness(playbackMode == fluctus::PLAYBACK_MODE_KAMMERL ? 1.f : 0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(playbackMode == fluctus::PLAYBACK_MODE_KAMMERL ? 1.f : 0.f);
+				lights[LIGHT_BLEND].setBrightness(static_cast<float>(playbackMode == fluctus::PLAYBACK_MODE_GRANULAR ||
+					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY));
+				lights[LIGHT_BLEND + 1].setBrightness(static_cast<float>(playbackMode == fluctus::PLAYBACK_MODE_GRANULAR ||
+					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY));
+				lights[LIGHT_SPREAD].setBrightness(static_cast<float>(playbackMode == fluctus::PLAYBACK_MODE_STRETCH ||
+					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY));
+				lights[LIGHT_SPREAD + 1].setBrightness(static_cast<float>(playbackMode == fluctus::PLAYBACK_MODE_STRETCH ||
+					playbackMode > fluctus::PLAYBACK_MODE_LOOPING_DELAY));
+				lights[LIGHT_FEEDBACK].setBrightness(static_cast<float>(playbackMode >= fluctus::PLAYBACK_MODE_LOOPING_DELAY));
+				lights[LIGHT_FEEDBACK + 1].setBrightness(static_cast<float>(playbackMode >= fluctus::PLAYBACK_MODE_LOOPING_DELAY));
+				lights[LIGHT_REVERB].setBrightness(static_cast<float>(playbackMode == fluctus::PLAYBACK_MODE_KAMMERL));
+				lights[LIGHT_REVERB + 1].setBrightness(static_cast<float>(playbackMode == fluctus::PLAYBACK_MODE_KAMMERL));
 				break;
 			}
 

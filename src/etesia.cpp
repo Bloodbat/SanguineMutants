@@ -525,20 +525,20 @@ struct Etesia : SanguineModule {
 				break;
 
 			case cloudyCommon::LEDS_MODE_MOMENTARY:
-				lights[LIGHT_BLEND].setBrightness(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
-					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR ? 1.f : 0.f);
-				lights[LIGHT_BLEND + 1].setBrightness(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
-					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR ? 1.f : 0.f);
-				lights[LIGHT_SPREAD].setBrightness(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
-					playbackMode == etesia::PLAYBACK_MODE_OLIVERB ? 1.f : 0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
-					playbackMode == etesia::PLAYBACK_MODE_OLIVERB ? 1.f : 0.f);
-				lights[LIGHT_FEEDBACK].setBrightness(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
-				lights[LIGHT_REVERB].setBrightness(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL ? 1.f : 0.f);
+				lights[LIGHT_BLEND].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
+					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR));
+				lights[LIGHT_BLEND + 1].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
+					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR));
+				lights[LIGHT_SPREAD].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
+					playbackMode == etesia::PLAYBACK_MODE_OLIVERB));
+				lights[LIGHT_SPREAD + 1].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
+					playbackMode == etesia::PLAYBACK_MODE_OLIVERB));
+				lights[LIGHT_FEEDBACK].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
+					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL));
+				lights[LIGHT_FEEDBACK + 1].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
+					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL));
+				lights[LIGHT_REVERB].setBrightness(static_cast<float>(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL));
+				lights[LIGHT_REVERB + 1].setBrightness(static_cast<float>(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL));
 				break;
 			}
 
