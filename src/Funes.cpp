@@ -586,7 +586,7 @@ struct Funes : SanguineModule {
 
 		funes::customDataDir = system::getDirectory(filePath);
 		loadCustomData(filePath);
-#else
+#else // USING_CARDINAL_NOT_RACK
 		async_dialog_filebrowser(false, nullptr, funes::customDataDir.empty() ?
 			nullptr : funes::customDataDir.c_str(), "Load custom data .bin file", [this](char* dialogFilePath) {
 				if (dialogFilePath == nullptr) {
@@ -601,7 +601,7 @@ struct Funes : SanguineModule {
 				loadCustomData(filePath);
 			});
 #endif
-#endif
+#endif // METAMODULE
 	}
 
 	void setEngine(int newModelNum) {
