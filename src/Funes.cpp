@@ -7,8 +7,10 @@
 #ifndef METAMODULE
 #include "osdialog.h"
 #include <fstream>
-#endif
 #include <thread>
+#else
+#include "async_filebrowser.hh"
+#endif
 
 #include "plaits/dsp/voice.h"
 #include "plaits/user_data.h"
@@ -540,12 +542,14 @@ struct Funes : SanguineModule {
 	}
 
 	void loadCustomData(const std::string& filePath) {
-#ifndef METAMODULE
 		bIsLoading = true;
 		DEFER({ bIsLoading = false; });
 		// HACK: Sleep 100us so DSP thread is likely to finish processing before we resize the vector.
+#ifndef METAMODULE
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
-
+#else
+		// delay_ms(1);
+#endif
 		std::string fileExtension = string::lowercase(system::getExtension(filePath));
 
 		if (fileExtension == ".bin") {
@@ -563,7 +567,6 @@ struct Funes : SanguineModule {
 				errorTimeOut = 4;
 			}
 		}
-#endif
 	}
 
 	void showCustomDataLoadDialog() {
@@ -600,6 +603,23 @@ struct Funes : SanguineModule {
 				loadCustomData(filePath);
 			});
 #endif
+#else
+		// TODO: this needs testing!
+		osdialog_filters* filters = osdialog_filters_parse(funes::CUSTOM_DATA_FILENAME_FILTERS);
+
+		DEFER({ osdialog_filters_free(filters); });
+
+		async_osdialog_file(OSDIALOG_OPEN, funes::customDataDir.empty() ? NULL : funes::customDataDir.c_str(), NULL, filters, [this](char* dialogFilePath) {
+			if (!dialogFilePath) {
+				errorTimeOut = 4;
+				return;
+			}
+			const std::string filePath = dialogFilePath;
+			std::free(dialogFilePath);
+
+			funes::customDataDir = system::getDirectory(filePath);
+			loadCustomData(filePath);
+			});
 #endif // METAMODULE
 	}
 
@@ -624,6 +644,8 @@ struct Funes : SanguineModule {
 		// Try to wait for DSP to finish.
 #ifndef METAMODULE
 		std::this_thread::sleep_for(std::chrono::duration<double>(100e-6));
+#else
+		// delay_ms(1);
 #endif
 	}
 
@@ -806,11 +828,9 @@ struct FunesWidget : SanguineModuleWidget {
 
 				int engineNum = module->patch.engine;
 				if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
-#ifndef METAMODULE
 					menu->addChild(createMenuItem("Load...", "", [=]() {
 						module->showCustomDataLoadDialog();
 						}));
-#endif
 
 					menu->addChild(createMenuItem("Reset to factory default", "", [=]() {
 						module->resetCustomData();
