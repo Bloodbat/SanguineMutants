@@ -549,8 +549,7 @@ struct Funes : SanguineModule {
 		std::string fileExtension = string::lowercase(system::getExtension(filePath));
 
 		if (fileExtension == ".bin") {
-			std::ifstream input(filePath, std::ios::binary);
-			std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
+			std::vector<uint8_t> buffer = system::readFile(filePath);
 			uint8_t* dataBuffer = buffer.data();
 			bool success = userData.Save(dataBuffer, patch.engine);
 			if (success) {
@@ -581,7 +580,7 @@ struct Funes : SanguineModule {
 			return;
 		}
 
-		std::string filePath = dialogFilePath;
+		const std::string filePath = dialogFilePath;
 		std::free(dialogFilePath);
 
 		funes::customDataDir = system::getDirectory(filePath);
