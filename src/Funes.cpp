@@ -571,6 +571,9 @@ struct Funes : SanguineModule {
 #ifndef METAMODULE
 #ifndef USING_CARDINAL_NOT_RACK
 		osdialog_filters* filters = osdialog_filters_parse(funes::CUSTOM_DATA_FILENAME_FILTERS);
+
+		DEFER({ osdialog_filters_free(filters); });
+
 		char* dialogFilePath = osdialog_file(OSDIALOG_OPEN, funes::customDataDir.empty() ? NULL : funes::customDataDir.c_str(), NULL, filters);
 
 		if (!dialogFilePath) {
