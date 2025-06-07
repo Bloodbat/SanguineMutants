@@ -802,9 +802,11 @@ struct FunesWidget : SanguineModuleWidget {
 
 				int engineNum = module->patch.engine;
 				if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
+#ifndef METAMODULE
 					menu->addChild(createMenuItem("Load...", "", [=]() {
 						module->showCustomDataLoadDialog();
 						}));
+#endif
 
 					menu->addChild(createMenuItem("Reset to factory default", "", [=]() {
 						module->resetCustomData();
