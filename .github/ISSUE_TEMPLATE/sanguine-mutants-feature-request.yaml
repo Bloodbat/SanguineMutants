@@ -14,6 +14,7 @@ body:
     label: Proposed change or addition
     description: Describe clearly and concisely what you want the plugin to do or the behavior improvements you would like to see.
     placeholder: I want the plugin to run Doom!
+    render: markdown
   validations:
     required: true
 
