@@ -524,6 +524,10 @@ struct Funes : SanguineModule {
 				const uint8_t* userDataBuffer = &userDataVector[0];
 				userData.setBuffer(userDataBuffer);
 				if (userDataBuffer[kMaxUserDataSize - 2] == 'U') {
+					for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+						voices[channel].ReloadUserData();
+					}
+
 					resetCustomDataStates();
 					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = funes::DataCustom;
 				}
