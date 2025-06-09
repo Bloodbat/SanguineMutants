@@ -152,12 +152,20 @@ namespace deadman {
 			return number_station_;
 		}
 
-		inline uint32_t getPhaseIncrement() {
+		inline uint32_t getLFOPhaseIncrement() {
 			return lfo_.getPhaseIncrement();
 		}
 
-		inline void setPhaseIncrement(const int32_t newPhaseIncrement) {
+		inline void setLFOPhaseIncrement(const int32_t newPhaseIncrement) {
 			lfo_.setPhaseIncrement(newPhaseIncrement);
+		}
+
+		inline uint32_t getPLOPhaseIncrement() {
+			return plo_.getPhaseIncrement();
+		}
+
+		inline void setPLOPhaseIncrement(const int32_t newPhaseIncrement) {
+			plo_.setPhaseIncrement(newPhaseIncrement);
 		}
 
 	private:
