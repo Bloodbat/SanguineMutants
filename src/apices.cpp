@@ -80,7 +80,7 @@ struct Apices : SanguineModule {
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = {};
 	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = {};
 
-	peaks::Processors processors[apicesCommon::kAdcChannelCount] = {};
+	peaks::Processors processors[apicesCommon::kChannelCount] = {};
 
 	int16_t output[apicesCommon::kBlockSize] = {};
 	int16_t brightness[apicesCommon::kChannelCount] = {};
@@ -522,6 +522,7 @@ struct Apices : SanguineModule {
 				processSwitch(apicesCommon::SWITCH_TWIN_MODE + button);
 			}
 		}
+
 		refreshLeds(args, sampleTime);
 	}
 
