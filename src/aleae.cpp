@@ -146,8 +146,8 @@ struct Aleae : SanguineModule {
 
 				const float sampleTime = args.sampleTime * kLightFrequency;
 				int currentLight = LIGHTS_STATE + section * 2;
-				lights[currentLight + 1].setSmoothBrightness(bIsLightAActive, sampleTime);
-				lights[currentLight + 0].setSmoothBrightness(bIsLightBActive, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(bIsLightAActive, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(bIsLightBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + section * 2;
 				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
