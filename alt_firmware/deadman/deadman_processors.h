@@ -152,6 +152,14 @@ namespace deadman {
 			return number_station_;
 		}
 
+		inline uint32_t getPhaseIncrement() {
+			return lfo_.getPhaseIncrement();
+		}
+
+		inline void setPhaseIncrement(const int32_t newPhaseIncrement) {
+			lfo_.setPhaseIncrement(newPhaseIncrement);
+		}
+
 	private:
 		void Configure() {
 			(this->*callbacks_.configure_fn)(&parameter_[0], control_mode_);

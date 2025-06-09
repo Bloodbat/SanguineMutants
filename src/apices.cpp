@@ -847,6 +847,13 @@ struct Apices : SanguineModule {
 		}
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
+		if (settings.processorFunctions[0] == apices::FUNCTION_TAP_LFO) {
+			setJsonInt(rootJ, "tapLFO0", processors[0].getPhaseIncrement());
+		}
+
+		if (settings.processorFunctions[1] == apices::FUNCTION_TAP_LFO) {
+			setJsonInt(rootJ, "tapLFO1", processors[1].getPhaseIncrement());
+		}
 		return rootJ;
 	}
 
@@ -881,6 +888,18 @@ struct Apices : SanguineModule {
 		// Update module internal state from settings.
 		init();
 		saveState();
+
+		if (settings.processorFunctions[0] == apices::FUNCTION_TAP_LFO) {
+			if (getJsonInt(rootJ, "tapLFO0", intValue)) {
+				processors[0].setPhaseIncrement(intValue);
+			}
+		}
+
+		if (settings.processorFunctions[1] == apices::FUNCTION_TAP_LFO) {
+			if (getJsonInt(rootJ, "tapLFO1", intValue)) {
+				processors[1].setPhaseIncrement(intValue);
+			}
+		}
 	}
 
 	inline Slice NextSlice(size_t size) {
