@@ -14,6 +14,8 @@
 
 - Apices family: tap lfo tempo values are now saved to and restored from patches and presets.
 
+- Mortuus: PLO phase values are now saved to and restored from patches and presets.
+
 - Nodi family: display channel also affects the big knob's light.
 
 ## Changes
