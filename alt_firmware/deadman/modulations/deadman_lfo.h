@@ -469,17 +469,17 @@ namespace deadman {
 			parameter_ = parameter;
 		}
 
-		// inline void set_reset_phase(int16_t reset_phase) {
-		//   reset_phase_ = static_cast<int32_t>(reset_phase) << 16;
-		// }
-
 		inline void set_level(uint16_t level) {
 			level_ = level >> 1;
 		}
 
-		// inline void set_mod_type(bool mod_type) {
-		//   random_mod_ = mod_type;
-		// }
+		inline uint32_t getPhaseIncrement() const {
+			return phase_increment_;
+		}
+
+		inline void setPhaseIncrement(const uint32_t newPhaseIncrement) {
+			phase_increment_ = newPhaseIncrement;
+		}
 
 	private:
 		int16_t ComputeSampleFoldedSine();
