@@ -6,6 +6,8 @@
 
 - Funes: custom data not loading under certain conditions.
 
+- Mortuus: button lights.
+
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
 
 ## Additions
