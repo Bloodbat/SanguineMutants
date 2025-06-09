@@ -877,11 +877,19 @@ struct Mortuus : SanguineModule {
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
 		if (settings.processorFunctions[0] == mortuus::FUNCTION_TAP_LFO) {
-			setJsonInt(rootJ, "tapLFO0", processors[0].getPhaseIncrement());
+			setJsonInt(rootJ, "tapLFO0", processors[0].getLFOPhaseIncrement());
 		}
 
 		if (settings.processorFunctions[1] == mortuus::FUNCTION_TAP_LFO) {
-			setJsonInt(rootJ, "tapLFO1", processors[1].getPhaseIncrement());
+			setJsonInt(rootJ, "tapLFO1", processors[1].getLFOPhaseIncrement());
+		}
+
+		if (settings.processorFunctions[0] == mortuus::FUNCTION_PHASE_LOCKED_OSCILLATOR) {
+			setJsonInt(rootJ, "tapPLO0", processors[0].getPLOPhaseIncrement());
+		}
+
+		if (settings.processorFunctions[1] == mortuus::FUNCTION_PHASE_LOCKED_OSCILLATOR) {
+			setJsonInt(rootJ, "tapPLO1", processors[1].getPLOPhaseIncrement());
 		}
 
 		return rootJ;
@@ -921,13 +929,25 @@ struct Mortuus : SanguineModule {
 
 		if (settings.processorFunctions[0] == mortuus::FUNCTION_TAP_LFO) {
 			if (getJsonInt(rootJ, "tapLFO0", intValue)) {
-				processors[0].setPhaseIncrement(intValue);
+				processors[0].setLFOPhaseIncrement(intValue);
 			}
 		}
 
 		if (settings.processorFunctions[1] == mortuus::FUNCTION_TAP_LFO) {
 			if (getJsonInt(rootJ, "tapLFO1", intValue)) {
-				processors[1].setPhaseIncrement(intValue);
+				processors[1].setLFOPhaseIncrement(intValue);
+			}
+		}
+
+		if (settings.processorFunctions[0] == mortuus::FUNCTION_PHASE_LOCKED_OSCILLATOR) {
+			if (getJsonInt(rootJ, "tapPLO0", intValue)) {
+				processors[0].setPLOPhaseIncrement(intValue);
+			}
+		}
+
+		if (settings.processorFunctions[1] == mortuus::FUNCTION_PHASE_LOCKED_OSCILLATOR) {
+			if (getJsonInt(rootJ, "tapPLO1", intValue)) {
+				processors[1].setPLOPhaseIncrement(intValue);
 			}
 		}
 	}
