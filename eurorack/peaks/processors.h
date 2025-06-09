@@ -130,6 +130,14 @@ namespace peaks {
       return number_station_;
     }
 
+    inline uint32_t getPhaseIncrement() {
+      return lfo_.getPhaseIncrement();
+    }
+
+    inline void setPhaseIncrement(const int32_t newPhaseIncrement) {
+      lfo_.setPhaseIncrement(newPhaseIncrement);
+    }
+
   private:
     void Configure() {
       if (function_ == PROCESSOR_FUNCTION_SNARE_DRUM || function_ == PROCESSOR_FUNCTION_HIGH_HAT) {
