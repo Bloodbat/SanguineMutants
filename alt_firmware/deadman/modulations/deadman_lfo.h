@@ -132,6 +132,14 @@ namespace deadman {
 			level_ = level >> 1;
 		}
 
+		inline uint32_t getPhaseIncrement() const {
+			return phase_increment_;
+		}
+
+		inline void setPhaseIncrement(const uint32_t newPhaseIncrement) {
+			phase_increment_ = newPhaseIncrement;
+		}
+
 	private:
 		int16_t ComputeSampleSine();
 		int16_t ComputeSampleTriangle();
