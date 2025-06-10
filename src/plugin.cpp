@@ -37,11 +37,14 @@ void init(rack::Plugin* p)
 	p->addModel(modelAestus);
 	p->addModel(modelTemulenti);
 	p->addModel(modelVimina);
+	p->addModel(modelScalaria);
+
+	// MetaModule disabled modules go here!
+
 #ifndef METAMODULE
 	p->addModel(modelNix);
 	p->addModel(modelAnsa);
 #endif
-	p->addModel(modelScalaria);
 
 	sanguineThemes::getDefaultSanguineTheme();
 }
