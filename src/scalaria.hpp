@@ -1,7 +1,12 @@
 #pragma once
 
 namespace scalaria {
-  static const std::vector<std::string> oscillatorNames = { "Off", "Triangle", "Saw", "Square" };
+  static const std::vector<std::string> oscillatorNames = {
+    "Off",
+    "Triangle",
+    "Saw",
+    "Square"
+  };
 
   static const uint8_t paletteFrequencies[10][3] = {
     { 255, 0, 0 },
