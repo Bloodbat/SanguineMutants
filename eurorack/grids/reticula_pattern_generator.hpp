@@ -108,11 +108,8 @@ namespace reticula {
         void setRandomness(float randomness);
         void setPatternMode(PatternGeneratorModes mode);
 
-        uint8_t getAllStates() const;
         uint8_t getDrumState(uint8_t channel) const;
-        PatternGeneratorModes getPatternMode() const;
         uint8_t getBeat() const;
-        uint8_t getEuclideanLength(uint8_t channel);
         bool getFirstBeat();
         bool getClockState() const;
         bool getResetState() const;
