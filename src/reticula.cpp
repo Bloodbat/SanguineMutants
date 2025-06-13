@@ -224,6 +224,8 @@ struct Reticula : SanguineModule {
     }
 
     void process(const ProcessArgs& args) override {
+        using simd::float_4;
+
         bool bIsRunConnected = inputs[INPUT_RUN].isConnected();
 
         if (runMode == reticula::MODE_TRIGGER) {
@@ -302,18 +304,40 @@ struct Reticula : SanguineModule {
                 metronome.process();
             }
 
-            mapX = params[PARAM_MAP_X].getValue() + ((inputs[INPUT_MAP_X].getVoltage() / 5.f) * 255.f);
-            mapX = clamp(mapX, 0.f, 255.f);
-            mapY = params[PARAM_MAP_Y].getValue() + ((inputs[INPUT_MAP_Y].getVoltage() / 5.f) * 255.f);
-            mapY = clamp(mapY, 0.f, 255.f);
-            BDFill = params[PARAM_BD_DENSITY].getValue() + ((inputs[INPUT_FILL_BD].getVoltage() / 5.f) * 255.f);
-            BDFill = clamp(BDFill, 0.f, 255.f);
-            SNFill = params[PARAM_SD_DENSITY].getValue() + ((inputs[INPUT_FILL_SD].getVoltage() / 5.f) * 255.f);
-            SNFill = clamp(SNFill, 0.f, 255.f);
-            HHFill = params[PARAM_HH_DENSITY].getValue() + ((inputs[INPUT_FILL_HH].getVoltage() / 5.f) * 255.f);
-            HHFill = clamp(HHFill, 0.f, 255.f);
-            chaos = params[PARAM_CHAOS].getValue() + ((inputs[INPUT_CHAOS].getVoltage() / 5.f) * 255.f);
-            chaos = clamp(chaos, 0.f, 255.f);
+            float_4 voltagesCV1 = {};
+            float_4 voltagesCV2 = {};
+
+            voltagesCV1[0] = inputs[INPUT_MAP_X].getVoltage();
+            voltagesCV1[1] = inputs[INPUT_MAP_Y].getVoltage();
+            voltagesCV1[2] = inputs[INPUT_FILL_BD].getVoltage();
+            voltagesCV1[1] = inputs[INPUT_FILL_SD].getVoltage();
+
+            voltagesCV2[0] = inputs[INPUT_FILL_HH].getVoltage();
+            voltagesCV2[1] = inputs[INPUT_CHAOS].getVoltage();
+
+            voltagesCV1 /= 5.f;
+            voltagesCV2 /= 5.f;
+
+            voltagesCV1 *= 255.f;
+            voltagesCV2 *= 255.f;
+
+            voltagesCV1[0] += params[PARAM_MAP_X].getValue();
+            voltagesCV1[1] += params[PARAM_MAP_Y].getValue();
+            voltagesCV1[2] += params[PARAM_BD_DENSITY].getValue();
+            voltagesCV1[3] += params[PARAM_SD_DENSITY].getValue();
+
+            voltagesCV2[0] += params[PARAM_HH_DENSITY].getValue();
+            voltagesCV2[1] += params[PARAM_CHAOS].getValue();
+
+            voltagesCV1 = simd::clamp(voltagesCV1, 0.f, 255.f);
+            voltagesCV2 = simd::clamp(voltagesCV2, 0.f, 255.f);
+
+            mapX = voltagesCV1[0];
+            mapY = voltagesCV1[1];
+            BDFill = voltagesCV1[2];
+            SNFill = voltagesCV1[3];
+            HHFill = voltagesCV2[0];
+            chaos = voltagesCV1[1];
 
             if (bUseExternalClock) {
                 if (stClock.process(inputs[INPUT_EXTERNAL_CLOCK].getVoltage())) {
