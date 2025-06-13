@@ -79,7 +79,7 @@ struct Reticula : SanguineModule {
 
     reticula::ExternalClockResolutions extClockResolution = reticula::RESOLUTION_24_PPQN;
 
-    bool advanceStep = false;
+    bool bNeedNextStep = false;
     bool bUseExternalClock = false;
     bool bNeedExternalReset = true;
     bool bIsModuleRunning = false;
@@ -317,14 +317,14 @@ struct Reticula : SanguineModule {
 
             if (bUseExternalClock) {
                 if (stClock.process(inputs[INPUT_EXTERNAL_CLOCK].getVoltage())) {
-                    advanceStep = true;
+                    bNeedNextStep = true;
                 }
             } else if (metronome.hasTicked()) {
-                advanceStep = true;
+                bNeedNextStep = true;
                 ++elapsedTicks;
                 elapsedTicks %= 12;
             } else {
-                advanceStep = false;
+                bNeedNextStep = false;
             }
 
             patternGenerator.setMapX(mapX);
@@ -338,9 +338,9 @@ struct Reticula : SanguineModule {
             patternGenerator.setEuclideanLength(1, mapY);
             patternGenerator.setEuclideanLength(2, chaos);
 
-            bool bDoClock = false;
+            bool bClockPulseRequested = false;
 
-            if (advanceStep) {
+            if (bNeedNextStep) {
                 patternGenerator.tick(tickCount);
                 for (int i = 0; i < kMaxDrumPorts; ++i) {
                     if (patternGenerator.getDrumState(i)) {
@@ -351,7 +351,7 @@ struct Reticula : SanguineModule {
                     }
                 }
 
-                bDoClock = patternGenerator.getClockState();
+                bClockPulseRequested = patternGenerator.getClockState();
 
                 if (patternGenerator.getResetState() && bWantSequencerResets) {
                     pgReset.trigger();
@@ -361,29 +361,29 @@ struct Reticula : SanguineModule {
                 if (sequenceStep >= 32) {
                     sequenceStep = 0;
                 }
-                advanceStep = false;
+                bNeedNextStep = false;
             }
 
             switch (clockOutputSource) {
             case reticula::CLOCK_SOURCE_FIRST_BEAT:
-                bDoClock = bIsModuleRunning && patternGenerator.getFirstBeat();
+                bClockPulseRequested = bIsModuleRunning && patternGenerator.getFirstBeat();
                 break;
 
             case reticula::CLOCK_SOURCE_BEAT:
-                bDoClock = bIsModuleRunning && patternGenerator.getBeat();
+                bClockPulseRequested = bIsModuleRunning && patternGenerator.getBeat();
                 break;
 
             case reticula::CLOCK_SOURCE_PATTERN:
-                bDoClock = bDoClock && bIsModuleRunning;
+                bClockPulseRequested = bClockPulseRequested && bIsModuleRunning;
                 break;
             }
 
-            lights[LIGHT_TAP + 0].setBrightnessSmooth((bDoClock && !bUseTapTempo) || (bDoClock && bUseExternalClock) ?
+            lights[LIGHT_TAP + 0].setBrightnessSmooth((bClockPulseRequested && !bUseTapTempo) || (bClockPulseRequested && bUseExternalClock) ?
                 kSanguineButtonLightValue : 0.f, args.sampleTime);
-            lights[LIGHT_TAP + 1].setBrightnessSmooth((bDoClock && bUseTapTempo) || (bDoClock && bUseExternalClock) ?
+            lights[LIGHT_TAP + 1].setBrightnessSmooth((bClockPulseRequested && bUseTapTempo) || (bClockPulseRequested && bUseExternalClock) ?
                 kSanguineButtonLightValue : 0.f, args.sampleTime);
 
-            if (bDoClock) {
+            if (bClockPulseRequested) {
                 pgClock.trigger();
             }
         }
