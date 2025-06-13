@@ -125,7 +125,7 @@ struct Reticula : SanguineModule {
 
     struct ReticulaKnob : ParamQuantity {
         std::string getDisplayValueString() override {
-            Reticula* moduleReticula = static_cast<Reticula*>(module);
+            const Reticula* moduleReticula = static_cast<Reticula*>(module);
             if (moduleReticula->sequencerMode == reticula::PATTERN_EUCLIDEAN) {
                 int euclidianLength = (static_cast<int>(getValue()) >> 3) + 1;
                 return string::f("%d", euclidianLength);
@@ -135,7 +135,7 @@ struct Reticula : SanguineModule {
         }
 
         std::string getLabel() override {
-            Reticula* moduleReticula = static_cast<Reticula*>(module);
+            const Reticula* moduleReticula = static_cast<Reticula*>(module);
             if (moduleReticula->sequencerMode == reticula::PATTERN_EUCLIDEAN) {
                 return "Length";
             } else {
@@ -144,7 +144,7 @@ struct Reticula : SanguineModule {
         }
 
         std::string getUnit() override {
-            Reticula* moduleReticula = static_cast<Reticula*>(module);
+            const Reticula* moduleReticula = static_cast<Reticula*>(module);
             if (moduleReticula->sequencerMode == reticula::PATTERN_EUCLIDEAN) {
                 return "";
             } else {
@@ -153,7 +153,7 @@ struct Reticula : SanguineModule {
         }
 
         void setDisplayValue(float 	displayValue) override {
-            Reticula* moduleReticula = static_cast<Reticula*>(module);
+            const Reticula* moduleReticula = static_cast<Reticula*>(module);
             if (moduleReticula->sequencerMode == reticula::PATTERN_EUCLIDEAN) {
                 float lengthValue = (static_cast<int>(displayValue) << 3) - 1;
                 setImmediateValue(lengthValue);
