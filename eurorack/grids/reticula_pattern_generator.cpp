@@ -108,7 +108,7 @@ namespace reticula {
     }
 
     uint8_t PatternGenerator::getDrumState(uint8_t channel) const {
-        uint8_t mask[6] = {
+        const uint8_t mask[6] = {
             1,
             2,
             4,
