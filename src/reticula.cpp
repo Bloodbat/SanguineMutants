@@ -106,6 +106,8 @@ struct Reticula : SanguineModule {
     Metronome metronome;
     reticula::PatternGenerator patternGenerator;
 
+    const float kMaxKnobValue = 255.f;
+
     float tempoParam = 120.f;
 
     float swing = 0.5f;
@@ -170,9 +172,9 @@ struct Reticula : SanguineModule {
 
         configParam(PARAM_CLOCK, 40.f, 240.f, 120.f, "Clock", " BPM");
 
-        configParam<ReticulaKnob>(PARAM_MAP_X, 0.f, 255.f, 0.f, "Map X", "%", 0.f, (1.f / 255.f) * 100.f);
-        configParam<ReticulaKnob>(PARAM_MAP_Y, 0.f, 255.f, 0.f, "Map Y", "%", 0.f, (1.f / 255.f) * 100.f);
-        configParam<ReticulaKnob>(PARAM_CHAOS, 0.f, 255.f, 0.f, "Chaos", "%", 0.f, (1.f / 255.f) * 100);
+        configParam<ReticulaKnob>(PARAM_MAP_X, 0.f, kMaxKnobValue, 0.f, "Map X", "%", 0.f, (1.f / kMaxKnobValue) * 100.f);
+        configParam<ReticulaKnob>(PARAM_MAP_Y, 0.f, kMaxKnobValue, 0.f, "Map Y", "%", 0.f, (1.f / kMaxKnobValue) * 100.f);
+        configParam<ReticulaKnob>(PARAM_CHAOS, 0.f, kMaxKnobValue, 0.f, "Chaos", "%", 0.f, (1.f / kMaxKnobValue) * 100);
 
         configButton(PARAM_TAP, "Tap / Reset");
 
@@ -190,9 +192,9 @@ struct Reticula : SanguineModule {
         configSwitch(PARAM_CLOCK_OUTPUT_SOURCE, 0.f, 2.f, 0.f, "Clock output source", reticula::clockOutputSourceLabels);
 
         configParam(PARAM_SWING, 0.f, 9.f, 0.f, "Swing", "%", 0.f, 10.f);
-        configParam(PARAM_BD_DENSITY, 0.f, 255.f, 127.5f, "Bass drum fill rate", "%", 0.f, (1.f / 255.f) * 100.f);
-        configParam(PARAM_SD_DENSITY, 0.f, 255.f, 127.5f, "Snare drum fill rate", "%", 0.f, (1.f / 255.f) * 100.f);
-        configParam(PARAM_HH_DENSITY, 0.f, 255.f, 127.5f, "Hi-hat fill rate", "%", 0.f, (1.f / 255.f) * 100.f);
+        configParam(PARAM_BD_DENSITY, 0.f, kMaxKnobValue, 127.5f, "Bass drum fill rate", "%", 0.f, (1.f / kMaxKnobValue) * 100.f);
+        configParam(PARAM_SD_DENSITY, 0.f, kMaxKnobValue, 127.5f, "Snare drum fill rate", "%", 0.f, (1.f / kMaxKnobValue) * 100.f);
+        configParam(PARAM_HH_DENSITY, 0.f, kMaxKnobValue, 127.5f, "Hi-hat fill rate", "%", 0.f, (1.f / kMaxKnobValue) * 100.f);
 
         configInput(INPUT_SWING, "Swing CV");
         configInput(INPUT_FILL_BD, "Bass drum fill CV");
@@ -318,8 +320,8 @@ struct Reticula : SanguineModule {
             voltagesCV1 /= 5.f;
             voltagesCV2 /= 5.f;
 
-            voltagesCV1 *= 255.f;
-            voltagesCV2 *= 255.f;
+            voltagesCV1 *= kMaxKnobValue;
+            voltagesCV2 *= kMaxKnobValue;
 
             voltagesCV1[0] += params[PARAM_MAP_X].getValue();
             voltagesCV1[1] += params[PARAM_MAP_Y].getValue();
@@ -329,8 +331,8 @@ struct Reticula : SanguineModule {
             voltagesCV2[0] += params[PARAM_HH_DENSITY].getValue();
             voltagesCV2[1] += params[PARAM_CHAOS].getValue();
 
-            voltagesCV1 = simd::clamp(voltagesCV1, 0.f, 255.f);
-            voltagesCV2 = simd::clamp(voltagesCV2, 0.f, 255.f);
+            voltagesCV1 = simd::clamp(voltagesCV1, 0.f, kMaxKnobValue);
+            voltagesCV2 = simd::clamp(voltagesCV2, 0.f, kMaxKnobValue);
 
             mapX = voltagesCV1[0];
             mapY = voltagesCV1[1];
