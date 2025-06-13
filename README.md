@@ -98,6 +98,10 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
     A polyphonic, multipurpose macro oscillator based on the Renaissance alternative firmware for MI's Braids. Exposes every control.
 
+- ### Reticula
+
+  A topographic sequencer based on Mutable Instrument's Grids, it offers new, versatile capabilities exclusive to Sanguine Mutants.
+
 - ### Scalaria
   
   A polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for MI's Warps.
