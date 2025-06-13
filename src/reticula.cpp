@@ -415,7 +415,7 @@ struct Reticula : SanguineModule {
 
             outputs[OUTPUT_TRIGGER_BD + drum].setVoltage(drumVoltage);
 
-            if (drum < 3) {
+            if (drum < kMaxChannels) {
                 lights[LIGHT_CHANNEL_BD + drum].setBrightnessSmooth(drumVoltage, args.sampleTime);
             }
         }
