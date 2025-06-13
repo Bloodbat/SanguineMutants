@@ -129,6 +129,8 @@ struct Aestus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		bool bIsLightsTurn = lightsDivider.process();
 
 		if (!bWantPeacocks) {
@@ -159,22 +161,36 @@ struct Aestus : SanguineModule {
 					bLastExternalSync = bHaveExternalSync;
 				}
 
-				// Pitch
+				// Setup SIMD voltages
+				float_4 paramVoltages = {};
+
+				paramVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f);
+				paramVoltages[1] = inputs[INPUT_SHAPE].getVoltage();
+				paramVoltages[2] = inputs[INPUT_SLOPE].getVoltage();
+				paramVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage();
+
+				paramVoltages /= 5.f;
+
+				// Pitch.
 				float pitch = params[PARAM_FREQUENCY].getValue();
 				pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
-				pitch += params[PARAM_FM].getValue() * inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f;
+				pitch += params[PARAM_FM].getValue() * paramVoltages[0];
 				pitch += 60.f;
 				// Scale to the global sample rate
 				pitch += log2f(48000.f / args.sampleRate) * 12.f;
 				generator.set_pitch(static_cast<int>(clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
 
-				// Shape, slope, smoothness
-				int16_t shape = clamp(params[PARAM_SHAPE].getValue() +
-					inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-				int16_t slope = clamp(params[PARAM_SLOPE].getValue() +
-					inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-				int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() +
-					inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
+				// Shape, slope, smoothness.
+				paramVoltages[1] += params[PARAM_SHAPE].getValue();
+				paramVoltages[2] += params[PARAM_SLOPE].getValue();
+				paramVoltages[3] += params[PARAM_SMOOTHNESS].getValue();
+
+				paramVoltages = simd::clamp(paramVoltages, -1.f, 1.f);
+				paramVoltages *= 32767.f;
+
+				int16_t shape = paramVoltages[1];
+				int16_t slope = paramVoltages[2];
+				int16_t smoothness = paramVoltages[3];
 				generator.set_shape(shape);
 				generator.set_slope(slope);
 				generator.set_smoothness(smoothness);
