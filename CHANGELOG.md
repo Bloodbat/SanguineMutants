@@ -1,5 +1,11 @@
 # Next version
 
+## New Modules
+
+### Reticula
+
+- A topographic drum sequencer based on Mutable Instruments' Grids, with capabilities exclusive to Sanguine Mutants.
+
 ## Fixes
 
 - Anuli: FX button light didn't follow plugin button light standards.
