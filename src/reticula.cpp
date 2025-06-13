@@ -552,7 +552,7 @@ struct ReticulaWidget : SanguineModuleWidget {
 
         addParam(createParam<Sanguine1PBlue>(millimetersToPixelsVec(34.688, 14.874), module, Reticula::PARAM_MAP_X));
         addParam(createParam<Sanguine1PBlue>(millimetersToPixelsVec(51.199, 14.874), module, Reticula::PARAM_MAP_Y));
-        addParam(createParam<Sanguine1PGreen>(millimetersToPixelsVec(67.71, 14.874), module, Reticula::PARAM_CHAOS));
+        addParam(createParam<Sanguine1PPurple>(millimetersToPixelsVec(67.71, 14.874), module, Reticula::PARAM_CHAOS));
 
         addParam(createLightParam<VCVLightBezel<GreenRedLight>>(millimetersToPixelsVec(2.607, 23.512), module,
             Reticula::PARAM_TAP, Reticula::LIGHT_TAP));
