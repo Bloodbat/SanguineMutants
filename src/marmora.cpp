@@ -148,7 +148,7 @@ struct Marmora : SanguineModule {
 		std::string getDisplayValueString() override {
 			float dejaVuLengthIndex = getValue() * (LENGTHOF(marmora::loopLengths) - 1);
 			int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
-			return (string::f("%d", dejaVuLength));
+			return string::f("%d", dejaVuLength);
 		}
 
 		void setDisplayValue(float 	displayValue) override {
