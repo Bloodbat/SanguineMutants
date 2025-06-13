@@ -144,9 +144,12 @@ SOURCES += alt_firmware/scalaria/dsp/scalaria_modulator.cc
 SOURCES += alt_firmware/scalaria/dsp/scalaria_oscillator.cc
 SOURCES += alt_firmware/scalaria/scalaria_resources.cc
 
+SOURCES += eurorack/grids/reticula_pattern_generator.cpp
+
 SOURCES += SanguineModulesCommon/src/sanguinecomponents.cpp
 SOURCES += SanguineModulesCommon/src/sanguinehelpers.cpp
 SOURCES += SanguineModulesCommon/src/themes.cpp
+SOURCES += SanguineModulesCommon/src/sanguinetimers.cpp
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
 
