@@ -103,10 +103,6 @@ namespace reticula {
         settings.patternMode = mode;
     }
 
-    uint8_t PatternGenerator::getAllStates() const {
-        return state;
-    }
-
     uint8_t PatternGenerator::getDrumState(uint8_t channel) const {
         const uint8_t mask[6] = {
             1,
@@ -119,16 +115,8 @@ namespace reticula {
         return (state & mask[channel]) >> channel;
     }
 
-    PatternGeneratorModes PatternGenerator::getPatternMode() const {
-        return settings.patternMode;
-    }
-
     uint8_t PatternGenerator::getBeat() const {
         return beat;
-    }
-
-    uint8_t PatternGenerator::getEuclideanLength(uint8_t channel) {
-        return settings.euclideanLengths[channel];
     }
 
     bool PatternGenerator::getFirstBeat() {
