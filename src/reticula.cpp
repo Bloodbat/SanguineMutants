@@ -306,40 +306,40 @@ struct Reticula : SanguineModule {
                 metronome.process();
             }
 
-            float_4 voltagesCV1 = {};
-            float_4 voltagesCV2 = {};
+            float_4 paramVoltages1 = {};
+            float_4 paramVoltages2 = {};
 
-            voltagesCV1[0] = inputs[INPUT_MAP_X].getVoltage();
-            voltagesCV1[1] = inputs[INPUT_MAP_Y].getVoltage();
-            voltagesCV1[2] = inputs[INPUT_FILL_BD].getVoltage();
-            voltagesCV1[1] = inputs[INPUT_FILL_SD].getVoltage();
+            paramVoltages1[0] = inputs[INPUT_MAP_X].getVoltage();
+            paramVoltages1[1] = inputs[INPUT_MAP_Y].getVoltage();
+            paramVoltages1[2] = inputs[INPUT_FILL_BD].getVoltage();
+            paramVoltages1[1] = inputs[INPUT_FILL_SD].getVoltage();
 
-            voltagesCV2[0] = inputs[INPUT_FILL_HH].getVoltage();
-            voltagesCV2[1] = inputs[INPUT_CHAOS].getVoltage();
+            paramVoltages2[0] = inputs[INPUT_FILL_HH].getVoltage();
+            paramVoltages2[1] = inputs[INPUT_CHAOS].getVoltage();
 
-            voltagesCV1 /= 5.f;
-            voltagesCV2 /= 5.f;
+            paramVoltages1 /= 5.f;
+            paramVoltages2 /= 5.f;
 
-            voltagesCV1 *= kMaxKnobValue;
-            voltagesCV2 *= kMaxKnobValue;
+            paramVoltages1 *= kMaxKnobValue;
+            paramVoltages2 *= kMaxKnobValue;
 
-            voltagesCV1[0] += params[PARAM_MAP_X].getValue();
-            voltagesCV1[1] += params[PARAM_MAP_Y].getValue();
-            voltagesCV1[2] += params[PARAM_BD_DENSITY].getValue();
-            voltagesCV1[3] += params[PARAM_SD_DENSITY].getValue();
+            paramVoltages1[0] += params[PARAM_MAP_X].getValue();
+            paramVoltages1[1] += params[PARAM_MAP_Y].getValue();
+            paramVoltages1[2] += params[PARAM_BD_DENSITY].getValue();
+            paramVoltages1[3] += params[PARAM_SD_DENSITY].getValue();
 
-            voltagesCV2[0] += params[PARAM_HH_DENSITY].getValue();
-            voltagesCV2[1] += params[PARAM_CHAOS].getValue();
+            paramVoltages2[0] += params[PARAM_HH_DENSITY].getValue();
+            paramVoltages2[1] += params[PARAM_CHAOS].getValue();
 
-            voltagesCV1 = simd::clamp(voltagesCV1, 0.f, kMaxKnobValue);
-            voltagesCV2 = simd::clamp(voltagesCV2, 0.f, kMaxKnobValue);
+            paramVoltages1 = simd::clamp(paramVoltages1, 0.f, kMaxKnobValue);
+            paramVoltages2 = simd::clamp(paramVoltages2, 0.f, kMaxKnobValue);
 
-            mapX = voltagesCV1[0];
-            mapY = voltagesCV1[1];
-            BDFill = voltagesCV1[2];
-            SNFill = voltagesCV1[3];
-            HHFill = voltagesCV2[0];
-            chaos = voltagesCV1[1];
+            mapX = paramVoltages1[0];
+            mapY = paramVoltages1[1];
+            BDFill = paramVoltages1[2];
+            SNFill = paramVoltages1[3];
+            HHFill = paramVoltages2[0];
+            chaos = paramVoltages1[1];
 
             if (bUseExternalClock) {
                 if (stClock.process(inputs[INPUT_EXTERNAL_CLOCK].getVoltage())) {
