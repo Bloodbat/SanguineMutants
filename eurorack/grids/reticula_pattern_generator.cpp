@@ -179,8 +179,7 @@ namespace reticula {
     }
 
     void PatternGenerator::evaluate() {
-        state = controlState = 0;
-        state = controlState |= 0x40;
+        state = controlState = 0x40;
 
         controlState |= OUTPUT_BIT_CLOCK;
 
