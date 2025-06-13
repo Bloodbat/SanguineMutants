@@ -140,6 +140,8 @@ struct Temulenti : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		bumps::GeneratorMode mode = generator.mode();
 		if (stMode.process(params[PARAM_MODE].getValue())) {
 			mode = bumps::GeneratorMode((static_cast<int>(mode) + 1) % 3);
@@ -163,10 +165,20 @@ struct Temulenti : SanguineModule {
 				bLastExternalSync = bHaveExternalSync;
 			}
 
-			// Pitch
+			// Setup SIMD voltages
+			float_4 paramVoltages = {};
+
+			paramVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f);
+			paramVoltages[1] = inputs[INPUT_SHAPE].getVoltage();
+			paramVoltages[2] = inputs[INPUT_SLOPE].getVoltage();
+			paramVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage();
+
+			paramVoltages /= 5.f;
+
+			// Pitch.
 			float pitchParam = params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
 				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
-			float fm = clamp(inputs[INPUT_FM].getNormalVoltage(0.1f) / 5.f * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
+			float fm = clamp(paramVoltages[0] * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
 
 			pitchParam += 60.f;
 			// This is probably not original but seems useful to keep the same frequency as in normal mode.
@@ -198,9 +210,17 @@ struct Temulenti : SanguineModule {
 			}
 
 			// Shape, slope, smoothness
-			int16_t shape = clamp(params[PARAM_SHAPE].getValue() + inputs[INPUT_SHAPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-			int16_t slope = clamp(params[PARAM_SLOPE].getValue() + inputs[INPUT_SLOPE].getVoltage() / 5.f, -1.f, 1.f) * 32767;
-			int16_t smoothness = clamp(params[PARAM_SMOOTHNESS].getValue() + inputs[INPUT_SMOOTHNESS].getVoltage() / 5.f, -1.f, 1.f) * 32767;
+
+			paramVoltages[1] += params[PARAM_SHAPE].getValue();
+			paramVoltages[2] += params[PARAM_SLOPE].getValue();
+			paramVoltages[3] += params[PARAM_SMOOTHNESS].getValue();
+
+			paramVoltages = simd::clamp(paramVoltages, -1.f, 1.f);
+			paramVoltages *= 32767.f;
+
+			int16_t shape = paramVoltages[1];
+			int16_t slope = paramVoltages[2];
+			int16_t smoothness = paramVoltages[3];
 			generator.set_shape(shape);
 			generator.set_slope(slope);
 			generator.set_smoothness(smoothness);
