@@ -199,39 +199,86 @@ struct Apices : SanguineModule {
 		if (bHasExpander) {
 			bWasExpanderConnected = true;
 
-			float cvValues[apicesCommon::kKnobCount * 2] = {};
-			int modulatedValues[apicesCommon::kKnobCount * 2] = {};
+			// Channel 1 strip.
+			simd::float_4 expanderCVValues1 = {};
 
-			int channel2Knob = 0;
+			expanderCVValues1[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_1).getVoltage();
+			expanderCVValues1[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_2).getVoltage();
+			expanderCVValues1[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_3).getVoltage();
+			expanderCVValues1[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_4).getVoltage();
+
+			expanderCVValues1 /= 5.f;
+			expanderCVValues1 = clamp(expanderCVValues1, -1.f, 1.f);
+			expanderCVValues1 *= 255.f;
+
+			expanderCVValues1[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_1).getValue();
+			expanderCVValues1[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_2).getValue();
+			expanderCVValues1[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_3).getValue();
+			expanderCVValues1[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_4).getValue();
+
+			simd::int32_4 expanderModulatedValues1 = {};
+
+			expanderModulatedValues1 = expanderCVValues1;
+
+			expanderModulatedValues1[0] += potValues[0];
+			expanderModulatedValues1[1] += potValues[1];
+			expanderModulatedValues1[2] += potValues[2];
+			expanderModulatedValues1[3] += potValues[3];
+
+			expanderModulatedValues1 = expanderModulatedValues1 << 8;
+
+			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
+
+			// Channel 2 strip.
+			simd::float_4 expanderCVValues2 = {};
+
+			expanderCVValues2[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
+			expanderCVValues2[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
+			expanderCVValues2[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
+			expanderCVValues2[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
+
+			expanderCVValues2 /= 5.f;
+			expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
+			expanderCVValues2 *= 255.f;
+
+			expanderCVValues2[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
+			expanderCVValues2[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
+			expanderCVValues2[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
+			expanderCVValues2[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
+
+			simd::int32_4 expanderModulatedValues2 = {};
+
+			expanderModulatedValues2 = expanderCVValues2;
+
+			expanderModulatedValues2[0] += potValues[4];
+			expanderModulatedValues2[1] += potValues[5];
+			expanderModulatedValues2[2] += potValues[6];
+			expanderModulatedValues2[3] += potValues[7];
+
+			expanderModulatedValues2 = expanderModulatedValues2 << 8;
+
+			expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
 
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				int channel1Input = Nix::INPUT_PARAM_CV_1 + knob;
-
 				if (nixExpander->getInput(channel1Input).isConnected()) {
-					int channel1Attenuverter = Nix::PARAM_PARAM_CV_1 + knob;
-
-					cvValues[knob] = (clamp(nixExpander->getInput(channel1Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
-						nixExpander->getParam(channel1Attenuverter).getValue();
-
-					modulatedValues[knob] = clamp((potValues[knob] + static_cast<int>(cvValues[knob])) << 8, 0, 65535);
-
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
-						processors[0].set_parameter(knob, modulatedValues[knob]);
-						processors[1].set_parameter(knob, modulatedValues[knob]);
+						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+						processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
 						break;
 
 					case apicesCommon::EDIT_MODE_SPLIT:
 						if (knob < 2) {
-							processors[0].set_parameter(knob, modulatedValues[knob]);
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
 						} else {
-							processors[1].set_parameter(knob - 2, modulatedValues[knob]);
+							processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
 						}
 						break;
 
 					case apicesCommon::EDIT_MODE_FIRST:
 					case apicesCommon::EDIT_MODE_SECOND:
-						processors[0].set_parameter(knob, modulatedValues[knob]);
+						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
 						break;
 					default:
 						break;
@@ -240,18 +287,9 @@ struct Apices : SanguineModule {
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
 					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + knob;
-					channel2Knob = knob + apicesCommon::kChannel2Offset;
 
 					if (nixExpander->getInput(channel2Input).isConnected()) {
-						int channel2Attenuverter = Nix::PARAM_PARAM_CV_CHANNEL_2_1 + knob;
-
-						cvValues[channel2Knob] = (clamp(nixExpander->getInput(channel2Input).getVoltage() / 5.f, -1.f, 1.f) * 255.f) *
-							nixExpander->getParam(channel2Attenuverter).getValue();
-
-						modulatedValues[channel2Knob] = clamp((potValues[channel2Knob] +
-							static_cast<int>(cvValues[channel2Knob])) << 8, 0, 65535);
-
-						processors[1].set_parameter(knob, modulatedValues[channel2Knob]);
+						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
 					}
 				}
 
