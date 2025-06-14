@@ -293,11 +293,19 @@ struct Anuli : SanguineModule {
 		voltages /= 5.f;
 		voltages *= 3.3f;
 
-		structure = params[PARAM_STRUCTURE].getValue() + parameterInfo.structureMod * voltages[0];
-		patch.structure = clamp(structure, 0.f, 0.9995f);
 		patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + parameterInfo.brightnessMod * voltages[1], 0.f, 1.f);
-		patch.damping = clamp(params[PARAM_DAMPING].getValue() + parameterInfo.dampingMod * voltages[2], 0.f, 0.9995f);
-		patch.position = clamp(params[PARAM_POSITION].getValue() + parameterInfo.positionMod * voltages[3], 0.f, 0.9995f);
+
+		structure = params[PARAM_STRUCTURE].getValue() + parameterInfo.structureMod * voltages[0];
+
+		voltages[0] = structure;
+		voltages[2] = params[PARAM_DAMPING].getValue() + parameterInfo.dampingMod * voltages[2];
+		voltages[3] = params[PARAM_POSITION].getValue() + parameterInfo.positionMod * voltages[3];
+
+		voltages = simd::clamp(voltages, 0.f, 0.9995f);
+
+		patch.structure = voltages[0];
+		patch.damping = voltages[2];
+		patch.position = voltages[3];
 	}
 
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
