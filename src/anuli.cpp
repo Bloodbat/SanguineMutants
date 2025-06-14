@@ -356,7 +356,7 @@ struct Anuli : SanguineModule {
 	void setupChannel(const int channel, bool& haveDisastrousPeace) {
 		bool bIsEasterEgg = channelModes[channel] > 5;
 
-		haveDisastrousPeace = haveDisastrousPeace || bIsEasterEgg;
+		haveDisastrousPeace |= bIsEasterEgg;
 
 		resonatorModels[channel] = bIsEasterEgg ? rings::RESONATOR_MODEL_MODAL :
 			static_cast<rings::ResonatorModel>(channelModes[channel]);
