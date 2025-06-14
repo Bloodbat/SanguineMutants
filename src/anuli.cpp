@@ -99,13 +99,13 @@ struct Anuli : SanguineModule {
 
 	static const int kLightsFrequency = 64;
 
-	struct ParameterInfo {
-		float structureMod;
-		float brightnessMod;
-		float dampingMod;
-		float positionMod;
+	struct ParametersInfo {
+		float modStructure;
+		float modBrightness;
+		float modDamping;
+		float modPosition;
 
-		float frequencyMod;
+		float modFrequency;
 
 		bool useInternalExciter;
 		bool useInternalStrum;
@@ -174,18 +174,18 @@ struct Anuli : SanguineModule {
 
 		channelModes.fill(static_cast<int>(params[PARAM_MODE].getValue()));
 
-		ParameterInfo parameterInfo = {};
+		ParametersInfo parametersInfo = {};
 
-		parameterInfo.structureMod = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
-		parameterInfo.brightnessMod = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
-		parameterInfo.dampingMod = dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue());
-		parameterInfo.positionMod = dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue());
+		parametersInfo.modStructure = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
+		parametersInfo.modBrightness = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
+		parametersInfo.modDamping = dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue());
+		parametersInfo.modPosition = dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue());
 
-		parameterInfo.frequencyMod = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
+		parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
 
-		parameterInfo.useInternalExciter = !inputs[INPUT_IN].isConnected();
-		parameterInfo.useInternalStrum = !inputs[INPUT_STRUM].isConnected();
-		parameterInfo.useInternalNote = !inputs[INPUT_PITCH].isConnected();
+		parametersInfo.useInternalExciter = !inputs[INPUT_IN].isConnected();
+		parametersInfo.useInternalStrum = !inputs[INPUT_STRUM].isConnected();
+		parametersInfo.useInternalNote = !inputs[INPUT_PITCH].isConnected();
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
@@ -199,7 +199,7 @@ struct Anuli : SanguineModule {
 
 					setupChannel(channel, bWithDisastrousPeace);
 
-					renderFrames(channel, parameterInfo, args.sampleRate);
+					renderFrames(channel, parametersInfo, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
@@ -210,7 +210,7 @@ struct Anuli : SanguineModule {
 
 					setupChannel(channel, bWithDisastrousPeace);
 
-					renderFrames(channel, parameterInfo, args.sampleRate);
+					renderFrames(channel, parametersInfo, args.sampleRate);
 
 					setOutputs(channel, bHaveBothOutputs);
 				}
@@ -219,7 +219,7 @@ struct Anuli : SanguineModule {
 			for (int channel = 0; channel < channelCount; ++channel) {
 				setupChannel(channel, bWithDisastrousPeace);
 
-				renderFrames(channel, parameterInfo, args.sampleRate);
+				renderFrames(channel, parametersInfo, args.sampleRate);
 
 				setOutputs(channel, bHaveBothOutputs);
 			}
@@ -280,7 +280,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupPatch(const int channel, rings::Patch& patch, float& structure, const ParameterInfo& parameterInfo) {
+	void setupPatch(const int channel, rings::Patch& patch, float& structure, const ParametersInfo& parametersInfo) {
 		using simd::float_4;
 
 		float_4 voltages;
@@ -293,13 +293,13 @@ struct Anuli : SanguineModule {
 		voltages /= 5.f;
 		voltages *= 3.3f;
 
-		patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + parameterInfo.brightnessMod * voltages[1], 0.f, 1.f);
+		patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + parametersInfo.modBrightness * voltages[1], 0.f, 1.f);
 
-		structure = params[PARAM_STRUCTURE].getValue() + parameterInfo.structureMod * voltages[0];
+		structure = params[PARAM_STRUCTURE].getValue() + parametersInfo.modStructure * voltages[0];
 
 		voltages[0] = structure;
-		voltages[2] = params[PARAM_DAMPING].getValue() + parameterInfo.dampingMod * voltages[2];
-		voltages[3] = params[PARAM_POSITION].getValue() + parameterInfo.positionMod * voltages[3];
+		voltages[2] = params[PARAM_DAMPING].getValue() + parametersInfo.modDamping * voltages[2];
+		voltages[3] = params[PARAM_POSITION].getValue() + parametersInfo.modPosition * voltages[3];
 
 		voltages = simd::clamp(voltages, 0.f, 0.9995f);
 
@@ -309,7 +309,7 @@ struct Anuli : SanguineModule {
 	}
 
 	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
-		const ParameterInfo& parameterInfo) {
+		const ParametersInfo& parametersInfo) {
 		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
@@ -321,12 +321,12 @@ struct Anuli : SanguineModule {
 		}
 		performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
 
-		performanceState.fm = clamp(48.f * 3.3f * parameterInfo.frequencyMod *
+		performanceState.fm = clamp(48.f * 3.3f * parametersInfo.modFrequency *
 			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(anuli::kVoltPerOctave, channel) / 5.f, -48.f, 48.f);
 
-		performanceState.internal_exciter = parameterInfo.useInternalExciter;
-		performanceState.internal_strum = parameterInfo.useInternalStrum;
-		performanceState.internal_note = parameterInfo.useInternalNote;
+		performanceState.internal_exciter = parametersInfo.useInternalExciter;
+		performanceState.internal_strum = parametersInfo.useInternalStrum;
+		performanceState.internal_note = parametersInfo.useInternalNote;
 
 		// TODO: "Normalized to a step detector on the V/OCT input and a transient detector on the IN input."
 		performanceState.strum = strums[channel] && !lastStrums[channel];
@@ -373,7 +373,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void renderFrames(const int channel, const ParameterInfo& parameterInfo, const float sampleRate) {
+	void renderFrames(const int channel, const ParametersInfo& parametersInfo, const float sampleRate) {
 		if (drbOutputBuffers[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
@@ -397,8 +397,8 @@ struct Anuli : SanguineModule {
 
 				stringSynths[channel].set_fx(rings::FxType(fxModel));
 
-				setupPatch(channel, patch, structure, parameterInfo);
-				setupPerformance(channel, performanceStates[channel], structure, parameterInfo);
+				setupPatch(channel, patch, structure, parametersInfo);
+				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
 
 				// Process audio
 				strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
@@ -412,8 +412,8 @@ struct Anuli : SanguineModule {
 
 				parts[channel].set_model(resonatorModels[channel]);
 
-				setupPatch(channel, patch, structure, parameterInfo);
-				setupPerformance(channel, performanceStates[channel], structure, parameterInfo);
+				setupPatch(channel, patch, structure, parametersInfo);
+				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
 
 				// Process audio
 				strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
