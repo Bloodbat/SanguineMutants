@@ -475,7 +475,7 @@ struct Reticula : SanguineModule {
                     tempoDisplay.insert(0, 1, '0');
                 }
             } else {
-                tempoDisplay = reticula::externalClockDisplay;
+                tempoDisplay = reticula::externalClockLabel;
             }
         }
     }
