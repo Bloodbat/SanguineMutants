@@ -251,7 +251,7 @@ namespace reticula {
         }
 
         controlState |= resetBits ? OUTPUT_BIT_COMMON : 0;
-        controlState |= (resetBits == 0x07) ? OUTPUT_BIT_RESET : 0;
+        controlState |= resetBits == 0x07 ? OUTPUT_BIT_RESET : 0;
 
         state |= resetBits << 3;
     }
