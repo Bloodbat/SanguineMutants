@@ -42,5 +42,5 @@ namespace reticula {
     };
 
     // NOTE: note a typo! This way it looks better on the display!
-    static const std::string externalClockDisplay = "ExT";
+    static const std::string externalClockLabel = "ExT";
 }
