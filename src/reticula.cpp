@@ -264,8 +264,8 @@ struct Reticula : SanguineModule {
             tapStamps[1] = args.frame;
 
             if (tapStamps[0] != 0) {
-                int64_t tapDifferencce = tapStamps[1] - tapStamps[0];
-                tempoParam = (60 * args.sampleRate) / tapDifferencce;
+                int64_t tapDifference = tapStamps[1] - tapStamps[0];
+                tempoParam = (60 * args.sampleRate) / tapDifference;
 
                 lastKnobTempo = params[PARAM_CLOCK].getValue();
                 bUseTapTempo = true;
