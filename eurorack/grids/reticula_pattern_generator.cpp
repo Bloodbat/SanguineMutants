@@ -37,7 +37,6 @@ namespace reticula {
         }
         state = 0;
         controlState = 0;
-        accentBits = 0;
     }
 
     void PatternGenerator::tick(uint8_t numPulses) {
@@ -196,7 +195,7 @@ namespace reticula {
         uint8_t instrumentMask = 1;
         uint8_t x = settings.x;
         uint8_t y = settings.y;
-        accentBits = 0;
+        uint8_t accentBits = 0;
         for (uint8_t i = 0; i < kNumParts; ++i) {
             uint8_t level = readDrumMap(step, i, x, y);
             if (level < 255 - partPerturbations[i]) {

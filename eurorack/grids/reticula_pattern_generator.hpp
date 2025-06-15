@@ -119,7 +119,6 @@ namespace reticula {
         uint8_t pulse;
         uint8_t step;
         uint8_t euclideanSteps[3];
-        uint8_t accentBits;
 
         uint8_t partPerturbations[kNumParts];
         uint8_t readDrumMap(uint8_t step, uint8_t instrument, uint8_t x, uint8_t y);
