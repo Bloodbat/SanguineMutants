@@ -69,7 +69,7 @@ struct Reticula : SanguineModule {
 
     int elapsedTicks = 0;
     int sequenceStep = 0;
-    int64_t tapStamps[2] = { 0,0 };
+    int64_t tapStamps[2] = { 0, 0 };
     uint8_t tickCount;
 
     reticula::PatternGeneratorModes sequencerMode = reticula::PATTERN_ORIGINAL;
