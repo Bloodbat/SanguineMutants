@@ -71,6 +71,12 @@ namespace funes {
       "Analog hi-hat"
   };
 
+  static const std::vector<std::string> chordBankLabels = {
+      "Original",
+      "Alternate 1 (Jon Butler)",
+      "Alternate 2 (Joe McMullen)"
+  };
+
   enum LEDModes {
     LEDNormal,
     LEDLPG,
