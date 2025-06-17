@@ -55,6 +55,9 @@ namespace plaits {
     float morph;
     float harmonics;
     float accent;
+
+    // Alt firmware.
+    uint8_t chord_set_option;
   };
 
   struct PostProcessingSettings {
