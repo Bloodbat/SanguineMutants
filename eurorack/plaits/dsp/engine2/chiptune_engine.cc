@@ -66,7 +66,7 @@ namespace plaits {
 
     if (clocked) {
       if (parameters.trigger & TRIGGER_RISING_EDGE) {
-        chords_.set_chord(parameters.harmonics);
+        chords_.set_chord(parameters.harmonics, parameters.chord_set_option);
         chords_.Sort();
 
         int pattern = arpeggiator_pattern_selector_.Process(parameters.timbre);
@@ -83,7 +83,7 @@ namespace plaits {
       float ratios[kChordNumVoices];
       float amplitudes[kChordNumVoices];
 
-      chords_.set_chord(parameters.harmonics);
+      chords_.set_chord(parameters.harmonics, parameters.chord_set_option);
       chords_.ComputeChordInversion(parameters.timbre, ratios, amplitudes);
       for (int j = 1; j < kChordNumVoices; j += 2) {
         amplitudes[j] = -amplitudes[j];

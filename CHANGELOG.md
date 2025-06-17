@@ -17,6 +17,10 @@ without the backticks.
 
 - A topographic drum sequencer based on Mutable Instruments' Grids, with capabilities exclusive to Sanguine Mutants.
 
+## Additions
+
+- Funes: new chord banks from Lyle Mills' firmware.
+
 
 ---
 
