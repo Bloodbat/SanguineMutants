@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -35,36 +35,30 @@
 #include "plaits/dsp/fx/ensemble.h"
 
 namespace plaits {
+  class StringMachineEngine : public Engine {
+  public:
+    StringMachineEngine() {}
+    ~StringMachineEngine() {}
 
-class StringMachineEngine : public Engine {
- public:
-  StringMachineEngine() { }
-  ~StringMachineEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
-      float* out,
-      float* aux,
-      size_t size,
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters, float* out, float* aux, size_t size,
       bool* already_enveloped) override;
 
- private:
-  void ComputeRegistration(float registration, float* amplitudes);
-  
-  ChordBank chords_;
-  
-  Ensemble ensemble_;
-  StringSynthOscillator divide_down_voice_[kChordNumNotes];
-  stmlib::NaiveSvf svf_[2];
-  
-  float morph_lp_;
-  float timbre_lp_;
-  
-  DISALLOW_COPY_AND_ASSIGN(StringMachineEngine);
-};
+  private:
+    void ComputeRegistration(float registration, float* amplitudes);
 
+    ChordBank chords_;
+
+    Ensemble ensemble_;
+    StringSynthOscillator divide_down_voice_[kChordNumNotes];
+    stmlib::NaiveSvf svf_[2];
+
+    float morph_lp_;
+    float timbre_lp_;
+
+    DISALLOW_COPY_AND_ASSIGN(StringMachineEngine);
+  };
 }  // namespace plaits
-
 #endif  // PLAITS_DSP_ENGINE_STRING_MACHINE_ENGINE_H_
