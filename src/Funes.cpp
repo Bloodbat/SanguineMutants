@@ -36,6 +36,7 @@ struct Funes : SanguineModule {
 		PARAM_HARMONICS_CV,
 		PARAM_LPG_COLOR_CV,
 		PARAM_LPG_DECAY_CV,
+		PARAM_CHORD_BANK,
 		PARAMS_COUNT
 	};
 
@@ -63,13 +64,15 @@ struct Funes : SanguineModule {
 		ENUMS(LIGHT_MODEL, 8 * 2),
 		LIGHT_FACTORY_DATA,
 		ENUMS(LIGHT_CUSTOM_DATA, 2),
+		ENUMS(LIGHT_CHORD_BANK, 2),
 		LIGHTS_COUNT
 	};
 
 	plaits::Voice voices[PORT_MAX_CHANNELS];
 	plaits::Patch patch = {};
 	plaits::UserData userData;
-	char sharedBuffers[PORT_MAX_CHANNELS][16384] = {};
+	// Hardware uses 16384; but new chords crash Rack on mode change if left as such.
+	char sharedBuffers[PORT_MAX_CHANNELS][50176] = {};
 
 	float triPhase = 0.f;
 	float lastLPGColor = 0.5f;
@@ -90,6 +93,9 @@ struct Funes : SanguineModule {
 	int errorTimeOut = 0;
 
 	uint32_t displayTimeout = 0;
+
+	uint8_t chordBank = 0;
+
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
 	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcOutputs;
@@ -131,6 +137,9 @@ struct Funes : SanguineModule {
 		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
 
+		// TODO: make me meaningful!
+		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
+
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
 		configInput(INPUT_FREQUENCY, "FM");
@@ -161,6 +170,8 @@ struct Funes : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
+
+		chordBank = params[PARAM_CHORD_BANK].getValue();
 
 		if (drbOutputBuffers.empty()) {
 			const int kBlockSize = 12;
@@ -217,6 +228,7 @@ struct Funes : SanguineModule {
 			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
 			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
+			patch.chord_set_option = chordBank;
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
 				ledsMode = funes::LEDLPG;
@@ -293,7 +305,7 @@ struct Funes : SanguineModule {
 				}
 			}
 
-			// Update model text, custom data lights and frequency mode every 16 samples only.
+			// Update model text, custom data lights, chord bank light and frequency mode every 16 samples only.
 			if (lightsDivider.process()) {
 				if (displayChannel >= channelCount) {
 					displayChannel = channelCount - 1;
@@ -324,6 +336,11 @@ struct Funes : SanguineModule {
 						errorTimeOut = 0;
 					}
 				}
+
+				bool bEngineHasChords = patch.engine == 6 || patch.engine == 7 || patch.engine == 14;
+
+				lights[LIGHT_CHORD_BANK + 0].setBrightness(bEngineHasChords && chordBank < 2 ? kSanguineButtonLightValue : 0.f);
+				lights[LIGHT_CHORD_BANK + 1].setBrightness(bEngineHasChords && chordBank > 0 ? kSanguineButtonLightValue : 0.f);
 			}
 
 			// Convert output.
@@ -658,6 +675,11 @@ struct Funes : SanguineModule {
 		params[PARAM_FREQ_MODE].setValue(freqModeNum);
 	}
 
+	void setChordBank(int chordBankNum) {
+		chordBank = chordBankNum;
+		params[PARAM_CHORD_BANK].setValue(chordBankNum);
+	}
+
 	void resetCustomDataStates() {
 		customDataStates[2] = funes::DataFactory;
 		customDataStates[3] = funes::DataFactory;
@@ -743,6 +765,9 @@ struct FunesWidget : SanguineModuleWidget {
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(111.028, 112.984), module, Funes::OUTPUT_OUT));
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(124.880, 112.984), module, Funes::OUTPUT_AUX));
 
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(116.456, 65.606), module,
+			Funes::PARAM_CHORD_BANK, Funes::LIGHT_CHORD_BANK));
+
 #ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.733, 113.895);
 		addChild(bloodLogo);
@@ -794,6 +819,11 @@ struct FunesWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Frequency mode", funes::frequencyModes,
 			[=]() {return module->frequencyMode; },
 			[=](int i) {module->setFrequencyMode(i); }
+		));
+
+		menu->addChild(createIndexSubmenuItem("Chord bank", funes::chordBankLabels,
+			[=]() {return module->chordBank; },
+			[=](int i) {module->setChordBank(i); }
 		));
 
 		menu->addChild(new MenuSeparator);
