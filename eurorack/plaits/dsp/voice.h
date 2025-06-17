@@ -120,6 +120,13 @@ namespace plaits {
     int engine;
     float decay;
     float lpg_colour;
+
+    /*
+     0 - original chord set
+     1 - jon butler chord set
+     2 - joe mcmullen chord set
+    */
+    uint8_t chord_set_option;
   };
 
   struct Modulations {

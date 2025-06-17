@@ -11,6 +11,10 @@ without the backticks.
 
 # Next version
 
+## Additions
+
+- Funes: new chord banks from Lyle Mills' firmware.
+
 
 ---
 
