@@ -750,11 +750,11 @@ struct FunesWidget : SanguineModuleWidget {
 
 		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(2.546, 91.296), module, Funes::INPUT_TIMBRE));
 		addParam(createParam<Trimpot>(millimetersToPixelsVec(17.552, 92.296), module, Funes::PARAM_TIMBRE_CV));
-		addParam(createParam<Sanguine1PSRed>(millimetersToPixelsVec(32.618, 88.606), module, Funes::PARAM_TIMBRE));
+		addParam(createParam<Sanguine1PSOrange>(millimetersToPixelsVec(32.618, 88.606), module, Funes::PARAM_TIMBRE));
 
-		addParam(createParam<Sanguine1PSPurple>(millimetersToPixelsVec(61.807, 88.606), module, Funes::PARAM_FREQ_MODE));
+		addParam(createParam<Sanguine1PSRed>(millimetersToPixelsVec(61.807, 88.606), module, Funes::PARAM_FREQ_MODE));
 
-		addParam(createParam<Sanguine1PSGreen>(millimetersToPixelsVec(91.329, 88.606), module, Funes::PARAM_MORPH));
+		addParam(createParam<Sanguine1PSPurple>(millimetersToPixelsVec(91.329, 88.606), module, Funes::PARAM_MORPH));
 		addParam(createParam<Trimpot>(millimetersToPixelsVec(113.456, 92.296), module, Funes::PARAM_MORPH_CV));
 		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(126.477, 91.296), module, Funes::INPUT_MORPH));
 
