@@ -339,7 +339,8 @@ struct Funes : SanguineModule {
 
 				bool bEngineHasChords = patch.engine == 6 || patch.engine == 7 || patch.engine == 14;
 
-				lights[LIGHT_CHORD_BANK + 0].setBrightness(bEngineHasChords && chordBank < 2 ? kSanguineButtonLightValue : 0.f);
+				lights[LIGHT_CHORD_BANK + 0].setBrightness(bEngineHasChords && (chordBank == 0 || chordBank == 2) ?
+					kSanguineButtonLightValue : 0.f);
 				lights[LIGHT_CHORD_BANK + 1].setBrightness(bEngineHasChords && chordBank > 0 ? kSanguineButtonLightValue : 0.f);
 			}
 
