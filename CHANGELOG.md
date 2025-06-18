@@ -21,6 +21,8 @@ without the backticks.
 
 - Funes: new chord banks from Lyle Mills' firmware.
 
+- Funes: ability and controls to crossfade the main signal with the auxiliary signal and output it in the Aux output, adapted from Lyle Mills' firmware.
+
 
 ---
 
