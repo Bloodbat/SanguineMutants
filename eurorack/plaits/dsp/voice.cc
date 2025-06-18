@@ -194,6 +194,17 @@ namespace plaits {
     bool already_enveloped = pp_s.already_enveloped;
     e->Render(p, out_buffer_, aux_buffer_, size, &already_enveloped);
 
+    // Crossfade the aux output between main and aux models.
+    float auxCrossfadeProportion = patch.aux_crossfade;
+
+    auxCrossfadeProportion += modulations.aux_crossfade;
+
+    CONSTRAIN(auxCrossfadeProportion, 0.f, 1.f);
+
+    for (size_t i = 0; i < size; ++i) {
+      aux_buffer_[i] = Crossfade(aux_buffer_[i], out_buffer_[i], auxCrossfadeProportion);
+    }
+
     bool lpg_bypass = already_enveloped || (!modulations.level_patched && !modulations.trigger_patched);
 
     // Compute LPG parameters.
