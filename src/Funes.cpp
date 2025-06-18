@@ -37,6 +37,7 @@ struct Funes : SanguineModule {
 		PARAM_LPG_COLOR_CV,
 		PARAM_LPG_DECAY_CV,
 		PARAM_CHORD_BANK,
+		PARAM_AUX_CROSSFADE,
 		PARAMS_COUNT
 	};
 
@@ -51,6 +52,7 @@ struct Funes : SanguineModule {
 		INPUT_NOTE,
 		INPUT_LGP_COLOR,
 		INPUT_LPG_DECAY,
+		INPUT_AUX_CROSSFADE,
 		INPUTS_COUNT
 	};
 
@@ -136,8 +138,8 @@ struct Funes : SanguineModule {
 		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
+		configParam(PARAM_AUX_CROSSFADE, 0.f, 1.f, 0.f, "Aux - Main crossfader", "%", 0.f, 100.f);
 
-		// TODO: make me meaningful!
 		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
 
 		configInput(INPUT_ENGINE, "Model");
@@ -150,6 +152,8 @@ struct Funes : SanguineModule {
 		configInput(INPUT_NOTE, "Pitch (1V/oct)");
 		configInput(INPUT_LGP_COLOR, "Lowpass gate response");
 		configInput(INPUT_LPG_DECAY, "Lowpass gate decay");
+
+		configInput(INPUT_AUX_CROSSFADE, "Aux - Main crossfader");
 
 		configOutput(OUTPUT_OUT, "Main");
 		configOutput(OUTPUT_AUX, "Auxiliary");
@@ -229,6 +233,7 @@ struct Funes : SanguineModule {
 			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
 			patch.chord_set_option = chordBank;
+			patch.aux_crossfade = params[PARAM_AUX_CROSSFADE].getValue();
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
 				ledsMode = funes::LEDLPG;
@@ -262,6 +267,8 @@ struct Funes : SanguineModule {
 				modulations.trigger = inputs[INPUT_TRIGGER].getPolyVoltage(channel) / 3.f;
 				modulations.level_patched = inputs[INPUT_LEVEL].isConnected();
 				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
+
+				modulations.aux_crossfade = inputs[INPUT_AUX_CROSSFADE].getPolyVoltage(channel) / 5.f;
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
@@ -762,6 +769,11 @@ struct FunesWidget : SanguineModuleWidget {
 		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(3.737, 112.984), module, Funes::INPUT_TRIGGER));
 		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(17.214, 112.984), module, Funes::INPUT_LEVEL));
 		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(30.690, 112.984), module, Funes::INPUT_NOTE));
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(88.27, 116.972), module,
+			Funes::INPUT_AUX_CROSSFADE));
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(102.07, 116.96), module, Funes::PARAM_AUX_CROSSFADE));
 
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(111.028, 112.984), module, Funes::OUTPUT_OUT));
 		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(124.880, 112.984), module, Funes::OUTPUT_AUX));
