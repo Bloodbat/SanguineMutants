@@ -121,6 +121,8 @@ namespace plaits {
     float decay;
     float lpg_colour;
 
+    float aux_crossfade;
+
     /*
      0 - original chord set
      1 - jon butler chord set
@@ -138,6 +140,8 @@ namespace plaits {
     float morph;
     float trigger;
     float level;
+
+    float aux_crossfade;
 
     bool frequency_patched;
     bool timbre_patched;
