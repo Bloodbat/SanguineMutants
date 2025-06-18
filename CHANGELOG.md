@@ -22,6 +22,8 @@
 
 - Contextus: make synthesis models light color palette more distinctive.
 
+- Funes: relate knobs using color.
+
 
 ---
 
