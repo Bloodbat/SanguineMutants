@@ -346,6 +346,7 @@
       "description" : "Topographic drum sequencer based on Mutable Instruments' Grids [16HP]",
       "keywords" : "Grids",
       "tags" : [
+        "Hardware clone",
         "Sequencer"
       ]
     }
