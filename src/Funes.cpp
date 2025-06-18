@@ -766,17 +766,17 @@ struct FunesWidget : SanguineModuleWidget {
 		addParam(createParam<Trimpot>(millimetersToPixelsVec(113.456, 92.296), module, Funes::PARAM_MORPH_CV));
 		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(126.477, 91.296), module, Funes::INPUT_MORPH));
 
-		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(3.737, 112.984), module, Funes::INPUT_TRIGGER));
-		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(17.214, 112.984), module, Funes::INPUT_LEVEL));
-		addInput(createInput<BananutGreenPoly>(millimetersToPixelsVec(30.690, 112.984), module, Funes::INPUT_NOTE));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.737, 116.972), module, Funes::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.213, 116.972), module, Funes::INPUT_LEVEL));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(34.69, 116.972), module, Funes::INPUT_NOTE));
 
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(88.27, 116.972), module,
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(98.669, 116.972), module,
 			Funes::INPUT_AUX_CROSSFADE));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(102.07, 116.96), module, Funes::PARAM_AUX_CROSSFADE));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(119.534, 112.576), module, Funes::PARAM_AUX_CROSSFADE));
 
-		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(111.028, 112.984), module, Funes::OUTPUT_OUT));
-		addOutput(createOutput<BananutRedPoly>(millimetersToPixelsVec(124.880, 112.984), module, Funes::OUTPUT_AUX));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(110.177, 116.972), module, Funes::OUTPUT_OUT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(128.88, 116.972), module, Funes::OUTPUT_AUX));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(116.456, 65.606), module,
 			Funes::PARAM_CHORD_BANK, Funes::LIGHT_CHORD_BANK));
