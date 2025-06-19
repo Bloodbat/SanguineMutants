@@ -24,6 +24,8 @@
 
 - Funes: ability and controls to crossfade the main signal with the auxiliary signal and output it in the Aux output, adapted from Lyle Mills' firmware.
 
+- Funes: Aux suboscillator adapted from Lyle Mills' firmware.
+
 - Mortuus: PLO phase values are now saved to and restored from patches and presets.
 
 - Nodi family: display channel also affects the big knob's light.

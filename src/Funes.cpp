@@ -38,6 +38,7 @@ struct Funes : SanguineModule {
 		PARAM_LPG_DECAY_CV,
 		PARAM_CHORD_BANK,
 		PARAM_AUX_CROSSFADE,
+		PARAM_AUX_SUBOSCILLATOR,
 		PARAMS_COUNT
 	};
 
@@ -67,6 +68,7 @@ struct Funes : SanguineModule {
 		LIGHT_FACTORY_DATA,
 		ENUMS(LIGHT_CUSTOM_DATA, 2),
 		ENUMS(LIGHT_CHORD_BANK, 2),
+		ENUMS(LIGHT_AUX_SUBOSCILLATOR, 3),
 		LIGHTS_COUNT
 	};
 
@@ -97,6 +99,8 @@ struct Funes : SanguineModule {
 	uint32_t displayTimeout = 0;
 
 	uint8_t chordBank = 0;
+
+	funes::SuboscillatorModes suboscillatorMode = funes::SUBOSCILLATOR_OFF;
 
 	stmlib::HysteresisQuantizer2 octaveQuantizer;
 
@@ -141,6 +145,8 @@ struct Funes : SanguineModule {
 		configParam(PARAM_AUX_CROSSFADE, 0.f, 1.f, 0.f, "Aux - Main crossfader", "%", 0.f, 100.f);
 
 		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
+
+		configSwitch(PARAM_AUX_SUBOSCILLATOR, 0.f, 4.f, 0.f, "Aux suboscillator", { funes::suboscillatorLabels });
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
@@ -234,6 +240,12 @@ struct Funes : SanguineModule {
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
 			patch.chord_set_option = chordBank;
 			patch.aux_crossfade = params[PARAM_AUX_CROSSFADE].getValue();
+			float suboscillatorOption = params[PARAM_AUX_SUBOSCILLATOR].getValue();
+			suboscillatorMode = static_cast<funes::SuboscillatorModes>(suboscillatorOption);
+			patch.aux_subosc_wave_option = suboscillatorOption > funes::SUBOSCILLATOR_SINE ? funes::SUBOSCILLATOR_SINE :
+				suboscillatorMode;
+			int8_t suboscillatorOctave = suboscillatorMode > funes::SUBOSCILLATOR_SINE ? suboscillatorMode - 2 : 0;
+			patch.aux_subosc_octave_option = suboscillatorOctave;
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
 				ledsMode = funes::LEDLPG;
@@ -349,6 +361,15 @@ struct Funes : SanguineModule {
 				lights[LIGHT_CHORD_BANK + 0].setBrightness(bEngineHasChords && (chordBank == 0 || chordBank == 2) ?
 					kSanguineButtonLightValue : 0.f);
 				lights[LIGHT_CHORD_BANK + 1].setBrightness(bEngineHasChords && chordBank > 0 ? kSanguineButtonLightValue : 0.f);
+
+				lights[LIGHT_AUX_SUBOSCILLATOR + 0].setBrightness(suboscillatorMode > funes::SUBOSCILLATOR_SQUARE ?
+					kSanguineButtonLightValue : 0.f);
+
+				lights[LIGHT_AUX_SUBOSCILLATOR + 1].setBrightness(suboscillatorMode == funes::SUBOSCILLATOR_SQUARE ||
+					suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_ONE ? kSanguineButtonLightValue : 0.f);
+
+				lights[LIGHT_AUX_SUBOSCILLATOR + 2].setBrightness(suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_TWO ?
+					kSanguineButtonLightValue : 0.f);
 			}
 
 			// Convert output.
@@ -598,6 +619,14 @@ struct Funes : SanguineModule {
 		}
 	}
 
+	void resetCustomDataStates() {
+		customDataStates[2] = funes::DataFactory;
+		customDataStates[3] = funes::DataFactory;
+		customDataStates[4] = funes::DataFactory;
+		customDataStates[5] = funes::DataFactory;
+		customDataStates[13] = funes::DataFactory;
+	}
+
 	void showCustomDataLoadDialog() {
 #ifndef METAMODULE
 #ifndef USING_CARDINAL_NOT_RACK
@@ -688,12 +717,9 @@ struct Funes : SanguineModule {
 		params[PARAM_CHORD_BANK].setValue(chordBankNum);
 	}
 
-	void resetCustomDataStates() {
-		customDataStates[2] = funes::DataFactory;
-		customDataStates[3] = funes::DataFactory;
-		customDataStates[4] = funes::DataFactory;
-		customDataStates[5] = funes::DataFactory;
-		customDataStates[13] = funes::DataFactory;
+	void setSuboscillatorMode(int suboscillatorMode) {
+		suboscillatorMode = suboscillatorMode;
+		params[PARAM_AUX_SUBOSCILLATOR].setValue(suboscillatorMode);
 	}
 };
 
@@ -770,6 +796,9 @@ struct FunesWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.213, 116.972), module, Funes::INPUT_LEVEL));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(34.69, 116.972), module, Funes::INPUT_NOTE));
 
+		addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedGreenBlueLight>>>(millimetersToPixelsVec(89.435, 116.972), module,
+			Funes::PARAM_AUX_SUBOSCILLATOR, Funes::LIGHT_AUX_SUBOSCILLATOR));
+
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(98.669, 116.972), module,
 			Funes::INPUT_AUX_CROSSFADE));
 
@@ -837,6 +866,11 @@ struct FunesWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Chord bank", funes::chordBankLabels,
 			[=]() {return module->chordBank; },
 			[=](int i) {module->setChordBank(i); }
+		));
+
+		menu->addChild(createIndexSubmenuItem("Aux suboscillator", funes::suboscillatorLabels,
+			[=]() {return module->suboscillatorMode; },
+			[=](int i) {module->setSuboscillatorMode(i); }
 		));
 
 		menu->addChild(new MenuSeparator);
