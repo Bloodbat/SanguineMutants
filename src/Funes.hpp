@@ -88,4 +88,20 @@ namespace funes {
     DataFactory,
     DataCustom
   };
+
+  enum SuboscillatorModes {
+    SUBOSCILLATOR_OFF,
+    SUBOSCILLATOR_SQUARE,
+    SUBOSCILLATOR_SINE,
+    SUBOSCILLATOR_SINE_MINUS_ONE,
+    SUBOSCILLATOR_SINE_MINUS_TWO
+  };
+
+  static const std::vector<std::string> suboscillatorLabels = {
+    "Off",
+    "Square",
+    "Sine",
+    "Sine minus 1 octave",
+    "Sine minus 2 octaves",
+  };
 }
