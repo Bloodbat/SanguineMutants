@@ -59,6 +59,8 @@
 #include "plaits/dsp/engine2/string_machine_engine.h"
 #include "plaits/dsp/engine2/virtual_analog_vcf_engine.h"
 #include "plaits/dsp/engine2/wave_terrain_engine.h"
+#include "plaits/dsp/oscillator/sine_oscillator.h"
+#include "plaits/dsp/oscillator/square_oscillator.h"
 
 #include "plaits/dsp/envelope.h"
 
@@ -121,6 +123,19 @@ namespace plaits {
     float decay;
     float lpg_colour;
 
+    /*
+      0 - regular aux model
+      1 - square wave
+      2 - sine wave
+    */
+    uint8_t aux_subosc_wave_option;
+    /*
+      0 - no octave shift
+      1 - 1 octave down
+      2 - 2 octaves down
+    */
+    uint8_t aux_subosc_octave_option;
+    
     float aux_crossfade;
 
     /*
@@ -209,6 +224,8 @@ namespace plaits {
     StringMachineEngine string_machine_engine_;
     ChiptuneEngine chiptune_engine_;
 
+    FastSineOscillator sine_oscillator_;
+    SquareOscillator square_oscillator_;
     stmlib::HysteresisQuantizer2 engine_quantizer_;
 
     UserData* user_data_;
