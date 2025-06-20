@@ -144,6 +144,12 @@ namespace plaits {
      2 - Joe Mcmullen chord set.
     */
     uint8_t chordBank;
+
+    /*
+      False - Don't hold params on trigger (original).
+      True - Hold Timbre, Morph, Harmo, Level, V/Oct CV modulations on trigger (not FM).
+    */
+    bool wantHoldModulations;
   };
 
   struct Modulations {
@@ -236,6 +242,12 @@ namespace plaits {
 
     float previous_note_;
     bool trigger_state_;
+
+    float heldTimbre;
+    float heldMorph;
+    float heldHarmo;
+    float heldLevel;
+    float heldNote;
 
     DecayEnvelope decay_envelope_;
     LPGEnvelope lpg_envelope_;
