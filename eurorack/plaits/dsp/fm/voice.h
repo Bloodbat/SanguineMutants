@@ -128,10 +128,6 @@ namespace plaits {
         return true;
       }
 
-      inline float op_level(int i) const {
-        return level_[i];
-      }
-
       inline void Render(const Parameters& parameters, float* temp, float* out, float* aux, size_t size) {
         float* buffers[4] = { out, aux, temp, temp };
         Render(parameters, buffers, size);
