@@ -216,9 +216,7 @@ struct Apices : SanguineModule {
 			expanderCVValues1[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_3).getValue();
 			expanderCVValues1[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_4).getValue();
 
-			simd::int32_4 expanderModulatedValues1 = {};
-
-			expanderModulatedValues1 = expanderCVValues1;
+			simd::int32_4 expanderModulatedValues1 = expanderCVValues1;
 
 			expanderModulatedValues1[0] += potValues[0];
 			expanderModulatedValues1[1] += potValues[1];
@@ -246,9 +244,7 @@ struct Apices : SanguineModule {
 			expanderCVValues2[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
 			expanderCVValues2[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
 
-			simd::int32_4 expanderModulatedValues2 = {};
-
-			expanderModulatedValues2 = expanderCVValues2;
+			simd::int32_4 expanderModulatedValues2 = expanderCVValues2;
 
 			expanderModulatedValues2[0] += potValues[4];
 			expanderModulatedValues2[1] += potValues[5];
