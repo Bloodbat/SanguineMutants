@@ -96,10 +96,30 @@ namespace plaits {
        CV out lags behind the GATE out. */
     trigger_delay_.Write(modulations.trigger);
     float trigger_value = trigger_delay_.Read(kTriggerDelay);
+    bool trigger_high = trigger_value > 0.3f;
+    float modulationTimbre = modulations.timbre;
+    float modulationMorph = modulations.morph;
+    float modulationHarmonics = modulations.harmonics;
+    float modulationLevel = modulations.level;
+    float modulationNote = modulations.note;
+    if (modulations.trigger_patched && (patch.wantHoldModulations)) {
+      if (!trigger_state_ && trigger_high) {
+        heldTimbre = modulations.timbre;
+        heldMorph = modulations.morph;
+        heldHarmo = modulations.harmonics;
+        heldLevel = modulations.level;
+        heldNote = modulations.note;
+      }
+      modulationTimbre = heldTimbre;
+      modulationMorph = heldMorph;
+      modulationHarmonics = heldHarmo;
+      modulationLevel = heldLevel;
+      modulationNote = heldNote;
+    }
 
     bool previous_trigger_state = trigger_state_;
     if (!previous_trigger_state) {
-      if (trigger_value > 0.3f) {
+      if (trigger_high) {
         trigger_state_ = true;
         if (!modulations.level_patched) {
           lpg_envelope_.Trigger();
@@ -139,8 +159,8 @@ namespace plaits {
     p.chord_set_option = patch.chordBank;
 
     bool rising_edge = trigger_state_ && !previous_trigger_state;
-    float note = (modulations.note + previous_note_) * 0.5f;
-    previous_note_ = modulations.note;
+    float note = (modulationNote + previous_note_) * 0.5f;
+    previous_note_ = modulationNote;
     const PostProcessingSettings& pp_s = e->post_processing_settings;
 
     if (modulations.trigger_patched) {
@@ -155,7 +175,7 @@ namespace plaits {
 
     decay_envelope_.Process(short_decay * 2.0f);
 
-    float compressed_level = 1.3f * modulations.level / (0.3f + fabsf(modulations.level));
+    float compressed_level = 1.3f * modulationLevel / (0.3f + fabsf(modulationLevel));
     CONSTRAIN(compressed_level, 0.0f, 1.0f);
     p.accent = modulations.level_patched ? compressed_level : 0.8f;
 
@@ -163,7 +183,7 @@ namespace plaits {
 
     // Actual synthesis parameters.
 
-    p.harmonics = patch.harmonics + modulations.harmonics;
+    p.harmonics = patch.harmonics + modulationHarmonics;
     CONSTRAIN(p.harmonics, 0.0f, 1.0f);
 
     float internal_envelope_amplitude = 1.0f;
@@ -190,10 +210,10 @@ namespace plaits {
       modulations.frequency, use_internal_envelope,
       internal_envelope_amplitude * decay_envelope_.value() * decay_envelope_.value() * 48.0f, 1.0f, -119.0f, 120.0f);
 
-    p.timbre = ApplyModulations(patch.timbre, patch.timbre_modulation_amount, modulations.timbre_patched, modulations.timbre,
+    p.timbre = ApplyModulations(patch.timbre, patch.timbre_modulation_amount, modulations.timbre_patched, modulationTimbre,
       use_internal_envelope, internal_envelope_amplitude_timbre * decay_envelope_.value(), 0.0f, 0.0f, 1.0f);
 
-    p.morph = ApplyModulations(patch.morph, patch.morph_modulation_amount, modulations.morph_patched, modulations.morph,
+    p.morph = ApplyModulations(patch.morph, patch.morph_modulation_amount, modulations.morph_patched, modulationMorph,
       use_internal_envelope, internal_envelope_amplitude * decay_envelope_.value(), 0.0f, 0.0f, 1.0f);
 
     bool already_enveloped = pp_s.already_enveloped;

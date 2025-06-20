@@ -26,6 +26,8 @@
 
 - Funes: Aux suboscillator adapted from Lyle Mills' firmware.
 
+- Funes: ability to hold Timbre, Morph, Harmonics, Level and Note voltages when trigger es received, adapted from Lyle Mills' firmware.
+
 - Mortuus: PLO phase values are now saved to and restored from patches and presets.
 
 - Nodi family: display channel also affects the big knob's light.
