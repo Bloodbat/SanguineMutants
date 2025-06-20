@@ -25,6 +25,8 @@ without the backticks.
 
 - Funes: Aux suboscillator adapted from Lyle Mills' firmware.
 
+- Funes: ability to hold Timbre, Morph, Harmonics, Level and Note voltages when trigger is received, adapted from Lyle Mills' firmware.
+
 
 ---
 
