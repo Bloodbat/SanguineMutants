@@ -72,7 +72,6 @@ namespace plaits {
 
       while (size--) {
         bool reset = false;
-        float reset_time = 0.0f;
 
         float this_sample = next_sample;
         next_sample = 0.0f;
@@ -85,7 +84,7 @@ namespace plaits {
 
         if (reset) {
           carrier_phase_ -= 1.0f;
-          reset_time = carrier_phase_ / f0;
+          float reset_time = carrier_phase_ / f0;
           float before = Grainlet(1.0f, formant_phase_ + (1.0f - reset_time) * f1,
             carrier_shape_modulation.subsample(1.0f - reset_time),
             carrier_bleed_modulation.subsample(1.0f - reset_time));
