@@ -56,7 +56,7 @@ namespace plaits {
       }
     }
 
-    void Process(float gain, float frequency, float hf_bleed, float* in, short* out, size_t size, size_t stride) {
+    void Process(float gain, float frequency, float hf_bleed, const float* in, short* out, size_t size, size_t stride) {
       stmlib::ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
       filter_.set_f_q<stmlib::FREQUENCY_DIRTY>(frequency, 0.4f);
       while (size--) {
