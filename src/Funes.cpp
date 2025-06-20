@@ -718,9 +718,9 @@ struct Funes : SanguineModule {
 		params[PARAM_CHORD_BANK].setValue(chordBankNum);
 	}
 
-	void setSuboscillatorMode(int suboscillatorMode) {
-		suboscillatorMode = suboscillatorMode;
-		params[PARAM_AUX_SUBOSCILLATOR].setValue(suboscillatorMode);
+	void setSuboscillatorMode(int suboscillatorModeNum) {
+		suboscillatorMode = static_cast<funes::SuboscillatorModes>(suboscillatorModeNum);
+		params[PARAM_AUX_SUBOSCILLATOR].setValue(suboscillatorModeNum);
 	}
 };
 
