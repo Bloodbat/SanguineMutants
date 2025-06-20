@@ -605,7 +605,7 @@ struct Funes : SanguineModule {
 
 		if (fileExtension == ".bin") {
 			std::vector<uint8_t> buffer = system::readFile(filePath);
-			uint8_t* dataBuffer = buffer.data();
+			const uint8_t* dataBuffer = buffer.data();
 			bool success = userData.Save(dataBuffer, patch.engine);
 			if (success) {
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
