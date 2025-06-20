@@ -235,11 +235,10 @@ struct Explorator : SanguineModule {
 		outputs[OUTPUT_SH_NOISE].setChannels(noiseChannels);
 
 		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
-			float noiseMultiplier = 0.f;
 			switch (noiseMode) {
 			case NOISE_PRISM:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
-					noiseMultiplier = static_cast<float>(pcgMultipliers[channel](16) + 1);
+					float noiseMultiplier = static_cast<float>(pcgMultipliers[channel](16) + 1);
 					noises[channel] = ldexpf(pcgNoises[channel](), -32) * noiseMultiplier - (noiseMultiplier / 2.f);
 				}
 				break;
