@@ -239,14 +239,14 @@ struct Funes : SanguineModule {
 			patch.frequency_modulation_amount = params[PARAM_FREQUENCY_CV].getValue();
 			patch.timbre_modulation_amount = params[PARAM_TIMBRE_CV].getValue();
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
-			patch.chord_set_option = chordBank;
-			patch.aux_crossfade = params[PARAM_AUX_CROSSFADE].getValue();
+			patch.chordBank = chordBank;
+			patch.auxCrossfade = params[PARAM_AUX_CROSSFADE].getValue();
 			float suboscillatorOption = params[PARAM_AUX_SUBOSCILLATOR].getValue();
 			suboscillatorMode = static_cast<funes::SuboscillatorModes>(suboscillatorOption);
-			patch.aux_subosc_wave_option = suboscillatorOption > funes::SUBOSCILLATOR_SINE ? funes::SUBOSCILLATOR_SINE :
+			patch.auxSuboscillatorWave = suboscillatorOption > funes::SUBOSCILLATOR_SINE ? funes::SUBOSCILLATOR_SINE :
 				suboscillatorMode;
 			int8_t suboscillatorOctave = suboscillatorMode > funes::SUBOSCILLATOR_SINE ? suboscillatorMode - 2 : 0;
-			patch.aux_subosc_octave_option = suboscillatorOctave;
+			patch.auxSuboscillatorOctave = suboscillatorOctave;
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
 				ledsMode = funes::LEDLPG;
@@ -281,7 +281,7 @@ struct Funes : SanguineModule {
 				modulations.level_patched = inputs[INPUT_LEVEL].isConnected();
 				modulations.level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
 
-				modulations.aux_crossfade = inputs[INPUT_AUX_CROSSFADE].getPolyVoltage(channel) / 5.f;
+				modulations.auxCrossfade = inputs[INPUT_AUX_CROSSFADE].getPolyVoltage(channel) / 5.f;
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
