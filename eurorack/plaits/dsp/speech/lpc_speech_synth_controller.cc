@@ -282,7 +282,7 @@ namespace plaits {
 
         synth_.Render(prosody_amount, pitch_shift, &new_sample[0], &new_sample[1], 1);
 
-        float discontinuity[2] = {
+        const float discontinuity[2] = {
           new_sample[0] - sample_[0],
           new_sample[1] - sample_[1]
         };
