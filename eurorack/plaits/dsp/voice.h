@@ -128,22 +128,22 @@ namespace plaits {
       1 - Square wave.
       2 - Sine wave.
     */
-    uint8_t aux_subosc_wave_option;
+    uint8_t auxSuboscillatorWave;
     /*
       0 - No octave shift.
       1 - 1 octave down.
       2 - 2 octaves down.
     */
-    uint8_t aux_subosc_octave_option;
+    uint8_t auxSuboscillatorOctave;
 
-    float aux_crossfade;
+    float auxCrossfade;
 
     /*
      0 - Original chord set.
      1 - Jon Butler chord set.
      2 - Joe Mcmullen chord set.
     */
-    uint8_t chord_set_option;
+    uint8_t chordBank;
   };
 
   struct Modulations {
@@ -156,7 +156,7 @@ namespace plaits {
     float trigger;
     float level;
 
-    float aux_crossfade;
+    float auxCrossfade;
 
     bool frequency_patched;
     bool timbre_patched;
