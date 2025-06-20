@@ -37,7 +37,7 @@ namespace plaits {
   using namespace std;
   using namespace stmlib;
 
-  void FMVoice::Init(fm::Algorithms<6>* algorithms, float sample_rate) {
+  void FMVoice::Init(const fm::Algorithms<6>* algorithms, float sample_rate) {
     voice_.Init(algorithms, sample_rate);
     lfo_.Init(sample_rate);
 
