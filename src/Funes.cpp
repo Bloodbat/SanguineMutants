@@ -39,6 +39,7 @@ struct Funes : SanguineModule {
 		PARAM_CHORD_BANK,
 		PARAM_AUX_CROSSFADE,
 		PARAM_AUX_SUBOSCILLATOR,
+		PARAM_HOLD_MODULATIONS,
 		PARAMS_COUNT
 	};
 
@@ -69,6 +70,7 @@ struct Funes : SanguineModule {
 		ENUMS(LIGHT_CUSTOM_DATA, 2),
 		ENUMS(LIGHT_CHORD_BANK, 2),
 		ENUMS(LIGHT_AUX_SUBOSCILLATOR, 3),
+		LIGHT_HOLD_MODULATIONS,
 		LIGHTS_COUNT
 	};
 
@@ -115,6 +117,8 @@ struct Funes : SanguineModule {
 
 	bool bNotesModelSelection = false;
 
+	bool bWantHoldModulations = false;
+
 	funes::LEDModes ledsMode = funes::LEDNormal;
 
 	std::string displayText = "";
@@ -142,6 +146,8 @@ struct Funes : SanguineModule {
 		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
+
+		configSwitch(PARAM_HOLD_MODULATIONS, 0.f, 1.f, 0.f, "Hold Timbre, Morph, Harmonics, Level and Note voltages on trigger");
 
 		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
 
@@ -183,6 +189,8 @@ struct Funes : SanguineModule {
 		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		chordBank = params[PARAM_CHORD_BANK].getValue();
+
+		bWantHoldModulations = static_cast<bool>(params[PARAM_HOLD_MODULATIONS].getValue());
 
 		if (drbOutputBuffers.empty()) {
 			const int kBlockSize = 12;
@@ -247,6 +255,8 @@ struct Funes : SanguineModule {
 				suboscillatorMode;
 			int8_t suboscillatorOctave = suboscillatorMode > funes::SUBOSCILLATOR_SINE ? suboscillatorMode - 2 : 0;
 			patch.auxSuboscillatorOctave = suboscillatorOctave;
+
+			patch.wantHoldModulations = bWantHoldModulations;
 
 			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
 				ledsMode = funes::LEDLPG;
@@ -371,6 +381,8 @@ struct Funes : SanguineModule {
 
 				lights[LIGHT_AUX_SUBOSCILLATOR + 2].setBrightness(suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_TWO ?
 					kSanguineButtonLightValue : 0.f);
+
+				lights[LIGHT_HOLD_MODULATIONS].setBrightness(bWantHoldModulations ? kSanguineButtonLightValue : 0.f);
 			}
 
 			// Convert output.
@@ -722,6 +734,11 @@ struct Funes : SanguineModule {
 		suboscillatorMode = static_cast<funes::SuboscillatorModes>(suboscillatorModeNum);
 		params[PARAM_AUX_SUBOSCILLATOR].setValue(suboscillatorModeNum);
 	}
+
+	void toggleHoldVoltagesOnTrigger() {
+		bWantHoldModulations = !bWantHoldModulations;
+		params[PARAM_HOLD_MODULATIONS].setValue(static_cast<float>(bWantHoldModulations));
+	}
 };
 
 struct FunesWidget : SanguineModuleWidget {
@@ -796,6 +813,9 @@ struct FunesWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.737, 116.972), module, Funes::INPUT_TRIGGER));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.213, 116.972), module, Funes::INPUT_LEVEL));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(34.69, 116.972), module, Funes::INPUT_NOTE));
+
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<BlueLight>>>(millimetersToPixelsVec(48.603, 116.972), module,
+			Funes::PARAM_HOLD_MODULATIONS, Funes::LIGHT_HOLD_MODULATIONS));
 
 		addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedGreenBlueLight>>>(millimetersToPixelsVec(89.435, 116.972), module,
 			Funes::PARAM_AUX_SUBOSCILLATOR, Funes::LIGHT_AUX_SUBOSCILLATOR));
@@ -873,6 +893,10 @@ struct FunesWidget : SanguineModuleWidget {
 			[=]() {return module->suboscillatorMode; },
 			[=](int i) {module->setSuboscillatorMode(i); }
 		));
+
+		menu->addChild(createCheckMenuItem("Hold parameter voltages on trigger", "",
+			[=]() {return module->bWantHoldModulations; },
+			[=]() {module->toggleHoldVoltagesOnTrigger(); }));
 
 		menu->addChild(new MenuSeparator);
 
