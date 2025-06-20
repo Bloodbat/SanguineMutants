@@ -124,24 +124,24 @@ namespace plaits {
     float lpg_colour;
 
     /*
-      0 - regular aux model
-      1 - square wave
-      2 - sine wave
+      0 - Regular aux model.
+      1 - Square wave.
+      2 - Sine wave.
     */
     uint8_t aux_subosc_wave_option;
     /*
-      0 - no octave shift
-      1 - 1 octave down
-      2 - 2 octaves down
+      0 - No octave shift.
+      1 - 1 octave down.
+      2 - 2 octaves down.
     */
     uint8_t aux_subosc_octave_option;
-    
+
     float aux_crossfade;
 
     /*
-     0 - original chord set
-     1 - jon butler chord set
-     2 - joe mcmullen chord set
+     0 - Original chord set.
+     1 - Jon Butler chord set.
+     2 - Joe Mcmullen chord set.
     */
     uint8_t chord_set_option;
   };
