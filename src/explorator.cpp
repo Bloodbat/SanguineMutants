@@ -236,8 +236,7 @@ struct Explorator : SanguineModule {
 
 		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
 			float noiseMultiplier = 0.f;
-			switch (noiseMode)
-			{
+			switch (noiseMode) {
 			case NOISE_PRISM:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
 					noiseMultiplier = static_cast<float>(pcgMultipliers[channel](16) + 1);
