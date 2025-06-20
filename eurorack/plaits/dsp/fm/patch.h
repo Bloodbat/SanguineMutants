@@ -89,10 +89,6 @@ namespace plaits {
       uint8_t name[10];
       uint8_t active_operators;
 
-      inline uint8_t* bytes() {
-        return static_cast<uint8_t*>(static_cast<void*>(this));
-      }
-
       inline void Unpack(const uint8_t* data) {
         for (int i = 0; i < 6; ++i) {
           Operator* o = &op[i];
