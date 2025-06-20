@@ -130,13 +130,13 @@ namespace plaits {
       e->Reset();
 
       out_post_processor_.Reset();
-    sine_oscillator_.Init();
-    square_oscillator_.Init();
+      sine_oscillator_.Init();
+      square_oscillator_.Init();
       previous_engine_index_ = engine_index;
       reload_user_data_ = false;
     }
     EngineParameters p;
-    p.chord_set_option = patch.chord_set_option;
+    p.chord_set_option = patch.chordBank;
 
     bool rising_edge = trigger_state_ && !previous_trigger_state;
     float note = (modulations.note + previous_note_) * 0.5f;
@@ -199,25 +199,25 @@ namespace plaits {
     bool already_enveloped = pp_s.already_enveloped;
     e->Render(p, out_buffer_, aux_buffer_, size, &already_enveloped);
 
-    if (patch.aux_subosc_wave_option >= 1) {
+    if (patch.auxSuboscillatorWave >= 1) {
       float frequency = NoteToFrequency(p.note);
-      if (patch.aux_subosc_octave_option == 1) {
+      if (patch.auxSuboscillatorOctave == 1) {
         frequency /= 2.0f;
-      } else if (patch.aux_subosc_octave_option == 2) {
+      } else if (patch.auxSuboscillatorOctave == 2) {
         frequency /= 4.0f;
       }
 
-      if (patch.aux_subosc_wave_option == 1) {
+      if (patch.auxSuboscillatorWave == 1) {
         square_oscillator_.Render(frequency, aux_buffer_, size);
-      } else if (patch.aux_subosc_wave_option == 2) {
+      } else if (patch.auxSuboscillatorWave == 2) {
         sine_oscillator_.Render(frequency, aux_buffer_, size);
       }
     }
 
     // Crossfade the aux output between main and aux models.
-    float auxCrossfadeProportion = patch.aux_crossfade;
+    float auxCrossfadeProportion = patch.auxCrossfade;
 
-    auxCrossfadeProportion += modulations.aux_crossfade;
+    auxCrossfadeProportion += modulations.auxCrossfade;
 
     CONSTRAIN(auxCrossfadeProportion, 0.f, 1.f);
 
