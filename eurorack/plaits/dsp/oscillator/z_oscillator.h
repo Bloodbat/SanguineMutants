@@ -72,7 +72,6 @@ namespace plaits {
 
       while (size--) {
         bool reset = false;
-        float reset_time = 0.0f;
 
         float this_sample = next_sample;
         next_sample = 0.0f;
@@ -86,7 +85,7 @@ namespace plaits {
 
         if (reset) {
           discontinuity_phase_ -= 1.0f;
-          reset_time = discontinuity_phase_ / (2.0f * f0);
+          float reset_time = discontinuity_phase_ / (2.0f * f0);
 
           float carrier_phase_before = carrier_phase_ >= 1.0f ? 1.0f : 0.5f;
           float carrier_phase_after = carrier_phase_ >= 1.0f ? 0.0f : 0.5f;
