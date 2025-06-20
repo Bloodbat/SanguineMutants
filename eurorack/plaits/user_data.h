@@ -66,7 +66,7 @@ namespace plaits {
       }
     }
 
-    inline bool Save(uint8_t* rx_buffer, int slot) {
+    inline bool Save(const uint8_t* rx_buffer, int slot) {
       if (rx_buffer == NULL) {
         for (size_t i = 0; i < MAX_USER_DATA_SIZE; ++i) {
           m_buffer[i] = 0;
