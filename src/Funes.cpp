@@ -151,9 +151,9 @@ struct Funes : SanguineModule {
 
 		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
 
-		configParam(PARAM_AUX_CROSSFADE, 0.f, 1.f, 0.f, "Main Out → Aux crossfader", "%", 0.f, 100.f);
+		configParam(PARAM_AUX_CROSSFADE, 0.f, 1.f, 0.f, "Main Out → Aux cross-fader", "%", 0.f, 100.f);
 
-		configSwitch(PARAM_AUX_SUBOSCILLATOR, 0.f, 4.f, 0.f, "Aux suboscillator", { funes::suboscillatorLabels });
+		configSwitch(PARAM_AUX_SUBOSCILLATOR, 0.f, 4.f, 0.f, "Aux sub-oscillator", { funes::suboscillatorLabels });
 
 		configInput(INPUT_ENGINE, "Model");
 		configInput(INPUT_TIMBRE, "Timbre");
@@ -166,7 +166,7 @@ struct Funes : SanguineModule {
 		configInput(INPUT_LGP_COLOR, "Lowpass gate response");
 		configInput(INPUT_LPG_DECAY, "Lowpass gate decay");
 
-		configInput(INPUT_AUX_CROSSFADE, "Main Out → Aux crossfader");
+		configInput(INPUT_AUX_CROSSFADE, "Main Out → Aux cross-fader");
 
 		configOutput(OUTPUT_OUT, "Main");
 		configOutput(OUTPUT_AUX, "Auxiliary");
@@ -889,7 +889,7 @@ struct FunesWidget : SanguineModuleWidget {
 			[=](int i) {module->setChordBank(i); }
 		));
 
-		menu->addChild(createIndexSubmenuItem("Aux suboscillator", funes::suboscillatorLabels,
+		menu->addChild(createIndexSubmenuItem("Aux sub-oscillator", funes::suboscillatorLabels,
 			[=]() {return module->suboscillatorMode; },
 			[=](int i) {module->setSuboscillatorMode(i); }
 		));
