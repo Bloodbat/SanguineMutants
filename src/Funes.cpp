@@ -814,7 +814,7 @@ struct FunesWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.213, 116.972), module, Funes::INPUT_LEVEL));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(34.69, 116.972), module, Funes::INPUT_NOTE));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<BlueLight>>>(millimetersToPixelsVec(48.603, 116.972), module,
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(48.603, 116.972), module,
 			Funes::PARAM_HOLD_MODULATIONS, Funes::LIGHT_HOLD_MODULATIONS));
 
 		addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedGreenBlueLight>>>(millimetersToPixelsVec(89.435, 116.972), module,
