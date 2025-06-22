@@ -147,7 +147,7 @@ struct Funes : SanguineModule {
 		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
 
-		configSwitch(PARAM_HOLD_MODULATIONS, 0.f, 1.f, 0.f, "Hold Timbre, Morph, Harmonics, Level and Note voltages on trigger");
+		configSwitch(PARAM_HOLD_MODULATIONS, 0.f, 1.f, 0.f, "Hold modulation voltages on trigger");
 
 		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
 
@@ -894,7 +894,7 @@ struct FunesWidget : SanguineModuleWidget {
 			[=](int i) {module->setSuboscillatorMode(i); }
 		));
 
-		menu->addChild(createCheckMenuItem("Hold parameter voltages on trigger", "",
+		menu->addChild(createCheckMenuItem("Hold modulation voltages on trigger", "",
 			[=]() {return module->bWantHoldModulations; },
 			[=]() {module->toggleHoldVoltagesOnTrigger(); }));
 
