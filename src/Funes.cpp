@@ -889,14 +889,15 @@ struct FunesWidget : SanguineModuleWidget {
 			[=](int i) {module->setChordBank(i); }
 		));
 
+		menu->addChild(createCheckMenuItem("Hold modulation voltages on trigger", "",
+			[=]() {return module->bWantHoldModulations; },
+			[=]() {module->toggleHoldVoltagesOnTrigger(); }
+		));
+
 		menu->addChild(createIndexSubmenuItem("Aux sub-oscillator", funes::suboscillatorLabels,
 			[=]() {return module->suboscillatorMode; },
 			[=](int i) {module->setSuboscillatorMode(i); }
 		));
-
-		menu->addChild(createCheckMenuItem("Hold modulation voltages on trigger", "",
-			[=]() {return module->bWantHoldModulations; },
-			[=]() {module->toggleHoldVoltagesOnTrigger(); }));
 
 		menu->addChild(new MenuSeparator);
 
