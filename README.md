@@ -100,7 +100,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
 - ### Reticula
 
-  A topographic sequencer based on Mutable Instrument's Grids, it offers new, versatile capabilities exclusive to Sanguine Mutants.
+  A topographic sequencer based on MI's Grids with new, versatile capabilities exclusive to Sanguine Mutants.
 
 - ### Scalaria
   
