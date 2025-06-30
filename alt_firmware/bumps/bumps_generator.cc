@@ -599,8 +599,8 @@ namespace bumps {
 		int64_t bi_lp_state_1 = bi_lp_state_[1];
 		int32_t previous_smoothed_slope = 0x7fffffff;
 		uint32_t end_of_attack = 1UL << 31;
-		uint32_t attack_factor = 1 << kSlopeBits;
-		uint32_t decay_factor = 1 << kSlopeBits;
+		uint32_t attack_factor;
+		uint32_t  decay_factor = attack_factor = 1 << kSlopeBits;
 
 		while (size--) {
 			sync_counter_++;
