@@ -189,13 +189,13 @@ namespace etesia {
       float x0, scale;
       if (resolution == RESOLUTION_16_BIT) {
         x0 = s16_[integral];
-        scale = 1.0f / 32768.0f;
+        scale = kScaleBig;
       } else if (resolution == RESOLUTION_8_BIT_MU_LAW) {
         x0 = MuLaw2Lin(s8_[integral]);
-        scale = 1.0f / 32768.0f;
+        scale = kScaleBig;
       } else {
         x0 = s8_[integral];
-        scale = 1.0f / 128.0f;
+        scale = kScaleSmall;
       }
       return x0 * scale;
     }
@@ -210,15 +210,15 @@ namespace etesia {
       if (resolution == RESOLUTION_16_BIT) {
         x0 = s16_[integral];
         x1 = s16_[integral + 1];
-        scale = 1.0f / 32768.0f;
+        scale = kScaleBig;
       } else if (resolution == RESOLUTION_8_BIT_MU_LAW) {
         x0 = MuLaw2Lin(s8_[integral]);
         x1 = MuLaw2Lin(s8_[integral + 1]);
-        scale = 1.0f / 32768.0f;
+        scale = kScaleBig;
       } else {
         x0 = s8_[integral];
         x1 = s8_[integral + 1];
-        scale = 1.0f / 128.0f;
+        scale = kScaleSmall;
       }
       return (x0 + (x1 - x0) * t) * scale;
     }
@@ -236,19 +236,19 @@ namespace etesia {
         x0 = s16_[integral + 1];
         x1 = s16_[integral + 2];
         x2 = s16_[integral + 3];
-        scale = 1.0f / 32768.0f;
+        scale = kScaleBig;
       } else if (resolution == RESOLUTION_8_BIT_MU_LAW) {
         xm1 = MuLaw2Lin(s8_[integral]);
         x0 = MuLaw2Lin(s8_[integral + 1]);
         x1 = MuLaw2Lin(s8_[integral + 2]);
         x2 = MuLaw2Lin(s8_[integral + 3]);
-        scale = 1.0f / 32768.0f;
+        scale = kScaleBig;
       } else {
         xm1 = s8_[integral];
         x0 = s8_[integral + 1];
         x1 = s8_[integral + 2];
         x2 = s8_[integral + 3];
-        scale = 1.0f / 128.0f;
+        scale = kScaleSmall;
       }
 
       // Laurent de Soras's Hermite interpolator.
@@ -281,6 +281,9 @@ namespace etesia {
 
     int16_t* tail_;
     int32_t crossfade_counter_;
+
+    static constexpr float kScaleBig = 1.f / 32768.f;
+    static constexpr float kScaleSmall = 1.f / 128.f;
 
     DISALLOW_COPY_AND_ASSIGN(AudioBuffer);
   };
