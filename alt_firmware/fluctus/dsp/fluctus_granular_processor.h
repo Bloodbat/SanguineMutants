@@ -86,32 +86,8 @@ namespace fluctus {
       return &parameters_;
     }
 
-    inline const Parameters& parameters() const {
-      return parameters_;
-    }
-
-    inline void ToggleFreeze() {
-      parameters_.freeze = !parameters_.freeze;
-    }
-
     inline void set_freeze(bool freeze) {
       parameters_.freeze = freeze;
-    }
-
-    inline bool frozen() const {
-      return parameters_.freeze;
-    }
-
-    inline void set_silence(bool silence) {
-      silence_ = silence;
-    }
-
-    inline void set_bypass(bool bypass) {
-      bypass_ = bypass;
-    }
-
-    inline bool bypass() const {
-      return bypass_;
     }
 
     inline void set_playback_mode(PlaybackMode playback_mode) {
