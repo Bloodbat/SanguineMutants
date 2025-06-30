@@ -56,7 +56,7 @@ namespace etesia {
 			ratio_ = 0.0f;
 			pitch_shift_amount_ = 1.0f;
 			level_ = 0.0f;
-			for (int i = 0; i < 9; i++) {
+			for (int i = 0; i < 9; ++i) {
 				lfo_[i].Init();
 			}
 		}
@@ -99,7 +99,7 @@ namespace etesia {
 			float slope = mod_rate_ * mod_rate_;
 			slope *= slope * slope;
 			slope /= 200.0f;
-			for (int i = 0; i < 9; i++) {
+			for (int i = 0; i < 9; ++i) {
 				lfo_[i].set_slope(slope);
 			}
 
