@@ -44,7 +44,6 @@ namespace etesia {
 		void Init(uint16_t* buffer) {
 			engine_.Init(buffer);
 			diffusion_ = 0.625f;
-			size_ = 1.0f;
 			mod_amount_ = 0.0f;
 			mod_rate_ = 0.0f;
 			size_ = 0.5f;
