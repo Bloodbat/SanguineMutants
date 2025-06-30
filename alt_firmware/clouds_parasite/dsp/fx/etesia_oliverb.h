@@ -38,8 +38,8 @@ namespace etesia {
 
 	class Oliverb {
 	public:
-		Oliverb() { }
-		~Oliverb() { }
+		Oliverb() {}
+		~Oliverb() {}
 
 		void Init(uint16_t* buffer) {
 			engine_.Init(buffer);
@@ -56,15 +56,16 @@ namespace etesia {
 			ratio_ = 0.0f;
 			pitch_shift_amount_ = 1.0f;
 			level_ = 0.0f;
-			for (int i = 0; i < 9; i++)
+			for (int i = 0; i < 9; i++) {
 				lfo_[i].Init();
+			}
 		}
 
 		void Process(FloatFrame* in_out, size_t size) {
-			// This is the Griesinger topology described in the Dattorro paper
-			// (4 AP diffusers on the input, then a loop of 2x 2AP+1Delay).
-			// Modulation is applied in the loop of the first diffuser AP for additional
-			// smearing; and to the two long delays for a slow shimmer/chorus effect.
+			/* This is the Griesinger topology described in the Dattorro paper
+			   (4 AP diffusers on the input, then a loop of 2x 2AP+1Delay).
+			   Modulation is applied in the loop of the first diffuser AP for additional
+			   smearing; and to the two long delays for a slow shimmer/chorus effect. */
 			typedef E::Reserve<113,     /* ap1 */
 				E::Reserve<162,           /* ap2 */
 				E::Reserve<241,           /* ap3 */
@@ -94,20 +95,21 @@ namespace etesia {
 			float hp_1 = hp_decay_1_;
 			float hp_2 = hp_decay_2_;
 
-			/* Set frequency of LFOs */
+			// Set frequency of LFOs.
 			float slope = mod_rate_ * mod_rate_;
 			slope *= slope * slope;
 			slope /= 200.0f;
-			for (int i = 0; i < 9; i++)
+			for (int i = 0; i < 9; i++) {
 				lfo_[i].set_slope(slope);
+			}
 
 			while (size--) {
 				engine_.Start(&c);
 
-				// Smooth parameters to avoid delay glitches
+				// Smooth parameters to avoid delay glitches.
 				ONE_POLE(smooth_size_, size_, 0.01f);
 
-				// compute windowing info for the pitch shifter
+				// Compute windowing info for the pitch shifter.
 				float ps_size = 128.0f + (3410.0f - 128.0f) * smooth_size_;
 				phase_ += (1.0f - ratio_) / ps_size;
 				if (phase_ >= 1.0f) phase_ -= 1.0f;
@@ -152,7 +154,7 @@ namespace etesia {
 				c.Write(apout);
 
 				INTERPOLATE_LFO(del2, lfo_[5], decay_ * (1.0f - pitch_shift_amount_));
-				/* blend in the pitch shifted feedback */
+				// Blend in the pitch shifted feedback.
 				c.InterpolateHermite(del2, phase, tri * decay_ * pitch_shift_amount_);
 				c.InterpolateHermite(del2, half, (1.0f - tri) * decay_ * pitch_shift_amount_);
 
@@ -169,7 +171,7 @@ namespace etesia {
 				c.Load(apout);
 
 				INTERPOLATE_LFO(del1, lfo_[7], decay_ * (1.0f - pitch_shift_amount_));
-				/* blend in the pitch shifted feedback */
+				// Blend in the pitch shifted feedback.
 				c.InterpolateHermite(del1, phase, tri * decay_ * pitch_shift_amount_);
 				c.InterpolateHermite(del1, half, (1.0f - tri) * decay_ * pitch_shift_amount_);
 				c.Lp(lp_2, lp_);
@@ -258,7 +260,5 @@ namespace etesia {
 
 		DISALLOW_COPY_AND_ASSIGN(Oliverb);
 	};
-
 }  // namespace etesia
-
 #endif  // ETESIA_DSP_FX_OLIVERB_H_

@@ -46,7 +46,6 @@
 #include "clouds_parasite/etesia_resources.h"
 
 namespace etesia {
-
 #ifndef METAMODULE
 	const int32_t kMaxWSOLASize = 4096;
 #else
@@ -60,9 +59,7 @@ namespace etesia {
 		WSOLASamplePlayer() {}
 		~WSOLASamplePlayer() {}
 
-		void Init(
-			Correlator* correlator,
-			int32_t num_channels) {
+		void Init(Correlator* correlator, int32_t num_channels) {
 			correlator_ = correlator;
 			num_channels_ = num_channels;
 
@@ -88,11 +85,7 @@ namespace etesia {
 		}
 
 		template<Resolution resolution>
-		void Play(
-			const AudioBuffer<resolution>* buffer,
-			const Parameters& parameters,
-			float* out,
-			size_t size) {
+		void Play(const AudioBuffer<resolution>* buffer, const Parameters& parameters, float* out, size_t size) {
 
 			int32_t max_delay = buffer->size() - 2 * window_size_;
 			tap_delay_counter_ += size;
@@ -146,12 +139,8 @@ namespace etesia {
 		}
 
 		template<int32_t num_channels, Resolution resolution>
-		int32_t ReadSignBits(
-			const AudioBuffer<resolution>* buffer,
-			int32_t phase_increment,
-			int32_t source,
-			int32_t size,
-			uint32_t* destination) {
+		int32_t ReadSignBits(const AudioBuffer<resolution>* buffer, int32_t phase_increment, int32_t source,
+			int32_t size, uint32_t* destination) {
 			int32_t phase = 0;
 			uint32_t bits = 0;
 			uint32_t bit_counter = 0;
@@ -194,40 +183,18 @@ namespace etesia {
 			float stride = window_size_ / 2048.0f;
 			CONSTRAIN(stride, 1.0f, 2.0f);
 			stride *= 65536.0f;
-			int32_t increment = static_cast<int32_t>(
-				stride * (next_pitch_ratio_ < 1.25f ? 1.25f : next_pitch_ratio_));
+			int32_t increment = static_cast<int32_t>(stride * (next_pitch_ratio_ < 1.25f ? 1.25f : next_pitch_ratio_));
 			int32_t num_samples = 0;
 			if (num_channels_ == 1) {
-				num_samples = ReadSignBits<1>(
-					buffer,
-					increment,
-					search_source_,
-					window_size_,
-					correlator_->source());
-				ReadSignBits<1>(
-					buffer,
-					increment,
-					search_target_ - window_size_,
-					window_size_ * 2,
+				num_samples = ReadSignBits<1>(buffer, increment, search_source_, window_size_, correlator_->source());
+				ReadSignBits<1>(buffer, increment, search_target_ - window_size_, window_size_ * 2,
 					correlator_->destination());
 			} else {
-				num_samples = ReadSignBits<2>(
-					buffer,
-					increment,
-					search_source_,
-					window_size_,
-					correlator_->source());
-				ReadSignBits<2>(
-					buffer,
-					increment,
-					search_target_ - window_size_,
-					window_size_ * 2,
+				num_samples = ReadSignBits<2>(buffer, increment, search_source_, window_size_, correlator_->source());
+				ReadSignBits<2>(buffer, increment, search_target_ - window_size_, window_size_ * 2,
 					correlator_->destination());
 			}
-			correlator_->StartSearch(
-				num_samples,
-				search_target_ - window_size_ + (window_size_ >> 1),
-				increment);
+			correlator_->StartSearch(num_samples, search_target_ - window_size_ + (window_size_ >> 1), increment);
 			correlator_loaded_ = true;
 		}
 
@@ -236,15 +203,10 @@ namespace etesia {
 
 	private:
 		template<Resolution resolution>
-		void ScheduleAlignedWindow(
-			const AudioBuffer<resolution>* buffer,
-			Window* window) {
+		void ScheduleAlignedWindow(const AudioBuffer<resolution>* buffer, Window* window) {
 			int32_t next_window_position = correlator_->best_match();
 			correlator_loaded_ = false;
-			window->Start(
-				buffer->size(),
-				next_window_position - (window_size_ >> 1),
-				window_size_,
+			window->Start(buffer->size(), next_window_position - (window_size_ >> 1), window_size_,
 				static_cast<uint32_t>(next_pitch_ratio_ * 65536.0f));
 
 			float pitch_error = pitch_ - smoothed_pitch_;
@@ -281,10 +243,12 @@ namespace etesia {
 				CONSTRAIN(index, 0, kMultDivSteps - 1);
 				do position = kMultDivs[index--] * static_cast<float>(tap_delay_);
 				while (position > limit && index >= 0);
-				/* to compensate partially for the size of the windows.
-				 * TODO: this is still not completely right... */
+				// To compensate partially for the size of the windows.
+				// TODO: this is still not completely right...
 				position -= window_size_ * 2;
-				if (position < 0) position = 0;
+				if (position < 0) {
+					position = 0;
+				}
 			}
 
 			int32_t target_position = buffer->head();
@@ -323,5 +287,4 @@ namespace etesia {
 	};
 
 }  // namespace etesia
-
 #endif  // ETESIA_DSP_WSOLA_SAMPLE_PLAYER_H_
