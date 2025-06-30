@@ -130,8 +130,8 @@ namespace etesia {
             }
           }
         }
-      } else if (write && !crossfade_counter_ && resolution == RESOLUTION_16_BIT &&
-        write_head_ >= kInterpolationTail && write_head_ < (size_ - size)) {
+      } else if (!crossfade_counter_ && resolution == RESOLUTION_16_BIT && write_head_ >= kInterpolationTail &&
+        write_head_ < (size_ - size)) {
         // Fast write routine for the most common case.
         while (size--) {
           s16_[write_head_] = parasites_stmlib::Clip16(static_cast<int32_t>(*in * 32767.0f));
