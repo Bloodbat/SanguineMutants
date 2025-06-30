@@ -64,9 +64,6 @@ namespace clouds {
     inline uint32_t* destination() {
       return destination_;
     }
-    inline int32_t candidate() {
-      return candidate_;
-    }
 
     inline bool done() {
       return done_;
