@@ -91,33 +91,6 @@ namespace etesia {
 			return parameters_;
 		}
 
-		inline void ToggleFreeze() {
-			parameters_.freeze = !parameters_.freeze;
-		}
-		inline void ToggleReverse() {
-			parameters_.granular.reverse = !parameters_.granular.reverse;
-		}
-
-		inline bool frozen() const {
-			return parameters_.freeze;
-		}
-
-		inline bool reversed() const {
-			return parameters_.granular.reverse;
-		}
-
-		inline void set_silence(bool silence) {
-			silence_ = silence;
-		}
-
-		inline void set_bypass(bool bypass) {
-			bypass_ = bypass;
-		}
-
-		inline bool bypass() const {
-			return bypass_;
-		}
-
 		inline void set_playback_mode(PlaybackMode playback_mode) {
 			playback_mode_ = playback_mode;
 		}
