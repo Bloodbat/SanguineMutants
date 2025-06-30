@@ -655,7 +655,7 @@ namespace bumps {
 				end_of_attack = slope_offset << 16;
 			}
 
-			uint32_t skewed_phase = phase;
+			uint32_t skewed_phase;
 			if (phase <= end_of_attack) {
 				skewed_phase = (phase >> kSlopeBits) * decay_factor;
 			} else {
