@@ -157,13 +157,8 @@ namespace deadman {
 						(last_frequency_ + (frequency_randomness_ >> 2)) :
 						(last_frequency_ - (frequency_randomness_ >> 2));
 				}
-				// constrain randomised frequency - probably not necessary
-				if (randomised_frequency < -32767) {
-					randomised_frequency = -32767;
-				}
-				else if (randomised_frequency > 32767) {
-					randomised_frequency = 32767;
-				}
+				// Probably not needed?
+				CONSTRAIN(randomised_frequency, -32767, 32767);
 				// set new random frequency
 				set_frequency(randomised_frequency);
 				last_frequency_ = randomised_frequency;
@@ -183,13 +178,7 @@ namespace deadman {
 				// }
 
 				randomised_hit_ = last_random_hit_ + ((stmlib::Random::GetSample() * hit_randomness_) >> 16);
-				// constrain randomised hit
-				if (randomised_hit_ < 0) {
-					randomised_hit_ = 0;
-				}
-				else if (randomised_hit_ > 65535) {
-					randomised_hit_ = 65535;
-				}
+				CONSTRAIN(randomised_hit_, 0, 65535);
 				last_random_hit_ = randomised_hit_;
 				set_tone(randomised_hit_);
 				set_decay(randomised_hit_);
