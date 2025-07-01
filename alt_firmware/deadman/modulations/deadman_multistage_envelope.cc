@@ -36,7 +36,6 @@
 #include "deadman/deadman_resources.h"
 
 namespace deadman {
-
 	using namespace stmlib;
 
 	void MultistageEnvelope::Init() {
@@ -49,23 +48,18 @@ namespace deadman {
 		hard_reset_ = false;
 	}
 
-	void MultistageEnvelope::Process(
-		const GateFlags* gate_flags, int16_t* out, size_t size) {
-
+	void MultistageEnvelope::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 			if (gate_flag & GATE_FLAG_RISING) {
-				start_value_ = (segment_ == num_segments_ || hard_reset_)
-					? level_[0] : value_;
+				start_value_ = (segment_ == num_segments_ || hard_reset_) ? level_[0] : value_;
 				segment_ = 0;
 				phase_ = 0;
-			}
-			else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
+			} else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
 				start_value_ = value_;
 				segment_ = sustain_point_;
 				phase_ = 0;
-			}
-			else if (phase_ < phase_increment_) {
+			} else if (phase_ < phase_increment_) {
 				start_value_ = level_[segment_ + 1];
 				++segment_;
 				phase_ = 0;
@@ -75,16 +69,13 @@ namespace deadman {
 			}
 
 			bool done = segment_ == num_segments_;
-			bool sustained = sustain_point_ && segment_ == sustain_point_ &&
-				gate_flag & GATE_FLAG_HIGH;
+			bool sustained = sustain_point_ && segment_ == sustain_point_ && gate_flag & GATE_FLAG_HIGH;
 
-			phase_increment_ =
-				sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
+			phase_increment_ = sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
 
 			int32_t a = start_value_;
 			int32_t b = level_[segment_ + 1];
-			uint16_t t = Interpolate824(
-				lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
+			uint16_t t = Interpolate824(lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
 			value_ = a + ((b - a) * (t >> 1) >> 15);
 			phase_ += phase_increment_;
 			*out++ = value_;
@@ -101,24 +92,18 @@ namespace deadman {
 		hard_reset_ = false;
 	}
 
-	void DualAttackEnvelope::Process(
-		const GateFlags* gate_flags, int16_t* out, size_t size) {
-
+	void DualAttackEnvelope::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 			if (gate_flag & GATE_FLAG_RISING) {
-				start_value_ = (segment_ == num_segments_ || hard_reset_)
-					? level_[0]
-					: value_;
+				start_value_ = (segment_ == num_segments_ || hard_reset_) ? level_[0] : value_;
 				segment_ = 0;
 				phase_ = 0;
-			}
-			else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
+			} else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
 				start_value_ = value_;
 				segment_ = sustain_point_;
 				phase_ = 0;
-			}
-			else if (phase_ < phase_increment_) {
+			} else if (phase_ < phase_increment_) {
 				start_value_ = level_[segment_ + 1];
 				++segment_;
 				phase_ = 0;
@@ -128,16 +113,13 @@ namespace deadman {
 			}
 
 			bool done = segment_ == num_segments_;
-			bool sustained = sustain_point_ && segment_ == sustain_point_ &&
-				gate_flag & GATE_FLAG_HIGH;
+			bool sustained = sustain_point_ && segment_ == sustain_point_ && gate_flag & GATE_FLAG_HIGH;
 
-			phase_increment_ =
-				sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
+			phase_increment_ = sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
 
 			int32_t a = start_value_;
 			int32_t b = level_[segment_ + 1];
-			uint16_t t = Interpolate824(
-				lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
+			uint16_t t = Interpolate824(lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
 			value_ = a + ((b - a) * (t >> 1) >> 15);
 			phase_ += phase_increment_;
 			*out++ = value_;
@@ -154,25 +136,19 @@ namespace deadman {
 		hard_reset_ = false;
 	}
 
-	void RepeatingAttackEnvelope::Process(
-		const GateFlags* gate_flags, int16_t* out, size_t size) {
-
+	void RepeatingAttackEnvelope::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 
 			if (gate_flag & GATE_FLAG_RISING) {
-				start_value_ = (segment_ == num_segments_ || hard_reset_)
-					? level_[0]
-					: value_;
+				start_value_ = (segment_ == num_segments_ || hard_reset_) ? level_[0] : value_;
 				segment_ = 0;
 				phase_ = 0;
-			}
-			else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
+			} else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
 				start_value_ = value_;
 				segment_ = sustain_point_;
 				phase_ = 0;
-			}
-			else if (phase_ < phase_increment_) {
+			} else if (phase_ < phase_increment_) {
 				start_value_ = level_[segment_ + 1];
 				++segment_;
 				phase_ = 0;
@@ -182,16 +158,13 @@ namespace deadman {
 			}
 
 			bool done = segment_ == num_segments_;
-			bool sustained = sustain_point_ && segment_ == sustain_point_ &&
-				gate_flag & GATE_FLAG_HIGH;
+			bool sustained = sustain_point_ && segment_ == sustain_point_ && gate_flag & GATE_FLAG_HIGH;
 
-			phase_increment_ =
-				sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
+			phase_increment_ = sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
 
 			int32_t a = start_value_;
 			int32_t b = level_[segment_ + 1];
-			uint16_t t = Interpolate824(
-				lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
+			uint16_t t = Interpolate824(lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
 			value_ = a + ((b - a) * (t >> 1) >> 15);
 			phase_ += phase_increment_;
 			*out++ = value_;
@@ -208,25 +181,20 @@ namespace deadman {
 		hard_reset_ = false;
 	}
 
-	void LoopingEnvelope::Process(
-		const GateFlags* gate_flags, int16_t* out, size_t size) {
+	void LoopingEnvelope::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 
 			if (gate_flag & GATE_FLAG_RISING) {
-				start_value_ = (segment_ == num_segments_ || hard_reset_)
-					? level_[0]
-					: value_;
+				start_value_ = (segment_ == num_segments_ || hard_reset_) ? level_[0] : value_;
 				segment_ = 0;
 				phase_ = 0;
-			}
-			else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
+			} else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
 				start_value_ = value_;
 				segment_ = sustain_point_;
 				phase_ = 0;
-			}
-			else if (phase_ < phase_increment_) {
+			} else if (phase_ < phase_increment_) {
 				start_value_ = level_[segment_ + 1];
 				++segment_;
 				phase_ = 0;
@@ -236,16 +204,13 @@ namespace deadman {
 			}
 
 			bool done = segment_ == num_segments_;
-			bool sustained = sustain_point_ && segment_ == sustain_point_ &&
-				gate_flag & GATE_FLAG_HIGH;
+			bool sustained = sustain_point_ && segment_ == sustain_point_ && gate_flag & GATE_FLAG_HIGH;
 
-			phase_increment_ =
-				sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
+			phase_increment_ = sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
 
 			int32_t a = start_value_;
 			int32_t b = level_[segment_ + 1];
-			uint16_t t = Interpolate824(
-				lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
+			uint16_t t = Interpolate824(lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
 			value_ = a + ((b - a) * (t >> 1) >> 15);
 			phase_ += phase_increment_;
 			*out++ = value_;
@@ -262,17 +227,12 @@ namespace deadman {
 		hard_reset_ = false;
 	}
 
-
-	void RandomisedEnvelope::Process(
-		const GateFlags* gate_flags, int16_t* out, size_t size) {
-
+	void RandomisedEnvelope::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 
 			if (gate_flag & GATE_FLAG_RISING) {
-				start_value_ = (segment_ == num_segments_ || hard_reset_)
-					? level_[0]
-					: value_;
+				start_value_ = (segment_ == num_segments_ || hard_reset_) ? level_[0] : value_;
 				segment_ = 0;
 				phase_ = 0;
 				// Randomise values here.
@@ -281,23 +241,21 @@ namespace deadman {
 				int32_t decay_random_offset = ((random_offset >> 16) * decay_randomness_) >> 17;
 				int32_t randomised_level = base_level_[1] - level_random_offset;
 				int32_t randomised_decay_time = base_time_[1] - decay_random_offset;
-				// constrain
+				// Constrain.
 				if (randomised_level < 0) {
 					randomised_level = 0;
 				}
 				if (randomised_decay_time < 0) {
 					randomised_decay_time = 0;
 				}
-				// reset the level and time values
+				// Reset the level and time values.
 				level_[1] = randomised_level;
 				time_[1] = randomised_decay_time;
-			}
-			else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
+			} else if (gate_flag & GATE_FLAG_FALLING && sustain_point_) {
 				start_value_ = value_;
 				segment_ = sustain_point_;
 				phase_ = 0;
-			}
-			else if (phase_ < phase_increment_) {
+			} else if (phase_ < phase_increment_) {
 				start_value_ = level_[segment_ + 1];
 				++segment_;
 				phase_ = 0;
@@ -307,21 +265,16 @@ namespace deadman {
 			}
 
 			bool done = segment_ == num_segments_;
-			bool sustained = sustain_point_ && segment_ == sustain_point_ &&
-				gate_flag & GATE_FLAG_HIGH;
+			bool sustained = sustain_point_ && segment_ == sustain_point_ && gate_flag & GATE_FLAG_HIGH;
 
-			phase_increment_ =
-				sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
+			phase_increment_ = sustained || done ? 0 : lut_env_increments[time_[segment_] >> 8];
 
 			int32_t a = start_value_;
 			int32_t b = level_[segment_ + 1];
-			uint16_t t = Interpolate824(
-				lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
+			uint16_t t = Interpolate824(lookup_table_table[LUT_ENV_LINEAR + shape_[segment_]], phase_);
 			value_ = a + ((b - a) * (t >> 1) >> 15);
 			phase_ += phase_increment_;
 			*out++ = value_;
 		}
 	}
-
-
 }  // namespace deadman

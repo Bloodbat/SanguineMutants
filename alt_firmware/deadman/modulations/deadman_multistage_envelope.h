@@ -37,7 +37,6 @@
 #include "deadman/deadman_gate_processor.h"
 
 namespace deadman {
-
 	enum EnvelopeShape {
 		ENV_SHAPE_LINEAR,
 		ENV_SHAPE_EXPONENTIAL,
@@ -353,7 +352,6 @@ namespace deadman {
 		DISALLOW_COPY_AND_ASSIGN(RepeatingAttackEnvelope);
 	};
 
-
 	// And copy the class again...
 	class LoopingEnvelope {
 	public:
@@ -457,7 +455,7 @@ namespace deadman {
 		DISALLOW_COPY_AND_ASSIGN(LoopingEnvelope);
 	};
 
-	// randomised AD envelope class
+	// Randomised AD envelope class.
 	class RandomisedEnvelope {
 	public:
 		RandomisedEnvelope() {}
@@ -579,8 +577,5 @@ namespace deadman {
 
 		DISALLOW_COPY_AND_ASSIGN(RandomisedEnvelope);
 	};
-
-
 }  // namespace deadman
-
 #endif  // DEADMAN_MODULATIONS_MULTISTAGE_ENVELOPE_H_
