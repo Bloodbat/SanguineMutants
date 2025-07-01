@@ -93,7 +93,6 @@ namespace deadman {
 
 	private:
 		Svf noise_;
-		// Svf vca_coloration_;
 		Excitation vca_envelope_;
 
 		uint32_t phase_[6];
@@ -111,7 +110,5 @@ namespace deadman {
 
 		DISALLOW_COPY_AND_ASSIGN(HighHat);
 	};
-
 }  // namespace deadman
-
 #endif  // DEADMAN_DRUMS_HIGH_HAT_H_
