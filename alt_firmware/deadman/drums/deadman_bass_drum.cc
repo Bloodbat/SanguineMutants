@@ -138,13 +138,8 @@ namespace deadman {
 						(last_frequency_ + (frequency_randomness_ >> 2)) :
 						(last_frequency_ - (frequency_randomness_ >> 2));
 				}
-				// constrain randomised frequency - probably not needed
-				if (randomised_frequency < -32767) {
-					randomised_frequency = -32767;
-				}
-				else if (randomised_frequency > 32767) {
-					randomised_frequency = 32767;
-				}
+				// Probably not needed?
+				CONSTRAIN(randomised_frequency, -32767, 32767);
 				// set new random frequency
 				set_frequency(randomised_frequency);
 				last_frequency_ = randomised_frequency;
@@ -152,13 +147,7 @@ namespace deadman {
 				// now random excitation level and decay
 				int32_t hit_random_offset = (stmlib::Random::GetSample() * hit_randomness_) >> 16;
 				int32_t randomised_decay_ = base_decay_ + (hit_random_offset >> 2);
-				// constrain randomised decay
-				if (randomised_decay_ < 0) {
-					randomised_decay_ = 0;
-				}
-				else if (randomised_decay_ > 65335) {
-					randomised_decay_ = 65335;
-				}
+				CONSTRAIN(randomised_decay_, 0, 65335);
 				set_decay(randomised_decay_);
 				pulse_up_.Trigger(12 * 32768 * 0.7);
 				pulse_down_.Trigger(-19662 * 0.7);
