@@ -86,7 +86,6 @@ namespace mutuus {
     float next_sample = next_sample_;
     bool high = high_;
     float lp_state = lp_state_;
-    float hp_state = hp_state_;
 
     while (size--) {
       float this_sample = next_sample;
@@ -167,7 +166,6 @@ namespace mutuus {
     phase_ = phase;
     next_sample_ = next_sample;
     lp_state_ = lp_state;
-    hp_state_ = hp_state;
 
     return shape == OSCILLATOR_SHAPE_PULSE ? 0.025f / (0.0002f + phase_increment_) : 1.0f;
   }
