@@ -144,10 +144,6 @@ namespace distortiones {
 		void ProcessDoppler(const ShortFrame* input, ShortFrame* output, size_t size);
 		void ProcessMeta(ShortFrame* input, ShortFrame* output, size_t size);
 		inline Parameters* mutable_parameters() { return &parameters_; }
-		inline const Parameters& parameters() { return parameters_; }
-
-		inline bool bypass() const { return bypass_; }
-		inline void set_bypass(bool bypass) { bypass_ = bypass; }
 
 		inline FeatureMode feature_mode() const { return feature_mode_; }
 		inline void set_feature_mode(FeatureMode feature_mode) { feature_mode_ = feature_mode; }
