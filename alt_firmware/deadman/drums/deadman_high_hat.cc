@@ -55,8 +55,7 @@ namespace deadman {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 
-			if (gate_flag & GATE_FLAG_RISING && (open_ ||
-				(!open_ && !(gate_flag & GATE_FLAG_AUXILIARY_RISING)))) {
+			if (gate_flag & GATE_FLAG_RISING && (open_ || !(gate_flag & GATE_FLAG_AUXILIARY_RISING))) {
 
 				// Randomise parameters.
 				// Frequency.
