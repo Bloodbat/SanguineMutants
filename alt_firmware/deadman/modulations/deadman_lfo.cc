@@ -38,7 +38,6 @@
 #include "deadman/deadman_resources.h"
 
 namespace deadman {
-
 	const uint16_t kSlopeBits = 12;
 	const uint32_t kSyncCounterMaxTime = 8 * 48000;
 
@@ -155,9 +154,8 @@ namespace deadman {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
-		return skewed_phase < 1UL << 31
-			? -32768 + (skewed_phase >> 15)
-			: 32767 - (skewed_phase >> 15);
+		return skewed_phase < 1UL << 31 ? -32768 + (skewed_phase >> 15) :
+			32767 - (skewed_phase >> 15);
 	}
 
 	int16_t Lfo::ComputeSampleSquare() {
@@ -210,7 +208,7 @@ namespace deadman {
 	  &Lfo::ComputeSampleNoise
 	};
 
-	// Repeat for internally frequency-modulated LFO
+	// Repeat for internally frequency-modulated LFO.
 
 	void FmLfo::Init() {
 		rate_ = 0;
@@ -234,7 +232,7 @@ namespace deadman {
 
 	void FmLfo::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		while (size--) {
-			// internal FM oscillator first
+			// Internal FM oscillator first.
 			int32_t fm_a = lut_lfo_increments[fm_rate_ >> 8];
 			int32_t fm_b = lut_lfo_increments[(fm_rate_ >> 8) + 1];
 			fm_phase_increment_ = fm_a + (((fm_b - fm_a) >> 1) * (fm_rate_ & 0xff) >> 7);
@@ -247,7 +245,7 @@ namespace deadman {
 			fm_phase_ += fm_phase_increment_;
 			int32_t fm_sample = FmLfo::ComputeModulation();
 			fm_delta_ = (fm_sample * fm_depth_) >> 18;
-			// now actual LFO
+			// Now actual LFO.
 			int32_t unclipped_modulated_rate = rate_ + fm_delta_;
 			if (unclipped_modulated_rate > 65535) {
 				unclipped_modulated_rate = 65335;
@@ -337,9 +335,8 @@ namespace deadman {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
-		return skewed_phase < 1UL << 31
-			? -32768 + (skewed_phase >> 15)
-			: 32767 - (skewed_phase >> 15);
+		return skewed_phase < 1UL << 31 ? -32768 + (skewed_phase >> 15) :
+			32767 - (skewed_phase >> 15);
 	}
 
 	int16_t FmLfo::ComputeSampleSquare() {
@@ -393,7 +390,7 @@ namespace deadman {
 	};
 
 	////////////////////////////////////////////////
-	// Repeat for internally waveshape-modulated LFO
+	// Repeat for internally waveshape-modulated LFO.
 
 	void WsmLfo::Init() {
 		rate_ = 0;
@@ -415,8 +412,7 @@ namespace deadman {
 	  { WSMLFO_SHAPE_TRIANGLE, 0 },
 	  { WSMLFO_SHAPE_TRIANGLE, 32767 },
 	  { WSMLFO_SHAPE_SQUARE, 0 },
-	  { WSMLFO_SHAPE_NOISE, -32767 },
-	  // { WSMLFO_SHAPE_NOISE, 32767 },
+	  { WSMLFO_SHAPE_NOISE, -32767 }
 	};
 
 	void WsmLfo::set_shape_parameter_preset(uint16_t value) {
@@ -427,7 +423,7 @@ namespace deadman {
 
 	void WsmLfo::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
 		while (size--) {
-			// internal waveshape modulation oscillator first
+			// Internal waveshape modulation oscillator first.
 			int32_t wsm_a = lut_lfo_increments[wsm_rate_ >> 8];
 			int32_t wsm_b = lut_lfo_increments[(wsm_rate_ >> 8) + 1];
 			wsm_phase_increment_ = wsm_a + (((wsm_b - wsm_a) >> 1) * (wsm_rate_ & 0xff) >> 7);
@@ -439,7 +435,7 @@ namespace deadman {
 			int32_t wsm_sample = WsmLfo::ComputeModulation();
 			wsm_delta_ = (wsm_sample * wsm_depth_) >> 16;
 			parameter_ = wsm_delta_;
-			// now actual LFO
+			// Now actual LFO.
 			int32_t a = lut_lfo_increments[rate_ >> 8];
 			int32_t b = lut_lfo_increments[(rate_ >> 8) + 1];
 			phase_increment_ = a + (((b - a) >> 1) * (rate_ & 0xff) >> 7);
@@ -539,9 +535,8 @@ namespace deadman {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
-		return skewed_phase < 1UL << 31
-			? -32768 + (skewed_phase >> 15)
-			: 32767 - (skewed_phase >> 15);
+		return skewed_phase < 1UL << 31 ? -32768 + (skewed_phase >> 15) :
+			32767 - (skewed_phase >> 15);
 	}
 
 	int16_t WsmLfo::ComputeSampleSquare() {
@@ -587,20 +582,17 @@ namespace deadman {
 	};
 
 	///////////////////////////////////////////
-	// Repeat for audio-frequency PLL oscillator
+	// Repeat for audio-frequency PLL oscillator.
 
 	void Plo::Init() {
 		rate_ = 0;
 		shape_ = WSMLFO_SHAPE_SQUARE;
 		parameter_ = 0;
-		// reset_phase_ = 0;
 		sync_ = true;
 		previous_parameter_ = 32767;
 		level_ = 32767;
 		wsm_rate_ = 0;
 		wsm_parameter_ = 0;
-		// wsm_reset_phase_ = 0;
-		// wsm_delta_ = 0 ;
 
 		sync_counter_ = kSyncCounterMaxTime;
 		pattern_predictor_.Init();
@@ -622,7 +614,7 @@ namespace deadman {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 
-			// internal waveshape modulation oscillator first
+			// Internal waveshape modulation oscillator first.
 			if (wsm_depth_) {
 				int32_t wsm_a = lut_lfo_increments[wsm_rate_ >> 8];
 				int32_t wsm_b = lut_lfo_increments[(wsm_rate_ >> 8) + 1];
@@ -724,9 +716,8 @@ namespace deadman {
 			skewed_phase = ((phase - end_of_attack_) >> kSlopeBits) * attack_factor_;
 			skewed_phase += 1L << 31;
 		}
-		return skewed_phase < 1UL << 31
-			? -32768 + (skewed_phase >> 15)
-			: 32767 - (skewed_phase >> 15);
+		return skewed_phase < 1UL << 31 ? -32768 + (skewed_phase >> 15) :
+			32767 - (skewed_phase >> 15);
 	}
 
 	int16_t Plo::ComputeSampleSquare() {
@@ -770,5 +761,4 @@ namespace deadman {
 	  &Plo::ComputeSampleSquare,
 	  &Plo::ComputeSampleNoise
 	};
-
 }  // namespace deadman

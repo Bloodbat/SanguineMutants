@@ -156,7 +156,5 @@ namespace peaks {
 
     DISALLOW_COPY_AND_ASSIGN(Lfo);
   };
-
 }  // namespace peaks
-
 #endif  // PEAKS_MODULATIONS_LFO_H_

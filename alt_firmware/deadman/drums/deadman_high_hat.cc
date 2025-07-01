@@ -43,12 +43,8 @@ namespace deadman {
 
 	void HighHat::Init() {
 		noise_.Init();
-		noise_.set_frequency(105 << 7);  // 8kHz
+		noise_.set_frequency(105 << 7);  // 8kHz.
 		noise_.set_resonance(24000);
-
-		// vca_coloration_.Init();
-		// vca_coloration_.set_frequency(110 << 7);  // 13kHz
-		// vca_coloration_.set_resonance(0);
 
 		vca_envelope_.Init();
 		vca_envelope_.set_delay(0);
@@ -59,63 +55,62 @@ namespace deadman {
 		while (size--) {
 			GateFlags gate_flag = *gate_flags++;
 
-			if (gate_flag & GATE_FLAG_RISING &&
-				(open_ || (!open_ && !(gate_flag & GATE_FLAG_AUXILIARY_RISING)))) {
+			if (gate_flag & GATE_FLAG_RISING && (open_ ||
+				(!open_ && !(gate_flag & GATE_FLAG_AUXILIARY_RISING)))) {
 
-				// randomise parameters
-				// frequency
+				// Randomise parameters.
+				// Frequency.
 				uint32_t random_value = stmlib::Random::GetWord();
 				bool freq_up = (random_value > 2147483647) ? true : false;
 				int32_t randomised_frequency = freq_up ?
 					(last_frequency_ + (frequency_randomness_ >> 2)) :
 					(last_frequency_ - (frequency_randomness_ >> 2));
 
-				// Check if we haven't walked out-of-bounds, and if so, reverse direction on last step
+				// Check if we haven't walked out-of-bounds, and if so, reverse direction on last step.
 				if (randomised_frequency < 0 || randomised_frequency > 65535) {
-					// flip the direction
+					// Flip the direction.
 					freq_up = !freq_up;
-					randomised_frequency = freq_up ?
-						(last_frequency_ + (frequency_randomness_ >> 2)) :
+					randomised_frequency = freq_up ? (last_frequency_ + (frequency_randomness_ >> 2)) :
 						(last_frequency_ - (frequency_randomness_ >> 2));
 				}
 
-				// constrain randomised frequency - probably not necessary
+				// Constrain randomised frequency - probably not necessary.
+				// TODO: use CONSTRAIN here?
 				if (randomised_frequency < 0) {
 					randomised_frequency = 0;
-				}
-				else if (randomised_frequency > 65535) {
+				} else if (randomised_frequency > 65535) {
 					randomised_frequency = 65535;
 				}
 
-				// set new random frequency
+				// Set new random frequency.
 				set_frequency(randomised_frequency);
 				last_frequency_ = randomised_frequency;
 
-				// decay
+				// Decay.
 				random_value = stmlib::Random::GetWord();
 				freq_up = (random_value > 2147483647) ? true : false;
 				randomised_frequency = freq_up ?
 					(last_decay_ + (decay_randomness_ >> 2)) :
 					(last_decay_ - (decay_randomness_ >> 2));
 
-				// Check if we haven't walked out-of-bounds, and if so, reverse direction on last step
+				// Check if we haven't walked out-of-bounds, and if so, reverse direction on last step.
 				if (randomised_frequency < 0 || randomised_frequency > 65535) {
-					// flip the direction
+					// Flip the direction.
 					freq_up = !freq_up;
 					randomised_frequency = freq_up ?
 						(last_decay_ + (decay_randomness_ >> 2)) :
 						(last_decay_ - (decay_randomness_ >> 2));
 				}
 
-				// constrain randomised frequency - probably not necessary
+				// Constrain randomised frequency - probably not necessary.
+				// TODO: use CONSTRAIN here?
 				if (randomised_frequency < 0) {
 					randomised_frequency = 0;
-				}
-				else if (randomised_frequency > 65535) {
+				} else if (randomised_frequency > 65535) {
 					randomised_frequency = 65535;
 				}
 
-				// set new random decay
+				// Set new random decay.
 				set_decay(randomised_frequency);
 				last_decay_ = randomised_frequency;
 
@@ -142,13 +137,11 @@ namespace deadman {
 			// Run the SVF at the double of the original sample rate for stability.
 			int32_t filtered_noise = 0;
 			filtered_noise += noise_.Process<SVF_MODE_BP>(noise);
-			// filtered_noise += noise_.Process(noise);
 
 			// The 808-style VCA amplifies only the positive section of the signal.
 			if (filtered_noise < 0) {
 				filtered_noise = 0;
-			}
-			else if (filtered_noise > 32767) {
+			} else if (filtered_noise > 32767) {
 				filtered_noise = 32767;
 			}
 
