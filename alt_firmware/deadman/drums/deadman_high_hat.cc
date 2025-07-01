@@ -74,13 +74,8 @@ namespace deadman {
 						(last_frequency_ - (frequency_randomness_ >> 2));
 				}
 
-				// Constrain randomised frequency - probably not necessary.
-				// TODO: use CONSTRAIN here?
-				if (randomised_frequency < 0) {
-					randomised_frequency = 0;
-				} else if (randomised_frequency > 65535) {
-					randomised_frequency = 65535;
-				}
+				// Probably not necessary?
+				CONSTRAIN(randomised_frequency, 0, 65535);
 
 				// Set new random frequency.
 				set_frequency(randomised_frequency);
@@ -102,13 +97,8 @@ namespace deadman {
 						(last_decay_ - (decay_randomness_ >> 2));
 				}
 
-				// Constrain randomised frequency - probably not necessary.
-				// TODO: use CONSTRAIN here?
-				if (randomised_frequency < 0) {
-					randomised_frequency = 0;
-				} else if (randomised_frequency > 65535) {
-					randomised_frequency = 65535;
-				}
+				// Probably not necessary?
+				CONSTRAIN(randomised_frequency, 0, 65535);
 
 				// Set new random decay.
 				set_decay(randomised_frequency);
