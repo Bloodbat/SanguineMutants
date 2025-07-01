@@ -145,7 +145,7 @@ namespace peaks {
     }
 
     uint32_t phase = phase_;
-    uint32_t skewed_phase = phase;
+    uint32_t skewed_phase;
     if (phase < end_of_attack_) {
       skewed_phase = (phase >> kSlopeBits) * decay_factor_;
     } else {
