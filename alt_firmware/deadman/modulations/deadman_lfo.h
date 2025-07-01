@@ -37,7 +37,6 @@
 #include "deadman/deadman_gate_processor.h"
 
 namespace deadman {
-
 	struct FrequencyRatio {
 		uint32_t p;
 		uint32_t q;
@@ -174,7 +173,7 @@ namespace deadman {
 		DISALLOW_COPY_AND_ASSIGN(Lfo);
 	};
 
-	// Repeat for FM LFO
+	// Repeat for FM LFO.
 	class FmLfo {
 	public:
 		typedef int16_t(FmLfo::* ComputeSampleFn)();
@@ -291,7 +290,7 @@ namespace deadman {
 	};
 
 	//////////////////////////////
-	// And repeat again for waveshape modulated LFO
+	// And repeat for waveshape modulated LFO.
 	class WsmLfo {
 	public:
 		typedef int16_t(WsmLfo::* ComputeSampleFn)();
@@ -409,7 +408,7 @@ namespace deadman {
 	};
 
 	//////////////////////////////////
-	// And repeat again for audio-rate PLL oscillators
+	// And repeat for audio-rate PLL oscillators.
 	class Plo {
 	public:
 		typedef int16_t(Plo::* ComputeSampleFn)();
@@ -528,7 +527,5 @@ namespace deadman {
 
 		DISALLOW_COPY_AND_ASSIGN(Plo);
 	};
-
 }  // namespace deadman
-
 #endif  // DEADMAN_MODULATIONS_LFO_H_
