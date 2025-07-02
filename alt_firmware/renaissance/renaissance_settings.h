@@ -33,7 +33,6 @@
 #include "renaissance/vocalist/wordlist.h"
 
 namespace renaissance {
-
 	enum MacroOscillatorShape {
 		MACRO_OSC_SHAPE_CSAW,
 		MACRO_OSC_SHAPE_MORPH,
@@ -221,8 +220,7 @@ namespace renaissance {
 		int16_t Clip(int16_t value) const {
 			if (value > max_value) {
 				value = max_value;
-			}
-			else if (value < min_value) {
+			} else if (value < min_value) {
 				value = min_value;
 			}
 			return value;
@@ -231,8 +229,13 @@ namespace renaissance {
 
 	class Settings {
 	public:
-		Settings() { }
-		~Settings() { }
+		Settings() {
+
+		}
+
+		~Settings() {
+
+		}
 
 		void Init();
 		void Save();
@@ -309,18 +312,6 @@ namespace renaissance {
 				data_.fm_cv_offset = adc_code_fm;
 			}
 
-			// int32_t min_code[2] = { adc_code_p0_min, adc_code_p1_min };
-			// int32_t max_code[2] = { adc_code_p0_max, adc_code_p1_max };
-			//
-			// for (int i = 0; i < 2; ++i) {
-			//   int32_t d = max_code[i] - min_code[i];
-			//   if (d > 3700) {
-			//     int32_t scale = (32768 * 4106) / d;
-			//     int32_t offset = -(min_code[i] * scale >> 12) - 40;
-			//     data_.parameter_cv_offset[i] = offset;
-			//     data_.parameter_cv_scale[i] = scale;
-			//   }
-			// }
 			Save();
 		}
 
@@ -329,16 +320,13 @@ namespace renaissance {
 				data_.pitch_range == PITCH_RANGE_LFO) {
 				pitch_adc_code = pitch_adc_code * data_.pitch_cv_scale >> 12;
 				pitch_adc_code += data_.pitch_cv_offset;
-			}
-			else if (data_.pitch_range == PITCH_RANGE_FREE) {
+			} else if (data_.pitch_range == PITCH_RANGE_FREE) {
 				pitch_adc_code = (pitch_adc_code - 1638);
 				pitch_adc_code = pitch_adc_code * data_.pitch_cv_scale >> 12;
 				pitch_adc_code += 60 << 7;
-			}
-			else if (data_.pitch_range == PITCH_RANGE_440) {
+			} else if (data_.pitch_range == PITCH_RANGE_440) {
 				pitch_adc_code = 69 << 7;
-			}
-			else {
+			} else {
 				pitch_adc_code = (pitch_adc_code - 1638) * 9 >> 1;
 				pitch_adc_code += 60 << 7;
 			}
@@ -386,7 +374,5 @@ namespace renaissance {
 	};
 
 	extern Settings settings;
-
 }  // namespace renaissance
-
 #endif
