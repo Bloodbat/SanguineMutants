@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -36,11 +36,14 @@
 #include "renaissance/renaissance_resources.h"
 
 namespace renaissance {
-
 	class SignatureWaveshaper {
 	public:
-		SignatureWaveshaper() { }
-		~SignatureWaveshaper() { }
+		SignatureWaveshaper() {
+
+		}
+		~SignatureWaveshaper() {
+
+		}
 
 		inline void Init(uint32_t seed) {
 			int32_t skew = seed & 15;
@@ -64,7 +67,7 @@ namespace renaissance {
 				int16_t x_skew = i * i - 32768;
 				x = stmlib::Mix(x, x_skew, skew << 11);
 
-				int16_t sigmoid = x * (8192 + (sigmoid_strength << 10)) / \
+				int16_t sigmoid = x * (8192 + (sigmoid_strength << 10)) /
 					(8192 + (sigmoid_strength * abs(x) >> 5));
 				int16_t bumplets = wav_sine[(i * bumplets_frequency) & 255];
 				uint16_t bumplet_gain = x * x / (bumplets_width)+16;
@@ -90,7 +93,5 @@ namespace renaissance {
 
 		DISALLOW_COPY_AND_ASSIGN(SignatureWaveshaper);
 	};
-
 }  // namespace renaissance
-
 #endif // renaissance_VCO_JITTER_SOURCE_H_
