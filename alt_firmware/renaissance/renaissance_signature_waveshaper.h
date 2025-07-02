@@ -57,7 +57,6 @@ namespace renaissance {
 			bumplets_frequency += 3;
 
 			int32_t bumplets_width = seed & 7;
-			seed >>= 3;
 			bumplets_width += 1;
 			bumplets_width <<= 7;
 			bumplets_width *= bumplets_width;
