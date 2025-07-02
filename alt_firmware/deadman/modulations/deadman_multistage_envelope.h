@@ -74,14 +74,6 @@ namespace deadman {
 			level_[segment] = level;
 		}
 
-		inline void set_num_segments(uint16_t num_segments) {
-			num_segments_ = num_segments;
-		}
-
-		inline void set_sustain_point(uint16_t sustain_point) {
-			sustain_point_ = sustain_point;
-		}
-
 		inline void set_adsr(uint16_t attack, uint16_t decay, uint16_t sustain, uint16_t release) {
 			num_segments_ = 3;
 			sustain_point_ = 2;
@@ -117,10 +109,6 @@ namespace deadman {
 			shape_[1] = ENV_SHAPE_EXPONENTIAL;
 
 			loop_start_ = loop_end_ = 0;
-		}
-
-		inline void set_hard_reset(bool hard_reset) {
-			hard_reset_ = hard_reset;
 		}
 
 	private:
@@ -175,14 +163,6 @@ namespace deadman {
 			level_[segment] = level;
 		}
 
-		inline void set_num_segments(uint16_t num_segments) {
-			num_segments_ = num_segments;
-		}
-
-		inline void set_sustain_point(uint16_t sustain_point) {
-			sustain_point_ = sustain_point;
-		}
-
 		inline void set_ad(uint16_t attack, uint16_t decay) {
 			num_segments_ = 2;
 			sustain_point_ = 0;
@@ -221,10 +201,6 @@ namespace deadman {
 			shape_[3] = ENV_SHAPE_EXPONENTIAL;
 
 			loop_start_ = loop_end_ = 0;
-		}
-
-		inline void set_hard_reset(bool hard_reset) {
-			hard_reset_ = hard_reset;
 		}
 
 	private:
@@ -279,14 +255,6 @@ namespace deadman {
 			level_[segment] = level;
 		}
 
-		inline void set_num_segments(uint16_t num_segments) {
-			num_segments_ = num_segments;
-		}
-
-		inline void set_sustain_point(uint16_t sustain_point) {
-			sustain_point_ = sustain_point;
-		}
-
 		inline void set_ad_loop(uint16_t attack, uint16_t decay) {
 			num_segments_ = 2;
 			sustain_point_ = 0;
@@ -324,10 +292,6 @@ namespace deadman {
 
 			loop_start_ = 0;
 			loop_end_ = 2; // was 3
-		}
-
-		inline void set_hard_reset(bool hard_reset) {
-			hard_reset_ = hard_reset;
 		}
 
 	private:
@@ -382,14 +346,6 @@ namespace deadman {
 			level_[segment] = level;
 		}
 
-		inline void set_num_segments(uint16_t num_segments) {
-			num_segments_ = num_segments;
-		}
-
-		inline void set_sustain_point(uint16_t sustain_point) {
-			sustain_point_ = sustain_point;
-		}
-
 		inline void set_ad_loop(uint16_t attack, uint16_t decay) {
 			num_segments_ = 2;
 			sustain_point_ = 0;
@@ -427,10 +383,6 @@ namespace deadman {
 
 			loop_start_ = 0;
 			loop_end_ = 3;
-		}
-
-		inline void set_hard_reset(bool hard_reset) {
-			hard_reset_ = hard_reset;
 		}
 
 	private:
@@ -485,14 +437,6 @@ namespace deadman {
 			level_[segment] = level;
 		}
 
-		inline void set_num_segments(uint16_t num_segments) {
-			num_segments_ = num_segments;
-		}
-
-		inline void set_sustain_point(uint16_t sustain_point) {
-			sustain_point_ = sustain_point;
-		}
-
 		inline void set_rad(uint16_t attack, uint16_t decay, uint16_t level_randomness,
 			uint16_t decay_randomness) {
 			num_segments_ = 2;
@@ -544,10 +488,6 @@ namespace deadman {
 
 			loop_start_ = 0;
 			loop_end_ = 0;
-		}
-
-		inline void set_hard_reset(bool hard_reset) {
-			hard_reset_ = hard_reset;
 		}
 
 	private:
