@@ -71,10 +71,6 @@ namespace braids {
       pitch_ = pitch;
     }
 
-    inline int16_t pitch() const {
-      return pitch_;
-    }
-
     inline void set_parameters(int16_t parameter_1, int16_t parameter_2) {
       parameter_[0] = parameter_1;
       parameter_[1] = parameter_2;
