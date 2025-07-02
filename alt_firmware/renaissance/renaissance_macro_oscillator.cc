@@ -37,21 +37,14 @@
 #include "renaissance/vocalist/wordlist.h"
 
 namespace renaissance {
-
 	using namespace stmlib;
 
-	void MacroOscillator::Render(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::Render(const uint8_t* sync, int16_t* buffer, size_t size) {
 		RenderFn fn = fn_table_[shape_];
 		(this->*fn)(sync, buffer, size);
 	}
 
-	void MacroOscillator::RenderCSaw(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderCSaw(const uint8_t* sync, int16_t* buffer, size_t size) {
 		analog_oscillator_[0].set_pitch(pitch_);
 		analog_oscillator_[0].set_shape(renaissance::OSC_SHAPE_CSAW);
 		analog_oscillator_[0].set_parameter(parameter_[0]);
@@ -64,10 +57,7 @@ namespace renaissance {
 		}
 	}
 
-	void MacroOscillator::RenderMorph(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderMorph(const uint8_t* sync, int16_t* buffer, size_t size) {
 		analog_oscillator_[0].set_pitch(pitch_);
 		analog_oscillator_[1].set_pitch(pitch_);
 
@@ -78,15 +68,13 @@ namespace renaissance {
 			analog_oscillator_[0].set_shape(renaissance::OSC_SHAPE_TRIANGLE);
 			analog_oscillator_[1].set_shape(renaissance::OSC_SHAPE_SAW);
 			balance = parameter_[0] * 6;
-		}
-		else if (parameter_[0] <= 21845) {
+		} else if (parameter_[0] <= 21845) {
 			analog_oscillator_[0].set_parameter(0);
 			analog_oscillator_[1].set_parameter(0);
 			analog_oscillator_[0].set_shape(renaissance::OSC_SHAPE_SQUARE);
 			analog_oscillator_[1].set_shape(renaissance::OSC_SHAPE_SAW);
 			balance = 65535 - (parameter_[0] - 10923) * 6;
-		}
-		else {
+		} else {
 			analog_oscillator_[0].set_parameter((parameter_[0] - 21846) * 3);
 			analog_oscillator_[1].set_parameter(0);
 			analog_oscillator_[0].set_shape(renaissance::OSC_SHAPE_SQUARE);
@@ -102,8 +90,7 @@ namespace renaissance {
 		int32_t lp_cutoff = pitch_ - (parameter_[1] >> 1) + 128 * 128;
 		if (lp_cutoff < 0) {
 			lp_cutoff = 0;
-		}
-		else if (lp_cutoff > 32767) {
+		} else if (lp_cutoff > 32767) {
 			lp_cutoff = 32767;
 		}
 		int32_t f = Interpolate824(lut_svf_cutoff, lp_cutoff << 17);
@@ -130,10 +117,7 @@ namespace renaissance {
 		lp_state_ = lp_state;
 	}
 
-	void MacroOscillator::RenderSawSquare(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderSawSquare(const uint8_t* sync, int16_t* buffer, size_t size) {
 		analog_oscillator_[0].set_parameter(parameter_[0]);
 		analog_oscillator_[1].set_parameter(parameter_[0]);
 		analog_oscillator_[0].set_pitch(pitch_);
@@ -181,10 +165,7 @@ namespace renaissance {
 	  24 SEMI - 4, 24 SEMI, 24 SEMI
 	};
 
-	void MacroOscillator::RenderTriple(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderTriple(const uint8_t* sync, int16_t* buffer, size_t size) {
 		renaissance::AnalogOscillatorShape base_shape;
 		switch (shape_) {
 		case MACRO_OSC_SHAPE_TRIPLE_SAW:
@@ -227,12 +208,7 @@ namespace renaissance {
 		}
 	}
 
-
-
-	void MacroOscillator::RenderSub(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderSub(const uint8_t* sync, int16_t* buffer, size_t size) {
 		renaissance::AnalogOscillatorShape base_shape = shape_ == MACRO_OSC_SHAPE_SQUARE_SUB ?
 			renaissance::OSC_SHAPE_SQUARE : renaissance::OSC_SHAPE_VARIABLE_SAW;
 		analog_oscillator_[0].set_parameter(parameter_[0]);
@@ -252,8 +228,8 @@ namespace renaissance {
 			int16_t* temp_buffer = temp_buffer_;
 		while (size--) {
 			INTERPOLATE_PARAMETER_1
-				uint16_t sub_gain = (parameter_1 < 16384
-					? (16383 - parameter_1) : (parameter_1 - 16384)) << 1;
+				uint16_t sub_gain = (parameter_1 < 16384 ? (16383 - parameter_1) :
+					(parameter_1 - 16384)) << 1;
 			*buffer = Mix(*buffer, *temp_buffer, sub_gain);
 			buffer++;
 			temp_buffer++;
@@ -262,10 +238,7 @@ namespace renaissance {
 		END_INTERPOLATE_PARAMETER_1
 	}
 
-	void MacroOscillator::RenderDualSync(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderDualSync(const uint8_t* sync, int16_t* buffer, size_t size) {
 		renaissance::AnalogOscillatorShape base_shape = shape_ == MACRO_OSC_SHAPE_SQUARE_SYNC ?
 			renaissance::OSC_SHAPE_SQUARE : renaissance::OSC_SHAPE_SAW;
 		analog_oscillator_[0].set_parameter(0);
@@ -294,10 +267,7 @@ namespace renaissance {
 		END_INTERPOLATE_PARAMETER_1
 	}
 
-	void MacroOscillator::RenderSineTriangle(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderSineTriangle(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int32_t attenuation_sine = 32767 - 6 * (pitch_ - (92 << 7));
 		int32_t attenuation_tri = 32767 - 7 * (pitch_ - (80 << 7));
 		if (attenuation_tri < 0) attenuation_tri = 0;
@@ -334,10 +304,7 @@ namespace renaissance {
 		END_INTERPOLATE_PARAMETER_1
 	}
 
-	void MacroOscillator::RenderBuzz(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderBuzz(const uint8_t* sync, int16_t* buffer, size_t size) {
 		analog_oscillator_[0].set_parameter(parameter_[0]);
 		analog_oscillator_[0].set_shape(renaissance::OSC_SHAPE_BUZZ);
 		analog_oscillator_[0].set_pitch(pitch_);
@@ -357,10 +324,7 @@ namespace renaissance {
 		}
 	}
 
-	void MacroOscillator::RenderDigital(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderDigital(const uint8_t* sync, int16_t* buffer, size_t size) {
 		digital_oscillator_.set_parameters(parameter_[0], parameter_[1]);
 		digital_oscillator_.set_pitch(pitch_);
 		digital_oscillator_.set_shape(static_cast<DigitalOscillatorShape>(
@@ -368,10 +332,7 @@ namespace renaissance {
 		digital_oscillator_.Render(sync, buffer, size);
 	}
 
-	void MacroOscillator::RenderSawComb(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void MacroOscillator::RenderSawComb(const uint8_t* sync, int16_t* buffer, size_t size) {
 		analog_oscillator_[0].set_parameter(0);
 		analog_oscillator_[0].set_pitch(pitch_);
 		analog_oscillator_[0].set_shape(renaissance::OSC_SHAPE_SAW);
@@ -451,8 +412,6 @@ namespace renaissance {
 	  &MacroOscillator::RenderDigital,
 	  &MacroOscillator::RenderDigital,
 	  &MacroOscillator::RenderDigital,
-	  &MacroOscillator::RenderDigital,
-	  // &MacroOscillator::RenderDigital
+	  &MacroOscillator::RenderDigital
 	};
-
 }  // namespace renaissance

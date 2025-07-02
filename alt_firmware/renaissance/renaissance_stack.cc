@@ -13,19 +13,14 @@
 /*extern*/ renaissance::Quantizer quantizer;
 
 namespace renaissance {
-
 	using namespace stmlib;
 
 	const int kStackSize = 6;
 
 #define CALC_SINE(phase) Interpolate88(ws_sine_fold, (Interpolate824(wav_sine, phase) * gain >> 15) + 32768);
 
-	inline void DigitalOscillator::renderChordSine(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size,
-		uint32_t* phase_increment,
-		uint8_t noteCount) {
+	inline void DigitalOscillator::renderChordSine(const uint8_t* sync, int16_t* buffer, size_t size,
+		uint32_t* phase_increment, uint8_t noteCount) {
 
 		uint32_t phase_0, phase_1, phase_2, phase_3, phase_4;
 		int16_t gain = 2048 + (parameter_[0] * 30720 >> 15);
@@ -89,12 +84,8 @@ namespace renaissance {
 		state_.stack.phase[4] = phase_4;
 	}
 
-	inline void DigitalOscillator::renderChordSaw(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size,
-		uint32_t* phase_increment,
-		uint8_t noteCount) {
+	inline void DigitalOscillator::renderChordSaw(const uint8_t* sync, int16_t* buffer, size_t size,
+		uint32_t* phase_increment, uint8_t noteCount) {
 
 		uint32_t phase_0, phase_1, phase_2, phase_3, phase_4, phase_5;
 
@@ -141,8 +132,7 @@ namespace renaissance {
 				CLIP(sample)
 					if (i == 0) {
 						*b++ = sample >> 1;
-					}
-					else {
+					} else {
 						*b += sample >> 1;
 						b++;
 					}
@@ -170,8 +160,7 @@ namespace renaissance {
 				CLIP(sample)
 					if (i == 0) {
 						*b++ = sample >> 1;
-					}
-					else {
+					} else {
 						*b += sample >> 1;
 						b++;
 					}
@@ -187,7 +176,6 @@ namespace renaissance {
 		}
 	}
 
-	// #define CALC_TRIANGLE_RAW(x) ((int16_t) ((((x >> 16) << 1) ^ (x & 0x80000000 ? 0xffff : 0x0000))) + 32768)
 #define CALC_TRIANGLE(x) Interpolate88(ws_tri_fold, (calc_triangle_raw(x) * gain >> 15) + 32768)
 
 	inline int16_t calc_triangle_raw(uint32_t phase) {
@@ -196,12 +184,8 @@ namespace renaissance {
 		return triangle + 32768;
 	}
 
-	inline void DigitalOscillator::renderChordTriangle(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size,
-		uint32_t* phase_increment,
-		uint8_t noteCount) {
+	inline void DigitalOscillator::renderChordTriangle(const uint8_t* sync, int16_t* buffer, size_t size,
+		uint32_t* phase_increment, uint8_t noteCount) {
 		uint32_t phase_0, phase_1, phase_2, phase_3, phase_4, phase_5;
 
 		phase_0 = state_.stack.phase[0];
@@ -275,12 +259,8 @@ namespace renaissance {
 
 #define CALC_SQUARE(x, width) ((x > width) ? 5400 : -5400)
 
-	inline void DigitalOscillator::renderChordSquare(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size,
-		uint32_t* phase_increment,
-		uint8_t noteCount) {
+	inline void DigitalOscillator::renderChordSquare(const uint8_t* sync, int16_t* buffer, size_t size,
+		uint32_t* phase_increment, uint8_t noteCount) {
 
 		uint32_t phase_0, phase_1, phase_2, phase_3, phase_4, phase_5;
 		uint32_t pw = parameter_[0] << 16;
@@ -374,12 +354,8 @@ namespace renaissance {
 	  { 4, 4 + 12 SEMI, 12 SEMI },
 	};
 
-	inline void DigitalOscillator::renderChordWavetable(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size,
-		uint32_t* phase_increment,
-		uint8_t noteCount) {
+	inline void DigitalOscillator::renderChordWavetable(const uint8_t* sync, int16_t* buffer, size_t size,
+		uint32_t* phase_increment, uint8_t noteCount) {
 
 		const uint8_t* wave_1 = wt_waves + mini_wave_line[parameter_[0] >> 10] * 129;
 		const uint8_t* wave_2 = wt_waves + mini_wave_line[(parameter_[0] >> 10) + 1] * 129;
@@ -443,13 +419,9 @@ namespace renaissance {
 
 	extern const uint16_t chords[17][3];
 
-	// without the attribute this gets build as-is AND inlined into RenderStack :/
-	void DigitalOscillator::renderChord(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size,
-		uint8_t* noteOffset,
-		uint8_t noteCount) {
+	// Without the attribute this gets built as-is AND inlined into RenderStack :/
+	void DigitalOscillator::renderChord(const uint8_t* sync, int16_t* buffer, size_t size,
+		uint8_t* noteOffset, uint8_t noteCount) {
 
 		uint32_t fm = 0;
 
@@ -463,18 +435,16 @@ namespace renaissance {
 		// Do not use an array here to allow these to be kept in arbitrary registers.
 		uint32_t phase_increment[6];
 
-		// indication we should use built in chords
+		// Indicates we should use built in chords.
 		if (noteCount == 0) {
 			noteCount = 4;
 			uint16_t chord_integral = parameter_[1] >> 11;
 			uint16_t chord_fractional = parameter_[1] << 5;
 			if (chord_fractional < 30720) {
 				chord_fractional = 0;
-			}
-			else if (chord_fractional >= 34816) {
+			} else if (chord_fractional >= 34816) {
 				chord_fractional = 65535;
-			}
-			else {
+			} else {
 				chord_fractional = (chord_fractional - 30720) * 16;
 			}
 
@@ -485,8 +455,7 @@ namespace renaissance {
 				uint16_t detune = detune_1 + ((detune_2 - detune_1) * chord_fractional >> 16);
 				phase_increment[i + 1] = ComputePhaseIncrement(pitch_ + detune);
 			}
-		}
-		else {
+		} else {
 			size_t i;
 			if (quantizer.enabled_) {
 				uint16_t index = quantizer.index;
@@ -501,8 +470,7 @@ namespace renaissance {
 					}
 					phase_increment[i] = DigitalOscillator::ComputePhaseIncrement(quantizer.codebook_[index] + fm);
 				}
-			}
-			else {
+			} else {
 				phase_increment[0] = phase_increment_;
 				for (i = 1; i < noteCount; i++) {
 					phase_increment[i] = DigitalOscillator::ComputePhaseIncrement(pitch_ + (noteOffset[i - 1] << 7));
@@ -512,22 +480,18 @@ namespace renaissance {
 
 		if (shape_ == OSC_SHAPE_STACK_SAW || shape_ == OSC_SHAPE_CHORD_SAW) {
 			renderChordSaw(sync, buffer, size, phase_increment, noteCount);
-		}
-		else if (shape_ == OSC_SHAPE_STACK_WAVETABLE || shape_ == OSC_SHAPE_CHORD_WAVETABLE) {
+		} else if (shape_ == OSC_SHAPE_STACK_WAVETABLE || shape_ == OSC_SHAPE_CHORD_WAVETABLE) {
 			renderChordWavetable(sync, buffer, size, phase_increment, noteCount);
-		}
-		else if (shape_ == OSC_SHAPE_STACK_TRIANGLE || shape_ == OSC_SHAPE_CHORD_TRIANGLE) {
+		} else if (shape_ == OSC_SHAPE_STACK_TRIANGLE || shape_ == OSC_SHAPE_CHORD_TRIANGLE) {
 			renderChordTriangle(sync, buffer, size, phase_increment, noteCount);
-		}
-		else if (shape_ == OSC_SHAPE_STACK_SQUARE || shape_ == OSC_SHAPE_CHORD_SQUARE) {
+		} else if (shape_ == OSC_SHAPE_STACK_SQUARE || shape_ == OSC_SHAPE_CHORD_SQUARE) {
 			renderChordSquare(sync, buffer, size, phase_increment, noteCount);
-		}
-		else {
+		} else {
 			renderChordSine(sync, buffer, size, phase_increment, noteCount);
 		}
 	}
 
-	// number of notes, followed by offsets
+	// Number of notes, followed by offsets.
 	const uint8_t diatonic_chords[16][4] = {
 	  {1, 7, 0, 0}, // octave
 	  {2, 5, 7, 0}, // octave add6
@@ -546,13 +510,9 @@ namespace renaissance {
 	  {3, 8, 10, 6}, // 11th sus4
 	};
 
-	void DigitalOscillator::RenderDiatonicChord(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderDiatonicChord(const uint8_t* sync, int16_t* buffer, size_t size) {
 
 		uint8_t extensionIndex = (parameter_[1] >> 12) & 0xf;
-		// uint8_t inversion = (parameter_[1] >> 13) & 0x7;
 		uint8_t offsets[6];
 		uint8_t len = 0;
 
@@ -561,11 +521,9 @@ namespace renaissance {
 
 			if (extensionIndex < 11) {
 				offsets[0] = 2;
-			}
-			else if (extensionIndex < 15) {
+			} else if (extensionIndex < 15) {
 				offsets[0] = 3;
-			}
-			else {
+			} else {
 				offsets[0] = 1;
 			}
 
@@ -574,18 +532,14 @@ namespace renaissance {
 			for (size_t i = 0; i < len; i++) {
 				offsets[i + 2] = diatonic_chords[extensionIndex][i + 1];
 			}
-		}
-		else {
-			// send len=0 as indication to use the phase offsets from the paraphonic chord array.
+		} else {
+			// Send len=0 to signal using the phase offsets from the paraphonic chord array.
 		}
 
 		renderChord(sync, buffer, size, offsets, len);
 	}
 
-	void DigitalOscillator::RenderStack(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderStack(const uint8_t* sync, int16_t* buffer, size_t size) {
 
 		uint8_t span = 1 + (parameter_[1] >> 11);
 		uint8_t offsets[kStackSize];
@@ -598,9 +552,10 @@ namespace renaissance {
 			offsets[i] = acc;
 		}
 
-		// don't pass in kStackSize or gcc will render a second, optimized version of renderChord that
-		// knows noteCount is static.
+		/*
+		   Don't pass in kStackSize or gcc will render a second, optimized version of renderChord that
+		   knows noteCount is static.
+		*/
 		renderChord(sync, buffer, size, offsets, i);
 	}
-
 }
