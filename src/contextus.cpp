@@ -227,7 +227,6 @@ struct Contextus : SanguineModule {
 			settings[channel].ad_timbre = params[PARAM_AD_TIMBRE].getValue();
 			settings[channel].ad_fm = params[PARAM_AD_MODULATION].getValue();
 			settings[channel].ad_color = params[PARAM_AD_COLOR].getValue();
-			settings[channel].invert_encoder = false;
 
 			// Trigger.
 			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
