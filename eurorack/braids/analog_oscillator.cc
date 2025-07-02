@@ -34,7 +34,6 @@
 #include "braids/parameter_interpolation.h"
 
 namespace braids {
-
   using namespace stmlib;
 
   static const size_t kNumZones = 15;
@@ -59,17 +58,13 @@ namespace braids {
 
     uint32_t a = lut_oscillator_increments[ref_pitch >> 4];
     uint32_t b = lut_oscillator_increments[(ref_pitch >> 4) + 1];
-    uint32_t phase_increment = a + \
-      (static_cast<int32_t>(b - a) * (ref_pitch & 0xf) >> 4);
+    uint32_t phase_increment = a + (static_cast<int32_t>(b - a) * (ref_pitch & 0xf) >> 4);
     phase_increment >>= num_shifts;
     return phase_increment;
   }
 
-  void AnalogOscillator::Render(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::Render(const uint8_t* sync_in, int16_t* buffer,
+    uint8_t* sync_out, size_t size) {
     RenderFn fn = fn_table_[shape_];
 
     if (shape_ != previous_shape_) {
@@ -88,11 +83,8 @@ namespace braids {
     (this->*fn)(sync_in, buffer, sync_out, size);
   }
 
-  void AnalogOscillator::RenderCSaw(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderCSaw(const uint8_t* sync_in, int16_t* buffer,
+    uint8_t* sync_out, size_t size) {
     BEGIN_INTERPOLATE_PHASE_INCREMENT
       int32_t next_sample = next_sample_;
     while (size--) {
@@ -112,8 +104,7 @@ namespace braids {
       if (*sync_in) {
         // sync_in contain the fractional reset time.
         reset_time = static_cast<uint32_t>(*sync_in - 1) << 9;
-        uint32_t phase_at_reset = phase_ + \
-          (65535 - reset_time) * (phase_increment >> 16);
+        uint32_t phase_at_reset = phase_ + (65535 - reset_time) * (phase_increment >> 16);
         sync_reset = true;
         transition_during_reset = false;
         if (phase_at_reset < phase_ || (!high_ && phase_at_reset >= pw)) {
@@ -192,20 +183,14 @@ namespace braids {
         high_ = false;
       }
 
-      next_sample += phase_ < pw
-        ? discontinuity_depth_
-        : phase_ >> 18;
+      next_sample += phase_ < pw ? discontinuity_depth_ : phase_ >> 18;
       *buffer++ = (this_sample - 8192) << 1;
     }
     next_sample_ = next_sample;
     END_INTERPOLATE_PHASE_INCREMENT
   }
 
-  void AnalogOscillator::RenderSquare(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderSquare(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     BEGIN_INTERPOLATE_PHASE_INCREMENT
       if (parameter_ > 32000) {
         parameter_ = 32000;
@@ -227,8 +212,7 @@ namespace braids {
       if (*sync_in) {
         // sync_in contain the fractional reset time.
         reset_time = static_cast<uint32_t>(*sync_in - 1) << 9;
-        uint32_t phase_at_reset = phase_ + \
-          (65535 - reset_time) * (phase_increment >> 16);
+        uint32_t phase_at_reset = phase_ + (65535 - reset_time) * (phase_increment >> 16);
         sync_reset = true;
         if (phase_at_reset < phase_ || (!high_ && phase_at_reset >= pw)) {
           transition_during_reset = true;
@@ -303,11 +287,7 @@ namespace braids {
     END_INTERPOLATE_PHASE_INCREMENT
   }
 
-  void AnalogOscillator::RenderSaw(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderSaw(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     BEGIN_INTERPOLATE_PHASE_INCREMENT
       int32_t next_sample = next_sample_;
     while (size--) {
@@ -323,8 +303,7 @@ namespace braids {
       if (*sync_in) {
         // sync_in contain the fractional reset time.
         reset_time = static_cast<uint32_t>(*sync_in - 1) << 9;
-        uint32_t phase_at_reset = phase_ + \
-          (65535 - reset_time) * (phase_increment >> 16);
+        uint32_t phase_at_reset = phase_ + (65535 - reset_time) * (phase_increment >> 16);
         sync_reset = true;
         if (phase_at_reset < phase_) {
           transition_during_reset = true;
@@ -374,11 +353,7 @@ namespace braids {
     END_INTERPOLATE_PHASE_INCREMENT
   }
 
-  void AnalogOscillator::RenderVariableSaw(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderVariableSaw(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     BEGIN_INTERPOLATE_PHASE_INCREMENT
       int32_t next_sample = next_sample_;
     if (parameter_ < 1024) {
@@ -399,8 +374,7 @@ namespace braids {
       if (*sync_in) {
         // sync_in contain the fractional reset time.
         reset_time = static_cast<uint32_t>(*sync_in - 1) << 9;
-        uint32_t phase_at_reset = phase_ + \
-          (65535 - reset_time) * (phase_increment >> 16);
+        uint32_t phase_at_reset = phase_ + (65535 - reset_time) * (phase_increment >> 16);
         sync_reset = true;
         if (phase_at_reset < phase_ || (!high_ && phase_at_reset >= pw)) {
           transition_during_reset = true;
@@ -477,11 +451,7 @@ namespace braids {
     END_INTERPOLATE_PHASE_INCREMENT
   }
 
-  void AnalogOscillator::RenderTriangle(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderTriangle(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     BEGIN_INTERPOLATE_PHASE_INCREMENT
       uint32_t phase = phase_;
     while (size--) {
@@ -510,11 +480,7 @@ namespace braids {
     END_INTERPOLATE_PHASE_INCREMENT
   }
 
-  void AnalogOscillator::RenderSine(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderSine(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     uint32_t phase = phase_;
     BEGIN_INTERPOLATE_PHASE_INCREMENT
       while (size--) {
@@ -529,11 +495,7 @@ namespace braids {
       phase_ = phase;
   }
 
-  void AnalogOscillator::RenderTriangleFold(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderTriangleFold(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     uint32_t phase = phase_;
 
     BEGIN_INTERPOLATE_PHASE_INCREMENT
@@ -575,11 +537,7 @@ namespace braids {
       phase_ = phase;
   }
 
-  void AnalogOscillator::RenderSineFold(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderSineFold(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     uint32_t phase = phase_;
 
     BEGIN_INTERPOLATE_PHASE_INCREMENT
@@ -616,11 +574,7 @@ namespace braids {
       phase_ = phase;
   }
 
-  void AnalogOscillator::RenderBuzz(
-    const uint8_t* sync_in,
-    int16_t* buffer,
-    uint8_t* sync_out,
-    size_t size) {
+  void AnalogOscillator::RenderBuzz(const uint8_t* sync_in, int16_t* buffer, uint8_t* sync_out, size_t size) {
     int32_t shifted_pitch = pitch_ + ((32767 - parameter_) >> 1);
     uint16_t crossfade = shifted_pitch << 6;
     size_t index = (shifted_pitch >> 10);
@@ -654,5 +608,4 @@ namespace braids {
     &AnalogOscillator::RenderSineFold,
     &AnalogOscillator::RenderBuzz,
   };
-
 }  // namespace braids

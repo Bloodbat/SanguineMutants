@@ -268,9 +268,9 @@ namespace renaissance {
 	public:
 		typedef void (DigitalOscillator::* RenderFn)(const uint8_t*, int16_t*, size_t);
 
-		DigitalOscillator() { }
+		DigitalOscillator() {}
 
-		~DigitalOscillator() { }
+		~DigitalOscillator() {}
 
 		inline void Init() {
 			memset(&state_, 0, sizeof(state_));
@@ -295,8 +295,7 @@ namespace renaissance {
 			// Smooth HF noise when the pitch CV is noisy.
 			if (pitch_ > (90 << 7) && pitch > (90 << 7)) {
 				pitch_ = (static_cast<int32_t>(pitch_) + pitch) >> 1;
-			}
-			else {
+			} else {
 				pitch_ = pitch;
 			}
 		}
