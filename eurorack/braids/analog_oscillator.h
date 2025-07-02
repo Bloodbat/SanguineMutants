@@ -93,10 +93,6 @@ namespace braids {
       aux_parameter_ = parameter;
     }
 
-    inline uint32_t phase_increment() const {
-      return phase_increment_;
-    }
-
     inline void Reset() {
       phase_ = -phase_increment_;
     }
