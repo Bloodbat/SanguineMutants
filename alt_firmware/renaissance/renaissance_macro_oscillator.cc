@@ -104,12 +104,10 @@ namespace renaissance {
 		}
 		while (size--) {
 			int16_t sample = Mix(*shape_1++, *shape_2++, balance);
-			int32_t shifted_sample = sample;
-			shifted_sample += (parameter_[1] >> 2) + (parameter_[0] >> 4);
 
 			lp_state += (sample - lp_state) * f >> 15;
 			CLIP(lp_state)
-				shifted_sample = lp_state + 32768;
+				int32_t shifted_sample = lp_state + 32768;
 
 			int16_t fuzzed = Interpolate88(ws_violent_overdrive, shifted_sample);
 			*buffer++ = Mix(sample, fuzzed, fuzz_amount);
