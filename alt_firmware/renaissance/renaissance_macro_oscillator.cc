@@ -223,7 +223,7 @@ namespace renaissance {
 
 		BEGIN_INTERPOLATE_PARAMETER_1
 
-			int16_t* temp_buffer = temp_buffer_;
+			const int16_t* temp_buffer = temp_buffer_;
 		while (size--) {
 			INTERPOLATE_PARAMETER_1
 				uint16_t sub_gain = (parameter_1 < 16384 ? (16383 - parameter_1) :
@@ -252,7 +252,7 @@ namespace renaissance {
 
 		BEGIN_INTERPOLATE_PARAMETER_1
 
-			int16_t* temp_buffer = temp_buffer_;
+			const int16_t* temp_buffer = temp_buffer_;
 		while (size--) {
 			INTERPOLATE_PARAMETER_1
 				uint16_t balance = parameter_1 << 1;
@@ -286,7 +286,7 @@ namespace renaissance {
 		analog_oscillator_[0].Render(sync, buffer, NULL, size);
 		analog_oscillator_[1].Render(sync, temp_buffer_, NULL, size);
 
-		int16_t* temp_buffer = temp_buffer_;
+		const int16_t* temp_buffer = temp_buffer_;
 
 		BEGIN_INTERPOLATE_PARAMETER_1
 
@@ -313,7 +313,7 @@ namespace renaissance {
 
 		analog_oscillator_[0].Render(sync, buffer, NULL, size);
 		analog_oscillator_[1].Render(sync, temp_buffer_, NULL, size);
-		int16_t* temp_buffer = temp_buffer_;
+		const int16_t* temp_buffer = temp_buffer_;
 		while (size--) {
 			*buffer >>= 1;
 			*buffer += *temp_buffer >> 1;
