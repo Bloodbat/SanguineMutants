@@ -72,10 +72,6 @@ namespace braids {
       transfer_[256] = transfer_[255];
     }
 
-    inline int32_t transfer(uint16_t i) {
-      return transfer_[i];
-    }
-
     inline int32_t Transform(int16_t sample) {
       uint16_t i = sample + 32768;
       int32_t a = transfer_[i >> 8];
