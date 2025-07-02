@@ -214,15 +214,6 @@ namespace renaissance {
 		uint8_t max_value;
 		const char name[5];
 		const char* const* strings;
-
-		int16_t Clip(int16_t value) const {
-			if (value > max_value) {
-				value = max_value;
-			} else if (value < min_value) {
-				value = min_value;
-			}
-			return value;
-		}
 	};
 
 	class Settings {
@@ -239,17 +230,6 @@ namespace renaissance {
 		void Save();
 		void Reset();
 
-		void SetValue(Setting setting, uint8_t value) {
-			uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(&data_));
-			data[setting] = value;
-		}
-
-		uint8_t GetValue(Setting setting) const {
-			const uint8_t* data = static_cast<const uint8_t*>(
-				static_cast<const void*>(&data_));
-			return data[setting];
-		}
-
 		inline MacroOscillatorShape shape() const {
 			return static_cast<MacroOscillatorShape>(data_.shape);
 		}
@@ -262,97 +242,8 @@ namespace renaissance {
 			return static_cast<SampleRate>(data_.sample_rate);
 		}
 
-		inline bool vco_flatten() const {
-			return data_.vco_flatten;
-		}
-
-		inline uint8_t vco_drift() const {
-			return data_.vco_drift;
-		}
-
-		inline uint8_t signature() const {
-			return data_.signature;
-		}
-
-		inline bool meta_modulation() const {
-			return data_.meta_modulation;
-		}
-
-		inline uint8_t trig_delay() const {
-			return data_.trig_delay;
-		}
-
-		inline int32_t quantizer_root() const {
-			return data_.quantizer_root;
-		}
-
-		inline const SettingsData& data() const { return data_; }
-		inline SettingsData* mutable_data() { return &data_; }
-
-		void Calibrate(
-			int32_t adc_code_c2,
-			int32_t adc_code_c4,
-			int32_t adc_code_fm,
-			int32_t adc_code_p0_min,
-			int32_t adc_code_p0_max,
-			int32_t adc_code_p1_min,
-			int32_t adc_code_p1_max) {
-			if (adc_code_c4 != adc_code_c2) {
-				int32_t scale = (24 * 128 * 4096L) / (adc_code_c4 - adc_code_c2);
-				data_.pitch_cv_scale = scale;
-				data_.pitch_cv_offset = (60 << 7) -
-					(scale * ((adc_code_c2 + adc_code_c4) >> 1) >> 12);
-				data_.fm_cv_offset = adc_code_fm;
-			}
-
-			Save();
-		}
-
-		inline int32_t adc_to_pitch(int32_t pitch_adc_code) const {
-			if (data_.pitch_range == PITCH_RANGE_EXTERNAL ||
-				data_.pitch_range == PITCH_RANGE_LFO) {
-				pitch_adc_code = pitch_adc_code * data_.pitch_cv_scale >> 12;
-				pitch_adc_code += data_.pitch_cv_offset;
-			} else if (data_.pitch_range == PITCH_RANGE_FREE) {
-				pitch_adc_code = (pitch_adc_code - 1638);
-				pitch_adc_code = pitch_adc_code * data_.pitch_cv_scale >> 12;
-				pitch_adc_code += 60 << 7;
-			} else if (data_.pitch_range == PITCH_RANGE_440) {
-				pitch_adc_code = 69 << 7;
-			} else {
-				pitch_adc_code = (pitch_adc_code - 1638) * 9 >> 1;
-				pitch_adc_code += 60 << 7;
-			}
-			return pitch_adc_code;
-		}
-
-		inline int32_t pitch_transposition() const {
-			int32_t t = data_.pitch_range == PITCH_RANGE_LFO ? int32_t(-36 * 128) : 0;
-			t += (static_cast<int32_t>(data_.pitch_octave) - 2) * 12 * 128;
-			return t;
-		}
-
-		inline int32_t adc_to_fm(int32_t fm_adc_code) const {
-			fm_adc_code -= data_.fm_cv_offset;
-			fm_adc_code = fm_adc_code * 7680 >> 12;
-			if (data_.pitch_range == PITCH_RANGE_440) {
-				fm_adc_code = 0;
-			}
-			return fm_adc_code;
-		}
-
-		inline int32_t adc_to_parameter(int index, int32_t adc_code) const {
-			int32_t scale = static_cast<int32_t>(data_.parameter_cv_scale[index]);
-			int32_t offset = static_cast<int32_t>(data_.parameter_cv_offset[index]);
-			return (scale * adc_code >> 12) + offset;
-		}
-
-		static const SettingMetadata& metadata(Setting setting) {
-			return metadata_[setting];
-		}
-
-		static const Setting& setting_at_index(int16_t index) {
-			return settings_order_[index];
+		inline const SettingsData& data() const {
+			return data_;
 		}
 
 	private:
