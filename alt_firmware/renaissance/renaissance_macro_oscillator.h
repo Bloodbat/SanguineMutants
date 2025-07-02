@@ -40,13 +40,16 @@
 #include "renaissance/vocalist/vocalist.h"
 
 namespace renaissance {
-
 	class MacroOscillator {
 	public:
 		typedef void (MacroOscillator::* RenderFn)(const uint8_t*, int16_t*, size_t);
 
-		MacroOscillator() { }
-		~MacroOscillator() { }
+		MacroOscillator() {
+
+		}
+		~MacroOscillator() {
+
+		}
 
 		inline void Init() {
 			analog_oscillator_[0].Init();
@@ -77,9 +80,7 @@ namespace renaissance {
 
 		inline int16_t pitch() const { return pitch_; }
 
-		inline void set_parameters(
-			int16_t parameter_1,
-			int16_t parameter_2) {
+		inline void set_parameters(int16_t parameter_1, int16_t parameter_2) {
 			parameter_[0] = parameter_1;
 			parameter_[1] = parameter_2;
 		}
@@ -119,7 +120,5 @@ namespace renaissance {
 
 		DISALLOW_COPY_AND_ASSIGN(MacroOscillator);
 	};
-
 }  // namespace renaissance
-
 #endif
