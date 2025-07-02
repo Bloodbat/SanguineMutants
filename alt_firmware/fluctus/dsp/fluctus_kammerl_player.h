@@ -47,8 +47,6 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wtype-limits"
-
 namespace fluctus {
 	// Maximum clock divisor.
 	const int kMaxClockDividerLog2 = 3; // 2^3 = 8
@@ -326,7 +324,10 @@ namespace fluctus {
 				uint32_t buffer_pos_idx_in_buffer = buffer_pos_idx >> 12;
 				uint32_t buffer_pos_fract = buffer_pos_idx << 4;
 				buffer_pos_idx_in_buffer = buffer_pos_idx_in_buffer % buffer->size();
-				CONSTRAIN(buffer_pos_idx_in_buffer, 0, buffer->size() - 5);
+
+				if (buffer_pos_idx_in_buffer > buffer->size() - 5) {
+					buffer_pos_idx_in_buffer = buffer->size() - 5;
+				}
 
 				// Write to output.
 				float l = buffer[0].ReadHermite(buffer_pos_idx_in_buffer, buffer_pos_fract);
