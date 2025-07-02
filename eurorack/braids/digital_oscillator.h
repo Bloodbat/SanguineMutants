@@ -278,10 +278,6 @@ namespace braids {
       parameter_[1] = parameter_2;
     }
 
-    inline uint32_t phase_increment() const {
-      return phase_increment_;
-    }
-
     inline void Strike() {
       strike_ = true;
     }

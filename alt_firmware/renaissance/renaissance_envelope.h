@@ -53,10 +53,6 @@ namespace renaissance {
 			increment_[ENV_SEGMENT_DEAD] = 0;
 		}
 
-		inline EnvelopeSegment segment() const {
-			return static_cast<EnvelopeSegment>(segment_);
-		}
-
 		inline void Update(int32_t a, int32_t d) {
 			increment_[ENV_SEGMENT_ATTACK] = lut_env_portamento_increments[a];
 			increment_[ENV_SEGMENT_DECAY] = lut_env_portamento_increments[d];
