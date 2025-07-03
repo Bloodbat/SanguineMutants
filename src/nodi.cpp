@@ -170,8 +170,6 @@ struct Nodi : SanguineModule {
 		configOutput(OUTPUT_OUT, "Audio");
 
 		configInput(INPUT_META, "Meta modulation");
-		// Unused: kept for compatibility.
-		configButton(PARAM_META, "");
 		configButton(PARAM_MORSE, "Toggle paques (morse code secret message)");
 		configButton(PARAM_VCA, "Toggle AD VCA");
 		configSwitch(PARAM_DRIFT, 0.f, 4.f, 0.f, "Oscillator drift", nodiCommon::intensityTooltipStrings);
