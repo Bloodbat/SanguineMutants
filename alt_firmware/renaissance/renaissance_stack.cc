@@ -87,17 +87,15 @@ namespace renaissance {
 	inline void DigitalOscillator::renderChordSaw(const uint8_t* sync, int16_t* buffer, size_t size,
 		uint32_t* phase_increment, uint8_t noteCount) {
 
-		uint32_t phase_0, phase_1, phase_2, phase_3, phase_4, phase_5;
-
 		uint32_t detune = 0;
 
 		for (int i = 0; i < 2; i++) {
-			phase_0 = state_.stack.phase[(i * 6) + 0];
-			phase_1 = state_.stack.phase[(i * 6) + 1];
-			phase_2 = state_.stack.phase[(i * 6) + 2];
-			phase_3 = state_.stack.phase[(i * 6) + 3];
-			phase_4 = state_.stack.phase[(i * 6) + 4];
-			phase_5 = state_.stack.phase[(i * 6) + 5];
+			uint32_t phase_0 = state_.stack.phase[(i * 6) + 0];
+			uint32_t phase_1 = state_.stack.phase[(i * 6) + 1];
+			uint32_t phase_2 = state_.stack.phase[(i * 6) + 2];
+			uint32_t phase_3 = state_.stack.phase[(i * 6) + 3];
+			uint32_t phase_4 = state_.stack.phase[(i * 6) + 4];
+			uint32_t phase_5 = state_.stack.phase[(i * 6) + 5];
 
 			if (i == 1) {
 				detune = parameter_[0] << 3;
@@ -422,9 +420,6 @@ namespace renaissance {
 	// Without the attribute this gets built as-is AND inlined into RenderStack :/
 	void DigitalOscillator::renderChord(const uint8_t* sync, int16_t* buffer, size_t size,
 		uint8_t* noteOffset, uint8_t noteCount) {
-
-		uint32_t fm = 0;
-
 		if (strike_) {
 			for (size_t i = 0; i < kStackSize; ++i) {
 				state_.stack.phase[i] = Random::GetWord();
@@ -459,7 +454,7 @@ namespace renaissance {
 			size_t i;
 			if (quantizer.enabled_) {
 				uint16_t index = quantizer.index;
-				fm = pitch_ - quantizer.codebook_[quantizer.index];
+				uint32_t fm = pitch_ - quantizer.codebook_[quantizer.index];
 
 				phase_increment[0] = phase_increment_;
 				for (i = 1; i < noteCount; i++) {
