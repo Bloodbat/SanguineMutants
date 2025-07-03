@@ -43,7 +43,6 @@ void SAM::LoadTables(const unsigned char* data) {
 	state->amplitude3 = &data[offset];
 	offset += tableLength[6];
 	state->sampledConsonantFlag = &data[offset];
-	offset += tableLength[7];
 
 	// Measure uncompressed length of frequency1 to calculate total frames in this word.
 	state->framesRemaining = 0;
