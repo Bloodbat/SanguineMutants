@@ -77,7 +77,6 @@ namespace marbles {
       if (must_complete_) {
         phase_ = 0.0f;
         pulse_width_ = pulse_width;
-        ratio_ = 1.0f;
         pulse_length_ = 0;
       }
 
