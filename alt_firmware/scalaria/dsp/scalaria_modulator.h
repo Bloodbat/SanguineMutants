@@ -108,7 +108,6 @@ namespace scalaria {
     inline Parameters* mutableParameters() {
       return &parameters_;
     }
-    inline const Parameters& parameters() { return parameters_; }
 
   private:
     void ApplyAmplification(ShortFrame* input, const float* level, float* auxOutput, size_t size, bool rawLevel) {
