@@ -107,33 +107,8 @@ namespace bumps {
       attenuverter_ = (attenuverter_ * 15 + scaled_value) >> 4;
     }
 
-    inline int16_t shape() const { return shape_; }
-    inline int16_t pitch() {
-      if (quantize_) {
-        /* Apply hysteresis and filtering to ADC reading to prevent
-           jittery quantization. */
-        if ((v_oct_ > previous_v_oct_ + 16) ||
-          (v_oct_ < previous_v_oct_ - 16)) {
-          previous_v_oct_ = v_oct_;
-        } else {
-          previous_v_oct_ += (v_oct_ - previous_v_oct_) >> 5;
-          v_oct_ = previous_v_oct_;
-        }
-      }
-
-      int32_t pitch = (v_oct_ - calibration_data_.v_oct_offset) *
-        calibration_data_.v_oct_scale >> 15;
-      pitch += 60 << 7;
-
-      if (quantize_) {
-        uint16_t semi = pitch >> 7;
-        uint16_t octaves = semi / 12;
-        semi -= octaves * 12;
-        pitch = octaves * kOctave +
-          quantize_lut[quantize_ - 1][semi];
-      }
-
-      return pitch;
+    inline int16_t shape() const {
+      return shape_;
     }
 
     uint8_t quantize_;
