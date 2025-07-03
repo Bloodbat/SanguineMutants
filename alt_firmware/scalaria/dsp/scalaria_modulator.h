@@ -135,7 +135,8 @@ namespace scalaria {
       }
     }
 
-    void Convert(ShortFrame* output, float* mainOutput, float* auxOutput, float auxGain, size_t size) {
+    void Convert(ShortFrame* output, const float* mainOutput, const float* auxOutput, const float auxGain,
+      size_t size) {
       while (size--) {
         output->l = parasites_stmlib::Clip16(static_cast<int32_t>(*mainOutput * 32768.0f));
         output->r = parasites_stmlib::Clip16(static_cast<int32_t>(*auxOutput * auxGain));
