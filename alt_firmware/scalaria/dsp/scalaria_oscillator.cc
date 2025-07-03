@@ -32,7 +32,6 @@
 #include "parasites_stmlib/utils/parasites_random.h"
 
 namespace scalaria {
-
   using namespace parasites_stmlib;
 
   const float kToFloat = 1.0f / 4294967296.0f;
@@ -129,8 +128,10 @@ namespace scalaria {
           }
           next_sample += phase;
           this_sample = this_sample * 2.0f - 1.0f;
-          // Slight roll-off of high frequencies - prevent high components near
-          // 48kHz that are not eliminated by the upsampling filter.
+          /*
+             Slight roll-off of high frequencies - prevent high components near
+             48kHz that are not eliminated by the upsampling filter.
+          */
           lp_state += 0.3f * (this_sample - lp_state);
           *out++ = lp_state;
         } else {
@@ -180,5 +181,4 @@ namespace scalaria {
     &Oscillator::RenderPolyblep<OSCILLATOR_SHAPE_SAW>,
     &Oscillator::RenderPolyblep<OSCILLATOR_SHAPE_PULSE>,
   };
-
 }  // namespace scalaria
