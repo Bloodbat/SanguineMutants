@@ -41,7 +41,6 @@
 #include <algorithm>
 
 namespace scalaria {
-
   using namespace std;
 
   const size_t kMaxBlockSize = 96;
@@ -58,7 +57,7 @@ namespace scalaria {
     }
 
     void Process(float drive, float limit, short* in, float* out, float* outRaw, size_t inStride, size_t size) {
-      // Process noise gate and compute raw output
+      // Process noise gate and compute raw output.
       parasites_stmlib::ParameterInterpolator drive_modulation(&drive_, drive, size);
       float level = level_;
       for (size_t i = 0; i < size; ++i) {
@@ -72,7 +71,7 @@ namespace scalaria {
       }
       level_ = level;
 
-      // Process overdrive / gain
+      // Process overdrive / gain.
       float drive2 = drive * drive;
       float preGainA = drive * 0.5f;
       float preGainB = drive2 * drive2 * drive * 24.0f;
@@ -106,7 +105,9 @@ namespace scalaria {
     void Init(float sampleRate);
     void Process(ShortFrame* input, ShortFrame* output, size_t size);
     void ProcessLadderFilter(ShortFrame* input, ShortFrame* output, size_t size);
-    inline Parameters* mutableParameters() { return &parameters_; }
+    inline Parameters* mutableParameters() {
+      return &parameters_;
+    }
     inline const Parameters& parameters() { return parameters_; }
 
   private:
@@ -114,7 +115,7 @@ namespace scalaria {
       if (!parameters_.oscillatorShape || rawLevel) {
         fill(&auxOutput[0], &auxOutput[size], 0.0f);
       }
-      // Convert audio inputs to float and apply VCA/saturation (5.8% per channel)
+      // Convert audio inputs to float and apply VCA/saturation (5.8% per channel).
       short* input_samples = &input->l;
       for (int32_t i = (parameters_.oscillatorShape && !rawLevel) ? 1 : 0; i < 2; ++i) {
         amplifier_[i].Process(level[i], 1.0f, input_samples + i, buffer_[i], auxOutput, 2, size);
@@ -159,5 +160,4 @@ namespace scalaria {
     DISALLOW_COPY_AND_ASSIGN(ScalariaModulator);
   };
 }  // namespace scalaria
-
 #endif  // SCALARIA_DSP_MODULATOR_H_
