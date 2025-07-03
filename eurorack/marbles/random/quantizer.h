@@ -49,42 +49,11 @@ namespace marbles {
     int num_degrees;
     Degree degree[kMaxDegrees];
 
-    inline float cell_voltage(int i) const {
-      float transposition = static_cast<float>(i / num_degrees) * base_interval;
-      return degree[i % num_degrees].voltage + transposition;
-    }
-
     void Init() {
       base_interval = 1.0f;
       num_degrees = 1;
       degree[0].voltage = 0.0f;
       degree[0].weight = 0.0f;
-    }
-
-    void InitMajor() {
-      const uint8_t major_scale_weights[] = {
-        255, 16, 128, 16, 192, 64, 8, 224, 16, 96, 32, 160,
-      };
-
-      base_interval = 1.0f;
-      num_degrees = 12;
-      for (size_t i = 0; i < 12; ++i) {
-        degree[i].voltage = static_cast<float>(i) * 0.0833333333f;
-        degree[i].weight = major_scale_weights[i];
-      }
-    }
-
-    void InitTenth() {
-      const uint8_t major_scale_weights[] = {
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 25
-      };
-
-      base_interval = 1.0f;
-      num_degrees = 10;
-      for (size_t i = 0; i < 10; ++i) {
-        degree[i].voltage = static_cast<float>(i) * 0.1f;
-        degree[i].weight = major_scale_weights[i];
-      }
     }
   };
 
