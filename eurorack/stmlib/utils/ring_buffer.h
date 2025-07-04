@@ -89,7 +89,7 @@ namespace stmlib {
       read_ptr_ = (write_ptr_ + 1 + n) % size;
     }
 
-    inline void ImmediateRead(T* destination, size_t num_elements) {
+    inline void ImmediateRead(const T* destination, size_t num_elements) {
       size_t r = read_ptr_;
       size_t read = num_elements;
 
@@ -146,7 +146,7 @@ namespace stmlib {
     inline T Read() { return T(0); }
     inline T ImmediateRead() { return T(0); }
     inline void Flush() {}
-    inline void ImmediateRead(T* destination, size_t num_elements) {}
+    inline void ImmediateRead(const T* destination, size_t num_elements) {}
     inline void Overwrite(const T* source, size_t num_elements) {}
 
   private:
