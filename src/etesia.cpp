@@ -108,8 +108,11 @@ struct Etesia : SanguineModule {
 	int lastStereo;
 
 	const int kClockDivider = 512;
+	// NOTE: related to saving and loading buffers? Not used for anything right now.
+	/*
 	int bufferSize = 1;
 	int currentBufferSize = 1;
+	*/
 
 	uint32_t displayTimeout = 0;
 
@@ -244,6 +247,8 @@ struct Etesia : SanguineModule {
 				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 			}
 
+			// NOTE: related to saving and loading buffers? Not used for anything right now.
+			/*
 			if (currentBufferSize != bufferSize) {
 				// Re-init etesiaProcessor with new size.
 				delete etesiaProcessor;
@@ -256,6 +261,7 @@ struct Etesia : SanguineModule {
 				etesiaProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 				currentBufferSize = bufferSize;
 			}
+			*/
 
 			// Set up Etesia processor
 			etesiaProcessor->set_playback_mode(playbackMode);
@@ -565,7 +571,8 @@ struct Etesia : SanguineModule {
 		} // lightsDivider
 	}
 
-
+	// NOTE: This is not used for anything ATM... revisit if we're implementing saving and loading buffers.
+	/*
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
@@ -583,6 +590,7 @@ struct Etesia : SanguineModule {
 			bufferSize = intValue;
 		}
 	}
+	*/
 
 	int getModeParam() {
 		return params[PARAM_MODE].getValue();
