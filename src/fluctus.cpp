@@ -105,8 +105,11 @@ struct Fluctus : SanguineModule {
 	int lastStereo;
 
 	const int kClockDivider = 512;
+	// NOTE: related to saving and loading buffers? Not used for anything right now.
+	/*
 	int bufferSize = 1;
 	int currentBufferSize = 1;
+	*/
 
 	uint32_t displayTimeout = 0;
 
@@ -237,6 +240,8 @@ struct Fluctus : SanguineModule {
 				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 			}
 
+			// NOTE: related to saving and loading buffers? Not used for anything right now.
+			/*
 			if (currentBufferSize != bufferSize) {
 				// Re-init fluctusProcessor with new size.
 				delete fluctusProcessor;
@@ -249,6 +254,7 @@ struct Fluctus : SanguineModule {
 				fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 				currentBufferSize = bufferSize;
 			}
+			*/
 
 			// Set up Fluctus processor
 			fluctusProcessor->set_playback_mode(playbackMode);
@@ -554,7 +560,8 @@ struct Fluctus : SanguineModule {
 		} // lightsDivider
 	}
 
-
+	// NOTE: This is not used for anything ATM... revisit if we're implementing saving and loading buffers.
+	/*
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
@@ -572,6 +579,7 @@ struct Fluctus : SanguineModule {
 			bufferSize = intValue;
 		}
 	}
+	*/
 
 	int getModeParam() {
 		return params[PARAM_MODE].getValue();
