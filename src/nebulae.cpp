@@ -224,16 +224,16 @@ struct Nebulae : SanguineModule {
 			// Convert input buffer.
 			srcInput.setRates(args.sampleRate, 32000);
 			dsp::Frame<2> inputFrames[32];
-			int inLen = drbInputBuffer.size();
-			int outLen = 32;
-			srcInput.process(drbInputBuffer.startData(), &inLen, inputFrames, &outLen);
-			drbInputBuffer.startIncr(inLen);
+			int inputLength = drbInputBuffer.size();
+			int outputLength = 32;
+			srcInput.process(drbInputBuffer.startData(), &inputLength, inputFrames, &outputLength);
+			drbInputBuffer.startIncr(inputLength);
 
 			/*
 			   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
 			   between the input and output SRC.
 			*/
-			for (int frame = 0; frame < outLen; ++frame) {
+			for (int frame = 0; frame < outputLength; ++frame) {
 				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
 				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 			}
