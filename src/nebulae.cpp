@@ -114,7 +114,7 @@ struct Nebulae : SanguineModule {
 	bool bTriggered = false;
 
 	uint8_t* bufferLarge;
-	uint8_t* bufferSmall;
+	uint8_t* bufferCcm;
 
 	clouds::GranularProcessor* cloudsProcessor;
 
@@ -182,22 +182,21 @@ struct Nebulae : SanguineModule {
 		lastHiFi = 1;
 		lastStereo = 1;
 
-		const int memLen = 118784;
-		const int ccmLen = 65536 - 128;
-		bufferLarge = new uint8_t[memLen]();
-		bufferSmall = new uint8_t[ccmLen]();
+		const int bigBufferLength = 118784;
+		const int ccmBufferLength = 65536 - 128;
+		bufferLarge = new uint8_t[bigBufferLength]();
+		bufferCcm = new uint8_t[ccmBufferLength]();
 		cloudsProcessor = new clouds::GranularProcessor();
 		memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
+		cloudsProcessor->Init(bufferLarge, bigBufferLength, bufferCcm, ccmBufferLength);
 
 		lightsDivider.setDivision(kClockDivider);
-
-		cloudsProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Nebulae() {
 		delete cloudsProcessor;
 		delete[] bufferLarge;
-		delete[] bufferSmall;
+		delete[] bufferCcm;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -250,7 +249,7 @@ struct Nebulae : SanguineModule {
 				bufferLarge = new uint8_t[memLen]();
 				cloudsProcessor = new clouds::GranularProcessor();
 				memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-				cloudsProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
+				cloudsProcessor->Init(bufferLarge, memLen, bufferCcm, ccmLen);
 				currentBufferSize = bufferSize;
 			}
 			*/

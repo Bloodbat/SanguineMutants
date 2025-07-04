@@ -121,7 +121,7 @@ struct Etesia : SanguineModule {
 	bool bTriggered = false;
 
 	uint8_t* bufferLarge;
-	uint8_t* bufferSmall;
+	uint8_t* bufferCcm;
 
 	etesia::EtesiaGranularProcessor* etesiaProcessor;
 
@@ -192,22 +192,21 @@ struct Etesia : SanguineModule {
 		lastHiFi = 1;
 		lastStereo = 1;
 
-		const int memLen = 118784;
-		const int ccmLen = 65536 - 128;
-		bufferLarge = new uint8_t[memLen]();
-		bufferSmall = new uint8_t[ccmLen]();
+		const int bigBufferLength = 118784;
+		const int ccmBufferLength = 65536 - 128;
+		bufferLarge = new uint8_t[bigBufferLength]();
+		bufferCcm = new uint8_t[ccmBufferLength]();
 		etesiaProcessor = new etesia::EtesiaGranularProcessor();
 		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
+		etesiaProcessor->Init(bufferLarge, bigBufferLength, bufferCcm, ccmBufferLength);
 
 		lightsDivider.setDivision(kClockDivider);
-
-		etesiaProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Etesia() {
 		delete etesiaProcessor;
 		delete[] bufferLarge;
-		delete[] bufferSmall;
+		delete[] bufferCcm;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -261,7 +260,7 @@ struct Etesia : SanguineModule {
 				bufferLarge = new uint8_t[memLen]();
 				etesiaProcessor = new etesia::EtesiaGranularProcessor();
 				memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
-				etesiaProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
+				etesiaProcessor->Init(bufferLarge, memLen, bufferCcm, ccmLen);
 				currentBufferSize = bufferSize;
 			}
 			*/

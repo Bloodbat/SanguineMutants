@@ -118,7 +118,7 @@ struct Fluctus : SanguineModule {
 	bool bTriggered = false;
 
 	uint8_t* bufferLarge;
-	uint8_t* bufferSmall;
+	uint8_t* bufferCcm;
 
 	fluctus::FluctusGranularProcessor* fluctusProcessor;
 
@@ -186,22 +186,21 @@ struct Fluctus : SanguineModule {
 		lastHiFi = 1;
 		lastStereo = 1;
 
-		const int memLen = 118784;
-		const int ccmLen = 65536 - 128;
-		bufferLarge = new uint8_t[memLen]();
-		bufferSmall = new uint8_t[ccmLen]();
+		const int bigBufferLength = 118784;
+		const int ccmBufferLength = 65536 - 128;
+		bufferLarge = new uint8_t[bigBufferLength]();
+		bufferCcm = new uint8_t[ccmBufferLength]();
 		fluctusProcessor = new fluctus::FluctusGranularProcessor();
 		memset(fluctusProcessor, 0, sizeof(*fluctusProcessor));
+		fluctusProcessor->Init(bufferLarge, bigBufferLength, bufferCcm, ccmBufferLength);
 
 		lightsDivider.setDivision(kClockDivider);
-
-		fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Fluctus() {
 		delete fluctusProcessor;
 		delete[] bufferLarge;
-		delete[] bufferSmall;
+		delete[] bufferCcm;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -254,7 +253,7 @@ struct Fluctus : SanguineModule {
 				bufferLarge = new uint8_t[memLen]();
 				fluctusProcessor = new fluctus::FluctusGranularProcessor();
 				memset(fluctusProcessor, 0, sizeof(*fluctusProcessor));
-				fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
+				fluctusProcessor->Init(bufferLarge, memLen, bufferCcm, ccmLen);
 				currentBufferSize = bufferSize;
 			}
 			*/
