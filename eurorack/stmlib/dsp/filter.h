@@ -287,15 +287,14 @@ namespace stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size) {
-      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        bp = g_ * hp + state_1;
+        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        float bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        lp = g_ * bp + state_2;
+        float lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -319,15 +318,14 @@ namespace stmlib {
 
     template<FilterMode mode>
     inline void ProcessAdd(const float* in, float* out, size_t size, float gain) {
-      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        bp = g_ * hp + state_1;
+        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        float bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        lp = g_ * bp + state_2;
+        float lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -351,15 +349,14 @@ namespace stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size, size_t stride) {
-      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        bp = g_ * hp + state_1;
+        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        float bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        lp = g_ * bp + state_2;
+        float lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -382,17 +379,16 @@ namespace stmlib {
     }
 
     inline void ProcessMultimode(const float* in, float* out, size_t size, float mode) {
-      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
       float hp_gain = mode < 0.5f ? -mode * 2.0f : -2.0f + mode * 2.0f;
       float lp_gain = mode < 0.5f ? 1.0f - mode * 2.0f : 0.0f;
       float bp_gain = mode < 0.5f ? 0.0f : mode * 2.0f - 1.0f;
       while (size--) {
-        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        bp = g_ * hp + state_1;
+        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        float bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        lp = g_ * bp + state_2;
+        float lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
         *out = hp_gain * hp + bp_gain * bp + lp_gain * lp;
         ++in;
@@ -403,17 +399,16 @@ namespace stmlib {
     }
 
     inline void ProcessMultimodeLPtoHP(const float* in, float* out, size_t size, float mode) {
-      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
       float hp_gain = std::min(-mode * 2.0f + 1.0f, 0.0f);
       float bp_gain = 1.0f - 2.0f * fabsf(mode - 0.5f);
       float lp_gain = std::max(1.0f - mode * 2.0f, 0.0f);
       while (size--) {
-        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        bp = g_ * hp + state_1;
+        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        float bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        lp = g_ * bp + state_2;
+        float lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
         *out = hp_gain * hp + bp_gain * bp + lp_gain * lp;
         ++in;
@@ -425,15 +420,14 @@ namespace stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out_1, float* out_2, size_t size, float gain_1, float gain_2) {
-      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        bp = g_ * hp + state_1;
+        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        float bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        lp = g_ * bp + state_2;
+        float lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -528,14 +522,13 @@ namespace stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size) {
-      float hp, notch, bp_normalized;
       float lp = lp_;
       float bp = bp_;
       while (size--) {
-        bp_normalized = bp * damp_;
-        notch = *in++ - bp_normalized;
+        float bp_normalized = bp * damp_;
+        float notch = *in++ - bp_normalized;
         lp += f_ * bp;
-        hp = notch - lp;
+        float hp = notch - lp;
         bp += f_ * hp;
 
         if (mode == FILTER_MODE_LOW_PASS) {
@@ -553,14 +546,13 @@ namespace stmlib {
     }
 
     inline void Split(const float* in, float* low, float* high, size_t size) {
-      float hp, notch, bp_normalized;
       float lp = lp_;
       float bp = bp_;
       while (size--) {
-        bp_normalized = bp * damp_;
-        notch = *in++ - bp_normalized;
+        float bp_normalized = bp * damp_;
+        float notch = *in++ - bp_normalized;
         lp += f_ * bp;
-        hp = notch - lp;
+        float hp = notch - lp;
         bp += f_ * hp;
         *low++ = lp;
         *high++ = hp;
@@ -571,15 +563,14 @@ namespace stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size, size_t decimate) {
-      float hp, notch, bp_normalized;
       float lp = lp_;
       float bp = bp_;
       size_t n = decimate - 1;
       while (size--) {
-        bp_normalized = bp * damp_;
-        notch = *in++ - bp_normalized;
+        float bp_normalized = bp * damp_;
+        float notch = *in++ - bp_normalized;
         lp += f_ * bp;
-        hp = notch - lp;
+        float hp = notch - lp;
         bp += f_ * hp;
 
         ++n;
