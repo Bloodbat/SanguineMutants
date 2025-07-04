@@ -216,7 +216,7 @@ struct Etesia : SanguineModule {
 		dsp::Frame<2> inputFrame;
 		dsp::Frame<2> outputFrame = {};
 
-		// Get input
+		// Get input.
 		if (!drbInputBuffer.full()) {
 			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
 			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
@@ -224,15 +224,15 @@ struct Etesia : SanguineModule {
 			drbInputBuffer.push(inputFrame);
 		}
 
-		// Trigger
+		// Trigger.
 		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.f;
 
 		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
 
-		// Render frames
+		// Render frames.
 		if (drbOutputBuffer.empty()) {
 			etesia::ShortFrame input[32] = {};
-			// Convert input buffer
+			// Convert input buffer.
 
 			srcInput.setRates(args.sampleRate, 32000);
 			dsp::Frame<2> inputFrames[32];
@@ -241,7 +241,10 @@ struct Etesia : SanguineModule {
 			srcInput.process(drbInputBuffer.startData(), &inLen, inputFrames, &outLen);
 			drbInputBuffer.startIncr(inLen);
 
-			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
+			/*
+			   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
+			   between the input and output SRC.
+			*/
 			for (int frame = 0; frame < outLen; ++frame) {
 				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
 				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
@@ -263,7 +266,7 @@ struct Etesia : SanguineModule {
 			}
 			*/
 
-			// Set up Etesia processor
+			// Set up Etesia processor.
 			etesiaProcessor->set_playback_mode(playbackMode);
 			etesiaProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
 			etesiaProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
@@ -330,7 +333,7 @@ struct Etesia : SanguineModule {
 				}
 			}
 
-			// Convert output buffer
+			// Convert output buffer.
 			dsp::Frame<2> outputFrames[32];
 			for (int frame = 0; frame < 32; ++frame) {
 				outputFrames[frame].samples[0] = output[frame].l / 32768.f;
@@ -346,7 +349,7 @@ struct Etesia : SanguineModule {
 			bTriggered = false;
 		}
 
-		// Set output
+		// Set output.
 		if (!drbOutputBuffer.empty()) {
 			outputFrame = drbOutputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
@@ -359,7 +362,7 @@ struct Etesia : SanguineModule {
 			}
 		}
 
-		// Lights
+		// Lights.
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode) {
@@ -403,7 +406,7 @@ struct Etesia : SanguineModule {
 			}
 		}
 
-		if (lightsDivider.process()) { // Expensive, so call this infrequently
+		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * kClockDivider;
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
@@ -426,7 +429,7 @@ struct Etesia : SanguineModule {
 				textTexture = etesia::modeDisplays[playbackMode].labelTexture;
 				textPitch = etesia::modeDisplays[playbackMode].labelPitch;
 				textTrigger = etesia::modeDisplays[playbackMode].labelTrigger;
-				// Parasite
+				// Parasite.
 				textBlend = etesia::modeDisplays[playbackMode].labelBlend;
 				textSpread = etesia::modeDisplays[playbackMode].labelSpread;
 				textFeedback = etesia::modeDisplays[playbackMode].labelFeedback;
@@ -452,7 +455,7 @@ struct Etesia : SanguineModule {
 
 				inputInfos[INPUT_TRIGGER]->name = etesia::modeTooltips[playbackMode].labelTrigger;
 
-				// Parasite
+				// Parasite.
 				paramQuantities[PARAM_BLEND]->name = etesia::modeTooltips[playbackMode].labelBlend;
 				inputInfos[INPUT_BLEND]->name = etesia::modeTooltips[playbackMode].labelBlend + cloudyCommon::kCVSuffix;
 
