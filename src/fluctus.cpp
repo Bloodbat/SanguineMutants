@@ -210,7 +210,7 @@ struct Fluctus : SanguineModule {
 		dsp::Frame<2> inputFrame;
 		dsp::Frame<2> outputFrame = {};
 
-		// Get input
+		// Get input.
 		if (!drbInputBuffer.full()) {
 			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
 			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
@@ -218,15 +218,15 @@ struct Fluctus : SanguineModule {
 			drbInputBuffer.push(inputFrame);
 		}
 
-		// Trigger
+		// Trigger.
 		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.f;
 
 		fluctus::Parameters* fluctusParameters = fluctusProcessor->mutable_parameters();
 
-		// Render frames
+		// Render frames.
 		if (drbOutputBuffer.empty()) {
 			fluctus::ShortFrame input[32] = {};
-			// Convert input buffer
+			// Convert input buffer.
 			srcInput.setRates(args.sampleRate, 32000);
 			dsp::Frame<2> inputFrames[32];
 			int inLen = drbInputBuffer.size();
@@ -234,7 +234,10 @@ struct Fluctus : SanguineModule {
 			srcInput.process(drbInputBuffer.startData(), &inLen, inputFrames, &outLen);
 			drbInputBuffer.startIncr(inLen);
 
-			// We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions between the input and output SRC.
+			/*
+			   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
+			   between the input and output SRC.
+			*/
 			for (int frame = 0; frame < outLen; ++frame) {
 				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
 				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
@@ -256,7 +259,7 @@ struct Fluctus : SanguineModule {
 			}
 			*/
 
-			// Set up Fluctus processor
+			// Set up Fluctus processor.
 			fluctusProcessor->set_playback_mode(playbackMode);
 			fluctusProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
 			fluctusProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
@@ -322,7 +325,7 @@ struct Fluctus : SanguineModule {
 				}
 			}
 
-			// Convert output buffer
+			// Convert output buffer.
 			{
 				dsp::Frame<2> outputFrames[32];
 				for (int frame = 0; frame < 32; ++frame) {
@@ -340,7 +343,7 @@ struct Fluctus : SanguineModule {
 			bTriggered = false;
 		}
 
-		// Set output
+		// Set output.
 		if (!drbOutputBuffer.empty()) {
 			outputFrame = drbOutputBuffer.shift();
 			if (outputs[OUTPUT_LEFT].isConnected()) {
@@ -353,7 +356,7 @@ struct Fluctus : SanguineModule {
 			}
 		}
 
-		// Lights
+		// Lights.
 		dsp::Frame<2> lightFrame = {};
 
 		switch (ledMode) {
@@ -396,7 +399,7 @@ struct Fluctus : SanguineModule {
 			}
 		}
 
-		if (lightsDivider.process()) { // Expensive, so call this infrequently
+		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * kClockDivider;
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
@@ -416,7 +419,7 @@ struct Fluctus : SanguineModule {
 				textTexture = fluctus::modeDisplays[playbackMode].labelTexture;
 				textPitch = fluctus::modeDisplays[playbackMode].labelPitch;
 				textTrigger = fluctus::modeDisplays[playbackMode].labelTrigger;
-				// Parasite
+				// Parasite.
 				textBlend = fluctus::modeDisplays[playbackMode].labelBlend;
 				textSpread = fluctus::modeDisplays[playbackMode].labelSpread;
 				textFeedback = fluctus::modeDisplays[playbackMode].labelFeedback;
@@ -442,7 +445,7 @@ struct Fluctus : SanguineModule {
 
 				inputInfos[INPUT_TRIGGER]->name = fluctus::modeTooltips[playbackMode].labelTrigger;
 
-				// Parasite
+				// Parasite.
 				paramQuantities[PARAM_BLEND]->name = fluctus::modeTooltips[playbackMode].labelBlend;
 				inputInfos[INPUT_BLEND]->name = fluctus::modeTooltips[playbackMode].labelBlend + cloudyCommon::kCVSuffix;
 
