@@ -224,12 +224,12 @@ struct Fluctus : SanguineModule {
 
 		// Render frames.
 		if (drbOutputBuffer.empty()) {
-			fluctus::ShortFrame input[32] = {};
+			fluctus::ShortFrame input[cloudyCommon::kMaxFrames] = {};
 			// Convert input buffer.
 			srcInput.setRates(args.sampleRate, 32000);
-			dsp::Frame<2> inputFrames[32];
+			dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
 			int inputLength = drbInputBuffer.size();
-			int outputLength = 32;
+			int outputLength = cloudyCommon::kMaxFrames;
 			srcInput.process(drbInputBuffer.startData(), &inputLength, inputFrames, &outputLength);
 			drbInputBuffer.startIncr(inputLength);
 
@@ -305,8 +305,8 @@ struct Fluctus : SanguineModule {
 			fluctusParameters->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(), -2.f, 2.f, 0.f, 1.f) +
 				inputs[INPUT_PITCH].getVoltage() / 5.f), 0.f, 1.f);
 
-			fluctus::ShortFrame output[32];
-			fluctusProcessor->Process(input, output, 32);
+			fluctus::ShortFrame output[cloudyCommon::kMaxFrames];
+			fluctusProcessor->Process(input, output, cloudyCommon::kMaxFrames);
 
 			if (bFrozen && !bLastFrozen) {
 				bLastFrozen = true;
@@ -326,14 +326,14 @@ struct Fluctus : SanguineModule {
 
 			// Convert output buffer.
 			{
-				dsp::Frame<2> outputFrames[32];
-				for (int frame = 0; frame < 32; ++frame) {
+				dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
+				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
 					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
 					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
 				srcOutput.setRates(32000, args.sampleRate);
-				int inCount = 32;
+				int inCount = cloudyCommon::kMaxFrames;
 				int outCount = drbOutputBuffer.capacity();
 				srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
 				drbOutputBuffer.endIncr(outCount);

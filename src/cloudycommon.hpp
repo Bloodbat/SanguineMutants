@@ -42,4 +42,6 @@ namespace cloudyCommon {
 		LEDS_QUALITY_MOMENTARY,
 		LEDS_MODE_MOMENTARY
 	};
+
+	static const int kMaxFrames = 32;
 }

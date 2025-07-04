@@ -220,12 +220,12 @@ struct Nebulae : SanguineModule {
 
 		// Render frames.
 		if (drbOutputBuffer.empty()) {
-			clouds::ShortFrame input[32] = {};
+			clouds::ShortFrame input[cloudyCommon::kMaxFrames] = {};
 			// Convert input buffer.
 			srcInput.setRates(args.sampleRate, 32000);
-			dsp::Frame<2> inputFrames[32];
+			dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
 			int inputLength = drbInputBuffer.size();
-			int outputLength = 32;
+			int outputLength = cloudyCommon::kMaxFrames;
 			srcInput.process(drbInputBuffer.startData(), &inputLength, inputFrames, &outputLength);
 			drbInputBuffer.startIncr(inputLength);
 
@@ -295,8 +295,8 @@ struct Nebulae : SanguineModule {
 			cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + parameters2[2], 0.f, 1.f);
 			cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + parameters2[3], 0.f, 1.f);
 
-			clouds::ShortFrame output[32];
-			cloudsProcessor->Process(input, output, 32);
+			clouds::ShortFrame output[cloudyCommon::kMaxFrames];
+			cloudsProcessor->Process(input, output, cloudyCommon::kMaxFrames);
 
 			if (bFrozen && !bLastFrozen) {
 				bLastFrozen = true;
@@ -316,14 +316,14 @@ struct Nebulae : SanguineModule {
 
 			// Convert output buffer.
 			{
-				dsp::Frame<2> outputFrames[32];
-				for (int frame = 0; frame < 32; ++frame) {
+				dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
+				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
 					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
 					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
 				srcOutput.setRates(32000, args.sampleRate);
-				int inCount = 32;
+				int inCount = cloudyCommon::kMaxFrames;
 				int outCount = drbOutputBuffer.capacity();
 				srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
 				drbOutputBuffer.endIncr(outCount);
