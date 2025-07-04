@@ -186,16 +186,15 @@ struct Fluctus : SanguineModule {
 		lastHiFi = 1;
 		lastStereo = 1;
 
-		const int memLen = 118784;
-		const int ccmLen = 65536 - 128;
-		bufferLarge = new uint8_t[memLen]();
-		bufferSmall = new uint8_t[ccmLen]();
+		const int bigBufferLength = 118784;
+		const int ccmBufferLength = 65536 - 128;
+		bufferLarge = new uint8_t[bigBufferLength]();
+		bufferSmall = new uint8_t[ccmBufferLength]();
 		fluctusProcessor = new fluctus::FluctusGranularProcessor();
 		memset(fluctusProcessor, 0, sizeof(*fluctusProcessor));
+		fluctusProcessor->Init(bufferLarge, bigBufferLength, bufferSmall, ccmBufferLength);
 
 		lightsDivider.setDivision(kClockDivider);
-
-		fluctusProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
 	}
 
 	~Fluctus() {
