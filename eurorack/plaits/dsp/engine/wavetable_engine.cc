@@ -81,7 +81,7 @@ namespace plaits {
 
         const int16_t* base = wav_integrated_waves;
         if (w >= kNumWaves) {
-          base = (const int16_t*)(user_data + 64);
+          base = reinterpret_cast<const int16_t*>(user_data + 64);
           w = min(w - kNumWaves, kNumCustomWaves);
         }
         wave_map_[i] = base + size_t(w) * (kTableSize + 4);
