@@ -38,7 +38,7 @@ namespace plaits {
 
   class Downsampler {
   public:
-    Downsampler(float* state) {
+    explicit Downsampler(float* state) {
       head_ = *state;
       tail_ = 0.0f;
       state_ = state;
