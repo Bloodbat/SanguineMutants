@@ -36,7 +36,6 @@
 #include <algorithm>
 
 namespace stmlib {
-
   enum FilterMode {
     FILTER_MODE_LOW_PASS,
     FILTER_MODE_BAND_PASS,
@@ -118,9 +117,11 @@ namespace stmlib {
         const float a = 3.736e-01f * M_PI_POW_3;
         return f * (M_PI_F + a * f * f);
       } else if (approximation == FREQUENCY_FAST) {
-        // The usual tangent approximation uses 3.1755e-01 and 2.033e-01, but
-        // the coefficients used here are optimized to minimize error for the
-        // 16Hz to 16kHz range, with a sample rate of 48kHz.
+        /*
+           The usual tangent approximation uses 3.1755e-01 and 2.033e-01, but
+           the coefficients used here are optimized to minimize error for the
+           16Hz to 16kHz range, with a sample rate of 48kHz.
+        */
         const float a = 3.260e-01f * M_PI_POW_3;
         const float b = 1.823e-01f * M_PI_POW_5;
         float f2 = f * f;
@@ -137,8 +138,10 @@ namespace stmlib {
       }
     }
 
-    // Set frequency and resonance from true units. Various approximations
-    // are available to avoid the cost of tanf.
+    /*
+       Set frequency and resonance from true units. Various approximations
+       are available to avoid the cost of tanf.
+    */
     template<FrequencyApproximation approximation>
     inline void set_f(float f) {
       g_ = tan<approximation>(f);
@@ -176,8 +179,6 @@ namespace stmlib {
     DISALLOW_COPY_AND_ASSIGN(OnePole);
   };
 
-
-
   class Svf {
   public:
     Svf() {}
@@ -206,8 +207,10 @@ namespace stmlib {
       h_ = h;
     }
 
-    // Set frequency and resonance coefficients from LUT, adjust remaining
-    // parameter.
+    /*
+       Set frequency and resonance coefficients from LUT, adjust remaining
+       parameter.
+    */
     inline void set_g_r(float g, float r) {
       g_ = g;
       r_ = r;
@@ -221,8 +224,10 @@ namespace stmlib {
       h_ = 1.0f / (1.0f + r_ * g_ + g_ * g_);
     }
 
-    // Set frequency and resonance from true units. Various approximations
-    // are available to avoid the cost of tanf.
+    /*
+       Set frequency and resonance from true units. Various approximations
+       are available to avoid the cost of tanf.
+    */
     template<FrequencyApproximation approximation>
     inline void set_f_q(float f, float resonance) {
       g_ = OnePole::tan<approximation>(f);
@@ -376,11 +381,7 @@ namespace stmlib {
       state_2_ = state_2;
     }
 
-    inline void ProcessMultimode(
-      const float* in,
-      float* out,
-      size_t size,
-      float mode) {
+    inline void ProcessMultimode(const float* in, float* out, size_t size, float mode) {
       float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
@@ -401,11 +402,7 @@ namespace stmlib {
       state_2_ = state_2;
     }
 
-    inline void ProcessMultimodeLPtoHP(
-      const float* in,
-      float* out,
-      size_t size,
-      float mode) {
+    inline void ProcessMultimodeLPtoHP(const float* in, float* out, size_t size, float mode) {
       float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
@@ -427,9 +424,7 @@ namespace stmlib {
     }
 
     template<FilterMode mode>
-    inline void Process(
-      const float* in, float* out_1, float* out_2, size_t size,
-      float gain_1, float gain_2) {
+    inline void Process(const float* in, float* out_1, float* out_2, size_t size, float gain_1, float gain_2) {
       float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
@@ -477,8 +472,6 @@ namespace stmlib {
     DISALLOW_COPY_AND_ASSIGN(Svf);
   };
 
-
-
   // Naive Chamberlin SVF.
   class NaiveSvf {
   public:
@@ -494,8 +487,10 @@ namespace stmlib {
       lp_ = bp_ = 0.0f;
     }
 
-    // Set frequency and resonance from true units. Various approximations
-    // are available to avoid the cost of sinf.
+    /*
+       Set frequency and resonance from true units. Various approximations
+       are available to avoid the cost of sinf.
+    */
     template<FrequencyApproximation approximation>
     inline void set_f_q(float f, float resonance) {
       if (approximation == FREQUENCY_EXACT) {
@@ -614,10 +609,10 @@ namespace stmlib {
     DISALLOW_COPY_AND_ASSIGN(NaiveSvf);
   };
 
-
-
-  // Modified Chamberlin SVF (Duane K. Wise)
-  // http://www.dafx.ca/proceedings/papers/p_053.pdf
+  /*
+     Modified Chamberlin SVF (Duane K. Wise)
+     http://www.dafx.ca/proceedings/papers/p_053.pdf
+  */
   class ModifiedSvf {
   public:
     ModifiedSvf() {}
@@ -647,8 +642,7 @@ namespace stmlib {
       while (size--) {
         lp += f * bp;
         bp += -fq * bp - f * lp + *in;
-        if (mode == FILTER_MODE_BAND_PASS ||
-          mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        if (mode == FILTER_MODE_BAND_PASS || mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
           bp += x;
         }
         x = *in++;
@@ -678,10 +672,10 @@ namespace stmlib {
     DISALLOW_COPY_AND_ASSIGN(ModifiedSvf);
   };
 
-
-
-  // Two passes of modified Chamberlin SVF with the same coefficients -
-  // to implement Linkwitz–Riley (Butterworth squared) crossover filters.
+  /*
+     Two passes of modified Chamberlin SVF with the same coefficients -
+     to implement Linkwitz–Riley (Butterworth squared) crossover filters.
+  */
   class CrossoverSvf {
   public:
     CrossoverSvf() {}
@@ -715,8 +709,7 @@ namespace stmlib {
       while (size--) {
         lp_1 += f * bp_1;
         bp_1 += -fq * bp_1 - f * lp_1 + *in;
-        if (mode == FILTER_MODE_BAND_PASS ||
-          mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        if (mode == FILTER_MODE_BAND_PASS || mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
           bp_1 += x_1;
         }
         x_1 = *in++;
@@ -734,8 +727,7 @@ namespace stmlib {
 
         lp_2 += f * bp_2;
         bp_2 += -fq * bp_2 - f * lp_2 + y;
-        if (mode == FILTER_MODE_BAND_PASS ||
-          mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        if (mode == FILTER_MODE_BAND_PASS || mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
           bp_2 += x_2;
         }
         x_2 = y;
@@ -767,7 +759,5 @@ namespace stmlib {
 
     DISALLOW_COPY_AND_ASSIGN(CrossoverSvf);
   };
-
 }  // namespace stmlib
-
 #endif  // STMLIB_DSP_FILTER_H_
