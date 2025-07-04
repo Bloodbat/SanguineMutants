@@ -459,7 +459,7 @@ namespace stmlib {
 
   public:
     void operator()(T* input, T* output, const uint8_t* bit_rev, Phasor* phasor) {
-      T* s = (T*)(input);
+      T* s = static_cast<T*>(input);
       T* d = output;
       Math<T> math;
 
@@ -552,7 +552,7 @@ namespace stmlib {
     }
 
     void operator()(T* input, T* output, const uint8_t* bit_rev, Phasor* phasor, size_t rt_num_passes) {
-      T* s = (T*)(input);
+      T* s = static_cast<T*>(input);
       T* d = output;
       Math<T> math;
 
