@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "cloudycommon.hpp"
 
@@ -22,15 +22,15 @@ namespace nebulae {
 
     static const std::vector<ModeDisplay> modeDisplays{
         {"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger"},
-        {"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP/HP",            "Pitch",     "Time"},
-        {"Stutter", "Time / Start", "Diffusion",        "Overlap / Duratn", "LP/HP",            "Pitch",     "Time"},
-        {"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",       "Quantize / Parts", "Transpose", "Glitch"}
+        {"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP | HP",          "Pitch",     "Time"},
+        {"Stutter", "Time / Start", "Diffusion",        "Overlap | Duratn", "LP | HP",          "Pitch",     "Time"},
+        {"Freeze",  "Buffer",       "FFT Upd. | Merge", "Polynomial",       "Quantize | Parts", "Transpose", "Glitch"}
     };
 
     static const std::vector<ModeDisplay> modeTooltips{
-        {"Freeze",  "Position",     "Density",          "Size",               "Texture",          "Pitch",     "Trigger"},
-        {"Stutter", "Scrub",        "Diffusion",        "Overlap",            "LP/HP",            "Pitch",     "Time"},
-        {"Stutter", "Time / Start", "Diffusion",        "Overlap / Duration", "LP/HP",            "Pitch",     "Time"},
-        {"Freeze",  "Buffer",       "FFT Upd. / Merge", "Polynomial",         "Quantize / Parts", "Transpose", "Glitch"}
+        {"Freeze",  "Grain position",   "Grain density",                "Grain Size",                   "Grain texture",                        "Grain pitch",  "Trigger"},
+        {"Stutter", "Scrub buffer",     "Diffusion",                    "Overlap",                      "LP ↓ | HP ↑",                          "Grain pitch",  "Time"},
+        {"Stutter", "Head position",    "Granular diffusion",           "Overlap: Grainy ↓ | Smooth ↑", "LP ↓ | HP ↑",                          "Grain pitch",  "Delay time"},
+        {"Freeze",  "Buffer select",    "F.F.T. Update ↓ | Merge ↑",    "Polynomial coefficients",      "Quantizer ↓ | Partial amplifier ↑",    "Transpose",    "Glitch audio"}
     };
 }
