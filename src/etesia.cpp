@@ -154,8 +154,8 @@ struct Etesia : SanguineModule {
 		configParam(PARAM_PITCH, -2.f, 2.f, 0.f, "Grain pitch");
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
 
-		configParam(PARAM_BLEND, 0.f, 1.f, 0.5f, "Dry/wet", "%", 0.f, 100.f);
-		configInput(INPUT_BLEND, "Dry/wet CV");
+		configParam(PARAM_BLEND, 0.f, 1.f, 0.5f, "Dry ↔ wet", "%", 0.f, 100.f);
+		configInput(INPUT_BLEND, "Dry ↔ wet CV");
 
 		configInput(INPUT_TRIGGER, "Trigger");
 
