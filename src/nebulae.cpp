@@ -218,6 +218,13 @@ struct Nebulae : SanguineModule {
 
 		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
 
+		float_4 voltages1;
+
+		voltages1[0] = inputs[INPUT_POSITION].getVoltage();
+		voltages1[1] = inputs[INPUT_DENSITY].getVoltage();
+		voltages1[2] = inputs[INPUT_SIZE].getVoltage();
+		voltages1[3] = inputs[INPUT_TEXTURE].getVoltage();
+
 		// Render frames.
 		if (drbOutputBuffer.empty()) {
 			clouds::ShortFrame input[cloudyCommon::kMaxFrames] = {};
@@ -266,34 +273,29 @@ struct Nebulae : SanguineModule {
 			bool bFrozen = static_cast<bool>(std::round(params[PARAM_FREEZE].getValue()));
 #endif
 
-			float_4 voltages1 = {};
-			float_4 voltages2 = {};
+			float_4 scaledVoltages2;
 
-			voltages1[0] = inputs[INPUT_POSITION].getVoltage();
-			voltages1[1] = inputs[INPUT_SIZE].getVoltage();
-			voltages1[2] = inputs[INPUT_DENSITY].getVoltage();
-			voltages1[3] = inputs[INPUT_TEXTURE].getVoltage();
+			scaledVoltages2[0] = inputs[INPUT_BLEND].getVoltage();
+			scaledVoltages2[1] = inputs[INPUT_SPREAD].getVoltage();
+			scaledVoltages2[2] = inputs[INPUT_FEEDBACK].getVoltage();
+			scaledVoltages2[3] = inputs[INPUT_REVERB].getVoltage();
 
-			voltages2[0] = inputs[INPUT_BLEND].getVoltage();
-			voltages2[1] = inputs[INPUT_SPREAD].getVoltage();
-			voltages2[2] = inputs[INPUT_FEEDBACK].getVoltage();
-			voltages2[3] = inputs[INPUT_REVERB].getVoltage();
-
-			voltages1 /= 5.f;
-			voltages2 /= 5.f;
+			float_4 scaledVoltages1 = voltages1 / 5.f;
+			scaledVoltages2 /= 5.f;
 
 			cloudsParameters->trigger = bTriggered;
 			cloudsParameters->gate = bTriggered;
 			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
 			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
-			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + voltages1[0], 0.f, 1.f);
-			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + voltages1[1], 0.f, 1.f);
-			cloudsParameters->density = clamp(params[PARAM_DENSITY].getValue() + voltages1[2], 0.f, 1.f);
-			cloudsParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + voltages1[3], 0.f, 1.f);
-			cloudsParameters->dry_wet = clamp(params[PARAM_BLEND].getValue() + voltages2[0], 0.f, 1.f);
-			cloudsParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + voltages2[1], 0.f, 1.f);
-			cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + voltages2[2], 0.f, 1.f);
-			cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + voltages2[3], 0.f, 1.f);
+			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + scaledVoltages1[0], 0.f, 1.f);
+			cloudsParameters->density = clamp(params[PARAM_DENSITY].getValue() + scaledVoltages1[1], 0.f, 1.f);
+			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + scaledVoltages1[2], 0.f, 1.f);
+			cloudsParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + scaledVoltages1[3], 0.f, 1.f);
+
+			cloudsParameters->dry_wet = clamp(params[PARAM_BLEND].getValue() + scaledVoltages2[0], 0.f, 1.f);
+			cloudsParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + scaledVoltages2[1], 0.f, 1.f);
+			cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + scaledVoltages2[2], 0.f, 1.f);
+			cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + scaledVoltages2[3], 0.f, 1.f);
 
 			clouds::ShortFrame output[cloudyCommon::kMaxFrames];
 			cloudsProcessor->Process(input, output, cloudyCommon::kMaxFrames);
@@ -504,22 +506,19 @@ struct Nebulae : SanguineModule {
 				break;
 			}
 
+			voltages1 = simd::rescale(voltages1, 0.f, 5.f, 0.f, 1.f);
 
-			float rescaledLight = math::rescale(inputs[INPUT_POSITION].getVoltage(), 0.f, 5.f, 0.f, 1.f);
-			lights[LIGHT_POSITION_CV + 0].setBrightness(rescaledLight);
-			lights[LIGHT_POSITION_CV + 1].setBrightness(-rescaledLight);
+			lights[LIGHT_POSITION_CV + 0].setBrightness(voltages1[0]);
+			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[0]);
 
-			rescaledLight = math::rescale(inputs[INPUT_DENSITY].getVoltage(), 0.f, 5.f, 0.f, 1.f);
-			lights[LIGHT_DENSITY_CV + 0].setBrightness(rescaledLight);
-			lights[LIGHT_DENSITY_CV + 1].setBrightness(-rescaledLight);
+			lights[LIGHT_DENSITY_CV + 0].setBrightness(voltages1[1]);
+			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[1]);
 
-			rescaledLight = math::rescale(inputs[INPUT_SIZE].getVoltage(), 0.f, 5.f, 0.f, 1.f);
-			lights[LIGHT_SIZE_CV + 0].setBrightness(rescaledLight);
-			lights[LIGHT_SIZE_CV + 1].setBrightness(-rescaledLight);
+			lights[LIGHT_SIZE_CV + 0].setBrightness(voltages1[2]);
+			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[2]);
 
-			rescaledLight = math::rescale(inputs[INPUT_TEXTURE].getVoltage(), 0.f, 5.f, 0.f, 1.f);
-			lights[LIGHT_TEXTURE_CV + 0].setBrightness(rescaledLight);
-			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-rescaledLight);
+			lights[LIGHT_TEXTURE_CV + 0].setBrightness(voltages1[3]);
+			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[3]);
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
