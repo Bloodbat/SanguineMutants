@@ -52,7 +52,6 @@ namespace fluctus {
 
     num_channels_ = 2;
     low_fidelity_ = false;
-    bypass_ = false;
 
     src_down_.Init();
     src_up_.Init();
@@ -187,11 +186,6 @@ namespace fluctus {
 
   void FluctusGranularProcessor::Process(ShortFrame* input, ShortFrame* output, size_t size) {
     // TIC.
-    if (bypass_) {
-      copy(&input[0], &input[size], &output[0]);
-      return;
-    }
-
     if (silence_ || reset_buffers_ || previous_playback_mode_ != playback_mode_) {
       short* output_samples = &output[0].l;
       fill(&output_samples[0], &output_samples[size << 1], 0);
