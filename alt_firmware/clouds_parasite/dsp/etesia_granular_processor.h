@@ -143,7 +143,6 @@ namespace etesia {
 		bool low_fidelity_;
 
 		bool silence_;
-		bool bypass_;
 		bool reset_buffers_;
 		float freeze_lp_;
 		float dry_wet_;
