@@ -280,40 +280,40 @@ struct Etesia : SanguineModule {
 
 			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
 
-			float_4 scaledVoltages2;
+			float_4 scaledVoltages;
 
-			scaledVoltages2[0] = inputs[INPUT_BLEND].getVoltage();
-			scaledVoltages2[1] = inputs[INPUT_SPREAD].getVoltage();
-			scaledVoltages2[2] = inputs[INPUT_FEEDBACK].getVoltage();
-			scaledVoltages2[3] = inputs[INPUT_REVERB].getVoltage();
+			scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage();
+			scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage();
+			scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage();
+			scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage();
 
-			scaledVoltages2 /= 5.f;
+			scaledVoltages /= 5.f;
 
-			scaledVoltages2[0] += params[PARAM_BLEND].getValue();
-			scaledVoltages2[1] += params[PARAM_SPREAD].getValue();
-			scaledVoltages2[2] += params[PARAM_FEEDBACK].getValue();
-			scaledVoltages2[3] += params[PARAM_REVERB].getValue();
+			scaledVoltages[0] += params[PARAM_BLEND].getValue();
+			scaledVoltages[1] += params[PARAM_SPREAD].getValue();
+			scaledVoltages[2] += params[PARAM_FEEDBACK].getValue();
+			scaledVoltages[3] += params[PARAM_REVERB].getValue();
 
-			scaledVoltages2 = clamp(scaledVoltages2, 0.f, 1.f);
+			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
 
-			etesiaParameters->dry_wet = scaledVoltages2[0];
-			etesiaParameters->stereo_spread = scaledVoltages2[1];
-			etesiaParameters->feedback = scaledVoltages2[2];
-			etesiaParameters->reverb = scaledVoltages2[3];
+			etesiaParameters->dry_wet = scaledVoltages[0];
+			etesiaParameters->stereo_spread = scaledVoltages[1];
+			etesiaParameters->feedback = scaledVoltages[2];
+			etesiaParameters->reverb = scaledVoltages[3];
 
-			float_4 scaledVoltages1 = voltages1 / 5.f;
+			scaledVoltages = voltages1 / 5.f;
 
-			scaledVoltages1[0] += params[PARAM_POSITION].getValue();
-			scaledVoltages1[1] += params[PARAM_DENSITY].getValue();
-			scaledVoltages1[2] += params[PARAM_SIZE].getValue();
-			scaledVoltages1[3] += params[PARAM_TEXTURE].getValue();
+			scaledVoltages[0] += params[PARAM_POSITION].getValue();
+			scaledVoltages[1] += params[PARAM_DENSITY].getValue();
+			scaledVoltages[2] += params[PARAM_SIZE].getValue();
+			scaledVoltages[3] += params[PARAM_TEXTURE].getValue();
 
-			scaledVoltages1 = clamp(scaledVoltages1, 0.f, 1.f);
+			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
 
-			etesiaParameters->position = scaledVoltages1[0];
-			etesiaParameters->density = scaledVoltages1[1];
-			etesiaParameters->size = scaledVoltages1[2];
-			etesiaParameters->texture = scaledVoltages1[3];
+			etesiaParameters->position = scaledVoltages[0];
+			etesiaParameters->density = scaledVoltages[1];
+			etesiaParameters->size = scaledVoltages[2];
+			etesiaParameters->texture = scaledVoltages[3];
 
 			etesiaParameters->trigger = bTriggered;
 			etesiaParameters->gate = bTriggered;
