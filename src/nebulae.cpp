@@ -280,22 +280,38 @@ struct Nebulae : SanguineModule {
 			scaledVoltages2[2] = inputs[INPUT_FEEDBACK].getVoltage();
 			scaledVoltages2[3] = inputs[INPUT_REVERB].getVoltage();
 
-			float_4 scaledVoltages1 = voltages1 / 5.f;
 			scaledVoltages2 /= 5.f;
 
+			scaledVoltages2[0] += params[PARAM_BLEND].getValue();
+			scaledVoltages2[1] += params[PARAM_SPREAD].getValue();
+			scaledVoltages2[2] += params[PARAM_FEEDBACK].getValue();
+			scaledVoltages2[3] += params[PARAM_REVERB].getValue();
+
+			scaledVoltages2 = clamp(scaledVoltages2, 0.f, 1.f);
+
+			cloudsParameters->dry_wet = scaledVoltages2[0];
+			cloudsParameters->stereo_spread = scaledVoltages2[1];
+			cloudsParameters->feedback = scaledVoltages2[2];
+			cloudsParameters->reverb = scaledVoltages2[3];
+
+			float_4 scaledVoltages1 = voltages1 / 5.f;
+
+			scaledVoltages1[0] += params[PARAM_POSITION].getValue();
+			scaledVoltages1[1] += params[PARAM_DENSITY].getValue();
+			scaledVoltages1[2] += params[PARAM_SIZE].getValue();
+			scaledVoltages1[3] += params[PARAM_TEXTURE].getValue();
+
+			scaledVoltages1 = clamp(scaledVoltages1, 0.f, 1.f);
+
+			cloudsParameters->position = scaledVoltages1[0];
+			cloudsParameters->density = scaledVoltages1[1];
+			cloudsParameters->size = scaledVoltages1[2];
+			cloudsParameters->texture = scaledVoltages1[3];
+
+			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
 			cloudsParameters->trigger = bTriggered;
 			cloudsParameters->gate = bTriggered;
 			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
-			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
-			cloudsParameters->position = clamp(params[PARAM_POSITION].getValue() + scaledVoltages1[0], 0.f, 1.f);
-			cloudsParameters->density = clamp(params[PARAM_DENSITY].getValue() + scaledVoltages1[1], 0.f, 1.f);
-			cloudsParameters->size = clamp(params[PARAM_SIZE].getValue() + scaledVoltages1[2], 0.f, 1.f);
-			cloudsParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + scaledVoltages1[3], 0.f, 1.f);
-
-			cloudsParameters->dry_wet = clamp(params[PARAM_BLEND].getValue() + scaledVoltages2[0], 0.f, 1.f);
-			cloudsParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + scaledVoltages2[1], 0.f, 1.f);
-			cloudsParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + scaledVoltages2[2], 0.f, 1.f);
-			cloudsParameters->reverb = clamp(params[PARAM_REVERB].getValue() + scaledVoltages2[3], 0.f, 1.f);
 
 			clouds::ShortFrame output[cloudyCommon::kMaxFrames];
 			cloudsProcessor->Process(input, output, cloudyCommon::kMaxFrames);

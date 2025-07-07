@@ -284,22 +284,38 @@ struct Fluctus : SanguineModule {
 			scaledVoltages2[2] = inputs[INPUT_FEEDBACK].getVoltage();
 			scaledVoltages2[3] = inputs[INPUT_REVERB].getVoltage();
 
-			float_4 scaledVoltages1 = voltages1 / 5.f;
 			scaledVoltages2 /= 5.f;
+
+			scaledVoltages2[0] += params[PARAM_BLEND].getValue();
+			scaledVoltages2[1] += params[PARAM_SPREAD].getValue();
+			scaledVoltages2[2] += params[PARAM_FEEDBACK].getValue();
+			scaledVoltages2[3] += params[PARAM_REVERB].getValue();
+
+			scaledVoltages2 = clamp(scaledVoltages2, 0.f, 1.f);
+
+			fluctusParameters->dry_wet = scaledVoltages2[0];
+			fluctusParameters->stereo_spread = scaledVoltages2[1];
+			fluctusParameters->feedback = scaledVoltages2[2];
+			fluctusParameters->reverb = scaledVoltages2[3];
+
+			float_4 scaledVoltages1 = voltages1 / 5.f;
+
+			scaledVoltages1[0] += params[PARAM_POSITION].getValue();
+			scaledVoltages1[1] += params[PARAM_DENSITY].getValue();
+			scaledVoltages1[2] += params[PARAM_SIZE].getValue();
+			scaledVoltages1[3] += params[PARAM_TEXTURE].getValue();
+
+			scaledVoltages1 = clamp(scaledVoltages1, 0.f, 1.f);
+
+			fluctusParameters->position = scaledVoltages1[0];
+			fluctusParameters->density = scaledVoltages1[1];
+			fluctusParameters->size = scaledVoltages1[2];
+			fluctusParameters->texture = scaledVoltages1[3];
 
 			fluctusParameters->trigger = bTriggered;
 			fluctusParameters->gate = bTriggered;
 			fluctusParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
 			fluctusParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
-			fluctusParameters->position = clamp(params[PARAM_POSITION].getValue() + scaledVoltages1[0], 0.f, 1.f);
-			fluctusParameters->density = clamp(params[PARAM_DENSITY].getValue() + scaledVoltages1[1], 0.f, 1.f);
-			fluctusParameters->size = clamp(params[PARAM_SIZE].getValue() + scaledVoltages1[2], 0.f, 1.f);
-			fluctusParameters->texture = clamp(params[PARAM_TEXTURE].getValue() + scaledVoltages1[3], 0.f, 1.f);
-
-			fluctusParameters->dry_wet = clamp(params[PARAM_BLEND].getValue() + scaledVoltages2[0], 0.f, 1.f);
-			fluctusParameters->stereo_spread = clamp(params[PARAM_SPREAD].getValue() + scaledVoltages2[1], 0.f, 1.f);
-			fluctusParameters->feedback = clamp(params[PARAM_FEEDBACK].getValue() + scaledVoltages2[2], 0.f, 1.f);
-			fluctusParameters->reverb = clamp(params[PARAM_REVERB].getValue() + scaledVoltages2[3], 0.f, 1.f);
 			fluctusParameters->kammerl.probability = fluctusParameters->dry_wet;
 			fluctusParameters->kammerl.clock_divider = fluctusParameters->stereo_spread;
 			fluctusParameters->kammerl.pitch_mode = fluctusParameters->feedback;
