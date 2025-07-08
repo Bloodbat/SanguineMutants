@@ -18,7 +18,7 @@ namespace scalaria {
 			SetResonance(0.1f); // [0, 4]
 		}
 
-		float Process(float in, float drive = 1.f) {
+		float Process(const float& in, const float& drive = 1.f) {
 			float dV0, dV1, dV2, dV3;
 
 			dV0 = -g * (getTanh((drive * in + resonance * V[3]) / kLadderDoubleThermalVoltage) + tV[0]);
