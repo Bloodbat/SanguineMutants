@@ -883,7 +883,7 @@ struct Mortuus : SanguineModule {
 		}
 	}
 
-	void switchExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn, const float sampleTime) {
+	void switchExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn, const float& sampleTime) {
 		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ?
 			kSanguineButtonLightValue : 0.f, sampleTime);
 
