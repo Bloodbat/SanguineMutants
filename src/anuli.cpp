@@ -308,7 +308,7 @@ struct Anuli : SanguineModule {
 		patch.position = voltages[3];
 	}
 
-	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float structure,
+	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float& structure,
 		const ParametersInfo& parametersInfo) {
 		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
@@ -373,7 +373,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void renderFrames(const int channel, const ParametersInfo& parametersInfo, const float sampleRate) {
+	void renderFrames(const int channel, const ParametersInfo& parametersInfo, const float& sampleRate) {
 		if (drbOutputBuffers[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
