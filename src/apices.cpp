@@ -855,7 +855,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float sampleTime) {
+	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float& sampleTime) {
 		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 		for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
