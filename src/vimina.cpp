@@ -105,14 +105,14 @@ struct Vimina : SanguineModule {
 	uint8_t triggerExtendCounts[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	// Swing constants
-	const float kSwingFactorMin = 50.f;
-	const float kSwingFactorMax = 70.f; // Maximum swing amount can be set up to 99.
+	static constexpr float kSwingFactorMin = 50.f;
+	static constexpr float kSwingFactorMax = 70.f; // Maximum swing amount can be set up to 99.
 
 	// Scaling constant
-	const float kMaxParamValue = 1.f;
+	static constexpr float kMaxParamValue = 1.f;
 
-	const float swingConversionFactor = kMaxParamValue / (kSwingFactorMax - kSwingFactorMin);
-	const float factorerConversionFactor = kMaxParamValue / (kFactorCount - 1.f);
+	static constexpr float swingConversionFactor = kMaxParamValue / (kSwingFactorMax - kSwingFactorMin);
+	static constexpr float factorerConversionFactor = kMaxParamValue / (kFactorCount - 1.f);
 
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
