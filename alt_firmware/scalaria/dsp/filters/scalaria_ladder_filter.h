@@ -1,11 +1,11 @@
 #ifndef SCALARIA_LADDER_FILTER_H
 #define SCALARIA_LADDER_FILTER_H
 
-static const float kMoogLadderPi = 3.1415927410125732421875f;
-static const float kLadderThermalVoltage = 0.312f;
-static const float kLadderDoubleThermalVoltage = 2.f * kLadderThermalVoltage;
-
 namespace scalaria {
+	static constexpr float kMoogLadderPi = 3.1415927410125732421875f;
+	static constexpr float kLadderThermalVoltage = 0.312f;
+	static constexpr float kLadderDoubleThermalVoltage = 2.f * kLadderThermalVoltage;
+
 	// Ported from https://github.com/ddiakopoulos/MoogLadders/blob/master/src/ImprovedModel.h
 	class MoogLadderFilter {
 	public:
