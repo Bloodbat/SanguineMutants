@@ -435,7 +435,7 @@ struct Marmora : SanguineModule {
 		}
 	}
 
-	void drawLight(const int light, const LightModes lightMode, const float sampleTime, const long long systemTimeMs) {
+	void drawLight(const int& light, const LightModes& lightMode, const float& sampleTime, const long long& systemTimeMs) {
 		switch (lightMode) {
 		case LIGHT_OFF:
 			lights[light].setBrightnessSmooth(0.f, sampleTime);
@@ -454,7 +454,8 @@ struct Marmora : SanguineModule {
 		}
 	}
 
-	void drawDejaVuLight(const int light, marmora::DejaVuLockModes lockMode, const float sampleTime, const long long systemTimeMs) {
+	void drawDejaVuLight(const int& light, const marmora::DejaVuLockModes& lockMode, const float& sampleTime,
+		const long long& systemTimeMs) {
 		int slowTriangle;
 		int pulseWidth;
 		int fastTriangle;
