@@ -550,7 +550,7 @@ struct Contextus : SanguineModule {
 		}
 	}
 
-	inline void pollSwitches(const float sampleTime) {
+	inline void pollSwitches(const float& sampleTime) {
 		// Handle switch lights.
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
