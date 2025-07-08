@@ -62,5 +62,5 @@ namespace anuli {
 
     static const int kBlockSize = 24;
 
-    static const float kVoltPerOctave = 1.f / 12.f;
+    static constexpr float kVoltPerOctave = 1.f / 12.f;
 }
