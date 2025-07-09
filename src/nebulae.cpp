@@ -101,11 +101,6 @@ struct Nebulae : SanguineModule {
 	int lastStereo;
 
 	const int kClockDivider = 512;
-	// NOTE: related to saving and loading buffers? Not used for anything right now.
-	/*
-	int bufferSize = 1;
-	int currentBufferSize = 1;
-	*/
 
 	uint32_t displayTimeout = 0;
 
@@ -243,22 +238,6 @@ struct Nebulae : SanguineModule {
 				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
 				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 			}
-
-			// NOTE: related to saving and loading buffers? Not used for anything right now.
-			/*
-			if (currentBufferSize != bufferSize) {
-				// Re-init cloudsProcessor with new size.
-				delete cloudsProcessor;
-				delete[] bufferLarge;
-				int memLen = 118784 * bufferSize;
-				const int ccmLen = 65536 - 128;
-				bufferLarge = new uint8_t[memLen]();
-				cloudsProcessor = new clouds::GranularProcessor();
-				memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-				cloudsProcessor->Init(bufferLarge, memLen, bufferSmall, ccmLen);
-				currentBufferSize = bufferSize;
-			}
-			*/
 
 			// Set up Clouds processor.
 			cloudsProcessor->set_playback_mode(playbackMode);
@@ -539,27 +518,6 @@ struct Nebulae : SanguineModule {
 				kSanguineButtonLightValue : 0.f, sampleTime);
 		} // lightsDivider
 	}
-
-	// NOTE: This is not used for anything ATM... revisit if we're implementing saving and loading buffers.
-	/*
-	json_t* dataToJson() override {
-		json_t* rootJ = SanguineModule::dataToJson();
-
-		setJsonInt(rootJ, "buffersize", bufferSize);
-
-		return rootJ;
-	}
-
-	void dataFromJson(json_t* rootJ) override {
-		SanguineModule::dataFromJson(rootJ);
-
-		json_int_t intValue = 0;
-
-		if (getJsonInt(rootJ, "buffersize", intValue)) {
-			bufferSize = intValue;
-		}
-	}
-	*/
 
 	int getModeParam() {
 		return params[PARAM_MODE].getValue();
