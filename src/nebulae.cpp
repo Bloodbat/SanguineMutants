@@ -100,7 +100,7 @@ struct Nebulae : SanguineModule {
 	int lastHiFi;
 	int lastStereo;
 
-	const int kClockDivider = 512;
+	const int kClockDivider = 64;
 
 	uint32_t displayTimeout = 0;
 
