@@ -42,6 +42,8 @@
 
 - Nebulae family: better parameter tooltips and display contents tweaks.
 
+- Nebulae family: improve lights response.
+
 
 ---
 
