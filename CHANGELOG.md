@@ -44,6 +44,8 @@
 
 - Nebulae family: improve lights response.
 
+- Vimina: produce slightly longer triggers.
+
 
 ---
 
