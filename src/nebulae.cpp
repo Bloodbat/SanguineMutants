@@ -182,13 +182,12 @@ struct Nebulae : SanguineModule {
 		lastHiFi = 1;
 		lastStereo = 1;
 
-		const int bigBufferLength = 118784;
-		const int ccmBufferLength = 65536 - 128;
-		bufferLarge = new uint8_t[bigBufferLength]();
-		bufferSmall = new uint8_t[ccmBufferLength]();
+		bufferLarge = new uint8_t[cloudyCommon::kBigBufferLength]();
+		bufferSmall = new uint8_t[cloudyCommon::kSmallBufferLength]();
 		cloudsProcessor = new clouds::GranularProcessor();
 		memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-		cloudsProcessor->Init(bufferLarge, bigBufferLength, bufferSmall, ccmBufferLength);
+		cloudsProcessor->Init(bufferLarge, cloudyCommon::kBigBufferLength,
+			bufferSmall, cloudyCommon::kSmallBufferLength);
 
 		lightsDivider.setDivision(kClockDivider);
 	}
