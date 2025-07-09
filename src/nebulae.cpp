@@ -332,19 +332,17 @@ struct Nebulae : SanguineModule {
 			}
 
 			// Convert output buffer.
-			{
-				dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
-				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
-					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
-					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
-				}
-
-				srcOutput.setRates(32000, args.sampleRate);
-				int inCount = cloudyCommon::kMaxFrames;
-				int outCount = drbOutputBuffer.capacity();
-				srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
-				drbOutputBuffer.endIncr(outCount);
+			dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
+			for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
+				outputFrames[frame].samples[0] = output[frame].l / 32768.f;
+				outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 			}
+
+			srcOutput.setRates(32000, args.sampleRate);
+			int inCount = cloudyCommon::kMaxFrames;
+			int outCount = drbOutputBuffer.capacity();
+			srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
+			drbOutputBuffer.endIncr(outCount);
 
 			bTriggered = false;
 		}
