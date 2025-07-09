@@ -58,7 +58,7 @@ struct Vimina : SanguineModule {
 	static const int kResetChannel = 0;
 	static const int kClockChannel = 1;
 
-	static const int kTriggerExtendCount = 20;
+	static const int kTriggerExtendCount = 64;
 
 	// Factorer constants
 	/*
