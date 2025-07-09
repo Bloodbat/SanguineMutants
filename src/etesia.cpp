@@ -192,13 +192,12 @@ struct Etesia : SanguineModule {
 		lastHiFi = 1;
 		lastStereo = 1;
 
-		const int bigBufferLength = 118784;
-		const int ccmBufferLength = 65536 - 128;
-		bufferLarge = new uint8_t[bigBufferLength]();
-		bufferSmall = new uint8_t[ccmBufferLength]();
+		bufferLarge = new uint8_t[cloudyCommon::kBigBufferLength]();
+		bufferSmall = new uint8_t[cloudyCommon::kSmallBufferLength]();
 		etesiaProcessor = new etesia::EtesiaGranularProcessor();
 		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
-		etesiaProcessor->Init(bufferLarge, bigBufferLength, bufferSmall, ccmBufferLength);
+		etesiaProcessor->Init(bufferLarge, cloudyCommon::kBigBufferLength,
+			bufferSmall, cloudyCommon::kSmallBufferLength);
 
 		lightsDivider.setDivision(kClockDivider);
 	}
