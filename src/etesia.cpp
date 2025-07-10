@@ -50,6 +50,8 @@ struct Etesia : SanguineModule {
 		INPUT_RIGHT,
 		INPUT_REVERSE,
 		INPUT_MODE,
+		INPUT_IN_GAIN,
+		INPUT_OUT_GAIN,
 		INPUTS_COUNT
 	};
 
@@ -180,9 +182,13 @@ struct Etesia : SanguineModule {
 		configInput(INPUT_REVERB, "Reverb CV");
 		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb", "%", 0.f, 100.f);
 
+		configInput(INPUT_IN_GAIN, "Input gain CV");
+
 		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain", "%", 0.f, 100.f);
 
 		configParam(PARAM_OUT_GAIN, 0.f, 2.f, 1.f, "Output gain", "%", 0.f, 100.f);
+
+		configInput(INPUT_IN_GAIN, "Output gain CV");
 
 		configInput(INPUT_LEFT, "Left");
 		configInput(INPUT_RIGHT, "Right");
@@ -257,9 +263,10 @@ struct Etesia : SanguineModule {
 		for (int channel = 0; channel < channelCount; ++channel) {
 			// Get input.
 			if (!drbInputBuffer[channel].full()) {
-				inputFrame[channel].samples[0] = inputs[INPUT_LEFT].getVoltage(channel) * inputGain / 5.f;
+				float finalInputGain = clamp(inputGain + (inputs[INPUT_IN_GAIN].getVoltage(channel) / 5.f), 0.f, 1.f);
+				inputFrame[channel].samples[0] = inputs[INPUT_LEFT].getVoltage(channel) * finalInputGain / 5.f;
 				inputFrame[channel].samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage(channel)
-					* inputGain / 5.f : inputFrame[channel].samples[0];
+					* finalInputGain / 5.f : inputFrame[channel].samples[0];
 				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
 
@@ -386,12 +393,13 @@ struct Etesia : SanguineModule {
 			// Set output.
 			if (!drbOutputBuffer[channel].empty()) {
 				outputFrame[channel] = drbOutputBuffer[channel].shift();
+				float finalOutputGain = clamp(outputGain + (inputs[INPUT_OUT_GAIN].getVoltage(channel) / 5.f), 0.f, 2.f);
 				if (outputs[OUTPUT_LEFT].isConnected()) {
-					outputFrame[channel].samples[0] *= outputGain;
+					outputFrame[channel].samples[0] *= finalOutputGain;
 					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame[channel].samples[0], channel);
 				}
 				if (outputs[OUTPUT_RIGHT].isConnected()) {
-					outputFrame[channel].samples[1] *= outputGain;
+					outputFrame[channel].samples[1] *= finalOutputGain;
 					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame[channel].samples[1], channel);
 				}
 			}
@@ -718,9 +726,13 @@ struct EtesiaWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.529, 116.972), module, Etesia::INPUT_RIGHT));
 
-		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(41.434, 117.002), module, Etesia::PARAM_IN_GAIN));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(33.873, 117.002), module, Etesia::INPUT_IN_GAIN));
 
-		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(95.701, 117.002), module, Etesia::PARAM_OUT_GAIN));
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(46.434, 117.002), module, Etesia::PARAM_IN_GAIN));
+
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(90.701, 117.002), module, Etesia::PARAM_OUT_GAIN));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(103.25, 117.002), module, Etesia::INPUT_OUT_GAIN));
 
 #ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
