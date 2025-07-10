@@ -2,12 +2,15 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
+#include "sanguinechannels.hpp"
 
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
 
 #include "etesia.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+using simd::float_4;
 
 struct Etesia : SanguineModule {
 	enum ParamIds {
@@ -30,6 +33,7 @@ struct Etesia : SanguineModule {
 		PARAM_OUT_GAIN,
 		PARAMS_COUNT
 	};
+
 	enum InputIds {
 		INPUT_FREEZE,
 		INPUT_POSITION,
@@ -45,13 +49,16 @@ struct Etesia : SanguineModule {
 		INPUT_LEFT,
 		INPUT_RIGHT,
 		INPUT_REVERSE,
+		INPUT_MODE,
 		INPUTS_COUNT
 	};
+
 	enum OutputIds {
 		OUTPUT_LEFT,
 		OUTPUT_RIGHT,
 		OUTPUTS_COUNT
 	};
+
 	enum LightIds {
 		LIGHT_FREEZE,
 		ENUMS(LIGHT_BLEND, 2),
@@ -65,6 +72,22 @@ struct Etesia : SanguineModule {
 		LIGHT_HI_FI,
 		LIGHT_STEREO,
 		LIGHT_REVERSE,
+		ENUMS(LIGHT_CHANNEL_1, 3),
+		ENUMS(LIGHT_CHANNEL_2, 3),
+		ENUMS(LIGHT_CHANNEL_3, 3),
+		ENUMS(LIGHT_CHANNEL_4, 3),
+		ENUMS(LIGHT_CHANNEL_5, 3),
+		ENUMS(LIGHT_CHANNEL_6, 3),
+		ENUMS(LIGHT_CHANNEL_7, 3),
+		ENUMS(LIGHT_CHANNEL_8, 3),
+		ENUMS(LIGHT_CHANNEL_9, 3),
+		ENUMS(LIGHT_CHANNEL_10, 3),
+		ENUMS(LIGHT_CHANNEL_11, 3),
+		ENUMS(LIGHT_CHANNEL_12, 3),
+		ENUMS(LIGHT_CHANNEL_13, 3),
+		ENUMS(LIGHT_CHANNEL_14, 3),
+		ENUMS(LIGHT_CHANNEL_15, 3),
+		ENUMS(LIGHT_CHANNEL_16, 3),
 		LIGHTS_COUNT
 	};
 
@@ -85,40 +108,34 @@ struct Etesia : SanguineModule {
 	std::string textFeedback = etesia::modeDisplays[0].labelFeedback;
 	std::string textReverb = etesia::modeDisplays[0].labelReverb;
 
-	dsp::SampleRateConverter<2> srcInput;
-	dsp::SampleRateConverter<2> srcOutput;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer;
+	dsp::SampleRateConverter<2> srcInput[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<2> srcOutput[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
 	etesia::PlaybackMode playbackMode = etesia::PLAYBACK_MODE_GRANULAR;
-	etesia::PlaybackMode lastPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
-	etesia::PlaybackMode lastLEDPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
+	etesia::PlaybackMode lastPlaybackMode = etesia::PLAYBACK_MODE_LAST;
 
 	float freezeLight = 0.f;
 
-	float lastBlend;
-	float lastSpread;
-	float lastFeedback;
-	float lastReverb;
+	float_4 voltages1[PORT_MAX_CHANNELS];
 
-	int lastHiFi;
-	int lastStereo;
+	int channelCount;
+	int displayChannel = 0;
 
 	const int kClockDivider = 64;
 
-	uint32_t displayTimeout = 0;
-
-	bool bLastFrozen = false;
+	bool bLastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
-	bool bTriggered = false;
+	bool triggered[PORT_MAX_CHANNELS];
 
-	uint8_t* bufferLarge;
-	uint8_t* bufferSmall;
+	uint8_t* bufferLarge[PORT_MAX_CHANNELS];
+	uint8_t* bufferSmall[PORT_MAX_CHANNELS];
 
-	etesia::EtesiaGranularProcessor* etesiaProcessor;
+	etesia::EtesiaGranularProcessor* etesiaProcessor[PORT_MAX_CHANNELS];
 
 	Etesia() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -150,7 +167,7 @@ struct Etesia : SanguineModule {
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
 
 		configParam(PARAM_BLEND, 0.f, 1.f, 0.5f, "Dry ↔ wet", "%", 0.f, 100.f);
-		configInput(INPUT_BLEND, "Dry ↔ wet CV");
+		configInput(INPUT_BLEND, "Dry / wet CV");
 
 		configInput(INPUT_TRIGGER, "Trigger");
 
@@ -176,380 +193,346 @@ struct Etesia : SanguineModule {
 		configOutput(OUTPUT_LEFT, "Left");
 		configOutput(OUTPUT_RIGHT, "Right");
 
+		configInput(INPUT_MODE, "Mode");
+
 		configBypass(INPUT_LEFT, OUTPUT_LEFT);
 		configBypass(INPUT_RIGHT, OUTPUT_RIGHT);
 
-		lastBlend = 0.5f;
-		lastSpread = 0.5f;
-		lastFeedback = 0.5f;
-		lastReverb = 0.5f;
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			triggered[channel] = false;
+			bLastFrozen[channel] = false;
 
-		lastHiFi = 1;
-		lastStereo = 1;
-
-		bufferLarge = new uint8_t[cloudyCommon::kBigBufferLength]();
-		bufferSmall = new uint8_t[cloudyCommon::kSmallBufferLength]();
-		etesiaProcessor = new etesia::EtesiaGranularProcessor();
-		memset(etesiaProcessor, 0, sizeof(*etesiaProcessor));
-		etesiaProcessor->Init(bufferLarge, cloudyCommon::kBigBufferLength,
-			bufferSmall, cloudyCommon::kSmallBufferLength);
+			bufferLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
+			bufferSmall[channel] = new uint8_t[cloudyCommon::kSmallBufferLength]();
+			etesiaProcessor[channel] = new etesia::EtesiaGranularProcessor();
+			memset(etesiaProcessor[channel], 0, sizeof(etesiaProcessor));
+			etesiaProcessor[channel]->Init(bufferLarge[channel], cloudyCommon::kBigBufferLength,
+				bufferSmall[channel], cloudyCommon::kSmallBufferLength);
+		}
 
 		lightsDivider.setDivision(kClockDivider);
 	}
 
 	~Etesia() {
-		delete etesiaProcessor;
-		delete[] bufferLarge;
-		delete[] bufferSmall;
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			delete etesiaProcessor[channel];
+			delete[] bufferLarge[channel];
+			delete[] bufferSmall[channel];
+		}
 	}
 
 	void process(const ProcessArgs& args) override {
-		using simd::float_4;
+		int stereoChannels = static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1;
+		bool bWantLoFi = !static_cast<bool>(params[PARAM_HI_FI].getValue());
+		bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
+		bool bReversed = static_cast<bool>(params[PARAM_REVERSE].getValue());
+		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
-		dsp::Frame<2> inputFrame;
-		dsp::Frame<2> outputFrame = {};
+		float paramBlend = params[PARAM_BLEND].getValue();
+		float paramSpread = params[PARAM_SPREAD].getValue();
+		float paramFeedback = params[PARAM_FEEDBACK].getValue();
+		float paramReverb = params[PARAM_REVERB].getValue();
 
-		// Get input.
-		if (!drbInputBuffer.full()) {
-			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
-			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum()
-				* params[PARAM_IN_GAIN].getValue() / 5.f : inputFrame.samples[0];
-			drbInputBuffer.push(inputFrame);
+		float paramPosition = params[PARAM_POSITION].getValue();
+		float paramDensity = params[PARAM_DENSITY].getValue();
+		float paramSize = params[PARAM_SIZE].getValue();
+		float paramTexture = params[PARAM_TEXTURE].getValue();
+
+		float paramPitch = params[PARAM_PITCH].getValue();
+
+		float inputGain = params[PARAM_IN_GAIN].getValue();
+		float outputGain = params[PARAM_OUT_GAIN].getValue();
+
+		dsp::Frame<2> inputFrame[PORT_MAX_CHANNELS];
+		dsp::Frame<2> outputFrame[PORT_MAX_CHANNELS] = {};
+
+		channelCount = std::max(std::max(inputs[INPUT_LEFT].getChannels(), inputs[INPUT_RIGHT].getChannels()), 1);
+
+		if (displayChannel >= channelCount) {
+			displayChannel = channelCount - 1;
 		}
 
-		// Trigger.
-		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.f;
+		etesia::Parameters* etesiaParameters[PORT_MAX_CHANNELS];
 
-		etesia::Parameters* etesiaParameters = etesiaProcessor->mutable_parameters();
-
-		float_4 voltages1;
-
-		voltages1[0] = inputs[INPUT_POSITION].getVoltage();
-		voltages1[1] = inputs[INPUT_DENSITY].getVoltage();
-		voltages1[2] = inputs[INPUT_SIZE].getVoltage();
-		voltages1[3] = inputs[INPUT_TEXTURE].getVoltage();
-
-		// Render frames.
-		if (drbOutputBuffer.empty()) {
-			etesia::ShortFrame input[cloudyCommon::kMaxFrames] = {};
-			// Convert input buffer.
-
-			srcInput.setRates(args.sampleRate, 32000);
-			dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
-			int inputLength = drbInputBuffer.size();
-			int outputLength = cloudyCommon::kMaxFrames;
-			srcInput.process(drbInputBuffer.startData(), &inputLength, inputFrames, &outputLength);
-			drbInputBuffer.startIncr(inputLength);
-
-			/*
-			   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
-			   between the input and output SRC.
-			*/
-			for (int frame = 0; frame < outputLength; ++frame) {
-				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
-				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
+		for (int channel = 0; channel < channelCount; ++channel) {
+			// Get input.
+			if (!drbInputBuffer[channel].full()) {
+				inputFrame[channel].samples[0] = inputs[INPUT_LEFT].getVoltage(channel) * inputGain / 5.f;
+				inputFrame[channel].samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage(channel)
+					* inputGain / 5.f : inputFrame[channel].samples[0];
+				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
 
-			// Set up Etesia processor.
-			etesiaProcessor->set_playback_mode(playbackMode);
-			etesiaProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
-			etesiaProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
-			etesiaProcessor->Prepare();
+			// Trigger.
+			triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
+			etesiaParameters[channel] = etesiaProcessor[channel]->mutable_parameters();
 
-			float_4 scaledVoltages;
+			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
+			voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
+			voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
+			voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
 
-			scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage();
-			scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage();
-			scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage();
-			scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage();
+			// Render frames.
+			if (drbOutputBuffer[channel].empty()) {
+				etesia::ShortFrame input[cloudyCommon::kMaxFrames] = {};
 
-			scaledVoltages /= 5.f;
+				// Convert input buffer.
+				srcInput[channel].setRates(args.sampleRate, 32000);
+				dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
+				int inputLength = drbInputBuffer[channel].size();
+				int outputLength = cloudyCommon::kMaxFrames;
+				srcInput[channel].process(drbInputBuffer[channel].startData(), &inputLength,
+					inputFrames, &outputLength);
+				drbInputBuffer[channel].startIncr(inputLength);
 
-			scaledVoltages[0] += params[PARAM_BLEND].getValue();
-			scaledVoltages[1] += params[PARAM_SPREAD].getValue();
-			scaledVoltages[2] += params[PARAM_FEEDBACK].getValue();
-			scaledVoltages[3] += params[PARAM_REVERB].getValue();
-
-			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-			etesiaParameters->dry_wet = scaledVoltages[0];
-			etesiaParameters->stereo_spread = scaledVoltages[1];
-			etesiaParameters->feedback = scaledVoltages[2];
-			etesiaParameters->reverb = scaledVoltages[3];
-
-			scaledVoltages = voltages1 / 5.f;
-
-			scaledVoltages[0] += params[PARAM_POSITION].getValue();
-			scaledVoltages[1] += params[PARAM_DENSITY].getValue();
-			scaledVoltages[2] += params[PARAM_SIZE].getValue();
-			scaledVoltages[3] += params[PARAM_TEXTURE].getValue();
-
-			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-			etesiaParameters->position = scaledVoltages[0];
-			etesiaParameters->density = scaledVoltages[1];
-			etesiaParameters->size = scaledVoltages[2];
-			etesiaParameters->texture = scaledVoltages[3];
-
-			etesiaParameters->trigger = bTriggered;
-			etesiaParameters->gate = bTriggered;
-			etesiaParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
-			etesiaParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
-			etesiaParameters->granular.reverse = (inputs[INPUT_REVERSE].getVoltage() >= 1.f ||
-				static_cast<bool>(params[PARAM_REVERSE].getValue()));
-
-			etesia::ShortFrame output[cloudyCommon::kMaxFrames];
-			etesiaProcessor->Process(input, output, cloudyCommon::kMaxFrames);
-
-			if (bFrozen && !bLastFrozen) {
-				bLastFrozen = true;
-				if (!bDisplaySwitched) {
-					ledMode = cloudyCommon::LEDS_OUTPUT;
-					lastLedMode = cloudyCommon::LEDS_OUTPUT;
+				/*
+				   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
+				   between the input and output SRC.
+				*/
+				for (int frame = 0; frame < outputLength; ++frame) {
+					input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
+					input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 				}
-			} else if (!bFrozen && bLastFrozen) {
-				bLastFrozen = false;
-				if (!bDisplaySwitched) {
-					ledMode = cloudyCommon::LEDS_INPUT;
-					lastLedMode = cloudyCommon::LEDS_INPUT;
+
+				// Set up Etesia processor.
+				if (!bHaveModeCable) {
+					etesiaProcessor[channel]->set_playback_mode(playbackMode);
 				} else {
-					bDisplaySwitched = false;
+					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
+					modeVoltage = clamp(modeVoltage, 0, 5);
+					etesiaProcessor[channel]->set_playback_mode(static_cast<etesia::PlaybackMode>(modeVoltage));
+				}
+				etesiaProcessor[channel]->set_num_channels(stereoChannels);
+				etesiaProcessor[channel]->set_low_fidelity(bWantLoFi);
+				etesiaProcessor[channel]->Prepare();
+
+				float_4 scaledVoltages;
+
+				scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage(channel);
+				scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage(channel);
+				scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage(channel);
+				scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage(channel);
+
+				scaledVoltages /= 5.f;
+
+				scaledVoltages[0] += paramBlend;
+				scaledVoltages[1] += paramSpread;
+				scaledVoltages[2] += paramFeedback;
+				scaledVoltages[3] += paramReverb;
+
+				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
+
+				etesiaParameters[channel]->dry_wet = scaledVoltages[0];
+				etesiaParameters[channel]->stereo_spread = scaledVoltages[1];
+				etesiaParameters[channel]->feedback = scaledVoltages[2];
+				etesiaParameters[channel]->reverb = scaledVoltages[3];
+
+				scaledVoltages = voltages1[channel] / 5.f;
+
+				scaledVoltages[0] += paramPosition;
+				scaledVoltages[1] += paramDensity;
+				scaledVoltages[2] += paramSize;
+				scaledVoltages[3] += paramTexture;
+
+				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
+
+				etesiaParameters[channel]->position = scaledVoltages[0];
+				etesiaParameters[channel]->density = scaledVoltages[1];
+				etesiaParameters[channel]->size = scaledVoltages[2];
+				etesiaParameters[channel]->texture = scaledVoltages[3];
+
+				etesiaParameters[channel]->trigger = triggered[channel];
+				etesiaParameters[channel]->gate = triggered[channel];
+				etesiaParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
+				etesiaParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
+				etesiaParameters[channel]->granular.reverse = (inputs[INPUT_REVERSE].getVoltage(channel) >= 1.f || bReversed);
+
+				etesia::ShortFrame output[cloudyCommon::kMaxFrames];
+				etesiaProcessor[channel]->Process(input, output, cloudyCommon::kMaxFrames);
+
+				if (bFrozen && !bLastFrozen[channel]) {
+					bLastFrozen[channel] = true;
+					if (!bDisplaySwitched && displayChannel == channel) {
+						ledMode = cloudyCommon::LEDS_OUTPUT;
+						lastLedMode = cloudyCommon::LEDS_OUTPUT;
+					}
+				} else if (!bFrozen && bLastFrozen[channel]) {
+					bLastFrozen[channel] = false;
+					if (!bDisplaySwitched && displayChannel == channel) {
+						ledMode = cloudyCommon::LEDS_INPUT;
+						lastLedMode = cloudyCommon::LEDS_INPUT;
+					} else {
+						bDisplaySwitched = false;
+					}
+				}
+
+				// Convert output buffer.
+				dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
+				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
+					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
+					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
+				}
+
+				srcOutput[channel].setRates(32000, args.sampleRate);
+				int inCount = cloudyCommon::kMaxFrames;
+				int outCount = drbOutputBuffer[channel].capacity();
+				srcOutput[channel].process(outputFrames, &inCount, drbOutputBuffer[channel].endData(), &outCount);
+				drbOutputBuffer[channel].endIncr(outCount);
+
+				triggered[channel] = false;
+			}
+
+			// Set output.
+			if (!drbOutputBuffer[channel].empty()) {
+				outputFrame[channel] = drbOutputBuffer[channel].shift();
+				if (outputs[OUTPUT_LEFT].isConnected()) {
+					outputFrame[channel].samples[0] *= outputGain;
+					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame[channel].samples[0], channel);
+				}
+				if (outputs[OUTPUT_RIGHT].isConnected()) {
+					outputFrame[channel].samples[1] *= outputGain;
+					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame[channel].samples[1], channel);
 				}
 			}
-
-			// Convert output buffer.
-			dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
-			for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
-				outputFrames[frame].samples[0] = output[frame].l / 32768.f;
-				outputFrames[frame].samples[1] = output[frame].r / 32768.f;
-			}
-
-			srcOutput.setRates(32000, args.sampleRate);
-			int inCount = cloudyCommon::kMaxFrames;
-			int outCount = drbOutputBuffer.capacity();
-			srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
-			drbOutputBuffer.endIncr(outCount);
-
-			bTriggered = false;
 		}
 
-		// Set output.
-		if (!drbOutputBuffer.empty()) {
-			outputFrame = drbOutputBuffer.shift();
-			if (outputs[OUTPUT_LEFT].isConnected()) {
-				outputFrame.samples[0] *= params[PARAM_OUT_GAIN].getValue();
-				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
-			}
-			if (outputs[OUTPUT_RIGHT].isConnected()) {
-				outputFrame.samples[1] *= params[PARAM_OUT_GAIN].getValue();
-				outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame.samples[1]);
-			}
-		}
+		outputs[OUTPUT_LEFT].setChannels(channelCount);
+		outputs[OUTPUT_RIGHT].setChannels(channelCount);
 
 		// Lights.
-		dsp::Frame<2> lightFrame = {};
-
-		switch (ledMode) {
-		case cloudyCommon::LEDS_OUTPUT:
-			lightFrame = outputFrame;
-			break;
-		default:
-			lightFrame = inputFrame;
-			break;
-		}
-
-		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
-			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
-			ledMode = cloudyCommon::LEDS_MOMENTARY;
-		}
-
-		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
-			ledMode = cloudyCommon::LEDS_QUALITY_MOMENTARY;
-		}
-
-		if (playbackMode != lastLEDPlaybackMode) {
-			ledMode = cloudyCommon::LEDS_MODE_MOMENTARY;
-		}
-
-		if (ledMode == cloudyCommon::LEDS_MOMENTARY ||
-			ledMode == cloudyCommon::LEDS_MODE_MOMENTARY ||
-			ledMode == cloudyCommon::LEDS_QUALITY_MOMENTARY) {
-			++displayTimeout;
-			if (displayTimeout >= args.sampleRate * 2) {
-				ledMode = lastLedMode;
-				displayTimeout = 0;
-				lastBlend = params[PARAM_BLEND].getValue();
-				lastSpread = params[PARAM_SPREAD].getValue();
-				lastFeedback = params[PARAM_FEEDBACK].getValue();
-				lastReverb = params[PARAM_REVERB].getValue();
-
-				lastHiFi = params[PARAM_HI_FI].getValue();
-				lastStereo = params[PARAM_STEREO].getValue();
-
-				lastLEDPlaybackMode = playbackMode;
-			}
-		}
-
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * kClockDivider;
 
+			dsp::Frame<2> lightFrame = {};
+
+			switch (ledMode) {
+			case cloudyCommon::LEDS_OUTPUT:
+				lightFrame = outputFrame[displayChannel];
+				break;
+			default:
+				lightFrame = inputFrame[displayChannel];
+				break;
+			}
+
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters->freeze ?
+			lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
+			lights[LIGHT_BLEND + 1].setBrightness(0.f);
+			lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
+			lights[LIGHT_SPREAD + 1].setBrightness(0.f);
+			float lightBrightness = vuMeter.getBrightness(-12.f, -6.f);
+			lights[LIGHT_FEEDBACK].setBrightness(lightBrightness);
+			lights[LIGHT_FEEDBACK + 1].setBrightness(lightBrightness);
+			lights[LIGHT_REVERB].setBrightness(0.f);
+			lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
+
+			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters[displayChannel]->freeze ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters->granular.reverse ?
+			lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters[displayChannel]->granular.reverse ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
 			playbackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
+			etesia::PlaybackMode channelPlaybackMode;
 
-			if (playbackMode != lastPlaybackMode) {
-				textMode = etesia::modeList[playbackMode].display;
+			if (bHaveModeCable) {
+				channelPlaybackMode = etesiaProcessor[displayChannel]->playback_mode();
+			} else {
+				channelPlaybackMode = playbackMode;
+			}
 
-				textFreeze = etesia::modeDisplays[playbackMode].labelFreeze;
-				textPosition = etesia::modeDisplays[playbackMode].labelPosition;
-				textDensity = etesia::modeDisplays[playbackMode].labelDensity;
-				textSize = etesia::modeDisplays[playbackMode].labelSize;
-				textTexture = etesia::modeDisplays[playbackMode].labelTexture;
-				textPitch = etesia::modeDisplays[playbackMode].labelPitch;
-				textTrigger = etesia::modeDisplays[playbackMode].labelTrigger;
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+				etesia::PlaybackMode currentChannelMode = etesiaProcessor[channel]->playback_mode();
+				lights[currentLight + 0].setBrightnessSmooth((currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
+					currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
+					currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
+					currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR) && channel < channelCount, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth((currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR ||
+					currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
+					currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
+					currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR) && channel < channelCount, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth((currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
+					currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
+					currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR) && channel < channelCount, sampleTime);
+			}
+
+			if (channelPlaybackMode != lastPlaybackMode) {
+				textMode = etesia::modeList[channelPlaybackMode].display;
+
+				textFreeze = etesia::modeDisplays[channelPlaybackMode].labelFreeze;
+				textPosition = etesia::modeDisplays[channelPlaybackMode].labelPosition;
+				textDensity = etesia::modeDisplays[channelPlaybackMode].labelDensity;
+				textSize = etesia::modeDisplays[channelPlaybackMode].labelSize;
+				textTexture = etesia::modeDisplays[channelPlaybackMode].labelTexture;
+				textPitch = etesia::modeDisplays[channelPlaybackMode].labelPitch;
+				textTrigger = etesia::modeDisplays[channelPlaybackMode].labelTrigger;
 				// Parasite.
-				textBlend = etesia::modeDisplays[playbackMode].labelBlend;
-				textSpread = etesia::modeDisplays[playbackMode].labelSpread;
-				textFeedback = etesia::modeDisplays[playbackMode].labelFeedback;
-				textReverb = etesia::modeDisplays[playbackMode].labelReverb;
+				textBlend = etesia::modeDisplays[channelPlaybackMode].labelBlend;
+				textSpread = etesia::modeDisplays[channelPlaybackMode].labelSpread;
+				textFeedback = etesia::modeDisplays[channelPlaybackMode].labelFeedback;
+				textReverb = etesia::modeDisplays[channelPlaybackMode].labelReverb;
 
-				paramQuantities[PARAM_FREEZE]->name = etesia::modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = etesia::modeTooltips[playbackMode].labelFreeze + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_FREEZE]->name = etesia::modeTooltips[channelPlaybackMode].labelFreeze;
+				inputInfos[INPUT_FREEZE]->name = etesia::modeInputTooltips[channelPlaybackMode].labelFreeze;
 
-				paramQuantities[PARAM_POSITION]->name = etesia::modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = etesia::modeTooltips[playbackMode].labelPosition + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_POSITION]->name = etesia::modeTooltips[channelPlaybackMode].labelPosition;
+				inputInfos[INPUT_POSITION]->name = etesia::modeInputTooltips[channelPlaybackMode].labelPosition;
 
-				paramQuantities[PARAM_DENSITY]->name = etesia::modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = etesia::modeTooltips[playbackMode].labelDensity + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_DENSITY]->name = etesia::modeTooltips[channelPlaybackMode].labelDensity;
+				inputInfos[INPUT_DENSITY]->name = etesia::modeInputTooltips[channelPlaybackMode].labelDensity;
 
-				paramQuantities[PARAM_SIZE]->name = etesia::modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = etesia::modeTooltips[playbackMode].labelSize + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_SIZE]->name = etesia::modeTooltips[channelPlaybackMode].labelSize;
+				inputInfos[INPUT_SIZE]->name = etesia::modeInputTooltips[channelPlaybackMode].labelSize;
 
-				paramQuantities[PARAM_TEXTURE]->name = etesia::modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = etesia::modeTooltips[playbackMode].labelTexture + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_TEXTURE]->name = etesia::modeTooltips[channelPlaybackMode].labelTexture;
+				inputInfos[INPUT_TEXTURE]->name = etesia::modeInputTooltips[channelPlaybackMode].labelTexture;
 
-				paramQuantities[PARAM_PITCH]->name = etesia::modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = etesia::modeTooltips[playbackMode].labelPitch + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_PITCH]->name = etesia::modeTooltips[channelPlaybackMode].labelPitch;
+				inputInfos[INPUT_PITCH]->name = etesia::modeInputTooltips[channelPlaybackMode].labelPitch;
 
-				inputInfos[INPUT_TRIGGER]->name = etesia::modeTooltips[playbackMode].labelTrigger;
+				inputInfos[INPUT_TRIGGER]->name = etesia::modeInputTooltips[channelPlaybackMode].labelTrigger;
 
 				// Parasite.
-				paramQuantities[PARAM_BLEND]->name = etesia::modeTooltips[playbackMode].labelBlend;
-				inputInfos[INPUT_BLEND]->name = etesia::modeTooltips[playbackMode].labelBlend + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_BLEND]->name = etesia::modeTooltips[channelPlaybackMode].labelBlend;
+				inputInfos[INPUT_BLEND]->name = etesia::modeInputTooltips[channelPlaybackMode].labelBlend;
 
-				paramQuantities[PARAM_SPREAD]->name = etesia::modeTooltips[playbackMode].labelSpread;
-				inputInfos[INPUT_SPREAD]->name = etesia::modeTooltips[playbackMode].labelSpread + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_SPREAD]->name = etesia::modeTooltips[channelPlaybackMode].labelSpread;
+				inputInfos[INPUT_SPREAD]->name = etesia::modeInputTooltips[channelPlaybackMode].labelSpread;
 
-				paramQuantities[PARAM_FEEDBACK]->name = etesia::modeTooltips[playbackMode].labelFeedback;
-				inputInfos[INPUT_FEEDBACK]->name = etesia::modeTooltips[playbackMode].labelFeedback + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_FEEDBACK]->name = etesia::modeTooltips[channelPlaybackMode].labelFeedback;
+				inputInfos[INPUT_FEEDBACK]->name = etesia::modeInputTooltips[channelPlaybackMode].labelFeedback;
 
-				paramQuantities[PARAM_REVERB]->name = etesia::modeTooltips[playbackMode].labelReverb;
-				inputInfos[INPUT_REVERB]->name = etesia::modeTooltips[playbackMode].labelReverb + cloudyCommon::kCVSuffix;
+				paramQuantities[PARAM_REVERB]->name = etesia::modeTooltips[channelPlaybackMode].labelReverb;
+				inputInfos[INPUT_REVERB]->name = etesia::modeInputTooltips[channelPlaybackMode].labelReverb;
 
-				lastPlaybackMode = playbackMode;
+				lastPlaybackMode = channelPlaybackMode;
 			}
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = cloudyCommon::LedModes((ledMode + 1) % 3);
+				ledMode = cloudyCommon::LedModes((ledMode + 1) % 2);
 				lastLedMode = ledMode;
-				displayTimeout = 0;
-				lastBlend = params[PARAM_BLEND].getValue();
-				lastSpread = params[PARAM_SPREAD].getValue();
-				lastFeedback = params[PARAM_FEEDBACK].getValue();
-				lastReverb = params[PARAM_REVERB].getValue();
-
-				lastHiFi = params[PARAM_HI_FI].getValue();
-				lastStereo = params[PARAM_STEREO].getValue();
-
-				lastLEDPlaybackMode = playbackMode;
 
 				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
 					cloudyCommon::buttonTexts[ledMode];
 
-				bDisplaySwitched = bLastFrozen;
+				bDisplaySwitched = bLastFrozen[displayChannel];
 			}
 
-			float lightBrightness = 0.f;
-			switch (ledMode) {
-			case cloudyCommon::LEDS_INPUT:
-			case cloudyCommon::LEDS_OUTPUT:
-				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
-				lights[LIGHT_BLEND + 1].setBrightness(0.f);
-				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
-				lights[LIGHT_SPREAD + 1].setBrightness(0.f);
-				lightBrightness = vuMeter.getBrightness(-12.f, -6.f);
-				lights[LIGHT_FEEDBACK].setBrightness(lightBrightness);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(lightBrightness);
-				lights[LIGHT_REVERB].setBrightness(0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
-				break;
+			voltages1[displayChannel] = simd::rescale(voltages1[displayChannel], 0.f, 5.f, 0.f, 1.f);
 
-			case cloudyCommon::LEDS_PARAMETERS:
-			case cloudyCommon::LEDS_MOMENTARY:
-				for (int light = 0; light < 4; ++light) {
-					float value = params[PARAM_BLEND + light].getValue();
-					int currentLight = LIGHT_BLEND + light * 2;
-					lights[currentLight + 0].setBrightness(value <= 0.66f ?
-						math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
-					lights[currentLight + 1].setBrightness(value >= 0.33f ?
-						math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
-				}
-				break;
+			lights[LIGHT_POSITION_CV + 0].setBrightness(voltages1[displayChannel][0]);
+			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[displayChannel][0]);
 
-			case cloudyCommon::LEDS_QUALITY_MOMENTARY:
-				lights[LIGHT_BLEND].setBrightness(0.f);
-				lights[LIGHT_BLEND + 1].setBrightness(static_cast<bool>(params[PARAM_HI_FI].getValue()) &&
-					static_cast<bool>(params[PARAM_STEREO].getValue()));
-				lights[LIGHT_SPREAD].setBrightness(0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness(static_cast<bool>(params[PARAM_HI_FI].getValue()) &&
-					!(static_cast<bool>(params[PARAM_STEREO].getValue())));
-				lights[LIGHT_FEEDBACK].setBrightness(0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(!(static_cast<bool>(params[PARAM_HI_FI].getValue())) &&
-					static_cast<bool>(params[PARAM_STEREO].getValue()));
-				lights[LIGHT_REVERB].setBrightness(0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(!(static_cast<bool>(params[PARAM_HI_FI].getValue())) &&
-					!(static_cast<bool>(params[PARAM_STEREO].getValue())));
-				break;
+			lights[LIGHT_DENSITY_CV + 0].setBrightness(voltages1[displayChannel][1]);
+			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[displayChannel][1]);
 
-			case cloudyCommon::LEDS_MODE_MOMENTARY:
-				lights[LIGHT_BLEND].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
-					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR));
-				lights[LIGHT_BLEND + 1].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_GRANULAR ||
-					playbackMode == etesia::PLAYBACK_MODE_RESONESTOR));
-				lights[LIGHT_SPREAD].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
-					playbackMode == etesia::PLAYBACK_MODE_OLIVERB));
-				lights[LIGHT_SPREAD + 1].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_STRETCH ||
-					playbackMode == etesia::PLAYBACK_MODE_OLIVERB));
-				lights[LIGHT_FEEDBACK].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL));
-				lights[LIGHT_FEEDBACK + 1].setBrightness(static_cast<float>(playbackMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-					playbackMode > etesia::PLAYBACK_MODE_SPECTRAL));
-				lights[LIGHT_REVERB].setBrightness(static_cast<float>(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL));
-				lights[LIGHT_REVERB + 1].setBrightness(static_cast<float>(playbackMode >= etesia::PLAYBACK_MODE_SPECTRAL));
-				break;
-			}
+			lights[LIGHT_SIZE_CV + 0].setBrightness(voltages1[displayChannel][2]);
+			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[displayChannel][2]);
 
-			voltages1 = simd::rescale(voltages1, 0.f, 5.f, 0.f, 1.f);
-
-			lights[LIGHT_POSITION_CV + 0].setBrightness(voltages1[0]);
-			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[0]);
-
-			lights[LIGHT_DENSITY_CV + 0].setBrightness(voltages1[1]);
-			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[1]);
-
-			lights[LIGHT_SIZE_CV + 0].setBrightness(voltages1[2]);
-			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[2]);
-
-			lights[LIGHT_TEXTURE_CV + 0].setBrightness(voltages1[3]);
-			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[3]);
+			lights[LIGHT_TEXTURE_CV + 0].setBrightness(voltages1[displayChannel][3]);
+			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[displayChannel][3]);
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
@@ -581,148 +564,160 @@ struct EtesiaWidget : SanguineModuleWidget {
 		FramebufferWidget* etesiaFramebuffer = new FramebufferWidget();
 		addChild(etesiaFramebuffer);
 
-		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 13.453, 16.419);
-		etesiaFramebuffer->addChild(displayFreeze);
-		displayFreeze->fallbackString = etesia::modeDisplays[0].labelFreeze;
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(68.374, 13.96), module, Etesia::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.578, 13.96), module, Etesia::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(90.781, 13.96), module, Etesia::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(101.985, 13.96), module, Etesia::LIGHT_REVERB));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(20.029, 25.607), module, Etesia::INPUT_FREEZE));
+		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(111.383, 13.96), module, Etesia::PARAM_LEDS_MODE));
 
-		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(6.177, 25.607), module, Etesia::PARAM_FREEZE);
+		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(12.229, 18.268), module, Etesia::PARAM_FREEZE);
 		freezeButton->latch = true;
 		freezeButton->momentary = false;
 		addParam(freezeButton);
-		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(6.177, 25.607), module, Etesia::LIGHT_FREEZE));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(12.229, 18.268), module, Etesia::LIGHT_FREEZE));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(30.904, 25.607), module, Etesia::INPUT_REVERSE));
-
-		CKD6* reverseButton = createParamCentered<CKD6>(millimetersToPixelsVec(44.75, 25.607), module, Etesia::PARAM_REVERSE);
+		CKD6* reverseButton = createParamCentered<CKD6>(millimetersToPixelsVec(29.904, 18.268), module, Etesia::PARAM_REVERSE);
 		reverseButton->latch = true;
 		reverseButton->momentary = false;
 		addParam(reverseButton);
-		addChild(createLightCentered<CKD6Light<WhiteLight>>(millimetersToPixelsVec(44.75, 25.607), module, Etesia::LIGHT_REVERSE));
+		addChild(createLightCentered<CKD6Light<WhiteLight>>(millimetersToPixelsVec(29.904, 18.268), module, Etesia::LIGHT_REVERSE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.173, 12.851), module, Etesia::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(85.911, 12.851), module, Etesia::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(92.649, 12.851), module, Etesia::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(99.386, 12.851), module, Etesia::LIGHT_REVERB));
+		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 12.229, 26.927);
+		etesiaFramebuffer->addChild(displayFreeze);
+		displayFreeze->fallbackString = etesia::modeDisplays[0].labelFreeze;
 
-		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(107.606, 12.851), module, Etesia::PARAM_LEDS_MODE));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(44.176, 26.927), module, Etesia::INPUT_MODE));
 
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 26.927);
 		etesiaFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = etesia::modeList[0].display;
 
-		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Etesia::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 26.927), module, Etesia::PARAM_MODE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(12.229, 35.987), module, Etesia::INPUT_FREEZE));
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(29.904, 35.987), module, Etesia::INPUT_REVERSE));
+
+		const float xDelta = 2.241f;
+
+		float currentX = 68.374;
+
+		for (int light = 0; light < PORT_MAX_CHANNELS; ++light) {
+			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 35.318), module,
+				Etesia::LIGHT_CHANNEL_1 + light * 3));
+			currentX += xDelta;
+		}
+
+		addParam(createParamCentered<Sanguine1PGreen>(millimetersToPixelsVec(86.118, 44.869), module, Etesia::PARAM_BLEND));
+
+		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 44.869), module, Etesia::PARAM_PITCH));
+
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 57.169),
 			module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
 
-#ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
-#else
-		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 72);
-#endif
-		etesiaFramebuffer->addChild(displayPosition);
-		displayPosition->fallbackString = etesia::modeDisplays[0].labelPosition;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Etesia::INPUT_POSITION));
-
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 50.173),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 57.169),
 			module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
 
-		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
-		etesiaFramebuffer->addChild(displayDensity);
-		displayDensity->fallbackString = etesia::modeDisplays[0].labelDensity;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Etesia::INPUT_DENSITY));
-
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 57.169),
 			module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
 
-#ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
-#else
-		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 72);
-#endif
-		etesiaFramebuffer->addChild(displaySize);
-		displaySize->fallbackString = etesia::modeDisplays[0].labelSize;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Etesia::INPUT_SIZE));
-
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 50.173),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 57.169),
 			module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
 
-		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
-		etesiaFramebuffer->addChild(displayTexture);
-		displayTexture->fallbackString = etesia::modeDisplays[0].labelTexture;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Etesia::INPUT_TEXTURE));
-
-		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Etesia::PARAM_PITCH));
+		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay(module, 86.118, 54.874);
+		etesiaFramebuffer->addChild(displayBlend);
+		displayBlend->fallbackString = etesia::modeDisplays[0].labelBlend;
 
 #ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
+		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54.874);
 #else
-		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54);
+		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 57.7);
 #endif
 		etesiaFramebuffer->addChild(displayPitch);
 		displayPitch->fallbackString = etesia::modeDisplays[0].labelPitch;
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Etesia::INPUT_PITCH));
-
-		addParam(createParamCentered<Sanguine1PGreen>(millimetersToPixelsVec(86.118, 41.169), module, Etesia::PARAM_BLEND));
-
-		Sanguine96x32OLEDDisplay* displayBlend = new Sanguine96x32OLEDDisplay(module, 86.118, 51.174);
-		etesiaFramebuffer->addChild(displayBlend);
-		displayBlend->fallbackString = etesia::modeDisplays[0].labelBlend;
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Etesia::INPUT_BLEND));
-
-		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
+		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 54.874);
 		etesiaFramebuffer->addChild(displayTrigger);
 		displayTrigger->fallbackString = etesia::modeDisplays[0].labelTrigger;
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Etesia::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(86.118, 63.587), module, Etesia::INPUT_BLEND));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 78.013), module, Etesia::INPUT_SPREAD));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(105.638, 63.587), module, Etesia::INPUT_PITCH));
 
-		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay(module, 86.118, 86.709);
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(125.214, 63.587), module, Etesia::INPUT_TRIGGER));
+
+#ifndef METAMODULE
+		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 75.163);
+#else
+		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 78.997);
+#endif
+		etesiaFramebuffer->addChild(displayPosition);
+		displayPosition->fallbackString = etesia::modeDisplays[0].labelPosition;
+
+		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 75.163);
+		etesiaFramebuffer->addChild(displayDensity);
+		displayDensity->fallbackString = etesia::modeDisplays[0].labelDensity;
+
+#ifndef METAMODULE
+		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 75.163);
+#else
+		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 78.997);
+#endif
+		etesiaFramebuffer->addChild(displaySize);
+		displaySize->fallbackString = etesia::modeDisplays[0].labelSize;
+
+		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 75.163);
+		etesiaFramebuffer->addChild(displayTexture);
+		displayTexture->fallbackString = etesia::modeDisplays[0].labelTexture;
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(86.118, 77.713), module, Etesia::INPUT_SPREAD));
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(105.638, 77.713), module, Etesia::INPUT_FEEDBACK));
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(125.214, 77.713), module, Etesia::INPUT_REVERB));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(11.763, 83.772), module, Etesia::INPUT_POSITION));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(29.722, 83.772), module, Etesia::INPUT_DENSITY));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(47.682, 83.772), module, Etesia::INPUT_SIZE));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(65.644, 83.772), module, Etesia::INPUT_TEXTURE));
+
+		Sanguine96x32OLEDDisplay* displaySpread = new Sanguine96x32OLEDDisplay(module, 86.118, 86.409);
 		etesiaFramebuffer->addChild(displaySpread);
 		displaySpread->fallbackString = etesia::modeDisplays[0].labelSpread;
 
-		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Etesia::PARAM_SPREAD));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 78.013), module, Etesia::INPUT_FEEDBACK));
-
 #ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.709);
+		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 86.409);
 #else
-		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 70);
+		Sanguine96x32OLEDDisplay* displayFeedback = new Sanguine96x32OLEDDisplay(module, 105.638, 69.7);
 #endif
 		etesiaFramebuffer->addChild(displayFeedback);
 		displayFeedback->fallbackString = etesia::modeDisplays[0].labelFeedback;
 
-		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Etesia::PARAM_FEEDBACK));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 78.013), module, Etesia::INPUT_REVERB));
-
-		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay(module, 125.214, 86.709);
+		Sanguine96x32OLEDDisplay* displayReverb = new Sanguine96x32OLEDDisplay(module, 125.214, 86.409);
 		etesiaFramebuffer->addChild(displayReverb);
 		displayReverb->fallbackString = etesia::modeDisplays[0].labelReverb;
 
-		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Etesia::PARAM_REVERB));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(18.631, 96.427),
+			module, Etesia::PARAM_HI_FI, Etesia::LIGHT_HI_FI));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(43.823, 96.427),
+			module, Etesia::PARAM_STEREO, Etesia::LIGHT_STEREO));
+
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.427), module, Etesia::PARAM_SPREAD));
+
+		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.427), module, Etesia::PARAM_FEEDBACK));
+
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.427), module, Etesia::PARAM_REVERB));
+
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.529, 116.972), module, Etesia::INPUT_RIGHT));
 
 		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(41.434, 117.002), module, Etesia::PARAM_IN_GAIN));
 
 		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(95.701, 117.002), module, Etesia::PARAM_OUT_GAIN));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(18.631, 96.727),
-			module, Etesia::PARAM_HI_FI, Etesia::LIGHT_HI_FI));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(43.823, 96.727),
-			module, Etesia::PARAM_STEREO, Etesia::LIGHT_STEREO));
-
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Etesia::INPUT_LEFT));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Etesia::INPUT_RIGHT));
 
 #ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
@@ -732,8 +727,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 		addChild(mutantsLogo);
 #endif
 
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Etesia::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(115.161, 116.972), module, Etesia::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(129.013, 116.972), module, Etesia::OUTPUT_RIGHT));
 
 		if (module) {
 			displayModel->values.displayText = &module->textMode;
@@ -766,6 +761,17 @@ struct EtesiaWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },
 			[=](int i) {module->setModeParam(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		std::vector<std::string> availableChannels;
+		for (int i = 0; i < module->channelCount; ++i) {
+			availableChannels.push_back(channelNumbers[i]);
+		}
+		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+			[=]() {return module->displayChannel; },
+			[=](int i) {module->displayChannel = i; }
 		));
 	}
 };
