@@ -445,17 +445,20 @@ struct Etesia : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
 				etesia::PlaybackMode currentChannelMode = etesiaProcessor[channel]->playback_mode();
-				lights[currentLight + 0].setBrightnessSmooth((currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
-					currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-					currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
-					currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR) && channel < channelCount, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth((currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR ||
-					currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
-					currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
-					currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR) && channel < channelCount, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth((currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
-					currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
-					currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR) && channel < channelCount, sampleTime);
+				lights[currentLight + 0].setBrightnessSmooth(channel < channelCount &&
+					(currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
+						currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
+						currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
+						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
+					(currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR ||
+						currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
+						currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
+						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
+					(currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
+						currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
+						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
