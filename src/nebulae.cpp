@@ -87,7 +87,7 @@ struct Nebulae : SanguineModule {
 	dsp::BooleanTrigger btLedsMode;
 
 	clouds::PlaybackMode playbackMode = clouds::PLAYBACK_MODE_GRANULAR;
-	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
+	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_LAST;
 	clouds::PlaybackMode lastLEDPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
 
 	float freezeLight = 0.f;
@@ -404,24 +404,32 @@ struct Nebulae : SanguineModule {
 				textTrigger = nebulae::modeDisplays[playbackMode].labelTrigger;
 
 				paramQuantities[PARAM_FREEZE]->name = nebulae::modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = nebulae::modeTooltips[playbackMode].labelFreeze + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_FREEZE]->name = nebulae::modeInputTooltips[playbackMode].labelFreeze;
 
 				paramQuantities[PARAM_POSITION]->name = nebulae::modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = nebulae::modeTooltips[playbackMode].labelPosition + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_POSITION]->name = nebulae::modeInputTooltips[playbackMode].labelPosition;
 
 				paramQuantities[PARAM_DENSITY]->name = nebulae::modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = nebulae::modeTooltips[playbackMode].labelDensity + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_DENSITY]->name = nebulae::modeInputTooltips[playbackMode].labelDensity;
 
 				paramQuantities[PARAM_SIZE]->name = nebulae::modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = nebulae::modeTooltips[playbackMode].labelSize + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_SIZE]->name = nebulae::modeInputTooltips[playbackMode].labelSize;
 
 				paramQuantities[PARAM_TEXTURE]->name = nebulae::modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = nebulae::modeTooltips[playbackMode].labelTexture + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_TEXTURE]->name = nebulae::modeInputTooltips[playbackMode].labelTexture;
 
 				paramQuantities[PARAM_PITCH]->name = nebulae::modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = nebulae::modeTooltips[playbackMode].labelPitch + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_PITCH]->name = nebulae::modeInputTooltips[playbackMode].labelPitch;
 
-				inputInfos[INPUT_TRIGGER]->name = nebulae::modeTooltips[playbackMode].labelTrigger;
+				inputInfos[INPUT_TRIGGER]->name = nebulae::modeInputTooltips[playbackMode].labelTrigger;
+
+				inputInfos[INPUT_BLEND]->name = nebulae::modeInputTooltips[playbackMode].labelBlend;
+
+				inputInfos[INPUT_SPREAD]->name = nebulae::modeInputTooltips[playbackMode].labelSpread;
+
+				inputInfos[INPUT_FEEDBACK]->name = nebulae::modeInputTooltips[playbackMode].labelFeedback;
+
+				inputInfos[INPUT_REVERB]->name = nebulae::modeInputTooltips[playbackMode].labelReverb;
 
 				lastPlaybackMode = playbackMode;
 			}
