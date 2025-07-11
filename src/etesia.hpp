@@ -12,6 +12,7 @@ namespace etesia {
         { "RESONESTOR", "Resonestor" }
     };
 
+#ifndef METAMODULE
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeDisplays{
         {"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger", "Blend",      "Spread",    "Feedback",   "Reverb"},
         {"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP | HP",          "Pitch",     "Time",    "Blend",      "Spread",    "Feedback",   "Reverb"},
@@ -20,6 +21,7 @@ namespace etesia {
         {"Freeze",  "Pre-delay",    "Decay",            "Size",             "Dampen LP | HP",   "Pitch",     "Clock",   "Dry | Wet",  "Diffusion", "Mod. Speed", "Mod. Amount"},
         {"Voice",   "Timbre",       "Decay",            "Chord",            "Filter LP | BP",   "Pitch",     "Burst",   "Distortion", "Stereo",    "Harmonics",  "Scatter"}
     };
+#endif
 
     // TODO: remove the tooltips for inputs without parameters!
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeTooltips{
