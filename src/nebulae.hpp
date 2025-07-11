@@ -33,4 +33,11 @@ namespace nebulae {
         {"Stutter", "Head position",    "Granular diffusion",           "Overlap: Grainy ↓ | Smooth ↑", "LP ↓ | HP ↑",                          "Grain pitch",  "Delay time"},
         {"Freeze",  "Buffer select",    "F.F.T. Update ↓ | Merge ↑",    "Polynomial coefficients",      "Quantizer ↓ | Partial amplifier ↑",    "Transpose",    "Glitch audio"}
     };
+
+    static const std::vector<cloudyCommon::ParasiteModeDisplay> modeInputTooltips{
+        {"Freeze",  "Grain position CV",    "Grain density CV",         "Grain Size CV",                "Grain texture CV", "Grain pitch (1V / oct)",   "Trigger",       "Dry / wet CV",    "Spread CV",    "Feedback CV",  "Reverb CV"},
+        {"Stutter", "Scrub buffer CV",      "Diffusion CV",             "Overlap CV",                   "Filter CV",        "Grain pitch (1V / oct)",   "Time",          "Dry / wet CV",    "Spread CV",    "Feedback CV",  "Reverb CV"},
+        {"Stutter", "Head position CV",     "Granular diffusion CV",    "Overlap CV",                   "Filter CV",        "Grain pitch (1V / oct)",   "Delay time",    "Dry / wet CV",    "Spread CV",    "Feedback CV",  "Reverb CV"},
+        {"Freeze",  "Buffer select CV",     "F.F.T. CV",                "Polynomial coefficients CV",   "Quantizer CV",     "Transpose CV",             "Glitch audio",  "Dry / wet CV",    "Spread CV",    "Feedback CV",  "Reverb CV"}
+    };
 }
