@@ -552,6 +552,29 @@ struct Etesia : SanguineModule {
 		} // lightsDivider
 	}
 
+	json_t* dataToJson() override {
+		json_t* rootJ = SanguineModule::dataToJson();
+
+		setJsonInt(rootJ, "displayChannel", displayChannel);
+		setJsonInt(rootJ, "LEDsMode", ledMode);
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
+		}
+
+		if (getJsonInt(rootJ, "LEDsMode", intValue)) {
+			ledMode = static_cast<cloudyCommon::LedModes>(intValue);
+		}
+	}
+
 	int getModeParam() {
 		return params[PARAM_MODE].getValue();
 	}
