@@ -91,7 +91,7 @@ struct Fluctus : SanguineModule {
 	dsp::BooleanTrigger btLedsMode;
 
 	fluctus::PlaybackMode playbackMode = fluctus::PLAYBACK_MODE_GRANULAR;
-	fluctus::PlaybackMode lastPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
+	fluctus::PlaybackMode lastPlaybackMode = fluctus::PLAYBACK_MODE_LAST;
 	fluctus::PlaybackMode lastLEDPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
 
 	float freezeLight = 0.f;
@@ -420,37 +420,37 @@ struct Fluctus : SanguineModule {
 				textReverb = fluctus::modeDisplays[playbackMode].labelReverb;
 
 				paramQuantities[PARAM_FREEZE]->name = fluctus::modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = fluctus::modeTooltips[playbackMode].labelFreeze + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_FREEZE]->name = fluctus::modeInputTooltips[playbackMode].labelFreeze;
 
 				paramQuantities[PARAM_POSITION]->name = fluctus::modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = fluctus::modeTooltips[playbackMode].labelPosition + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_POSITION]->name = fluctus::modeInputTooltips[playbackMode].labelPosition;
 
 				paramQuantities[PARAM_DENSITY]->name = fluctus::modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = fluctus::modeTooltips[playbackMode].labelDensity + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_DENSITY]->name = fluctus::modeInputTooltips[playbackMode].labelDensity;
 
 				paramQuantities[PARAM_SIZE]->name = fluctus::modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = fluctus::modeTooltips[playbackMode].labelSize + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_SIZE]->name = fluctus::modeInputTooltips[playbackMode].labelSize;
 
 				paramQuantities[PARAM_TEXTURE]->name = fluctus::modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = fluctus::modeTooltips[playbackMode].labelTexture + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_TEXTURE]->name = fluctus::modeInputTooltips[playbackMode].labelTexture;
 
 				paramQuantities[PARAM_PITCH]->name = fluctus::modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = fluctus::modeTooltips[playbackMode].labelPitch + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_PITCH]->name = fluctus::modeInputTooltips[playbackMode].labelPitch;
 
-				inputInfos[INPUT_TRIGGER]->name = fluctus::modeTooltips[playbackMode].labelTrigger;
+				inputInfos[INPUT_TRIGGER]->name = fluctus::modeInputTooltips[playbackMode].labelTrigger;
 
 				// Parasite.
 				paramQuantities[PARAM_BLEND]->name = fluctus::modeTooltips[playbackMode].labelBlend;
-				inputInfos[INPUT_BLEND]->name = fluctus::modeTooltips[playbackMode].labelBlend + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_BLEND]->name = fluctus::modeInputTooltips[playbackMode].labelBlend;
 
 				paramQuantities[PARAM_SPREAD]->name = fluctus::modeTooltips[playbackMode].labelSpread;
-				inputInfos[INPUT_SPREAD]->name = fluctus::modeTooltips[playbackMode].labelSpread + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_SPREAD]->name = fluctus::modeInputTooltips[playbackMode].labelSpread;
 
 				paramQuantities[PARAM_FEEDBACK]->name = fluctus::modeTooltips[playbackMode].labelFeedback;
-				inputInfos[INPUT_FEEDBACK]->name = fluctus::modeTooltips[playbackMode].labelFeedback + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_FEEDBACK]->name = fluctus::modeInputTooltips[playbackMode].labelFeedback;
 
 				paramQuantities[PARAM_REVERB]->name = fluctus::modeTooltips[playbackMode].labelReverb;
-				inputInfos[INPUT_REVERB]->name = fluctus::modeTooltips[playbackMode].labelReverb + cloudyCommon::kCVSuffix;
+				inputInfos[INPUT_REVERB]->name = fluctus::modeInputTooltips[playbackMode].labelReverb;
 
 				lastPlaybackMode = playbackMode;
 			}
