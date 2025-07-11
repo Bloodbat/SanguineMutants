@@ -20,12 +20,14 @@ namespace nebulae {
         std::string labelTrigger;
     };
 
+#ifndef METAMODULE
     static const std::vector<ModeDisplay> modeDisplays{
         {"Freeze",  "Position",     "Density",          "Size",             "Texture",          "Pitch",     "Trigger"},
         {"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP | HP",          "Pitch",     "Time"},
         {"Stutter", "Time / Start", "Diffusion",        "Overlap | Duratn", "LP | HP",          "Pitch",     "Time"},
         {"Freeze",  "Buffer",       "FFT Upd. | Merge", "Polynomial",       "Quantize | Parts", "Transpose", "Glitch"}
     };
+#endif
 
     static const std::vector<ModeDisplay> modeTooltips{
         {"Freeze",  "Grain position",   "Grain density",                "Grain Size",                   "Grain texture",                        "Grain pitch",  "Trigger"},
