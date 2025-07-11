@@ -2,12 +2,15 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
+#include "sanguinechannels.hpp"
 
 #include "clouds/dsp/granular_processor.h"
 
 #include "nebulae.hpp"
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+
+using simd::float_4;
 
 struct Nebulae : SanguineModule {
 	enum ParamIds {
@@ -29,6 +32,7 @@ struct Nebulae : SanguineModule {
 		PARAM_OUT_GAIN,
 		PARAMS_COUNT
 	};
+
 	enum InputIds {
 		INPUT_FREEZE,
 		INPUT_POSITION,
@@ -43,13 +47,18 @@ struct Nebulae : SanguineModule {
 		INPUT_REVERB,
 		INPUT_LEFT,
 		INPUT_RIGHT,
+		INPUT_MODE,
+		INPUT_IN_GAIN,
+		INPUT_OUT_GAIN,
 		INPUTS_COUNT
 	};
+
 	enum OutputIds {
 		OUTPUT_LEFT,
 		OUTPUT_RIGHT,
 		OUTPUTS_COUNT
 	};
+
 	enum LightIds {
 		LIGHT_FREEZE,
 		ENUMS(LIGHT_BLEND, 2),
@@ -62,6 +71,22 @@ struct Nebulae : SanguineModule {
 		ENUMS(LIGHT_TEXTURE_CV, 2),
 		LIGHT_HI_FI,
 		LIGHT_STEREO,
+		ENUMS(LIGHT_CHANNEL_1, 3),
+		ENUMS(LIGHT_CHANNEL_2, 3),
+		ENUMS(LIGHT_CHANNEL_3, 3),
+		ENUMS(LIGHT_CHANNEL_4, 3),
+		ENUMS(LIGHT_CHANNEL_5, 3),
+		ENUMS(LIGHT_CHANNEL_6, 3),
+		ENUMS(LIGHT_CHANNEL_7, 3),
+		ENUMS(LIGHT_CHANNEL_8, 3),
+		ENUMS(LIGHT_CHANNEL_9, 3),
+		ENUMS(LIGHT_CHANNEL_10, 3),
+		ENUMS(LIGHT_CHANNEL_11, 3),
+		ENUMS(LIGHT_CHANNEL_12, 3),
+		ENUMS(LIGHT_CHANNEL_13, 3),
+		ENUMS(LIGHT_CHANNEL_14, 3),
+		ENUMS(LIGHT_CHANNEL_15, 3),
+		ENUMS(LIGHT_CHANNEL_16, 3),
 		LIGHTS_COUNT
 	};
 
@@ -70,6 +95,7 @@ struct Nebulae : SanguineModule {
 	cloudyCommon::LedModes lastLedMode = cloudyCommon::LEDS_INPUT;
 
 	std::string textMode = nebulae::modeList[0].display;
+#ifndef METAMODULE
 	std::string textFreeze = nebulae::modeDisplays[0].labelFreeze;
 	std::string textPosition = nebulae::modeDisplays[0].labelPosition;
 	std::string textDensity = nebulae::modeDisplays[0].labelDensity;
@@ -77,41 +103,36 @@ struct Nebulae : SanguineModule {
 	std::string textTexture = nebulae::modeDisplays[0].labelTexture;
 	std::string textPitch = nebulae::modeDisplays[0].labelPitch;
 	std::string textTrigger = nebulae::modeDisplays[0].labelTrigger;
+#endif
 
-	dsp::SampleRateConverter<2> srcInput;
-	dsp::SampleRateConverter<2> srcOutput;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer;
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer;
+	dsp::SampleRateConverter<2> srcInput[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<2> srcOutput[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffer[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffer[PORT_MAX_CHANNELS];
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
 	clouds::PlaybackMode playbackMode = clouds::PLAYBACK_MODE_GRANULAR;
 	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_LAST;
-	clouds::PlaybackMode lastLEDPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
 
 	float freezeLight = 0.f;
 
-	float lastBlend;
-	float lastSpread;
-	float lastFeedback;
-	float lastReverb;
+	float_4 voltages1[PORT_MAX_CHANNELS];
 
-	int lastHiFi;
-	int lastStereo;
+	int channelCount;
+	int displayChannel = 0;
 
 	const int kClockDivider = 64;
 
-	uint32_t displayTimeout = 0;
-
-	bool bLastFrozen = false;
+	bool bLastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
-	bool bTriggered = false;
+	bool triggered[PORT_MAX_CHANNELS];
 
-	uint8_t* bufferLarge;
-	uint8_t* bufferSmall;
+	uint8_t* bufferLarge[PORT_MAX_CHANNELS];
+	uint8_t* bufferSmall[PORT_MAX_CHANNELS];
 
-	clouds::GranularProcessor* cloudsProcessor;
+	clouds::GranularProcessor* cloudsProcessor[PORT_MAX_CHANNELS];
 
 	Nebulae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -140,7 +161,7 @@ struct Nebulae : SanguineModule {
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
 
 		configParam(PARAM_BLEND, 0.f, 1.f, 0.5f, "Dry ↔ wet", "%", 0.f, 100.f);
-		configInput(INPUT_BLEND, "Dry ↔ wet CV");
+		configInput(INPUT_BLEND, "Dry / wet CV");
 
 		configInput(INPUT_TRIGGER, "Trigger");
 
@@ -153,9 +174,13 @@ struct Nebulae : SanguineModule {
 		configInput(INPUT_REVERB, "Reverb CV");
 		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb", "%", 0.f, 100.f);
 
+		configInput(INPUT_IN_GAIN, "Input gain CV");
+
 		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain", "%", 0.f, 100.f);
 
 		configParam(PARAM_OUT_GAIN, 0.f, 2.f, 1.f, "Output gain", "%", 0.f, 100.f);
+
+		configInput(INPUT_IN_GAIN, "Output gain CV");
 
 		configInput(INPUT_LEFT, "Left");
 		configInput(INPUT_RIGHT, "Right");
@@ -166,365 +191,361 @@ struct Nebulae : SanguineModule {
 		configOutput(OUTPUT_LEFT, "Left");
 		configOutput(OUTPUT_RIGHT, "Right");
 
+		configInput(INPUT_MODE, "Mode");
+
 		configBypass(INPUT_LEFT, OUTPUT_LEFT);
 		configBypass(INPUT_RIGHT, OUTPUT_RIGHT);
 
-		lastBlend = 0.5f;
-		lastSpread = 0.5f;
-		lastFeedback = 0.5f;
-		lastReverb = 0.5f;
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			triggered[channel] = false;
+			bLastFrozen[channel] = false;
 
-		lastHiFi = 1;
-		lastStereo = 1;
-
-		bufferLarge = new uint8_t[cloudyCommon::kBigBufferLength]();
-		bufferSmall = new uint8_t[cloudyCommon::kSmallBufferLength]();
-		cloudsProcessor = new clouds::GranularProcessor();
-		memset(cloudsProcessor, 0, sizeof(*cloudsProcessor));
-		cloudsProcessor->Init(bufferLarge, cloudyCommon::kBigBufferLength,
-			bufferSmall, cloudyCommon::kSmallBufferLength);
+			bufferLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
+			bufferSmall[channel] = new uint8_t[cloudyCommon::kSmallBufferLength]();
+			cloudsProcessor[channel] = new clouds::GranularProcessor();
+			memset(cloudsProcessor[channel], 0, sizeof(cloudsProcessor));
+			cloudsProcessor[channel]->Init(bufferLarge[channel], cloudyCommon::kBigBufferLength,
+				bufferSmall[channel], cloudyCommon::kSmallBufferLength);
+		}
 
 		lightsDivider.setDivision(kClockDivider);
 	}
 
 	~Nebulae() {
-		delete cloudsProcessor;
-		delete[] bufferLarge;
-		delete[] bufferSmall;
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			delete cloudsProcessor[channel];
+			delete[] bufferLarge[channel];
+			delete[] bufferSmall[channel];
+		}
 	}
 
 	void process(const ProcessArgs& args) override {
-		using simd::float_4;
+		int stereoChannels = static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1;
+		bool bWantLoFi = !static_cast<bool>(params[PARAM_HI_FI].getValue());
+		bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
+		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
-		dsp::Frame<2> inputFrame;
-		dsp::Frame<2> outputFrame = {};
+		float paramBlend = params[PARAM_BLEND].getValue();
+		float paramSpread = params[PARAM_SPREAD].getValue();
+		float paramFeedback = params[PARAM_FEEDBACK].getValue();
+		float paramReverb = params[PARAM_REVERB].getValue();
 
-		// Get input.
-		if (!drbInputBuffer.full()) {
-			inputFrame.samples[0] = inputs[INPUT_LEFT].getVoltageSum() * params[PARAM_IN_GAIN].getValue() / 5.f;
-			inputFrame.samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltageSum() *
-				params[PARAM_IN_GAIN].getValue() / 5.f : inputFrame.samples[0];
-			drbInputBuffer.push(inputFrame);
+		float paramPosition = params[PARAM_POSITION].getValue();
+		float paramDensity = params[PARAM_DENSITY].getValue();
+		float paramSize = params[PARAM_SIZE].getValue();
+		float paramTexture = params[PARAM_TEXTURE].getValue();
+
+		float paramPitch = params[PARAM_PITCH].getValue();
+
+		float inputGain = params[PARAM_IN_GAIN].getValue();
+		float outputGain = params[PARAM_OUT_GAIN].getValue();
+
+		dsp::Frame<2> inputFrame[PORT_MAX_CHANNELS];
+		dsp::Frame<2> outputFrame[PORT_MAX_CHANNELS] = {};
+
+		channelCount = std::max(std::max(inputs[INPUT_LEFT].getChannels(), inputs[INPUT_RIGHT].getChannels()), 1);
+
+		if (displayChannel >= channelCount) {
+			displayChannel = channelCount - 1;
 		}
 
-		// Trigger.
-		bTriggered = inputs[INPUT_TRIGGER].getVoltage() >= 1.f;
+		clouds::Parameters* cloudsParameters[PORT_MAX_CHANNELS];
 
-		clouds::Parameters* cloudsParameters = cloudsProcessor->mutable_parameters();
-
-		float_4 voltages1;
-
-		voltages1[0] = inputs[INPUT_POSITION].getVoltage();
-		voltages1[1] = inputs[INPUT_DENSITY].getVoltage();
-		voltages1[2] = inputs[INPUT_SIZE].getVoltage();
-		voltages1[3] = inputs[INPUT_TEXTURE].getVoltage();
-
-		// Render frames.
-		if (drbOutputBuffer.empty()) {
-			clouds::ShortFrame input[cloudyCommon::kMaxFrames] = {};
-			// Convert input buffer.
-			srcInput.setRates(args.sampleRate, 32000);
-			dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
-			int inputLength = drbInputBuffer.size();
-			int outputLength = cloudyCommon::kMaxFrames;
-			srcInput.process(drbInputBuffer.startData(), &inputLength, inputFrames, &outputLength);
-			drbInputBuffer.startIncr(inputLength);
-
-			/*
-			   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
-			   between the input and output SRC.
-			*/
-			for (int frame = 0; frame < outputLength; ++frame) {
-				input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
-				input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
+		for (int channel = 0; channel < channelCount; ++channel) {
+			// Get input.
+			if (!drbInputBuffer[channel].full()) {
+				float finalInputGain = clamp(inputGain + (inputs[INPUT_IN_GAIN].getVoltage(channel) / 5.f), 0.f, 1.f);
+				inputFrame[channel].samples[0] = inputs[INPUT_LEFT].getVoltage(channel) * finalInputGain / 5.f;
+				inputFrame[channel].samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage(channel)
+					* finalInputGain / 5.f : inputFrame[channel].samples[0];
+				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
 
-			// Set up Clouds processor.
-			cloudsProcessor->set_playback_mode(playbackMode);
-			cloudsProcessor->set_num_channels(static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1);
-			cloudsProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
-			cloudsProcessor->Prepare();
+			// Trigger.
+			triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-#ifndef METAMODULE
-			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
-#else
-			bool bFrozen = static_cast<bool>(std::round(params[PARAM_FREEZE].getValue()));
-#endif
+			cloudsParameters[channel] = cloudsProcessor[channel]->mutable_parameters();
 
-			float_4 scaledVoltages;
+			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
+			voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
+			voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
+			voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
 
-			scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage();
-			scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage();
-			scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage();
-			scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage();
+			// Render frames.
+			if (drbOutputBuffer[channel].empty()) {
+				clouds::ShortFrame input[cloudyCommon::kMaxFrames] = {};
 
-			scaledVoltages /= 5.f;
+				// Convert input buffer.
+				srcInput[channel].setRates(args.sampleRate, 32000);
+				dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
+				int inputLength = drbInputBuffer[channel].size();
+				int outputLength = cloudyCommon::kMaxFrames;
+				srcInput[channel].process(drbInputBuffer[channel].startData(), &inputLength,
+					inputFrames, &outputLength);
+				drbInputBuffer[channel].startIncr(inputLength);
 
-			scaledVoltages[0] += params[PARAM_BLEND].getValue();
-			scaledVoltages[1] += params[PARAM_SPREAD].getValue();
-			scaledVoltages[2] += params[PARAM_FEEDBACK].getValue();
-			scaledVoltages[3] += params[PARAM_REVERB].getValue();
-
-			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-			cloudsParameters->dry_wet = scaledVoltages[0];
-			cloudsParameters->stereo_spread = scaledVoltages[1];
-			cloudsParameters->feedback = scaledVoltages[2];
-			cloudsParameters->reverb = scaledVoltages[3];
-
-			scaledVoltages = voltages1 / 5.f;
-
-			scaledVoltages[0] += params[PARAM_POSITION].getValue();
-			scaledVoltages[1] += params[PARAM_DENSITY].getValue();
-			scaledVoltages[2] += params[PARAM_SIZE].getValue();
-			scaledVoltages[3] += params[PARAM_TEXTURE].getValue();
-
-			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-			cloudsParameters->position = scaledVoltages[0];
-			cloudsParameters->density = scaledVoltages[1];
-			cloudsParameters->size = scaledVoltages[2];
-			cloudsParameters->texture = scaledVoltages[3];
-
-			cloudsParameters->pitch = clamp((params[PARAM_PITCH].getValue() + inputs[INPUT_PITCH].getVoltage()) * 12.f, -48.f, 48.f);
-			cloudsParameters->trigger = bTriggered;
-			cloudsParameters->gate = bTriggered;
-			cloudsParameters->freeze = (inputs[INPUT_FREEZE].getVoltage() >= 1.f || bFrozen);
-
-			clouds::ShortFrame output[cloudyCommon::kMaxFrames];
-			cloudsProcessor->Process(input, output, cloudyCommon::kMaxFrames);
-
-			if (bFrozen && !bLastFrozen) {
-				bLastFrozen = true;
-				if (!bDisplaySwitched) {
-					ledMode = cloudyCommon::LEDS_OUTPUT;
-					lastLedMode = cloudyCommon::LEDS_OUTPUT;
+				/*
+				   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
+				   between the input and output SRC.
+				*/
+				for (int frame = 0; frame < outputLength; ++frame) {
+					input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
+					input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
 				}
-			} else if (!bFrozen && bLastFrozen) {
-				bLastFrozen = false;
-				if (!bDisplaySwitched) {
-					ledMode = cloudyCommon::LEDS_INPUT;
-					lastLedMode = cloudyCommon::LEDS_INPUT;
+
+				// Set up Clouds processor.
+				if (!bHaveModeCable) {
+					cloudsProcessor[channel]->set_playback_mode(playbackMode);
 				} else {
-					bDisplaySwitched = false;
+					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
+					modeVoltage = clamp(modeVoltage, 0, 3);
+					cloudsProcessor[channel]->set_playback_mode(static_cast<clouds::PlaybackMode>(modeVoltage));
+				}
+				cloudsProcessor[channel]->set_num_channels(stereoChannels);
+				cloudsProcessor[channel]->set_low_fidelity(bWantLoFi);
+				cloudsProcessor[channel]->Prepare();
+
+				float_4 scaledVoltages;
+
+				scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage(channel);
+				scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage(channel);
+				scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage(channel);
+				scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage(channel);
+
+				scaledVoltages /= 5.f;
+
+				scaledVoltages[0] += paramBlend;
+				scaledVoltages[1] += paramSpread;
+				scaledVoltages[2] += paramFeedback;
+				scaledVoltages[3] += paramReverb;
+
+				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
+
+				cloudsParameters[channel]->dry_wet = scaledVoltages[0];
+				cloudsParameters[channel]->stereo_spread = scaledVoltages[1];
+				cloudsParameters[channel]->feedback = scaledVoltages[2];
+				cloudsParameters[channel]->reverb = scaledVoltages[3];
+
+				scaledVoltages = voltages1[channel] / 5.f;
+
+				scaledVoltages[0] += paramPosition;
+				scaledVoltages[1] += paramDensity;
+				scaledVoltages[2] += paramSize;
+				scaledVoltages[3] += paramTexture;
+
+				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
+
+				cloudsParameters[channel]->position = scaledVoltages[0];
+				cloudsParameters[channel]->density = scaledVoltages[1];
+				cloudsParameters[channel]->size = scaledVoltages[2];
+				cloudsParameters[channel]->texture = scaledVoltages[3];
+
+				cloudsParameters[channel]->trigger = triggered[channel];
+				cloudsParameters[channel]->gate = triggered[channel];
+				cloudsParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
+				cloudsParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
+
+				clouds::ShortFrame output[cloudyCommon::kMaxFrames];
+				cloudsProcessor[channel]->Process(input, output, cloudyCommon::kMaxFrames);
+
+				if (bFrozen && !bLastFrozen[channel]) {
+					bLastFrozen[channel] = true;
+					if (!bDisplaySwitched && displayChannel == channel) {
+						ledMode = cloudyCommon::LEDS_OUTPUT;
+						lastLedMode = cloudyCommon::LEDS_OUTPUT;
+					}
+				} else if (!bFrozen && bLastFrozen[channel]) {
+					bLastFrozen[channel] = false;
+					if (!bDisplaySwitched && displayChannel == channel) {
+						ledMode = cloudyCommon::LEDS_INPUT;
+						lastLedMode = cloudyCommon::LEDS_INPUT;
+					} else {
+						bDisplaySwitched = false;
+					}
+				}
+
+				// Convert output buffer.
+				dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
+				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
+					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
+					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
+				}
+
+				srcOutput[channel].setRates(32000, args.sampleRate);
+				int inCount = cloudyCommon::kMaxFrames;
+				int outCount = drbOutputBuffer[channel].capacity();
+				srcOutput[channel].process(outputFrames, &inCount, drbOutputBuffer[channel].endData(), &outCount);
+				drbOutputBuffer[channel].endIncr(outCount);
+
+				triggered[channel] = false;
+			}
+
+			// Set output.
+			if (!drbOutputBuffer[channel].empty()) {
+				outputFrame[channel] = drbOutputBuffer[channel].shift();
+				float finalOutputGain = clamp(outputGain + (inputs[INPUT_OUT_GAIN].getVoltage(channel) / 5.f), 0.f, 2.f);
+				if (outputs[OUTPUT_LEFT].isConnected()) {
+					outputFrame[channel].samples[0] *= finalOutputGain;
+					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame[channel].samples[0], channel);
+				}
+				if (outputs[OUTPUT_RIGHT].isConnected()) {
+					outputFrame[channel].samples[1] *= finalOutputGain;
+					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame[channel].samples[1], channel);
 				}
 			}
-
-			// Convert output buffer.
-			dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
-			for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
-				outputFrames[frame].samples[0] = output[frame].l / 32768.f;
-				outputFrames[frame].samples[1] = output[frame].r / 32768.f;
-			}
-
-			srcOutput.setRates(32000, args.sampleRate);
-			int inCount = cloudyCommon::kMaxFrames;
-			int outCount = drbOutputBuffer.capacity();
-			srcOutput.process(outputFrames, &inCount, drbOutputBuffer.endData(), &outCount);
-			drbOutputBuffer.endIncr(outCount);
-
-			bTriggered = false;
 		}
 
-		// Set output.
-		if (!drbOutputBuffer.empty()) {
-			outputFrame = drbOutputBuffer.shift();
-			if (outputs[OUTPUT_LEFT].isConnected()) {
-				outputFrame.samples[0] *= params[PARAM_OUT_GAIN].getValue();
-				outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame.samples[0]);
-			}
-			if (outputs[OUTPUT_RIGHT].isConnected()) {
-				outputFrame.samples[1] *= params[PARAM_OUT_GAIN].getValue();
-				outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame.samples[1]);
-			}
-		}
+		outputs[OUTPUT_LEFT].setChannels(channelCount);
+		outputs[OUTPUT_RIGHT].setChannels(channelCount);
 
-		dsp::Frame<2> lightFrame = {};
-
-		switch (ledMode) {
-		case cloudyCommon::LEDS_OUTPUT:
-			lightFrame = outputFrame;
-			break;
-		default:
-			lightFrame = inputFrame;
-			break;
-		}
-
-		if (params[PARAM_BLEND].getValue() != lastBlend || params[PARAM_SPREAD].getValue() != lastSpread ||
-			params[PARAM_FEEDBACK].getValue() != lastFeedback || params[PARAM_REVERB].getValue() != lastReverb) {
-			ledMode = cloudyCommon::LEDS_MOMENTARY;
-		}
-
-		if (params[PARAM_HI_FI].getValue() != lastHiFi || params[PARAM_STEREO].getValue() != lastStereo) {
-			ledMode = cloudyCommon::LEDS_QUALITY_MOMENTARY;
-		}
-
-		if (playbackMode != lastLEDPlaybackMode) {
-			ledMode = cloudyCommon::LEDS_MODE_MOMENTARY;
-		}
-
-		if (ledMode == cloudyCommon::LEDS_MOMENTARY ||
-			ledMode == cloudyCommon::LEDS_MODE_MOMENTARY ||
-			ledMode == cloudyCommon::LEDS_QUALITY_MOMENTARY) {
-			++displayTimeout;
-			if (displayTimeout >= args.sampleRate * 2) {
-				ledMode = lastLedMode;
-				displayTimeout = 0;
-				lastBlend = params[PARAM_BLEND].getValue();
-				lastSpread = params[PARAM_SPREAD].getValue();
-				lastFeedback = params[PARAM_FEEDBACK].getValue();
-				lastReverb = params[PARAM_REVERB].getValue();
-
-				lastHiFi = params[PARAM_HI_FI].getValue();
-				lastStereo = params[PARAM_STEREO].getValue();
-
-				lastLEDPlaybackMode = playbackMode;
-			}
-		}
-
+		// Lights.
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * kClockDivider;
 
-			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
-
-			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters->freeze ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-
-			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
-
-			if (playbackMode != lastPlaybackMode) {
-				textMode = nebulae::modeList[playbackMode].display;
-
-				textFreeze = nebulae::modeDisplays[playbackMode].labelFreeze;
-				textPosition = nebulae::modeDisplays[playbackMode].labelPosition;
-				textDensity = nebulae::modeDisplays[playbackMode].labelDensity;
-				textSize = nebulae::modeDisplays[playbackMode].labelSize;
-				textTexture = nebulae::modeDisplays[playbackMode].labelTexture;
-				textPitch = nebulae::modeDisplays[playbackMode].labelPitch;
-				textTrigger = nebulae::modeDisplays[playbackMode].labelTrigger;
-
-				paramQuantities[PARAM_FREEZE]->name = nebulae::modeTooltips[playbackMode].labelFreeze;
-				inputInfos[INPUT_FREEZE]->name = nebulae::modeInputTooltips[playbackMode].labelFreeze;
-
-				paramQuantities[PARAM_POSITION]->name = nebulae::modeTooltips[playbackMode].labelPosition;
-				inputInfos[INPUT_POSITION]->name = nebulae::modeInputTooltips[playbackMode].labelPosition;
-
-				paramQuantities[PARAM_DENSITY]->name = nebulae::modeTooltips[playbackMode].labelDensity;
-				inputInfos[INPUT_DENSITY]->name = nebulae::modeInputTooltips[playbackMode].labelDensity;
-
-				paramQuantities[PARAM_SIZE]->name = nebulae::modeTooltips[playbackMode].labelSize;
-				inputInfos[INPUT_SIZE]->name = nebulae::modeInputTooltips[playbackMode].labelSize;
-
-				paramQuantities[PARAM_TEXTURE]->name = nebulae::modeTooltips[playbackMode].labelTexture;
-				inputInfos[INPUT_TEXTURE]->name = nebulae::modeInputTooltips[playbackMode].labelTexture;
-
-				paramQuantities[PARAM_PITCH]->name = nebulae::modeTooltips[playbackMode].labelPitch;
-				inputInfos[INPUT_PITCH]->name = nebulae::modeInputTooltips[playbackMode].labelPitch;
-
-				inputInfos[INPUT_TRIGGER]->name = nebulae::modeInputTooltips[playbackMode].labelTrigger;
-
-				inputInfos[INPUT_BLEND]->name = nebulae::modeInputTooltips[playbackMode].labelBlend;
-
-				inputInfos[INPUT_SPREAD]->name = nebulae::modeInputTooltips[playbackMode].labelSpread;
-
-				inputInfos[INPUT_FEEDBACK]->name = nebulae::modeInputTooltips[playbackMode].labelFeedback;
-
-				inputInfos[INPUT_REVERB]->name = nebulae::modeInputTooltips[playbackMode].labelReverb;
-
-				lastPlaybackMode = playbackMode;
-			}
-
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = cloudyCommon::LedModes((ledMode + 1) % 3);
+				ledMode = cloudyCommon::LedModes((ledMode + 1) % 2);
 				lastLedMode = ledMode;
-				displayTimeout = 0;
-				lastBlend = params[PARAM_BLEND].getValue();
-				lastSpread = params[PARAM_SPREAD].getValue();
-				lastFeedback = params[PARAM_FEEDBACK].getValue();
-				lastReverb = params[PARAM_REVERB].getValue();
-
-				lastHiFi = params[PARAM_HI_FI].getValue();
-				lastStereo = params[PARAM_STEREO].getValue();
-
-				lastLEDPlaybackMode = playbackMode;
 
 				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
 					cloudyCommon::buttonTexts[ledMode];
 
-				bLastFrozen = bDisplaySwitched;
+				bDisplaySwitched = bLastFrozen[displayChannel];
 			}
 
-			float lightBrightness = 0.f;
+			dsp::Frame<2> lightFrame = {};
+
 			switch (ledMode) {
-			case cloudyCommon::LEDS_INPUT:
 			case cloudyCommon::LEDS_OUTPUT:
-				lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
-				lights[LIGHT_BLEND + 1].setBrightness(0.f);
-				lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
-				lights[LIGHT_SPREAD + 1].setBrightness(0.f);
-				lightBrightness = vuMeter.getBrightness(-12.f, -6.f);
-				lights[LIGHT_FEEDBACK].setBrightness(lightBrightness);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(lightBrightness);
-				lights[LIGHT_REVERB].setBrightness(0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
+				lightFrame = outputFrame[displayChannel];
 				break;
-
-			case cloudyCommon::LEDS_PARAMETERS:
-			case cloudyCommon::LEDS_MOMENTARY:
-				for (int light = 0; light < 4; ++light) {
-					float value = params[PARAM_BLEND + light].getValue();
-					int currentLight = LIGHT_BLEND + light * 2;
-					lights[currentLight + 0].setBrightness(value <= 0.66f ?
-						math::rescale(value, 0.f, 0.66f, 0.f, 1.f) : math::rescale(value, 0.67f, 1.f, 1.f, 0.f));
-					lights[currentLight + 1].setBrightness(value >= 0.33f ?
-						math::rescale(value, 0.33f, 1.f, 0.f, 1.f) : math::rescale(value, 1.f, 0.34f, 1.f, 0.f));
-				}
-				break;
-
-			case cloudyCommon::LEDS_QUALITY_MOMENTARY:
-				lights[LIGHT_BLEND].setBrightness(0.f);
-				lights[LIGHT_BLEND + 1].setBrightness(static_cast<bool>(params[PARAM_HI_FI].getValue()) &&
-					static_cast<bool>(params[PARAM_STEREO].getValue()));
-				lights[LIGHT_SPREAD].setBrightness(0.f);
-				lights[LIGHT_SPREAD + 1].setBrightness(static_cast<bool>(params[PARAM_HI_FI].getValue()) &&
-					!(static_cast<bool>(params[PARAM_STEREO].getValue())));
-				lights[LIGHT_FEEDBACK].setBrightness(0.f);
-				lights[LIGHT_FEEDBACK + 1].setBrightness(!(static_cast<bool>(params[PARAM_HI_FI].getValue())) &&
-					static_cast<bool>(params[PARAM_STEREO].getValue()));
-				lights[LIGHT_REVERB].setBrightness(0.f);
-				lights[LIGHT_REVERB + 1].setBrightness(!(static_cast<bool>(params[PARAM_HI_FI].getValue())) &&
-					!(static_cast<bool>(params[PARAM_STEREO].getValue())));
-				break;
-
-			case cloudyCommon::LEDS_MODE_MOMENTARY:
-				for (int light = 0; light < clouds::PLAYBACK_MODE_LAST; ++light) {
-					int currentLight = LIGHT_BLEND + light * 2;
-
-					lights[currentLight + 0].setBrightness(static_cast<float>(playbackMode == light));
-					lights[currentLight + 1].setBrightness(static_cast<float>(playbackMode == light));
-				}
+			default:
+				lightFrame = inputFrame[displayChannel];
 				break;
 			}
 
-			voltages1 = simd::rescale(voltages1, 0.f, 5.f, 0.f, 1.f);
+			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-			lights[LIGHT_POSITION_CV + 0].setBrightness(voltages1[0]);
-			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[0]);
+			lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
+			lights[LIGHT_BLEND + 1].setBrightness(0.f);
+			lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
+			lights[LIGHT_SPREAD + 1].setBrightness(0.f);
+			float lightBrightness = vuMeter.getBrightness(-12.f, -6.f);
+			lights[LIGHT_FEEDBACK].setBrightness(lightBrightness);
+			lights[LIGHT_FEEDBACK + 1].setBrightness(lightBrightness);
+			lights[LIGHT_REVERB].setBrightness(0.f);
+			lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
 
-			lights[LIGHT_DENSITY_CV + 0].setBrightness(voltages1[1]);
-			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[1]);
+			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters[displayChannel]->freeze ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			lights[LIGHT_SIZE_CV + 0].setBrightness(voltages1[2]);
-			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[2]);
+			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
+			clouds::PlaybackMode channelPlaybackMode;
 
-			lights[LIGHT_TEXTURE_CV + 0].setBrightness(voltages1[3]);
-			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[3]);
+			if (bHaveModeCable) {
+				channelPlaybackMode = cloudsProcessor[displayChannel]->playback_mode();
+			} else {
+				channelPlaybackMode = playbackMode;
+			}
+
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+				clouds::PlaybackMode currentChannelMode = cloudsProcessor[channel]->playback_mode();
+				lights[currentLight + 0].setBrightnessSmooth(channel < channelCount &&
+					(currentChannelMode == clouds::PLAYBACK_MODE_STRETCH ||
+						currentChannelMode == clouds::PLAYBACK_MODE_LOOPING_DELAY), sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
+					(currentChannelMode == clouds::PLAYBACK_MODE_GRANULAR ||
+						currentChannelMode == clouds::PLAYBACK_MODE_STRETCH), sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
+					currentChannelMode == clouds::PLAYBACK_MODE_SPECTRAL, sampleTime);
+			}
+
+			if (channelPlaybackMode != lastPlaybackMode) {
+				textMode = nebulae::modeList[channelPlaybackMode].display;
+
+#ifndef METAMODULE
+				textFreeze = nebulae::modeDisplays[channelPlaybackMode].labelFreeze;
+				textPosition = nebulae::modeDisplays[channelPlaybackMode].labelPosition;
+				textDensity = nebulae::modeDisplays[channelPlaybackMode].labelDensity;
+				textSize = nebulae::modeDisplays[channelPlaybackMode].labelSize;
+				textTexture = nebulae::modeDisplays[channelPlaybackMode].labelTexture;
+				textPitch = nebulae::modeDisplays[channelPlaybackMode].labelPitch;
+				textTrigger = nebulae::modeDisplays[channelPlaybackMode].labelTrigger;
+#endif
+
+				paramQuantities[PARAM_FREEZE]->name = nebulae::modeTooltips[channelPlaybackMode].labelFreeze;
+				inputInfos[INPUT_FREEZE]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelFreeze;
+
+				paramQuantities[PARAM_POSITION]->name = nebulae::modeTooltips[channelPlaybackMode].labelPosition;
+				inputInfos[INPUT_POSITION]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelPosition;
+
+				paramQuantities[PARAM_DENSITY]->name = nebulae::modeTooltips[channelPlaybackMode].labelDensity;
+				inputInfos[INPUT_DENSITY]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelDensity;
+
+				paramQuantities[PARAM_SIZE]->name = nebulae::modeTooltips[channelPlaybackMode].labelSize;
+				inputInfos[INPUT_SIZE]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelSize;
+
+				paramQuantities[PARAM_TEXTURE]->name = nebulae::modeTooltips[channelPlaybackMode].labelTexture;
+				inputInfos[INPUT_TEXTURE]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelTexture;
+
+				paramQuantities[PARAM_PITCH]->name = nebulae::modeTooltips[channelPlaybackMode].labelPitch;
+				inputInfos[INPUT_PITCH]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelPitch;
+
+				inputInfos[INPUT_TRIGGER]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelTrigger;
+
+				inputInfos[INPUT_BLEND]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelBlend;
+
+				inputInfos[INPUT_SPREAD]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelSpread;
+
+				inputInfos[INPUT_FEEDBACK]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelFeedback;
+
+				inputInfos[INPUT_REVERB]->name = nebulae::modeInputTooltips[channelPlaybackMode].labelReverb;
+
+				lastPlaybackMode = channelPlaybackMode;
+			}
+
+			voltages1[displayChannel] = simd::rescale(voltages1[displayChannel], 0.f, 5.f, 0.f, 1.f);
+
+			lights[LIGHT_POSITION_CV + 0].setBrightness(voltages1[displayChannel][0]);
+			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[displayChannel][0]);
+
+			lights[LIGHT_DENSITY_CV + 0].setBrightness(voltages1[displayChannel][1]);
+			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[displayChannel][1]);
+
+			lights[LIGHT_SIZE_CV + 0].setBrightness(voltages1[displayChannel][2]);
+			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[displayChannel][2]);
+
+			lights[LIGHT_TEXTURE_CV + 0].setBrightness(voltages1[displayChannel][3]);
+			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[displayChannel][3]);
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 		} // lightsDivider
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = SanguineModule::dataToJson();
+
+		setJsonInt(rootJ, "displayChannel", displayChannel);
+		setJsonInt(rootJ, "LEDsMode", ledMode);
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		SanguineModule::dataFromJson(rootJ);
+
+		json_int_t intValue = 0;
+
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
+		}
+
+		if (getJsonInt(rootJ, "LEDsMode", intValue)) {
+			ledMode = static_cast<cloudyCommon::LedModes>(intValue);
+		}
 	}
 
 	int getModeParam() {
@@ -550,119 +571,100 @@ struct NebulaeWidget : SanguineModuleWidget {
 		FramebufferWidget* nebulaeFramebuffer = new FramebufferWidget();
 		addChild(nebulaeFramebuffer);
 
-		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 14.953, 16.419);
-		nebulaeFramebuffer->addChild(displayFreeze);
-		displayFreeze->fallbackString = nebulae::modeDisplays[0].labelFreeze;
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(68.374, 13.96), module, Nebulae::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.578, 13.96), module, Nebulae::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(90.781, 13.96), module, Nebulae::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(101.985, 13.96), module, Nebulae::LIGHT_REVERB));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(7.677, 25.607), module, Nebulae::INPUT_FREEZE));
-		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(21.529, 25.607), module, Nebulae::PARAM_FREEZE);
+		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(111.383, 13.96), module, Nebulae::PARAM_LEDS_MODE));
+
+		CKD6* freezeButton = createParamCentered<CKD6>(millimetersToPixelsVec(12.229, 18.268), module, Nebulae::PARAM_FREEZE);
 		freezeButton->latch = true;
 		freezeButton->momentary = false;
 		addParam(freezeButton);
-		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(21.529, 25.607), module, Nebulae::LIGHT_FREEZE));
+		addChild(createLightCentered<CKD6Light<BlueLight>>(millimetersToPixelsVec(12.229, 18.268), module, Nebulae::LIGHT_FREEZE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.173, 12.851), module, Nebulae::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(85.911, 12.851), module, Nebulae::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(92.649, 12.851), module, Nebulae::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(99.386, 12.851), module, Nebulae::LIGHT_REVERB));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(44.176, 26.927), module, Nebulae::INPUT_MODE));
 
-		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(107.606, 12.851), module, Nebulae::PARAM_LEDS_MODE));
-
-		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 25.227);
+		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 26.927);
 		nebulaeFramebuffer->addChild(displayModel);
 		displayModel->fallbackString = nebulae::modeList[0].display;
 
-		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 25.227), module, Nebulae::PARAM_MODE));
+		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 26.927), module, Nebulae::PARAM_MODE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 50.173),
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(12.229, 35.987), module, Nebulae::INPUT_FREEZE));
+
+		const float xDelta = 2.241f;
+
+		float currentX = 68.374;
+
+		for (int light = 0; light < PORT_MAX_CHANNELS; ++light) {
+			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 35.318), module,
+				Nebulae::LIGHT_CHANNEL_1 + light * 3));
+			currentX += xDelta;
+		}
+
+		addParam(createParamCentered<Sanguine1PGreen>(millimetersToPixelsVec(86.118, 44.869), module, Nebulae::PARAM_BLEND));
+
+		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 44.869), module, Nebulae::PARAM_PITCH));
+
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 57.169),
 			module, Nebulae::PARAM_POSITION, Nebulae::LIGHT_POSITION_CV));
 
-#ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 68.166);
-#else
-		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 74);
-#endif
-		nebulaeFramebuffer->addChild(displayPosition);
-		displayPosition->fallbackString = nebulae::modeDisplays[0].labelPosition;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(11.763, 76.776), module, Nebulae::INPUT_POSITION));
-
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 50.173),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 57.169),
 			module, Nebulae::PARAM_DENSITY, Nebulae::LIGHT_DENSITY_CV));
 
-		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 68.166);
-		nebulaeFramebuffer->addChild(displayDensity);
-		displayDensity->fallbackString = nebulae::modeDisplays[0].labelDensity;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(29.722, 76.776), module, Nebulae::INPUT_DENSITY));
-
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 50.173),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 57.169),
 			module, Nebulae::PARAM_SIZE, Nebulae::LIGHT_SIZE_CV));
 
-#ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 68.166);
-#else
-		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 72);
-#endif
-		nebulaeFramebuffer->addChild(displaySize);
-		displaySize->fallbackString = nebulae::modeDisplays[0].labelSize;
-
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(47.682, 76.776), module, Nebulae::INPUT_SIZE));
-
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 50.173),
+		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 57.169),
 			module, Nebulae::PARAM_TEXTURE, Nebulae::LIGHT_TEXTURE_CV));
 
-		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 68.166);
-		nebulaeFramebuffer->addChild(displayTexture);
-		displayTexture->fallbackString = nebulae::modeDisplays[0].labelTexture;
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(86.118, 63.587), module, Nebulae::INPUT_BLEND));
 
-		addInput(createInputCentered<BananutBlack>(millimetersToPixelsVec(65.644, 76.776), module, Nebulae::INPUT_TEXTURE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(105.638, 63.587), module, Nebulae::INPUT_PITCH));
 
-		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 41.169), module, Nebulae::PARAM_PITCH));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(125.214, 63.587), module, Nebulae::INPUT_TRIGGER));
 
-#ifndef METAMODULE
-		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 51.174);
-#else
-		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54);
-#endif
-		nebulaeFramebuffer->addChild(displayPitch);
-		displayPitch->fallbackString = nebulae::modeDisplays[0].labelPitch;
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(86.118, 77.713), module, Nebulae::INPUT_SPREAD));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 59.887), module, Nebulae::INPUT_PITCH));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(105.638, 77.713), module, Nebulae::INPUT_FEEDBACK));
 
-		addParam(createParamCentered<Sanguine1PGreen>(millimetersToPixelsVec(86.118, 41.169), module, Nebulae::PARAM_BLEND));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(125.214, 77.713), module, Nebulae::INPUT_REVERB));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 59.887), module, Nebulae::INPUT_BLEND));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(11.763, 83.772), module, Nebulae::INPUT_POSITION));
 
-		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 51.174);
-		nebulaeFramebuffer->addChild(displayTrigger);
-		displayTrigger->fallbackString = nebulae::modeDisplays[0].labelTrigger;
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(29.722, 83.772), module, Nebulae::INPUT_DENSITY));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 59.887), module, Nebulae::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(47.682, 83.772), module, Nebulae::INPUT_SIZE));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(86.118, 78.013), module, Nebulae::INPUT_SPREAD));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(65.644, 83.772), module, Nebulae::INPUT_TEXTURE));
 
-		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.727), module, Nebulae::PARAM_SPREAD));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(105.638, 78.013), module, Nebulae::INPUT_FEEDBACK));
-
-		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.727), module, Nebulae::PARAM_FEEDBACK));
-
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(125.214, 78.013), module, Nebulae::INPUT_REVERB));
-
-		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.727), module, Nebulae::PARAM_REVERB));
-
-		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(41.434, 117.002), module, Nebulae::PARAM_IN_GAIN));
-
-		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(95.701, 117.002), module, Nebulae::PARAM_OUT_GAIN));
-
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(18.631, 96.727),
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(18.631, 96.427),
 			module, Nebulae::PARAM_HI_FI, Nebulae::LIGHT_HI_FI));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(43.823, 96.727),
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(43.823, 96.427),
 			module, Nebulae::PARAM_STEREO, Nebulae::LIGHT_STEREO));
 
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(7.677, 116.972), module, Nebulae::INPUT_LEFT));
-		addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(21.529, 116.972), module, Nebulae::INPUT_RIGHT));
+		addParam(createParamCentered<Sanguine1PBlue>(millimetersToPixelsVec(86.118, 96.427), module, Nebulae::PARAM_SPREAD));
+
+		addParam(createParamCentered<Sanguine1PPurple>(millimetersToPixelsVec(105.638, 96.427), module, Nebulae::PARAM_FEEDBACK));
+
+		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.427), module, Nebulae::PARAM_REVERB));
+
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.677, 116.972), module, Nebulae::INPUT_LEFT));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.529, 116.972), module, Nebulae::INPUT_RIGHT));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(33.873, 117.002), module, Nebulae::INPUT_IN_GAIN));
+
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(46.434, 117.002), module, Nebulae::PARAM_IN_GAIN));
+
+		addParam(createParamCentered<Rogan1PWhite>(millimetersToPixelsVec(90.701, 117.002), module, Nebulae::PARAM_OUT_GAIN));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(103.25, 117.002), module, Nebulae::INPUT_OUT_GAIN));
+
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(115.161, 116.972), module, Nebulae::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(129.013, 116.972), module, Nebulae::OUTPUT_RIGHT));
+
 
 #ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 58.816, 110.16);
@@ -670,14 +672,41 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 71.817, 117.093);
 		addChild(mutantsLogo);
-#endif
 
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(115.161, 116.972), module, Nebulae::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(129.013, 116.972), module, Nebulae::OUTPUT_RIGHT));
+		// OLED displays
+		Sanguine96x32OLEDDisplay* displayFreeze = new Sanguine96x32OLEDDisplay(module, 12.229, 26.927);
+		nebulaeFramebuffer->addChild(displayFreeze);
+		displayFreeze->fallbackString = nebulae::modeDisplays[0].labelFreeze;
+
+		Sanguine96x32OLEDDisplay* displayPitch = new Sanguine96x32OLEDDisplay(module, 105.638, 54.874);
+		nebulaeFramebuffer->addChild(displayPitch);
+		displayPitch->fallbackString = nebulae::modeDisplays[0].labelPitch;
+
+		Sanguine96x32OLEDDisplay* displayTrigger = new Sanguine96x32OLEDDisplay(module, 125.214, 54.874);
+		nebulaeFramebuffer->addChild(displayTrigger);
+		displayTrigger->fallbackString = nebulae::modeDisplays[0].labelTrigger;
+
+		Sanguine96x32OLEDDisplay* displayPosition = new Sanguine96x32OLEDDisplay(module, 11.763, 75.163);
+		nebulaeFramebuffer->addChild(displayPosition);
+		displayPosition->fallbackString = nebulae::modeDisplays[0].labelPosition;
+
+		Sanguine96x32OLEDDisplay* displayDensity = new Sanguine96x32OLEDDisplay(module, 29.722, 75.163);
+		nebulaeFramebuffer->addChild(displayDensity);
+		displayDensity->fallbackString = nebulae::modeDisplays[0].labelDensity;
+
+		Sanguine96x32OLEDDisplay* displaySize = new Sanguine96x32OLEDDisplay(module, 47.682, 75.163);
+		nebulaeFramebuffer->addChild(displaySize);
+		displaySize->fallbackString = nebulae::modeDisplays[0].labelSize;
+
+		Sanguine96x32OLEDDisplay* displayTexture = new Sanguine96x32OLEDDisplay(module, 65.644, 75.163);
+		nebulaeFramebuffer->addChild(displayTexture);
+		displayTexture->fallbackString = nebulae::modeDisplays[0].labelTexture;
+#endif
 
 		if (module) {
 			displayModel->values.displayText = &module->textMode;
 
+#ifndef METAMODULE
 			displayFreeze->oledText = &module->textFreeze;
 			displayPosition->oledText = &module->textPosition;
 			displayDensity->oledText = &module->textDensity;
@@ -685,6 +714,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 			displayTexture->oledText = &module->textTexture;
 			displayPitch->oledText = &module->textPitch;
 			displayTrigger->oledText = &module->textTrigger;
+#endif
 		}
 	}
 
@@ -702,6 +732,17 @@ struct NebulaeWidget : SanguineModuleWidget {
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },
 			[=](int i) {module->setModeParam(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		std::vector<std::string> availableChannels;
+		for (int i = 0; i < module->channelCount; ++i) {
+			availableChannels.push_back(channelNumbers[i]);
+		}
+		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+			[=]() {return module->displayChannel; },
+			[=](int i) {module->displayChannel = i; }
 		));
 	}
 };
