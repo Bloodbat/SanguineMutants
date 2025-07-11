@@ -412,6 +412,16 @@ struct Etesia : SanguineModule {
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * kClockDivider;
 
+			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
+				ledMode = cloudyCommon::LedModes((ledMode + 1) % 2);
+				lastLedMode = ledMode;
+
+				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
+					cloudyCommon::buttonTexts[ledMode];
+
+				bDisplaySwitched = bLastFrozen[displayChannel];
+			}
+
 			dsp::Frame<2> lightFrame = {};
 
 			switch (ledMode) {
@@ -519,16 +529,6 @@ struct Etesia : SanguineModule {
 				inputInfos[INPUT_REVERB]->name = etesia::modeInputTooltips[channelPlaybackMode].labelReverb;
 
 				lastPlaybackMode = channelPlaybackMode;
-			}
-
-			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = cloudyCommon::LedModes((ledMode + 1) % 2);
-				lastLedMode = ledMode;
-
-				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
-					cloudyCommon::buttonTexts[ledMode];
-
-				bDisplaySwitched = bLastFrozen[displayChannel];
 			}
 
 			voltages1[displayChannel] = simd::rescale(voltages1[displayChannel], 0.f, 5.f, 0.f, 1.f);
