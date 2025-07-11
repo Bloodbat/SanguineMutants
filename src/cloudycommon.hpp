@@ -21,8 +21,6 @@ namespace cloudyCommon {
 		std::string menuLabel;
 	};
 
-	static const std::string kCVSuffix = " CV";
-
 	static const std::string kLedButtonPrefix = "LED display value: ";
 
 	static const std::vector<std::string> buttonTexts{
