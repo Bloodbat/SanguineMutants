@@ -468,12 +468,10 @@ struct Etesia : SanguineModule {
 				lights[currentLight + 0].setBrightnessSmooth(channel < channelCount &&
 					(currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
 						currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-						currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
-						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
+						currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB), sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
 					(currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR ||
 						currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
-						currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
 						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
 					(currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
