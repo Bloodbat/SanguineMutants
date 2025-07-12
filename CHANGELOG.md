@@ -14,6 +14,8 @@
 
 - Mortuus: button lights.
 
+- Nebulae family: proper tooltips on startup.
+
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
 
 ## Additions
@@ -30,6 +32,8 @@
 
 - Mortuus: PLO phase values are now saved to and restored from patches and presets.
 
+- Nebulae family: modules are fully polyphonic.
+
 - Nodi family: display channel also affects the big knob's light.
 
 ## Changes
@@ -40,11 +44,19 @@
 
 - Funes: relate knobs using color.
 
-- Nebulae family: better parameter tooltips and display contents tweaks.
+- Nebulae family: better parameter and input tooltips.
+
+- Nebulae family: OLED display text tweaks.
 
 - Nebulae family: improve lights response.
 
 - Vimina: produce slightly longer triggers.
+
+## Removals
+
+- Nebulae family: emulation of hardware parameter and quality light patterns: not very useful when the modules are polyphonic (and every parameter is on the faceplate showing its value at all times).
+
+- Nebulae family: OLED displays when running under MetaModule.
 
 
 ---

@@ -11,6 +11,7 @@ namespace fluctus {
         { "BEAT-REPEAT", "Beat-repeat " },
     };
 
+#ifndef METAMODULE
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeDisplays{
         {"Freeze",  "Position",     "Density",          "Size",             "Texture",      "Pitch",         "Trigger",   "Blend",          "Spread",         "Feedback",   "Reverb"},
         {"Stutter", "Scrub",        "Diffusion",        "Overlap",          "LP | HP",      "Pitch",         "Time",      "Blend",          "Spread",         "Feedback",   "Reverb"},
@@ -18,13 +19,14 @@ namespace fluctus {
         {"Freeze",  "Fq. Bnd Prb.", "Flt. Smooth",      "Fq. Bnd. Div.",    "Flt. Text.",   "Pitch shift",   "Randomize", "Dry | wet",      "Rnd. Flt. Prob", "Warm dist.", "Reverb"},
         {"Freeze",  "Loop begin",   "Loop size mod.",   "Loop size",        "Slice step",   "Playback spd.", "Clock",     "Slice prob.",    "Clock div.",     "Pitch mod.", "Feedback"}
     };
+#endif
 
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeTooltips{
-        {"Freeze",  "Grain position",               "Grain density",        "Grain Size",                           "Grain texture",                        "Grain pitch",                  "Trigger",      "Dry ↔ wet",                "Spread",                       "Feedback",                 "Reverb"},
-        {"Stutter", "Scrub buffer",                 "Diffusion",            "Overlap",                              "Filter: LP ↓ | HP ↑",                  "Grain pitch",                  "Time",         "Dry ↔ wet",                "Spread",                       "Feedback",                 "Reverb"},
-        {"Stutter", "Head position",                "Granular diffusion",   "Overlap: Grainy ↓ | Smooth ↑",         "Filter: LP ↓ | HP ↑",                  "Grain pitch",                  "Delay time",   "Dry ↔ wet",                "Spread",                       "Feedback",                 "Reverb"},
-        {"Freeze",  "Frequency band probability",   "Filter smoothing",     "Frequency band division: 4 ↓ | 128 ↑", "Filter texture",                       "Pitch shift",                  "Randomize",    "Dry ↔ wet",                "Random filter probability",    "Warm distortion",          "Reverb"},
-        {"Freeze",  "Loop start",                   "Loop size modulation", "Loop size: Regular ↓ | Alternating ↑", "Slice step: Disabled ↓ | Random ↑",    "Playback speed: 0 ↔ Original", "Clock",        "Slice probability",        "Clock division",               "Pitch modulation mode",    "Feedback"}
+        {"Freeze",  "Grain position",               "Grain density",        "Grain Size",                           "Grain texture",                        "Grain pitch",                  "", "Dry ↔ wet",            "Spread",                       "Feedback",                 "Reverb"},
+        {"Stutter", "Scrub buffer",                 "Diffusion",            "Overlap",                              "Filter: LP ↓ | HP ↑",                  "Grain pitch",                  "", "Dry ↔ wet",            "Spread",                       "Feedback",                 "Reverb"},
+        {"Stutter", "Head position",                "Granular diffusion",   "Overlap: Grainy ↓ | Smooth ↑",         "Filter: LP ↓ | HP ↑",                  "Grain pitch",                  "", "Dry ↔ wet",            "Spread",                       "Feedback",                 "Reverb"},
+        {"Freeze",  "Frequency band probability",   "Filter smoothing",     "Frequency band division: 4 ↓ | 128 ↑", "Filter texture",                       "Pitch shift",                  "", "Dry ↔ wet",            "Random filter probability",    "Warm distortion",          "Reverb"},
+        {"Freeze",  "Loop start",                   "Loop size modulation", "Loop size: Regular ↓ | Alternating ↑", "Slice step: Disabled ↓ | Random ↑",    "Playback speed: 0 ↔ Original", "", "Slice probability",    "Clock division",               "Pitch modulation mode",    "Feedback"}
     };
 
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeInputTooltips{
