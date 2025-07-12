@@ -23,14 +23,13 @@ namespace etesia {
     };
 #endif
 
-    // TODO: remove the tooltips for inputs without parameters!
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeTooltips{
-        {"",    "Grain position",                   "Grain density",                "Grain Size",                   "Grain texture",                        "Grain pitch",  "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
-        {"",    "Scrub buffer",                     "Diffusion",                    "Overlap",                      "Filter: LP ↓ | HP ↑",                  "Grain pitch",  "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
-        {"",    "Head position",                    "Granular diffusion",           "Overlap: Grainy ↓ | Smooth ↑", "Filter: LP ↓ | HP ↑",                  "Grain pitch",  "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
-        {"",    "Buffer select",                    "F.F.T. Update ↓ | Merge ↑",    "Polynomial coefficients",      "Quantizer ↓ | Partial amplifier ↑",    "Transpose",    "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
-        {"",    "Pre-delay Multiply ↓ | Divide ↑",  "Decay",                        "Room size",                    "Dampening: LP ↓ | HP ↑",               "Pitch shift",  "", "Dry ↔ wet",    "Diffusion",    "Modulation speed", "Modulation amount"},
-        {"",    "Timbre",                           "Decay",                        "Chord",                        "Filter: LP ↓ | HP ↑",                  "Pitch",        "", "Distortion",   "Stereo mix",   "String harmonics", "Scatter"}
+        {"Freeze",          "Grain position",                   "Grain density",                "Grain Size",                   "Grain texture",                        "Grain pitch",  "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
+        {"Stutter",         "Scrub buffer",                     "Diffusion",                    "Overlap",                      "Filter: LP ↓ | HP ↑",                  "Grain pitch",  "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
+        {"Stutter",         "Head position",                    "Granular diffusion",           "Overlap: Grainy ↓ | Smooth ↑", "Filter: LP ↓ | HP ↑",                  "Grain pitch",  "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
+        {"Freeze",          "Buffer select",                    "F.F.T. Update ↓ | Merge ↑",    "Polynomial coefficients",      "Quantizer ↓ | Partial amplifier ↑",    "Transpose",    "", "Dry ↔ wet",    "Spread",       "Feedback",         "Reverb"},
+        {"Freeze",          "Pre-delay Multiply ↓ | Divide ↑",  "Decay",                        "Room size",                    "Dampening: LP ↓ | HP ↑",               "Pitch shift",  "", "Dry ↔ wet",    "Diffusion",    "Modulation speed", "Modulation amount"},
+        {"Switch voice",    "Timbre",                           "Decay",                        "Chord",                        "Filter: LP ↓ | HP ↑",                  "Pitch",        "", "Distortion",   "Stereo mix",   "String harmonics", "Scatter"}
     };
 
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeInputTooltips{
