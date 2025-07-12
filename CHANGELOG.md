@@ -17,6 +17,10 @@ without the backticks.
 
 - A topographic drum sequencer based on Mutable Instruments' Grids, with capabilities exclusive to Sanguine Mutants.
 
+## Fixes
+
+- Nebulae family: proper tooltips on startup.
+
 ## Additions
 
 - Funes: new chord banks from Lyle Mills' firmware.
@@ -26,6 +30,18 @@ without the backticks.
 - Funes: Aux suboscillator adapted from Lyle Mills' firmware.
 
 - Funes: ability to hold Timbre, Morph, Harmonics, Level and Note voltages when trigger is received, adapted from Lyle Mills' firmware.
+
+- Nebulae family: modules are fully polyphonic.
+
+## Changes
+
+- Nebulae family: OLED display text tweaks.
+
+## Removals
+
+- Nebulae family: emulation of hardware parameter and quality light patterns: not very useful when the modules are polyphonic (and every parameter is on the faceplate showing its value at all times).
+
+- Nebulae family: OLED displays when running under MetaModule.
 
 
 ---

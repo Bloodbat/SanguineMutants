@@ -108,6 +108,7 @@
         "Effect",
         "Granular",
         "Hardware clone",
+        "Polyphonic",
         "Reverb"
       ]
     },
@@ -122,6 +123,7 @@
         "Effect",
         "Granular",
         "Hardware clone",
+        "Polyphonic",
         "Reverb"
       ]
     },
@@ -152,7 +154,9 @@
         "Digital",
         "Effect",
         "Granular",
-        "Hardware clone"
+        "Hardware clone",
+        "Polyphonic",
+        "Reverb"
       ]
     },
     {
