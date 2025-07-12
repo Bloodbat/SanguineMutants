@@ -30,10 +30,10 @@ namespace nebulae {
 #endif
 
     static const std::vector<ModeDisplay> modeTooltips{
-        {"Freeze",  "Grain position",   "Grain density",                "Grain Size",                   "Grain texture",                        "Grain pitch",  "Trigger"},
-        {"Stutter", "Scrub buffer",     "Diffusion",                    "Overlap",                      "LP ↓ | HP ↑",                          "Grain pitch",  "Time"},
-        {"Stutter", "Head position",    "Granular diffusion",           "Overlap: Grainy ↓ | Smooth ↑", "LP ↓ | HP ↑",                          "Grain pitch",  "Delay time"},
-        {"Freeze",  "Buffer select",    "F.F.T. Update ↓ | Merge ↑",    "Polynomial coefficients",      "Quantizer ↓ | Partial amplifier ↑",    "Transpose",    "Glitch audio"}
+        {"Freeze",  "Grain position",   "Grain density",                "Grain Size",                   "Grain texture",                        "Grain pitch",  ""},
+        {"Stutter", "Scrub buffer",     "Diffusion",                    "Overlap",                      "LP ↓ | HP ↑",                          "Grain pitch",  ""},
+        {"Stutter", "Head position",    "Granular diffusion",           "Overlap: Grainy ↓ | Smooth ↑", "LP ↓ | HP ↑",                          "Grain pitch",  ""},
+        {"Freeze",  "Buffer select",    "F.F.T. Update ↓ | Merge ↑",    "Polynomial coefficients",      "Quantizer ↓ | Partial amplifier ↑",    "Transpose",    ""}
     };
 
     static const std::vector<cloudyCommon::ParasiteModeDisplay> modeInputTooltips{
