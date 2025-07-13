@@ -32,7 +32,8 @@ namespace cloudyCommon {
 
 	enum LedModes {
 		LEDS_INPUT,
-		LEDS_OUTPUT
+		LEDS_OUTPUT,
+		LED_MODES_LAST
 	};
 
 	static const int kMaxFrames = 32;
