@@ -27,18 +27,12 @@ namespace cloudyCommon {
 
 	static const std::vector<std::string> buttonTexts{
 		"Input",
-		"Output",
-		"Blends",
-		"Momentary"
+		"Output"
 	};
 
 	enum LedModes {
 		LEDS_INPUT,
-		LEDS_OUTPUT,
-		LEDS_PARAMETERS,
-		LEDS_MOMENTARY,
-		LEDS_QUALITY_MOMENTARY,
-		LEDS_MODE_MOMENTARY
+		LEDS_OUTPUT
 	};
 
 	static const int kMaxFrames = 32;
