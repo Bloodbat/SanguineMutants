@@ -80,15 +80,15 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
 - ### Nebulae
 
-  A texture synthesizer Based on MI's Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control. Lights behave closer to hardware version.
+  A polyphonic texture synthesizer Based on MI's Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control.
 
   - ### Etesia
 
-    A texture synthesizer based on the Parasite firmware for MI's Clouds and Southpole's Smoke Parasite. Exposes every control.
+    A polyphonic texture synthesizer based on the Parasite firmware for MI's Clouds and Southpole's Smoke Parasite. Exposes every control.
     
   - ### Fluctus
 
-    A texture synthesizer based on the Kammerl Beat-Repeat firmware for MI's Clouds.
+    A polyphonic texture synthesizer based on the Kammerl Beat-Repeat firmware for MI's Clouds.
 
 - ### Nodi
 

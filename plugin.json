@@ -100,7 +100,7 @@
     {
       "slug" : "Sanguine-Nebulae",
       "name" : "Nebulae",
-      "description" : "Texture synthesizer based on the Monsoon version of Mutable Instruments' Clouds",
+      "description" : "Polyphonic texture synthesizer based on the Monsoon version of Mutable Instruments' Clouds",
       "keywords" : "Clouds Monsoon",
       "tags" : [
         "Delay",
@@ -115,7 +115,7 @@
     {
       "slug" : "Sanguine-Etesia",
       "name" : "Etesia",
-      "description" : "Texture synthesizer based on the Parasite firmware for Mutable Instruments' Clouds",
+      "description" : "Polyphonic texture synthesizer based on the Parasite firmware for Mutable Instruments' Clouds",
       "keywords" : "Clouds Parasite Monsoon",
       "tags" : [
         "Delay",
@@ -147,7 +147,7 @@
     {
       "slug" : "Sanguine-Fluctus",
       "name" : "Fluctus",
-      "description" : "Texture synthesizer based on the Kammerl Beat-Repeat firmware for Mutable Instruments' Clouds",
+      "description" : "Polyphonic texture synthesizer based on the Kammerl Beat-Repeat firmware for Mutable Instruments' Clouds",
       "keywords" : "Clouds Beat-repeat Beat Repeat Monsoon beatrepeat",
       "tags" : [
         "Delay",
