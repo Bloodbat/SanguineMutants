@@ -403,7 +403,7 @@ struct Nebulae : SanguineModule {
 			const float sampleTime = args.sampleTime * kClockDivider;
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
-				ledMode = cloudyCommon::LedModes((ledMode + 1) % 2);
+				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
 				lastLedMode = ledMode;
 
 				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
