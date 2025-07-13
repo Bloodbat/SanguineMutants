@@ -222,7 +222,11 @@ struct Nebulae : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		int stereoChannels = static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1;
 		bool bWantLoFi = !static_cast<bool>(params[PARAM_HI_FI].getValue());
+#ifndef METAMODULE
 		bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
+#else
+		bool bFrozen = static_cast<bool>(std::round(params[PARAM_FREEZE].getValue()));
+#endif
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
 		float paramBlend = params[PARAM_BLEND].getValue();
