@@ -30,7 +30,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 - ### Aleae
 
   A polyphonic pair of Bernoulli gates based on MI's Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
-
+  
   - ### Vimina
 
     A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
@@ -44,7 +44,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
   A versatile complement to any patch, based on MI's Peaks. It exposes every control and provides access to the Bouncing Ball envelope, unavailable in unmodified hardware.
 
   - ### Nix
-
+  
     An expander for Apices that provides CV parameter modulation, inspired by the Rainier version of MI's Peaks.
 
   - ### Mortuus
@@ -68,11 +68,11 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 - ### Incurvationes
 
   A fully polyphonic meta-modulator based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
-
+  
   - ### Distortiones
 
    A polyphonic, doctored, flexible meta-modulator based on the Parasite firmware for MI's Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
-
+  
   - ### Mutuus
 
     A polyphonic, multifaceted meta-modulator based on the Symbiote firmware for MI's Warps.
@@ -87,15 +87,15 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
 - ### Nebulae
 
-  A texture synthesizer Based on MI's Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control. Lights behave closer to hardware version.
+  A polyphonic texture synthesizer Based on MI's Clouds and Southpole's Smoke; inspired by the Monsoon hardware variant. Exposes every control.
 
   - ### Etesia
 
-    A texture synthesizer based on the Parasite firmware for MI's Clouds and Southpole's Smoke Parasite. Exposes every control.
-
+    A polyphonic texture synthesizer based on the Parasite firmware for MI's Clouds and Southpole's Smoke Parasite. Exposes every control.
+    
   - ### Fluctus
 
-    A texture synthesizer based on the Kammerl Beat-Repeat firmware for MI's Clouds.
+    A polyphonic texture synthesizer based on the Kammerl Beat-Repeat firmware for MI's Clouds.
 
 - ### Nodi
 
@@ -110,7 +110,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
   A topographic sequencer based on MI's Grids with new, versatile capabilities exclusive to Sanguine Mutants.
 
 - ### Scalaria
-
+  
   A polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for MI's Warps.
 
 - ### Velamina
