@@ -256,7 +256,11 @@ struct Fluctus : SanguineModule {
 			fluctusProcessor->set_low_fidelity(!static_cast<bool>(params[PARAM_HI_FI].getValue()));
 			fluctusProcessor->Prepare();
 
+#ifndef METAMODULE
+			bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
+#else
 			bool bFrozen = static_cast<bool>(std::round(params[PARAM_FREEZE].getValue()));
+#endif
 
 			float_4 parameters1 = {};
 			float_4 parameters2 = {};
