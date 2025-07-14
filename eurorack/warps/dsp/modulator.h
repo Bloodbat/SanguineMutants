@@ -185,7 +185,6 @@ namespace warps {
 
     static float Diode(float x);
 
-    bool bypass_;
     bool easter_egg_;
 
     Parameters parameters_;
