@@ -248,8 +248,6 @@ namespace distortiones {
 
 		static float Diode(float x);
 
-		bool bypass_;
-
 		FeatureMode feature_mode_;
 
 		Parameters parameters_;

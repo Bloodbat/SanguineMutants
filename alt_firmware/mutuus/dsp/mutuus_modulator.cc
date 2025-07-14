@@ -41,7 +41,6 @@ namespace mutuus {
   using namespace stmlib;
 
   void MutuusModulator::Init(float sample_rate, uint16_t* reverb_buffer) {
-    bypass_ = false;
     feature_mode_ = FEATURE_MODE_META;
 
     for (int32_t i = 0; i < 2; ++i) {
@@ -762,10 +761,6 @@ namespace mutuus {
   }
 
   void MutuusModulator::Process(ShortFrame* input, ShortFrame* output, size_t size) {
-    if (bypass_) {
-      copy(&input[0], &input[size], &output[0]);
-      return;
-    }
     if (reset_fx) {
       reverb.Clear();
       ensemble.Reset();

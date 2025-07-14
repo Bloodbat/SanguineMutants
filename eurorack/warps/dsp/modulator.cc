@@ -40,7 +40,6 @@ namespace warps {
   using namespace stmlib;
 
   void Modulator::Init(float sample_rate) {
-    bypass_ = false;
     easter_egg_ = false;
 
     for (int32_t i = 0; i < 2; ++i) {
@@ -167,10 +166,7 @@ namespace warps {
   }
 
   void Modulator::Process(ShortFrame* input, ShortFrame* output, size_t size) {
-    if (bypass_) {
-      copy(&input[0], &input[size], &output[0]);
-      return;
-    } else if (easter_egg_) {
+    if (easter_egg_) {
       ProcessEasterEgg(input, output, size);
       return;
     }

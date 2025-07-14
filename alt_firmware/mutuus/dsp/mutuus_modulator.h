@@ -316,7 +316,6 @@ namespace mutuus {
 
 		static float Diode(float x);
 
-		bool bypass_;
 		bool reset_fx;
 		bool alt_feature_mode_;
 		int32_t transpose_;
