@@ -43,7 +43,6 @@ namespace distortiones {
 	const float kXmodCarrierGain = 0.5f;
 
 	void DistortionesModulator::Init(float sample_rate) {
-		bypass_ = false;
 		feature_mode_ = FEATURE_MODE_META;
 
 		for (int32_t i = 0; i < 2; ++i) {
@@ -763,11 +762,6 @@ namespace distortiones {
 	}
 
 	void DistortionesModulator::Process(ShortFrame* input, ShortFrame* output, size_t size) {
-		if (bypass_) {
-			copy(&input[0], &input[size], &output[0]);
-			return;
-		}
-
 		switch (feature_mode_) {
 
 		case FEATURE_MODE_DOPPLER:
