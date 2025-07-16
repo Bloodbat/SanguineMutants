@@ -312,12 +312,15 @@ struct Temulenti : SanguineModule {
 			{
 			case bumps::Generator::FEAT_MODE_HARMONIC:
 				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[2];
+				paramQuantities[PARAM_RANGE]->name = temulenti::modelRangeHeaders[1];
 				break;
 			case bumps::Generator::FEAT_MODE_SHEEP:
 				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
+				paramQuantities[PARAM_RANGE]->name = temulenti::modelRangeHeaders[0];
 				break;
 			default:
 				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
+				paramQuantities[PARAM_RANGE]->name = temulenti::modelRangeHeaders[0];
 				break;
 			}
 		}
@@ -457,6 +460,7 @@ struct TemulentiWidget : SanguineModuleWidget {
 			[=](int i) { module->setModel(i); }
 		));
 
+		std::string rangeLabel;
 		switch (module->generator.feature_mode_)
 		{
 		case bumps::Generator::FEAT_MODE_RANDOM:
@@ -464,28 +468,32 @@ struct TemulentiWidget : SanguineModuleWidget {
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
+			rangeLabel = temulenti::modelRangeHeaders[0];
 			break;
 		case bumps::Generator::FEAT_MODE_HARMONIC:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[2], temulenti::bumpsModeLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
+			rangeLabel = temulenti::modelRangeHeaders[1];
 			break;
 		case bumps::Generator::FEAT_MODE_SHEEP:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
+			rangeLabel = temulenti::modelRangeHeaders[0];
 			break;
 		default:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
 				[=]() { return module->generator.mode(); },
 				[=](int i) { module->setMode(i); }
 			));
+			rangeLabel = temulenti::modelRangeHeaders[0];
 			break;
 		}
 
-		menu->addChild(createIndexSubmenuItem("Range", aestusCommon::rangeMenuLabels,
+		menu->addChild(createIndexSubmenuItem(rangeLabel, aestusCommon::rangeMenuLabels,
 			[=]() { return module->generator.range(); },
 			[=](int i) { module->setRange(i); }
 		));

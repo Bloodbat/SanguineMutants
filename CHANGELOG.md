@@ -50,6 +50,8 @@
 
 - Nebulae family: improve lights response.
 
+- Temulenti: better tooltips and Range menu entry for Two Bumps mode.
+
 - Vimina: produce slightly longer triggers.
 
 ## Removals

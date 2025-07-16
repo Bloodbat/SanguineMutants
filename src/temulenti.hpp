@@ -37,4 +37,9 @@ namespace temulenti {
         "Cycling",
         "Gate"
     };
+
+    static const std::vector<std::string> modelRangeHeaders = {
+    "Frequency range",
+    "Sine quality"
+    };
 }
