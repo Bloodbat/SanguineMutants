@@ -36,10 +36,7 @@
 
 #include "bumps/bumps_resources.h"
 
-// #define CORE_ONLY
-
 namespace bumps {
-
 	using namespace parasites_stmlib;
 
 	const int16_t kOctave = 12 * 128;
@@ -127,7 +124,7 @@ namespace bumps {
 			return;
 		}
 		previous_pitch_ = pitch;
-		// Corresponds to a 0V CV after calibration
+		// Corresponds to a 0V CV after calibration.
 		pitch -= (36 << 7);
 		// The range of the control panel knob is 4 octaves.
 		pitch = pitch * 12 / (48 << 7);
@@ -156,11 +153,11 @@ namespace bumps {
 			pitch -= kOctave;
 			++num_shifts;
 		}
-		// Lookup phase increment
+		// Lookup phase increment.
 		int32_t a = lut_increments[pitch >> 4];
 		int32_t b = lut_increments[(pitch >> 4) + 1];
 		int32_t phase_increment = a + ((b - a) * (pitch & 0xf) >> 4);
-		// Compensate for downsampling
+		// Compensate for downsampling.
 		phase_increment *= clock_divider_;
 		phase_increment = num_shifts >= 0 ? phase_increment << num_shifts :
 			phase_increment >> -num_shifts;
@@ -215,10 +212,7 @@ namespace bumps {
 		return frequency;
 	}
 
-	int32_t Generator::ComputeAntialiasAttenuation(
-		int16_t pitch,
-		int16_t slope,
-		int16_t shape,
+	int32_t Generator::ComputeAntialiasAttenuation(int16_t pitch, int16_t slope, int16_t shape,
 		int16_t smoothness) {
 		pitch += 128;
 		if (pitch < 0) pitch = 0;
@@ -331,8 +325,10 @@ namespace bumps {
 		const int16_t* wave_1 = waveform_table[WAV_BANDLIMITED_PARABOLA_0 + index];
 		const int16_t* wave_2 = waveform_table[WAV_BANDLIMITED_PARABOLA_0 + index + 1];
 
-		/* We split the slope button into two: original slope on the first
-		   half, compression on the second. */
+		/*
+		   We split the slope button into two: original slope on the first
+		   half, compression on the second.
+		*/
 		int32_t compress = -slope_;
 		int32_t slope = slope_;
 		CONSTRAIN(slope, 0, 32767);
@@ -341,7 +337,7 @@ namespace bumps {
 		// Adjust knob response for Slope.
 		int32_t s = 32768 - slope;
 		slope = 32768 - ((s * s) >> 15);
-		CONSTRAIN(slope, 0, 32600); 	// that is a bit weird
+		CONSTRAIN(slope, 0, 32600); 	// That is a bit weird.
 
 		int32_t gain = slope;
 		gain = (32768 - (gain * gain >> 15)) * 3 >> 1;
@@ -377,8 +373,10 @@ namespace bumps {
 
 		uint32_t end_of_attack = (static_cast<uint32_t>(slope + 32768) << 16);
 
-		/* Load state into registers - saves some memory load/store inside the
-		   rendering loop. */
+		/*
+		   Load state into registers - saves some memory load/store inside the
+		   rendering loop.
+		*/
 		uint32_t phase = phase_;
 		int32_t phase_increment = phase_increment_;
 		int32_t phase_increment_increment = (phase_increment_end - phase_increment_) / size;
@@ -449,8 +447,10 @@ namespace bumps {
 					local_osc_phase_increment_) >> 8;
 				local_osc_phase_ += local_osc_phase_increment_;
 
-				/* Slow phase realignment between the master oscillator and the local
-				   oscillator. */
+				/*
+				   Slow phase realignment between the master oscillator and the local
+				   oscillator.
+				*/
 				int32_t phase_error = local_osc_phase_ - phase;
 				phase_increment = local_osc_phase_increment_ + (phase_error >> 13);
 			}
@@ -587,8 +587,10 @@ namespace bumps {
 			wf_balance = smoothness_;
 		}
 
-		/* Load state into registers - saves some memory load/store inside the
-		   rendering loop. */
+		/*
+		   Load state into registers - saves some memory load/store inside the
+		   rendering loop.
+		*/
 		uint32_t phase = phase_;
 		uint32_t phase_increment = phase_increment_;
 		bool wrap = wrap_;
@@ -713,8 +715,10 @@ namespace bumps {
 				sample.flags |= FLAG_END_OF_RELEASE;
 				--eor_counter_;
 			}
-			/* Two special cases for the "pure decay" scenario:
-			   END_OF_ATTACK is always true except at the initial trigger. */
+			/*
+			   Two special cases for the "pure decay" scenario:
+			   END_OF_ATTACK is always true except at the initial trigger.
+			*/
 			if (end_of_attack == 0) {
 				sample.flags |= FLAG_END_OF_ATTACK;
 			}
@@ -844,8 +848,10 @@ namespace bumps {
 					local_osc_phase_increment_) >> 8;
 				local_osc_phase_ += local_osc_phase_increment_;
 
-				/* Slow phase realignment between the master oscillator and the local
-				   oscillator. */
+				/*
+				   Slow phase realignment between the master oscillator and the local
+				   oscillator.
+				*/
 				int32_t phase_error = local_osc_phase_ - phase;
 				phase_increment = local_osc_phase_increment_ + (phase_error >> 13);
 			}
@@ -1027,8 +1033,10 @@ namespace bumps {
 					static_cast<int32_t>(target_phase_increment_ - local_osc_phase_increment_) >> 5;
 				local_osc_phase_ += local_osc_phase_increment_;
 
-				/* Slow phase realignment between the master oscillator and the local
-				   oscillator. */
+				/*
+				   Slow phase realignment between the master oscillator and the local
+				   oscillator.
+				*/
 				int32_t phase_error = local_osc_phase_ - phase_;
 				phase_increment_ = local_osc_phase_increment_ + (phase_error >> 13);
 			}
@@ -1045,7 +1053,6 @@ namespace bumps {
 			int32_t tn = sine;
 
 			for (uint8_t harm = 0; harm < kNumHarmonics; harm++) {
-
 				envelope_[harm] += envelope_increment_[harm];
 				gain += envelope_[harm];
 
@@ -1077,7 +1084,7 @@ namespace bumps {
 
 			// Normalization.
 			if (gain <= 65536)
-				gain = 65536;		// Avoids extreme amplifications.
+				gain = 65536;	// Avoids extreme amplifications.
 			gain += 256;
 
 			s.bipolar = ((bipolar << 13) / gain) << 3;
@@ -1232,8 +1239,10 @@ namespace bumps {
 				old_slope_ = slope_;
 				old_pitch_ = pitch_;
 
-				/* Recompute delay and divider to avoid waiting for next phase
-				   to hear the changes */
+				/*
+				   Recompute delay and divider to avoid waiting for next phase
+				   to hear the changes
+				*/
 				RandomizeDelay();
 				RandomizeDivider();
 			}
@@ -1309,11 +1318,13 @@ namespace bumps {
 
 			output_buffer_.Overwrite(s);
 
-			/* NOTE: We use running_ and wrap_ to store the state
+			/*
+			   NOTE: We use running_ and wrap_ to store the state
 			   (running/stopped) of resp. the divided and the delayed
-			   oscillator. */
+			   oscillator.
+			*/
 
-			   // On main phase reset.
+			// On main phase reset.
 			if (phase_ < abs(phase_increment_)) {
 			}
 
@@ -1327,9 +1338,9 @@ namespace bumps {
 					running_ = false;
 			}
 
-			// just before delayed phase reset
+			// Just before delayed phase reset.
 			if (wrap_ && delayed_phase_ > UINT32_MAX - delayed_phase_increment_) {
-				// stop the delayed oscillator
+				// Stop the delayed oscillator.
 				if (((mode_ == GENERATOR_MODE_AD) ||
 					(control & CONTROL_FREEZE) ||
 					(mode_ == GENERATOR_MODE_AR && !(control & CONTROL_GATE))))
@@ -1353,5 +1364,4 @@ namespace bumps {
 			}
 		}
 	}
-
 }  // namespace bumps

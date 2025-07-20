@@ -34,10 +34,7 @@
 #include "stmlib/algorithms/pattern_predictor.h"
 #include "stmlib/utils/ring_buffer.h"
 
-// #define WAVETABLE_HACK
-
 namespace tides {
-
   enum GeneratorRange {
     GENERATOR_RANGE_HIGH,
     GENERATOR_RANGE_MEDIUM,
@@ -129,8 +126,13 @@ namespace tides {
       sync_edges_counter_ = 0;
     }
 
-    inline GeneratorMode mode() const { return mode_; }
-    inline GeneratorRange range() const { return range_; }
+    inline GeneratorMode mode() const {
+      return mode_;
+    }
+
+    inline GeneratorRange range() const {
+      return range_;
+    }
 
     inline const GeneratorSample& Process(uint8_t control) {
       input_samples_[playback_block_][current_sample_] = control;
@@ -166,17 +168,16 @@ namespace tides {
     }
 
   private:
-    // There are two versions of the rendering code, one optimized for audio, with
-    // band-limiting.
+    /*
+       There are two versions of the rendering code, one optimized for audio, with
+       band-limiting.
+    */
     void ProcessAudioRate(const uint8_t* in, GeneratorSample* out, size_t size);
     void ProcessControlRate(const uint8_t* in, GeneratorSample* out, size_t size);
     void ProcessWavetable(const uint8_t* in, GeneratorSample* out, size_t size);
     void ProcessFilterWavefolder(GeneratorSample* in_out, size_t size);
 
-    int32_t ComputeAntialiasAttenuation(
-      int16_t pitch,
-      int16_t slope,
-      int16_t shape,
+    int32_t ComputeAntialiasAttenuation(int16_t pitch, int16_t slope, int16_t shape,
       int16_t smoothness) const;
 
     inline void ClearFilterState() {
@@ -267,7 +268,5 @@ namespace tides {
 
     DISALLOW_COPY_AND_ASSIGN(Generator);
   };
-
 }  // namespace tides
-
 #endif  // TIDES_GENERATOR_H_
