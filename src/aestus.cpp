@@ -31,6 +31,7 @@ struct Aestus : SanguineModule {
 
 		PARAMS_COUNT
 	};
+
 	enum InputIds {
 		INPUT_SHAPE,
 		INPUT_SLOPE,
@@ -45,6 +46,7 @@ struct Aestus : SanguineModule {
 		INPUT_CLOCK,
 		INPUTS_COUNT
 	};
+
 	enum OutputIds {
 		OUTPUT_HIGH,
 		OUTPUT_LOW,
@@ -52,6 +54,7 @@ struct Aestus : SanguineModule {
 		OUTPUT_BI,
 		OUTPUTS_COUNT
 	};
+
 	enum LightIds {
 		ENUMS(LIGHT_MODE, 2),
 		ENUMS(LIGHT_PHASE, 2),
@@ -150,18 +153,18 @@ struct Aestus : SanguineModule {
 
 			bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bUseSheepFirmware && inputs[INPUT_CLOCK].isConnected());
 
-			// Buffer loop
+			// Buffer loop.
 			if (++frame >= 16) {
 				frame = 0;
 
-				// Sync
+				// Sync.
 				// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 				if (bHaveExternalSync != bLastExternalSync) {
 					generator.set_sync(bHaveExternalSync);
 					bLastExternalSync = bHaveExternalSync;
 				}
 
-				// Setup SIMD voltages
+				// Setup SIMD voltages.
 				float_4 paramVoltages = {};
 
 				paramVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f);
@@ -176,7 +179,7 @@ struct Aestus : SanguineModule {
 				pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
 				pitch += params[PARAM_FM].getValue() * paramVoltages[0];
 				pitch += 60.f;
-				// Scale to the global sample rate
+				// Scale to the global sample rate.
 				pitch += log2f(48000.f / args.sampleRate) * 12.f;
 				generator.set_pitch(static_cast<int>(clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
 
@@ -195,11 +198,11 @@ struct Aestus : SanguineModule {
 				generator.set_slope(slope);
 				generator.set_smoothness(smoothness);
 
-				// Generator
+				// Generator.
 				generator.Process(bUseSheepFirmware);
 			}
 
-			// Level
+			// Level.
 			uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f)
 				* 65535;
 			if (level < 32) {
@@ -459,6 +462,5 @@ struct AestusWidget : SanguineModuleWidget {
 		menu->addChild(createBoolPtrMenuItem("Peacocks easter egg", "", &module->bWantPeacocks));
 	}
 };
-
 
 Model* modelAestus = createModel<Aestus, AestusWidget>("Sanguine-Aestus");

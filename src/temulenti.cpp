@@ -31,6 +31,7 @@ struct Temulenti : SanguineModule {
 
 		PARAMS_COUNT
 	};
+
 	enum InputIds {
 		INPUT_SHAPE,
 		INPUT_SLOPE,
@@ -45,6 +46,7 @@ struct Temulenti : SanguineModule {
 		INPUT_CLOCK,
 		INPUTS_COUNT
 	};
+
 	enum OutputIds {
 		OUTPUT_HIGH,
 		OUTPUT_LOW,
@@ -52,6 +54,7 @@ struct Temulenti : SanguineModule {
 		OUTPUT_BI,
 		OUTPUTS_COUNT
 	};
+
 	enum LightIds {
 		ENUMS(LIGHT_MODE, 2),
 		ENUMS(LIGHT_PHASE, 2),
@@ -156,16 +159,16 @@ struct Temulenti : SanguineModule {
 
 		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
-		//Buffer loop
+		//Buffer loop.
 		if (generator.writable_block()) {
-			// Sync
+			// Sync.
 			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 			if (bHaveExternalSync != bLastExternalSync) {
 				generator.set_sync(bHaveExternalSync);
 				bLastExternalSync = bHaveExternalSync;
 			}
 
-			// Setup SIMD voltages
+			// Setup SIMD voltages.
 			float_4 paramVoltages = {};
 
 			paramVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f);
@@ -209,8 +212,7 @@ struct Temulenti : SanguineModule {
 				generator.set_pulse_width(clamp(1.f - -params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 32767);
 			}
 
-			// Shape, slope, smoothness
-
+			// Shape, slope, smoothness.
 			paramVoltages[1] += params[PARAM_SHAPE].getValue();
 			paramVoltages[2] += params[PARAM_SLOPE].getValue();
 			paramVoltages[3] += params[PARAM_SMOOTHNESS].getValue();
@@ -228,7 +230,7 @@ struct Temulenti : SanguineModule {
 			generator.FillBuffer();
 		}
 
-		// Level
+		// Level.
 		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f) * 65535;
 		if (level < 32)
 		{
@@ -512,6 +514,5 @@ struct TemulentiWidget : SanguineModuleWidget {
 		));
 	}
 };
-
 
 Model* modelTemulenti = createModel<Temulenti, TemulentiWidget>("Sanguine-Temulenti");
