@@ -35,7 +35,6 @@
 #include "bumps/bumps_resources.h"
 
 namespace bumps {
-
   const int16_t kOctave = 12 * 128;
 
 #define SE * 128
@@ -135,7 +134,5 @@ namespace bumps {
 
     DISALLOW_COPY_AND_ASSIGN(CvScaler);
   };
-
 }  // namespace bumps
-
 #endif  // BUMPS_CV_SCALER_H_
