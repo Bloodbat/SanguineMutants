@@ -36,10 +36,7 @@
 #include "parasites_stmlib/algorithms/parasites_pattern_predictor.h"
 #include "parasites_stmlib/utils/parasites_ring_buffer.h"
 
-// #define WAVETABLE_HACK
-
 namespace bumps {
-
 	enum GeneratorRange {
 		GENERATOR_RANGE_HIGH,
 		GENERATOR_RANGE_MEDIUM,
@@ -89,7 +86,7 @@ namespace bumps {
 		void set_range(GeneratorRange range) {
 			ClearFilterState();
 			range_ = range;
-			/* harmonic oscillator is sampled at 24kHz */
+			// Harmonic oscillator is sampled at 24kHz.
 			clock_divider_ = feature_mode_ == FEAT_MODE_HARMONIC ? 2 :
 				range_ == GENERATOR_RANGE_LOW ? 4 : 1;
 		}
@@ -150,8 +147,12 @@ namespace bumps {
 			pulse_width_ = pw;
 		}
 
-		inline GeneratorMode mode() const { return mode_; }
-		inline GeneratorRange range() const { return range_; }
+		inline GeneratorMode mode() const {
+			return mode_;
+		}
+		inline GeneratorRange range() const {
+			return range_;
+		}
 
 		inline GeneratorSample Process(uint8_t control) {
 			input_buffer_.Overwrite(control);
@@ -174,18 +175,16 @@ namespace bumps {
 		FeatureMode feature_mode_;
 
 	private:
-		// There are two versions of the rendering code, one optimized for audio, with
-		// band-limiting.
+		/*
+		   There are two versions of the rendering code, one optimized for audio, with
+		   band-limiting.
+		*/
 		void FillBufferAudioRate();
 		void FillBufferControlRate();
 		void FillBufferWavetable();
 		template<GeneratorMode mode> void FillBufferHarmonic();
 		void FillBufferRandom();
-		int32_t ComputeAntialiasAttenuation(
-			int16_t pitch,
-			int16_t slope,
-			int16_t shape,
-			int16_t smoothness);
+		int32_t ComputeAntialiasAttenuation(int16_t pitch, int16_t slope, int16_t shape, int16_t smoothness);
 
 		inline void ClearFilterState() {
 			uni_lp_state_[0] = uni_lp_state_[1] = 0;
@@ -279,7 +278,5 @@ namespace bumps {
 
 		DISALLOW_COPY_AND_ASSIGN(Generator);
 	};
-
 }  // namespace bumps
-
 #endif  // BUMPS_GENERATOR_H_
