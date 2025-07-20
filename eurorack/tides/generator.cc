@@ -36,7 +36,6 @@
 #include "tides/resources.h"
 
 namespace tides {
-
   using namespace std;
   using namespace stmlib;
 
@@ -64,8 +63,8 @@ namespace tides {
   };
 
   /* static */
-  const int16_t Generator::num_frequency_ratios_ = sizeof(Generator::frequency_ratios_)
-    / sizeof(FrequencyRatio);
+  const int16_t Generator::num_frequency_ratios_ = sizeof(Generator::frequency_ratios_) /
+    sizeof(FrequencyRatio);
 
   void Generator::Init() {
     mode_ = GENERATOR_MODE_LOOPING;
@@ -113,7 +112,7 @@ namespace tides {
       return;
     }
     previous_pitch_ = pitch;
-    // Corresponds to a 0V CV after calibration
+    // Corresponds to a 0V CV after calibration.
     pitch -= (36 << 7);
     // The range of the control panel knob is 4 octaves.
     pitch = pitch * 12 / (48 << 7);
@@ -142,11 +141,11 @@ namespace tides {
       pitch -= kOctave;
       ++num_shifts;
     }
-    // Lookup phase increment
+    // Lookup phase increment.
     uint32_t a = lut_increments[pitch >> 4];
     uint32_t b = lut_increments[(pitch >> 4) + 1];
     uint32_t phase_increment = a + ((b - a) * (pitch & 0xf) >> 4);
-    // Compensate for downsampling
+    // Compensate for downsampling.
     phase_increment *= clock_divider_;
     return num_shifts >= 0 ? phase_increment << num_shifts :
       phase_increment >> -num_shifts;
@@ -200,10 +199,7 @@ namespace tides {
     return frequency;
   }
 
-  int32_t Generator::ComputeAntialiasAttenuation(
-    int16_t pitch,
-    int16_t slope,
-    int16_t shape,
+  int32_t Generator::ComputeAntialiasAttenuation(int16_t pitch, int16_t slope, int16_t shape,
     int16_t smoothness) const {
     pitch += 12 * 128;
     if (pitch < 0) pitch = 0;
@@ -231,8 +227,7 @@ namespace tides {
     return p;
   }
 
-  void Generator::ProcessFilterWavefolder(
-    GeneratorSample* in_out, size_t size) {
+  void Generator::ProcessFilterWavefolder(GeneratorSample* in_out, size_t size) {
     int32_t frequency = ComputeCutoffFrequency(pitch_, smoothness_);
     int32_t f_a = lut_cutoff[frequency >> 7] >> 16;
     int32_t f_b = lut_cutoff[(frequency >> 7) + 1] >> 16;
@@ -306,8 +301,10 @@ namespace tides {
 
     uint32_t end_of_attack = (static_cast<uint32_t>(slope_ + 32768) << 16);
 
-    // Load state into registers - saves some memory load/store inside the
-    // rendering loop.
+    /*
+       Load state into registers - saves some memory load/store inside the
+       rendering loop.
+    */
     uint32_t phase = phase_;
     uint32_t phase_increment = phase_increment_;
     bool wrap = wrap_;
@@ -344,8 +341,7 @@ namespace tides {
           if (sync_edges_counter_ >= frequency_ratio_.q) {
             sync_edges_counter_ = 0;
             if (sync_counter_ < kSyncCounterMaxTime && sync_counter_) {
-              uint64_t increment = frequency_ratio_.p *
-                static_cast<uint64_t>(0xffffffff / sync_counter_);
+              uint64_t increment = frequency_ratio_.p * static_cast<uint64_t>(0xffffffff / sync_counter_);
               if (increment > 0x20000000) {
                 increment = 0x20000000;
               }
@@ -360,8 +356,10 @@ namespace tides {
           local_osc_phase_increment_) >> 8;
         local_osc_phase_ += local_osc_phase_increment_;
 
-        // Slow phase realignment between the master oscillator and the local
-        // oscillator.
+        /*
+           Slow phase realignment between the master oscillator and the local
+           oscillator.
+        */
         int32_t phase_error = local_osc_phase_ - phase;
         phase_increment = local_osc_phase_increment_ + (phase_error >> 13);
       }
@@ -493,8 +491,10 @@ namespace tides {
     const int16_t* shape_2 = waveform_table[wave_index + 1];
     uint16_t shape_xfade = shape << 3;
 
-    // Load state into registers - saves some memory load/store inside the
-    // rendering loop.
+    /*
+       Load state into registers - saves some memory load/store inside the
+       rendering loop.
+    */
     uint32_t phase = phase_;
     uint32_t phase_increment = phase_increment_;
     bool wrap = wrap_;
@@ -599,8 +599,10 @@ namespace tides {
         sample.flags |= FLAG_END_OF_RELEASE;
         --eor_counter_;
       }
-      // Two special cases for the "pure decay" scenario:
-      // END_OF_ATTACK is always true except at the initial trigger.
+      /*
+         Two special cases for the "pure decay" scenario:
+         END_OF_ATTACK is always true except at the initial trigger.
+      */
       if (end_of_attack == 0) {
         sample.flags |= FLAG_END_OF_ATTACK;
       }
@@ -776,5 +778,4 @@ namespace tides {
     bi_lp_state_[0] = lp_state_0;
     bi_lp_state_[1] = lp_state_1;
   }
-
 }  // namespace tides

@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -36,42 +36,39 @@
 
 #include "stmlib/stmlib.h"
 
-
-
 namespace tides {
+    typedef uint8_t ResourceId;
 
-typedef uint8_t ResourceId;
+    extern const uint16_t* lookup_table_table[];
 
-extern const uint16_t* lookup_table_table[];
+    extern const uint32_t* lookup_table_32_table[];
 
-extern const uint32_t* lookup_table_32_table[];
+    extern const int16_t* waveform_table[];
 
-extern const int16_t* waveform_table[];
+    extern const int16_t* wavetable_table[];
 
-extern const int16_t* wavetable_table[];
+    extern const int16_t* waveshaper_table[];
 
-extern const int16_t* waveshaper_table[];
-
-extern const uint16_t lut_attenuverter_curve[];
-extern const uint16_t lut_slope_compression[];
-extern const uint32_t lut_increments[];
-extern const uint32_t lut_cutoff[];
-extern const int16_t wav_inverse_tan_audio[];
-extern const int16_t wav_inverse_sin_audio[];
-extern const int16_t wav_linear_audio[];
-extern const int16_t wav_sin_audio[];
-extern const int16_t wav_tan_audio[];
-extern const int16_t wav_reversed_control[];
-extern const int16_t wav_spiky_exp_control[];
-extern const int16_t wav_spiky_control[];
-extern const int16_t wav_linear_control[];
-extern const int16_t wav_bump_control[];
-extern const int16_t wav_bump_exp_control[];
-extern const int16_t wav_normal_control[];
-extern const int16_t wav_bipolar_fold[];
-extern const int16_t wav_unipolar_fold[];
-extern const int16_t wt_waves[];
-extern const int16_t ws_smooth_bipolar_fold[] IN_RAM;
+    extern const uint16_t lut_attenuverter_curve[];
+    extern const uint16_t lut_slope_compression[];
+    extern const uint32_t lut_increments[];
+    extern const uint32_t lut_cutoff[];
+    extern const int16_t wav_inverse_tan_audio[];
+    extern const int16_t wav_inverse_sin_audio[];
+    extern const int16_t wav_linear_audio[];
+    extern const int16_t wav_sin_audio[];
+    extern const int16_t wav_tan_audio[];
+    extern const int16_t wav_reversed_control[];
+    extern const int16_t wav_spiky_exp_control[];
+    extern const int16_t wav_spiky_control[];
+    extern const int16_t wav_linear_control[];
+    extern const int16_t wav_bump_control[];
+    extern const int16_t wav_bump_exp_control[];
+    extern const int16_t wav_normal_control[];
+    extern const int16_t wav_bipolar_fold[];
+    extern const int16_t wav_unipolar_fold[];
+    extern const int16_t wt_waves[];
+    extern const int16_t ws_smooth_bipolar_fold[] IN_RAM;
 #define LUT_ATTENUVERTER_CURVE 0
 #define LUT_ATTENUVERTER_CURVE_SIZE 257
 #define LUT_SLOPE_COMPRESSION 1
@@ -112,7 +109,5 @@ extern const int16_t ws_smooth_bipolar_fold[] IN_RAM;
 #define WT_WAVES_SIZE 45746
 #define WS_SMOOTH_BIPOLAR_FOLD 0
 #define WS_SMOOTH_BIPOLAR_FOLD_SIZE 1025
-
 }  // namespace tides
-
 #endif  // TIDES_RESOURCES_H_
