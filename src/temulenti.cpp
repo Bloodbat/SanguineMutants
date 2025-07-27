@@ -443,16 +443,9 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_SYNC].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			// TODO: remove the branch here!
-			if (quantizers[displayChannel]) {
-				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantizers[displayChannel] & 1 ? 1.f : 0.f, sampleTime);
-				lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantizers[displayChannel] & 2 ? 1.f : 0.f, sampleTime);
-				lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantizers[displayChannel] & 4 ? 1.f : 0.f, sampleTime);
-			} else {
-				for (int currentLight = 0; currentLight < 3; ++currentLight) {
-					lights[LIGHT_QUANTIZER1 + currentLight].setBrightnessSmooth(0.f, sampleTime);
-				}
-			}
+			lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantizers[displayChannel] & 1, sampleTime);
+			lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantizers[displayChannel] & 2, sampleTime);
+			lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantizers[displayChannel] & 4, sampleTime);
 
 			displayModel = temulenti::displayModels[displayFeatureMode];
 
