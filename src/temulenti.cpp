@@ -128,6 +128,7 @@ struct Temulenti : SanguineModule {
 	bumps::GeneratorRange selectedRange = bumps::GENERATOR_RANGE_MEDIUM;
 	bumps::GeneratorRange lastRanges[PORT_MAX_CHANNELS];
 	bumps::Generator::FeatureMode selectedFeatureMode = bumps::Generator::FEAT_MODE_FUNCTION;
+	bumps::Generator::FeatureMode lastFeatureModes[PORT_MAX_CHANNELS];
 
 	uint8_t lastGates[PORT_MAX_CHANNELS];
 	uint8_t quantizers[PORT_MAX_CHANNELS];
@@ -183,6 +184,8 @@ struct Temulenti : SanguineModule {
 			lastExternalSyncs[channel] = false;
 			lastRanges[channel] = bumps::GENERATOR_RANGE_MEDIUM;
 			lastModes[channel] = bumps::GENERATOR_MODE_LOOPING;
+
+			lastFeatureModes[channel] = bumps::Generator::FEAT_MODE_FUNCTION;
 		}
 		lightsDivider.setDivision(kLightsFrequency);
 		onReset();
@@ -396,7 +399,6 @@ struct Temulenti : SanguineModule {
 			selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				// TODO: IMPORTANT: reset mode and range when switching models: smoothness isn't smooth otherwise :(
 				if (!bModelConnected) {
 					generators[channel].feature_mode_ = selectedFeatureMode;
 				} else {
@@ -404,6 +406,12 @@ struct Temulenti : SanguineModule {
 					modelVoltage = clamp(modelVoltage, 0.f, 3.f);
 					modelVoltage = roundf(modelVoltage);
 					generators[channel].feature_mode_ = static_cast<bumps::Generator::FeatureMode>(modelVoltage);
+				}
+
+				if (lastFeatureModes[channel] != generators[channel].feature_mode_) {
+					generators[channel].set_mode(lastModes[channel]);
+					generators[channel].set_range(lastRanges[channel]);
+					lastFeatureModes[channel] = generators[channel].feature_mode_;
 				}
 
 				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
