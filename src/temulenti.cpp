@@ -116,7 +116,9 @@ struct Temulenti : SanguineModule {
 		}
 	};
 
-	bumps::Generator generators[PORT_MAX_CHANNELS];
+	bool bUseCalibrationOffset = true;
+	bool lastExternalSyncs[PORT_MAX_CHANNELS];
+
 	static const int kLightsFrequency = 16;
 	int channelCount = 1;
 	int displayChannel = 0;
@@ -129,12 +131,12 @@ struct Temulenti : SanguineModule {
 
 	uint8_t lastGates[PORT_MAX_CHANNELS];
 	uint8_t quantizers[PORT_MAX_CHANNELS];
+
+	bumps::Generator generators[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulenti::displayModels[0];
-	bool bUseCalibrationOffset = true;
-	bool lastExternalSyncs[PORT_MAX_CHANNELS];
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
