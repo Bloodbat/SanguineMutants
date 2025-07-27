@@ -191,15 +191,15 @@ struct Temulenti : SanguineModule {
 
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
+		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+
 		if (stMode.process(params[PARAM_MODE].getValue())) {
 			selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
 		}
 
-		if (stRange.process(params[PARAM_RANGE].getValue())) {
+		if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
 			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
 		}
-
-		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
 		bool bModelConnected = inputs[INPUT_MODEL].isConnected();
 		bool bModeConnected = inputs[INPUT_MODE].isConnected();
@@ -243,15 +243,17 @@ struct Temulenti : SanguineModule {
 					lastRanges[channel] = selectedRange;
 				}
 			} else {
-				float rangeVoltage = inputs[INPUT_RANGE].getVoltage(channel);
+				if (!bHaveExternalSync) {
+					float rangeVoltage = inputs[INPUT_RANGE].getVoltage(channel);
 
-				rangeVoltage = clamp(rangeVoltage, 0.f, 3.f);
-				rangeVoltage = roundf(rangeVoltage);
+					rangeVoltage = clamp(rangeVoltage, 0.f, 3.f);
+					rangeVoltage = roundf(rangeVoltage);
 
-				bumps::GeneratorRange newRange = static_cast<bumps::GeneratorRange>(static_cast<int>(rangeVoltage));
-				if (lastRanges[channel] != newRange) {
-					generators[channel].set_range(newRange);
-					lastRanges[channel] = newRange;
+					bumps::GeneratorRange newRange = static_cast<bumps::GeneratorRange>(static_cast<int>(rangeVoltage));
+					if (lastRanges[channel] != newRange) {
+						generators[channel].set_range(newRange);
+						lastRanges[channel] = newRange;
+					}
 				}
 			}
 
@@ -427,11 +429,10 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_MODE + 1].setBrightnessSmooth(displayMode == bumps::GENERATOR_MODE_AR ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			// TODO: Turn this off and ignore it when external sync is engaged.
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_LOW ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_HIGH ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_LOW &&
+				!bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_HIGH &&
+				!bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 			if (samples[displayChannel].flags & bumps::FLAG_END_OF_ATTACK) {
 				unipolarFlags[displayChannel] *= -1.f;
