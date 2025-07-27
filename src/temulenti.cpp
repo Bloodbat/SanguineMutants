@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
+#include "sanguinechannels.hpp"
 
 #include "bumps/bumps_generator.h"
 #include "bumps/bumps_cv_scaler.h"
@@ -44,6 +45,11 @@ struct Temulenti : SanguineModule {
 		INPUT_LEVEL,
 
 		INPUT_CLOCK,
+
+		INPUT_MODEL,
+		INPUT_MODE,
+		INPUT_RANGE,
+		INPUT_QUANTIZER,
 		INPUTS_COUNT
 	};
 
@@ -59,28 +65,45 @@ struct Temulenti : SanguineModule {
 		ENUMS(LIGHT_MODE, 2),
 		ENUMS(LIGHT_PHASE, 2),
 		ENUMS(LIGHT_RANGE, 2),
-		ENUMS(LIGHT_SYNC, 2),
+		LIGHT_SYNC,
 		LIGHT_QUANTIZER1,
 		LIGHT_QUANTIZER2,
 		LIGHT_QUANTIZER3,
+
+		ENUMS(LIGHT_CHANNEL_1, 3),
+		ENUMS(LIGHT_CHANNEL_2, 3),
+		ENUMS(LIGHT_CHANNEL_3, 3),
+		ENUMS(LIGHT_CHANNEL_4, 3),
+		ENUMS(LIGHT_CHANNEL_5, 3),
+		ENUMS(LIGHT_CHANNEL_6, 3),
+		ENUMS(LIGHT_CHANNEL_7, 3),
+		ENUMS(LIGHT_CHANNEL_8, 3),
+		ENUMS(LIGHT_CHANNEL_9, 3),
+		ENUMS(LIGHT_CHANNEL_10, 3),
+		ENUMS(LIGHT_CHANNEL_11, 3),
+		ENUMS(LIGHT_CHANNEL_12, 3),
+		ENUMS(LIGHT_CHANNEL_13, 3),
+		ENUMS(LIGHT_CHANNEL_14, 3),
+		ENUMS(LIGHT_CHANNEL_15, 3),
+		ENUMS(LIGHT_CHANNEL_16, 3),
 		LIGHTS_COUNT
 	};
 
 	struct ModeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-			switch (moduleTemulenti->generator.feature_mode_) {
+			switch (moduleTemulenti->generators[moduleTemulenti->displayChannel].feature_mode_) {
 			case bumps::Generator::FEAT_MODE_RANDOM:
-				return temulenti::drunksModeLabels[moduleTemulenti->generator.mode()];
+				return temulenti::drunksModeLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].mode()];
 				break;
 			case bumps::Generator::FEAT_MODE_HARMONIC:
-				return temulenti::bumpsModeLabels[moduleTemulenti->generator.mode()];
+				return temulenti::bumpsModeLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].mode()];
 				break;
 			case bumps::Generator::FEAT_MODE_SHEEP:
-				return aestusCommon::sheepMenuLabels[moduleTemulenti->generator.mode()];
+				return aestusCommon::sheepMenuLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].mode()];
 				break;
 			default:
-				return aestusCommon::modeMenuLabels[moduleTemulenti->generator.mode()];
+				return aestusCommon::modeMenuLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].mode()];
 				break;
 			}
 		}
@@ -89,26 +112,34 @@ struct Temulenti : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-			return aestusCommon::rangeMenuLabels[moduleTemulenti->generator.range()];
+			return aestusCommon::rangeMenuLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].range()];
 		}
 	};
 
-	bumps::Generator generator;
-	int frame = 0;
+	bumps::Generator generators[PORT_MAX_CHANNELS];
 	static const int kLightsFrequency = 16;
-	uint8_t lastGate = 0;
-	uint8_t quantize = 0;
+	int channelCount = 1;
+	int displayChannel = 0;
+
+	bumps::GeneratorMode selectedMode = bumps::GENERATOR_MODE_LOOPING;
+	bumps::GeneratorMode lastModes[PORT_MAX_CHANNELS];
+	bumps::GeneratorRange selectedRange = bumps::GENERATOR_RANGE_MEDIUM;
+	bumps::GeneratorRange lastRanges[PORT_MAX_CHANNELS];
+	bumps::Generator::FeatureMode selectedFeatureMode = bumps::Generator::FEAT_MODE_FUNCTION;
+
+	uint8_t lastGates[PORT_MAX_CHANNELS];
+	uint8_t quantizers[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulenti::displayModels[0];
 	bool bUseCalibrationOffset = true;
-	bool bLastExternalSync = false;
+	bool lastExternalSyncs[PORT_MAX_CHANNELS];
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
-		configButton<RangeParam>(PARAM_RANGE, "Frequency range");
+		configButton<RangeParam>(PARAM_RANGE, temulenti::modelRangeHeaders[0]);
 		configParam(PARAM_FREQUENCY, -48.f, 48.f, 0.f, "Frequency", " semitones");
 		configParam(PARAM_FM, -12.f, 12.f, 0.f, "FM attenuverter", " centitones");
 		configParam(PARAM_SHAPE, -1.f, 1.f, 0.f, "Shape", "%", 0, 100);
@@ -136,8 +167,21 @@ struct Temulenti : SanguineModule {
 
 		configSwitch(PARAM_QUANTIZER, 0.f, 7.f, 0.f, "Quantizer scale", temulenti::quantizerLabels);
 
-		memset(&generator, 0, sizeof(bumps::Generator));
-		generator.Init();
+		configInput(INPUT_MODEL, "Model CV");
+		configInput(INPUT_MODE, "Mode CV");
+		configInput(INPUT_RANGE, "Range CV");
+		configInput(INPUT_QUANTIZER, "Quantizer CV");
+
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			memset(&generators[channel], 0, sizeof(bumps::Generator));
+			generators[channel].Init();
+
+			lastGates[channel] = 0;
+			quantizers[channel] = 0;
+			lastExternalSyncs[channel] = false;
+			lastRanges[channel] = bumps::GENERATOR_RANGE_MEDIUM;
+			lastModes[channel] = bumps::GENERATOR_MODE_LOOPING;
+		}
 		lightsDivider.setDivision(kLightsFrequency);
 		onReset();
 	}
@@ -145,173 +189,273 @@ struct Temulenti : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
-		bumps::GeneratorMode mode = generator.mode();
+		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
+
 		if (stMode.process(params[PARAM_MODE].getValue())) {
-			mode = bumps::GeneratorMode((static_cast<int>(mode) + 1) % 3);
-			generator.set_mode(mode);
+			selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
 		}
 
-		bumps::GeneratorRange range = generator.range();
 		if (stRange.process(params[PARAM_RANGE].getValue())) {
-			range = bumps::GeneratorRange((static_cast<int>(range) - 1 + 3) % 3);
-			generator.set_range(range);
+			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
 		}
 
 		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
-		//Buffer loop.
-		if (generator.writable_block()) {
-			// Sync.
-			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-			if (bHaveExternalSync != bLastExternalSync) {
-				generator.set_sync(bHaveExternalSync);
-				bLastExternalSync = bHaveExternalSync;
-			}
+		bool bModelConnected = inputs[INPUT_MODEL].isConnected();
+		bool bModeConnected = inputs[INPUT_MODE].isConnected();
+		bool bRangeConnected = inputs[INPUT_RANGE].isConnected();
+		bool bQuantizerConnected = inputs[INPUT_QUANTIZER].isConnected();
 
-			// Setup SIMD voltages.
-			float_4 paramVoltages = {};
+		float knobFrequency = params[PARAM_FREQUENCY].getValue();
+		float knobFm = params[PARAM_FM].getValue();
+		float knobQuantizer = params[PARAM_QUANTIZER].getValue();
+		float knobShape = params[PARAM_SHAPE].getValue();
+		float knobSlope = params[PARAM_SLOPE].getValue();
+		float knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
 
-			paramVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f);
-			paramVoltages[1] = inputs[INPUT_SHAPE].getVoltage();
-			paramVoltages[2] = inputs[INPUT_SLOPE].getVoltage();
-			paramVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage();
+		bumps::GeneratorSample samples[PORT_MAX_CHANNELS];
+		float unipolarFlags[PORT_MAX_CHANNELS];
 
-			paramVoltages /= 5.f;
-
-			// Pitch.
-			float pitchParam = params[PARAM_FREQUENCY].getValue() + (inputs[INPUT_PITCH].getVoltage() +
-				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
-			float fm = clamp(paramVoltages[0] * params[PARAM_FM].getValue() / 12.f, -1.f, 1.f) * 1536.f;
-
-			pitchParam += 60.f;
-			// This is probably not original but seems useful to keep the same frequency as in normal mode.
-			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC && !bUseCalibrationOffset) {
-				pitchParam -= 12.f;
-			}
-
-			// This is equivalent to shifting left by 7 bits.
-			int16_t pitch = static_cast<int16_t>(pitchParam * 128);
-
-			if ((quantize = params[PARAM_QUANTIZER].getValue())) {
-				uint16_t semi = pitch >> 7;
-				uint16_t octaves = semi / 12;
-				semi -= octaves * 12;
-				pitch = octaves * bumps::kOctave + bumps::quantize_lut[quantize - 1][semi];
-			}
-
-			// Scale to the global sample rate.
-			pitch += log2f(48000.f / args.sampleRate) * 12.f * 128;
-
-			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
-				generator.set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
+		for (int channel = 0; channel < channelCount; ++channel) {
+			if (!bModeConnected) {
+				if (lastModes[channel] != selectedMode) {
+					generators[channel].set_mode(selectedMode);
+					lastModes[channel] = selectedMode;
+				}
 			} else {
-				generator.set_pitch(clamp(pitch, -32768, 32767), fm);
+				float modeVoltage;
+				modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
+
+				modeVoltage = clamp(modeVoltage, 0.f, 3.f);
+				modeVoltage = roundf(modeVoltage);
+
+				bumps::GeneratorMode newMode = static_cast<bumps::GeneratorMode>(modeVoltage);
+
+				if (lastModes[channel] != newMode) {
+					generators[channel].set_mode(static_cast<bumps::GeneratorMode>(modeVoltage));
+					lastModes[channel] = newMode;
+				}
 			}
 
-			if (generator.feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM) {
-				generator.set_pulse_width(clamp(1.f - -params[PARAM_FM].getValue() / 12.f, 0.f, 2.f) * 32767);
+			if (!bRangeConnected) {
+				if (lastRanges[channel] != selectedRange) {
+					generators[channel].set_range(selectedRange);
+					lastRanges[channel] = selectedRange;
+				}
+			} else {
+				float rangeVoltage = inputs[INPUT_RANGE].getVoltage(channel);
+
+				rangeVoltage = clamp(rangeVoltage, 0.f, 3.f);
+				rangeVoltage = roundf(rangeVoltage);
+
+				bumps::GeneratorRange newRange = static_cast<bumps::GeneratorRange>(static_cast<int>(rangeVoltage));
+				if (lastRanges[channel] != newRange) {
+					generators[channel].set_range(newRange);
+					lastRanges[channel] = newRange;
+				}
 			}
 
-			// Shape, slope, smoothness.
-			paramVoltages[1] += params[PARAM_SHAPE].getValue();
-			paramVoltages[2] += params[PARAM_SLOPE].getValue();
-			paramVoltages[3] += params[PARAM_SMOOTHNESS].getValue();
+			//Buffer loop.
+			if (generators[channel].writable_block()) {
+				// Sync.
+				// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
+				if (bHaveExternalSync != lastExternalSyncs[channel]) {
+					generators[channel].set_sync(bHaveExternalSync);
+					lastExternalSyncs[channel] = bHaveExternalSync;
+				}
 
-			paramVoltages = simd::clamp(paramVoltages, -1.f, 1.f);
-			paramVoltages *= 32767.f;
+				// Setup SIMD voltages.
+				float_4 inputVoltages;
 
-			int16_t shape = paramVoltages[1];
-			int16_t slope = paramVoltages[2];
-			int16_t smoothness = paramVoltages[3];
-			generator.set_shape(shape);
-			generator.set_slope(slope);
-			generator.set_smoothness(smoothness);
+				inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
+				inputVoltages[1] = inputs[INPUT_SHAPE].getVoltage(channel);
+				inputVoltages[2] = inputs[INPUT_SLOPE].getVoltage(channel);
+				inputVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage(channel);
 
-			generator.FillBuffer();
+				inputVoltages /= 5.f;
+
+				// Pitch.
+				float pitchParam = knobFrequency + (inputs[INPUT_PITCH].getVoltage(channel) +
+					aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
+				float fm = clamp(inputVoltages[0] * knobFm / 12.f, -1.f, 1.f) * 1536.f;
+
+				pitchParam += 60.f;
+				// This is probably not original but seems useful to keep the same frequency as in normal mode.
+				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC && !bUseCalibrationOffset) {
+					pitchParam -= 12.f;
+				}
+
+				// This is equivalent to shifting left by 7 bits.
+				int16_t pitch = static_cast<int16_t>(pitchParam * 128);
+
+				if (!bQuantizerConnected) {
+					quantizers[channel] = static_cast<uint8_t>(knobQuantizer);
+				} else {
+					float quantizerVoltage = inputs[INPUT_QUANTIZER].getVoltage(channel);
+					quantizerVoltage = clamp(quantizerVoltage, 0.f, 7.f);
+					quantizerVoltage = roundf(quantizerVoltage);
+					quantizers[channel] = static_cast<uint8_t>(quantizerVoltage);
+				}
+
+				if (quantizers[channel]) {
+					uint16_t semi = pitch >> 7;
+					uint16_t octaves = semi / 12;
+					semi -= octaves * 12;
+					pitch = octaves * bumps::kOctave + bumps::quantize_lut[quantizers[channel] - 1][semi];
+				}
+
+				// Scale to the global sample rate.
+				pitch += log2f(48000.f / args.sampleRate) * 12.f * 128;
+
+				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
+					generators[channel].set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
+				} else {
+					generators[channel].set_pitch(clamp(pitch, -32768, 32767), fm);
+				}
+
+				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM) {
+					generators[channel].set_pulse_width(clamp(1.f - -knobFm / 12.f, 0.f, 2.f) * 32767);
+				}
+
+				// Shape, slope, smoothness.
+				inputVoltages[1] += knobShape;
+				inputVoltages[2] += knobSlope;
+				inputVoltages[3] += knobSmoothness;
+
+				inputVoltages = simd::clamp(inputVoltages, -1.f, 1.f);
+				inputVoltages *= 32767.f;
+
+				int16_t shape = static_cast<int16_t>(inputVoltages[1]);
+				int16_t slope = static_cast<int16_t>(inputVoltages[2]);
+				int16_t smoothness = static_cast<int16_t>(inputVoltages[3]);
+				generators[channel].set_shape(shape);
+				generators[channel].set_slope(slope);
+				generators[channel].set_smoothness(smoothness);
+
+				generators[channel].FillBuffer();
+			}
+
+			// Level.
+			uint16_t level = static_cast<uint16_t>(clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+			if (level < 32)
+			{
+				level = 0;
+			}
+
+			uint8_t gate = 0;
+
+			if (inputs[INPUT_FREEZE].getVoltage(channel) >= 0.7f) {
+				gate |= bumps::CONTROL_FREEZE;
+			}
+			if (inputs[INPUT_TRIGGER].getVoltage(channel) >= 0.7f) {
+				gate |= bumps::CONTROL_GATE;
+			}
+			if (inputs[INPUT_CLOCK].getVoltage(channel) >= 0.7f) {
+				gate |= bumps::CONTROL_CLOCK;
+			}
+
+			if (!(lastGates[channel] & bumps::CONTROL_CLOCK) && (gate & bumps::CONTROL_CLOCK)) {
+				gate |= bumps::CONTROL_CLOCK_RISING;
+			}
+			if (!(lastGates[channel] & bumps::CONTROL_GATE) && (gate & bumps::CONTROL_GATE)) {
+				gate |= bumps::CONTROL_GATE_RISING;
+			}
+			if ((lastGates[channel] & bumps::CONTROL_GATE) && !(gate & bumps::CONTROL_GATE)) {
+				gate |= bumps::CONTROL_GATE_FALLING;
+			}
+			lastGates[channel] = gate;
+
+			samples[channel] = generators[channel].Process(gate);
+
+			uint32_t uni = samples[channel].unipolar;
+			int32_t bi = samples[channel].bipolar;
+
+			uni = uni * level >> 16;
+			bi = -bi * level >> 16;
+			unipolarFlags[channel] = static_cast<float>(uni) / 65535;
+			float bipolarFlag = static_cast<float>(bi) / 32768;
+
+			outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_ATTACK) ? 5.f : 0.f, channel);
+			outputs[OUTPUT_LOW].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_RELEASE) ? 5.f : 0.f, channel);
+			outputs[OUTPUT_UNI].setVoltage(unipolarFlags[channel] * 8.f, channel);
+			outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f, channel);
 		}
 
-		// Level.
-		uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f) * 65535;
-		if (level < 32)
-		{
-			level = 0;
-		}
-
-		uint8_t gate = 0;
-		if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f) {
-			gate |= bumps::CONTROL_FREEZE;
-		}
-		if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f) {
-			gate |= bumps::CONTROL_GATE;
-		}
-		if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f) {
-			gate |= bumps::CONTROL_CLOCK;
-		}
-		if (!(lastGate & bumps::CONTROL_CLOCK) && (gate & bumps::CONTROL_CLOCK)) {
-			gate |= bumps::CONTROL_CLOCK_RISING;
-		}
-		if (!(lastGate & bumps::CONTROL_GATE) && (gate & bumps::CONTROL_GATE)) {
-			gate |= bumps::CONTROL_GATE_RISING;
-		}
-		if ((lastGate & bumps::CONTROL_GATE) && !(gate & bumps::CONTROL_GATE)) {
-			gate |= bumps::CONTROL_GATE_FALLING;
-		}
-		lastGate = gate;
-
-		const bumps::GeneratorSample& sample = generator.Process(gate);
-
-		uint32_t uni = sample.unipolar;
-		int32_t bi = sample.bipolar;
-
-		uni = uni * level >> 16;
-		bi = -bi * level >> 16;
-		float unipolarFlag = static_cast<float>(uni) / 65535;
-		float bipolarFlag = static_cast<float>(bi) / 32768;
-
-		outputs[OUTPUT_HIGH].setVoltage((sample.flags & bumps::FLAG_END_OF_ATTACK) ? 5.f : 0.f);
-		outputs[OUTPUT_LOW].setVoltage((sample.flags & bumps::FLAG_END_OF_RELEASE) ? 5.f : 0.f);
-		outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
-		outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
+		outputs[OUTPUT_HIGH].setChannels(channelCount);
+		outputs[OUTPUT_LOW].setChannels(channelCount);
+		outputs[OUTPUT_UNI].setChannels(channelCount);
+		outputs[OUTPUT_BI].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightsFrequency * args.sampleTime;
 
-			generator.feature_mode_ = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
+			selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AD ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == bumps::GENERATOR_MODE_AR ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				// TODO: IMPORTANT: reset mode and range when switching models: smoothness isn't smooth otherwise :(
+				if (!bModelConnected) {
+					generators[channel].feature_mode_ = selectedFeatureMode;
+				} else {
+					float modelVoltage = inputs[INPUT_MODEL].getVoltage(channel);
+					modelVoltage = clamp(modelVoltage, 0.f, 3.f);
+					modelVoltage = roundf(modelVoltage);
+					generators[channel].feature_mode_ = static_cast<bumps::Generator::FeatureMode>(modelVoltage);
+				}
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_LOW ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == bumps::GENERATOR_RANGE_HIGH ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-
-			if (sample.flags & bumps::FLAG_END_OF_ATTACK) {
-				unipolarFlag *= -1.f;
+				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+				lights[currentLight + 0].setBrightnessSmooth(channel < channelCount &&
+					(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM ||
+						generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC), sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
+					(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_FUNCTION ||
+						generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC), sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
+					generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_SHEEP, sampleTime);
 			}
-			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
-			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-			lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
+			if (displayChannel >= channelCount) {
+				displayChannel = channelCount - 1;
+			}
+
+			bumps::Generator::FeatureMode displayFeatureMode = generators[displayChannel].feature_mode_;
+			bumps::GeneratorMode displayMode = generators[displayChannel].mode();
+			bumps::GeneratorRange displayRange = generators[displayChannel].range();
+
+
+			lights[LIGHT_MODE + 0].setBrightnessSmooth(displayMode == bumps::GENERATOR_MODE_AD ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth(displayMode == bumps::GENERATOR_MODE_AR ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			if (quantize) {
-				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantize & 1 ? 1.f : 0.f, sampleTime);
-				lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantize & 2 ? 1.f : 0.f, sampleTime);
-				lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantize & 4 ? 1.f : 0.f, sampleTime);
+			// TODO: Turn this off and ignore it when external sync is engaged.
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_LOW ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_HIGH ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
+
+			if (samples[displayChannel].flags & bumps::FLAG_END_OF_ATTACK) {
+				unipolarFlags[displayChannel] *= -1.f;
+			}
+			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
+			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
+
+			lights[LIGHT_SYNC].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
+				kSanguineButtonLightValue : 0.f, sampleTime);
+
+			// TODO: remove the branch here!
+			if (quantizers[displayChannel]) {
+				lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantizers[displayChannel] & 1 ? 1.f : 0.f, sampleTime);
+				lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantizers[displayChannel] & 2 ? 1.f : 0.f, sampleTime);
+				lights[LIGHT_QUANTIZER3].setBrightnessSmooth(quantizers[displayChannel] & 4 ? 1.f : 0.f, sampleTime);
 			} else {
 				for (int currentLight = 0; currentLight < 3; ++currentLight) {
 					lights[LIGHT_QUANTIZER1 + currentLight].setBrightnessSmooth(0.f, sampleTime);
 				}
 			}
 
-			displayModel = temulenti::displayModels[params[PARAM_MODEL].getValue()];
+			displayModel = temulenti::displayModels[displayFeatureMode];
 
-			switch (generator.feature_mode_)
-			{
+			switch (displayFeatureMode) {
 			case bumps::Generator::FEAT_MODE_HARMONIC:
 				paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[2];
 				paramQuantities[PARAM_RANGE]->name = temulenti::modelRangeHeaders[1];
@@ -329,21 +473,27 @@ struct Temulenti : SanguineModule {
 	}
 
 	void onReset() override {
-		generator.set_mode(bumps::GENERATOR_MODE_LOOPING);
-		generator.set_range(bumps::GENERATOR_RANGE_MEDIUM);
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			generators[channel].set_mode(bumps::GENERATOR_MODE_LOOPING);
+			generators[channel].set_range(bumps::GENERATOR_RANGE_MEDIUM);
+			lastRanges[channel] = bumps::GENERATOR_RANGE_MEDIUM;
+			lastModes[channel] = bumps::GENERATOR_MODE_LOOPING;
+		}
 		params[PARAM_MODEL].setValue(0.f);
 	}
 
 	void onRandomize() override {
-		generator.set_range(bumps::GeneratorRange(random::u32() % 3));
-		generator.set_mode(bumps::GeneratorMode(random::u32() % 3));
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			generators[channel].set_range(bumps::GeneratorRange(random::u32() % 3));
+			generators[channel].set_mode(bumps::GeneratorMode(random::u32() % 3));
+		}
 	}
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		setJsonInt(rootJ, "mode", static_cast<int>(generator.mode()));
-		setJsonInt(rootJ, "range", static_cast<int>(generator.range()));
+		setJsonInt(rootJ, "mode", static_cast<int>(selectedMode));
+		setJsonInt(rootJ, "range", static_cast<int>(selectedRange));
 		setJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 
 		return rootJ;
@@ -355,11 +505,11 @@ struct Temulenti : SanguineModule {
 		json_int_t intValue = 0;
 
 		if (getJsonInt(rootJ, "mode", intValue)) {
-			generator.set_mode(bumps::GeneratorMode(intValue));
+			selectedMode = static_cast<bumps::GeneratorMode>(intValue);
 		}
 
 		if (getJsonInt(rootJ, "range", intValue)) {
-			generator.set_range(bumps::GeneratorRange(intValue));
+			selectedRange = static_cast<bumps::GeneratorRange>(intValue);
 		}
 
 		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
@@ -370,11 +520,11 @@ struct Temulenti : SanguineModule {
 	}
 
 	void setMode(int modeNum) {
-		generator.set_mode(bumps::GeneratorMode(modeNum));
+		selectedMode = static_cast<bumps::GeneratorMode>(modeNum);
 	}
 
 	void setRange(int rangeNum) {
-		generator.set_range(bumps::GeneratorRange(rangeNum));
+		selectedRange = static_cast<bumps::GeneratorRange>(rangeNum);
 	}
 
 	void setQuantizer(int quantizerNum) {
@@ -394,12 +544,15 @@ struct TemulentiWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(11.966, 19.002), module, Temulenti::PARAM_MODEL));
-
 		FramebufferWidget* temulentiFrameBuffer = new FramebufferWidget();
+
 		addChild(temulentiFrameBuffer);
 
-		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 23.42, 17.343);
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 17.302), module, Temulenti::INPUT_MODEL));
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(16.25, 17.302), module, Temulenti::PARAM_MODEL));
+
+		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 27.524, 17.302);
 		displayModel->displayType = DISPLAY_STRING;
 		temulentiFrameBuffer->addChild(displayModel);
 		displayModel->fallbackString = temulenti::displayModels[0];
@@ -408,45 +561,65 @@ struct TemulentiWidget : SanguineModuleWidget {
 			displayModel->values.displayText = &module->displayModel;
 		}
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.56, 19.002), module, Temulenti::PARAM_QUANTIZER));
-		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 16.496), module, Temulenti::LIGHT_QUANTIZER1));
-		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 19.002), module, Temulenti::LIGHT_QUANTIZER2));
-		addChild(createLightCentered<TinyLight<GreenLight> >(millimetersToPixelsVec(40.438, 21.496), module, Temulenti::LIGHT_QUANTIZER3));
+		const float kFirstRowY = 16.307f;
+		const float kSecondRowY = 18.297f;
+		const float kDeltaX = 1.993;
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(59.142, 19.002), module,
-			Temulenti::PARAM_SYNC, Temulenti::LIGHT_SYNC));
+		float currentX = 34.095f;
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 29.086), module,
+		const int kLightOffset = 8;
+
+		for (int light = 0; light < kLightOffset; ++light) {
+			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kFirstRowY),
+				module, Temulenti::LIGHT_CHANNEL_1 + light * 3));
+			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kSecondRowY),
+				module, Temulenti::LIGHT_CHANNEL_1 + (light + kLightOffset) * 3));
+			currentX += kDeltaX;
+		}
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(54.875, 17.302), module, Temulenti::PARAM_QUANTIZER));
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(65.946, 17.302), module, Temulenti::INPUT_QUANTIZER));
+
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(52.477, 21.724), module, Temulenti::LIGHT_QUANTIZER1));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(54.875, 21.724), module, Temulenti::LIGHT_QUANTIZER2));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(57.264, 21.724), module, Temulenti::LIGHT_QUANTIZER3));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 28.812), module, Temulenti::INPUT_MODE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 28.812), module,
 			Temulenti::PARAM_MODE, Temulenti::LIGHT_MODE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 37.214), module, Temulenti::LIGHT_PHASE));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(10.671, 37.84), module,
+			Temulenti::PARAM_SYNC, Temulenti::LIGHT_SYNC));
 
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 37.214), module, Temulenti::PARAM_FREQUENCY));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 37.84), module, Temulenti::LIGHT_PHASE));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 37.214), module, Temulenti::PARAM_FM));
+		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 37.84), module, Temulenti::PARAM_FREQUENCY));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 45.343),
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 37.84), module, Temulenti::PARAM_FM));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 46.869), module, Temulenti::INPUT_RANGE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 46.869),
 			module, Temulenti::PARAM_RANGE, Temulenti::LIGHT_RANGE));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 62.855), module, Temulenti::PARAM_SHAPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 62.855), module, Temulenti::PARAM_SLOPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 62.855), module, Temulenti::PARAM_SMOOTHNESS));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 64.055), module, Temulenti::PARAM_SHAPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 64.055), module, Temulenti::PARAM_SLOPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 64.055), module, Temulenti::PARAM_SMOOTHNESS));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(11.966, 78.995), module, Temulenti::INPUT_SHAPE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(35.56, 78.995), module, Temulenti::INPUT_SLOPE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(59.142, 78.995), module, Temulenti::INPUT_SMOOTHNESS));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(11.966, 80.195), module, Temulenti::INPUT_SHAPE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.56, 80.195), module, Temulenti::INPUT_SLOPE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(59.142, 80.195), module, Temulenti::INPUT_SMOOTHNESS));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(6.665, 95.56), module, Temulenti::INPUT_TRIGGER));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(21.11, 95.56), module, Temulenti::INPUT_FREEZE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(35.554, 95.56), module, Temulenti::INPUT_PITCH));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(49.998, 95.56), module, Temulenti::INPUT_FM));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(64.442, 95.56), module, Temulenti::INPUT_LEVEL));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 95.56), module, Temulenti::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(21.11, 95.56), module, Temulenti::INPUT_FREEZE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.554, 95.56), module, Temulenti::INPUT_PITCH));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(49.998, 95.56), module, Temulenti::INPUT_FM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(64.442, 95.56), module, Temulenti::INPUT_LEVEL));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(6.665, 111.643), module, Temulenti::INPUT_CLOCK));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(21.11, 111.643), module, Temulenti::OUTPUT_HIGH));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(35.554, 111.643), module, Temulenti::OUTPUT_LOW));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(49.998, 111.643), module, Temulenti::OUTPUT_UNI));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(64.442, 111.643), module, Temulenti::OUTPUT_BI));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 111.643), module, Temulenti::INPUT_CLOCK));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(21.11, 111.643), module, Temulenti::OUTPUT_HIGH));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(35.554, 111.643), module, Temulenti::OUTPUT_LOW));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(49.998, 111.643), module, Temulenti::OUTPUT_UNI));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(64.442, 111.643), module, Temulenti::OUTPUT_BI));
 	}
 
 	void appendContextMenu(Menu* menu) override {
@@ -463,32 +636,32 @@ struct TemulentiWidget : SanguineModuleWidget {
 		));
 
 		std::string rangeLabel;
-		switch (module->generator.feature_mode_)
+		switch (module->selectedFeatureMode)
 		{
 		case bumps::Generator::FEAT_MODE_RANDOM:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], temulenti::drunksModeLabels,
-				[=]() { return module->generator.mode(); },
+				[=]() { return module->selectedMode; },
 				[=](int i) { module->setMode(i); }
 			));
 			rangeLabel = temulenti::modelRangeHeaders[0];
 			break;
 		case bumps::Generator::FEAT_MODE_HARMONIC:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[2], temulenti::bumpsModeLabels,
-				[=]() { return module->generator.mode(); },
+				[=]() { return module->selectedMode; },
 				[=](int i) { module->setMode(i); }
 			));
 			rangeLabel = temulenti::modelRangeHeaders[1];
 			break;
 		case bumps::Generator::FEAT_MODE_SHEEP:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
-				[=]() { return module->generator.mode(); },
+				[=]() { return module->selectedMode; },
 				[=](int i) { module->setMode(i); }
 			));
 			rangeLabel = temulenti::modelRangeHeaders[0];
 			break;
 		default:
 			menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
-				[=]() { return module->generator.mode(); },
+				[=]() { return module->selectedMode; },
 				[=](int i) { module->setMode(i); }
 			));
 			rangeLabel = temulenti::modelRangeHeaders[0];
@@ -496,13 +669,28 @@ struct TemulentiWidget : SanguineModuleWidget {
 		}
 
 		menu->addChild(createIndexSubmenuItem(rangeLabel, aestusCommon::rangeMenuLabels,
-			[=]() { return module->generator.range(); },
+			[=]() { return module->selectedRange; },
 			[=](int i) { module->setRange(i); }
 		));
 
 		menu->addChild(createIndexSubmenuItem("Quantizer scale", temulenti::quantizerLabels,
 			[=]() { return module->params[Temulenti::PARAM_QUANTIZER].getValue(); },
 			[=](int i) { module->setQuantizer(i); }
+		));
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem("Options", "",
+			[=](Menu* menu) {
+				std::vector<std::string> availableChannels;
+				for (int i = 0; i < module->channelCount; ++i) {
+					availableChannels.push_back(channelNumbers[i]);
+				}
+				menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+					[=]() {return module->displayChannel; },
+					[=](int i) {module->displayChannel = i; }
+				));
+			}
 		));
 
 		menu->addChild(new MenuSeparator);
