@@ -288,7 +288,7 @@
     {
       "slug" : "Sanguine-Temulenti",
       "name" : "Temulenti",
-      "description" : "Multifaceted modulator based on the Parasite firmware for Mutable Instruments' Tides",
+      "description" : "Multifaceted, polyphonic modulator based on the Parasite firmware for Mutable Instruments' Tides",
       "keywords" : "Tides Parasite",
       "tags" : [
         "Clock generator",
@@ -298,6 +298,7 @@
         "Hardware clone",
         "Low-frequency oscillator",
         "Oscillator",
+        "Polyphonic",
         "Waveshaper"
       ]
     },
