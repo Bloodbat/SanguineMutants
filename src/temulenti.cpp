@@ -499,6 +499,7 @@ struct Temulenti : SanguineModule {
 		setJsonInt(rootJ, "mode", static_cast<int>(selectedMode));
 		setJsonInt(rootJ, "range", static_cast<int>(selectedRange));
 		setJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
 
 		return rootJ;
 	}
@@ -517,6 +518,10 @@ struct Temulenti : SanguineModule {
 		}
 
 		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
+
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
+		}
 	}
 
 	void setModel(int modelNum) {
