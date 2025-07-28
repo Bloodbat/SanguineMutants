@@ -391,7 +391,7 @@ struct AestusWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 37.214), module, Aestus::PARAM_FREQUENCY));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 37.214), module, Aestus::PARAM_FM));
+		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(59.142, 37.214), module, Aestus::PARAM_FM));
 
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 45.343),
 			module, Aestus::PARAM_RANGE, Aestus::LIGHT_RANGE));
