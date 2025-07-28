@@ -584,40 +584,40 @@ struct TemulentiWidget : SanguineModuleWidget {
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(54.875, 17.302), module, Temulenti::PARAM_QUANTIZER));
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(65.946, 17.302), module, Temulenti::INPUT_QUANTIZER));
 
-		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(52.477, 21.724), module, Temulenti::LIGHT_QUANTIZER1));
-		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(54.875, 21.724), module, Temulenti::LIGHT_QUANTIZER2));
-		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(57.264, 21.724), module, Temulenti::LIGHT_QUANTIZER3));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(52.477, 21.731), module, Temulenti::LIGHT_QUANTIZER1));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(54.875, 21.731), module, Temulenti::LIGHT_QUANTIZER2));
+		addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(57.264, 21.731), module, Temulenti::LIGHT_QUANTIZER3));
 
-		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 28.812), module, Temulenti::INPUT_MODE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 28.812), module,
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 29.512), module, Temulenti::INPUT_MODE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 29.512), module,
 			Temulenti::PARAM_MODE, Temulenti::LIGHT_MODE));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(10.671, 37.84), module,
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(10.671, 38.54), module,
 			Temulenti::PARAM_SYNC, Temulenti::LIGHT_SYNC));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 37.84), module, Temulenti::LIGHT_PHASE));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 38.54), module, Temulenti::LIGHT_PHASE));
 
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 37.84), module, Temulenti::PARAM_FREQUENCY));
+		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 38.54), module, Temulenti::PARAM_FREQUENCY));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 37.84), module, Temulenti::PARAM_FM));
+		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 38.54), module, Temulenti::PARAM_FM));
 
-		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 46.869), module, Temulenti::INPUT_RANGE));
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 46.869),
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 47.569), module, Temulenti::INPUT_RANGE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 47.569),
 			module, Temulenti::PARAM_RANGE, Temulenti::LIGHT_RANGE));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 64.055), module, Temulenti::PARAM_SHAPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 64.055), module, Temulenti::PARAM_SLOPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 64.055), module, Temulenti::PARAM_SMOOTHNESS));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 65.455), module, Temulenti::PARAM_SHAPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 65.455), module, Temulenti::PARAM_SLOPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 65.455), module, Temulenti::PARAM_SMOOTHNESS));
 
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(11.966, 80.195), module, Temulenti::INPUT_SHAPE));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.56, 80.195), module, Temulenti::INPUT_SLOPE));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(59.142, 80.195), module, Temulenti::INPUT_SMOOTHNESS));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(11.966, 81.595), module, Temulenti::INPUT_SHAPE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.56, 81.595), module, Temulenti::INPUT_SLOPE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(59.142, 81.595), module, Temulenti::INPUT_SMOOTHNESS));
 
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 95.56), module, Temulenti::INPUT_TRIGGER));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(21.11, 95.56), module, Temulenti::INPUT_FREEZE));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.554, 95.56), module, Temulenti::INPUT_PITCH));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(49.998, 95.56), module, Temulenti::INPUT_FM));
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(64.442, 95.56), module, Temulenti::INPUT_LEVEL));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 98.26), module, Temulenti::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(21.11, 98.26), module, Temulenti::INPUT_FREEZE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.554, 98.26), module, Temulenti::INPUT_PITCH));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(49.998, 98.26), module, Temulenti::INPUT_FM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(64.442, 98.26), module, Temulenti::INPUT_LEVEL));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 111.643), module, Temulenti::INPUT_CLOCK));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(21.11, 111.643), module, Temulenti::OUTPUT_HIGH));
