@@ -87,7 +87,7 @@ struct Aestus : SanguineModule {
 	bool bWantPeacocks = false;
 	tides::Generator generator;
 	tides::Plotter plotter;
-	int frame = 0;
+	size_t frame = 0;
 	static const int kLightsFrequency = 16;
 	uint8_t lastGate = 0;
 	dsp::SchmittTrigger stMode;
@@ -154,7 +154,7 @@ struct Aestus : SanguineModule {
 			bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bUseSheepFirmware && inputs[INPUT_CLOCK].isConnected());
 
 			// Buffer loop.
-			if (++frame >= 16) {
+			if (++frame >= tides::kBlockSize) {
 				frame = 0;
 
 				// Sync.
@@ -276,7 +276,7 @@ struct Aestus : SanguineModule {
 				}
 			}
 		} else {
-			if (++frame >= 16) {
+			if (++frame >= tides::kBlockSize) {
 				frame = 0;
 				plotter.Run();
 				outputs[OUTPUT_UNI].setVoltage(rescale(static_cast<float>(plotter.x()), 0.f, UINT16_MAX, -8.f, 8.f));
