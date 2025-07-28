@@ -599,7 +599,7 @@ struct TemulentiWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 38.54), module, Temulenti::PARAM_FREQUENCY));
 
-		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(59.142, 38.54), module, Temulenti::PARAM_FM));
+		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(59.142, 38.54), module, Temulenti::PARAM_FM));
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 47.569), module, Temulenti::INPUT_RANGE));
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 47.569),
