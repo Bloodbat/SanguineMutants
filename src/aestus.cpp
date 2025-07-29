@@ -207,10 +207,10 @@ struct Aestus : SanguineModule {
 		float knobSlope = params[PARAM_SLOPE].getValue();
 		float knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
 
-		tides::GeneratorSample samples[PORT_MAX_CHANNELS];
-		float unipolarFlags[PORT_MAX_CHANNELS];
-
 		if (!bWantPeacocks) {
+			tides::GeneratorSample samples[PORT_MAX_CHANNELS];
+			float unipolarFlags[PORT_MAX_CHANNELS];
+
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (!bModeConnected) {
 					if (lastModes[channel] != selectedMode) {
