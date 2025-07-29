@@ -262,16 +262,16 @@ struct Temulenti : SanguineModule {
 				}
 			}
 
-		//Buffer loop.
+			//Buffer loop.
 			if (generators[channel].writable_block()) {
-			// Sync.
-			// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
+				// Sync.
+				// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 				if (bHaveExternalSync != lastExternalSyncs[channel]) {
 					generators[channel].set_sync(bHaveExternalSync);
 					lastExternalSyncs[channel] = bHaveExternalSync;
-			}
+				}
 
-			// Setup SIMD voltages.
+				// Setup SIMD voltages.
 				float_4 inputVoltages;
 
 				inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
@@ -281,19 +281,19 @@ struct Temulenti : SanguineModule {
 
 				inputVoltages /= 5.f;
 
-			// Pitch.
+				// Pitch.
 				float pitchParam = knobFrequency + (inputs[INPUT_PITCH].getVoltage(channel) +
-				aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
+					aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
 				float fm = clamp(inputVoltages[0] * knobFm / 12.f, -1.f, 1.f) * 1536.f;
 
-			pitchParam += 60.f;
-			// This is probably not original but seems useful to keep the same frequency as in normal mode.
+				pitchParam += 60.f;
+				// This is probably not original but seems useful to keep the same frequency as in normal mode.
 				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC && !bUseCalibrationOffset) {
-				pitchParam -= 12.f;
-			}
+					pitchParam -= 12.f;
+				}
 
-			// This is equivalent to shifting left by 7 bits.
-			int16_t pitch = static_cast<int16_t>(pitchParam * 128);
+				// This is equivalent to shifting left by 7 bits.
+				int16_t pitch = static_cast<int16_t>(pitchParam * 128);
 
 				if (!bQuantizerConnected) {
 					quantizers[channel] = static_cast<uint8_t>(knobQuantizer);
@@ -305,26 +305,26 @@ struct Temulenti : SanguineModule {
 				}
 
 				if (quantizers[channel]) {
-				uint16_t semi = pitch >> 7;
-				uint16_t octaves = semi / 12;
-				semi -= octaves * 12;
+					uint16_t semi = pitch >> 7;
+					uint16_t octaves = semi / 12;
+					semi -= octaves * 12;
 					pitch = octaves * bumps::kOctave + bumps::quantize_lut[quantizers[channel] - 1][semi];
-			}
+				}
 
-			// Scale to the global sample rate.
-			pitch += log2f(48000.f / args.sampleRate) * 12.f * 128;
+				// Scale to the global sample rate.
+				pitch += log2f(48000.f / args.sampleRate) * 12.f * 128;
 
 				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 					generators[channel].set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
-			} else {
+				} else {
 					generators[channel].set_pitch(clamp(pitch, -32768, 32767), fm);
-			}
+				}
 
 				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM) {
 					generators[channel].set_pulse_width(clamp(1.f - -knobFm / 12.f, 0.f, 2.f) * 32767);
-			}
+				}
 
-			// Shape, slope, smoothness.
+				// Shape, slope, smoothness.
 				inputVoltages[1] += knobShape;
 				inputVoltages[2] += knobSlope;
 				inputVoltages[3] += knobSmoothness;
@@ -340,36 +340,36 @@ struct Temulenti : SanguineModule {
 				generators[channel].set_smoothness(smoothness);
 
 				generators[channel].FillBuffer();
-		}
+			}
 
-		// Level.
-			uint16_t level = static_cast<uint16_t>(clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
-		if (level < 32)
-		{
-			level = 0;
-		}
+			// Level.
+			uint16_t level = static_cast<uint16_t>(
+				clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+			if (level < 32) {
+				level = 0;
+			}
 
-		uint8_t gate = 0;
+			uint8_t gate = 0;
 
 			if (inputs[INPUT_FREEZE].getVoltage(channel) >= 0.7f) {
-			gate |= bumps::CONTROL_FREEZE;
-		}
+				gate |= bumps::CONTROL_FREEZE;
+			}
 			if (inputs[INPUT_TRIGGER].getVoltage(channel) >= 0.7f) {
-			gate |= bumps::CONTROL_GATE;
-		}
+				gate |= bumps::CONTROL_GATE;
+			}
 			if (inputs[INPUT_CLOCK].getVoltage(channel) >= 0.7f) {
-			gate |= bumps::CONTROL_CLOCK;
-		}
+				gate |= bumps::CONTROL_CLOCK;
+			}
 
 			if (!(lastGates[channel] & bumps::CONTROL_CLOCK) && (gate & bumps::CONTROL_CLOCK)) {
-			gate |= bumps::CONTROL_CLOCK_RISING;
-		}
+				gate |= bumps::CONTROL_CLOCK_RISING;
+			}
 			if (!(lastGates[channel] & bumps::CONTROL_GATE) && (gate & bumps::CONTROL_GATE)) {
-			gate |= bumps::CONTROL_GATE_RISING;
-		}
+				gate |= bumps::CONTROL_GATE_RISING;
+			}
 			if ((lastGates[channel] & bumps::CONTROL_GATE) && !(gate & bumps::CONTROL_GATE)) {
-			gate |= bumps::CONTROL_GATE_FALLING;
-		}
+				gate |= bumps::CONTROL_GATE_FALLING;
+			}
 			lastGates[channel] = gate;
 
 			samples[channel] = generators[channel].Process(gate);
@@ -377,10 +377,10 @@ struct Temulenti : SanguineModule {
 			uint32_t uni = samples[channel].unipolar;
 			int32_t bi = samples[channel].bipolar;
 
-		uni = uni * level >> 16;
-		bi = -bi * level >> 16;
+			uni = uni * level >> 16;
+			bi = -bi * level >> 16;
 			unipolarFlags[channel] = static_cast<float>(uni) / 65535;
-		float bipolarFlag = static_cast<float>(bi) / 32768;
+			float bipolarFlag = static_cast<float>(bi) / 32768;
 
 			outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_ATTACK) ? 5.f : 0.f, channel);
 			outputs[OUTPUT_LOW].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_RELEASE) ? 5.f : 0.f, channel);
