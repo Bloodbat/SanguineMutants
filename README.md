@@ -6,6 +6,8 @@ You can find the Mutants manual [here](https://media.githubusercontent.com/media
 
 You can find the Nightly builds [here](https://github.com/Bloodbat/SanguineMutants/releases/tag/Nightly).
 
+Looking for the Monsters? Click [here](https://github.com/Bloodbat/SanguineMonsters).
+
 ## Modules
 
 ![alt text](pics/mutants_modules.png)
