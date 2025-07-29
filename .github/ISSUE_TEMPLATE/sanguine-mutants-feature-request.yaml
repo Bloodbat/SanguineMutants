@@ -4,26 +4,25 @@ title: "[REQUEST] <title>"
 labels: ["feature request"]
 
 body:
+  - type: markdown
+    attributes:
+      value: "If you want to suggest a feature for the Sanguine Monsters, please file your request at: https://github.com/Bloodbat/SanguineMonsters"
 
-- type: markdown
-  attributes:
-    value: "If you want to suggest a feature for the Sanguine Monsters, please file your request at: https://github.com/Bloodbat/SanguineMonsters"
+  - type: textarea
+    attributes:
+      label: Proposed change or addition
+      description: Describe clearly and concisely what you want the plugin to do or the behavior improvements you would like to see.
+      placeholder: I want the plugin to run Doom!
+      render: markdown
+    validations:
+      required: true
 
-- type: textarea
-  attributes:
-    label: Proposed change or addition
-    description: Describe clearly and concisely what you want the plugin to do or the behavior improvements you would like to see.
-    placeholder: I want the plugin to run Doom!
-    render: markdown
-  validations:
-    required: true
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Links? References? Anything that will give us more context about your feature request!
 
-- type: textarea
-  attributes:
-    label: Anything else?
-    description: |
-      Links? References? Anything that will give us more context about your feature request!
-
-      Tip: You can attach images by clicking this area to highlight it and then dragging files to it.
-  validations:
-    required: false
+        Tip: You can attach images by clicking this area to highlight it and then dragging files to it.
+    validations:
+      required: false
