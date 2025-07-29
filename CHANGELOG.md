@@ -12,6 +12,8 @@
 
 ## Additions
 
+- Aestus family: modules are fully polyphonic.
+
 - Funes: new chord banks from Lyle Mills' firmware.
 
 - Funes: ability and controls to crossfade the main signal with the auxiliary signal and output it in the Aux output, adapted from Lyle Mills' firmware.
@@ -23,6 +25,18 @@
 - Nebulae family: modules are fully polyphonic.
 
 ## Changes
+
+- Plugin: performance tweaks.
+
+- Aestus: due to how polyphonic mode selection works, Sync mode must be enabled to clock the module externally even when the Tidal Modulator model is selected.
+
+- Aestus family: reorganize the faceplates to accommodate the polyphonic versions of the modules.
+
+- Aestus family: signal PLL/Sync mode by blinking the Sync button on and off instead of yellow/red (closer to what the hardware does).
+
+- Aestus family: ignore Range button and voltages when PLL/Sync mode is enabled (hardware behavior).
+
+- Aestus family: turn off Range button LED when PLL/Sync mode is enabled.
 
 - Nebulae family: OLED display text tweaks.
 
