@@ -343,9 +343,9 @@ struct Temulenti : SanguineModule {
 			}
 
 			// Level.
-			uint16_t level = static_cast<uint16_t>(clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
-			if (level < 32)
-			{
+			uint16_t level = static_cast<uint16_t>(
+				clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+			if (level < 32) {
 				level = 0;
 			}
 
