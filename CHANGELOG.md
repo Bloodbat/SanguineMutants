@@ -8,6 +8,8 @@
 
 ## Fixes
 
+- Aestus family: use the proper knob for the FM parameter.
+
 - Anuli: FX button light didn't follow plugin button light standards.
 
 - Funes: custom data not loading under certain conditions.
@@ -19,6 +21,8 @@
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
 
 ## Additions
+
+- Aestus family: modules are fully polyphonic.
 
 - Apices family: tap lfo tempo values are now saved to and restored from patches and presets.
 
@@ -39,6 +43,16 @@
 ## Changes
 
 - Plugin: performance tweaks.
+
+- Aestus: due to how polyphonic mode selection works, Sync mode must be enabled to clock the module externally even when the Tidal Modulator model is selected.
+
+- Aestus family: reorganize the faceplates to accommodate the polyphonic versions of the modules.
+
+- Aestus family: signal PLL/Sync mode by blinking the Sync button on and off instead of yellow/red (closer to what the hardware does).
+
+- Aestus family: ignore Range button and voltages when PLL/Sync mode is enabled (hardware behavior).
+
+- Aestus family: turn off Range button LED when PLL/Sync mode is enabled.
 
 - Contextus: make synthesis models light color palette more distinctive.
 
