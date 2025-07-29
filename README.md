@@ -14,11 +14,11 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
 - ### Aestus
 
-  A modulator based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+  A polyphonic modulator based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
 
   - ### Temulenti
 
-    A multifaceted modulator based based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
+    A multifaceted, polyphonic modulator based based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
 
 - ### Aleae
 
