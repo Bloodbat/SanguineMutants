@@ -272,7 +272,7 @@
     {
       "slug" : "Sanguine-Aestus",
       "name" : "Aestus",
-      "description" : "Modulator based on Mutable Instruments' Tides",
+      "description" : "Polyphonic modulator based on Mutable Instruments' Tides",
       "keywords" : "Tides",
       "tags" : [
         "Clock generator",
@@ -282,6 +282,7 @@
         "Hardware clone",
         "Low-frequency oscillator",
         "Oscillator",
+        "Polyphonic",
         "Waveshaper"
       ]
     },
