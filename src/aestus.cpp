@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
+#include "sanguinechannels.hpp"
 
 #include "tides/generator.h"
 #include "tides/plotter.h"
@@ -44,6 +45,10 @@ struct Aestus : SanguineModule {
 		INPUT_LEVEL,
 
 		INPUT_CLOCK,
+
+		INPUT_MODEL,
+		INPUT_MODE,
+		INPUT_RANGE,
 		INPUTS_COUNT
 	};
 
@@ -59,17 +64,34 @@ struct Aestus : SanguineModule {
 		ENUMS(LIGHT_MODE, 2),
 		ENUMS(LIGHT_PHASE, 2),
 		ENUMS(LIGHT_RANGE, 2),
-		ENUMS(LIGHT_SYNC, 2),
+		LIGHT_SYNC,
+
+		ENUMS(LIGHT_CHANNEL_1, 3),
+		ENUMS(LIGHT_CHANNEL_2, 3),
+		ENUMS(LIGHT_CHANNEL_3, 3),
+		ENUMS(LIGHT_CHANNEL_4, 3),
+		ENUMS(LIGHT_CHANNEL_5, 3),
+		ENUMS(LIGHT_CHANNEL_6, 3),
+		ENUMS(LIGHT_CHANNEL_7, 3),
+		ENUMS(LIGHT_CHANNEL_8, 3),
+		ENUMS(LIGHT_CHANNEL_9, 3),
+		ENUMS(LIGHT_CHANNEL_10, 3),
+		ENUMS(LIGHT_CHANNEL_11, 3),
+		ENUMS(LIGHT_CHANNEL_12, 3),
+		ENUMS(LIGHT_CHANNEL_13, 3),
+		ENUMS(LIGHT_CHANNEL_14, 3),
+		ENUMS(LIGHT_CHANNEL_15, 3),
+		ENUMS(LIGHT_CHANNEL_16, 3),
 		LIGHTS_COUNT
 	};
 
 	struct ModeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
-			if (!moduleAestus->bUseSheepFirmware) {
-				return aestusCommon::modeMenuLabels[moduleAestus->generator.mode()];
+			if (!moduleAestus->channelIsSheep[moduleAestus->displayChannel]) {
+				return aestusCommon::modeMenuLabels[moduleAestus->generators[moduleAestus->displayChannel].mode()];
 			} else {
-				return aestusCommon::sheepMenuLabels[moduleAestus->generator.mode()];
+				return aestusCommon::sheepMenuLabels[moduleAestus->generators[moduleAestus->displayChannel].mode()];
 			}
 		}
 	};
@@ -77,19 +99,29 @@ struct Aestus : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
-			return aestusCommon::rangeMenuLabels[moduleAestus->generator.range()];
+			return aestusCommon::rangeMenuLabels[moduleAestus->generators[moduleAestus->displayChannel].range()];
 		}
 	};
 
-	bool bUseSheepFirmware = false;
+	bool bSheepSelected = false;
+	bool channelIsSheep[PORT_MAX_CHANNELS];
+	bool lastSheepFirmwares[PORT_MAX_CHANNELS];
 	bool bUseCalibrationOffset = true;
-	bool bLastExternalSync = false;
+	bool lastExternalSyncs[PORT_MAX_CHANNELS];
 	bool bWantPeacocks = false;
-	tides::Generator generator;
-	tides::Plotter plotter;
-	size_t frame = 0;
+	size_t frames[PORT_MAX_CHANNELS];
 	static const int kLightsFrequency = 16;
-	uint8_t lastGate = 0;
+	int channelCount = 1;
+	int displayChannel = 0;
+	uint8_t lastGates[PORT_MAX_CHANNELS];
+
+	tides::GeneratorMode selectedMode = tides::GENERATOR_MODE_LOOPING;
+	tides::GeneratorMode lastModes[PORT_MAX_CHANNELS];
+	tides::GeneratorRange selectedRange = tides::GENERATOR_RANGE_MEDIUM;
+	tides::GeneratorRange lastRanges[PORT_MAX_CHANNELS];
+
+	tides::Generator generators[PORT_MAX_CHANNELS];
+	tides::Plotter plotters[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
@@ -124,9 +156,24 @@ struct Aestus : SanguineModule {
 
 		configButton(PARAM_SYNC, "Clock sync/PLL mode");
 
-		memset(&generator, 0, sizeof(tides::Generator));
-		generator.Init();
-		plotter.Init(tides::plotInstructions, sizeof(tides::plotInstructions) / sizeof(tides::PlotInstruction));
+		configInput(INPUT_MODEL, "Model CV");
+		configInput(INPUT_MODE, "Mode CV");
+		configInput(INPUT_RANGE, "Range CV");
+
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			memset(&generators[channel], 0, sizeof(tides::Generator));
+			generators[channel].Init();
+			plotters[channel].Init(tides::plotInstructions,
+				sizeof(tides::plotInstructions) / sizeof(tides::PlotInstruction));
+
+			lastGates[channel] = 0;
+			lastExternalSyncs[channel] = false;
+			lastRanges[channel] = tides::GENERATOR_RANGE_MEDIUM;
+			lastModes[channel] = tides::GENERATOR_MODE_LOOPING;
+			frames[channel] = 0;
+			channelIsSheep[channel] = false;
+			lastSheepFirmwares[channel] = false;
+		}
 		lightsDivider.setDivision(kLightsFrequency);
 		onReset();
 	}
@@ -134,157 +181,249 @@ struct Aestus : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
+		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
+
+		bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
+
+		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+
 		bool bIsLightsTurn = lightsDivider.process();
 
+		if (stMode.process(params[PARAM_MODE].getValue())) {
+			selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+		}
+
+		if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
+			selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+		}
+
+		bool bModelConnected = inputs[INPUT_MODEL].isConnected();
+		bool bModeConnected = inputs[INPUT_MODE].isConnected();
+		bool bRangeConnected = inputs[INPUT_RANGE].isConnected();
+
+		float knobFrequency = params[PARAM_FREQUENCY].getValue();
+		float knobFm = params[PARAM_FM].getValue();
+		float knobShape = params[PARAM_SHAPE].getValue();
+		float knobSlope = params[PARAM_SLOPE].getValue();
+		float knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
+
+		tides::GeneratorSample samples[PORT_MAX_CHANNELS];
+		float unipolarFlags[PORT_MAX_CHANNELS];
+
 		if (!bWantPeacocks) {
-			tides::GeneratorMode mode = generator.mode();
-			if (stMode.process(params[PARAM_MODE].getValue())) {
-				mode = tides::GeneratorMode((static_cast<int>(mode) + 1) % 3);
-				generator.set_mode(mode);
-			}
+			for (int channel = 0; channel < channelCount; ++channel) {
+				if (!bModeConnected) {
+					if (lastModes[channel] != selectedMode) {
+						generators[channel].set_mode(selectedMode);
+						lastModes[channel] = selectedMode;
+					}
+				} else {
+					float modeVoltage;
+					modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
 
-			tides::GeneratorRange range = generator.range();
-			if (stRange.process(params[PARAM_RANGE].getValue())) {
-				range = tides::GeneratorRange((static_cast<int>(range) - 1 + 3) % 3);
-				generator.set_range(range);
-			}
+					modeVoltage = clamp(modeVoltage, 0.f, 3.f);
+					modeVoltage = roundf(modeVoltage);
 
-			bUseSheepFirmware = static_cast<bool>(params[PARAM_MODEL].getValue());
+					tides::GeneratorMode newMode = static_cast<tides::GeneratorMode>(modeVoltage);
 
-			bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue()) || (!bUseSheepFirmware && inputs[INPUT_CLOCK].isConnected());
-
-			// Buffer loop.
-			if (++frame >= tides::kBlockSize) {
-				frame = 0;
-
-				// Sync.
-				// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-				if (bHaveExternalSync != bLastExternalSync) {
-					generator.set_sync(bHaveExternalSync);
-					bLastExternalSync = bHaveExternalSync;
+					if (lastModes[channel] != newMode) {
+						generators[channel].set_mode(static_cast<tides::GeneratorMode>(modeVoltage));
+						lastModes[channel] = newMode;
+					}
 				}
 
-				// Setup SIMD voltages.
-				float_4 paramVoltages = {};
+				if (!bRangeConnected) {
+					if (lastRanges[channel] != selectedRange) {
+						generators[channel].set_range(selectedRange);
+						lastRanges[channel] = selectedRange;
+					}
+				} else {
+					if (!bHaveExternalSync) {
+						float rangeVoltage = inputs[INPUT_RANGE].getVoltage(channel);
 
-				paramVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f);
-				paramVoltages[1] = inputs[INPUT_SHAPE].getVoltage();
-				paramVoltages[2] = inputs[INPUT_SLOPE].getVoltage();
-				paramVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage();
+						rangeVoltage = clamp(rangeVoltage, 0.f, 3.f);
+						rangeVoltage = roundf(rangeVoltage);
 
-				paramVoltages /= 5.f;
+						tides::GeneratorRange newRange = static_cast<tides::GeneratorRange>(static_cast<int>(rangeVoltage));
+						if (lastRanges[channel] != newRange) {
+							generators[channel].set_range(newRange);
+							lastRanges[channel] = newRange;
+						}
+					}
+				}
 
-				// Pitch.
-				float pitch = params[PARAM_FREQUENCY].getValue();
-				pitch += 12.f * (inputs[INPUT_PITCH].getVoltage() + aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
-				pitch += params[PARAM_FM].getValue() * paramVoltages[0];
-				pitch += 60.f;
-				// Scale to the global sample rate.
-				pitch += log2f(48000.f / args.sampleRate) * 12.f;
-				generator.set_pitch(static_cast<int>(clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
+				if (!bModelConnected) {
+					channelIsSheep[channel] = bSheepSelected;
+				} else {
+					channelIsSheep[channel] = inputs[INPUT_MODEL].getVoltage(channel) >= 1.f;
+				}
 
-				// Shape, slope, smoothness.
-				paramVoltages[1] += params[PARAM_SHAPE].getValue();
-				paramVoltages[2] += params[PARAM_SLOPE].getValue();
-				paramVoltages[3] += params[PARAM_SMOOTHNESS].getValue();
+				// Buffer loop.
+				if (++frames[channel] >= tides::kBlockSize) {
+					frames[channel] = 0;
 
-				paramVoltages = simd::clamp(paramVoltages, -1.f, 1.f);
-				paramVoltages *= 32767.f;
+					// Sync.
+					// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
+					if (bHaveExternalSync != lastExternalSyncs[channel]) {
+						generators[channel].set_sync(bHaveExternalSync);
+						lastExternalSyncs[channel] = bHaveExternalSync;
+					}
 
-				int16_t shape = paramVoltages[1];
-				int16_t slope = paramVoltages[2];
-				int16_t smoothness = paramVoltages[3];
-				generator.set_shape(shape);
-				generator.set_slope(slope);
-				generator.set_smoothness(smoothness);
+					// Setup SIMD voltages.
+					float_4 inputVoltages;
 
-				// Generator.
-				generator.Process(bUseSheepFirmware);
+					inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
+					inputVoltages[1] = inputs[INPUT_SHAPE].getVoltage(channel);
+					inputVoltages[2] = inputs[INPUT_SLOPE].getVoltage(channel);
+					inputVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage(channel);
+
+					inputVoltages /= 5.f;
+
+					// Pitch.
+					float pitch = knobFrequency;
+					pitch += 12.f * (inputs[INPUT_PITCH].getVoltage(channel) +
+						aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
+					pitch += knobFm * inputVoltages[0];
+					pitch += 60.f;
+					// Scale to the global sample rate.
+					pitch += log2f(48000.f / args.sampleRate) * 12.f;
+					generators[channel].set_pitch(static_cast<int>(
+						clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
+
+					// Shape, slope, smoothness.
+					inputVoltages[1] += knobShape;
+					inputVoltages[2] += knobSlope;
+					inputVoltages[3] += knobSmoothness;
+
+					inputVoltages = simd::clamp(inputVoltages, -1.f, 1.f);
+					inputVoltages *= 32767.f;
+
+					int16_t shape = static_cast<int16_t>(inputVoltages[1]);
+					int16_t slope = static_cast<int16_t>(inputVoltages[2]);
+					int16_t smoothness = static_cast<int16_t>(inputVoltages[3]);
+					generators[channel].set_shape(shape);
+					generators[channel].set_slope(slope);
+					generators[channel].set_smoothness(smoothness);
+
+					generators[channel].Process(channelIsSheep[channel]);
+				}
+
+				// Level.
+				uint16_t level = static_cast<uint16_t>(
+					clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+				if (level < 32) {
+					level = 0;
+				}
+
+				uint8_t gate = 0;
+				if (inputs[INPUT_FREEZE].getVoltage(channel) >= 0.7f) {
+					gate |= tides::CONTROL_FREEZE;
+				}
+				if (inputs[INPUT_TRIGGER].getVoltage(channel) >= 0.7f) {
+					gate |= tides::CONTROL_GATE;
+				}
+				if (inputs[INPUT_CLOCK].getVoltage(channel) >= 0.7f) {
+					gate |= tides::CONTROL_CLOCK;
+				}
+				if (!(lastGates[channel] & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK)) {
+					gate |= tides::CONTROL_CLOCK_RISING;
+				}
+				if (!(lastGates[channel] & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE)) {
+					gate |= tides::CONTROL_GATE_RISING;
+				}
+				if ((lastGates[channel] & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE)) {
+					gate |= tides::CONTROL_GATE_FALLING;
+				}
+				lastGates[channel] = gate;
+
+				samples[channel] = generators[channel].Process(gate);
+				uint32_t uni = samples[channel].unipolar;
+				int32_t bi = samples[channel].bipolar;
+
+				uni = uni * level >> 16;
+				bi = -bi * level >> 16;
+				unipolarFlags[channel] = static_cast<float>(uni) / 65535;
+				float bipolarFlag = static_cast<float>(bi) / 32768;
+
+				outputs[OUTPUT_HIGH].setVoltage(samples[channel].flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f, channel);
+				outputs[OUTPUT_LOW].setVoltage(samples[channel].flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f, channel);
+				outputs[OUTPUT_UNI].setVoltage(unipolarFlags[channel] * 8.f, channel);
+				outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f, channel);
 			}
-
-			// Level.
-			uint16_t level = clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f) / 8.f, 0.f, 1.f)
-				* 65535;
-			if (level < 32) {
-				level = 0;
-			}
-
-			uint8_t gate = 0;
-			if (inputs[INPUT_FREEZE].getVoltage() >= 0.7f) {
-				gate |= tides::CONTROL_FREEZE;
-			}
-			if (inputs[INPUT_TRIGGER].getVoltage() >= 0.7f) {
-				gate |= tides::CONTROL_GATE;
-			}
-			if (inputs[INPUT_CLOCK].getVoltage() >= 0.7f) {
-				gate |= tides::CONTROL_CLOCK;
-			}
-			if (!(lastGate & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK)) {
-				gate |= tides::CONTROL_CLOCK_RISING;
-			}
-			if (!(lastGate & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE)) {
-				gate |= tides::CONTROL_GATE_RISING;
-			}
-			if ((lastGate & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE)) {
-				gate |= tides::CONTROL_GATE_FALLING;
-			}
-			lastGate = gate;
-
-			const tides::GeneratorSample& sample = generator.Process(gate);
-			uint32_t uni = sample.unipolar;
-			int32_t bi = sample.bipolar;
-
-			uni = uni * level >> 16;
-			bi = -bi * level >> 16;
-			float unipolarFlag = static_cast<float>(uni) / 65535;
-			float bipolarFlag = static_cast<float>(bi) / 32768;
-
-			outputs[OUTPUT_HIGH].setVoltage(sample.flags & tides::FLAG_END_OF_ATTACK ? 5.f : 0.f);
-			outputs[OUTPUT_LOW].setVoltage(sample.flags & tides::FLAG_END_OF_RELEASE ? 5.f : 0.f);
-			outputs[OUTPUT_UNI].setVoltage(unipolarFlag * 8.f);
-			outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f);
 
 			if (bIsLightsTurn) {
 				const float sampleTime = kLightsFrequency * args.sampleTime;
 
-				lights[LIGHT_MODE + 0].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AD ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[LIGHT_MODE + 1].setBrightnessSmooth(mode == tides::GENERATOR_MODE_AR ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
+				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+					if (lastSheepFirmwares[channel] != channelIsSheep[channel]) {
+						generators[channel].set_mode(lastModes[channel]);
+						generators[channel].set_range(lastRanges[channel]);
+						lastSheepFirmwares[channel] = channelIsSheep[channel];
+					}
 
-				lights[LIGHT_RANGE + 0].setBrightnessSmooth(range == tides::GENERATOR_RANGE_LOW ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[LIGHT_RANGE + 1].setBrightnessSmooth(range == tides::GENERATOR_RANGE_HIGH ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-
-				if (sample.flags & tides::FLAG_END_OF_ATTACK) {
-					unipolarFlag *= -1.f;
+					int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+					lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
+						!channelIsSheep[channel], sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
+						channelIsSheep[channel], sampleTime);
 				}
-				lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlag), sampleTime);
-				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlag), sampleTime);
 
-				lights[LIGHT_SYNC + 0].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
+				if (displayChannel >= channelCount) {
+					displayChannel = channelCount - 1;
+				}
+
+				tides::GeneratorMode displayMode = generators[displayChannel].mode();
+				tides::GeneratorRange displayRange = generators[displayChannel].range();
+
+				lights[LIGHT_MODE + 0].setBrightnessSmooth(displayMode == tides::GENERATOR_MODE_AD ?
 					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[LIGHT_SYNC + 1].setBrightnessSmooth(bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_MODE + 1].setBrightnessSmooth(displayMode == tides::GENERATOR_MODE_AR ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
 
-				displayModel = aestus::displayModels[params[PARAM_MODEL].getValue()];
+				lights[LIGHT_RANGE + 0].setBrightnessSmooth(displayRange == tides::GENERATOR_RANGE_LOW ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth(displayRange == tides::GENERATOR_RANGE_HIGH ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
 
-				if (!bUseSheepFirmware) {
+				if (samples[displayChannel].flags & tides::FLAG_END_OF_ATTACK) {
+					unipolarFlags[displayChannel] *= -1.f;
+				}
+				lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
+				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
+
+				lights[LIGHT_SYNC].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
+					kSanguineButtonLightValue : 0.f, sampleTime);
+
+				displayModel = aestus::displayModels[static_cast<int>(channelIsSheep[displayChannel])];
+
+				if (!channelIsSheep[displayChannel]) {
 					paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[0];
 				} else {
 					paramQuantities[PARAM_MODE]->name = aestusCommon::modelModeHeaders[1];
 				}
 			}
 		} else {
-			if (++frame >= tides::kBlockSize) {
-				frame = 0;
-				plotter.Run();
-				outputs[OUTPUT_UNI].setVoltage(rescale(static_cast<float>(plotter.x()), 0.f, UINT16_MAX, -8.f, 8.f));
-				outputs[OUTPUT_BI].setVoltage(rescale(static_cast<float>(plotter.y()), 0.f, UINT16_MAX, 8.f, -8.f));
+			for (int channel = 0; channel < channelCount; ++channel) {
+				if (++frames[channel] >= tides::kBlockSize) {
+					frames[channel] = 0;
+					plotters[channel].Run();
+					outputs[OUTPUT_UNI].setVoltage(rescale(
+						static_cast<float>(plotters[channel].x()), 0.f, UINT16_MAX, -8.f, 8.f), channel);
+					outputs[OUTPUT_BI].setVoltage(rescale(
+						static_cast<float>(plotters[channel].y()), 0.f, UINT16_MAX, 8.f, -8.f), channel);
+				}
 			}
 
 			if (bIsLightsTurn) {
 				const float sampleTime = kLightsFrequency * args.sampleTime;
+
+				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+					int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+					lights[currentLight + 0].setBrightnessSmooth(channel < channelCount, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+				}
 
 				lights[LIGHT_MODE + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_MODE + 1].setBrightnessSmooth(1.f, sampleTime);
@@ -301,26 +440,38 @@ struct Aestus : SanguineModule {
 				displayModel = aestus::displayModels[aestus::kPeacocksString];
 			}
 		}
+
+		outputs[OUTPUT_HIGH].setChannels(channelCount);
+		outputs[OUTPUT_LOW].setChannels(channelCount);
+		outputs[OUTPUT_UNI].setChannels(channelCount);
+		outputs[OUTPUT_BI].setChannels(channelCount);
 	}
 
 	void onReset() override {
-		generator.set_mode(tides::GENERATOR_MODE_LOOPING);
-		generator.set_range(tides::GENERATOR_RANGE_MEDIUM);
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			generators[channel].set_mode(tides::GENERATOR_MODE_LOOPING);
+			generators[channel].set_range(tides::GENERATOR_RANGE_MEDIUM);
+			lastRanges[channel] = tides::GENERATOR_RANGE_MEDIUM;
+			lastModes[channel] = tides::GENERATOR_MODE_LOOPING;
+		}
 		params[PARAM_MODEL].setValue(0.f);
 	}
 
 	void onRandomize() override {
-		generator.set_range(tides::GeneratorRange(random::u32() % 3));
-		generator.set_mode(tides::GeneratorMode(random::u32() % 3));
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			generators[channel].set_range(tides::GeneratorRange(random::u32() % 3));
+			generators[channel].set_mode(tides::GeneratorMode(random::u32() % 3));
+		}
 	}
 
 	json_t* dataToJson() override {
 		json_t* rootJ = SanguineModule::dataToJson();
 
-		setJsonInt(rootJ, "mode", static_cast<int>(generator.mode()));
-		setJsonInt(rootJ, "range", static_cast<int>(generator.range()));
+		setJsonInt(rootJ, "mode", static_cast<int>(selectedMode));
+		setJsonInt(rootJ, "range", static_cast<int>(selectedRange));
 		setJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 		setJsonBoolean(rootJ, "wantPeacocksEgg", bWantPeacocks);
+		setJsonInt(rootJ, "displayChannel", displayChannel);
 
 		return rootJ;
 	}
@@ -331,15 +482,19 @@ struct Aestus : SanguineModule {
 		json_int_t intValue = 0;
 
 		if (getJsonInt(rootJ, "mode", intValue)) {
-			generator.set_mode(static_cast<tides::GeneratorMode>(intValue));
+			selectedMode = static_cast<tides::GeneratorMode>(intValue);
 		}
 
 		if (getJsonInt(rootJ, "range", intValue)) {
-			generator.set_range(static_cast<tides::GeneratorRange>(intValue));
+			selectedRange = static_cast<tides::GeneratorRange>(intValue);
 		}
 
 		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
 		getJsonBoolean(rootJ, "wantPeacocksEgg", bWantPeacocks);
+
+		if (getJsonInt(rootJ, "displayChannel", intValue)) {
+			displayChannel = intValue;
+		}
 	}
 
 	void setModel(int modelNum) {
@@ -347,11 +502,11 @@ struct Aestus : SanguineModule {
 	}
 
 	void setMode(int modeNum) {
-		generator.set_mode(tides::GeneratorMode(modeNum));
+		selectedMode = static_cast<tides::GeneratorMode>(modeNum);
 	}
 
 	void setRange(int rangeNum) {
-		generator.set_range(tides::GeneratorRange(rangeNum));
+		selectedRange = static_cast<tides::GeneratorRange>(rangeNum);
 	}
 };
 
@@ -367,12 +522,14 @@ struct AestusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(11.966, 19.002), module, Aestus::PARAM_MODEL));
-
 		FramebufferWidget* aestusFrameBuffer = new FramebufferWidget();
 		addChild(aestusFrameBuffer);
 
-		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 23.42, 17.343);
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 17.302), module, Aestus::INPUT_MODEL));
+
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(16.25, 17.302), module, Aestus::PARAM_MODEL));
+
+		SanguineTinyNumericDisplay* displayModel = new SanguineTinyNumericDisplay(1, module, 27.524, 17.302);
 		displayModel->displayType = DISPLAY_STRING;
 		aestusFrameBuffer->addChild(displayModel);
 		displayModel->fallbackString = aestus::displayModels[0];
@@ -381,40 +538,58 @@ struct AestusWidget : SanguineModuleWidget {
 			displayModel->values.displayText = &module->displayModel;
 		}
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(59.142, 19.002), module,
-			Aestus::PARAM_SYNC, Aestus::LIGHT_SYNC));
+		const float kFirstRowY = 15.972f;
+		const float kSecondRowY = 18.632f;
+		const float kDeltaX = 2.656f;
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 29.086),
+		float currentX = 35.611f;
+
+		const int kLightOffset = 8;
+
+		for (int light = 0; light < kLightOffset; ++light) {
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kFirstRowY),
+				module, Aestus::LIGHT_CHANNEL_1 + light * 3));
+			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kSecondRowY),
+				module, Aestus::LIGHT_CHANNEL_1 + (light + kLightOffset) * 3));
+			currentX += kDeltaX;
+		}
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 29.512), module, Aestus::INPUT_MODE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 29.512),
 			module, Aestus::PARAM_MODE, Aestus::LIGHT_MODE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 37.214), module, Aestus::LIGHT_PHASE));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(10.671, 38.54), module,
+			Aestus::PARAM_SYNC, Aestus::LIGHT_SYNC));
 
-		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 37.214), module, Aestus::PARAM_FREQUENCY));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(20.888, 38.54), module, Aestus::LIGHT_PHASE));
 
-		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(59.142, 37.214), module, Aestus::PARAM_FM));
+		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(35.56, 38.54), module, Aestus::PARAM_FREQUENCY));
 
-		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(11.966, 45.343),
+		addParam(createParamCentered<Sanguine2PSRed>(millimetersToPixelsVec(59.142, 38.54), module, Aestus::PARAM_FM));
+
+		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(5.171, 47.569), module, Aestus::INPUT_RANGE));
+		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(20.888, 47.569),
 			module, Aestus::PARAM_RANGE, Aestus::LIGHT_RANGE));
 
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 62.855), module, Aestus::PARAM_SHAPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 62.855), module, Aestus::PARAM_SLOPE));
-		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 62.855), module, Aestus::PARAM_SMOOTHNESS));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(11.966, 65.455), module, Aestus::PARAM_SHAPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(35.56, 65.455), module, Aestus::PARAM_SLOPE));
+		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(59.142, 65.455), module, Aestus::PARAM_SMOOTHNESS));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(11.966, 78.995), module, Aestus::INPUT_SHAPE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(35.56, 78.995), module, Aestus::INPUT_SLOPE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(59.142, 78.995), module, Aestus::INPUT_SMOOTHNESS));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(11.966, 81.595), module, Aestus::INPUT_SHAPE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.56, 81.595), module, Aestus::INPUT_SLOPE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(59.142, 81.595), module, Aestus::INPUT_SMOOTHNESS));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(6.665, 95.56), module, Aestus::INPUT_TRIGGER));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(21.11, 95.56), module, Aestus::INPUT_FREEZE));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(35.554, 95.56), module, Aestus::INPUT_PITCH));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(49.998, 95.56), module, Aestus::INPUT_FM));
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(64.442, 95.56), module, Aestus::INPUT_LEVEL));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 98.26), module, Aestus::INPUT_TRIGGER));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(21.11, 98.26), module, Aestus::INPUT_FREEZE));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(35.554, 98.26), module, Aestus::INPUT_PITCH));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(49.998, 98.26), module, Aestus::INPUT_FM));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(64.442, 98.26), module, Aestus::INPUT_LEVEL));
 
-		addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(6.665, 111.643), module, Aestus::INPUT_CLOCK));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(21.11, 111.643), module, Aestus::OUTPUT_HIGH));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(35.554, 111.643), module, Aestus::OUTPUT_LOW));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(49.998, 111.643), module, Aestus::OUTPUT_UNI));
-		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(64.442, 111.643), module, Aestus::OUTPUT_BI));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(6.665, 111.643), module, Aestus::INPUT_CLOCK));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(21.11, 111.643), module, Aestus::OUTPUT_HIGH));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(35.554, 111.643), module, Aestus::OUTPUT_LOW));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(49.998, 111.643), module, Aestus::OUTPUT_UNI));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(64.442, 111.643), module, Aestus::OUTPUT_BI));
 	}
 
 	void appendContextMenu(Menu* menu) override {
@@ -431,21 +606,36 @@ struct AestusWidget : SanguineModuleWidget {
 				[=](int i) { module->setModel(i); }
 			));
 
-			if (!module->bUseSheepFirmware) {
+			if (!module->bSheepSelected) {
 				menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[0], aestusCommon::modeMenuLabels,
-					[=]() { return module->generator.mode(); },
+					[=]() { return module->selectedMode; },
 					[=](int i) { module->setMode(i); }
 				));
 			} else {
 				menu->addChild(createIndexSubmenuItem(aestusCommon::modelModeHeaders[1], aestusCommon::sheepMenuLabels,
-					[=]() { return module->generator.mode(); },
+					[=]() { return module->selectedMode; },
 					[=](int i) { module->setMode(i); }
 				));
 			}
 
 			menu->addChild(createIndexSubmenuItem("Range", aestusCommon::rangeMenuLabels,
-				[=]() { return module->generator.range(); },
+				[=]() { return module->selectedRange; },
 				[=](int i) { module->setRange(i); }
+			));
+
+			menu->addChild(new MenuSeparator);
+
+			menu->addChild(createSubmenuItem("Options", "",
+				[=](Menu* menu) {
+					std::vector<std::string> availableChannels;
+					for (int i = 0; i < module->channelCount; ++i) {
+						availableChannels.push_back(channelNumbers[i]);
+					}
+					menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+						[=]() {return module->displayChannel; },
+						[=](int i) {module->displayChannel = i; }
+					));
+				}
 			));
 
 			menu->addChild(new MenuSeparator);
