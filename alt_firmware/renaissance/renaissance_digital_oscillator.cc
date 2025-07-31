@@ -39,7 +39,6 @@
 #include "renaissance_settings.h"
 
 namespace renaissance {
-
 	using namespace stmlib;
 
 	static const uint16_t kHighestNote = 140 * 128;
@@ -65,7 +64,7 @@ namespace renaissance {
 
 		uint32_t a = lut_oscillator_increments[ref_pitch >> 4];
 		uint32_t b = lut_oscillator_increments[(ref_pitch >> 4) + 1];
-		uint32_t phase_increment = a + \
+		uint32_t phase_increment = a +
 			(static_cast<int32_t>(b - a) * (ref_pitch & 0xf) >> 4);
 		phase_increment >>= num_shifts;
 		return phase_increment;
@@ -92,14 +91,9 @@ namespace renaissance {
 		return delay;
 	}
 
-	void DigitalOscillator::Render(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
-
+	void DigitalOscillator::Render(const uint8_t* sync, int16_t* buffer, size_t size) {
 		// Quantize parameter for FM.
-		if (shape_ >= OSC_SHAPE_FM &&
-			shape_ <= OSC_SHAPE_CHAOTIC_FEEDBACK_FM) {
+		if (shape_ >= OSC_SHAPE_FM && shape_ <= OSC_SHAPE_CHAOTIC_FEEDBACK_FM) {
 			uint16_t integral = parameter_[1] >> 8;
 			uint16_t fractional = parameter_[1] & 255;
 			int16_t a = lut_fm_frequency_quantizer[integral];
@@ -120,27 +114,23 @@ namespace renaissance {
 
 		if (pitch_ > kHighestNote) {
 			pitch_ = kHighestNote;
-		}
-		else if (pitch_ < 0) {
+		} else if (pitch_ < 0) {
 			pitch_ = 0;
 		}
 
 		(this->*fn)(sync, buffer, size);
 	}
 
-	void DigitalOscillator::RenderTripleRingMod(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderTripleRingMod(const uint8_t* sync,
+		int16_t* buffer, size_t size) {
 		uint32_t phase = phase_ + (1L << 30);
 		uint32_t increment = phase_increment_;
 		uint32_t modulator_phase = state_.vow.formant_phase[0];
 		uint32_t modulator_phase_2 = state_.vow.formant_phase[1];
-		uint32_t modulator_phase_increment = ComputePhaseIncrement(
-			pitch_ + ((parameter_[0] - 16384) >> 2)
-		);
-		uint32_t modulator_phase_increment_2 = ComputePhaseIncrement(
-			pitch_ + ((parameter_[1] - 16384) >> 2)
+		uint32_t modulator_phase_increment = ComputePhaseIncrement(pitch_ +
+			((parameter_[0] - 16384) >> 2));
+		uint32_t modulator_phase_increment_2 = ComputePhaseIncrement(pitch_ +
+			((parameter_[1] - 16384) >> 2)
 		);
 
 		while (size--) {
@@ -163,10 +153,7 @@ namespace renaissance {
 		state_.vow.formant_phase[1] = modulator_phase_2;
 	}
 
-	void DigitalOscillator::RenderSawSwarm(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderSawSwarm(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int32_t detune = parameter_[0] + 1024;
 		detune = (detune * detune) >> 9;
 		uint32_t increments[7];
@@ -176,8 +163,7 @@ namespace renaissance {
 			int32_t detune_fractional = saw_detune & 0xffff;
 			int32_t increment_a = ComputePhaseIncrement(pitch_ + detune_integral);
 			int32_t increment_b = ComputePhaseIncrement(pitch_ + detune_integral + 1);
-			increments[i] = increment_a + \
-				(((increment_b - increment_a) * detune_fractional) >> 16);
+			increments[i] = increment_a + (((increment_b - increment_a) * detune_fractional) >> 16);
 		}
 		if (strike_) {
 			for (size_t i = 0; i < 6; ++i) {
@@ -188,14 +174,12 @@ namespace renaissance {
 		int32_t hp_cutoff = pitch_;
 		if (parameter_[1] < 10922) {
 			hp_cutoff += ((parameter_[1] - 10922) * 24) >> 5;
-		}
-		else {
+		} else {
 			hp_cutoff += ((parameter_[1] - 10922) * 12) >> 5;
 		}
 		if (hp_cutoff < 0) {
 			hp_cutoff = 0;
-		}
-		else if (hp_cutoff > 32767) {
+		} else if (hp_cutoff > 32767) {
 			hp_cutoff = 32767;
 		}
 
@@ -245,10 +229,7 @@ namespace renaissance {
 		state_.saw.bp = bp;
 	}
 
-	void DigitalOscillator::RenderComb(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderComb(const uint8_t* sync, int16_t* buffer, size_t size) {
 		// Filter the delay time to avoid clicks/glitches.
 		int32_t pitch = pitch_ + ((parameter_[0] - 16384) >> 1);
 		int32_t filtered_pitch = state_.ffm.previous_sample;
@@ -286,10 +267,7 @@ namespace renaissance {
 		phase_ = delay_ptr;
 	}
 
-	void DigitalOscillator::RenderToy(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderToy(const uint8_t* sync, int16_t* buffer, size_t size) {
 		// 4 times oversampling.
 		phase_increment_ >>= 2;
 
@@ -329,10 +307,7 @@ namespace renaissance {
 	  0x80000000
 	};
 
-	void DigitalOscillator::RenderDigitalFilter(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderDigitalFilter(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int16_t shifted_pitch = pitch_ + ((parameter_[0] - 2048) >> 1);
 		if (shifted_pitch > 16383) {
 			shifted_pitch = 16383;
@@ -345,10 +320,9 @@ namespace renaissance {
 
 		uint32_t modulator_phase_increment = state_.res.modulator_phase_increment;
 		uint32_t target_increment = ComputePhaseIncrement(shifted_pitch);
-		uint32_t modulator_phase_increment_increment =
-			modulator_phase_increment < target_increment
-			? (target_increment - modulator_phase_increment) / size
-			: ~((modulator_phase_increment - target_increment) / size);
+		uint32_t modulator_phase_increment_increment = modulator_phase_increment < target_increment ?
+			(target_increment - modulator_phase_increment) / size :
+			~((modulator_phase_increment - target_increment) / size);
 
 		while (size--) {
 			phase_ += phase_increment_;
@@ -394,16 +368,14 @@ namespace renaissance {
 			if (filter_type & 2) {
 				saw_tri_signal = (carrier * window) >> 16;
 				square_signal = pulse;
-			}
-			else {
+			} else {
 				saw_tri_signal = (window * (carrier + 32768) >> 16) - 32768;
 				square_signal = square_integrator;
 				if (filter_type == 1) {
 					square_signal = (pulse + square_integrator) >> 1;
 				}
 			}
-			uint16_t balance = (parameter_[1] < 16384 ?
-				parameter_[1] : ~parameter_[1]) << 2;
+			uint16_t balance = (parameter_[1] < 16384 ? parameter_[1] : ~parameter_[1]) << 2;
 			*buffer++ = Mix(saw_tri_signal, square_signal, balance);
 		}
 		state_.res.modulator_phase = modulator_phase;
@@ -412,10 +384,7 @@ namespace renaissance {
 		state_.res.modulator_phase_increment = modulator_phase_increment;
 	}
 
-	void DigitalOscillator::RenderVosim(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderVosim(const uint8_t* sync, int16_t* buffer, size_t size) {
 		for (size_t i = 0; i < 2; ++i) {
 			state_.vow.formant_increment[i] = ComputePhaseIncrement(parameter_[i] >> 1);
 		}
@@ -471,10 +440,7 @@ namespace renaissance {
 	};
 
 
-	void DigitalOscillator::RenderVowel(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderVowel(const uint8_t* sync, int16_t* buffer, size_t size) {
 		size_t vowel_index = parameter_[0] >> 12;
 		uint16_t balance = parameter_[0] & 0x0fff;
 		uint16_t formant_shift = (200 + (parameter_[1] >> 6));
@@ -483,9 +449,8 @@ namespace renaissance {
 			state_.vow.consonant_frames = 160;
 			uint16_t index = (Random::GetSample() + 1) & 7;
 			for (size_t i = 0; i < 3; ++i) {
-				state_.vow.formant_increment[i] = \
-					static_cast<uint32_t>(consonant_data[index].formant_frequency[i]) * \
-					0x1000 * formant_shift;
+				state_.vow.formant_increment[i] =
+					static_cast<uint32_t>(consonant_data[index].formant_frequency[i]) * 0x1000 * formant_shift;
 				state_.vow.formant_amplitude[i] = consonant_data[index].formant_amplitude[i];
 			}
 			state_.vow.noise = index >= 6 ? 4095 : 0;
@@ -493,15 +458,13 @@ namespace renaissance {
 
 		if (state_.vow.consonant_frames) {
 			--state_.vow.consonant_frames;
-		}
-		else {
+		} else {
 			for (size_t i = 0; i < 3; ++i) {
 				state_.vow.formant_increment[i] =
-					(vowels_data[vowel_index].formant_frequency[i] * (0x1000 - balance) + \
-						vowels_data[vowel_index + 1].formant_frequency[i] * balance) * \
-					formant_shift;
+					(vowels_data[vowel_index].formant_frequency[i] * (0x1000 - balance) +
+						vowels_data[vowel_index + 1].formant_frequency[i] * balance) * formant_shift;
 				state_.vow.formant_amplitude[i] =
-					(vowels_data[vowel_index].formant_amplitude[i] * (0x1000 - balance) + \
+					(vowels_data[vowel_index].formant_amplitude[i] * (0x1000 - balance) +
 						vowels_data[vowel_index + 1].formant_amplitude[i] * balance) >> 12;
 			}
 			state_.vow.noise = 0;
@@ -623,11 +586,8 @@ namespace renaissance {
 		}
 	};
 
-	int16_t DigitalOscillator::InterpolateFormantParameter(
-		const int16_t table[][kNumFormants][kNumFormants],
-		int16_t x,
-		int16_t y,
-		uint8_t formant) {
+	int16_t DigitalOscillator::InterpolateFormantParameter(const int16_t table[][kNumFormants][kNumFormants],
+		int16_t x, int16_t y, uint8_t formant) {
 		uint16_t x_index = x >> 13;
 		uint16_t x_mix = x << 3;
 		uint16_t y_index = y >> 13;
@@ -641,13 +601,12 @@ namespace renaissance {
 		return a + ((c - a) * y_mix >> 16);
 	}
 
-	void DigitalOscillator::RenderVowelFof(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderVowelFof(const uint8_t* sync, int16_t* buffer, size_t size) {
 
-		// The original implementation used FOF but we live in the future and it's
-		// less computationally expensive to render a proper bank of 5 SVF.
+		/*
+		   The original implementation used FOF but we live in the future and it's
+		   less computationally expensive to render a proper bank of 5 SVF.
+		*/
 
 		int16_t amplitudes[kNumFormants];
 		int32_t svf_lp[kNumFormants];
@@ -655,22 +614,13 @@ namespace renaissance {
 		int16_t svf_f[kNumFormants];
 
 		for (size_t i = 0; i < kNumFormants; ++i) {
-			int32_t frequency = InterpolateFormantParameter(
-				formant_f_data,
-				parameter_[1],
-				parameter_[0],
-				i) + (12 << 7);
+			int32_t frequency = InterpolateFormantParameter(formant_f_data, parameter_[1], parameter_[0], i) + (12 << 7);
 			svf_f[i] = Interpolate824(lut_svf_cutoff, frequency << 17);
-			amplitudes[i] = InterpolateFormantParameter(
-				formant_a_data,
-				parameter_[1],
-				parameter_[0],
-				i);
+			amplitudes[i] = InterpolateFormantParameter(formant_a_data, parameter_[1], parameter_[0], i);
 			if (init_) {
 				svf_lp[i] = 0;
 				svf_bp[i] = 0;
-			}
-			else {
+			} else {
 				svf_lp[i] = state_.fof.svf_lp[i];
 				svf_bp[i] = state_.fof.svf_bp[i];
 			}
@@ -724,16 +674,12 @@ namespace renaissance {
 		}
 	}
 
-	void DigitalOscillator::RenderFm(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderFm(const uint8_t* sync, int16_t* buffer, size_t size) {
 		uint32_t modulator_phase = state_.modulator_phase;
 		uint32_t modulator_phase_increment = ComputePhaseIncrement(
 			(12 << 7) + pitch_ + ((parameter_[1] - 16384) >> 1)) >> 1;
 
 		BEGIN_INTERPOLATE_PARAMETER_0
-
 			while (size--) {
 				INTERPOLATE_PARAMETER_0
 
@@ -747,17 +693,13 @@ namespace renaissance {
 					Interpolate824(wav_sine, modulator_phase) * parameter_0) << 2;
 				*buffer++ = Interpolate824(wav_sine, phase_ + pm);
 			}
-
 		END_INTERPOLATE_PARAMETER_0
 
 			previous_parameter_[0] = parameter_[0];
 		state_.modulator_phase = modulator_phase;
 	}
 
-	void DigitalOscillator::RenderFeedbackFm(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderFeedbackFm(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int16_t previous_sample = state_.ffm.previous_sample;
 		uint32_t modulator_phase = state_.ffm.modulator_phase;
 
@@ -770,7 +712,6 @@ namespace renaissance {
 			(12 << 7) + pitch_ + ((parameter_[1] - 16384) >> 1)) >> 1;
 
 		BEGIN_INTERPOLATE_PARAMETER_0
-
 			while (size--) {
 				INTERPOLATE_PARAMETER_0
 
@@ -784,29 +725,23 @@ namespace renaissance {
 				int32_t pm;
 				int32_t p = parameter_0 * attenuation >> 15;
 				pm = previous_sample << 14;
-				pm = (
-					Interpolate824(wav_sine, modulator_phase + pm) * p) << 1;
+				pm = (Interpolate824(wav_sine, modulator_phase + pm) * p) << 1;
 				previous_sample = Interpolate824(wav_sine, phase_ + pm);
 				*buffer++ = previous_sample;
 			}
-
 		END_INTERPOLATE_PARAMETER_0
 
 			state_.ffm.previous_sample = previous_sample;
 		state_.ffm.modulator_phase = modulator_phase;
 	}
 
-	void DigitalOscillator::RenderChaoticFeedbackFm(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderChaoticFeedbackFm(const uint8_t* sync, int16_t* buffer, size_t size) {
 		uint32_t modulator_phase_increment = ComputePhaseIncrement(
 			(12 << 7) + pitch_ + ((parameter_[1] - 16384) >> 1)) >> 1;
 		int16_t previous_sample = state_.ffm.previous_sample;
 		uint32_t modulator_phase = state_.ffm.modulator_phase;
 
 		BEGIN_INTERPOLATE_PARAMETER_0
-
 			while (size--) {
 				INTERPOLATE_PARAMETER_0
 
@@ -819,10 +754,8 @@ namespace renaissance {
 				pm = (Interpolate824(wav_sine, modulator_phase) * parameter_0) << 1;
 				previous_sample = Interpolate824(wav_sine, phase_ + pm);
 				*buffer++ = previous_sample;
-				modulator_phase += (modulator_phase_increment >> 8) * \
-					(129 + (previous_sample >> 9));
+				modulator_phase += (modulator_phase_increment >> 8) * (129 + (previous_sample >> 9));
 			}
-
 		END_INTERPOLATE_PARAMETER_0
 
 			state_.ffm.previous_sample = previous_sample;
@@ -862,18 +795,14 @@ namespace renaissance {
 	  65083, 64715, 64715, 64715, 64715, 62312
 	};
 
-	void DigitalOscillator::RenderStruckBell(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
-
-		// To save some CPU cycles, do not refresh the frequency of all partials at
-		// the same time. This create a kind of "arpeggiation" with high frequency
-		// CV though...
+	void DigitalOscillator::RenderStruckBell(const uint8_t* sync, int16_t* buffer, size_t size) {
+		/*
+		   To save some CPU cycles, do not refresh the frequency of all partials at
+		   the same time. This create a kind of "arpeggiation" with high frequency
+		   CV though...
+		*/
 		size_t first_partial = state_.add.current_partial;
-		size_t last_partial = std::min(
-			state_.add.current_partial + 3,
-			kNumBellPartials);
+		size_t last_partial = std::min(state_.add.current_partial + 3, kNumBellPartials);
 		state_.add.current_partial = (first_partial + 3) % kNumBellPartials;
 
 		if (strike_) {
@@ -890,16 +819,16 @@ namespace renaissance {
 			int16_t partial_pitch = pitch_ + kBellPartials[i];
 			if (i & 1) {
 				partial_pitch += parameter_[1] >> 7;
-			}
-			else {
+			} else {
 				partial_pitch -= parameter_[1] >> 7;
 			}
-			state_.add.partial_phase_increment[i] = \
-				ComputePhaseIncrement(partial_pitch) << 1;
+			state_.add.partial_phase_increment[i] = ComputePhaseIncrement(partial_pitch) << 1;
 		}
 
-		// Allow a "droning" bell with no energy loss when the parameter is set to
-		// its maximum value
+		/*
+		   Allow a "droning" bell with no energy loss when the parameter is set to
+		   its maximum value.
+		*/
 		if (parameter_[0] < 32000) {
 			for (size_t i = 0; i < kNumBellPartials; ++i) {
 				int32_t decay_long = kBellPartialDecayLong[i];
@@ -907,8 +836,7 @@ namespace renaissance {
 				int16_t balance = (32767 - parameter_[0]) >> 8;
 				balance = balance * balance >> 7;
 				int32_t decay = decay_long - ((decay_long - decay_short) * balance >> 7);
-				state_.add.partial_amplitude[i] = \
-					state_.add.partial_amplitude[i] * decay >> 16;
+				state_.add.partial_amplitude[i] = state_.add.partial_amplitude[i] * decay >> 16;
 			}
 		}
 
@@ -929,10 +857,7 @@ namespace renaissance {
 	}
 
 
-	void DigitalOscillator::RenderStruckDrum(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderStruckDrum(const uint8_t* sync, int16_t* buffer, size_t size) {
 
 		if (strike_) {
 			bool reset_phase = state_.add.partial_amplitude[0] < 1024;
@@ -943,8 +868,7 @@ namespace renaissance {
 				}
 			}
 			strike_ = false;
-		}
-		else {
+		} else {
 			if (parameter_[0] < 32000) {
 				for (size_t i = 0; i < kNumDrumPartials; ++i) {
 					int32_t decay_long = kDrumPartialDecayLong[i];
@@ -952,8 +876,7 @@ namespace renaissance {
 					int16_t balance = (32767 - parameter_[0]) >> 8;
 					balance = balance * balance >> 7;
 					int32_t decay = decay_long - ((decay_long - decay_short) * balance >> 7);
-					state_.add.target_partial_amplitude[i] = \
-						state_.add.partial_amplitude[i] * decay >> 16;
+					state_.add.target_partial_amplitude[i] = state_.add.partial_amplitude[i] * decay >> 16;
 				}
 			}
 		}
@@ -967,8 +890,7 @@ namespace renaissance {
 		int32_t cutoff = (pitch_ - 12 * 128) + (parameter_[1] >> 2);
 		if (cutoff < 0) {
 			cutoff = 0;
-		}
-		else if (cutoff > 32767) {
+		} else if (cutoff > 32767) {
 			cutoff = 32767;
 		}
 		int32_t f = Interpolate824(lut_svf_cutoff, cutoff << 16);
@@ -1001,7 +923,7 @@ namespace renaissance {
 				AdditiveState* a = &state_.add;
 				a->partial_phase[i] += a->partial_phase_increment[i];
 				int32_t partial = Interpolate824(wav_sine, a->partial_phase[i]);
-				int32_t amplitude = a->partial_amplitude[i] + \
+				int32_t amplitude = a->partial_amplitude[i] +
 					(((a->target_partial_amplitude[i] - a->partial_amplitude[i]) * fade) >> 15);
 				partial = partial * amplitude >> 16;
 				harmonics += partial;
@@ -1014,7 +936,6 @@ namespace renaissance {
 			sample += noise_mode_2 * noise_mode_gain >> 14;
 			sample += harmonics * harmonics_gain >> 14;
 			CLIP(sample)
-				//sample = Interpolate88(ws_moderate_overdrive, sample + 32768);
 				* buffer++ = (sample + previous_sample) >> 1;
 			*buffer++ = sample; size--;
 			previous_sample = sample;
@@ -1029,10 +950,7 @@ namespace renaissance {
 		}
 	}
 
-	void DigitalOscillator::RenderPlucked(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderPlucked(const uint8_t* sync, int16_t* buffer, size_t size) {
 		phase_increment_ <<= 1;
 		if (strike_) {
 			++active_voice_;
@@ -1059,25 +977,23 @@ namespace renaissance {
 		}
 
 		PluckState* current_string = &state_.plk[active_voice_];
-
-		// Update the phase increment of the latest note, but do not transpose too
-		// high above the original pitch.
-		current_string->phase_increment = std::min(
-			phase_increment_,
+		/*
+		   Update the phase increment of the latest note, but do not transpose too
+		   high above the original pitch.
+		*/
+		current_string->phase_increment = std::min(phase_increment_,
 			current_string->max_phase_increment);
 
 		// Compute loss and stretching factors.
-		uint32_t update_probability = parameter_[0] < 16384
-			? 65535
-			: 131072 - (parameter_[0] >> 3) * 31;
+		uint32_t update_probability = parameter_[0] < 16384 ? 65535 :
+			131072 - (parameter_[0] >> 3) * 31;
 		int16_t loss = 4096 - (phase_increment_ >> 14);
 		if (loss < 256) {
 			loss = 256;
 		}
 		if (parameter_[0] < 16384) {
 			loss = loss * (16384 - parameter_[0]) >> 14;
-		}
-		else {
+		} else {
 			loss = 0;
 		}
 
@@ -1088,16 +1004,17 @@ namespace renaissance {
 			for (size_t i = 0; i < kNumPluckVoices; ++i) {
 				PluckState* p = &state_.plk[i];
 				int16_t* dl = delay_lines_.ks + i * 1025;
-				// Initialization: Just use a white noise sample and fill the delay
-				// line.
+				/*
+				   Initialization: Just use a white noise sample and fill the delay
+				   line.
+				*/
 				if (p->initialization_ptr) {
 					--p->initialization_ptr;
-					int32_t excitation_sample = (dl[p->initialization_ptr] + \
+					int32_t excitation_sample = (dl[p->initialization_ptr] +
 						3 * Random::GetSample()) >> 2;
 					dl[p->initialization_ptr] = excitation_sample;
 					sample += excitation_sample;
-				}
-				else {
+				} else {
 					p->phase += p->phase_increment;
 					size_t read_ptr = ((p->phase >> (22 + p->shift)) + 2) & p->mask;
 					size_t write_ptr = p->write_ptr;
@@ -1140,10 +1057,7 @@ namespace renaissance {
 	static const int32_t kBiquadPole1 = 6948;
 	static const int32_t kBiquadPole2 = -2959;
 
-	void DigitalOscillator::RenderBowed(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderBowed(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int8_t* dl_b = delay_lines_.bowed.bridge;
 		int8_t* dl_n = delay_lines_.bowed.neck;
 
@@ -1166,8 +1080,8 @@ namespace renaissance {
 		uint32_t delay = (delay_ >> 1) - (2 << 16);  // Compensation for 1-pole delay
 		uint32_t bridge_delay = (delay >> 8) * parameter_1;
 		// Transpose one octave up when the note is too low to fit in the delays.
-		while ((delay - bridge_delay) > ((kWGNeckLength - 1) << 16)
-			|| bridge_delay > ((kWGBridgeLength - 1) << 16)) {
+		while ((delay - bridge_delay) > ((kWGNeckLength - 1) << 16) ||
+			bridge_delay > ((kWGBridgeLength - 1) << 16)) {
 			delay >>= 1;
 			bridge_delay >>= 1;
 		}
@@ -1177,22 +1091,21 @@ namespace renaissance {
 		uint32_t neck_delay_integral = neck_delay >> 16;
 		uint16_t neck_delay_fractional = neck_delay & 0xffff;
 		int16_t previous_sample = state_.phy.previous_sample;
-		// Rendered at half the sample rate (for avoiding big rounding error in
-		// coefficients of body IIR filter).
+		/*
+		   Rendered at half the sample rate (for avoiding big rounding error in
+		   coefficients of body IIR filter).
+		*/
 		while (size) {
 			phase_ += phase_increment_;
 
 			int32_t new_velocity, friction;
-			uint16_t bridge_delay_ptr = delay_ptr + 2 * kWGBridgeLength \
-				- bridge_delay_integral;
-			uint16_t neck_delay_ptr = delay_ptr + 2 * kWGNeckLength \
-				- neck_delay_integral;
+			uint16_t bridge_delay_ptr = delay_ptr + 2 * kWGBridgeLength - bridge_delay_integral;
+			uint16_t neck_delay_ptr = delay_ptr + 2 * kWGNeckLength - neck_delay_integral;
 			int16_t bridge_dl_a = dl_b[bridge_delay_ptr % kWGBridgeLength];
 			int16_t bridge_dl_b = dl_b[(bridge_delay_ptr - 1) % kWGBridgeLength];
 			int16_t nut_dl_a = dl_n[neck_delay_ptr % kWGNeckLength];
 			int16_t nut_dl_b = dl_n[(neck_delay_ptr - 1) % kWGNeckLength];
-			int32_t bridge_value = Mix(
-				bridge_dl_a, bridge_dl_b, bridge_delay_fractional) << 8;
+			int32_t bridge_value = Mix(bridge_dl_a, bridge_dl_b, bridge_delay_fractional) << 8;
 			int32_t nut_value = Mix(nut_dl_a, nut_dl_b, neck_delay_fractional) << 8;
 			lp_state = (bridge_value * kBridgeLPGain + lp_state * kBridgeLPPole1) >> 15;
 			int32_t bridge_reflection = -lp_state;
@@ -1210,7 +1123,6 @@ namespace renaissance {
 			if (friction >= (1 << 17)) {
 				friction = (1 << 17) - 1;
 			}
-			//friction = Interpolate824(lut_bowing_friction, friction << 15);
 			friction = lut_bowing_friction[friction >> 9];
 			new_velocity = friction * velocity_delta >> 15;
 			dl_n[delay_ptr % kWGNeckLength] = (bridge_reflection + new_velocity) >> 8;
@@ -1247,10 +1159,7 @@ namespace renaissance {
 	static const int16_t kReedSlope = -1229;
 	static const int16_t kReedOffset = 22938;
 
-	void DigitalOscillator::RenderBlown(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderBlown(const uint8_t* sync, int16_t* buffer, size_t size) {
 		uint16_t delay_ptr = state_.phy.delay_ptr;
 		int32_t lp_state = state_.phy.lp_state;
 
@@ -1271,8 +1180,7 @@ namespace renaissance {
 		int16_t normalized_pitch = (pitch_ - 8192 + (parameter_[1] >> 1)) >> 7;
 		if (normalized_pitch < 0) {
 			normalized_pitch = 0;
-		}
-		else if (normalized_pitch > 127) {
+		} else if (normalized_pitch > 127) {
 			normalized_pitch = 127;
 		}
 		uint16_t filter_coefficient = lut_flute_body_filter[normalized_pitch];
@@ -1283,8 +1191,7 @@ namespace renaissance {
 			breath_pressure = breath_pressure * kBreathPressure >> 15;
 			breath_pressure += kBreathPressure;
 
-			uint16_t bore_delay_ptr = delay_ptr + 2 * kWGBoreLength \
-				- bore_delay_integral;
+			uint16_t bore_delay_ptr = delay_ptr + 2 * kWGBoreLength - bore_delay_integral;
 			int16_t dl_a = dl[bore_delay_ptr % kWGBoreLength];
 			int16_t dl_b = dl[(bore_delay_ptr - 1) % kWGBoreLength];
 			int32_t dl_value = Mix(dl_a, dl_b, bore_delay_fractional);
@@ -1300,7 +1207,7 @@ namespace renaissance {
 			out += breath_pressure;
 			CLIP(out)
 				dl[delay_ptr++ % kWGBoreLength] = out;
-			filter_state = (filter_coefficient * out + \
+			filter_state = (filter_coefficient * out +
 				(4096 - filter_coefficient) * filter_state) >> 12;
 			*buffer++ = filter_state;
 		}
@@ -1312,10 +1219,7 @@ namespace renaissance {
 	static const uint16_t kRandomPressure = 0.22 * 4096;
 	static const uint16_t kDCBlockingPole = 0.99 * 4096;
 
-	void DigitalOscillator::RenderFluted(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderFluted(const uint8_t* sync, int16_t* buffer, size_t size) {
 		uint16_t delay_ptr = state_.phy.delay_ptr;
 		uint16_t excitation_ptr = state_.phy.excitation_ptr;
 
@@ -1338,8 +1242,8 @@ namespace renaissance {
 		uint32_t bore_delay = (delay_ << 1) - (2 << 16);
 		uint32_t jet_delay = (bore_delay >> 8) * (48 + (parameter_[1] >> 10));
 		bore_delay -= jet_delay;
-		while (bore_delay > ((kWGFBoreLength - 1) << 16)
-			|| jet_delay > ((kWGJetLength - 1) << 16)) {
+		while (bore_delay > ((kWGFBoreLength - 1) << 16) ||
+			jet_delay > ((kWGJetLength - 1) << 16)) {
 			bore_delay >>= 1;
 			jet_delay >>= 1;
 		}
@@ -1353,10 +1257,8 @@ namespace renaissance {
 		while (size--) {
 			phase_ += phase_increment_;
 
-			uint16_t bore_delay_ptr = delay_ptr + 2 * kWGFBoreLength \
-				- bore_delay_integral;
-			uint16_t jet_delay_ptr = delay_ptr + 2 * kWGJetLength \
-				- jet_delay_integral;
+			uint16_t bore_delay_ptr = delay_ptr + 2 * kWGFBoreLength - bore_delay_integral;
+			uint16_t jet_delay_ptr = delay_ptr + 2 * kWGJetLength - jet_delay_integral;
 			int16_t bore_dl_a = dl_b[bore_delay_ptr % kWGFBoreLength];
 			int16_t bore_dl_b = dl_b[(bore_delay_ptr - 1) % kWGFBoreLength];
 			int16_t jet_dl_a = dl_j[jet_delay_ptr % kWGJetLength];
@@ -1370,8 +1272,7 @@ namespace renaissance {
 			random_pressure = random_pressure * breath_pressure >> 15;
 			breath_pressure += random_pressure;
 
-			lp_state = (-filter_coefficient * bore_value + \
-				(4096 - filter_coefficient) * lp_state) >> 12;
+			lp_state = (-filter_coefficient * bore_value + (4096 - filter_coefficient) * lp_state) >> 12;
 			int32_t reflection = lp_state;
 			dc_blocking_y0 = (kDCBlockingPole * dc_blocking_y0 >> 12);
 			dc_blocking_y0 += reflection - dc_blocking_x0;
@@ -1430,52 +1331,40 @@ namespace renaissance {
 		// 06 shamus
 		{ 16 , { 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 92 } },
 		// 07 swept_string
-		{ 16 , { 93, 94, 95, 96, 97, 98, 99, 100, 101,
-				 102, 103, 104, 105, 106, 107, 108, 108 } },
-				 // 08 bowed
-				 { 16 , { 109, 110, 111, 112, 113, 114, 115, 116,
-						  117, 118, 119, 120, 121, 122, 123, 124, 124 } },
-						  // 09 cello
-						  { 16 , { 125, 126, 127, 128, 129, 130, 131, 132,
-								   132, 132, 132, 132, 132, 132, 132, 132, 132 } },
-								   // 10 vibes
-								   { 16 , { 133, 134, 135, 136, 137, 138, 139, 140,
-											141, 142, 143, 144, 144, 144, 145, 145, 145 } },
-											// 11 slap
-											{ 16 , { 146, 147, 148, 149, 150, 151, 151, 151,
-													 152, 152, 152, 152, 153, 153, 153, 153, 153 } },
-													 // 12 piano
-													 { 8 , { 154, 154, 154, 154, 154, 154, 155, 156, 156 } },
-													 // 13 organ!
-													 { 16 , { 176, 157, 158, 159, 160, 161, 162, 163,
-															  164, 165, 166, 167, 168, 169, 170, 171, 171 } },
-															  // 14 waves!
-															  { 16 , { 172, 173, 174, 175, 176, 177, 178, 179,
-																	   180, 181, 182, 183, 184, 185, 186, 187, 187 } },
-																	   // 15 digital
-																	   { 16 , { 176, 188, 189, 190, 191, 192, 193, 194,
-																				195, 196, 197, 198, 199, 200, 201, 202, 202 } },
-																				// 16 drone 1
-																				{ 16 , { 203, 205, 204, 205, 212, 206, 207, 208,
-																						 208, 209, 210, 210, 211, 211, 212, 212, 212 } },
-																						 // 17 drone 2
-																						 { 8 , { 213, 213, 213, 214, 215, 216, 217, 218, 219 } },
-																						 // 18 metallic
-																						 { 16 , { 220, 221, 222, 223, 224, 225, 226, 227,
-																								  228, 229, 230, 231, 232, 233, 234, 235, 235 } },
-																								  // 19 fantasy
-																								  { 16 , { 236, 237, 238, 239, 240, 241, 242, 243,
-																										   244, 245, 246, 247, 248, 249, 250, 251, 251 } },
-																										   // 20 bell
-																										   { 4 , { 252, 253, 254, 255, 254 } },
+		{ 16 , { 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 108 } },
+		// 08 bowed
+		{ 16 , { 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 124 } },
+		// 09 cello
+		{ 16 , { 125, 126, 127, 128, 129, 130, 131, 132, 132, 132, 132, 132, 132, 132, 132, 132, 132 } },
+		// 10 vibes
+		{ 16 , { 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 144, 144, 145, 145, 145 } },
+		// 11 slap
+		{ 16 , { 146, 147, 148, 149, 150, 151, 151, 151, 152, 152, 152, 152, 153, 153, 153, 153, 153 } },
+		// 12 piano
+		{ 8 , { 154, 154, 154, 154, 154, 154, 155, 156, 156 } },
+		// 13 organ!
+		{ 16 , { 176, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 171 } },
+		// 14 waves!
+		{ 16 , { 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 187 } },
+		// 15 digital
+		{ 16 , { 176, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 202 } },
+		// 16 drone 1
+		{ 16 , { 203, 205, 204, 205, 212, 206, 207, 208,208, 209, 210, 210, 211, 211, 212, 212, 212 } },
+		// 17 drone 2
+		{ 8 , { 213, 213, 213, 214, 215, 216, 217, 218, 219 } },
+		// 18 metallic
+		{ 16 , { 220, 221, 222, 223, 224, 225, 226, 227,228, 229, 230, 231, 232, 233, 234, 235, 235 } },
+		// 19 fantasy
+		{ 16 , { 236, 237, 238, 239, 240, 241, 242, 243,244, 245, 246, 247, 248, 249, 250, 251, 251 } },
+		// 20 bell
+		{ 4 , { 252, 253, 254, 255, 254 } },
 	};
 
-	void DigitalOscillator::RenderWavetables(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
-		// Add some hysteresis to the second parameter to prevent a single DAC bit
-		// error to cause a sharp and glitchy wavetable transition.
+	void DigitalOscillator::RenderWavetables(const uint8_t* sync, int16_t* buffer, size_t size) {
+		/*
+		   Add some hysteresis to the second parameter to prevent a single DAC bit
+		   error to cause a sharp and glitchy wavetable transition.
+		*/
 		if ((parameter_[1] > previous_parameter_[1] + 64) ||
 			(parameter_[1] < previous_parameter_[1] - 64)) {
 			previous_parameter_[1] = parameter_[1];
@@ -1510,11 +1399,7 @@ namespace renaissance {
 		}
 	}
 
-	void DigitalOscillator::RenderWaveMap(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
-
+	void DigitalOscillator::RenderWaveMap(const uint8_t* sync, int16_t* buffer, size_t size) {
 		// The grid is 16x16; so there are 15 interpolation squares.
 		uint16_t p[2];
 		uint16_t wave_xfade[2];
@@ -1531,8 +1416,7 @@ namespace renaissance {
 
 		for (size_t i = 0; i < 2; ++i) {
 			for (size_t j = 0; j < 2; ++j) {
-				uint16_t wave_index = \
-					(wave_coordinate[0] + i) * 16 + (wave_coordinate[1] + j);
+				uint16_t wave_index = (wave_coordinate[0] + i) * 16 + (wave_coordinate[1] + j);
 				wave[i][j] = wt_waves + wt_map[wave_index] * 129;
 			}
 		}
@@ -1567,10 +1451,7 @@ namespace renaissance {
 	};
 
 
-	void DigitalOscillator::RenderWaveLine(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderWaveLine(const uint8_t* sync, int16_t* buffer, size_t size) {
 		smoothed_parameter_ = (3 * smoothed_parameter_ + (parameter_[0] << 1)) >> 2;
 
 		uint16_t scan = smoothed_parameter_;
@@ -1609,8 +1490,7 @@ namespace renaissance {
 
 				*buffer++ = sample >> 1;
 			}
-		}
-		else if (parameter_[1] < 16384) {
+		} else if (parameter_[1] < 16384) {
 			while (size--) {
 				if (*sync++) {
 					phase = 0;
@@ -1631,8 +1511,7 @@ namespace renaissance {
 
 				*buffer++ = sample >> 1;
 			}
-		}
-		else if (parameter_[1] < 24576) {
+		} else if (parameter_[1] < 24576) {
 			while (size--) {
 				if (*sync++) {
 					phase = 0;
@@ -1651,8 +1530,7 @@ namespace renaissance {
 
 				*buffer++ = sample >> 1;
 			}
-		}
-		else {
+		} else {
 			while (size--) {
 				if (*sync++) {
 					phase = 0;
@@ -1675,10 +1553,7 @@ namespace renaissance {
 		previous_parameter_[0] = smoothed_parameter_ >> 1;
 	}
 
-	void DigitalOscillator::RenderFilteredNoise(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderFilteredNoise(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int32_t f = Interpolate824(lut_svf_cutoff, pitch_ << 17);
 		int32_t damp = Interpolate824(lut_svf_damp, parameter_[0] << 17);
 		int32_t scale = Interpolate824(lut_svf_scale, parameter_[0] << 17);
@@ -1691,8 +1566,7 @@ namespace renaissance {
 			bp_gain = parameter_[1];
 			lp_gain = 16384 - bp_gain;
 			hp_gain = 0;
-		}
-		else {
+		} else {
 			bp_gain = 32767 - parameter_[1];
 			hp_gain = parameter_[1] - 16384;
 			lp_gain = 0;
@@ -1721,10 +1595,7 @@ namespace renaissance {
 		state_.svf.bp = bp;
 	}
 
-	void DigitalOscillator::RenderTwinPeaksNoise(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderTwinPeaksNoise(const uint8_t* sync, int16_t* buffer, size_t size) {
 		int32_t sample;
 		int32_t y10, y20;
 		int32_t y11 = state_.pno.filter_state[0][0];
@@ -1755,8 +1626,7 @@ namespace renaissance {
 			if (sample > 0) {
 				y10 = sample * s1 >> 16;
 				y20 = sample * s2 >> 16;
-			}
-			else {
+			} else {
 				y10 = -((-sample) * s1 >> 16);
 				y20 = -((-sample) * s2 >> 16);
 			}
@@ -1790,10 +1660,7 @@ namespace renaissance {
 		state_.pno.filter_state[1][1] = y22;
 	}
 
-	void DigitalOscillator::RenderClockedNoise(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderClockedNoise(const uint8_t* sync, int16_t* buffer, size_t size) {
 		ClockedNoiseState* state = &state_.clk;
 
 		if ((parameter_[1] > previous_parameter_[1] + 64) ||
@@ -1811,8 +1678,10 @@ namespace renaissance {
 			strike_ = false;
 		}
 
-		// Shift the range of the Coarse knob to reach higher clock rates, close
-		// to the sample rate.
+		/*
+		   Shift the range of the Coarse knob to reach higher clock rates, close
+		   to the sample rate.
+		*/
 		uint32_t phase = phase_;
 		uint32_t phase_increment = phase_increment_;
 		for (size_t i = 0; i < 3; ++i) {
@@ -1822,10 +1691,9 @@ namespace renaissance {
 		}
 
 		// Compute the period of the random generator.
-		state->cycle_phase_increment = ComputePhaseIncrement(
-			previous_parameter_[0] - 16384) << 1;
+		state->cycle_phase_increment = ComputePhaseIncrement(previous_parameter_[0] - 16384) << 1;
 
-		// Compute the number of quantization steps
+		// Compute the number of quantization steps.
 		uint32_t num_steps = 1 + (previous_parameter_[1] >> 10);
 		if (num_steps == 1) {
 			num_steps = 2;
@@ -1841,7 +1709,7 @@ namespace renaissance {
 			if (phase < phase_increment) {
 				state->rng_state = state->rng_state * 1664525L + 1013904223L;
 				state->cycle_phase += state->cycle_phase_increment;
-				// Enforce period
+				// Enforce period.
 				if (state->cycle_phase < state->cycle_phase_increment) {
 					state->rng_state = state->seed;
 					// Make the period an integer.
@@ -1859,11 +1727,7 @@ namespace renaissance {
 		phase_ = phase;
 	}
 
-	void DigitalOscillator::RenderGranularCloud(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
-
+	void DigitalOscillator::RenderGranularCloud(const uint8_t* sync, int16_t* buffer, size_t size) {
 		for (size_t i = 0; i < 4; ++i) {
 			Grain* g = &state_.grain[i];
 			// If a grain has reached the end of its envelope, reset it.
@@ -1871,44 +1735,41 @@ namespace renaissance {
 				g->envelope_phase_increment == 0) {
 				g->envelope_phase_increment = 0;
 				if ((Random::GetWord() & 0xffff) < 0x4000) {
-					g->envelope_phase_increment = \
-						lut_granular_envelope_rate[parameter_[0] >> 7] << 3;
+					g->envelope_phase_increment = lut_granular_envelope_rate[parameter_[0] >> 7] << 3;
 					g->envelope_phase = 0;
 					g->phase_increment = phase_increment_;
 					int32_t pitch_mod = Random::GetSample() * parameter_[1] >> 16;
 					int32_t phi = phase_increment_ >> 8;
 					if (pitch_mod < 0) {
 						g->phase_increment += phi * (pitch_mod >> 8);
-					}
-					else {
+					} else {
 						g->phase_increment += phi * (pitch_mod >> 7);
 					}
 				}
 			}
 		}
 
-		// TODO(pichenettes): Check if it's possible to interpolate envelope
-		// increment too!
+		// TODO: (pichenettes): Check if it's possible to interpolate envelope increment too!
 		while (size--) {
 			int32_t sample = 0;
 			state_.grain[0].phase += state_.grain[0].phase_increment;
 			state_.grain[0].envelope_phase += state_.grain[0].envelope_phase_increment;
-			sample += Interpolate824(wav_sine, state_.grain[0].phase) * \
+			sample += Interpolate824(wav_sine, state_.grain[0].phase) *
 				lut_granular_envelope[state_.grain[0].envelope_phase >> 16] >> 17;
 
 			state_.grain[1].phase += state_.grain[1].phase_increment;
 			state_.grain[1].envelope_phase += state_.grain[1].envelope_phase_increment;
-			sample += Interpolate824(wav_sine, state_.grain[1].phase) * \
+			sample += Interpolate824(wav_sine, state_.grain[1].phase) *
 				lut_granular_envelope[state_.grain[1].envelope_phase >> 16] >> 17;
 
 			state_.grain[2].phase += state_.grain[2].phase_increment;
 			state_.grain[2].envelope_phase += state_.grain[2].envelope_phase_increment;
-			sample += Interpolate824(wav_sine, state_.grain[2].phase) * \
+			sample += Interpolate824(wav_sine, state_.grain[2].phase) *
 				lut_granular_envelope[state_.grain[2].envelope_phase >> 16] >> 17;
 
 			state_.grain[3].phase += state_.grain[3].phase_increment;
 			state_.grain[3].envelope_phase += state_.grain[3].envelope_phase_increment;
-			sample += Interpolate824(wav_sine, state_.grain[3].phase) * \
+			sample += Interpolate824(wav_sine, state_.grain[3].phase) *
 				lut_granular_envelope[state_.grain[3].envelope_phase >> 16] >> 17;
 
 			if (sample < -32768) {
@@ -1925,10 +1786,7 @@ namespace renaissance {
 	static const int32_t kResonanceSquared = 32768 * 0.996 * 0.996;
 	static const int32_t kResonanceFactor = 32768 * 0.996;
 
-	void DigitalOscillator::RenderParticleNoise(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderParticleNoise(const uint8_t* sync, int16_t* buffer, size_t size) {
 		uint16_t amplitude = state_.pno.amplitude;
 		uint32_t density = 1024 + parameter_[0];
 		int32_t sample;
@@ -1980,8 +1838,7 @@ namespace renaissance {
 				y10 = sample * s1 >> 16;
 				y20 = sample * s2 >> 16;
 				y30 = sample * s3 >> 16;
-			}
-			else {
+			} else {
 				y10 = -((-sample) * s1 >> 16);
 				y20 = -((-sample) * s2 >> 16);
 				y30 = -((-sample) * s3 >> 16);
@@ -2027,10 +1884,7 @@ namespace renaissance {
 		state_.pno.filter_coefficient[2] = c3;
 	}
 
-	void DigitalOscillator::RenderKick(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderKick(const uint8_t* sync, int16_t* buffer, size_t size) {
 		if (init_) {
 			pulse_[0].Init();
 			pulse_[0].set_delay(0);
@@ -2092,10 +1946,7 @@ namespace renaissance {
 		state_.svf.lp = lp_state;
 	}
 
-	void DigitalOscillator::RenderSnare(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderSnare(const uint8_t* sync, int16_t* buffer, size_t size) {
 		if (init_) {
 			pulse_[0].Init();
 			pulse_[0].set_delay(0);
@@ -2175,10 +2026,7 @@ namespace renaissance {
 		}
 	}
 
-	void DigitalOscillator::RenderCymbal(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderCymbal(const uint8_t* sync, int16_t* buffer, size_t size) {
 		if (init_) {
 			svf_[0].Init();
 			svf_[0].set_mode(SVF_MODE_BP);
@@ -2239,10 +2087,7 @@ namespace renaissance {
 		}
 	}
 
-	void DigitalOscillator::RenderVocalist(
-		const uint8_t* sync,
-		int16_t* buffer,
-		size_t size) {
+	void DigitalOscillator::RenderVocalist(const uint8_t* sync, int16_t* buffer, size_t size) {
 
 		if (init_) {
 			memset(&delay_lines_.vocalistState, 0, sizeof(delay_lines_.vocalistState));
@@ -2334,5 +2179,4 @@ namespace renaissance {
 
 	  // &DigitalOscillator::RenderYourAlgo,
 	};
-
 }  // namespace renaissance

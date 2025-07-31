@@ -38,7 +38,6 @@
 #include <cstring>
 
 namespace renaissance {
-
 	static const size_t kWGBridgeLength = 1024;
 	static const size_t kWGNeckLength = 4096;
 	static const size_t kWGBoreLength = 2048;
@@ -300,9 +299,7 @@ namespace renaissance {
 			}
 		}
 
-		inline void set_parameters(
-			int16_t parameter_1,
-			int16_t parameter_2) {
+		inline void set_parameters(int16_t parameter_1, int16_t parameter_2) {
 			parameter_[0] = parameter_1;
 			parameter_[1] = parameter_2;
 		}
@@ -354,57 +351,30 @@ namespace renaissance {
 		void RenderStack(const uint8_t*, int16_t*, size_t);
 		void RenderDiatonicChord(const uint8_t*, int16_t*, size_t);
 
-		void renderChord(
-			const uint8_t* sync,
-			int16_t* buffer,
-			size_t size,
-			uint8_t* noteOffset,
-			uint8_t noteCount);
+		void renderChord(const uint8_t* sync, int16_t* buffer, size_t size,
+			uint8_t* noteOffset, uint8_t noteCount);
 
-		void renderChordWavetable(
-			const uint8_t* sync,
-			int16_t* buffer,
-			size_t size,
-			uint32_t* phase_offsets,
-			uint8_t noteCount);
+		void renderChordWavetable(const uint8_t* sync, int16_t* buffer, size_t size,
+			uint32_t* phase_offsets, uint8_t noteCount);
 
-		void renderChordSaw(
-			const uint8_t* sync,
-			int16_t* buffer,
-			size_t size,
-			uint32_t* phase_offsets,
-			uint8_t noteCount);
+		void renderChordSaw(const uint8_t* sync, int16_t* buffer, size_t size,
+			uint32_t* phase_offsets, uint8_t noteCount);
 
-		void renderChordSquare(
-			const uint8_t* sync,
-			int16_t* buffer,
-			size_t size,
-			uint32_t* phase_offsets,
-			uint8_t noteCount);
+		void renderChordSquare(const uint8_t* sync, int16_t* buffer, size_t size,
+			uint32_t* phase_offsets, uint8_t noteCount);
 
-		void renderChordSine(
-			const uint8_t* sync,
-			int16_t* buffer,
-			size_t size,
-			uint32_t* phase_offsets,
-			uint8_t noteCount);
+		void renderChordSine(const uint8_t* sync, int16_t* buffer, size_t size,
+			uint32_t* phase_offsets, uint8_t noteCount);
 
-		void renderChordTriangle(
-			const uint8_t* sync,
-			int16_t* buffer,
-			size_t size,
-			uint32_t* phase_offsets,
-			uint8_t noteCount);
+		void renderChordTriangle(const uint8_t* sync, int16_t* buffer, size_t size,
+			uint32_t* phase_offsets, uint8_t noteCount);
 
 		// void RenderYourAlgo(const uint8_t*, int16_t*, size_t);
 
 		uint32_t ComputePhaseIncrement(int16_t midi_pitch);
 		uint32_t ComputeDelay(int16_t midi_pitch);
-		int16_t InterpolateFormantParameter(
-			const int16_t table[][kNumFormants][kNumFormants],
-			int16_t x,
-			int16_t y,
-			uint8_t formant);
+		int16_t InterpolateFormantParameter(const int16_t table[][kNumFormants][kNumFormants],
+			int16_t x, int16_t y, uint8_t formant);
 
 		uint32_t phase_;
 		uint32_t phase_increment_;
@@ -448,7 +418,5 @@ namespace renaissance {
 
 		DISALLOW_COPY_AND_ASSIGN(DigitalOscillator);
 	};
-
 }  // namespace renaissance
-
 #endif
