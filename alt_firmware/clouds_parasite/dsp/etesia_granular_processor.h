@@ -87,10 +87,6 @@ namespace etesia {
 			return &parameters_;
 		}
 
-		inline const Parameters& parameters() const {
-			return parameters_;
-		}
-
 		inline void set_playback_mode(PlaybackMode playback_mode) {
 			playback_mode_ = playback_mode;
 		}
