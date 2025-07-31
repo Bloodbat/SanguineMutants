@@ -1780,7 +1780,6 @@ namespace braids {
   }
 
   void DigitalOscillator::RenderTwinPeaksNoise(const uint8_t* sync, int16_t* buffer, size_t size) {
-    int32_t sample;
     int32_t y10, y20;
     int32_t y11 = state_.pno.filter_state[0][0];
     int32_t y12 = state_.pno.filter_state[0][1];
@@ -1805,7 +1804,7 @@ namespace braids {
     int32_t makeup_gain = 8191 - (parameter_[0] >> 2);
 
     while (size) {
-      sample = Random::GetSample() >> 1;
+      int32_t sample = Random::GetSample() >> 1;
 
       if (sample > 0) {
         y10 = sample * s1 >> 16;
@@ -1974,7 +1973,6 @@ namespace braids {
   void DigitalOscillator::RenderParticleNoise(const uint8_t* sync, int16_t* buffer, size_t size) {
     uint16_t amplitude = state_.pno.amplitude;
     uint32_t density = 1024 + parameter_[0];
-    int32_t sample;
 
     int32_t y10, y20, y30;
     int32_t y11 = state_.pno.filter_state[0][0];
@@ -2016,7 +2014,7 @@ namespace braids {
         c2 = c2 * kResonanceFactor >> 15;
         c3 = c3 * kResonanceFactor >> 15;
       }
-      sample = (static_cast<int16_t>(noise) * amplitude) >> 16;
+      int32_t sample = (static_cast<int16_t>(noise) * amplitude) >> 16;
       amplitude = (amplitude * kParticleNoiseDecay) >> 16;
 
       if (sample > 0) {
