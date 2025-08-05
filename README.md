@@ -10,7 +10,7 @@ Looking for the Monsters? Click [here](https://github.com/Bloodbat/SanguineMonst
 
 ## Modules
 
-![alt text](pics/mutants_modules.png)
+![Sanguine Mutants modules](pics/mutants_modules.png)
 
 Base modules are listed in alphabetical order, with their alternative firmwares and expanders immediately following.
 
