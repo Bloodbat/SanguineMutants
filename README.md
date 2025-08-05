@@ -25,7 +25,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 - ### Aleae
 
   A polyphonic pair of Bernoulli gates based on MI's Branches. Works as described in the hardware manual. Every option is present on the face plate: no need to go context menu diving.
-  
+
   - ### Vimina
 
     A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
@@ -39,7 +39,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
   A versatile complement to any patch, based on MI's Peaks. It exposes every control and provides access to the Bouncing Ball envelope, unavailable in unmodified hardware.
 
   - ### Nix
-  
+
     An expander for Apices that provides CV parameter modulation, inspired by the Rainier version of MI's Peaks.
 
   - ### Mortuus
@@ -63,11 +63,11 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 - ### Incurvationes
 
   A fully polyphonic meta-modulator based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
-  
+
   - ### Distortiones
 
    A polyphonic, doctored, flexible meta-modulator based on the Parasite firmware for MI's Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
-  
+
   - ### Mutuus
 
     A polyphonic, multifaceted meta-modulator based on the Symbiote firmware for MI's Warps.
@@ -87,7 +87,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
   - ### Etesia
 
     A polyphonic texture synthesizer based on the Parasite firmware for MI's Clouds and Southpole's Smoke Parasite. Exposes every control.
-    
+
   - ### Fluctus
 
     A polyphonic texture synthesizer based on the Kammerl Beat-Repeat firmware for MI's Clouds.
@@ -105,9 +105,34 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
   A topographic sequencer based on MI's Grids with new, versatile capabilities exclusive to Sanguine Mutants.
 
 - ### Scalaria
-  
+
   A polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for MI's Warps.
 
 - ### Velamina
 
   A polyphonic tetrad of voltage controlled amplifiers; my attempt at recreating MI's Veils... the 2020 version. Outputs beyond 10V are saturated.
+
+## MetaModule port modules
+
+A port for MetaModule, courtesy of Eric Gao, is available!
+
+The modules available in the MetaModule port are the following:
+
+|                                                        |                                                  |                                                          |
+| :----------------------------------------------------: | :----------------------------------------------: | :------------------------------------------------------: |
+|       ![Aestus](meta_pics/aestus_metamodule.png)       |     ![Aleae](meta_pics/aleae_metamodule.png)     |         ![Anuli](meta_pics/anuli_metamodule.png)         |
+|                         Aestus                         |                      Aleae                       |                          Anuli                           |
+|       ![Apices](meta_pics/apices_metamodule.png)       |     ![Blank](meta_pics/blank_metamodule.png)     |     ![Contextus](meta_pics/contextus_metamodule.png)     |
+|                         Apices                         |                      Blank                       |                        Contextus                         |
+| ![Distortiones](meta_pics/distortiones_metamodule.png) |    ![Etesia](meta_pics/etesia_metamodule.png)    |    ![Explorator](meta_pics/explorator_metamodule.png)    |
+|                      Distortiones                      |                      Etesia                      |                        Explorator                        |
+|      ![Fluctus](meta_pics/fluctus_metamodule.png)      |     ![Funes](meta_pics/funes_metamodule.png)     | ![Incurvationes](meta_pics/incurvationes_metamodule.png) |
+|                        Fluctus                         |                      Funes                       |                      Incurvationes                       |
+|      ![Marmora](meta_pics/marmora_metamodule.png)      |   ![Mortuus](meta_pics/mortuus_metamodule.png)   |        ![Mutuus](meta_pics/mutuus_metamodule.png)        |
+|                        Marmora                         |                     Mortuus                      |                          Mutuus                          |
+|      ![Nebulae](meta_pics/nebulae_metamodule.png)      |      ![Nodi](meta_pics/nodi_metamodule.png)      |      ![Reticula](meta_pics/reticula_metamodule.png)      |
+|                        Nebulae                         |                       Nodi                       |                         Reticula                         |
+|     ![Scalaria](meta_pics/scalaria_metamodule.png)     | ![Temulenti](meta_pics/temulenti_metamodule.png) |      ![Velamina](meta_pics/velamina_metamodule.png)      |
+|                        Scalaria                        |                    Temulenti                     |                         Velamina                         |
+|       ![Vimina](meta_pics/vimina_metamodule.png)       |                                                  |                                                          |
+|                         Vimina                         |                                                  |                                                          |
