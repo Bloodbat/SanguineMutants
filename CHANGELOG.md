@@ -24,11 +24,12 @@
 
 - Plugin: performance tweaks.
 
+- Apices family expanders: display trimpot values as percentages.
 - Contextus: make synthesis models light color palette more distinctive.
 
 - Funes: relate knobs using color.
 
-- Nebulae family: better parameter tooltips and display contents tweaks.
+- Nebulae family: better parameter and input tooltips.
 
 - Nebulae family: improve lights response.
 
