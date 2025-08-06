@@ -820,23 +820,23 @@ struct Apices : SanguineModule {
 					if (bHasExpander) {
 						Module* nixExpander = getRightExpander().module;
 
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob1 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob2 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob3 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob4 + apicesCommon::kSuffixCV;
+						std::string toolTipText;
 
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob1;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob2;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob3;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = channelTextKnob +
-							apices::knobLabelsTwinMode[currentFunction].knob4;
+						toolTipText = channelTextKnob + apices::knobLabelsTwinMode[currentFunction].knob1;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channelTextKnob + apices::knobLabelsTwinMode[currentFunction].knob2;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channelTextKnob + apices::knobLabelsTwinMode[currentFunction].knob3;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channelTextKnob + apices::knobLabelsTwinMode[currentFunction].knob4;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = toolTipText + apicesCommon::kSuffixCV;
 
 						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
 						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
@@ -867,41 +867,39 @@ struct Apices : SanguineModule {
 
 						Module* nixExpander = getRightExpander().module;
 
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob1 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob2 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob3 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob4 + apicesCommon::kSuffixCV;
+						std::string toolTipText;
 
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob1;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob2;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob3;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = channel1TextKnob +
-							apices::knobLabelsTwinMode[processor1Function].knob4;
+						toolTipText = channel1TextKnob + apices::knobLabelsTwinMode[processor1Function].knob1;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name = toolTipText + apicesCommon::kSuffixCV;
 
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob1 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob2 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob3 + apicesCommon::kSuffixCV;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob4 + apicesCommon::kSuffixCV;
+						toolTipText = channel1TextKnob + apices::knobLabelsTwinMode[processor1Function].knob2;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name = toolTipText + apicesCommon::kSuffixCV;
 
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob1;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob2;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob3;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
-							apices::knobLabelsTwinMode[processor2Function].knob4;
+						toolTipText = channel1TextKnob + apices::knobLabelsTwinMode[processor1Function].knob3;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel1TextKnob + apices::knobLabelsTwinMode[processor1Function].knob4;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + apices::knobLabelsTwinMode[processor2Function].knob1;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + apices::knobLabelsTwinMode[processor2Function].knob2;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + apices::knobLabelsTwinMode[processor2Function].knob3;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + apices::knobLabelsTwinMode[processor2Function].knob4;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = toolTipText;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = toolTipText + apicesCommon::kSuffixCV;
 					}
 				}
 
