@@ -30,7 +30,7 @@ namespace apices {
         "BOUNCE BALL@"
     };
 
-    static const std::vector<apicesCommon::KnobLabels> knobLabelsSplitMode{
+    static const std::vector<apicesCommon::KnobLabels> displayLabelsSplitMode{
         { "1. Attack", "1. Decay", "2. Attack",  "2. Decay" },
         { "1. Frequency", "1. Waveform", "2. Frequency", "2. Waveform" },
         { "1. Waveform", "1. Wave. Var.", "2. Waveform", "2. Wave. Var." },
@@ -43,7 +43,7 @@ namespace apices {
         { "1. Gravity", "1. Bounce", "2. Gravity", "2. Bounce" }
     };
 
-    static const std::vector<apicesCommon::KnobLabels> knobLabelsTwinMode{
+    static const std::vector<apicesCommon::KnobLabels> displayLabelsTwinMode{
         { "Attack", "Decay", "Sustain", "Release" },
         { "Frequency", "Waveform", "Wave. Var", "Phase" },
         { "Amplitude", "Waveform", "Wave. Var", "Phase" },
