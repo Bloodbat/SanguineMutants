@@ -78,6 +78,8 @@
 
 ## Removals
 
+- Apices family: OLED displays when running under MetaModule.
+
 - Nebulae family: emulation of hardware parameter and quality light patterns: not very useful when the modules are polyphonic (and every parameter is on the faceplate showing its value at all times).
 
 - Nebulae family: OLED displays when running under MetaModule.
