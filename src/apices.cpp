@@ -754,10 +754,10 @@ struct Apices : SanguineModule {
 
 	void updateOleds() {
 		if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
-			oledText1 = apices::knobLabelsSplitMode[processorFunctions[0]].knob1;
-			oledText2 = apices::knobLabelsSplitMode[processorFunctions[0]].knob2;
-			oledText3 = apices::knobLabelsSplitMode[processorFunctions[0]].knob3;
-			oledText4 = apices::knobLabelsSplitMode[processorFunctions[0]].knob4;
+			oledText1 = apices::displayLabelsSplitMode[processorFunctions[0]].knob1;
+			oledText2 = apices::displayLabelsSplitMode[processorFunctions[0]].knob2;
+			oledText3 = apices::displayLabelsSplitMode[processorFunctions[0]].knob3;
+			oledText4 = apices::displayLabelsSplitMode[processorFunctions[0]].knob4;
 		} else {
 			int currentFunction = -1;
 			std::string channelText;
@@ -774,10 +774,10 @@ struct Apices : SanguineModule {
 				channelText = string::f("%d. ", functionOffset + 1);
 			}
 
-			oledText1 = channelText + apices::knobLabelsTwinMode[currentFunction].knob1;
-			oledText2 = channelText + apices::knobLabelsTwinMode[currentFunction].knob2;
-			oledText3 = channelText + apices::knobLabelsTwinMode[currentFunction].knob3;
-			oledText4 = channelText + apices::knobLabelsTwinMode[currentFunction].knob4;
+			oledText1 = channelText + apices::displayLabelsTwinMode[currentFunction].knob1;
+			oledText2 = channelText + apices::displayLabelsTwinMode[currentFunction].knob2;
+			oledText3 = channelText + apices::displayLabelsTwinMode[currentFunction].knob3;
+			oledText4 = channelText + apices::displayLabelsTwinMode[currentFunction].knob4;
 		}
 	}
 
@@ -1088,19 +1088,19 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		apicesFramebuffer->addChild(oledDisplay1);
-		oledDisplay1->fallbackString = apices::knobLabelsTwinMode[0].knob1;
+		oledDisplay1->fallbackString = apices::displayLabelsTwinMode[0].knob1;
 
 		Sanguine96x32OLEDDisplay* oledDisplay2 = new Sanguine96x32OLEDDisplay(module, 81.759, 74.91);
 		apicesFramebuffer->addChild(oledDisplay2);
-		oledDisplay2->fallbackString = apices::knobLabelsTwinMode[0].knob2;
+		oledDisplay2->fallbackString = apices::displayLabelsTwinMode[0].knob2;
 
 		Sanguine96x32OLEDDisplay* oledDisplay3 = new Sanguine96x32OLEDDisplay(module, 30.264, 84.057);
 		apicesFramebuffer->addChild(oledDisplay3);
-		oledDisplay3->fallbackString = apices::knobLabelsTwinMode[0].knob3;
+		oledDisplay3->fallbackString = apices::displayLabelsTwinMode[0].knob3;
 
 		Sanguine96x32OLEDDisplay* oledDisplay4 = new Sanguine96x32OLEDDisplay(module, 81.759, 84.057);
 		apicesFramebuffer->addChild(oledDisplay4);
-		oledDisplay4->fallbackString = apices::knobLabelsTwinMode[0].knob4;
+		oledDisplay4->fallbackString = apices::displayLabelsTwinMode[0].knob4;
 
 #ifndef METAMODULE
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
