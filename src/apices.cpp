@@ -113,10 +113,12 @@ struct Apices : SanguineModule {
 	std::string displayText1 = "";
 	std::string displayText2 = "";
 
+#ifndef METAMODULE
 	std::string oledText1 = "";
 	std::string oledText2 = "";
 	std::string oledText3 = "";
 	std::string oledText4 = "";
+#endif
 
 	const peaks::ProcessorFunction processorFunctionTable[apices::FUNCTION_LAST][apicesCommon::kChannelCount] = {
 		{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
@@ -767,10 +769,12 @@ struct Apices : SanguineModule {
 				paramQuantities[PARAM_KNOB_3]->name = apices::knobLabelsSplitMode[processorFunctions[0]].knob3;
 				paramQuantities[PARAM_KNOB_4]->name = apices::knobLabelsSplitMode[processorFunctions[0]].knob4;
 
+#ifndef METAMODULE
 				oledText1 = apices::displayLabelsSplitMode[processorFunctions[0]].knob1;
 				oledText2 = apices::displayLabelsSplitMode[processorFunctions[0]].knob2;
 				oledText3 = apices::displayLabelsSplitMode[processorFunctions[0]].knob3;
 				oledText4 = apices::displayLabelsSplitMode[processorFunctions[0]].knob4;
+#endif
 
 				if (bHasExpander) {
 					Module* nixExpander = getRightExpander().module;
@@ -910,10 +914,12 @@ struct Apices : SanguineModule {
 				paramQuantities[PARAM_KNOB_4]->name = channelTextKnob +
 					apices::knobLabelsTwinMode[currentFunction].knob4;
 
+#ifndef METAMODULE
 				oledText1 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob1;
 				oledText2 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob2;
 				oledText3 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob3;
 				oledText4 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob4;
+#endif
 			}
 			lastEditMode = editMode;
 			lastProcessorFunctions[0] = processorFunctions[0];
@@ -1226,6 +1232,7 @@ struct ApicesWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 100.846), module, Apices::OUTPUT_OUT_1));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Apices::OUTPUT_OUT_2));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		apicesFramebuffer->addChild(oledDisplay1);
 		oledDisplay1->fallbackString = apices::displayLabelsTwinMode[0].knob1;
@@ -1242,7 +1249,6 @@ struct ApicesWidget : SanguineModuleWidget {
 		apicesFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = apices::displayLabelsTwinMode[0].knob4;
 
-#ifndef METAMODULE
 		SanguineMutantsLogoLight* mutantsLogo = new SanguineMutantsLogoLight(module, 59.118, 117.108);
 		addChild(mutantsLogo);
 
@@ -1257,10 +1263,12 @@ struct ApicesWidget : SanguineModuleWidget {
 #endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;
+#ifndef METAMODULE
 			oledDisplay1->oledText = &module->oledText1;
 			oledDisplay2->oledText = &module->oledText2;
 			oledDisplay3->oledText = &module->oledText3;
 			oledDisplay4->oledText = &module->oledText4;
+#endif
 		}
 	}
 
