@@ -767,8 +767,6 @@ struct Apices : SanguineModule {
 			// If expert, pick the active set of labels.
 			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 				currentFunction = processorFunctions[editMode - apicesCommon::EDIT_MODE_FIRST];
-			} else {
-				return;
 			}
 
 			std::string channelText = (editMode == apicesCommon::EDIT_MODE_TWIN) ?
