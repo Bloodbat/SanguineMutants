@@ -26,6 +26,10 @@
 
 - Apices family: tap lfo tempo values are now saved to and restored from patches and presets.
 
+- Apices family: knob tooltips for the different modes.
+
+- Apices family expanders: mode dependent tooltips for the trimpots and inputs.
+
 - Funes: new chord banks from Lyle Mills' firmware.
 
 - Funes: ability and controls to crossfade the main signal with the auxiliary signal and output it in the Aux output, adapted from Lyle Mills' firmware.
