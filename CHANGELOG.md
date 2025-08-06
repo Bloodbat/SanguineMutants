@@ -43,6 +43,10 @@
 
 - Vimina: produce slightly longer triggers.
 
+## Removals
+
+- Apices family: OLED displays when running under MetaModule.
+
 
 ---
 
