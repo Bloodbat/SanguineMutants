@@ -794,8 +794,10 @@ struct Mortuus : SanguineModule {
 			}
 			// If expert, pick the active set of labels.
 			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
-				currentFunction = processorFunctions[editMode - apicesCommon::EDIT_MODE_FIRST];
-				channelText = string::f("%d. ", editMode - apicesCommon::EDIT_MODE_FIRST + 1);
+				int functionOffset = editMode - apicesCommon::EDIT_MODE_FIRST;
+
+				currentFunction = processorFunctions[functionOffset];
+				channelText = string::f("%d. ", functionOffset + 1);
 			}
 
 			oledText1 = channelText + mortuus::knobLabelsTwinMode[currentFunction].knob1;
