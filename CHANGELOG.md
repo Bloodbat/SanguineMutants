@@ -62,6 +62,8 @@
 
 - Apices family expanders: display trimpot values as percentages.
 
+- Apices family expanders: reorder the faceplates to resemble the order of the base modules a bit more.
+
 - Contextus: make synthesis models light color palette more distinctive.
 
 - Funes: relate knobs using color.

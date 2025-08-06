@@ -50,41 +50,42 @@ struct NixWidget : SanguineModuleWidget {
 
         addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(2.8, 5.573), module, Nix::LIGHT_MASTER_MODULE));
 
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(11.295, 11.455), module, Nix::LIGHT_SPLIT_CHANNEL_1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(34.43, 11.455), module, Nix::LIGHT_SPLIT_CHANNEL_2));
-
         addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 20.72), module, Nix::PARAM_PARAM_CV_1));
         addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(17.653, 25.113), module, Nix::LIGHT_PARAM_1));
         addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 30.518), module, Nix::INPUT_PARAM_CV_1));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 43.641), module, Nix::PARAM_PARAM_CV_2));
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(17.653, 48.046), module, Nix::LIGHT_PARAM_2));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 53.45), module, Nix::INPUT_PARAM_CV_2));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(34.43, 20.72), module, Nix::PARAM_PARAM_CV_2));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(28.067, 25.113), module, Nix::LIGHT_PARAM_2));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(34.43, 30.518), module, Nix::INPUT_PARAM_CV_2));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 83.001), module, Nix::PARAM_PARAM_CV_3));
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(17.653, 87.405), module, Nix::LIGHT_PARAM_3));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 92.81), module, Nix::INPUT_PARAM_CV_3));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(22.862, 36.706), module, Nix::LIGHT_SPLIT_CHANNEL_1));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 105.933), module, Nix::PARAM_PARAM_CV_4));
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(17.653, 110.338), module, Nix::LIGHT_PARAM_4));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 115.742), module, Nix::INPUT_PARAM_CV_4));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 43.641), module, Nix::PARAM_PARAM_CV_3));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(17.653, 48.046), module, Nix::LIGHT_PARAM_3));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 53.45), module, Nix::INPUT_PARAM_CV_3));
+
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(34.43, 43.641), module, Nix::PARAM_PARAM_CV_4));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(millimetersToPixelsVec(28.067, 48.046), module, Nix::LIGHT_PARAM_4));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(34.43, 53.45), module, Nix::INPUT_PARAM_CV_4));
 
         // Split Channel 2
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.994, 20.72), module, Nix::PARAM_PARAM_CV_CHANNEL_2_1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(40.789, 25.113), module, Nix::LIGHT_PARAM_CHANNEL_2_1));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.994, 30.518), module, Nix::INPUT_PARAM_CV_CHANNEL_2_1));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 83.001), module, Nix::PARAM_PARAM_CV_CHANNEL_2_1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(17.653, 87.405), module, Nix::LIGHT_PARAM_CHANNEL_2_1));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 92.81), module, Nix::INPUT_PARAM_CV_CHANNEL_2_1));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.994, 43.641), module, Nix::PARAM_PARAM_CV_CHANNEL_2_2));
-        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(40.789, 48.046), module, Nix::LIGHT_PARAM_CHANNEL_2_2));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.994, 53.45), module, Nix::INPUT_PARAM_CV_CHANNEL_2_2));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(34.43, 83.001), module, Nix::PARAM_PARAM_CV_CHANNEL_2_2));
+        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(28.067, 87.405), module, Nix::LIGHT_PARAM_CHANNEL_2_2));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.994, 92.81), module, Nix::INPUT_PARAM_CV_CHANNEL_2_2));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.994, 83.001), module, Nix::PARAM_PARAM_CV_CHANNEL_2_3));
-        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(40.789, 87.405), module, Nix::LIGHT_PARAM_CHANNEL_2_3));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.994, 92.81), module, Nix::INPUT_PARAM_CV_CHANNEL_2_3));
+        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(22.862, 98.998), module, Nix::LIGHT_SPLIT_CHANNEL_2));
 
-        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(33.994, 105.933), module, Nix::PARAM_PARAM_CV_CHANNEL_2_4));
-        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(40.789, 110.338), module, Nix::LIGHT_PARAM_CHANNEL_2_4));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(33.994, 115.742), module, Nix::INPUT_PARAM_CV_CHANNEL_2_4));
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 105.933), module, Nix::PARAM_PARAM_CV_CHANNEL_2_3));
+        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(17.653, 110.338), module, Nix::LIGHT_PARAM_CHANNEL_2_3));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(10.859, 115.742), module, Nix::INPUT_PARAM_CV_CHANNEL_2_3));
+
+        addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(34.43, 105.933), module, Nix::PARAM_PARAM_CV_CHANNEL_2_4));
+        addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(28.067, 110.338), module, Nix::LIGHT_PARAM_CHANNEL_2_4));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(34.43, 115.742), module, Nix::INPUT_PARAM_CV_CHANNEL_2_4));
     }
 };
 
