@@ -53,7 +53,7 @@ struct Apices : SanguineModule {
 		LIGHT_FUNCTION_2,
 		LIGHT_FUNCTION_3,
 		LIGHT_FUNCTION_4,
-#ifndef metamodule
+#ifndef METAMODULE
 		LIGHT_EXPANDER,
 #endif
 		LIGHTS_COUNT
@@ -753,26 +753,26 @@ struct Apices : SanguineModule {
 	}
 
 	void updateOleds() {
-		if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
-			oledText1 = apices::displayLabelsSplitMode[processorFunctions[0]].knob1;
-			oledText2 = apices::displayLabelsSplitMode[processorFunctions[0]].knob2;
-			oledText3 = apices::displayLabelsSplitMode[processorFunctions[0]].knob3;
-			oledText4 = apices::displayLabelsSplitMode[processorFunctions[0]].knob4;
-		} else {
-			int currentFunction = -1;
+			if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
+				oledText1 = apices::displayLabelsSplitMode[processorFunctions[0]].knob1;
+				oledText2 = apices::displayLabelsSplitMode[processorFunctions[0]].knob2;
+				oledText3 = apices::displayLabelsSplitMode[processorFunctions[0]].knob3;
+				oledText4 = apices::displayLabelsSplitMode[processorFunctions[0]].knob4;
+			} else {
+				int currentFunction = -1;
 			std::string channelText;
-			// Same for both.
-			if (editMode == apicesCommon::EDIT_MODE_TWIN) {
-				currentFunction = processorFunctions[0];
+				// Same for both.
+				if (editMode == apicesCommon::EDIT_MODE_TWIN) {
+					currentFunction = processorFunctions[0];
 				channelText = "1&2. ";
-			}
-			// If expert, pick the active set of labels.
-			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
-				int functionOffset = editMode - apicesCommon::EDIT_MODE_FIRST;
+				}
+				// If expert, pick the active set of labels.
+				else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
+					int functionOffset = editMode - apicesCommon::EDIT_MODE_FIRST;
 
-				currentFunction = processorFunctions[functionOffset];
+					currentFunction = processorFunctions[functionOffset];
 				channelText = string::f("%d. ", functionOffset + 1);
-			}
+				}
 
 			oledText1 = channelText + apices::displayLabelsTwinMode[currentFunction].knob1;
 			oledText2 = channelText + apices::displayLabelsTwinMode[currentFunction].knob2;
