@@ -27,6 +27,8 @@
 
 - Plugin: performance tweaks.
 
+- Apices family: display knob values as percentages.
+
 - Apices family expanders: display trimpot values as percentages.
 
 - Contextus: make synthesis models light color palette more distinctive.
