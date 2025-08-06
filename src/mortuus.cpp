@@ -151,10 +151,10 @@ struct Mortuus : SanguineModule {
 		configParam(PARAM_MODE, 0.f, mortuus::FUNCTION_LAST - 1, 0.f, "Mode", "", 0.f, 1.f, 1.f);
 		paramQuantities[PARAM_MODE]->snapEnabled = true;
 
-		configParam(PARAM_KNOB_1, 0.f, 65535.f, 32678.f, "Knob 1", "", 0.f, (1.f / 65535.f) * 100);
-		configParam(PARAM_KNOB_2, 0.f, 65535.f, 32678.f, "Knob 2", "", 0.f, (1.f / 65535.f) * 100);
-		configParam(PARAM_KNOB_3, 0.f, 65535.f, 32678.f, "Knob 3", "", 0.f, (1.f / 65535.f) * 100);
-		configParam(PARAM_KNOB_4, 0.f, 65535.f, 32678.f, "Knob 4", "", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_1, 0.f, 65535.f, 32678.f, "Knob 1", "%", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_2, 0.f, 65535.f, 32678.f, "Knob 2", "%", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_3, 0.f, 65535.f, 32678.f, "Knob 3", "%", 0.f, (1.f / 65535.f) * 100);
+		configParam(PARAM_KNOB_4, 0.f, 65535.f, 32678.f, "Knob 4", "%", 0.f, (1.f / 65535.f) * 100);
 		configButton(PARAM_EDIT_MODE, "Toggle split mode");
 		configButton(PARAM_CHANNEL_SELECT, "Expert mode channel select");
 		configButton(PARAM_EXPERT_MODE, "Toggle expert mode");
