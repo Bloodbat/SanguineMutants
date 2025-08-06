@@ -113,10 +113,12 @@ struct Mortuus : SanguineModule {
 	std::string displayText1 = "";
 	std::string displayText2 = "";
 
+#ifndef METAMODULE
 	std::string oledText1 = "";
 	std::string oledText2 = "";
 	std::string oledText3 = "";
 	std::string oledText4 = "";
+#endif
 
 	const deadman::ProcessorFunction processorFunctionTable[mortuus::FUNCTION_LAST][apicesCommon::kChannelCount] = {
 		{ deadman::PROCESSOR_FUNCTION_ENVELOPE, deadman::PROCESSOR_FUNCTION_ENVELOPE },
@@ -793,10 +795,12 @@ struct Mortuus : SanguineModule {
 				paramQuantities[PARAM_KNOB_3]->name = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob3;
 				paramQuantities[PARAM_KNOB_4]->name = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4;
 
+#ifndef METAMODULE
 				oledText1 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob1;
 				oledText2 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob2;
 				oledText3 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob3;
 				oledText4 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob4;
+#endif
 
 				if (bHasExpander) {
 					Module* ansaExpander = getRightExpander().module;
@@ -936,10 +940,12 @@ struct Mortuus : SanguineModule {
 				paramQuantities[PARAM_KNOB_4]->name = channelTextKnob +
 					mortuus::knobLabelsTwinMode[currentFunction].knob4;
 
+#ifndef METAMODULE
 				oledText1 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob1;
 				oledText2 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob2;
 				oledText3 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob3;
 				oledText4 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob4;
+#endif
 			}
 
 			lastEditMode = editMode;
@@ -1276,6 +1282,7 @@ struct MortuusWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 100.846), module, Mortuus::OUTPUT_OUT_1));
 		addOutput(createOutputCentered<BananutRed>(millimetersToPixelsVec(101.388, 116.989), module, Mortuus::OUTPUT_OUT_2));
 
+#ifndef METAMODULE
 		Sanguine96x32OLEDDisplay* oledDisplay1 = new Sanguine96x32OLEDDisplay(module, 30.264, 74.91);
 		mortuusFramebuffer->addChild(oledDisplay1);
 		oledDisplay1->fallbackString = mortuus::displayLabelsTwinMode[0].knob1;
@@ -1292,7 +1299,6 @@ struct MortuusWidget : SanguineModuleWidget {
 		mortuusFramebuffer->addChild(oledDisplay4);
 		oledDisplay4->fallbackString = mortuus::displayLabelsTwinMode[0].knob4;
 
-#ifndef METAMODULE
 		SanguineBloodLogoLight* bloodLogo = new SanguineBloodLogoLight(module, 46.116, 110.175);
 		addChild(bloodLogo);
 
@@ -1307,10 +1313,13 @@ struct MortuusWidget : SanguineModuleWidget {
 #endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;
+
+#ifndef METAMODULE
 			oledDisplay1->oledText = &module->oledText1;
 			oledDisplay2->oledText = &module->oledText2;
 			oledDisplay3->oledText = &module->oledText3;
 			oledDisplay4->oledText = &module->oledText4;
+#endif
 		}
 	}
 
