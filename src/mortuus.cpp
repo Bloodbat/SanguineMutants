@@ -846,23 +846,23 @@ struct Mortuus : SanguineModule {
 					if (bHasExpander) {
 						Module* ansaExpander = getRightExpander().module;
 
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob1 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob2 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob3 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob4 + apicesCommon::kSuffixCV;
+						std::string toolTipText;
 
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob1;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob2;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob3;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = channelTextKnob +
-							mortuus::knobLabelsTwinMode[currentFunction].knob4;
+						toolTipText = channelTextKnob + mortuus::knobLabelsTwinMode[currentFunction].knob1;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channelTextKnob + mortuus::knobLabelsTwinMode[currentFunction].knob2;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channelTextKnob + mortuus::knobLabelsTwinMode[currentFunction].knob3;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channelTextKnob + mortuus::knobLabelsTwinMode[currentFunction].knob4;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = toolTipText + apicesCommon::kSuffixCV;
 
 						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
 						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
@@ -893,41 +893,39 @@ struct Mortuus : SanguineModule {
 
 						Module* ansaExpander = getRightExpander().module;
 
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob1 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob2 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob3 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob4 + apicesCommon::kSuffixCV;
+						std::string toolTipText;
 
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob1;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob2;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob3;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = channel1TextKnob +
-							mortuus::knobLabelsTwinMode[processor1Function].knob4;
+						toolTipText = channel1TextKnob + mortuus::knobLabelsTwinMode[processor1Function].knob1;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name = toolTipText + apicesCommon::kSuffixCV;
 
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob1 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob2 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob3 + apicesCommon::kSuffixCV;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob4 + apicesCommon::kSuffixCV;
+						toolTipText = channel1TextKnob + mortuus::knobLabelsTwinMode[processor1Function].knob2;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name = toolTipText + apicesCommon::kSuffixCV;
 
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob1;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob2;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob3;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
-							mortuus::knobLabelsTwinMode[processor2Function].knob4;
+						toolTipText = channel1TextKnob + mortuus::knobLabelsTwinMode[processor1Function].knob3;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel1TextKnob + mortuus::knobLabelsTwinMode[processor1Function].knob4;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + mortuus::knobLabelsTwinMode[processor2Function].knob1;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + mortuus::knobLabelsTwinMode[processor2Function].knob2;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + mortuus::knobLabelsTwinMode[processor2Function].knob3;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = toolTipText + apicesCommon::kSuffixCV;
+
+						toolTipText = channel2TextKnob + mortuus::knobLabelsTwinMode[processor2Function].knob4;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = toolTipText;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = toolTipText + apicesCommon::kSuffixCV;
 					}
 				}
 
