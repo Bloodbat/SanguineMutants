@@ -786,17 +786,17 @@ struct Mortuus : SanguineModule {
 			oledText4 = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4;
 		} else {
 			int currentFunction = -1;
+			std::string channelText;
 			// Same for both.
 			if (editMode == apicesCommon::EDIT_MODE_TWIN) {
 				currentFunction = processorFunctions[0];
+				channelText = "1&2. ";
 			}
 			// If expert, pick the active set of labels.
 			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 				currentFunction = processorFunctions[editMode - apicesCommon::EDIT_MODE_FIRST];
+				channelText = string::f("%d. ", editMode - apicesCommon::EDIT_MODE_FIRST + 1);
 			}
-
-			std::string channelText = (editMode == apicesCommon::EDIT_MODE_TWIN) ?
-				"1&2. " : string::f("%d. ", editMode - apicesCommon::EDIT_MODE_FIRST + 1);
 
 			oledText1 = channelText + mortuus::knobLabelsTwinMode[currentFunction].knob1;
 			oledText2 = channelText + mortuus::knobLabelsTwinMode[currentFunction].knob2;
