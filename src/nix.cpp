@@ -5,11 +5,12 @@ Nix::Nix() {
 
     for (size_t parameter = 0; parameter < apicesCommon::kKnobCount; ++parameter) {
         int functionNumber = parameter + 1;
-        configParam(PARAM_PARAM_CV_1 + parameter, -1.f, 1.f, 0.f, string::f("Parameter %d CV", functionNumber));
+        configParam(PARAM_PARAM_CV_1 + parameter, -1.f, 1.f, 0.f, string::f("Parameter %d CV", functionNumber),
+            "%", 0.f, 100.f);
         configInput(INPUT_PARAM_CV_1 + parameter, string::f("Parameter %d", functionNumber));
 
         configParam(PARAM_PARAM_CV_1 + parameter + apicesCommon::kChannel2Offset, -1.f, 1.f, 0.f,
-            string::f("Expert channel 2 parameter %d CV", functionNumber));
+            string::f("Expert channel 2 parameter %d CV", functionNumber), "%", 0.f, 100.f);
         configInput(INPUT_PARAM_CV_1 + parameter + apicesCommon::kChannel2Offset,
             string::f("Expert channel 2 parameter %d", functionNumber));
     }

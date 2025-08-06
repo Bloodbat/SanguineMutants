@@ -54,6 +54,8 @@
 
 - Aestus family: turn off Range button LED when PLL/Sync mode is enabled.
 
+- Apices family expanders: display trimpot values as percentages.
+
 - Contextus: make synthesis models light color palette more distinctive.
 
 - Funes: relate knobs using color.
