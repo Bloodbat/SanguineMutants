@@ -60,7 +60,9 @@ struct Apices : SanguineModule {
 	};
 
 	apicesCommon::EditModes editMode = apicesCommon::EDIT_MODE_TWIN;
+	apicesCommon::EditModes lastEditMode = apicesCommon::EDIT_MODE_LAST;
 	apices::ProcessorFunctions processorFunctions[apicesCommon::kChannelCount] = { apices::FUNCTION_ENVELOPE, apices::FUNCTION_ENVELOPE };
+	apices::ProcessorFunctions lastProcessorFunctions[apicesCommon::kChannelCount] = { apices::FUNCTION_LAST, apices::FUNCTION_LAST };
 	apicesCommon::Settings settings = {};
 
 	uint8_t potValues[apicesCommon::kKnobCount * 2] = {};
@@ -166,6 +168,7 @@ struct Apices : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 #ifndef METAMODULE
+		// TODO: maybe this could be a class global!
 		Module* nixExpander = getRightExpander().module;
 		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 #endif
@@ -200,6 +203,7 @@ struct Apices : SanguineModule {
 			bWasExpanderConnected = true;
 
 			// Channel 1 strip.
+			// TODO: this does not need initialization.
 			simd::float_4 expanderCVValues1 = {};
 
 			expanderCVValues1[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_1).getVoltage();
@@ -228,6 +232,8 @@ struct Apices : SanguineModule {
 			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
 			// Channel 2 strip.
+			// TODO: this does not need initialization.
+			// TODO: process these only when expert mode is enabled!
 			simd::float_4 expanderCVValues2 = {};
 
 			expanderCVValues2[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
@@ -753,31 +759,165 @@ struct Apices : SanguineModule {
 	}
 
 	void updateOleds() {
+		if (lastEditMode != editMode || lastProcessorFunctions[0] != processorFunctions[0] ||
+			lastProcessorFunctions[1] != processorFunctions[1]) {
 			if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
+				paramQuantities[PARAM_KNOB_1]->name = apices::knobLabelsSplitMode[processorFunctions[0]].knob1;
+				paramQuantities[PARAM_KNOB_2]->name = apices::knobLabelsSplitMode[processorFunctions[0]].knob2;
+				paramQuantities[PARAM_KNOB_3]->name = apices::knobLabelsSplitMode[processorFunctions[0]].knob3;
+				paramQuantities[PARAM_KNOB_4]->name = apices::knobLabelsSplitMode[processorFunctions[0]].knob4;
+
 				oledText1 = apices::displayLabelsSplitMode[processorFunctions[0]].knob1;
 				oledText2 = apices::displayLabelsSplitMode[processorFunctions[0]].knob2;
 				oledText3 = apices::displayLabelsSplitMode[processorFunctions[0]].knob3;
 				oledText4 = apices::displayLabelsSplitMode[processorFunctions[0]].knob4;
+
+				if (bHasExpander) {
+					Module* nixExpander = getRightExpander().module;
+
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob1 + apicesCommon::kSuffixCV;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob2 + apicesCommon::kSuffixCV;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob3 + apicesCommon::kSuffixCV;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob4 + apicesCommon::kSuffixCV;
+
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob1;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob2;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob3;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name =
+						apices::knobLabelsSplitMode[processorFunctions[0]].knob4;
+
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+				}
 			} else {
 				int currentFunction = -1;
-			std::string channelText;
+				std::string channelTextDisplay;
+				std::string channelTextKnob;
 				// Same for both.
 				if (editMode == apicesCommon::EDIT_MODE_TWIN) {
 					currentFunction = processorFunctions[0];
-				channelText = "1&2. ";
+					channelTextDisplay = "1&2. ";
+					channelTextKnob = apicesCommon::kPrefixChannelTwin;
+
+					if (bHasExpander) {
+						Module* nixExpander = getRightExpander().module;
+
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob1 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob2 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob3 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob4 + apicesCommon::kSuffixCV;
+
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob1;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob2;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob3;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = channelTextKnob +
+							apices::knobLabelsTwinMode[currentFunction].knob4;
+
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+					}
 				}
 				// If expert, pick the active set of labels.
 				else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 					int functionOffset = editMode - apicesCommon::EDIT_MODE_FIRST;
+					int calculatedChannel = functionOffset + 1;
 
 					currentFunction = processorFunctions[functionOffset];
-				channelText = string::f("%d. ", functionOffset + 1);
+					channelTextDisplay = string::f("%d. ", calculatedChannel);
+					channelTextKnob = string::f(apicesCommon::kPrefixChannelExpert, calculatedChannel);
+
+					if (bHasExpander) {
+						int processor1Function = processorFunctions[0];
+						int processor2Function = processorFunctions[1];
+
+						const std::string channel1TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 1);
+						const std::string channel2TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 2);
+
+						Module* nixExpander = getRightExpander().module;
+
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob1 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob2 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_3]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob3 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob4 + apicesCommon::kSuffixCV;
+
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_1]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob1;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_2]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob2;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_3]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob3;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = channel1TextKnob +
+							apices::knobLabelsTwinMode[processor1Function].knob4;
+
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob1 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob2 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob3 + apicesCommon::kSuffixCV;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob4 + apicesCommon::kSuffixCV;
+
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob1;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob2;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob3;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
+							apices::knobLabelsTwinMode[processor2Function].knob4;
+					}
 				}
 
-			oledText1 = channelText + apices::displayLabelsTwinMode[currentFunction].knob1;
-			oledText2 = channelText + apices::displayLabelsTwinMode[currentFunction].knob2;
-			oledText3 = channelText + apices::displayLabelsTwinMode[currentFunction].knob3;
-			oledText4 = channelText + apices::displayLabelsTwinMode[currentFunction].knob4;
+				paramQuantities[PARAM_KNOB_1]->name = channelTextKnob +
+					apices::knobLabelsTwinMode[currentFunction].knob1;
+				paramQuantities[PARAM_KNOB_2]->name = channelTextKnob +
+					apices::knobLabelsTwinMode[currentFunction].knob2;
+				paramQuantities[PARAM_KNOB_3]->name = channelTextKnob +
+					apices::knobLabelsTwinMode[currentFunction].knob3;
+				paramQuantities[PARAM_KNOB_4]->name = channelTextKnob +
+					apices::knobLabelsTwinMode[currentFunction].knob4;
+
+				oledText1 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob1;
+				oledText2 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob2;
+				oledText3 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob3;
+				oledText4 = channelTextDisplay + apices::displayLabelsTwinMode[currentFunction].knob4;
+			}
+			lastEditMode = editMode;
+			lastProcessorFunctions[0] = processorFunctions[0];
+			lastProcessorFunctions[1] = processorFunctions[1];
 		}
 	}
 

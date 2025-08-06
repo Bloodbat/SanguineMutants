@@ -60,6 +60,34 @@ namespace mortuus {
         "NUMBER STAT&"
     };
 
+    static const std::vector<apicesCommon::KnobLabels> knobLabelsSplitMode{
+        { "Channel 1 - Attack", "Channel 1 - Decay", "Channel 2 - Attack",  "Channel 2 - Decay" },
+        { "Channel 1 - Frequency", "Channel 1 - Waveform", "Channel 2 - Frequency", "Channel 2 - Waveform" },
+        { "Channel 1 - Waveform", "Channel 1 - Waveform variation", "Channel 2 - Waveform", "Channel 2 - Waveform Variation" },
+        { "Channel 1 - Bass drum tone", "Channel 1 - Bass drum decay", "Channel 2 - Snare drum tone", "Channel 2 - Snare drum snappiness" },
+        { "Channel 1 - Attack", "Channel 1 - Decay", "Channel 2 - Attack", "Channel 2 - Decay" },
+        { "Channel 1 - Attack", "Channel 1 - Decay", "Channel 2 - Attack", "Channel 2 - Decay" },
+        { "Channel 1 - Attack", "Channel 1 - Decay", "Channel 2 - Attack", "Channel 2 - Decay" },
+        { "Channel 1 - Attack", "Channel 1 - Decay", "Channel 2 - Attack", "Channel 2 - Decay" },
+        { "Channel 1 - Gravity", "Channel 1 - Bounce", "Channel 2 - Gravity", "Channel 2 - Bounce" },
+        { "Channel 1 - Frequency", "Channel 1 - Waveform", "Channel 2 - Frequency", "Channel 2 - Waveform" },
+        { "Channel 1 - Frequency", "Channel 1 - Waveform", "Channel 2 - Frequency", "Channel 2 - Waveform" },
+        { "Channel 1 - Frequency", "Channel 1 - Waveform", "Channel 2 - Frequency", "Channel 2 - Waveform" },
+        { "Channel 1 - Frequency", "Channel 1 - Waveform", "Channel 2 - Frequency", "Channel 2 - Waveform" },
+        { "Channel 1 - Frequency divider / multiplier", "Channel 1 - LFO Waveform", "Channel 2 - Frequency divider / multiplier", "Channel 2 - LFO Waveform" },
+        { "Channel 1 - Step 1 voltage", "Channel 1 - Step 2 voltage", "Channel 2 - Step 1 voltage", "Channel 2 - Step 2 voltage" },
+        { "Channel 1 - Step 1 / 3 voltage", "Channel 1 - Step 2 / 4 voltage", "Channel 2 - Step 1 / 3 voltage", "Channel 2 - Step 2 / 4 voltage" },
+        { "Channel 1 - Delay", "Channel 1 - Number of repeats", "Channel 2 - Delay", "Channel 2 - Number of repeats" },
+        { "Channel 1 - Acceptance / Regeneration probability", "Channel 1 - Delay", "Channel 2 - Acceptance / Regeneration probability", "Channel 2 - Delay" },
+        { "Channel 1 - Probability", "Channel 1 - Span", "Channel 2 - Probability", "Channel 2 - Span" },
+        { "Channel 1 - Pitch", "Channel 1 - Parameter 0", "Channel 2 - Pitch", "Channel 2 - Parameter 0" },
+        { "Channel 1 - Bass drum preset morph", "Channel 1 - Bass drum preset variation", "Channel 2 - Snare drum preset morph", "Channel 2 - Snare drum preset variation" },
+        { "Channel 1 - Noise crossfade", "Channel 1 - Decay", "Channel 2 - Noise crossfade", "Channel 2 - Decay" },
+        { "Channel 1 - Bass drum pitch", "Channel 1 - Bass drum tone / decay", "Channel 2 - Snare drum pitch", "Channel 2 - Snare drum decay / snap" },
+        { "Channel 1 - Pitch", "Channel 1 - Tone", "Channel 2 - Pitch", "Channel 2 - Decay" },
+        { "Channel 1 - Frequency", "Channel 1 - Variation probability", "Channel 2 - Frequency", "Channel 2 - Variation probability" }
+    };
+
     static const std::vector<apicesCommon::KnobLabels> displayLabelsSplitMode{
         { "1. Attack", "1. Decay", "2. Attack",  "2. Decay" },
         { "1. Frequency", "1. Waveform", "2. Frequency", "2. Waveform" },
@@ -88,6 +116,34 @@ namespace mortuus {
         { "1. Frequency", "1. Var. Prob", "2. Frequency", "2. Var. Prob" }
     };
 
+    static const std::vector<apicesCommon::KnobLabels> knobLabelsTwinMode{
+        { "Attack", "Decay", "Sustain", "Release" },
+        { "Frequency", "Waveform", "Waveform variation", "Phase on restart" },
+        { "Amplitude", "Waveform", "Waveform variation", "Phase on restart" },
+        { "Base frequency", "Frequency modulation", "High frequency content", "Decay" },
+        { "Attack", "Decay", "Sustain", "Release" },
+        { "Attack", "Decay", "Sustain", "Release" },
+        { "Attack", "Decay", "Sustain", "Release" },
+        { "Attack", "Decay", "Amplitude variation", "Decay time variation" },
+        { "Gravity", "Bounce", "Amplitude", "Velocity" },
+        { "Frequency", "Waveform", "FM frequency", "FM depth" },
+        { "Frequency", "Waveform", "FM frequency", "FM depth" },
+        { "Frequency", "Waveform", "Wave shaper frequency", "Wave shaper depth" },
+        { "Frequency", "Waveform", "Wave shaper frequency", "Wave shaper depth" },
+        { "Frequency divider / multiplier", "LFO waveform", "Wave shaper frequency", "Wave shaper depth" },
+        { "Step 1 voltage", "Step 2 voltage", "Step 3 voltage", "Step 4 voltage" },
+        { "Step 1 / 5 voltage", "Step 2 / 6 voltage", "Step 3 / 7 voltage", "Step 4 / 8 voltage" },
+        { "Pre-delay", "Gate time", "Delay", "Number of repeats" },
+        { "Trigger probability", "Regeneration probability", "Delay time", "Jitter" },
+        { "Probability", "Span", "Length", "Clock division" },
+        { "Pitch", "Parameter 0", "Parameter 1", "Equation" },
+        { "Frequency", "FM intensity", "Envelope decay time", "Color" },
+        { "Pitch", "Clipping level", "Noise crossfade", "Decay" },
+        { "Pitch", "Tone / Decay time", "Pitch randomization", "Amplitude randomization" },
+        { "Pitch", "Decay", "Pitch randomization", "Decay randomization"},
+        { "Frequency", "Variation probability", "Noise", "Distortion" }
+    };
+
     static const std::vector<apicesCommon::KnobLabels> displayLabelsTwinMode{
         { "Attack", "Decay", "Sustain", "Release" },
         { "Frequency", "Waveform", "Wave. Var", "Phase" },
@@ -96,10 +152,10 @@ namespace mortuus {
         { "Attack", "Decay", "Sustain", "Release" },
         { "Attack", "Decay", "Sustain", "Release" },
         { "Attack", "Decay", "Sustain", "Release" },
-        { "Attack", "Decay", "Attack Var.", "Decay Var." },
+        { "Attack", "Decay", "Amp. Var.", "Decay Var." },
         { "Gravity", "Bounce", "Amplitude", "Velocity" },
         { "Frequency", "Waveform", "FM Freq.", "FM Depth" },
-        { "Frequency", "Waveform", "FM. Freq.", "FM. Depth" },
+        { "Frequency", "Waveform", "FM Freq.", "FM Depth" },
         { "Frequency", "Waveform", "WS. Freq.", "WS. Depth" },
         { "Frequency", "Waveform", "WS. Freq.", "WS. Depth" },
         { "Freq. Div", "LFO Wave", "WS. Freq.", "WS. Depth" },

@@ -59,7 +59,9 @@ struct Mortuus : SanguineModule {
 	};
 
 	apicesCommon::EditModes editMode = apicesCommon::EDIT_MODE_TWIN;
+	apicesCommon::EditModes lastEditMode = apicesCommon::EDIT_MODE_LAST;
 	mortuus::ProcessorFunctions processorFunctions[apicesCommon::kChannelCount] = { mortuus::FUNCTION_ENVELOPE, mortuus::FUNCTION_ENVELOPE };
+	mortuus::ProcessorFunctions lastProcessorFunctions[apicesCommon::kChannelCount] = { mortuus::FUNCTION_LAST,mortuus::FUNCTION_LAST };
 	apicesCommon::Settings settings = {};
 
 	uint8_t potValues[apicesCommon::kKnobCount * 2] = {};
@@ -179,6 +181,7 @@ struct Mortuus : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 #ifndef METAMODULE
+		// TODO: maybe this could be a class global!
 		Module* ansaExpander = getRightExpander().module;
 		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 #endif
@@ -213,6 +216,7 @@ struct Mortuus : SanguineModule {
 			bWasExpanderConnected = true;
 
 			// Channel 1 strip.
+			// TODO: this does not need initialization.
 			simd::float_4 expanderCVValues1 = {};
 
 			expanderCVValues1[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_1).getVoltage();
@@ -241,6 +245,8 @@ struct Mortuus : SanguineModule {
 			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
 			// Channel 2 strip.
+			// TODO: this does not need initialization.
+			// TODO: process these only when expert mode is enabled!
 			simd::float_4 expanderCVValues2 = {};
 
 			expanderCVValues2[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
@@ -779,33 +785,167 @@ struct Mortuus : SanguineModule {
 	}
 
 	void updateOleds() {
-		if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
-			oledText1 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob1;
-			oledText2 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob2;
-			oledText3 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob3;
-			oledText4 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob4;
-		} else {
-			int currentFunction = -1;
-			std::string channelText;
-			// Same for both.
-			if (editMode == apicesCommon::EDIT_MODE_TWIN) {
-				currentFunction = processorFunctions[0];
-				channelText = "1&2. ";
-			}
-			// If expert, pick the active set of labels.
-			else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
-				int functionOffset = editMode - apicesCommon::EDIT_MODE_FIRST;
+		if (lastEditMode != editMode || lastProcessorFunctions[0] != processorFunctions[0] ||
+			lastProcessorFunctions[1] != processorFunctions[1]) {
+			if (editMode == apicesCommon::EDIT_MODE_SPLIT) {
+				paramQuantities[PARAM_KNOB_1]->name = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob1;
+				paramQuantities[PARAM_KNOB_2]->name = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob2;
+				paramQuantities[PARAM_KNOB_3]->name = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob3;
+				paramQuantities[PARAM_KNOB_4]->name = mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4;
 
-				currentFunction = processorFunctions[functionOffset];
-				channelText = string::f("%d. ", functionOffset + 1);
+				oledText1 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob1;
+				oledText2 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob2;
+				oledText3 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob3;
+				oledText4 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob4;
+
+				if (bHasExpander) {
+					Module* ansaExpander = getRightExpander().module;
+
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob1 + apicesCommon::kSuffixCV;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob2 + apicesCommon::kSuffixCV;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob3 + apicesCommon::kSuffixCV;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4 + apicesCommon::kSuffixCV;
+
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob1;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob2;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob3;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name =
+						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4;
+
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+				}
+			} else {
+				int currentFunction = -1;
+				std::string channelTextDisplay;
+				std::string channelTextKnob;
+				// Same for both.
+				if (editMode == apicesCommon::EDIT_MODE_TWIN) {
+					currentFunction = processorFunctions[0];
+					channelTextDisplay = "1&2. ";
+					channelTextKnob = apicesCommon::kPrefixChannelTwin;
+
+					if (bHasExpander) {
+						Module* ansaExpander = getRightExpander().module;
+
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob1 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob2 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob3 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob4 + apicesCommon::kSuffixCV;
+
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob1;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob2;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob3;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = channelTextKnob +
+							mortuus::knobLabelsTwinMode[currentFunction].knob4;
+
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+					}
+				}
+				// If expert, pick the active set of labels.
+				else if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
+					int functionOffset = editMode - apicesCommon::EDIT_MODE_FIRST;
+					int calculatedChannel = functionOffset + 1;
+
+					currentFunction = processorFunctions[functionOffset];
+					channelTextDisplay = string::f("%d. ", calculatedChannel);
+					channelTextKnob = string::f(apicesCommon::kPrefixChannelExpert, calculatedChannel);
+
+					if (bHasExpander) {
+						int processor1Function = processorFunctions[0];
+						int processor2Function = processorFunctions[1];
+
+						const std::string channel1TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 1);
+						const std::string channel2TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 2);
+
+						Module* ansaExpander = getRightExpander().module;
+
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob1 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob2 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_3]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob3 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob4 + apicesCommon::kSuffixCV;
+
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_1]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob1;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_2]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob2;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_3]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob3;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = channel1TextKnob +
+							mortuus::knobLabelsTwinMode[processor1Function].knob4;
+
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob1 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob2 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob3 + apicesCommon::kSuffixCV;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob4 + apicesCommon::kSuffixCV;
+
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob1;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob2;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob3;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = channel2TextKnob +
+							mortuus::knobLabelsTwinMode[processor2Function].knob4;
+					}
+				}
+
+				paramQuantities[PARAM_KNOB_1]->name = channelTextKnob +
+					mortuus::knobLabelsTwinMode[currentFunction].knob1;
+				paramQuantities[PARAM_KNOB_2]->name = channelTextKnob +
+					mortuus::knobLabelsTwinMode[currentFunction].knob2;
+				paramQuantities[PARAM_KNOB_3]->name = channelTextKnob +
+					mortuus::knobLabelsTwinMode[currentFunction].knob3;
+				paramQuantities[PARAM_KNOB_4]->name = channelTextKnob +
+					mortuus::knobLabelsTwinMode[currentFunction].knob4;
+
+				oledText1 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob1;
+				oledText2 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob2;
+				oledText3 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob3;
+				oledText4 = channelTextDisplay + mortuus::displayLabelsTwinMode[currentFunction].knob4;
 			}
 
-			oledText1 = channelText + mortuus::displayLabelsTwinMode[currentFunction].knob1;
-			oledText2 = channelText + mortuus::displayLabelsTwinMode[currentFunction].knob2;
-			oledText3 = channelText + mortuus::displayLabelsTwinMode[currentFunction].knob3;
-			oledText4 = channelText + mortuus::displayLabelsTwinMode[currentFunction].knob4;
+			lastEditMode = editMode;
+			lastProcessorFunctions[0] = processorFunctions[0];
+			lastProcessorFunctions[1] = processorFunctions[1];
 		}
-
 	}
 
 #ifndef METAMODULE

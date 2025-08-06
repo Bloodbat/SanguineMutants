@@ -16,6 +16,9 @@
 
 - Apices family: tap lfo tempo values are now saved to and restored from patches and presets.
 
+- Apices family: knob tooltips for the different modes.
+
+- Apices family expanders: mode dependent tooltips for the trimpots and inputs.
 - Mortuus: PLO phase values are now saved to and restored from patches and presets.
 
 - Nodi family: display channel also affects the big knob's light.
@@ -25,6 +28,7 @@
 - Plugin: performance tweaks.
 
 - Apices family expanders: display trimpot values as percentages.
+
 - Contextus: make synthesis models light color palette more distinctive.
 
 - Funes: relate knobs using color.

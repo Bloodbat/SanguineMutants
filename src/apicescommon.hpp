@@ -34,4 +34,9 @@ namespace apicesCommon {
         std::string knob3;
         std::string knob4;
     };
+
+    static const std::string kSuffixCV = " CV";
+    static const std::string kPrefixChannelTwin = "Channels 1 & 2 - ";
+    static const std::string kPrefixChannelExpert = "Channel %d - ";
+    static const std::string kInactivedLabel = "Inactive";
 }
