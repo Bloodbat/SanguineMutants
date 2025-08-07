@@ -116,7 +116,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 - ### Velamina
 
   A polyphonic tetrad of voltage controlled amplifiers; my attempt at recreating MI's Veils... the 2020 version. Outputs beyond 10V are saturated.
-  
+
 ## Module HP sizes
 
 | Module        | Size |
