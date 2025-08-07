@@ -221,8 +221,7 @@ struct Mortuus : SanguineModule {
 			bWasExpanderConnected = true;
 
 			// Channel 1 strip.
-			// TODO: this does not need initialization.
-			simd::float_4 expanderCVValues1 = {};
+			simd::float_4 expanderCVValues1;
 
 			expanderCVValues1[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_1).getVoltage();
 			expanderCVValues1[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_2).getVoltage();
@@ -250,9 +249,8 @@ struct Mortuus : SanguineModule {
 			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
 			// Channel 2 strip.
-			// TODO: this does not need initialization.
 			// TODO: process these only when expert mode is enabled!
-			simd::float_4 expanderCVValues2 = {};
+			simd::float_4 expanderCVValues2;
 
 			expanderCVValues2[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
 			expanderCVValues2[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
