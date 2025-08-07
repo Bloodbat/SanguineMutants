@@ -249,33 +249,36 @@ struct Mortuus : SanguineModule {
 			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
 			// Channel 2 strip.
-			// TODO: process these only when expert mode is enabled!
-			simd::float_4 expanderCVValues2;
+			simd::int32_4 expanderModulatedValues2 = {};
 
-			expanderCVValues2[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
-			expanderCVValues2[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
-			expanderCVValues2[2] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
-			expanderCVValues2[3] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
+			if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
+				simd::float_4 expanderCVValues2;
 
-			expanderCVValues2 /= 5.f;
-			expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
-			expanderCVValues2 *= 255.f;
+				expanderCVValues2[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
+				expanderCVValues2[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
+				expanderCVValues2[2] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
+				expanderCVValues2[3] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
 
-			expanderCVValues2[0] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
-			expanderCVValues2[1] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
-			expanderCVValues2[2] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
-			expanderCVValues2[3] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
+				expanderCVValues2 /= 5.f;
+				expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
+				expanderCVValues2 *= 255.f;
 
-			simd::int32_4 expanderModulatedValues2 = expanderCVValues2;
+				expanderCVValues2[0] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
+				expanderCVValues2[1] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
+				expanderCVValues2[2] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
+				expanderCVValues2[3] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
 
-			expanderModulatedValues2[0] += potValues[4];
-			expanderModulatedValues2[1] += potValues[5];
-			expanderModulatedValues2[2] += potValues[6];
-			expanderModulatedValues2[3] += potValues[7];
+				expanderModulatedValues2 = expanderCVValues2;
 
-			expanderModulatedValues2 = expanderModulatedValues2 << 8;
+				expanderModulatedValues2[0] += potValues[4];
+				expanderModulatedValues2[1] += potValues[5];
+				expanderModulatedValues2[2] += potValues[6];
+				expanderModulatedValues2[3] += potValues[7];
 
-			expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
+				expanderModulatedValues2 = expanderModulatedValues2 << 8;
+
+				expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
+			}
 
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				int channel1Input = Ansa::INPUT_PARAM_CV_1 + knob;
