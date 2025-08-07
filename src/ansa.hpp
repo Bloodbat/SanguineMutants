@@ -56,4 +56,15 @@ struct Ansa : SanguineModule {
     Ansa();
 
     void onExpanderChange(const ExpanderChangeEvent& e) override;
+    void onPortChange(const PortChangeEvent& e) override;
+
+    bool getChannel1PortChanged(const int portNumber) const;
+    bool getChannel2PortChanged(const int portNumber) const;
+
+    void setChannel1PortChanged(const int portNumber, const bool value);
+    void setChannel2PortChanged(const int portNumber, const bool value);
+
+private:
+    bool expanderPorts1Changed[apicesCommon::kKnobCount];
+    bool expanderPorts2Changed[apicesCommon::kKnobCount];
 };
