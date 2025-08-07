@@ -136,3 +136,5 @@ The modules available in the MetaModule port are the following:
 |                        Scalaria                        |                    Temulenti                     |                         Velamina                         |
 |       ![Vimina](meta_pics/vimina_metamodule.png)       |                                                  |                                                          |
 |                         Vimina                         |                                                  |                                                          |
+
+Keep in mind we're not in charge of building or releasing the MetaModule plugin; so available modules and their faceplates may be out of sync with those presented here.
