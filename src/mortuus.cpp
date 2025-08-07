@@ -110,6 +110,10 @@ struct Mortuus : SanguineModule {
 	size_t ioBlock = 0;
 	size_t renderBlock = apicesCommon::kBlockCount / 2;
 
+#ifndef METAMODULE
+	Module* ansaExpander = nullptr;
+#endif
+
 	std::string displayText1 = "";
 	std::string displayText2 = "";
 
@@ -183,8 +187,7 @@ struct Mortuus : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 #ifndef METAMODULE
-		// TODO: maybe this could be a class global!
-		Module* ansaExpander = getRightExpander().module;
+		ansaExpander = getRightExpander().module;
 		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 #endif
 
@@ -354,19 +357,19 @@ struct Mortuus : SanguineModule {
 						channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
 						channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(ansaExpander, true, sampleTime);
+						switchExpanderChannel2Lights(true, sampleTime);
 						break;
 					case apicesCommon::EDIT_MODE_TWIN:
 						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
 						channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
+						switchExpanderChannel2Lights(false, sampleTime);
 						break;
 					case apicesCommon::EDIT_MODE_SPLIT:
 						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
 						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(ansaExpander, false, sampleTime);
+						switchExpanderChannel2Lights(false, sampleTime);
 						break;
 					default:
 						break;
@@ -803,8 +806,6 @@ struct Mortuus : SanguineModule {
 #endif
 
 				if (bHasExpander) {
-					Module* ansaExpander = getRightExpander().module;
-
 					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name =
 						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob1 + apicesCommon::kSuffixCV;
 					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name =
@@ -844,8 +845,6 @@ struct Mortuus : SanguineModule {
 					channelTextKnob = apicesCommon::kPrefixChannelTwin;
 
 					if (bHasExpander) {
-						Module* ansaExpander = getRightExpander().module;
-
 						std::string toolTipText;
 
 						toolTipText = channelTextKnob + mortuus::knobLabelsTwinMode[currentFunction].knob1;
@@ -890,8 +889,6 @@ struct Mortuus : SanguineModule {
 
 						const std::string channel1TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 1);
 						const std::string channel2TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 2);
-
-						Module* ansaExpander = getRightExpander().module;
 
 						std::string toolTipText;
 
@@ -953,7 +950,7 @@ struct Mortuus : SanguineModule {
 	}
 
 #ifndef METAMODULE
-	void setExpanderChannel1Lights(Module* ansaExpander, bool lightIsOn) {
+	void setExpanderChannel1Lights(bool lightIsOn) {
 		Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
 		Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
 		Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
@@ -964,19 +961,19 @@ struct Mortuus : SanguineModule {
 			channel1LightRed.setBrightness(0.f);
 			channel1LightGreen.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 			channel1LightBlue.setBrightness(0.f);
-			setExpanderChannel2Lights(ansaExpander, lightIsOn & true);
+			setExpanderChannel2Lights(lightIsOn & true);
 			break;
 		case apicesCommon::EDIT_MODE_TWIN:
 			channel1LightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
-			setExpanderChannel2Lights(ansaExpander, false);
+			setExpanderChannel2Lights(false);
 			break;
 		case apicesCommon::EDIT_MODE_SPLIT:
 			channel1LightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(0.f);
-			setExpanderChannel2Lights(ansaExpander, false);
+			setExpanderChannel2Lights(false);
 			break;
 		default:
 			break;
@@ -1018,7 +1015,7 @@ struct Mortuus : SanguineModule {
 		}
 	}
 
-	void setExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn) {
+	void setExpanderChannel2Lights(bool lightIsOn) {
 		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ?
 			kSanguineButtonLightValue : 0.f);
 
@@ -1027,7 +1024,7 @@ struct Mortuus : SanguineModule {
 		}
 	}
 
-	void switchExpanderChannel2Lights(Module* ansaExpander, bool lightIsOn, const float& sampleTime) {
+	void switchExpanderChannel2Lights(bool lightIsOn, const float& sampleTime) {
 		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ?
 			kSanguineButtonLightValue : 0.f, sampleTime);
 
@@ -1166,18 +1163,16 @@ struct Mortuus : SanguineModule {
 #ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
 		if (bHasExpander) {
-			Module* ansaExpander = getRightExpander().module;
 			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(0.f);
-			setExpanderChannel1Lights(ansaExpander, false);
+			setExpanderChannel1Lights(false);
 		}
 		Module::onBypass(e);
 	}
 
 	void onUnBypass(const UnBypassEvent& e) override {
 		if (bHasExpander) {
-			Module* ansaExpander = getRightExpander().module;
 			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(kSanguineButtonLightValue);
-			setExpanderChannel1Lights(ansaExpander, true);
+			setExpanderChannel1Lights(true);
 		}
 		Module::onUnBypass(e);
 	}
@@ -1331,8 +1326,7 @@ struct MortuusWidget : SanguineModuleWidget {
 
 #ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
-		const Module* expander = mortuus->rightExpander.module;
-		if (expander && expander->model == modelAnsa) {
+		if (mortuus->bHasExpander) {
 			menu->addChild(createMenuLabel("Ansa expander already connected"));
 		} else {
 			menu->addChild(createMenuItem("Add Ansa expander", "", [=]() {

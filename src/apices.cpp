@@ -110,6 +110,10 @@ struct Apices : SanguineModule {
 	size_t ioBlock = 0;
 	size_t renderBlock = apicesCommon::kBlockCount / 2;
 
+#ifndef METAMODULE
+	Module* nixExpander = nullptr;
+#endif
+
 	std::string displayText1 = "";
 	std::string displayText2 = "";
 
@@ -170,8 +174,7 @@ struct Apices : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 #ifndef METAMODULE
-		// TODO: maybe this could be a class global!
-		Module* nixExpander = getRightExpander().module;
+		nixExpander = getRightExpander().module;
 		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 #endif
 
@@ -341,19 +344,19 @@ struct Apices : SanguineModule {
 						channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
 						channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(nixExpander, true, sampleTime);
+						switchExpanderChannel2Lights(true, sampleTime);
 						break;
 					case apicesCommon::EDIT_MODE_TWIN:
 						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
 						channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						switchExpanderChannel2Lights(nixExpander, false, sampleTime);
+						switchExpanderChannel2Lights(false, sampleTime);
 						break;
 					case apicesCommon::EDIT_MODE_SPLIT:
 						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
 						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(nixExpander, false, sampleTime);
+						switchExpanderChannel2Lights(false, sampleTime);
 						break;
 					default:
 						break;
@@ -777,8 +780,6 @@ struct Apices : SanguineModule {
 #endif
 
 				if (bHasExpander) {
-					Module* nixExpander = getRightExpander().module;
-
 					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name =
 						apices::knobLabelsSplitMode[processorFunctions[0]].knob1 + apicesCommon::kSuffixCV;
 					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name =
@@ -818,8 +819,6 @@ struct Apices : SanguineModule {
 					channelTextKnob = apicesCommon::kPrefixChannelTwin;
 
 					if (bHasExpander) {
-						Module* nixExpander = getRightExpander().module;
-
 						std::string toolTipText;
 
 						toolTipText = channelTextKnob + apices::knobLabelsTwinMode[currentFunction].knob1;
@@ -864,8 +863,6 @@ struct Apices : SanguineModule {
 
 						const std::string channel1TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 1);
 						const std::string channel2TextKnob = string::f(apicesCommon::kPrefixChannelExpert, 2);
-
-						Module* nixExpander = getRightExpander().module;
 
 						std::string toolTipText;
 
@@ -926,7 +923,7 @@ struct Apices : SanguineModule {
 	}
 
 #ifndef METAMODULE
-	void setExpanderChannel1Lights(Module* nixExpander, bool lightIsOn) {
+	void setExpanderChannel1Lights(bool lightIsOn) {
 		Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
 		Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
 		Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);
@@ -937,19 +934,19 @@ struct Apices : SanguineModule {
 			channel1LightRed.setBrightness(0.f);
 			channel1LightGreen.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 			channel1LightBlue.setBrightness(0.f);
-			setExpanderChannel2Lights(nixExpander, lightIsOn & true);
+			setExpanderChannel2Lights(lightIsOn & true);
 			break;
 		case apicesCommon::EDIT_MODE_TWIN:
 			channel1LightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
-			setExpanderChannel2Lights(nixExpander, false);
+			setExpanderChannel2Lights(false);
 			break;
 		case apicesCommon::EDIT_MODE_SPLIT:
 			channel1LightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(0.f);
-			setExpanderChannel2Lights(nixExpander, false);
+			setExpanderChannel2Lights(false);
 			break;
 		default:
 			break;
@@ -991,7 +988,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void setExpanderChannel2Lights(Module* nixExpander, bool lightIsOn) {
+	void setExpanderChannel2Lights(bool lightIsOn) {
 		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
 
 		for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
@@ -999,7 +996,7 @@ struct Apices : SanguineModule {
 		}
 	}
 
-	void switchExpanderChannel2Lights(Module* nixExpander, bool lightIsOn, const float& sampleTime) {
+	void switchExpanderChannel2Lights(bool lightIsOn, const float& sampleTime) {
 		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightnessSmooth(lightIsOn ? kSanguineButtonLightValue : 0.f, sampleTime);
 
 		for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
@@ -1116,18 +1113,16 @@ struct Apices : SanguineModule {
 #ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
 		if (bHasExpander) {
-			Module* nixExpander = getRightExpander().module;
 			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(0.f);
-			setExpanderChannel1Lights(nixExpander, false);
+			setExpanderChannel1Lights(false);
 		}
 		Module::onBypass(e);
 	}
 
 	void onUnBypass(const UnBypassEvent& e) override {
 		if (bHasExpander) {
-			Module* nixExpander = getRightExpander().module;
 			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(kSanguineButtonLightValue);
-			setExpanderChannel1Lights(nixExpander, true);
+			setExpanderChannel1Lights(true);
 		}
 		Module::onUnBypass(e);
 	}
@@ -1280,8 +1275,7 @@ struct ApicesWidget : SanguineModuleWidget {
 
 #ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
-		const Module* expander = apices->rightExpander.module;
-		if (expander && expander->model == modelNix) {
+		if (apices->bHasExpander) {
 			menu->addChild(createMenuLabel("Nix expander already connected"));
 		} else {
 			menu->addChild(createMenuItem("Add Nix expander", "", [=]() {
