@@ -111,7 +111,7 @@ struct Apices : SanguineModule {
 	size_t renderBlock = apicesCommon::kBlockCount / 2;
 
 #ifndef METAMODULE
-	Module* nixExpander = nullptr;
+	Nix* nixExpander = nullptr;
 #endif
 
 	std::string displayText1 = "";
@@ -174,7 +174,7 @@ struct Apices : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 #ifndef METAMODULE
-		nixExpander = getRightExpander().module;
+		nixExpander = dynamic_cast<Nix*>(getRightExpander().module);
 		bHasExpander = (nixExpander && nixExpander->getModel() == modelNix && !nixExpander->isBypassed());
 #endif
 
@@ -268,7 +268,8 @@ struct Apices : SanguineModule {
 
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				int channel1Input = Nix::INPUT_PARAM_CV_1 + knob;
-				if (nixExpander->getInput(channel1Input).isConnected()) {
+				if (nixExpander->getInput(channel1Input).isConnected() ||
+					nixExpander->getChannel1PortChanged(knob)) {
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
 						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
@@ -290,13 +291,18 @@ struct Apices : SanguineModule {
 					default:
 						break;
 					}
+
+					nixExpander->setChannel1PortChanged(knob, false);
 				}
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
 					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + knob;
 
-					if (nixExpander->getInput(channel2Input).isConnected()) {
+					if (nixExpander->getInput(channel2Input).isConnected() ||
+						nixExpander->getChannel2PortChanged(knob)) {
 						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
+
+						nixExpander->setChannel2PortChanged(knob, false);
 					}
 				}
 

@@ -13,6 +13,9 @@ Nix::Nix() {
             string::f("Expert channel 2 parameter %d CV", functionNumber), "%", 0.f, 100.f);
         configInput(INPUT_PARAM_CV_1 + parameter + apicesCommon::kChannel2Offset,
             string::f("Expert channel 2 parameter %d", functionNumber));
+
+        expanderPorts1Changed[parameter] = false;
+        expanderPorts2Changed[parameter] = false;
     }
 }
 
@@ -34,6 +37,34 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
             }
         }
     }
+}
+
+void Nix::onPortChange(const PortChangeEvent& e) {
+    if (!e.connecting) {
+        if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
+            expanderPorts1Changed[e.portId] = true;
+        } else {
+            expanderPorts2Changed[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
+        }
+    }
+
+    Module::onPortChange(e);
+}
+
+bool Nix::getChannel1PortChanged(const int portNumber) const {
+    return expanderPorts1Changed[portNumber];
+}
+
+bool Nix::getChannel2PortChanged(const int portNumber) const {
+    return expanderPorts2Changed[portNumber];
+}
+
+void Nix::setChannel1PortChanged(const int portNumber, const bool value) {
+    expanderPorts1Changed[portNumber] = value;
+}
+
+void Nix::setChannel2PortChanged(const int portNumber, const bool value) {
+    expanderPorts2Changed[portNumber] = value;
 }
 
 struct NixWidget : SanguineModuleWidget {
