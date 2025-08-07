@@ -111,7 +111,7 @@ struct Mortuus : SanguineModule {
 	size_t renderBlock = apicesCommon::kBlockCount / 2;
 
 #ifndef METAMODULE
-	Module* ansaExpander = nullptr;
+	Ansa* ansaExpander = nullptr;
 #endif
 
 	std::string displayText1 = "";
@@ -187,7 +187,7 @@ struct Mortuus : SanguineModule {
 
 	void process(const ProcessArgs& args) override {
 #ifndef METAMODULE
-		ansaExpander = getRightExpander().module;
+		ansaExpander = dynamic_cast<Ansa*>(getRightExpander().module);
 		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
 #endif
 
@@ -281,7 +281,8 @@ struct Mortuus : SanguineModule {
 
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				int channel1Input = Ansa::INPUT_PARAM_CV_1 + knob;
-				if (ansaExpander->getInput(channel1Input).isConnected()) {
+				if (ansaExpander->getInput(channel1Input).isConnected() ||
+					ansaExpander->getChannel1PortChanged(knob)) {
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
 						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
@@ -303,13 +304,18 @@ struct Mortuus : SanguineModule {
 					default:
 						break;
 					}
+
+					ansaExpander->setChannel1PortChanged(knob, false);
 				}
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
 					int channel2Input = Ansa::INPUT_PARAM_CV_CHANNEL_2_1 + knob;
 
-					if (ansaExpander->getInput(channel2Input).isConnected()) {
+					if (ansaExpander->getInput(channel2Input).isConnected() ||
+						ansaExpander->getChannel2PortChanged(knob)) {
 						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
+
+						ansaExpander->setChannel2PortChanged(knob, false);
 					}
 				}
 

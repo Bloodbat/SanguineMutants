@@ -7,7 +7,6 @@
 #include "peakiesconsts.hpp"
 
 struct Nix : SanguineModule {
-
     enum ParamIds {
         PARAM_PARAM_CV_1,
         PARAM_PARAM_CV_2,
@@ -54,4 +53,15 @@ struct Nix : SanguineModule {
     Nix();
 
     void onExpanderChange(const ExpanderChangeEvent& e) override;
+    void onPortChange(const PortChangeEvent& e) override;
+
+    bool getChannel1PortChanged(const int portNumber) const;
+    bool getChannel2PortChanged(const int portNumber) const;
+
+    void setChannel1PortChanged(const int portNumber, const bool value);
+    void setChannel2PortChanged(const int portNumber, const bool value);
+
+private:
+    bool expanderPorts1Changed[apicesCommon::kKnobCount];
+    bool expanderPorts2Changed[apicesCommon::kKnobCount];
 };
