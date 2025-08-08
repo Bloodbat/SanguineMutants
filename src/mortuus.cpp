@@ -186,11 +186,6 @@ struct Mortuus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-#ifndef METAMODULE
-		ansaExpander = dynamic_cast<Ansa*>(getRightExpander().module);
-		bHasExpander = (ansaExpander && ansaExpander->getModel() == modelAnsa && !ansaExpander->isBypassed());
-#endif
-
 		float sampleTime = 0.f;
 
 		bool bIsLightsTurn = lightsDivider.process();
@@ -1185,32 +1180,41 @@ struct Mortuus : SanguineModule {
 	}
 
 	void onExpanderChange(const ExpanderChangeEvent& e) override {
-		if (bWasExpanderConnected) {
-			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-				switch (editMode) {
-				case apicesCommon::EDIT_MODE_TWIN:
-					processors[0].set_parameter(knob, potValues[knob] << 8);
-					processors[1].set_parameter(knob, potValues[knob] << 8);
-					break;
+		if (e.side == 1) {
+			Module* rightModule = getRightExpander().module;
+			bHasExpander = (rightModule && rightModule->getModel() == modelAnsa && !rightModule->isBypassed());
 
-				case apicesCommon::EDIT_MODE_SPLIT:
-					if (knob < 2) {
-						processors[0].set_parameter(knob, potValues[knob] << 8);
-					} else {
-						processors[1].set_parameter(knob, potValues[knob - 2] << 8);
-					}
-					break;
-
-				case apicesCommon::EDIT_MODE_FIRST:
-				case apicesCommon::EDIT_MODE_SECOND:
-					processors[0].set_parameter(knob, potValues[knob] << 8);
-					processors[1].set_parameter(knob, potValues[knob + apicesCommon::kChannel2Offset] << 8);
-					break;
-				default:
-					break;
-				}
+			if (bHasExpander) {
+				ansaExpander = dynamic_cast<Ansa*>(rightModule);
 			}
-			bWasExpanderConnected = false;
+
+			if (bWasExpanderConnected) {
+				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+					switch (editMode) {
+					case apicesCommon::EDIT_MODE_TWIN:
+						processors[0].set_parameter(knob, potValues[knob] << 8);
+						processors[1].set_parameter(knob, potValues[knob] << 8);
+						break;
+
+					case apicesCommon::EDIT_MODE_SPLIT:
+						if (knob < 2) {
+							processors[0].set_parameter(knob, potValues[knob] << 8);
+						} else {
+							processors[1].set_parameter(knob, potValues[knob - 2] << 8);
+						}
+						break;
+
+					case apicesCommon::EDIT_MODE_FIRST:
+					case apicesCommon::EDIT_MODE_SECOND:
+						processors[0].set_parameter(knob, potValues[knob] << 8);
+						processors[1].set_parameter(knob, potValues[knob + apicesCommon::kChannel2Offset] << 8);
+						break;
+					default:
+						break;
+					}
+				}
+				bWasExpanderConnected = false;
+			}
 		}
 	}
 #endif
