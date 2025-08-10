@@ -37,6 +37,7 @@ void Ansa::onExpanderChange(const ExpanderChangeEvent& e) {
             }
         }
     }
+    Module::onExpanderChange(e);
 }
 
 void Ansa::onPortChange(const PortChangeEvent& e) {
