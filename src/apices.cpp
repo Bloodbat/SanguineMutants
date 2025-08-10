@@ -1166,6 +1166,7 @@ struct Apices : SanguineModule {
 				bWasExpanderConnected = false;
 			}
 		}
+		Module::onExpanderChange(e);
 	}
 #endif
 };
