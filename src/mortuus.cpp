@@ -1216,6 +1216,7 @@ struct Mortuus : SanguineModule {
 				bWasExpanderConnected = false;
 			}
 		}
+		Module::onExpanderChange(e);
 	}
 #endif
 };
