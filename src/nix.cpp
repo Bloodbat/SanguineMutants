@@ -37,6 +37,7 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
             }
         }
     }
+    Module::onExpanderChange(e);
 }
 
 void Nix::onPortChange(const PortChangeEvent& e) {
