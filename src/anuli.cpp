@@ -172,7 +172,9 @@ struct Anuli : SanguineModule {
 
 		fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
 
-		channelModes.fill(static_cast<int>(params[PARAM_MODE].getValue()));
+		int knobMode = static_cast<int>(params[PARAM_MODE].getValue());
+
+		channelModes.fill(knobMode);
 
 		ParametersInfo parametersInfo = {};
 
