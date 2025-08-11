@@ -241,6 +241,11 @@ struct Etesia : SanguineModule {
 #endif
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
+		bool bRightInputConnected = inputs[INPUT_RIGHT].isConnected();
+
+		bool bLeftOutputConnected = outputs[OUTPUT_LEFT].isConnected();
+		bool bRightOutputConnected = outputs[OUTPUT_RIGHT].isConnected();
+
 		float_4 knobValues;
 		float_4 sliderValues;
 
@@ -275,7 +280,7 @@ struct Etesia : SanguineModule {
 			if (!drbInputBuffer[channel].full()) {
 				float finalInputGain = clamp(inputGain + (inputs[INPUT_IN_GAIN].getVoltage(channel) / 5.f), 0.f, 1.f);
 				inputFrame[channel].samples[0] = inputs[INPUT_LEFT].getVoltage(channel) * finalInputGain / 5.f;
-				inputFrame[channel].samples[1] = inputs[INPUT_RIGHT].isConnected() ? inputs[INPUT_RIGHT].getVoltage(channel)
+				inputFrame[channel].samples[1] = bRightInputConnected ? inputs[INPUT_RIGHT].getVoltage(channel)
 					* finalInputGain / 5.f : inputFrame[channel].samples[0];
 				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
@@ -398,11 +403,11 @@ struct Etesia : SanguineModule {
 			if (!drbOutputBuffer[channel].empty()) {
 				outputFrame[channel] = drbOutputBuffer[channel].shift();
 				float finalOutputGain = clamp(outputGain + (inputs[INPUT_OUT_GAIN].getVoltage(channel) / 5.f), 0.f, 2.f);
-				if (outputs[OUTPUT_LEFT].isConnected()) {
+				if (bLeftOutputConnected) {
 					outputFrame[channel].samples[0] *= finalOutputGain;
 					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrame[channel].samples[0], channel);
 				}
-				if (outputs[OUTPUT_RIGHT].isConnected()) {
+				if (bRightOutputConnected) {
 					outputFrame[channel].samples[1] *= finalOutputGain;
 					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrame[channel].samples[1], channel);
 				}
