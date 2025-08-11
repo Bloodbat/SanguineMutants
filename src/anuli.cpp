@@ -12,6 +12,8 @@
 
 #include "anuli.hpp"
 
+using simd::float_4;
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Anuli : SanguineModule {
@@ -98,10 +100,11 @@ struct Anuli : SanguineModule {
 	static const int kLightsFrequency = 64;
 
 	struct ParametersInfo {
-		float modStructure;
-		float modBrightness;
-		float modDamping;
-		float modPosition;
+		float_4 knobValues;
+
+		float frequency;
+
+		float_4 modValues;
 
 		float modFrequency;
 
@@ -176,10 +179,19 @@ struct Anuli : SanguineModule {
 
 		ParametersInfo parametersInfo;
 
-		parametersInfo.modStructure = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
-		parametersInfo.modBrightness = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
-		parametersInfo.modDamping = dsp::quadraticBipolar(params[PARAM_DAMPING_MOD].getValue());
-		parametersInfo.modPosition = dsp::quadraticBipolar(params[PARAM_POSITION_MOD].getValue());
+		parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
+		parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
+		parametersInfo.knobValues[2] = params[PARAM_DAMPING].getValue();
+		parametersInfo.knobValues[3] = params[PARAM_POSITION].getValue();
+
+		parametersInfo.frequency = params[PARAM_FREQUENCY].getValue();
+
+		parametersInfo.modValues[0] = params[PARAM_STRUCTURE_MOD].getValue();
+		parametersInfo.modValues[1] = params[PARAM_BRIGHTNESS_MOD].getValue();
+		parametersInfo.modValues[2] = params[PARAM_DAMPING_MOD].getValue();
+		parametersInfo.modValues[3] = params[PARAM_POSITION_MOD].getValue();
+
+		parametersInfo.modValues = dsp::quadraticBipolar(parametersInfo.modValues);
 
 		parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
 
@@ -281,8 +293,6 @@ struct Anuli : SanguineModule {
 	}
 
 	void setupPatch(const int channel, rings::Patch& patch, float& structure, const ParametersInfo& parametersInfo) {
-		using simd::float_4;
-
 		float_4 voltages;
 
 		voltages[0] = inputs[INPUT_STRUCTURE_CV].getVoltage(channel);
@@ -293,13 +303,12 @@ struct Anuli : SanguineModule {
 		voltages /= 5.f;
 		voltages *= 3.3f;
 
-		patch.brightness = clamp(params[PARAM_BRIGHTNESS].getValue() + parametersInfo.modBrightness * voltages[1], 0.f, 1.f);
+		voltages *= parametersInfo.modValues;
+		voltages += parametersInfo.knobValues;
 
-		structure = params[PARAM_STRUCTURE].getValue() + parametersInfo.modStructure * voltages[0];
+		structure = voltages[0];
 
-		voltages[0] = structure;
-		voltages[2] = params[PARAM_DAMPING].getValue() + parametersInfo.modDamping * voltages[2];
-		voltages[3] = params[PARAM_POSITION].getValue() + parametersInfo.modPosition * voltages[3];
+		patch.brightness = clamp(voltages[1], 0.f, 1.f);
 
 		voltages = simd::clamp(voltages, 0.f, 0.9995f);
 
@@ -314,7 +323,7 @@ struct Anuli : SanguineModule {
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
 
-		float transpose = params[PARAM_FREQUENCY].getValue();
+		float transpose = parametersInfo.frequency;
 		// Quantize transpose if pitch input is connected
 		if (inputs[INPUT_PITCH].isConnected()) {
 			transpose = roundf(transpose);
