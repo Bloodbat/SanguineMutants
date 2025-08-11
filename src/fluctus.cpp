@@ -233,15 +233,18 @@ struct Fluctus : SanguineModule {
 #endif
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
-		float paramBlend = params[PARAM_BLEND].getValue();
-		float paramSpread = params[PARAM_SPREAD].getValue();
-		float paramFeedback = params[PARAM_FEEDBACK].getValue();
-		float paramReverb = params[PARAM_REVERB].getValue();
+		float_4 knobValues;
+		float_4 sliderValues;
 
-		float paramPosition = params[PARAM_POSITION].getValue();
-		float paramDensity = params[PARAM_DENSITY].getValue();
-		float paramSize = params[PARAM_SIZE].getValue();
-		float paramTexture = params[PARAM_TEXTURE].getValue();
+		knobValues[0] = params[PARAM_BLEND].getValue();
+		knobValues[1] = params[PARAM_SPREAD].getValue();
+		knobValues[2] = params[PARAM_FEEDBACK].getValue();
+		knobValues[3] = params[PARAM_REVERB].getValue();
+
+		sliderValues[0] = params[PARAM_POSITION].getValue();
+		sliderValues[1] = params[PARAM_DENSITY].getValue();
+		sliderValues[2] = params[PARAM_SIZE].getValue();
+		sliderValues[3] = params[PARAM_TEXTURE].getValue();
 
 		float paramPitch = params[PARAM_PITCH].getValue();
 
@@ -322,10 +325,7 @@ struct Fluctus : SanguineModule {
 
 				scaledVoltages /= 5.f;
 
-				scaledVoltages[0] += paramBlend;
-				scaledVoltages[1] += paramSpread;
-				scaledVoltages[2] += paramFeedback;
-				scaledVoltages[3] += paramReverb;
+				scaledVoltages += knobValues;
 
 				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
 
@@ -335,13 +335,10 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->reverb = scaledVoltages[3];
 
 				scaledVoltages = voltages1[channel] / 5.f;
+				
+fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
 
-				fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
-
-				scaledVoltages[0] += paramPosition;
-				scaledVoltages[1] += paramDensity;
-				scaledVoltages[2] += paramSize;
-				scaledVoltages[3] += paramTexture;
+				scaledVoltages += sliderValues;
 
 				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
 
@@ -350,7 +347,7 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->size = scaledVoltages[2];
 				fluctusParameters[channel]->texture = scaledVoltages[3];
 
-				fluctusParameters[channel]->kammerl.slice_modulation = paramTexture;
+				fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
 				fluctusParameters[channel]->kammerl.size_modulation = fluctusParameters[channel]->density;
 
 				fluctusParameters[channel]->trigger = triggered[channel];
