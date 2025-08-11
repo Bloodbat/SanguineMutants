@@ -176,7 +176,7 @@ struct Anuli : SanguineModule {
 
 		channelModes.fill(knobMode);
 
-		ParametersInfo parametersInfo = {};
+		ParametersInfo parametersInfo;
 
 		parametersInfo.modStructure = dsp::quadraticBipolar(params[PARAM_STRUCTURE_MOD].getValue());
 		parametersInfo.modBrightness = dsp::quadraticBipolar(params[PARAM_BRIGHTNESS_MOD].getValue());
