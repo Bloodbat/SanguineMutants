@@ -44,6 +44,8 @@
 
 - Nebulae family: modules are fully polyphonic.
 
+- Nebulae family: optional hardware-like handling of triggers: rising edge detection instead of treating them as gates.
+
 - Nodi family: display channel also affects the big knob's light.
 
 ## Changes

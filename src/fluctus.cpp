@@ -131,7 +131,8 @@ struct Fluctus : SanguineModule {
 
 	bool bLastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
-	bool triggered[PORT_MAX_CHANNELS];
+	bool bTriggersAreGates = true;
+	bool lastTriggered[PORT_MAX_CHANNELS];
 
 	uint8_t* bufferLarge[PORT_MAX_CHANNELS];
 	uint8_t* bufferSmall[PORT_MAX_CHANNELS];
@@ -201,7 +202,7 @@ struct Fluctus : SanguineModule {
 		configBypass(INPUT_RIGHT, OUTPUT_RIGHT);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			triggered[channel] = false;
+			lastTriggered[channel] = false;
 			bLastFrozen[channel] = false;
 
 			bufferLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
@@ -336,6 +337,11 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->feedback = scaledVoltages[2];
 				fluctusParameters[channel]->reverb = scaledVoltages[3];
 
+				fluctusParameters[channel]->kammerl.probability = fluctusParameters[channel]->dry_wet;
+				fluctusParameters[channel]->kammerl.clock_divider = fluctusParameters[channel]->stereo_spread;
+				fluctusParameters[channel]->kammerl.pitch_mode = fluctusParameters[channel]->feedback;
+				fluctusParameters[channel]->kammerl.distortion = fluctusParameters[channel]->reverb;
+
 				scaledVoltages = voltages1[channel] / 5.f;
 
 				scaledVoltages += sliderValues;
@@ -348,15 +354,16 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->texture = scaledVoltages[3];
 
 				// Trigger.
-				triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
+				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-				fluctusParameters[channel]->trigger = triggered[channel];
-				fluctusParameters[channel]->gate = triggered[channel];
+				fluctusParameters[channel]->trigger = (bTriggersAreGates && bIsGate) ||
+					(!bTriggersAreGates && (bIsGate && !lastTriggered[channel]));
+				fluctusParameters[channel]->gate = bIsGate;
+
+				lastTriggered[channel] = bIsGate;
+
 				fluctusParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
-				fluctusParameters[channel]->kammerl.probability = fluctusParameters[channel]->dry_wet;
-				fluctusParameters[channel]->kammerl.clock_divider = fluctusParameters[channel]->stereo_spread;
-				fluctusParameters[channel]->kammerl.pitch_mode = fluctusParameters[channel]->feedback;
-				fluctusParameters[channel]->kammerl.distortion = fluctusParameters[channel]->reverb;
+
 				float pitchVoltage = inputs[INPUT_PITCH].getVoltage(channel);
 				fluctusParameters[channel]->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(), -2.f, 2.f, 0.f, 1.f) +
 					pitchVoltage / 5.f), 0.f, 1.f);
@@ -393,8 +400,6 @@ struct Fluctus : SanguineModule {
 				int outCount = drbOutputBuffer[channel].capacity();
 				srcOutput[channel].process(outputFrames, &inCount, drbOutputBuffer[channel].endData(), &outCount);
 				drbOutputBuffer[channel].endIncr(outCount);
-
-				triggered[channel] = false;
 			}
 
 			// Set output.
@@ -785,13 +790,19 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; ++i) {
-			availableChannels.push_back(channelNumbers[i]);
-		}
-		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
-			[=]() {return module->displayChannel; },
-			[=](int i) {module->displayChannel = i; }
+		menu->addChild(createSubmenuItem("Options", "",
+			[=](Menu* menu) {
+				menu->addChild(createBoolPtrMenuItem("Handle triggers as gates", "", &module->bTriggersAreGates));
+
+				std::vector<std::string> availableChannels;
+				for (int i = 0; i < module->channelCount; ++i) {
+					availableChannels.push_back(channelNumbers[i]);
+				}
+				menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+					[=]() {return module->displayChannel; },
+					[=](int i) {module->displayChannel = i; }
+				));
+			}
 		));
 	}
 };
