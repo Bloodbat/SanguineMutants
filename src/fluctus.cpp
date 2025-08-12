@@ -564,6 +564,7 @@ struct Fluctus : SanguineModule {
 
 		setJsonInt(rootJ, "displayChannel", displayChannel);
 		setJsonInt(rootJ, "LEDsMode", ledMode);
+		setJsonBoolean(rootJ, "triggersAreGates", bTriggersAreGates);
 
 		return rootJ;
 	}
@@ -580,6 +581,8 @@ struct Fluctus : SanguineModule {
 		if (getJsonInt(rootJ, "LEDsMode", intValue)) {
 			ledMode = static_cast<cloudyCommon::LedModes>(intValue);
 		}
+
+		getJsonBoolean(rootJ, "triggersAreGates", bTriggersAreGates);
 	}
 
 	int getModeParam() {
