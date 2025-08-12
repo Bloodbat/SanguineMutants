@@ -186,6 +186,7 @@ struct Etesia : SanguineModule {
 		configParam(PARAM_REVERB, 0.f, 1.f, 0.5f, "Reverb", "%", 0.f, 100.f);
 
 		configInput(INPUT_IN_GAIN, "Input gain CV");
+		configInput(INPUT_OUT_GAIN, "Output gain CV");
 
 		configParam(PARAM_IN_GAIN, 0.f, 1.f, 0.5f, "Input gain", "%", 0.f, 100.f);
 
