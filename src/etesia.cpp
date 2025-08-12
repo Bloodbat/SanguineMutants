@@ -285,9 +285,6 @@ struct Etesia : SanguineModule {
 				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
 
-			// Trigger.
-			triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-
 			etesiaParameters[channel] = etesiaProcessor[channel]->mutable_parameters();
 
 			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
@@ -357,6 +354,9 @@ struct Etesia : SanguineModule {
 				etesiaParameters[channel]->density = scaledVoltages[1];
 				etesiaParameters[channel]->size = scaledVoltages[2];
 				etesiaParameters[channel]->texture = scaledVoltages[3];
+
+				// Trigger.
+				triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
 				etesiaParameters[channel]->trigger = triggered[channel];
 				etesiaParameters[channel]->gate = triggered[channel];

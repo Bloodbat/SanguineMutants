@@ -273,9 +273,6 @@ struct Nebulae : SanguineModule {
 				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
 
-			// Trigger.
-			triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-
 			cloudsParameters[channel] = cloudsProcessor[channel]->mutable_parameters();
 
 			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
@@ -345,6 +342,10 @@ struct Nebulae : SanguineModule {
 				cloudsParameters[channel]->density = scaledVoltages[1];
 				cloudsParameters[channel]->size = scaledVoltages[2];
 				cloudsParameters[channel]->texture = scaledVoltages[3];
+
+				// Trigger.
+				// TODO: treat triggers as actual triggers? As hardware does (gate_input.h)
+				triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
 				cloudsParameters[channel]->trigger = triggered[channel];
 				cloudsParameters[channel]->gate = triggered[channel];
