@@ -277,9 +277,6 @@ struct Fluctus : SanguineModule {
 				drbInputBuffer[channel].push(inputFrame[channel]);
 			}
 
-			// Trigger.
-			triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-
 			fluctusParameters[channel] = fluctusProcessor[channel]->mutable_parameters();
 
 			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
@@ -349,6 +346,9 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->density = scaledVoltages[1];
 				fluctusParameters[channel]->size = scaledVoltages[2];
 				fluctusParameters[channel]->texture = scaledVoltages[3];
+
+				// Trigger.
+				triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
 				fluctusParameters[channel]->trigger = triggered[channel];
 				fluctusParameters[channel]->gate = triggered[channel];
