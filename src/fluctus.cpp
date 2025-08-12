@@ -117,7 +117,7 @@ struct Fluctus : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
-	fluctus::PlaybackMode playbackMode = fluctus::PLAYBACK_MODE_GRANULAR;
+	fluctus::PlaybackMode knobPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
 	fluctus::PlaybackMode lastPlaybackMode = fluctus::PLAYBACK_MODE_LAST;
 
 	float freezeLight = 0.f;
@@ -308,7 +308,7 @@ struct Fluctus : SanguineModule {
 
 				// Set up Fluctus processor.
 				if (!bHaveModeCable) {
-					fluctusProcessor[channel]->set_playback_mode(playbackMode);
+					fluctusProcessor[channel]->set_playback_mode(knobPlaybackMode);
 				} else {
 					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
 					modeVoltage = clamp(modeVoltage, 0, 4);
@@ -455,13 +455,13 @@ struct Fluctus : SanguineModule {
 			lights[LIGHT_FREEZE].setBrightnessSmooth(fluctusParameters[displayChannel]->freeze ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			playbackMode = fluctus::PlaybackMode(params[PARAM_MODE].getValue());
+			knobPlaybackMode = fluctus::PlaybackMode(params[PARAM_MODE].getValue());
 			fluctus::PlaybackMode channelPlaybackMode;
 
 			if (bHaveModeCable) {
 				channelPlaybackMode = fluctusProcessor[displayChannel]->playback_mode();
 			} else {
-				channelPlaybackMode = playbackMode;
+				channelPlaybackMode = knobPlaybackMode;
 			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {

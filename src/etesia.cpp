@@ -120,7 +120,7 @@ struct Etesia : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
-	etesia::PlaybackMode playbackMode = etesia::PLAYBACK_MODE_GRANULAR;
+	etesia::PlaybackMode knobPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
 	etesia::PlaybackMode lastPlaybackMode = etesia::PLAYBACK_MODE_LAST;
 
 	float freezeLight = 0.f;
@@ -316,7 +316,7 @@ struct Etesia : SanguineModule {
 
 				// Set up Etesia processor.
 				if (!bHaveModeCable) {
-					etesiaProcessor[channel]->set_playback_mode(playbackMode);
+					etesiaProcessor[channel]->set_playback_mode(knobPlaybackMode);
 				} else {
 					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
 					modeVoltage = clamp(modeVoltage, 0, 5);
@@ -460,13 +460,13 @@ struct Etesia : SanguineModule {
 			lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters[displayChannel]->granular.reverse ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			playbackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
+			knobPlaybackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
 			etesia::PlaybackMode channelPlaybackMode;
 
 			if (bHaveModeCable) {
 				channelPlaybackMode = etesiaProcessor[displayChannel]->playback_mode();
 			} else {
-				channelPlaybackMode = playbackMode;
+				channelPlaybackMode = knobPlaybackMode;
 			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
