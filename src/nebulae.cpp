@@ -113,7 +113,7 @@ struct Nebulae : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
 
-	clouds::PlaybackMode playbackMode = clouds::PLAYBACK_MODE_GRANULAR;
+	clouds::PlaybackMode knobPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
 	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_LAST;
 
 	float freezeLight = 0.f;
@@ -304,7 +304,7 @@ struct Nebulae : SanguineModule {
 
 				// Set up Clouds processor.
 				if (!bHaveModeCable) {
-					cloudsProcessor[channel]->set_playback_mode(playbackMode);
+					cloudsProcessor[channel]->set_playback_mode(knobPlaybackMode);
 				} else {
 					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
 					modeVoltage = clamp(modeVoltage, 0, 3);
@@ -445,13 +445,13 @@ struct Nebulae : SanguineModule {
 			lights[LIGHT_FREEZE].setBrightnessSmooth(cloudsParameters[displayChannel]->freeze ?
 				kSanguineButtonLightValue : 0.f, sampleTime);
 
-			playbackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
+			knobPlaybackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
 			clouds::PlaybackMode channelPlaybackMode;
 
 			if (bHaveModeCable) {
 				channelPlaybackMode = cloudsProcessor[displayChannel]->playback_mode();
 			} else {
-				channelPlaybackMode = playbackMode;
+				channelPlaybackMode = knobPlaybackMode;
 			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
