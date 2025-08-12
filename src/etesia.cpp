@@ -134,7 +134,8 @@ struct Etesia : SanguineModule {
 
 	bool bLastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
-	bool triggered[PORT_MAX_CHANNELS];
+	bool bTriggersAreGates = true;
+	bool lastTriggered[PORT_MAX_CHANNELS];
 
 	uint8_t* bufferLarge[PORT_MAX_CHANNELS];
 	uint8_t* bufferSmall[PORT_MAX_CHANNELS];
@@ -207,7 +208,7 @@ struct Etesia : SanguineModule {
 		configBypass(INPUT_RIGHT, OUTPUT_RIGHT);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			triggered[channel] = false;
+			lastTriggered[channel] = false;
 			bLastFrozen[channel] = false;
 
 			bufferLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
@@ -356,13 +357,18 @@ struct Etesia : SanguineModule {
 				etesiaParameters[channel]->texture = scaledVoltages[3];
 
 				// Trigger.
-				triggered[channel] = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
+				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-				etesiaParameters[channel]->trigger = triggered[channel];
-				etesiaParameters[channel]->gate = triggered[channel];
+				etesiaParameters[channel]->trigger = (bTriggersAreGates && bIsGate) ||
+					(!bTriggersAreGates && (bIsGate && !lastTriggered[channel]));
+				etesiaParameters[channel]->gate = bIsGate;
+
+				lastTriggered[channel] = bIsGate;
+
 				etesiaParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
-				etesiaParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 				etesiaParameters[channel]->granular.reverse = (inputs[INPUT_REVERSE].getVoltage(channel) >= 1.f || bReversed);
+
+				etesiaParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
 				etesia::ShortFrame output[cloudyCommon::kMaxFrames];
 				etesiaProcessor[channel]->Process(input, output, cloudyCommon::kMaxFrames);
@@ -395,8 +401,6 @@ struct Etesia : SanguineModule {
 				int outCount = drbOutputBuffer[channel].capacity();
 				srcOutput[channel].process(outputFrames, &inCount, drbOutputBuffer[channel].endData(), &outCount);
 				drbOutputBuffer[channel].endIncr(outCount);
-
-				triggered[channel] = false;
 			}
 
 			// Set output.
@@ -800,13 +804,19 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		std::vector<std::string> availableChannels;
-		for (int i = 0; i < module->channelCount; ++i) {
-			availableChannels.push_back(channelNumbers[i]);
-		}
-		menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
-			[=]() {return module->displayChannel; },
-			[=](int i) {module->displayChannel = i; }
+		menu->addChild(createSubmenuItem("Options", "",
+			[=](Menu* menu) {
+				menu->addChild(createBoolPtrMenuItem("Handle triggers as gates", "", &module->bTriggersAreGates));
+
+				std::vector<std::string> availableChannels;
+				for (int i = 0; i < module->channelCount; ++i) {
+					availableChannels.push_back(channelNumbers[i]);
+				}
+				menu->addChild(createIndexSubmenuItem("Display channel", availableChannels,
+					[=]() {return module->displayChannel; },
+					[=](int i) {module->displayChannel = i; }
+				));
+			}
 		));
 	}
 };
