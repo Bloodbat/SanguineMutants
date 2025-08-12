@@ -185,7 +185,8 @@ struct Fluctus : SanguineModule {
 
 		configParam(PARAM_OUT_GAIN, 0.f, 2.f, 1.f, "Output gain", "%", 0.f, 100.f);
 
-		configInput(INPUT_IN_GAIN, "Output gain CV");
+		configInput(INPUT_IN_GAIN, "Input gain CV");
+		configInput(INPUT_OUT_GAIN, "Output gain CV");
 
 		configInput(INPUT_LEFT, "Left");
 		configInput(INPUT_RIGHT, "Right");
