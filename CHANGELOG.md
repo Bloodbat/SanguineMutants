@@ -24,6 +24,8 @@
 
 - Nebulae family: modules are fully polyphonic.
 
+- Nebulae family: optional hardware-like handling of triggers: rising edge detection instead of treating them as gates.
+
 ## Changes
 
 - Plugin: performance tweaks.
