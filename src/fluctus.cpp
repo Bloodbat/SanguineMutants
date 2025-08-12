@@ -569,6 +569,7 @@ fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
 
 		setJsonInt(rootJ, "displayChannel", displayChannel);
 		setJsonInt(rootJ, "LEDsMode", ledMode);
+		setJsonBoolean(rootJ, "triggersAreGates", bTriggersAreGates);
 
 		return rootJ;
 	}
@@ -585,6 +586,8 @@ fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
 		if (getJsonInt(rootJ, "LEDsMode", intValue)) {
 			ledMode = static_cast<cloudyCommon::LedModes>(intValue);
 		}
+
+		getJsonBoolean(rootJ, "triggersAreGates", bTriggersAreGates);
 	}
 
 	int getModeParam() {
