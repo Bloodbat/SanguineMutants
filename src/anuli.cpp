@@ -205,38 +205,37 @@ struct Anuli : SanguineModule {
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
 		if (bHaveModeCable) {
-			if (bNotesModeSelection) {
-				for (int channel = 0; channel < channelCount; ++channel) {
-					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-					modeVoltage = roundf(modeVoltage * 12.f);
-					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
-
-					setupChannel(channel, bWithDisastrousPeace);
-
-					renderFrames(channel, parametersInfo, args.sampleRate);
-
-					setOutputs(channel, bHaveBothOutputs);
+			if (!bNotesModeSelection) {
+				float_4 inputVoltages;
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+					channelModes[channel] = static_cast<int>(inputVoltages[0]);
+					channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
+					channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
+					channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
 				}
 			} else {
-				for (int channel = 0; channel < channelCount; ++channel) {
-					float modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-					channelModes[channel] = clamp(static_cast<int>(modeVoltage), 0, 6);
-
-					setupChannel(channel, bWithDisastrousPeace);
-
-					renderFrames(channel, parametersInfo, args.sampleRate);
-
-					setOutputs(channel, bHaveBothOutputs);
+				float_4 inputVoltages;
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					inputVoltages *= 12.f;
+					inputVoltages = simd::round(inputVoltages);
+					inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+					channelModes[channel] = static_cast<int>(inputVoltages[0]);
+					channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
+					channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
+					channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
 				}
 			}
-		} else {
-			for (int channel = 0; channel < channelCount; ++channel) {
-				setupChannel(channel, bWithDisastrousPeace);
+		}
 
-				renderFrames(channel, parametersInfo, args.sampleRate);
+		for (int channel = 0; channel < channelCount; ++channel) {
+			setupChannel(channel, bWithDisastrousPeace);
 
-				setOutputs(channel, bHaveBothOutputs);
-			}
+			renderFrames(channel, parametersInfo, args.sampleRate);
+
+			setOutputs(channel, bHaveBothOutputs);
 		}
 
 		setStrummingFlag(performanceStates[displayChannel].strum);
