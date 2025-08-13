@@ -183,31 +183,31 @@ struct Aestus : SanguineModule {
 
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
-		bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
-
-		bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
-
 		bool bIsLightsTurn = lightsDivider.process();
 
-		if (stMode.process(params[PARAM_MODE].getValue())) {
-			selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-		}
-
-		if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
-			selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-		}
-
-		bool bModelConnected = inputs[INPUT_MODEL].isConnected();
-		bool bModeConnected = inputs[INPUT_MODE].isConnected();
-		bool bRangeConnected = inputs[INPUT_RANGE].isConnected();
-
-		float knobFrequency = params[PARAM_FREQUENCY].getValue();
-		float knobFm = params[PARAM_FM].getValue();
-		float knobShape = params[PARAM_SHAPE].getValue();
-		float knobSlope = params[PARAM_SLOPE].getValue();
-		float knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
-
 		if (!bWantPeacocks) {
+			bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
+
+			bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+
+			if (stMode.process(params[PARAM_MODE].getValue())) {
+				selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+			}
+
+			if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
+				selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+			}
+
+			bool bModelConnected = inputs[INPUT_MODEL].isConnected();
+			bool bModeConnected = inputs[INPUT_MODE].isConnected();
+			bool bRangeConnected = inputs[INPUT_RANGE].isConnected();
+
+			float knobFrequency = params[PARAM_FREQUENCY].getValue();
+			float knobFm = params[PARAM_FM].getValue();
+			float knobShape = params[PARAM_SHAPE].getValue();
+			float knobSlope = params[PARAM_SLOPE].getValue();
+			float knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
+
 			tides::GeneratorSample samples[PORT_MAX_CHANNELS];
 			float unipolarFlags[PORT_MAX_CHANNELS];
 
