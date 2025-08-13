@@ -252,11 +252,8 @@ struct Aestus : SanguineModule {
 					}
 				}
 
-				if (!bModelConnected) {
-					channelIsSheep[channel] = bSheepSelected;
-				} else {
-					channelIsSheep[channel] = inputs[INPUT_MODEL].getVoltage(channel) >= 1.f;
-				}
+				channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
+					(bModelConnected && inputs[INPUT_MODEL].getVoltage(channel) >= 1.f);
 
 				// Buffer loop.
 				if (++frames[channel] >= tides::kBlockSize) {
