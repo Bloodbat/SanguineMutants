@@ -345,7 +345,7 @@ struct Fluctus : SanguineModule {
 
 				scaledVoltages = voltages1[channel] / 5.f;
 
-fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
+				fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
 
 				scaledVoltages += sliderValues;
 
@@ -355,8 +355,7 @@ fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0
 				fluctusParameters[channel]->density = scaledVoltages[1];
 				fluctusParameters[channel]->size = scaledVoltages[2];
 				fluctusParameters[channel]->texture = scaledVoltages[3];
-				
-fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
+				fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
 				fluctusParameters[channel]->kammerl.size_modulation = fluctusParameters[channel]->density;
 
 				// Trigger.
@@ -371,6 +370,8 @@ fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
 				fluctusParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
 
 				float pitchVoltage = inputs[INPUT_PITCH].getVoltage(channel);
+
+				// TODO: the firmware subtracts -0.5f from incoming voltage...
 				fluctusParameters[channel]->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(), -2.f, 2.f, 0.f, 1.f) +
 					pitchVoltage / 5.f), 0.f, 1.f);
 				fluctusParameters[channel]->pitch = clamp((paramPitch + pitchVoltage) * 12.f, -48.f, 48.f);
