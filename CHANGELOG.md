@@ -14,6 +14,8 @@
 
 - Apices family: go back to parameter values set by the knobs when expanders are connected and a cable is disconnected from one of the expander inputs.
 
+- Fluctus: some parameters for Beat-repeat were not being handled.
+
 - Funes: custom data not loading under certain conditions.
 
 - Mortuus: button lights.
