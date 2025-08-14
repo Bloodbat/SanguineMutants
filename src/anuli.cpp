@@ -274,15 +274,15 @@ struct Anuli : SanguineModule {
 			}
 
 			for (int light = 0; light < 2; ++light) {
-				float lightValue = bWithDisastrousPeace && (anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_ON ||
-					(anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_BLINK && bIsTrianglePulse)) ?
-					kSanguineButtonLightValue : 0.f;
+				float lightValue = (bWithDisastrousPeace && (anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_ON ||
+					(anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_BLINK && bIsTrianglePulse))) *
+					kSanguineButtonLightValue;
 				lights[LIGHT_FX + light].setBrightnessSmooth(lightValue, sampleTime);
 			}
 
-			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3 ? 1.f : 0.f);
+			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3);
 			lights[LIGHT_POLYPHONY + 1].setBrightness((polyphonyMode != 3 && polyphonyMode & 0x06) ||
-				(polyphonyMode == 3 && bIsTrianglePulse) ? 1.f : 0.f);
+				(polyphonyMode == 3 && bIsTrianglePulse));
 
 			++strummingFlagInterval;
 			if (strummingFlagCounter) {
