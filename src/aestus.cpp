@@ -382,15 +382,15 @@ struct Aestus : SanguineModule {
 				tides::GeneratorMode displayMode = generators[displayChannel].mode();
 				tides::GeneratorRange displayRange = generators[displayChannel].range();
 
-				lights[LIGHT_MODE + 0].setBrightnessSmooth(displayMode == tides::GENERATOR_MODE_AD ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[LIGHT_MODE + 1].setBrightnessSmooth(displayMode == tides::GENERATOR_MODE_AR ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_MODE + 0].setBrightnessSmooth((displayMode == tides::GENERATOR_MODE_AD) *
+					kSanguineButtonLightValue, sampleTime);
+				lights[LIGHT_MODE + 1].setBrightnessSmooth((displayMode == tides::GENERATOR_MODE_AR) *
+					kSanguineButtonLightValue, sampleTime);
 
-				lights[LIGHT_RANGE + 0].setBrightnessSmooth(displayRange == tides::GENERATOR_RANGE_LOW ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[LIGHT_RANGE + 1].setBrightnessSmooth(displayRange == tides::GENERATOR_RANGE_HIGH ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_RANGE + 0].setBrightnessSmooth((displayRange == tides::GENERATOR_RANGE_LOW) *
+					kSanguineButtonLightValue, sampleTime);
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth((displayRange == tides::GENERATOR_RANGE_HIGH) *
+					kSanguineButtonLightValue, sampleTime);
 
 				if (samples[displayChannel].flags & tides::FLAG_END_OF_ATTACK) {
 					unipolarFlags[displayChannel] *= -1.f;
@@ -398,8 +398,8 @@ struct Aestus : SanguineModule {
 				lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
 
-				lights[LIGHT_SYNC].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[LIGHT_SYNC].setBrightnessSmooth((bHaveExternalSync && !(getSystemTimeMs() & 128)) *
+					kSanguineButtonLightValue, sampleTime);
 
 				displayModel = aestus::displayModels[static_cast<int>(channelIsSheep[displayChannel])];
 
