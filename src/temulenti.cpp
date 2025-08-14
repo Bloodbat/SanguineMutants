@@ -1,4 +1,7 @@
 #include "plugin.hpp"
+
+#include <array>
+
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
@@ -131,7 +134,7 @@ struct Temulenti : SanguineModule {
 	bumps::Generator::FeatureMode lastFeatureModes[PORT_MAX_CHANNELS];
 
 	uint8_t lastGates[PORT_MAX_CHANNELS];
-	uint8_t quantizers[PORT_MAX_CHANNELS];
+	std::array<uint8_t, PORT_MAX_CHANNELS> quantizers;
 
 	bumps::Generator generators[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
@@ -221,45 +224,67 @@ struct Temulenti : SanguineModule {
 		bumps::GeneratorSample samples[PORT_MAX_CHANNELS];
 		float unipolarFlags[PORT_MAX_CHANNELS];
 
+		std::array<bumps::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
+		std::array<bumps::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
+
+		channelModes.fill(selectedMode);
+		channelRanges.fill(selectedRange);
+		quantizers.fill(static_cast<uint8_t>(knobQuantizer));
+
+		if (bModeConnected) {
+			float_4 modeVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+				modeVoltages = simd::round(modeVoltages);
+				modeVoltages = simd::clamp(modeVoltages, 0.f, 3.f);
+
+				channelModes[channel] = static_cast<bumps::GeneratorMode>(modeVoltages[0]);
+				channelModes[channel + 1] = static_cast<bumps::GeneratorMode>(modeVoltages[1]);
+				channelModes[channel + 2] = static_cast<bumps::GeneratorMode>(modeVoltages[2]);
+				channelModes[channel + 3] = static_cast<bumps::GeneratorMode>(modeVoltages[3]);
+			}
+		}
+
+		if (bRangeConnected) {
+			float_4 rangeVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				rangeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+				rangeVoltages = simd::round(rangeVoltages);
+				rangeVoltages = simd::clamp(rangeVoltages, 0.f, 3.f);
+
+				channelRanges[channel] = static_cast<bumps::GeneratorRange>(rangeVoltages[0]);
+				channelRanges[channel + 1] = static_cast<bumps::GeneratorRange>(rangeVoltages[1]);
+				channelRanges[channel + 2] = static_cast<bumps::GeneratorRange>(rangeVoltages[2]);
+				channelRanges[channel + 3] = static_cast<bumps::GeneratorRange>(rangeVoltages[3]);
+			}
+		}
+
+		if (bQuantizerConnected) {
+			float_4 quantizerVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				quantizerVoltages = inputs[INPUT_QUANTIZER].getVoltageSimd<float_4>(channel);
+
+				quantizerVoltages = simd::round(quantizerVoltages);
+				quantizerVoltages = simd::clamp(quantizerVoltages, 0.f, 7.f);
+
+				quantizers[channel] = static_cast<uint8_t>(quantizerVoltages[0]);
+				quantizers[channel + 1] = static_cast<uint8_t>(quantizerVoltages[1]);
+				quantizers[channel + 2] = static_cast<uint8_t>(quantizerVoltages[2]);
+				quantizers[channel + 3] = static_cast<uint8_t>(quantizerVoltages[3]);
+			}
+		}
+
 		for (int channel = 0; channel < channelCount; ++channel) {
-			if (!bModeConnected) {
-				if (lastModes[channel] != selectedMode) {
-					generators[channel].set_mode(selectedMode);
-					lastModes[channel] = selectedMode;
-				}
-			} else {
-				float modeVoltage;
-				modeVoltage = inputs[INPUT_MODE].getVoltage(channel);
-
-				modeVoltage = clamp(modeVoltage, 0.f, 3.f);
-				modeVoltage = roundf(modeVoltage);
-
-				bumps::GeneratorMode newMode = static_cast<bumps::GeneratorMode>(modeVoltage);
-
-				if (lastModes[channel] != newMode) {
-					generators[channel].set_mode(static_cast<bumps::GeneratorMode>(modeVoltage));
-					lastModes[channel] = newMode;
-				}
+			if (lastModes[channel] != channelModes[channel]) {
+				generators[channel].set_mode(channelModes[channel]);
+				lastModes[channel] = channelModes[channel];
 			}
 
-			if (!bRangeConnected) {
-				if (lastRanges[channel] != selectedRange) {
-					generators[channel].set_range(selectedRange);
-					lastRanges[channel] = selectedRange;
-				}
-			} else {
-				if (!bHaveExternalSync) {
-					float rangeVoltage = inputs[INPUT_RANGE].getVoltage(channel);
-
-					rangeVoltage = clamp(rangeVoltage, 0.f, 3.f);
-					rangeVoltage = roundf(rangeVoltage);
-
-					bumps::GeneratorRange newRange = static_cast<bumps::GeneratorRange>(static_cast<int>(rangeVoltage));
-					if (lastRanges[channel] != newRange) {
-						generators[channel].set_range(newRange);
-						lastRanges[channel] = newRange;
-					}
-				}
+			if (lastRanges[channel] != channelRanges[channel]) {
+				generators[channel].set_range(channelRanges[channel]);
+				lastRanges[channel] = channelRanges[channel];
 			}
 
 			//Buffer loop.
@@ -294,15 +319,6 @@ struct Temulenti : SanguineModule {
 
 				// This is equivalent to shifting left by 7 bits.
 				int16_t pitch = static_cast<int16_t>(pitchParam * 128);
-
-				if (!bQuantizerConnected) {
-					quantizers[channel] = static_cast<uint8_t>(knobQuantizer);
-				} else {
-					float quantizerVoltage = inputs[INPUT_QUANTIZER].getVoltage(channel);
-					quantizerVoltage = clamp(quantizerVoltage, 0.f, 7.f);
-					quantizerVoltage = roundf(quantizerVoltage);
-					quantizers[channel] = static_cast<uint8_t>(quantizerVoltage);
-				}
 
 				if (quantizers[channel]) {
 					uint16_t semi = pitch >> 7;
@@ -398,20 +414,30 @@ struct Temulenti : SanguineModule {
 
 			selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				if (!bModelConnected) {
-					generators[channel].feature_mode_ = selectedFeatureMode;
-				} else {
-					float modelVoltage = inputs[INPUT_MODEL].getVoltage(channel);
-					modelVoltage = clamp(modelVoltage, 0.f, 3.f);
-					modelVoltage = roundf(modelVoltage);
-					generators[channel].feature_mode_ = static_cast<bumps::Generator::FeatureMode>(modelVoltage);
-				}
+			std::array<bumps::Generator::FeatureMode, PORT_MAX_CHANNELS> channelModes;
+			channelModes.fill(selectedFeatureMode);
 
-				if (lastFeatureModes[channel] != generators[channel].feature_mode_) {
+			if (bModelConnected) {
+				float_4 modelVoltages;
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					modelVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+
+					modelVoltages = simd::round(modelVoltages);
+					modelVoltages = simd::clamp(modelVoltages, 0.f, 3.f);
+
+					channelModes[channel] = static_cast<bumps::Generator::FeatureMode>(modelVoltages[0]);
+					channelModes[channel + 1] = static_cast<bumps::Generator::FeatureMode>(modelVoltages[1]);
+					channelModes[channel + 2] = static_cast<bumps::Generator::FeatureMode>(modelVoltages[2]);
+					channelModes[channel + 3] = static_cast<bumps::Generator::FeatureMode>(modelVoltages[3]);
+				}
+			}
+
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				if ((channel < channelCount) && (lastFeatureModes[channel] != channelModes[channel])) {
+					generators[channel].feature_mode_ = channelModes[channel];
 					generators[channel].set_mode(lastModes[channel]);
 					generators[channel].set_range(lastRanges[channel]);
-					lastFeatureModes[channel] = generators[channel].feature_mode_;
+					lastFeatureModes[channel] = channelModes[channel];
 				}
 
 				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
