@@ -142,6 +142,8 @@ struct Temulenti : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = temulenti::displayModels[0];
 
+	float log2SampleRate = 0.f;
+
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
@@ -191,6 +193,9 @@ struct Temulenti : SanguineModule {
 			lastFeatureModes[channel] = bumps::Generator::FEAT_MODE_FUNCTION;
 		}
 		lightsDivider.setDivision(kLightsFrequency);
+
+		onSampleRateChange();
+
 		onReset();
 	}
 
@@ -328,7 +333,7 @@ struct Temulenti : SanguineModule {
 				}
 
 				// Scale to the global sample rate.
-				pitch += log2f(48000.f / args.sampleRate) * 12.f * 128;
+				pitch += log2SampleRate * 12.f * 128;
 
 				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 					generators[channel].set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
@@ -548,6 +553,10 @@ struct Temulenti : SanguineModule {
 		if (getJsonInt(rootJ, "displayChannel", intValue)) {
 			displayChannel = intValue;
 		}
+	}
+
+	void onSampleRateChange() override {
+		log2SampleRate = log2f(48000.f / APP->engine->getSampleRate());
 	}
 
 	void setModel(int modelNum) {
