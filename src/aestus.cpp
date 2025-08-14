@@ -432,10 +432,10 @@ struct Aestus : SanguineModule {
 				}
 
 				lights[LIGHT_MODE + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_MODE + 1].setBrightnessSmooth(1.f, sampleTime);
+				lights[LIGHT_MODE + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 
 				lights[LIGHT_RANGE + 0].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_RANGE + 1].setBrightnessSmooth(1.f, sampleTime);
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 
 				lights[LIGHT_PHASE + 0].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_PHASE + 1].setBrightnessSmooth(1.f, sampleTime);
