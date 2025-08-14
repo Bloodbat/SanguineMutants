@@ -128,6 +128,8 @@ struct Aestus : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	std::string displayModel = aestus::displayModels[0];
 
+	float log2SampleRate = 0.f;
+
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
@@ -176,6 +178,9 @@ struct Aestus : SanguineModule {
 			lastSheepFirmwares[channel] = false;
 		}
 		lightsDivider.setDivision(kLightsFrequency);
+
+		onSampleRateChange();
+
 		onReset();
 	}
 
@@ -290,7 +295,7 @@ struct Aestus : SanguineModule {
 					pitch += knobFm * inputVoltages[0];
 					pitch += 60.f;
 					// Scale to the global sample rate.
-					pitch += log2f(48000.f / args.sampleRate) * 12.f;
+					pitch += log2SampleRate * 12.f;
 					generators[channel].set_pitch(static_cast<int>(
 						clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
 
@@ -499,6 +504,10 @@ struct Aestus : SanguineModule {
 		if (getJsonInt(rootJ, "displayChannel", intValue)) {
 			displayChannel = intValue;
 		}
+	}
+
+	void onSampleRateChange() override {
+		log2SampleRate = log2f(48000.f / APP->engine->getSampleRate());
 	}
 
 	void setModel(int modelNum) {
