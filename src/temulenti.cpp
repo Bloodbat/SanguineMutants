@@ -398,8 +398,8 @@ struct Temulenti : SanguineModule {
 			unipolarFlags[channel] = static_cast<float>(uni) / 65535;
 			float bipolarFlag = static_cast<float>(bi) / 32768;
 
-			outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_ATTACK) ? 5.f : 0.f, channel);
-			outputs[OUTPUT_LOW].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_RELEASE) ? 5.f : 0.f, channel);
+			outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_ATTACK) * 5.f, channel);
+			outputs[OUTPUT_LOW].setVoltage((samples[channel].flags & bumps::FLAG_END_OF_RELEASE) * 5.f, channel);
 			outputs[OUTPUT_UNI].setVoltage(unipolarFlags[channel] * 8.f, channel);
 			outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f, channel);
 		}
