@@ -128,6 +128,8 @@ struct Nodi : SanguineModule {
 
 	std::string displayText = "";
 
+	float log2SampleRate = 1.f;
+
 	Nodi() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -201,6 +203,8 @@ struct Nodi : SanguineModule {
 		memset(&lastSettings, 0, sizeof(braids::SettingsData));
 
 		lightsDivider.setDivision(kLightsUpdateFrequency);
+
+		onSampleRateChange();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -304,7 +308,7 @@ struct Nodi : SanguineModule {
 				pitchV += fm;
 
 				if (bWantLowCpu) {
-					pitchV += log2f(96000.f / args.sampleRate);
+					pitchV += log2SampleRate;
 				}
 
 				int16_t pitch = (pitchV * 12.f + 60) * 128;
@@ -647,6 +651,10 @@ struct Nodi : SanguineModule {
 			userSignSeed = getInstanceSeed();
 			setWaveShaperSeed(userSignSeed);
 		}
+	}
+
+	void onSampleRateChange() override {
+		log2SampleRate = log2f(96000.f / APP->engine->getSampleRate());
 	}
 
 	int getModelParam() {

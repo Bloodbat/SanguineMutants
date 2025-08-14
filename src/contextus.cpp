@@ -126,6 +126,8 @@ struct Contextus : SanguineModule {
 
 	std::string displayText = "";
 
+	float log2SampleRate = 1.f;
+
 	Contextus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -199,6 +201,8 @@ struct Contextus : SanguineModule {
 		memset(&lastSettings, 0, sizeof(renaissance::SettingsData));
 
 		lightsDivider.setDivision(kLightsUpdateFrequency);
+
+		onSampleRateChange();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -299,7 +303,7 @@ struct Contextus : SanguineModule {
 				pitchV += fm;
 
 				if (bWantLowCpu) {
-					pitchV += log2f(96000.f / args.sampleRate);
+					pitchV += log2SampleRate;
 				}
 
 				int16_t pitch = (pitchV * 12.f + 60) * 128;
@@ -630,6 +634,10 @@ struct Contextus : SanguineModule {
 			userSignSeed = getInstanceSeed();
 			setWaveShaperSeed(userSignSeed);
 		}
+	}
+
+	void onSampleRateChange() override {
+		log2SampleRate = log2f(96000.f / APP->engine->getSampleRate());
 	}
 
 	int getModelParam() {
