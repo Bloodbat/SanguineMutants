@@ -460,15 +460,15 @@ struct Temulenti : SanguineModule {
 			bumps::GeneratorRange displayRange = generators[displayChannel].range();
 
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth(displayMode == bumps::GENERATOR_MODE_AD ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_MODE + 1].setBrightnessSmooth(displayMode == bumps::GENERATOR_MODE_AR ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_MODE + 0].setBrightnessSmooth((displayMode == bumps::GENERATOR_MODE_AD) *
+				kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_MODE + 1].setBrightnessSmooth((displayMode == bumps::GENERATOR_MODE_AR) *
+				kSanguineButtonLightValue, sampleTime);
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_LOW &&
-				!bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth(displayRange == bumps::GENERATOR_RANGE_HIGH &&
-				!bHaveExternalSync ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_RANGE + 0].setBrightnessSmooth((displayRange == bumps::GENERATOR_RANGE_LOW &&
+				!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth((displayRange == bumps::GENERATOR_RANGE_HIGH &&
+				!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
 
 			if (samples[displayChannel].flags & bumps::FLAG_END_OF_ATTACK) {
 				unipolarFlags[displayChannel] *= -1.f;
@@ -476,8 +476,8 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
 
-			lights[LIGHT_SYNC].setBrightnessSmooth(bHaveExternalSync && !(getSystemTimeMs() & 128) ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_SYNC].setBrightnessSmooth((bHaveExternalSync && !(getSystemTimeMs() & 128)) *
+				kSanguineButtonLightValue, sampleTime);
 
 			lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantizers[displayChannel] & 1, sampleTime);
 			lights[LIGHT_QUANTIZER2].setBrightnessSmooth(quantizers[displayChannel] & 2, sampleTime);
