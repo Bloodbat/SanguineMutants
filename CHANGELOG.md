@@ -14,6 +14,8 @@
 
 - Aestus family: modules are fully polyphonic.
 
+- Anuli: polyphonic CV selection of FX for Disastrous Peace channels.
+
 - Funes: new chord banks from Lyle Mills' firmware.
 
 - Funes: ability and controls to crossfade the main signal with the auxiliary signal and output it in the Aux output, adapted from Lyle Mills' firmware.
@@ -43,6 +45,8 @@
 - Nebulae family: OLED display text tweaks.
 
 ## Removals
+
+- Anuli: Note polyphony display.
 
 - Nebulae family: emulation of hardware parameter and quality light patterns: not very useful when the modules are polyphonic (and every parameter is on the faceplate showing its value at all times).
 
