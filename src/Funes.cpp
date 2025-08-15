@@ -183,8 +183,7 @@ struct Funes : SanguineModule {
 
 		resetCustomDataStates();
 
-		ResetEvent dummyEvent;
-		onReset(dummyEvent);
+		init();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -530,10 +529,14 @@ struct Funes : SanguineModule {
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 	}
 
-	void onReset(const ResetEvent& e) override {
+	void init() {
 		setEngine(8);
 		patch.lpg_colour = 0.5f;
 		patch.decay = 0.5f;
+	}
+
+	void onReset(const ResetEvent& e) override {
+		init();
 	}
 
 	void onRandomize() override {

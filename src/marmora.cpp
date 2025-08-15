@@ -260,8 +260,7 @@ struct Marmora : SanguineModule {
 			copyScale(marmora::presetScales[scale], marmoraScales[scale].scale);
 		}
 
-		ResetEvent dummyEvent;
-		onReset(dummyEvent);
+		init();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -588,8 +587,12 @@ struct Marmora : SanguineModule {
 		}
 	}
 
-	void onReset(const ResetEvent& e) override {
+	void init() {
 		yDividerIndex = 4;
+	}
+
+	void onReset(const ResetEvent& e) override {
+		init();
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
