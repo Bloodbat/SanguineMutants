@@ -505,7 +505,7 @@ struct Vimina : SanguineModule {
 		}
 	}
 
-	void onReset() override {
+	void onReset(const ResetEvent& e) override {
 		params[PARAM_MODE_1].setValue(1);
 		params[PARAM_MODE_2].setValue(0);
 		params[PARAM_FACTOR_1].setValue(0.5f);
