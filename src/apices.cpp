@@ -732,7 +732,7 @@ struct Apices : SanguineModule {
 			0.f, 255.f, 0.f, kSanguineButtonLightValue), sampleTime);
 	}
 
-	void onReset() override {
+	void onReset(const ResetEvent& e) override {
 		init();
 	}
 

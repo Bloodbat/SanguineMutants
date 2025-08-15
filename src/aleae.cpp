@@ -161,7 +161,7 @@ struct Aleae : SanguineModule {
 	}
 
 
-	void onReset() override {
+	void onReset(const ResetEvent& e) override {
 		for (int section = 0; section < kMaxModuleSections; ++section) {
 			params[PARAM_ROLL_MODE_1 + section].setValue(0);
 			params[PARAM_OUT_MODE_1 + section].setValue(0);
