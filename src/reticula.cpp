@@ -480,8 +480,8 @@ struct Reticula : SanguineModule {
         }
     }
 
-    void onSampleRateChange() override {
-        metronome.setSampleRate(APP->engine->getSampleRate());
+    void onSampleRateChange(const SampleRateChangeEvent& e) override {
+        metronome.setSampleRate(e.sampleRate);
     }
 
     void onRandomize(const RandomizeEvent& e) override {

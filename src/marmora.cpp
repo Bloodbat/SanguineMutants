@@ -260,7 +260,6 @@ struct Marmora : SanguineModule {
 			copyScale(marmora::presetScales[scale], marmoraScales[scale].scale);
 		}
 
-		onSampleRateChange();
 		onReset();
 	}
 
@@ -592,8 +591,8 @@ struct Marmora : SanguineModule {
 		yDividerIndex = 4;
 	}
 
-	void onSampleRateChange() override {
-		float sampleRate = APP->engine->getSampleRate();
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		float sampleRate = e.sampleRate;
 		memset(&tGenerator, 0, sizeof(marbles::TGenerator));
 		memset(&xyGenerator, 0, sizeof(marbles::XYGenerator));
 
