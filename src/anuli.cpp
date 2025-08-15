@@ -325,7 +325,7 @@ struct Anuli : SanguineModule {
 		performanceState.note = 12.f * note;
 
 		float transpose = parametersInfo.frequency;
-		// Quantize transpose if pitch input is connected
+		// Quantize transpose if pitch input is connected.
 		if (inputs[INPUT_PITCH].isConnected()) {
 			transpose = roundf(transpose);
 		}
@@ -350,8 +350,10 @@ struct Anuli : SanguineModule {
 	void setOutputs(const int channel, const bool withBothOutputs) {
 		if (!drbOutputBuffers[channel].empty()) {
 			dsp::Frame<2> outputFrame = drbOutputBuffers[channel].shift();
-			/* "Note: you need to insert a jack into each output to split the signals:
-				when only one jack is inserted, both signals are mixed together." */
+			/*
+			"Note: you need to insert a jack into each output to split the signals:
+				   when only one jack is inserted, both signals are mixed together."
+			*/
 			if (withBothOutputs) {
 				outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
 				outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
@@ -387,7 +389,7 @@ struct Anuli : SanguineModule {
 		if (drbOutputBuffers[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
-			// Convert input buffer
+			// Convert input buffer.
 			srcInputs[channel].setRates(static_cast<int>(sampleRate), 48000);
 			int inLen = drbInputBuffers[channel].size();
 			int outLen = anuli::kBlockSize;
@@ -410,7 +412,7 @@ struct Anuli : SanguineModule {
 				setupPatch(channel, patch, structure, parametersInfo);
 				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
 
-				// Process audio
+				// Process audio.
 				strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
 				stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
 				break;
@@ -425,13 +427,13 @@ struct Anuli : SanguineModule {
 				setupPatch(channel, patch, structure, parametersInfo);
 				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
 
-				// Process audio
+				// Process audio.
 				strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
 				parts[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
 				break;
 			}
 
-			// Convert output buffer
+			// Convert output buffer.
 			dsp::Frame<2> outputFrames[anuli::kBlockSize];
 			for (int frame = 0; frame < anuli::kBlockSize; ++frame) {
 				outputFrames[frame].samples[0] = out[frame];
