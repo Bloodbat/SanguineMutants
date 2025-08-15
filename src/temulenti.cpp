@@ -183,19 +183,11 @@ struct Temulenti : SanguineModule {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			memset(&generators[channel], 0, sizeof(bumps::Generator));
 			generators[channel].Init();
-
-			lastGates[channel] = 0;
-			quantizers[channel] = 0;
-			lastExternalSyncs[channel] = false;
-			lastRanges[channel] = bumps::GENERATOR_RANGE_MEDIUM;
-			lastModes[channel] = bumps::GENERATOR_MODE_LOOPING;
-
-			lastFeatureModes[channel] = bumps::Generator::FEAT_MODE_FUNCTION;
 		}
-		lightsDivider.setDivision(kLightsFrequency);
 
-		ResetEvent dummyEvent;
-		onReset(dummyEvent);
+		init();
+
+		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -506,14 +498,24 @@ struct Temulenti : SanguineModule {
 		}
 	}
 
-	void onReset(const ResetEvent& e) override {
+	void init() {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			generators[channel].set_mode(bumps::GENERATOR_MODE_LOOPING);
 			generators[channel].set_range(bumps::GENERATOR_RANGE_MEDIUM);
 			lastRanges[channel] = bumps::GENERATOR_RANGE_MEDIUM;
 			lastModes[channel] = bumps::GENERATOR_MODE_LOOPING;
+
+			lastGates[channel] = 0;
+			quantizers[channel] = 0;
+			lastExternalSyncs[channel] = false;
+
+			lastFeatureModes[channel] = bumps::Generator::FEAT_MODE_FUNCTION;
 		}
 		params[PARAM_MODEL].setValue(0.f);
+	}
+
+	void onReset(const ResetEvent& e) override {
+		init();
 	}
 
 	void onRandomize() override {

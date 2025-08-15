@@ -170,20 +170,11 @@ struct Aestus : SanguineModule {
 			generators[channel].Init();
 			plotters[channel].Init(tides::plotInstructions,
 				sizeof(tides::plotInstructions) / sizeof(tides::PlotInstruction));
-
-			lastGates[channel] = 0;
-			lastExternalSyncs[channel] = false;
-			lastRanges[channel] = tides::GENERATOR_RANGE_MEDIUM;
-			lastModes[channel] = tides::GENERATOR_MODE_LOOPING;
-			frames[channel] = 0;
-			channelIsSheep[channel] = false;
-			lastSheepFirmwares[channel] = false;
 		}
+
+		init();
+
 		lightsDivider.setDivision(kLightsFrequency);
-
-		ResetEvent dummyEvent;
-
-		onReset(dummyEvent);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -458,14 +449,24 @@ struct Aestus : SanguineModule {
 		outputs[OUTPUT_BI].setChannels(channelCount);
 	}
 
-	void onReset(const ResetEvent& e) override {
+	void init() {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			generators[channel].set_mode(tides::GENERATOR_MODE_LOOPING);
 			generators[channel].set_range(tides::GENERATOR_RANGE_MEDIUM);
 			lastRanges[channel] = tides::GENERATOR_RANGE_MEDIUM;
 			lastModes[channel] = tides::GENERATOR_MODE_LOOPING;
+
+			lastGates[channel] = 0;
+			lastExternalSyncs[channel] = false;
+			frames[channel] = 0;
+			channelIsSheep[channel] = false;
+			lastSheepFirmwares[channel] = false;
 		}
 		params[PARAM_MODEL].setValue(0.f);
+	}
+
+	void onReset(const ResetEvent& e) override {
+		init();
 	}
 
 	void onRandomize() override {
