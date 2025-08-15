@@ -181,8 +181,6 @@ struct Aestus : SanguineModule {
 		}
 		lightsDivider.setDivision(kLightsFrequency);
 
-		onSampleRateChange();
-
 		onReset();
 	}
 
@@ -508,8 +506,8 @@ struct Aestus : SanguineModule {
 		}
 	}
 
-	void onSampleRateChange() override {
-		log2SampleRate = log2f(48000.f / APP->engine->getSampleRate());
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		log2SampleRate = log2f(48000.f / e.sampleRate);
 	}
 
 	void setModel(int modelNum) {
