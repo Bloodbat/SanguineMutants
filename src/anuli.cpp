@@ -49,6 +49,7 @@ struct Anuli : SanguineModule {
 		INPUT_PITCH,
 		INPUT_IN,
 		INPUT_MODE,
+		INPUT_FX,
 		INPUTS_COUNT
 	};
 
@@ -96,6 +97,8 @@ struct Anuli : SanguineModule {
 
 	rings::ResonatorModel resonatorModels[PORT_MAX_CHANNELS] = {};
 	rings::FxType fxModel = rings::FX_FORMANT;
+
+	std::array<rings::FxType, PORT_MAX_CHANNELS> channelFx = {};
 
 	std::string displayText = "";
 
@@ -153,6 +156,8 @@ struct Anuli : SanguineModule {
 		configBypass(INPUT_IN, OUTPUT_ODD);
 		configBypass(INPUT_IN, OUTPUT_EVEN);
 
+		configInput(INPUT_FX, "FX");
+
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			memset(&strummers[channel], 0, sizeof(rings::Strummer));
 			memset(&parts[channel], 0, sizeof(rings::Part));
@@ -174,6 +179,8 @@ struct Anuli : SanguineModule {
 		polyphonyMode = params[PARAM_POLYPHONY].getValue();
 
 		fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
+
+		channelFx.fill(fxModel);
 
 		int knobMode = static_cast<int>(params[PARAM_MODE].getValue());
 
@@ -203,6 +210,7 @@ struct Anuli : SanguineModule {
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
+		bool bHaveFxCable = inputs[INPUT_FX].isConnected();
 
 		if (bHaveModeCable) {
 			if (!bNotesModeSelection) {
@@ -227,6 +235,19 @@ struct Anuli : SanguineModule {
 					channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
 					channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
 				}
+			}
+		}
+
+		if (bHaveFxCable) {
+			float_4 inputVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
+				inputVoltages = simd::round(inputVoltages);
+				inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
+				channelFx[channel] = static_cast<rings::FxType>(inputVoltages[0]);
+				channelFx[channel + 1] = static_cast<rings::FxType>(inputVoltages[1]);
+				channelFx[channel + 2] = static_cast<rings::FxType>(inputVoltages[2]);
+				channelFx[channel + 3] = static_cast<rings::FxType>(inputVoltages[3]);
 			}
 		}
 
@@ -274,8 +295,9 @@ struct Anuli : SanguineModule {
 			}
 
 			for (int light = 0; light < 2; ++light) {
-				float lightValue = (bWithDisastrousPeace && (anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_ON ||
-					(anuli::fxModeLights[static_cast<int>(fxModel)][light] == LIGHT_BLINK && bIsTrianglePulse))) *
+				float lightValue = (((!bHaveFxCable && bWithDisastrousPeace) || (bHaveFxCable && channelModes[displayChannel] == 6)) &&
+					(anuli::fxModeLights[static_cast<int>(channelFx[displayChannel])][light] == LIGHT_ON ||
+						(anuli::fxModeLights[static_cast<int>(channelFx[displayChannel])][light] == LIGHT_BLINK && bIsTrianglePulse))) *
 					kSanguineButtonLightValue;
 				lights[LIGHT_FX + light].setBrightnessSmooth(lightValue, sampleTime);
 			}
@@ -407,7 +429,7 @@ struct Anuli : SanguineModule {
 			case 6: // Disastrous peace.
 				stringSynths[channel].set_polyphony(polyphonyMode);
 
-				stringSynths[channel].set_fx(rings::FxType(fxModel));
+				stringSynths[channel].set_fx(rings::FxType(channelFx[channel]));
 
 				setupPatch(channel, patch, structure, parametersInfo);
 				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
@@ -525,29 +547,27 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(98.297, 22.087), module, Anuli::PARAM_MODE));
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(53.34f, 30.245f), module, Anuli::LIGHT_POLYPHONY));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(53.34f, 31.645f), module, Anuli::LIGHT_POLYPHONY));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 35.904), module, Anuli::INPUT_FREQUENCY_CV));
-
-		SanguineTinyNumericDisplay* displayPolyphony = new SanguineTinyNumericDisplay(2, module, 53.34f, 37.486f);
-		anuliFramebuffer->addChild(displayPolyphony);
-		displayPolyphony->fallbackNumber = 1;
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 35.904), module, Anuli::INPUT_STRUCTURE_CV));
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(18.415, 42.833), module, Anuli::PARAM_FREQUENCY_MOD));
 
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.34, 41.999), module, Anuli::PARAM_POLYPHONY));
+
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(87.986, 42.833), module, Anuli::PARAM_STRUCTURE_MOD));
 
 		addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(33.006, 49.715), module, Anuli::PARAM_FREQUENCY));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.34, 54.784), module, Anuli::PARAM_POLYPHONY));
-
 		addParam(createParamCentered<Sanguine3PSGreen>(millimetersToPixelsVec(73.674, 49.715), module, Anuli::PARAM_STRUCTURE));
+
+		addInput(createInputCentered <BananutBlackPoly>(millimetersToPixelsVec(53.34, 63.033), module, Anuli::INPUT_FX));
 
 		addParam(createParamCentered<Sanguine1PSPurple>(millimetersToPixelsVec(33.006, 72.385), module, Anuli::PARAM_BRIGHTNESS));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(53.34, 70.654),
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(53.34, 74.654),
 			module, Anuli::PARAM_FX, Anuli::LIGHT_FX));
 
 		addParam(createParamCentered<Sanguine1PSYellow>(millimetersToPixelsVec(73.674, 72.385), module, Anuli::PARAM_POSITION));
@@ -558,17 +578,17 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(8.383, 86.197), module, Anuli::INPUT_BRIGHTNESS_CV));
 
-		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(53.34, 84.417), module, Anuli::PARAM_DAMPING));
-
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(98.297, 86.197), module, Anuli::INPUT_POSITION_CV));
 
-		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.15, 101.964), module, Anuli::PARAM_DAMPING_MOD));
+		addParam(createParamCentered<Sanguine1PSBlue>(millimetersToPixelsVec(53.34, 88.488), module, Anuli::PARAM_DAMPING));
 
-		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(53.34, 112.736), module, Anuli::INPUT_DAMPING_CV));
+		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(53.34, 106.034), module, Anuli::PARAM_DAMPING_MOD));
 
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(8.728, 116.807), module, Anuli::INPUT_STRUM));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(22.58, 116.807), module, Anuli::INPUT_PITCH));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(36.382, 116.807), module, Anuli::INPUT_IN));
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(53.34, 116.807), module, Anuli::INPUT_DAMPING_CV));
 
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(84.046, 116.807), module, Anuli::OUTPUT_ODD));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(97.898, 116.807), module, Anuli::OUTPUT_EVEN));
@@ -583,7 +603,6 @@ struct AnuliWidget : SanguineModuleWidget {
 
 		if (module) {
 			displayModel->values.displayText = &module->displayText;
-			displayPolyphony->values.numberValue = &module->polyphonyMode;
 		}
 	}
 
