@@ -201,8 +201,6 @@ struct Contextus : SanguineModule {
 		memset(&lastSettings, 0, sizeof(renaissance::SettingsData));
 
 		lightsDivider.setDivision(kLightsUpdateFrequency);
-
-		onSampleRateChange();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -636,8 +634,8 @@ struct Contextus : SanguineModule {
 		}
 	}
 
-	void onSampleRateChange() override {
-		log2SampleRate = log2f(96000.f / APP->engine->getSampleRate());
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		log2SampleRate = log2f(96000.f / e.sampleRate);
 	}
 
 	int getModelParam() {
