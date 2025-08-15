@@ -539,7 +539,7 @@ struct Funes : SanguineModule {
 		init();
 	}
 
-	void onRandomize() override {
+	void onRandomize(const RandomizeEvent& e) override {
 		int newEngine;
 		newEngine = random::u32() % 24;
 		setEngine(newEngine);
