@@ -30,6 +30,8 @@
 
 - Aestus family: modules are fully polyphonic.
 
+- Anuli: polyphonic CV selection of FX for Disastrous Peace channels.
+
 - Apices family: tap lfo tempo values are now saved to and restored from patches and presets.
 
 - Apices family: knob tooltips for the different modes.
@@ -87,6 +89,8 @@
 - Vimina: produce slightly longer triggers.
 
 ## Removals
+
+- Anuli: Note polyphony display.
 
 - Apices family: OLED displays when running under MetaModule.
 
