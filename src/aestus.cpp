@@ -181,7 +181,9 @@ struct Aestus : SanguineModule {
 		}
 		lightsDivider.setDivision(kLightsFrequency);
 
-		onReset();
+		ResetEvent dummyEvent;
+
+		onReset(dummyEvent);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -456,7 +458,7 @@ struct Aestus : SanguineModule {
 		outputs[OUTPUT_BI].setChannels(channelCount);
 	}
 
-	void onReset() override {
+	void onReset(const ResetEvent& e) override {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			generators[channel].set_mode(tides::GENERATOR_MODE_LOOPING);
 			generators[channel].set_range(tides::GENERATOR_RANGE_MEDIUM);
