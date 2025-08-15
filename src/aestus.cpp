@@ -469,7 +469,7 @@ struct Aestus : SanguineModule {
 		init();
 	}
 
-	void onRandomize() override {
+	void onRandomize(const RandomizeEvent& e) override {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			generators[channel].set_range(tides::GeneratorRange(random::u32() % 3));
 			generators[channel].set_mode(tides::GeneratorMode(random::u32() % 3));
