@@ -295,7 +295,7 @@ struct Anuli : SanguineModule {
 			}
 
 			for (int light = 0; light < 2; ++light) {
-				float lightValue = (((!bHaveFxCable && bWithDisastrousPeace) || (bHaveFxCable && channelModes[displayChannel] == 6)) &&
+				float lightValue = (channelModes[displayChannel] == 6 &&
 					(anuli::fxModeLights[static_cast<int>(channelFx[displayChannel])][light] == LIGHT_ON ||
 						(anuli::fxModeLights[static_cast<int>(channelFx[displayChannel])][light] == LIGHT_BLINK && bIsTrianglePulse))) *
 					kSanguineButtonLightValue;
