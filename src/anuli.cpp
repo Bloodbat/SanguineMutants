@@ -89,7 +89,7 @@ struct Anuli : SanguineModule {
 	int channelCount = 0;
 	int polyphonyMode = 1;
 	int strummingFlagCounter = 0;
-	int strummingFlagInterval = 0;
+	// int strummingFlagInterval = 0;
 
 	int displayChannel = 0;
 
@@ -306,7 +306,7 @@ struct Anuli : SanguineModule {
 			lights[LIGHT_POLYPHONY + 1].setBrightness((polyphonyMode != 3 && polyphonyMode & 0x06) ||
 				(polyphonyMode == 3 && bIsTrianglePulse));
 
-			++strummingFlagInterval;
+			// ++strummingFlagInterval;
 			if (strummingFlagCounter) {
 				--strummingFlagCounter;
 				lights[LIGHT_POLYPHONY + 0].setBrightness(0.f);
@@ -475,7 +475,7 @@ struct Anuli : SanguineModule {
 			// Make sure the LED is off for a short enough time (ui.cc).
 			// strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
 			strummingFlagCounter = kLightsFrequency;
-			strummingFlagInterval = 0;
+			// strummingFlagInterval = 0;
 		}
 	}
 
