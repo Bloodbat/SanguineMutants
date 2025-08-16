@@ -171,8 +171,6 @@ struct Anuli : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bool bWithDisastrousPeace = false;
-
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
 
@@ -252,7 +250,7 @@ struct Anuli : SanguineModule {
 		}
 
 		for (int channel = 0; channel < channelCount; ++channel) {
-			setupChannel(channel, bWithDisastrousPeace);
+			setupChannel(channel);
 
 			renderFrames(channel, parametersInfo, args.sampleRate);
 
@@ -387,12 +385,8 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupChannel(const int channel, bool& haveDisastrousPeace) {
-		bool bIsEasterEgg = channelModes[channel] > 5;
-
-		haveDisastrousPeace |= bIsEasterEgg;
-
-		resonatorModels[channel] = bIsEasterEgg ? rings::RESONATOR_MODEL_MODAL :
+	void setupChannel(const int channel) {
+		resonatorModels[channel] = channelModes[channel] == 6 ? rings::RESONATOR_MODEL_MODAL :
 			static_cast<rings::ResonatorModel>(channelModes[channel]);
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
