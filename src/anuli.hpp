@@ -18,7 +18,7 @@ namespace anuli {
         "Rolandish chorus",
         "Caveman reverb",
         "Formant filter (less abrasive variant)",
-        "Rolandish chorus (Solinaish ensemble)",
+        "Solinaish ensemble",
         "Caveman reverb (shinier variant)"
     };
 
