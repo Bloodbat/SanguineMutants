@@ -200,7 +200,7 @@ struct Mortuus : SanguineModule {
 			updateOleds();
 
 #ifndef METAMODULE
-			lights[LIGHT_EXPANDER].setBrightnessSmooth(bHasExpander ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth((bHasExpander) * (kSanguineButtonLightValue), sampleTime);
 #endif
 		}
 
@@ -418,9 +418,11 @@ struct Mortuus : SanguineModule {
 
 				/* A hack to make channel 1 aware of what's going on in channel 2. Used to
 				  reset the sequencer. */
-				slice.block->input[0][slice.frame_index] = gateFlags[0] | (gateFlags[1] << 4) | (buttons & 8 ? deadman::GATE_FLAG_FROM_BUTTON : 0);
+				slice.block->input[0][slice.frame_index] = gateFlags[0] |
+					(gateFlags[1] << 4) | (buttons & 8 ? deadman::GATE_FLAG_FROM_BUTTON : 0);
 
-				slice.block->input[1][slice.frame_index] = gateFlags[1] | (buttons & 2 ? deadman::GATE_FLAG_FROM_BUTTON : 0);
+				slice.block->input[1][slice.frame_index] = gateFlags[1] |
+					(buttons & 2 ? deadman::GATE_FLAG_FROM_BUTTON : 0);
 			}
 
 			srcOutput.process(frame, &inLen, drbOutputBuffer.endData(), &outLen);
@@ -605,25 +607,25 @@ struct Mortuus : SanguineModule {
 		int currentLight;
 		switch (editMode) {
 		case apicesCommon::EDIT_MODE_FIRST:
-			lights[LIGHT_CHANNEL_1].setBrightnessSmooth((flash == 1) ? 1.f : 0.f, sampleTime);
+			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(flash == 1, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			break;
 		case apicesCommon::EDIT_MODE_SECOND:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(0.f, sampleTime);
-			lights[LIGHT_CHANNEL_2].setBrightnessSmooth((flash == 1 || flash == 3) ? 1.f : 0.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(flash == 1 || flash == 3, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+				lights[currentLight].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
@@ -631,11 +633,11 @@ struct Mortuus : SanguineModule {
 		case apicesCommon::EDIT_MODE_TWIN:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+				lights[currentLight].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			}
@@ -643,17 +645,17 @@ struct Mortuus : SanguineModule {
 		case apicesCommon::EDIT_MODE_SPLIT:
 			lights[LIGHT_CHANNEL_1].setBrightnessSmooth(1.f, sampleTime);
 			lights[LIGHT_CHANNEL_2].setBrightnessSmooth(1.f, sampleTime);
-			lights[LIGHT_CHANNEL_SELECT + 0].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_CHANNEL_SELECT].setBrightnessSmooth(0.f, sampleTime);
 			lights[LIGHT_CHANNEL_SELECT + 1].setBrightnessSmooth(0.f, sampleTime);
 			for (int knob = 0; knob < 2; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+				lights[currentLight].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 			for (size_t knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
 				currentLight = LIGHT_KNOBS_MODE + knob * 3;
-				lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			}
@@ -662,10 +664,10 @@ struct Mortuus : SanguineModule {
 			break;
 		}
 
-		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == apicesCommon::EDIT_MODE_SPLIT) ?
-			kSanguineButtonLightValue : 0.f, sampleTime);
-		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & apicesCommon::EDIT_MODE_FIRST) ?
-			kSanguineButtonLightValue : 0.f, sampleTime);
+		lights[LIGHT_SPLIT_MODE].setBrightnessSmooth((editMode == apicesCommon::EDIT_MODE_SPLIT) *
+			kSanguineButtonLightValue, sampleTime);
+		lights[LIGHT_EXPERT_MODE].setBrightnessSmooth((editMode & apicesCommon::EDIT_MODE_FIRST) *
+			kSanguineButtonLightValue, sampleTime);
 
 		mortuus::ProcessorFunctions currentProcessorFunction = getProcessorFunction();
 		for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
@@ -678,7 +680,7 @@ struct Mortuus : SanguineModule {
 				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
 				break;
 			case LIGHT_BLINK:
-				lights[currentLight].setBrightnessSmooth(systemTimeMs & 256 ? 0.f : 1.f, sampleTime);
+				lights[currentLight].setBrightnessSmooth(!(systemTimeMs & 256), sampleTime);
 				break;
 			default:
 				break;
@@ -726,7 +728,7 @@ struct Mortuus : SanguineModule {
 			if (editMode < apicesCommon::EDIT_MODE_FIRST) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
-					lights[LIGHT_FUNCTION_1 + light].setBrightness((pattern & 1) ? 1.f : 0.f);
+					lights[LIGHT_FUNCTION_1 + light].setBrightness(pattern & 1);
 					pattern = pattern >> 1;
 				}
 			}
@@ -734,14 +736,14 @@ struct Mortuus : SanguineModule {
 			else if (editMode == apicesCommon::EDIT_MODE_FIRST && bIsChannel1Station) {
 				int digit = processors[0].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
-					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
+					lights[LIGHT_FUNCTION_1 + light].setBrightness(light & digit);
 				}
 			}
 			// Ibid.
 			else if (editMode == apicesCommon::EDIT_MODE_SECOND && bIsChannel2Station) {
 				uint8_t digit = processors[1].number_station().digit();
 				for (size_t light = 0; light < apicesCommon::kFunctionLightCount; ++light) {
-					lights[LIGHT_FUNCTION_1 + light].setBrightness((light & digit) ? 1.f : 0.f);
+					lights[LIGHT_FUNCTION_1 + light].setBrightness(light & digit);
 				}
 			}
 			if (bIsChannel1Station) {
@@ -961,18 +963,18 @@ struct Mortuus : SanguineModule {
 		case apicesCommon::EDIT_MODE_FIRST:
 		case apicesCommon::EDIT_MODE_SECOND:
 			channel1LightRed.setBrightness(0.f);
-			channel1LightGreen.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+			channel1LightGreen.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 			channel1LightBlue.setBrightness(0.f);
 			setExpanderChannel2Lights(lightIsOn & true);
 			break;
 		case apicesCommon::EDIT_MODE_TWIN:
-			channel1LightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+			channel1LightRed.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 			channel1LightGreen.setBrightness(0.f);
-			channel1LightBlue.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+			channel1LightBlue.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 			setExpanderChannel2Lights(false);
 			break;
 		case apicesCommon::EDIT_MODE_SPLIT:
-			channel1LightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+			channel1LightRed.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 			channel1LightGreen.setBrightness(0.f);
 			channel1LightBlue.setBrightness(0.f);
 			setExpanderChannel2Lights(false);
@@ -988,27 +990,27 @@ struct Mortuus : SanguineModule {
 
 			switch (editMode) {
 			case apicesCommon::EDIT_MODE_TWIN:
-				currentLightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+				currentLightRed.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 				currentLightGreen.setBrightness(0.f);
-				currentLightBlue.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+				currentLightBlue.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 				break;
 
 			case apicesCommon::EDIT_MODE_SPLIT:
 				if (function < 2) {
-					currentLightRed.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+					currentLightRed.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 					currentLightGreen.setBrightness(0.f);
 					currentLightBlue.setBrightness(0.f);
 				} else {
 					currentLightRed.setBrightness(0.f);
 					currentLightGreen.setBrightness(0.f);
-					currentLightBlue.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+					currentLightBlue.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 				}
 				break;
 
 			case apicesCommon::EDIT_MODE_FIRST:
 			case apicesCommon::EDIT_MODE_SECOND:
 				currentLightRed.setBrightness(0.f);
-				currentLightGreen.setBrightness(lightIsOn ? kSanguineButtonLightValue : 0.f);
+				currentLightGreen.setBrightness((lightIsOn) * (kSanguineButtonLightValue));
 				currentLightBlue.setBrightness(0.f);
 				break;
 			default:
