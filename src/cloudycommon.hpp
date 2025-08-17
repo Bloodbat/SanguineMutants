@@ -18,11 +18,6 @@ namespace cloudyCommon {
 		std::string labelReverb;
 	};
 
-	struct ModeInfo {
-		std::string display;
-		std::string menuLabel;
-	};
-
 	static const std::string kLedButtonPrefix = "LED display value: ";
 
 	static const std::vector<std::string> vuButtonLabels{
