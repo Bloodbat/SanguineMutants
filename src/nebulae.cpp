@@ -94,7 +94,7 @@ struct Nebulae : SanguineModule {
 
 	cloudyCommon::LedModes lastLedMode = cloudyCommon::LEDS_INPUT;
 
-	std::string textMode = nebulae::modeList[0].display;
+	std::string textMode = nebulae::modeListDisplay[0];
 #ifndef METAMODULE
 	std::string textFreeze = nebulae::modeDisplays[0].labelFreeze;
 	std::string textPosition = nebulae::modeDisplays[0].labelPosition;
@@ -143,8 +143,7 @@ struct Nebulae : SanguineModule {
 
 		configButton(PARAM_LEDS_MODE, "LED display value: Input");
 
-		configParam(PARAM_MODE, 0.f, 3.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
-		paramQuantities[PARAM_MODE]->snapEnabled = true;
+		configSwitch(PARAM_MODE, 0.f, 3.f, 0.f, "Mode", nebulae::modeListMenu);
 
 		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Grain position", "%", 0.f, 100.f);
 		configInput(INPUT_POSITION, "Grain position CV");
@@ -476,7 +475,7 @@ struct Nebulae : SanguineModule {
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
-				textMode = nebulae::modeList[channelPlaybackMode].display;
+				textMode = nebulae::modeListDisplay[channelPlaybackMode];
 
 #ifndef METAMODULE
 				textFreeze = nebulae::modeDisplays[channelPlaybackMode].labelFreeze;
@@ -606,7 +605,7 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 26.927);
 		nebulaeFramebuffer->addChild(displayModel);
-		displayModel->fallbackString = nebulae::modeList[0].display;
+		displayModel->fallbackString = nebulae::modeListDisplay[0];
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 26.927), module, Nebulae::PARAM_MODE));
 
@@ -744,8 +743,8 @@ struct NebulaeWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(nebulae::modeList.size()); ++i) {
-			modelLabels.push_back(nebulae::modeList[i].display + ": " + nebulae::modeList[i].menuLabel);
+		for (int i = 0; i < static_cast<int>(nebulae::modeListDisplay.size()); ++i) {
+			modelLabels.push_back(nebulae::modeListDisplay[i] + ": " + nebulae::modeListMenu[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },

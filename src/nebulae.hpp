@@ -3,11 +3,18 @@
 #include "cloudycommon.hpp"
 
 namespace nebulae {
-    static const std::vector<cloudyCommon::ModeInfo> modeList{
-        { "GRANULAR", "Granular mode" },
-        { "STRETCH", "Pitch shifter/time stretcher" },
-        { "LOOPING DLY", "Looping delay" },
-        { "SPECTRAL", "Spectral madness" }
+    static const std::vector<std::string> modeListDisplay{
+        "GRANULAR",
+        "STRETCH",
+        "LOOPING DLY",
+        "SPECTRAL"
+    };
+
+    static const std::vector<std::string> modeListMenu{
+        "Granular mode",
+        "Pitch shifter / time stretcher",
+        "Looping delay",
+        "Spectral madness"
     };
 
     struct ModeDisplay {
