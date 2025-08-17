@@ -437,14 +437,16 @@ struct Temulenti : SanguineModule {
 				}
 
 				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
-				lights[currentLight + 0].setBrightnessSmooth(channel < channelCount &&
-					(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM ||
-						generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC), sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
-					(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_FUNCTION ||
-						generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC), sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
-					generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_SHEEP, sampleTime);
+				bool bIsChannelActive = channel < channelCount;
+
+				lights[currentLight].setBrightnessSmooth(bIsChannelActive &
+					((generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_RANDOM) |
+						(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC)), sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(bIsChannelActive &
+					((generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_FUNCTION) |
+						(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC)), sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(bIsChannelActive &
+					(generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_SHEEP), sampleTime);
 			}
 
 			if (displayChannel >= channelCount) {
@@ -456,23 +458,23 @@ struct Temulenti : SanguineModule {
 			bumps::GeneratorRange displayRange = generators[displayChannel].range();
 
 
-			lights[LIGHT_MODE + 0].setBrightnessSmooth((displayMode == bumps::GENERATOR_MODE_AD) *
+			lights[LIGHT_MODE].setBrightnessSmooth((displayMode == bumps::GENERATOR_MODE_AD) *
 				kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_MODE + 1].setBrightnessSmooth((displayMode == bumps::GENERATOR_MODE_AR) *
 				kSanguineButtonLightValue, sampleTime);
 
-			lights[LIGHT_RANGE + 0].setBrightnessSmooth((displayRange == bumps::GENERATOR_RANGE_LOW &&
+			lights[LIGHT_RANGE].setBrightnessSmooth(((displayRange == bumps::GENERATOR_RANGE_LOW) &
 				!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
-			lights[LIGHT_RANGE + 1].setBrightnessSmooth((displayRange == bumps::GENERATOR_RANGE_HIGH &&
+			lights[LIGHT_RANGE + 1].setBrightnessSmooth(((displayRange == bumps::GENERATOR_RANGE_HIGH) &
 				!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
 
 			if (samples[displayChannel].flags & bumps::FLAG_END_OF_ATTACK) {
 				unipolarFlags[displayChannel] *= -1.f;
 			}
-			lights[LIGHT_PHASE + 0].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
+			lights[LIGHT_PHASE].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
 
-			lights[LIGHT_SYNC].setBrightnessSmooth((bHaveExternalSync && !(getSystemTimeMs() & 128)) *
+			lights[LIGHT_SYNC].setBrightnessSmooth((bHaveExternalSync & !(getSystemTimeMs() & 128)) *
 				kSanguineButtonLightValue, sampleTime);
 
 			lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantizers[displayChannel] & 1, sampleTime);
