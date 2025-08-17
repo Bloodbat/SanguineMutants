@@ -63,10 +63,10 @@ struct Etesia : SanguineModule {
 
 	enum LightIds {
 		LIGHT_FREEZE,
-		ENUMS(LIGHT_BLEND, 2),
-		ENUMS(LIGHT_SPREAD, 2),
-		ENUMS(LIGHT_FEEDBACK, 2),
-		ENUMS(LIGHT_REVERB, 2),
+		LIGHT_BLEND,
+		LIGHT_SPREAD,
+		LIGHT_FEEDBACK,
+		LIGHT_REVERB,
 		ENUMS(LIGHT_POSITION_CV, 2),
 		ENUMS(LIGHT_DENSITY_CV, 2),
 		ENUMS(LIGHT_SIZE_CV, 2),
@@ -449,21 +449,21 @@ struct Etesia : SanguineModule {
 
 			vuMeter.process(sampleTime, fmaxf(fabsf(lightFrame.samples[0]), fabsf(lightFrame.samples[1])));
 
-			lights[LIGHT_BLEND].setBrightness(vuMeter.getBrightness(-24.f, -18.f));
-			lights[LIGHT_BLEND + 1].setBrightness(0.f);
-			lights[LIGHT_SPREAD].setBrightness(vuMeter.getBrightness(-18.f, -12.f));
-			lights[LIGHT_SPREAD + 1].setBrightness(0.f);
+			float lightBlend = vuMeter.getBrightness(-24.f, -18.f);
+			float lightSpread = vuMeter.getBrightness(-18.f, -12.f);
 			float lightBrightness = vuMeter.getBrightness(-12.f, -6.f);
+			float lightReverb = vuMeter.getBrightness(-6.f, 0.f);
+
+			lights[LIGHT_BLEND].setBrightness(lightBlend);
+			lights[LIGHT_SPREAD].setBrightness(lightSpread);
 			lights[LIGHT_FEEDBACK].setBrightness(lightBrightness);
-			lights[LIGHT_FEEDBACK + 1].setBrightness(lightBrightness);
-			lights[LIGHT_REVERB].setBrightness(0.f);
-			lights[LIGHT_REVERB + 1].setBrightness(vuMeter.getBrightness(-6.f, 0.f));
+			lights[LIGHT_REVERB].setBrightness(lightReverb);
 
-			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters[displayChannel]->freeze ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_FREEZE].setBrightnessSmooth(etesiaParameters[displayChannel]->freeze *
+				kSanguineButtonLightValue, sampleTime);
 
-			lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters[displayChannel]->granular.reverse ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_REVERSE].setBrightnessSmooth(etesiaParameters[displayChannel]->granular.reverse *
+				kSanguineButtonLightValue, sampleTime);
 
 			knobPlaybackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
 			etesia::PlaybackMode channelPlaybackMode;
@@ -476,19 +476,23 @@ struct Etesia : SanguineModule {
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+
 				etesia::PlaybackMode currentChannelMode = etesiaProcessor[channel]->playback_mode();
-				lights[currentLight + 0].setBrightnessSmooth(channel < channelCount &&
-					(currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
-						currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY ||
-						currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB), sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(channel < channelCount &&
-					(currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR ||
-						currentChannelMode == etesia::PLAYBACK_MODE_STRETCH ||
-						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(channel < channelCount &&
-					(currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL ||
-						currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB ||
-						currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR), sampleTime);
+
+				bool bIsChannelActive = channel < channelCount;
+
+				lights[currentLight].setBrightnessSmooth(bIsChannelActive &
+					((currentChannelMode == etesia::PLAYBACK_MODE_STRETCH) |
+						(currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY) |
+						(currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB)), sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(bIsChannelActive &
+					((currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR) |
+						(currentChannelMode == etesia::PLAYBACK_MODE_STRETCH) |
+						(currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR)), sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(bIsChannelActive &
+					((currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL) |
+						(currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB) |
+						(currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR)), sampleTime);
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
@@ -547,22 +551,22 @@ struct Etesia : SanguineModule {
 
 			voltages1[displayChannel] = simd::rescale(voltages1[displayChannel], 0.f, 5.f, 0.f, 1.f);
 
-			lights[LIGHT_POSITION_CV + 0].setBrightness(voltages1[displayChannel][0]);
+			lights[LIGHT_POSITION_CV].setBrightness(voltages1[displayChannel][0]);
 			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[displayChannel][0]);
 
-			lights[LIGHT_DENSITY_CV + 0].setBrightness(voltages1[displayChannel][1]);
+			lights[LIGHT_DENSITY_CV].setBrightness(voltages1[displayChannel][1]);
 			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[displayChannel][1]);
 
-			lights[LIGHT_SIZE_CV + 0].setBrightness(voltages1[displayChannel][2]);
+			lights[LIGHT_SIZE_CV].setBrightness(voltages1[displayChannel][2]);
 			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[displayChannel][2]);
 
-			lights[LIGHT_TEXTURE_CV + 0].setBrightness(voltages1[displayChannel][3]);
+			lights[LIGHT_TEXTURE_CV].setBrightness(voltages1[displayChannel][3]);
 			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[displayChannel][3]);
 
-			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
-			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() ?
-				kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() *
+				kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() *
+				kSanguineButtonLightValue, sampleTime);
 		} // lightsDivider
 	}
 
@@ -615,10 +619,10 @@ struct EtesiaWidget : SanguineModuleWidget {
 		FramebufferWidget* etesiaFramebuffer = new FramebufferWidget();
 		addChild(etesiaFramebuffer);
 
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(68.374, 13.96), module, Etesia::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(79.578, 13.96), module, Etesia::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(90.781, 13.96), module, Etesia::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(101.985, 13.96), module, Etesia::LIGHT_REVERB));
+		addChild(createLightCentered<MediumLight<GreenLight>>(millimetersToPixelsVec(68.374, 13.96), module, Etesia::LIGHT_BLEND));
+		addChild(createLightCentered<MediumLight<GreenLight>>(millimetersToPixelsVec(79.578, 13.96), module, Etesia::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(90.781, 13.96), module, Etesia::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(101.985, 13.96), module, Etesia::LIGHT_REVERB));
 
 		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(111.383, 13.96), module, Etesia::PARAM_LEDS_MODE));
 
