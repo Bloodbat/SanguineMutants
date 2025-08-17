@@ -30,6 +30,8 @@
 
 - Nebulae family: better button tooltips.
 
+- Nebulae family: better mode knob tooltips.
+
 ## Changes
 
 - Plugin: performance tweaks.
