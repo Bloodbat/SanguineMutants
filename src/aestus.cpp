@@ -385,10 +385,10 @@ struct Aestus : SanguineModule {
 				lights[LIGHT_MODE + 1].setBrightnessSmooth((displayMode == tides::GENERATOR_MODE_AR) *
 					kSanguineButtonLightValue, sampleTime);
 
-				lights[LIGHT_RANGE].setBrightnessSmooth((displayRange == tides::GENERATOR_RANGE_LOW) *
-					kSanguineButtonLightValue, sampleTime);
-				lights[LIGHT_RANGE + 1].setBrightnessSmooth((displayRange == tides::GENERATOR_RANGE_HIGH) *
-					kSanguineButtonLightValue, sampleTime);
+				lights[LIGHT_RANGE].setBrightnessSmooth(((displayRange == tides::GENERATOR_RANGE_LOW) &
+					!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth(((displayRange == tides::GENERATOR_RANGE_HIGH) &
+					!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
 
 				if (samples[displayChannel].flags & tides::FLAG_END_OF_ATTACK) {
 					unipolarFlags[displayChannel] *= -1.f;
