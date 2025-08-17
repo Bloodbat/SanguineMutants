@@ -97,7 +97,7 @@ struct Etesia : SanguineModule {
 
 	cloudyCommon::LedModes lastLedMode = cloudyCommon::LEDS_INPUT;
 
-	std::string textMode = etesia::modeList[0].display;
+	std::string textMode = etesia::modeListDisplay[0];
 #ifndef METAMODULE
 	std::string textFreeze = etesia::modeDisplays[0].labelFreeze;
 	std::string textPosition = etesia::modeDisplays[0].labelPosition;
@@ -153,8 +153,7 @@ struct Etesia : SanguineModule {
 
 		configButton(PARAM_LEDS_MODE, "LED display value: Input");
 
-		configParam(PARAM_MODE, 0.f, 5.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
-		paramQuantities[PARAM_MODE]->snapEnabled = true;
+		configSwitch(PARAM_MODE, 0.f, 5.f, 0.f, "Mode", etesia::modeListMenu);
 
 		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Grain position", "%", 0.f, 100.f);
 		configInput(INPUT_POSITION, "Grain position CV");
@@ -496,7 +495,7 @@ struct Etesia : SanguineModule {
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
-				textMode = etesia::modeList[channelPlaybackMode].display;
+				textMode = etesia::modeListDisplay[channelPlaybackMode];
 
 #ifndef METAMODULE
 				textFreeze = etesia::modeDisplays[channelPlaybackMode].labelFreeze;
@@ -642,7 +641,7 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 26.927);
 		etesiaFramebuffer->addChild(displayModel);
-		displayModel->fallbackString = etesia::modeList[0].display;
+		displayModel->fallbackString = etesia::modeListDisplay[0];
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 26.927), module, Etesia::PARAM_MODE));
 
@@ -802,8 +801,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(etesia::modeList.size()); ++i) {
-			modelLabels.push_back(etesia::modeList[i].display + ": " + etesia::modeList[i].menuLabel);
+		for (int i = 0; i < static_cast<int>(etesia::modeListDisplay.size()); ++i) {
+			modelLabels.push_back(etesia::modeListDisplay[i] + ": " + etesia::modeListMenu[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },
