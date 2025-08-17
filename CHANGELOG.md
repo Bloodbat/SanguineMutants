@@ -39,6 +39,8 @@ without the backticks.
 
 - Nebulae family: optional hardware-like handling of triggers: rising edge detection instead of treating them as gates.
 
+- Nebulae family: better button tooltips.
+
 ## Changes
 
 - Plugin: performance tweaks.

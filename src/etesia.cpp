@@ -146,10 +146,10 @@ struct Etesia : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configInput(INPUT_FREEZE, "Freeze");
-		configParam(PARAM_FREEZE, 0.f, 1.f, 0.f, "Freeze");
+		configSwitch(PARAM_FREEZE, 0.f, 1.f, 0.f, "Freeze", cloudyCommon::freezeButtonLabels);
 
 		configInput(INPUT_REVERSE, "Reverse");
-		configParam(PARAM_REVERSE, 0.f, 1.f, 0.f, "Reverse");
+		configSwitch(PARAM_REVERSE, 0.f, 1.f, 0.f, "Reverse", cloudyCommon::freezeButtonLabels);
 
 		configButton(PARAM_LEDS_MODE, "LED display value: Input");
 
@@ -197,8 +197,8 @@ struct Etesia : SanguineModule {
 		configInput(INPUT_LEFT, "Left");
 		configInput(INPUT_RIGHT, "Right");
 
-		configParam(PARAM_HI_FI, 0.f, 1.f, 1.f, "Toggle Hi-Fi");
-		configParam(PARAM_STEREO, 0.f, 1.f, 1.f, "Toggle stereo");
+		configSwitch(PARAM_HI_FI, 0.f, 1.f, 1.f, "Buffer resolution", cloudyCommon::bufferQualityLabels);
+		configSwitch(PARAM_STEREO, 0.f, 1.f, 1.f, "Buffer channels", cloudyCommon::bufferChannelsLabels);
 
 		configOutput(OUTPUT_LEFT, "Left");
 		configOutput(OUTPUT_RIGHT, "Right");
@@ -431,7 +431,7 @@ struct Etesia : SanguineModule {
 				lastLedMode = ledMode;
 
 				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
-					cloudyCommon::buttonTexts[ledMode];
+					cloudyCommon::vuButtonLabels[ledMode];
 
 				bDisplaySwitched = bLastFrozen[displayChannel];
 			}
