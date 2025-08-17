@@ -54,6 +54,8 @@
 
 - Nebulae family: better button tooltips.
 
+- Nebulae family: better mode knob tooltips.
+
 - Nodi family: display channel also affects the big knob's light.
 
 ## Changes
