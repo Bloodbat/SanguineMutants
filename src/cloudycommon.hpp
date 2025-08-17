@@ -25,9 +25,24 @@ namespace cloudyCommon {
 
 	static const std::string kLedButtonPrefix = "LED display value: ";
 
-	static const std::vector<std::string> buttonTexts{
+	static const std::vector<std::string> vuButtonLabels{
 		"Input",
 		"Output"
+	};
+
+	static const std::vector<std::string> bufferQualityLabels{
+		"8-bit",
+		"16-bit"
+	};
+
+	static const std::vector<std::string> bufferChannelsLabels{
+		"Mono",
+		"Stereo"
+	};
+
+	static const std::vector<std::string> freezeButtonLabels{
+		"Disabled",
+		"Enabled"
 	};
 
 	enum LedModes {
