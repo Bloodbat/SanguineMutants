@@ -282,32 +282,45 @@ struct Anuli : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_RESONATOR + channel * 3;
 
-				for (int light = 0; light < 3; ++light) {
-					LightModes lightMode = anuli::modeLights[channelModes[channel]][light];
+				const bool bIsChannelActive = channel < channelCount;
 
-					float lightValue = static_cast<float>(channel < channelCount &&
-						(lightMode == LIGHT_ON || (lightMode == LIGHT_BLINK && bIsTrianglePulse)));
+				LightModes lightMode = anuli::modeLights[channelModes[channel]][0];
+				float lightValue = static_cast<float>(bIsChannelActive &
+					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
+				lights[currentLight].setBrightnessSmooth(lightValue, sampleTime);
 
-					lights[currentLight + light].setBrightnessSmooth(lightValue, sampleTime);
-				}
+				lightMode = anuli::modeLights[channelModes[channel]][1];
+				lightValue = static_cast<float>(bIsChannelActive &
+					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
+				lights[currentLight + 1].setBrightnessSmooth(lightValue, sampleTime);
+
+				lightMode = anuli::modeLights[channelModes[channel]][2];
+				lightValue = static_cast<float>(bIsChannelActive &
+					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
+				lights[currentLight + 2].setBrightnessSmooth(lightValue, sampleTime);
 			}
 
-			for (int light = 0; light < 2; ++light) {
-				float lightValue = (channelModes[displayChannel] == 6 &&
-					(anuli::fxModeLights[static_cast<int>(channelFx[displayChannel])][light] == LIGHT_ON ||
-						(anuli::fxModeLights[static_cast<int>(channelFx[displayChannel])][light] == LIGHT_BLINK && bIsTrianglePulse))) *
-					kSanguineButtonLightValue;
-				lights[LIGHT_FX + light].setBrightnessSmooth(lightValue, sampleTime);
-			}
+			float lightValue = ((channelModes[displayChannel] == 6) &
+				((anuli::fxModeLights[channelFx[displayChannel]][0] == LIGHT_ON) |
+					((anuli::fxModeLights[channelFx[displayChannel]][0] == LIGHT_BLINK) & bIsTrianglePulse))) *
+				kSanguineButtonLightValue;
+			lights[LIGHT_FX].setBrightnessSmooth(lightValue, sampleTime);
 
-			lights[LIGHT_POLYPHONY + 0].setBrightness(polyphonyMode <= 3);
-			lights[LIGHT_POLYPHONY + 1].setBrightness((polyphonyMode != 3 && polyphonyMode & 0x06) ||
-				(polyphonyMode == 3 && bIsTrianglePulse));
+			lightValue = ((channelModes[displayChannel] == 6) &
+				((anuli::fxModeLights[channelFx[displayChannel]][1] == LIGHT_ON) |
+					((anuli::fxModeLights[channelFx[displayChannel]][1] == LIGHT_BLINK) & bIsTrianglePulse))) *
+				kSanguineButtonLightValue;
+			lights[LIGHT_FX + 1].setBrightnessSmooth(lightValue, sampleTime);
+
+
+			lights[LIGHT_POLYPHONY].setBrightness(polyphonyMode < 4);
+			lights[LIGHT_POLYPHONY + 1].setBrightness(((polyphonyMode == 2) | (polyphonyMode == 4)) |
+				((polyphonyMode == 3) & bIsTrianglePulse));
 
 			// ++strummingFlagInterval;
 			if (strummingFlagCounter) {
 				--strummingFlagCounter;
-				lights[LIGHT_POLYPHONY + 0].setBrightness(0.f);
+				lights[LIGHT_POLYPHONY].setBrightness(0.f);
 				lights[LIGHT_POLYPHONY + 1].setBrightness(0.f);
 			}
 		}
