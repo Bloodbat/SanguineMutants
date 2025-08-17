@@ -52,6 +52,8 @@
 
 - Nebulae family: optional hardware-like handling of triggers: rising edge detection instead of treating them as gates.
 
+- Nebulae family: better button tooltips.
+
 - Nodi family: display channel also affects the big knob's light.
 
 ## Changes
