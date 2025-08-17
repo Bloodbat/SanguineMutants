@@ -3,12 +3,20 @@
 #include "cloudycommon.hpp"
 
 namespace fluctus {
-    static const std::vector<cloudyCommon::ModeInfo> modeList{
-        { "GRANULAR", "Granular mode" },
-        { "STRETCH", "Pitch shifter/time stretcher" },
-        { "LOOPING DLY", "Looping delay" },
-        { "SPCT. CLOUDS", "Spectral clouds" },
-        { "BEAT-REPEAT", "Beat-repeat " },
+    static const std::vector<std::string> modeListDisplay{
+         "GRANULAR",
+         "STRETCH",
+         "LOOPING DLY",
+         "SPCT. CLOUDS",
+         "BEAT-REPEAT"
+    };
+
+    static const std::vector<std::string> modeListMenu{
+        "Granular mode",
+        "Pitch shifter / time stretcher",
+        "Looping delay",
+        "Spectral clouds",
+        "Beat-repeat"
     };
 
 #ifndef METAMODULE

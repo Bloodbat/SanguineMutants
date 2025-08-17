@@ -94,7 +94,7 @@ struct Fluctus : SanguineModule {
 
 	cloudyCommon::LedModes lastLedMode = cloudyCommon::LEDS_INPUT;
 
-	std::string textMode = fluctus::modeList[0].display;
+	std::string textMode = fluctus::modeListDisplay[0];
 #ifndef METAMODULE
 	std::string textFreeze = fluctus::modeDisplays[0].labelFreeze;
 	std::string textPosition = fluctus::modeDisplays[0].labelPosition;
@@ -147,8 +147,7 @@ struct Fluctus : SanguineModule {
 
 		configButton(PARAM_LEDS_MODE, "LED display value: Input");
 
-		configParam(PARAM_MODE, 0.f, 4.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
-		paramQuantities[PARAM_MODE]->snapEnabled = true;
+		configSwitch(PARAM_MODE, 0.f, 4.f, 0.f, "Mode", fluctus::modeListMenu);
 
 		configParam(PARAM_POSITION, 0.f, 1.f, 0.5f, "Grain position", "%", 0.f, 100.f);
 		configInput(INPUT_POSITION, "Grain position CV");
@@ -496,7 +495,7 @@ struct Fluctus : SanguineModule {
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
-				textMode = fluctus::modeList[channelPlaybackMode].display;
+				textMode = fluctus::modeListDisplay[channelPlaybackMode];
 
 #ifndef METAMODULE
 				textFreeze = fluctus::modeDisplays[channelPlaybackMode].labelFreeze;
@@ -636,7 +635,7 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayModel = new SanguineMatrixDisplay(12, module, 85.18, 26.927);
 		fluctusFramebuffer->addChild(displayModel);
-		displayModel->fallbackString = fluctus::modeList[0].display;
+		displayModel->fallbackString = fluctus::modeListDisplay[0];
 
 		addParam(createParamCentered<Sanguine1SGray>(millimetersToPixelsVec(128.505, 26.927), module, Fluctus::PARAM_MODE));
 
@@ -794,8 +793,8 @@ struct FluctusWidget : SanguineModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		std::vector<std::string> modelLabels;
-		for (int i = 0; i < static_cast<int>(fluctus::modeList.size()); ++i) {
-			modelLabels.push_back(fluctus::modeList[i].display + ": " + fluctus::modeList[i].menuLabel);
+		for (int i = 0; i < static_cast<int>(fluctus::modeListDisplay.size()); ++i) {
+			modelLabels.push_back(fluctus::modeListDisplay[i] + ": " + fluctus::modeListMenu[i]);
 		}
 		menu->addChild(createIndexSubmenuItem("Mode", modelLabels,
 			[=]() {return module->getModeParam(); },

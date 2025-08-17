@@ -3,13 +3,22 @@
 #include "cloudycommon.hpp"
 
 namespace etesia {
-    static const std::vector<cloudyCommon::ModeInfo> modeList{
-        { "GRANULAR", "Granular mode" },
-        { "STRETCH", "Pitch shifter/time stretcher" },
-        { "LOOPING DLY", "Looping delay" },
-        { "SPECTRAL", "Spectral madness" },
-        { "OLIVERB", "Oliverb" },
-        { "RESONESTOR", "Resonestor" }
+    static const std::vector<std::string> modeListDisplay{
+           "GRANULAR",
+           "STRETCH",
+           "LOOPING DLY",
+           "SPECTRAL",
+           "OLIVERB",
+           "RESONESTOR"
+    };
+
+    static const std::vector<std::string> modeListMenu{
+        "Granular mode",
+        "Pitch shifter / time stretcher",
+        "Looping delay",
+        "Spectral madness",
+        "Oliverb",
+        "Resonestor"
     };
 
 #ifndef METAMODULE
