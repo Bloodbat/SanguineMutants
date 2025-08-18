@@ -113,20 +113,24 @@ struct Scalaria : SanguineModule {
 
         int channelCount = std::max(std::max(inputs[INPUT_CHANNEL_1].getChannels(), inputs[INPUT_CHANNEL_2].getChannels()), 1);
 
-        outputs[OUTPUT_CHANNEL_1_PLUS_2].setChannels(channelCount);
-        outputs[OUTPUT_AUX].setChannels(channelCount);
-        float frequencyValue = params[PARAM_FREQUENCY].getValue();
+        const int32_t internalOscillator = params[PARAM_INTERNAL_OSCILLATOR].getValue();
 
-        float frequencyAttenuverterValue = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
+        const float knobFrequency = params[PARAM_FREQUENCY].getValue();
+        const float knobResonance = params[PARAM_RESONANCE].getValue();
 
-        float resonanceAttenuverterValue = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
+        float_4 f4KnobValues;
+
+        f4KnobValues[0] = params[PARAM_CHANNEL_1_LEVEL].getValue();
+        f4KnobValues[1] = params[PARAM_CHANNEL_2_LEVEL].getValue();
+        f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
+        f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
+
+        float_4 f4Voltages;
 
         for (int channel = 0; channel < channelCount; ++channel) {
-            parameters[channel]->oscillatorShape = params[PARAM_INTERNAL_OSCILLATOR].getValue();
+            parameters[channel]->oscillatorShape = internalOscillator;
 
-            float_4 f4Voltages;
-
-            // Buffer loop
+            // Buffer loop.
             if (++frames[channel] >= warpiescommon::kBlockSize) {
                 frames[channel] = 0;
 
@@ -138,17 +142,22 @@ struct Scalaria : SanguineModule {
 
                 f4Voltages /= 5.f;
 
-                parameters[channel]->channel_drive[0] = clamp(params[PARAM_CHANNEL_1_LEVEL].getValue() * f4Voltages[0], 0.f, 1.f);
-                parameters[channel]->channel_drive[1] = clamp(params[PARAM_CHANNEL_2_LEVEL].getValue() * f4Voltages[1], 0.f, 1.f);
+                f4Voltages *= f4KnobValues;
 
-                parameters[channel]->rawFrequency = clamp(frequencyValue +
-                    (f4Voltages[2] * frequencyAttenuverterValue), 0.f, 1.f);
+                f4Voltages[2] += knobFrequency;
+                f4Voltages[3] += knobResonance;
 
-                parameters[channel]->rawResonance = clamp(params[PARAM_RESONANCE].getValue() +
-                    (f4Voltages[3] * resonanceAttenuverterValue), 0.f, 1.f);
+                f4Voltages = simd::clamp(f4Voltages, 0.f, 1.f);
 
-                parameters[channel]->note = 60.f * params[PARAM_CHANNEL_1_LEVEL].getValue() + 12.f
-                    * inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
+                parameters[channel]->channel_drive[0] = f4Voltages[0];
+                parameters[channel]->channel_drive[1] = f4Voltages[1];
+
+                parameters[channel]->rawFrequency = f4Voltages[2];
+
+                parameters[channel]->rawResonance = f4Voltages[3];
+
+                parameters[channel]->note = 60.f * f4KnobValues[0] + 12.f *
+                    inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
                 parameters[channel]->note += log2f(scalaria::ksampleRate * args.sampleTime) * 12.f;
 
                 modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
@@ -162,6 +171,9 @@ struct Scalaria : SanguineModule {
             outputs[OUTPUT_CHANNEL_1_PLUS_2].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
             outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
         }
+
+        outputs[OUTPUT_CHANNEL_1_PLUS_2].setChannels(channelCount);
+        outputs[OUTPUT_AUX].setChannels(channelCount);
 
         if (lightsDivider.process()) {
             const float sampleTime = kLightFrequency * args.sampleTime;
