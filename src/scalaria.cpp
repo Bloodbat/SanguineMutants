@@ -229,9 +229,9 @@ struct Scalaria : SanguineModule {
 
                 colorValues = simd::rescale(colorValues, 0.f, 1.f, 0.f, kSanguineButtonLightValue);
 
-                lights[currentLight].setBrightness(colorValues[0]);
-                lights[currentLight + 1].setBrightness(colorValues[1]);
-                lights[currentLight + 2].setBrightness(colorValues[2]);
+                lights[currentLight].setBrightnessSmooth(colorValues[0], sampleTime);
+                lights[currentLight + 1].setBrightnessSmooth(colorValues[1], sampleTime);
+                lights[currentLight + 2].setBrightnessSmooth(colorValues[2], sampleTime);
             }
 
             for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
