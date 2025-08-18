@@ -3,6 +3,7 @@
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
 #include "sanguinechannels.hpp"
+#include "array"
 
 #include "clouds_parasite/dsp/etesia_granular_processor.h"
 
@@ -123,6 +124,8 @@ struct Etesia : SanguineModule {
 	etesia::PlaybackMode knobPlaybackMode = etesia::PLAYBACK_MODE_GRANULAR;
 	etesia::PlaybackMode lastPlaybackMode = etesia::PLAYBACK_MODE_LAST;
 
+	std::array<etesia::PlaybackMode, PORT_MAX_CHANNELS> playbackModes;
+
 	float freezeLight = 0.f;
 
 	float_4 voltages1[PORT_MAX_CHANNELS];
@@ -218,6 +221,8 @@ struct Etesia : SanguineModule {
 			etesiaProcessor[channel]->Init(bufferLarge[channel], cloudyCommon::kBigBufferLength,
 				bufferSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
+
+		playbackModes.fill(etesia::PLAYBACK_MODE_GRANULAR);
 
 		lightsDivider.setDivision(kClockDivider);
 	}
@@ -316,13 +321,8 @@ struct Etesia : SanguineModule {
 				}
 
 				// Set up Etesia processor.
-				if (!bHaveModeCable) {
-					etesiaProcessor[channel]->set_playback_mode(knobPlaybackMode);
-				} else {
-					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
-					modeVoltage = clamp(modeVoltage, 0, 5);
-					etesiaProcessor[channel]->set_playback_mode(static_cast<etesia::PlaybackMode>(modeVoltage));
-				}
+				etesiaProcessor[channel]->set_playback_mode(playbackModes[channel]);
+
 				etesiaProcessor[channel]->set_num_channels(stereoChannels);
 				etesiaProcessor[channel]->set_low_fidelity(bWantLoFi);
 				etesiaProcessor[channel]->Prepare();
@@ -466,12 +466,23 @@ struct Etesia : SanguineModule {
 				kSanguineButtonLightValue, sampleTime);
 
 			knobPlaybackMode = etesia::PlaybackMode(params[PARAM_MODE].getValue());
-			etesia::PlaybackMode channelPlaybackMode;
+			etesia::PlaybackMode channelPlaybackMode = knobPlaybackMode;
+
+			playbackModes.fill(knobPlaybackMode);
 
 			if (bHaveModeCable) {
-				channelPlaybackMode = etesiaProcessor[displayChannel]->playback_mode();
-			} else {
-				channelPlaybackMode = knobPlaybackMode;
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					float_4 modeVoltages;
+					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					modeVoltages = simd::round(modeVoltages);
+					modeVoltages = simd::clamp(modeVoltages, 0.f, 5.f);
+					playbackModes[channel] = static_cast<etesia::PlaybackMode>(modeVoltages[0]);
+					playbackModes[channel + 1] = static_cast<etesia::PlaybackMode>(modeVoltages[1]);
+					playbackModes[channel + 2] = static_cast<etesia::PlaybackMode>(modeVoltages[2]);
+					playbackModes[channel + 3] = static_cast<etesia::PlaybackMode>(modeVoltages[3]);
+				}
+
+				channelPlaybackMode = playbackModes[displayChannel];
 			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
