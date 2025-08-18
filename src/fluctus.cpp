@@ -3,6 +3,7 @@
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
 #include "sanguinechannels.hpp"
+#include "array"
 
 #include "fluctus/dsp/fluctus_granular_processor.h"
 
@@ -120,6 +121,8 @@ struct Fluctus : SanguineModule {
 	fluctus::PlaybackMode knobPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
 	fluctus::PlaybackMode lastPlaybackMode = fluctus::PLAYBACK_MODE_LAST;
 
+	std::array<fluctus::PlaybackMode, PORT_MAX_CHANNELS> playbackModes;
+
 	float freezeLight = 0.f;
 
 	float_4 voltages1[PORT_MAX_CHANNELS];
@@ -212,6 +215,8 @@ struct Fluctus : SanguineModule {
 			fluctusProcessor[channel]->Init(bufferLarge[channel], cloudyCommon::kBigBufferLength,
 				bufferSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
+
+		playbackModes.fill(fluctus::PLAYBACK_MODE_GRANULAR);
 
 		lightsDivider.setDivision(kClockDivider);
 	}
@@ -308,13 +313,8 @@ struct Fluctus : SanguineModule {
 				}
 
 				// Set up Fluctus processor.
-				if (!bHaveModeCable) {
-					fluctusProcessor[channel]->set_playback_mode(knobPlaybackMode);
-				} else {
-					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
-					modeVoltage = clamp(modeVoltage, 0, 4);
-					fluctusProcessor[channel]->set_playback_mode(static_cast<fluctus::PlaybackMode>(modeVoltage));
-				}
+				fluctusProcessor[channel]->set_playback_mode(playbackModes[channel]);
+
 				fluctusProcessor[channel]->set_num_channels(stereoChannels);
 				fluctusProcessor[channel]->set_low_fidelity(bWantLoFi);
 				fluctusProcessor[channel]->Prepare();
@@ -468,12 +468,23 @@ struct Fluctus : SanguineModule {
 				kSanguineButtonLightValue, sampleTime);
 
 			knobPlaybackMode = fluctus::PlaybackMode(params[PARAM_MODE].getValue());
-			fluctus::PlaybackMode channelPlaybackMode;
+			fluctus::PlaybackMode channelPlaybackMode = knobPlaybackMode;
+
+			playbackModes.fill(knobPlaybackMode);
 
 			if (bHaveModeCable) {
-				channelPlaybackMode = fluctusProcessor[displayChannel]->playback_mode();
-			} else {
-				channelPlaybackMode = knobPlaybackMode;
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					float_4 modeVoltages;
+					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					modeVoltages = simd::round(modeVoltages);
+					modeVoltages = simd::clamp(modeVoltages, 0.f, 4.f);
+					playbackModes[channel] = static_cast<fluctus::PlaybackMode>(modeVoltages[0]);
+					playbackModes[channel + 1] = static_cast<fluctus::PlaybackMode>(modeVoltages[1]);
+					playbackModes[channel + 2] = static_cast<fluctus::PlaybackMode>(modeVoltages[2]);
+					playbackModes[channel + 3] = static_cast<fluctus::PlaybackMode>(modeVoltages[3]);
+				}
+
+				channelPlaybackMode = playbackModes[displayChannel];
 			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {

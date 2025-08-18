@@ -3,6 +3,7 @@
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
 #include "sanguinechannels.hpp"
+#include "array"
 
 #include "clouds/dsp/granular_processor.h"
 
@@ -116,6 +117,8 @@ struct Nebulae : SanguineModule {
 	clouds::PlaybackMode knobPlaybackMode = clouds::PLAYBACK_MODE_GRANULAR;
 	clouds::PlaybackMode lastPlaybackMode = clouds::PLAYBACK_MODE_LAST;
 
+	std::array<clouds::PlaybackMode, PORT_MAX_CHANNELS> playbackModes;
+
 	float freezeLight = 0.f;
 
 	float_4 voltages1[PORT_MAX_CHANNELS];
@@ -208,6 +211,8 @@ struct Nebulae : SanguineModule {
 			cloudsProcessor[channel]->Init(bufferLarge[channel], cloudyCommon::kBigBufferLength,
 				bufferSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
+
+		playbackModes.fill(clouds::PLAYBACK_MODE_GRANULAR);
 
 		lightsDivider.setDivision(kClockDivider);
 	}
@@ -304,13 +309,8 @@ struct Nebulae : SanguineModule {
 				}
 
 				// Set up Clouds processor.
-				if (!bHaveModeCable) {
-					cloudsProcessor[channel]->set_playback_mode(knobPlaybackMode);
-				} else {
-					int modeVoltage = static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel)));
-					modeVoltage = clamp(modeVoltage, 0, 3);
-					cloudsProcessor[channel]->set_playback_mode(static_cast<clouds::PlaybackMode>(modeVoltage));
-				}
+				cloudsProcessor[channel]->set_playback_mode(playbackModes[channel]);
+
 				cloudsProcessor[channel]->set_num_channels(stereoChannels);
 				cloudsProcessor[channel]->set_low_fidelity(bWantLoFi);
 				cloudsProcessor[channel]->Prepare();
@@ -450,12 +450,23 @@ struct Nebulae : SanguineModule {
 				kSanguineButtonLightValue, sampleTime);
 
 			knobPlaybackMode = clouds::PlaybackMode(params[PARAM_MODE].getValue());
-			clouds::PlaybackMode channelPlaybackMode;
+			clouds::PlaybackMode channelPlaybackMode = knobPlaybackMode;
+
+			playbackModes.fill(knobPlaybackMode);
 
 			if (bHaveModeCable) {
-				channelPlaybackMode = cloudsProcessor[displayChannel]->playback_mode();
-			} else {
-				channelPlaybackMode = knobPlaybackMode;
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					float_4 modeVoltages;
+					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					modeVoltages = simd::round(modeVoltages);
+					modeVoltages = simd::clamp(modeVoltages, 0.f, 3.f);
+					playbackModes[channel] = static_cast<clouds::PlaybackMode>(modeVoltages[0]);
+					playbackModes[channel + 1] = static_cast<clouds::PlaybackMode>(modeVoltages[1]);
+					playbackModes[channel + 2] = static_cast<clouds::PlaybackMode>(modeVoltages[2]);
+					playbackModes[channel + 3] = static_cast<clouds::PlaybackMode>(modeVoltages[3]);
+				}
+
+				channelPlaybackMode = playbackModes[displayChannel];
 			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
