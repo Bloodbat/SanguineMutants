@@ -342,7 +342,8 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->kammerl.pitch_mode = fluctusParameters[channel]->feedback;
 				fluctusParameters[channel]->kammerl.distortion = fluctusParameters[channel]->reverb;
 
-				scaledVoltages = voltages1[channel] / 5.f;
+				scaledVoltages = voltages1[channel];
+				scaledVoltages /= 5.f;
 
 				fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
 
@@ -360,13 +361,13 @@ struct Fluctus : SanguineModule {
 				// Trigger.
 				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-				fluctusParameters[channel]->trigger = (bTriggersAreGates && bIsGate) ||
-					(!bTriggersAreGates && (bIsGate && !lastTriggered[channel]));
+				fluctusParameters[channel]->trigger = (bTriggersAreGates & bIsGate) |
+					((!bTriggersAreGates) & (bIsGate & (!lastTriggered[channel])));
 				fluctusParameters[channel]->gate = bIsGate;
 
 				lastTriggered[channel] = bIsGate;
 
-				fluctusParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
+				fluctusParameters[channel]->freeze = ((inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f) | bFrozen);
 
 				float pitchVoltage = inputs[INPUT_PITCH].getVoltage(channel);
 
