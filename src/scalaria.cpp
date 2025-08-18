@@ -168,47 +168,66 @@ struct Scalaria : SanguineModule {
 
             bool bHaveInternalOscillator = !parameters[0]->oscillatorShape == 0;
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(bHaveInternalOscillator ?
-                0.f : kSanguineButtonLightValue, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(!bHaveInternalOscillator * kSanguineButtonLightValue,
+                sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth(parameters[0]->oscillatorShape == 1 ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth((parameters[0]->oscillatorShape == 1) *
+                kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth(parameters[0]->oscillatorShape == 2 ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth((parameters[0]->oscillatorShape == 2) *
+                kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth(parameters[0]->oscillatorShape == 3 ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth((parameters[0]->oscillatorShape == 3) *
+                kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator *
+                kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(bHaveInternalOscillator ?
-                0.f : kSanguineButtonLightValue, sampleTime);
+            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(!bHaveInternalOscillator *
+                kSanguineButtonLightValue, sampleTime);
 
-            for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            for (int channel = 0; channel < channelCount; ++channel) {
                 const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
 
-                if (channel < channelCount) {
-                    const uint8_t(*palette)[3];
-                    float zone;
+                const uint8_t(*palette)[3];
+                float zone;
 
-                    palette = scalaria::paletteFrequencies;
+                palette = scalaria::paletteFrequencies;
 
-                    zone = 8.f * parameters[channel]->rawFrequency;
-                    MAKE_INTEGRAL_FRACTIONAL(zone);
-                    int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-                    for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-                        int a = palette[zone_integral][rgbComponent];
-                        int b = palette[zone_integral + 1][rgbComponent];
-                        const float lightValue = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
-                        lights[currentLight + rgbComponent].setBrightness(rescale(lightValue, 0.f, 1.f, 0.f, kSanguineButtonLightValue));
-                    }
-                } else {
-                    for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-                        lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
-                    }
-                }
+                zone = 8.f * parameters[channel]->rawFrequency;
+                MAKE_INTEGRAL_FRACTIONAL(zone);
+                int integerZoneFractional = static_cast<int>(zone_fractional * 256);
+
+                int aRed = palette[zone_integral][0];
+                int bRed = palette[zone_integral + 1][0];
+
+                int aGreen = palette[zone_integral][1];
+                int bGreen = palette[zone_integral + 1][1];
+
+                int aBlue = palette[zone_integral][2];
+                int bBlue = palette[zone_integral + 1][2];
+
+                float_4 colorValues;
+
+                colorValues[0] = static_cast<float>(aRed + ((bRed - aRed) * integerZoneFractional >> 8));
+                colorValues[1] = static_cast<float>(aGreen + ((bGreen - aGreen) * integerZoneFractional >> 8));
+                colorValues[2] = static_cast<float>(aBlue + ((bBlue - aBlue) * integerZoneFractional >> 8));
+
+                colorValues /= 255.f;
+
+                colorValues = simd::rescale(colorValues, 0.f, 1.f, 0.f, kSanguineButtonLightValue);
+
+                lights[currentLight].setBrightness(colorValues[0]);
+                lights[currentLight + 1].setBrightness(colorValues[1]);
+                lights[currentLight + 2].setBrightness(colorValues[2]);
+            }
+
+            for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+                const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+
+                lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+                lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+                lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
             }
         }
     }
