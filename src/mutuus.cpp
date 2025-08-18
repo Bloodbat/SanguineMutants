@@ -116,6 +116,7 @@ struct Mutuus : SanguineModule {
 
 		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
 
+		// TODO: FIX ME!!! Mode selection snapping to the wrong value when switching back to mode selection after first time.
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
 			bModeSwitchEnabled = !bModeSwitchEnabled;
 
@@ -217,37 +218,44 @@ struct Mutuus : SanguineModule {
 		if (lightsDivider.process()) {
 			const float sampleTime = kLightFrequency * args.sampleTime;
 
-			lights[LIGHT_CARRIER + 0].value = (parameters[0]->carrier_shape == 1
-				|| parameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
-			lights[LIGHT_CARRIER + 1].value = (parameters[0]->carrier_shape == 2
-				|| parameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER].setBrightness(((parameters[0]->carrier_shape == 1) |
+				(parameters[0]->carrier_shape == 2)) * kSanguineButtonLightValue);
+			lights[LIGHT_CARRIER + 1].setBrightness(((parameters[0]->carrier_shape == 2) |
+				(parameters[0]->carrier_shape == 3)) * kSanguineButtonLightValue);
 
-			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled);
 
-			lights[LIGHT_STEREO].setBrightness(modulators[0].alt_feature_mode() ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_STEREO].setBrightness(modulators[0].alt_feature_mode() * kSanguineButtonLightValue);
 
 			for (int mode = 0; mode < kModeCount; ++mode) {
-				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode ? 1.f : 0.f, sampleTime);
+				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode, sampleTime);
 			}
 
 			if (!bModeSwitchEnabled) {
-				const uint8_t(*palette)[3];
 				float zone;
-				if (featureMode != mutuus::FEATURE_MODE_META) {
-					palette = warpiespals::paletteFreqsShift;
-				} else {
-					palette = warpiespals::paletteDefault;
-				}
+				const uint8_t(*palette)[3] = featureMode != mutuus::FEATURE_MODE_META ?
+					warpiespals::paletteFreqsShift : warpiespals::paletteDefault;
 
 				zone = 8.f * parameters[0]->modulation_algorithm;
 				MAKE_INTEGRAL_FRACTIONAL(zone);
-				int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-					int a = palette[zone_integral][rgbComponent];
-					int b = palette[zone_integral + 1][rgbComponent];
-					lights[LIGHT_ALGORITHM + rgbComponent].setBrightness(static_cast<float>(a + ((b - a) * zone_fractional_i >> 8))
-						/ 255.f);
-				}
+				int integerZoneFractional = static_cast<int>(zone_fractional * 256);
+
+				int aRed = palette[zone_integral][0];
+				int bRed = palette[zone_integral + 1][0];
+
+				int aGreen = palette[zone_integral][1];
+				int bGreen = palette[zone_integral + 1][1];
+
+				int aBlue = palette[zone_integral][2];
+				int bBlue = palette[zone_integral + 1][2];
+
+				float redValue = static_cast<float>(aRed + ((bRed - aRed) * integerZoneFractional >> 8)) / 255.f;
+				float greenValue = static_cast<float>(aGreen + ((bGreen - aGreen) * integerZoneFractional >> 8)) / 255.f;
+				float blueValue = static_cast<float>(aBlue + ((bBlue - aBlue) * integerZoneFractional >> 8)) / 255.f;
+
+				lights[LIGHT_ALGORITHM].setBrightness(redValue);
+				lights[LIGHT_ALGORITHM + 1].setBrightness(greenValue);
+				lights[LIGHT_ALGORITHM + 2].setBrightness(blueValue);
 			} else {
 				featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
 				modulators[0].set_feature_mode(mutuus::FeatureMode(featureMode));
@@ -257,26 +265,33 @@ struct Mutuus : SanguineModule {
 				int8_t ramp = systemTimeMs & 127;
 				uint8_t tri = (systemTimeMs & 255) < 128 ? 127 + ramp : 255 - ramp;
 
-				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-					lights[LIGHT_ALGORITHM + rgbComponent].setBrightnessSmooth((
-						(warpiespals::paletteParasiteFeatureMode[featureMode][rgbComponent] * tri) >> 8) / 255.f, sampleTime);
-				}
+				lights[LIGHT_ALGORITHM].setBrightnessSmooth((
+					(warpiespals::paletteParasiteFeatureMode[featureMode][0] * tri) >> 8) / 255.f, sampleTime);
+				lights[LIGHT_ALGORITHM + 1].setBrightnessSmooth((
+					(warpiespals::paletteParasiteFeatureMode[featureMode][1] * tri) >> 8) / 255.f, sampleTime);
+				lights[LIGHT_ALGORITHM + 2].setBrightnessSmooth((
+					(warpiespals::paletteParasiteFeatureMode[featureMode][2] * tri) >> 8) / 255.f, sampleTime);
 			}
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
-				if (channel < channelCount) {
-					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-						lights[currentLight + rgbComponent].setBrightnessSmooth(
-							(warpiespals::paletteParasiteFeatureMode[modulators[channel].feature_mode()][rgbComponent]) / 255.f,
-							sampleTime);
-					}
-				} else {
-					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-						lights[currentLight + rgbComponent].setBrightnessSmooth(0.f, sampleTime);
-					}
-				}
+				mutuus::FeatureMode featureMode = modulators[channel].feature_mode();
+
+				lights[currentLight].setBrightnessSmooth(
+					(warpiespals::paletteParasiteFeatureMode[featureMode][0]) / 255.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(
+					(warpiespals::paletteParasiteFeatureMode[featureMode][1]) / 255.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(
+					(warpiespals::paletteParasiteFeatureMode[featureMode][2]) / 255.f, sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 		}
 	}

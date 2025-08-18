@@ -150,40 +150,54 @@ struct Incurvationes : SanguineModule {
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			lights[LIGHT_CARRIER + 0].value = (parameters[0]->carrier_shape == 1
-				|| parameters[0]->carrier_shape == 2) ? kSanguineButtonLightValue : 0.f;
-			lights[LIGHT_CARRIER + 1].value = (parameters[0]->carrier_shape == 2
-				|| parameters[0]->carrier_shape == 3) ? kSanguineButtonLightValue : 0.f;
+			lights[LIGHT_CARRIER].setBrightness(((parameters[0]->carrier_shape == 1) |
+				(parameters[0]->carrier_shape == 2)) * kSanguineButtonLightValue);
+			lights[LIGHT_CARRIER + 1].setBrightness(((parameters[0]->carrier_shape == 2) |
+				(parameters[0]->carrier_shape == 3)) * kSanguineButtonLightValue);
 
-			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_EASTER_EGG].setBrightness(bEasterEggEnabled * kSanguineButtonLightValue);
 
 			const uint8_t(*palette)[3];
 
 			palette = bEasterEggEnabled ? warpiespals::paletteFreqsShift : warpiespals::paletteDefault;
-			float colorValues[PORT_MAX_CHANNELS][3] = {};
+			float colorValues[PORT_MAX_CHANNELS][3];
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_ALGORITHM + channel * 3;
 
-				for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-					lights[currentLight + rgbComponent].setBrightness(0.f);
-				}
+				float zone = 8.f * (bEasterEggEnabled ? parameters[channel]->phase_shift :
+					parameters[channel]->modulation_algorithm);
 
-				if (channel < channelCount) {
-					float zone = 8.f * (bEasterEggEnabled ? parameters[channel]->phase_shift :
-						parameters[channel]->modulation_algorithm);
+				MAKE_INTEGRAL_FRACTIONAL(zone);
+				int integerZoneFractional = static_cast<int>(zone_fractional * 256);
 
-					MAKE_INTEGRAL_FRACTIONAL(zone);
-					int zone_fractional_i = static_cast<int>(zone_fractional * 256);
-					for (int rgbComponent = 0; rgbComponent < 3; ++rgbComponent) {
-						int a = palette[zone_integral][rgbComponent];
-						int b = palette[zone_integral + 1][rgbComponent];
+				int aRed = palette[zone_integral][0];
+				int bRed = palette[zone_integral + 1][0];
 
-						colorValues[channel][rgbComponent] = static_cast<float>(a + ((b - a) * zone_fractional_i >> 8)) / 255.f;
+				int aGreen = palette[zone_integral][1];
+				int bGreen = palette[zone_integral + 1][1];
 
-						lights[currentLight + rgbComponent].setBrightness(colorValues[channel][rgbComponent]);
-					}
-				}
+				int aBlue = palette[zone_integral][2];
+				int bBlue = palette[zone_integral + 1][2];
+
+				colorValues[channel][0] = static_cast<float>(aRed + ((bRed - aRed) *
+					integerZoneFractional >> 8)) / 255.f;
+				colorValues[channel][1] = static_cast<float>(aGreen + ((bGreen - aGreen) *
+					integerZoneFractional >> 8)) / 255.f;
+				colorValues[channel][2] = static_cast<float>(aBlue + ((bBlue - aBlue) *
+					integerZoneFractional >> 8)) / 255.f;
+
+				lights[currentLight].setBrightness(colorValues[channel][0]);
+				lights[currentLight + 1].setBrightness(colorValues[channel][1]);
+				lights[currentLight + 2].setBrightness(colorValues[channel][2]);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				const int currentLight = LIGHT_CHANNEL_ALGORITHM + channel * 3;
+
+				lights[currentLight].setBrightness(0.f);
+				lights[currentLight + 1].setBrightness(0.f);
+				lights[currentLight + 2].setBrightness(0.f);
 			}
 
 			lights[LIGHT_ALGORITHM + 0].setBrightness(colorValues[0][0]);
