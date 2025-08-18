@@ -345,7 +345,8 @@ struct Etesia : SanguineModule {
 				etesiaParameters[channel]->feedback = scaledVoltages[2];
 				etesiaParameters[channel]->reverb = scaledVoltages[3];
 
-				scaledVoltages = voltages1[channel] / 5.f;
+				scaledVoltages = voltages1[channel];
+				scaledVoltages /= 5.f;
 
 				scaledVoltages += sliderValues;
 
@@ -359,14 +360,14 @@ struct Etesia : SanguineModule {
 				// Trigger.
 				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-				etesiaParameters[channel]->trigger = (bTriggersAreGates && bIsGate) ||
-					(!bTriggersAreGates && (bIsGate && !lastTriggered[channel]));
+				etesiaParameters[channel]->trigger = (bTriggersAreGates & bIsGate) |
+					((!bTriggersAreGates) & (bIsGate & (!lastTriggered[channel])));
 				etesiaParameters[channel]->gate = bIsGate;
 
 				lastTriggered[channel] = bIsGate;
 
-				etesiaParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
-				etesiaParameters[channel]->granular.reverse = (inputs[INPUT_REVERSE].getVoltage(channel) >= 1.f || bReversed);
+				etesiaParameters[channel]->freeze = ((inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f) | bFrozen);
+				etesiaParameters[channel]->granular.reverse = ((inputs[INPUT_REVERSE].getVoltage(channel) >= 1.f) | bReversed);
 
 				etesiaParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
