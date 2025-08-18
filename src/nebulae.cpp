@@ -333,7 +333,8 @@ struct Nebulae : SanguineModule {
 				cloudsParameters[channel]->feedback = scaledVoltages[2];
 				cloudsParameters[channel]->reverb = scaledVoltages[3];
 
-				scaledVoltages = voltages1[channel] / 5.f;
+				scaledVoltages = voltages1[channel];
+				scaledVoltages /= 5.f;
 
 				scaledVoltages += sliderValues;
 
@@ -347,13 +348,13 @@ struct Nebulae : SanguineModule {
 				// Trigger.
 				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
 
-				cloudsParameters[channel]->trigger = (bTriggersAreGates && bIsGate) ||
-					(!bTriggersAreGates && (bIsGate && !lastTriggered[channel]));
+				cloudsParameters[channel]->trigger = (bTriggersAreGates & bIsGate) |
+					((!bTriggersAreGates) & (bIsGate & (!lastTriggered[channel])));
 				cloudsParameters[channel]->gate = bIsGate;
 
 				lastTriggered[channel] = bIsGate;
 
-				cloudsParameters[channel]->freeze = (inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f || bFrozen);
+				cloudsParameters[channel]->freeze = ((inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f) | bFrozen);
 
 				cloudsParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
