@@ -236,10 +236,10 @@ struct Vimina : SanguineModule {
 
 			for (int section = 0; section < kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_MODE + section * 2;
-				lights[currentLight + 0].setBrightnessSmooth(channelFunction[section] == SECTION_FUNCTION_FACTORER ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(!channelFunction[section] == SECTION_FUNCTION_FACTORER ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
+				lights[currentLight].setBrightnessSmooth((channelFunction[section] == SECTION_FUNCTION_FACTORER) *
+					kSanguineButtonLightValue, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth((!channelFunction[section] == SECTION_FUNCTION_FACTORER) *
+					kSanguineButtonLightValue, sampleTime);
 
 				float sectionFactor = params[PARAM_FACTOR_1 + section].getValue();
 
@@ -498,18 +498,30 @@ struct Vimina : SanguineModule {
 		int currentLight = LIGHTS_STATE + section * 2;
 		switch (ledStates[section][channel]) {
 		case CHANNEL_REST:
-			lights[currentLight + 0].setBrightnessSmooth(0.f, sampleTime);
-			lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+			setStateLedRest(currentLight, sampleTime);
 			break;
 		case CHANNEL_THRU:
-			lights[currentLight + 0].setBrightnessSmooth(1.f, sampleTime);
-			lights[currentLight + 1].setBrightness(0.f);
+			setStateLedThru(currentLight, sampleTime);
 			break;
 		case CHANNEL_GENERATED:
-			lights[currentLight + 0].setBrightness(0.f);
-			lights[currentLight + 1].setBrightnessSmooth(1.f, sampleTime);
+			setStateLedGenerated(currentLight, sampleTime);
 			break;
 		}
+	}
+
+	void setStateLedRest(const int light, const float sampleTime) {
+		lights[light].setBrightnessSmooth(0.f, sampleTime);
+		lights[light + 1].setBrightnessSmooth(0.f, sampleTime);
+	}
+
+	void setStateLedThru(const int light, const float sampleTime) {
+		lights[light].setBrightnessSmooth(1.f, sampleTime);
+		lights[light + 1].setBrightness(0.f);
+	}
+
+	void setStateLedGenerated(const int light, const float sampleTime) {
+		lights[light].setBrightness(0.f);
+		lights[light + 1].setBrightnessSmooth(1.f, sampleTime);
 	}
 
 	void onReset(const ResetEvent& e) override {
