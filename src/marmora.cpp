@@ -123,7 +123,7 @@ struct Marmora : SanguineModule {
 	int blockIndex = 0;
 	uint32_t userSeed = 1;
 
-	const int kLightDivider = 64;
+	static const int kLightDivider = 64;
 
 	dsp::ClockDivider lightsDivider;
 	dsp::SchmittTrigger stTReset;
