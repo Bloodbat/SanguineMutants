@@ -150,12 +150,13 @@ struct Aleae : SanguineModule {
 				lights[currentLight].setBrightnessSmooth(bIsLightBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + section * 2;
-				lights[currentLight].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
-					kSanguineButtonLightValue : 0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
-					0.f : kSanguineButtonLightValue, sampleTime);
+				lights[currentLight].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT *
+					kSanguineButtonLightValue, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] != aleae::ROLL_DIRECT *
+					kSanguineButtonLightValue, sampleTime);
 
-				lights[LIGHTS_OUT_MODE + section].setBrightnessSmooth(outModes[section] ? 0.5 : 0.f, sampleTime);
+				lights[LIGHTS_OUT_MODE + section].setBrightnessSmooth(outModes[section] *
+					kSanguineButtonLightValue, sampleTime);
 			}
 		}
 	}
