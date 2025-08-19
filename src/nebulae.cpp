@@ -126,7 +126,7 @@ struct Nebulae : SanguineModule {
 	int channelCount;
 	int displayChannel = 0;
 
-	const int kLightsDivision = 64;
+	const int kLightsFrequency = 64;
 
 	bool lastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
@@ -214,7 +214,7 @@ struct Nebulae : SanguineModule {
 
 		channelModes.fill(clouds::PLAYBACK_MODE_GRANULAR);
 
-		lightsDivider.setDivision(kLightsDivision);
+		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	~Nebulae() {
@@ -411,7 +411,7 @@ struct Nebulae : SanguineModule {
 
 		// Lights.
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
-			const float sampleTime = args.sampleTime * kLightsDivision;
+			const float sampleTime = args.sampleTime * kLightsFrequency;
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
 				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
