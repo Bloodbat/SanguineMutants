@@ -564,7 +564,7 @@ struct ViminaWidget : SanguineModuleWidget {
 
 		// Channel 1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,
-			Vimina::PARAM_MODE_1, Vimina::LIGHTS_MODE + 0 * 2));
+			Vimina::PARAM_MODE_1, Vimina::LIGHTS_MODE));
 
 		addParam(createParamCentered<VCVButton>(millimetersToPixelsVec(25.863, 16.723),
 			module, Vimina::PARAM_RESET_1));
@@ -573,7 +573,7 @@ struct ViminaWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Vimina::INPUT_RESET));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Vimina::INPUT_CV1));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Vimina::OUTPUT_OUT_1A));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Vimina::LIGHTS_STATE + 0 * 2));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Vimina::LIGHTS_STATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Vimina::OUTPUT_OUT_1B));
 
 		// Channel 2
