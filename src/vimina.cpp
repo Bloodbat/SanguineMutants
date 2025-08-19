@@ -38,8 +38,8 @@ struct Vimina : SanguineModule {
 	};
 
 	enum SectionFunctions {
-		SECTION_FUNCTION_FACTORER,
-		SECTION_FUNCTION_SWING
+		FUNCTION_FACTORER,
+		FUNCTION_SWING
 	};
 
 	enum ChannelStates {
@@ -124,8 +124,8 @@ struct Vimina : SanguineModule {
 	bool isMultiplyDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
 	SectionFunctions channelFunction[kMaxModuleSections] = {
-		SECTION_FUNCTION_SWING,
-		SECTION_FUNCTION_FACTORER
+		FUNCTION_SWING,
+		FUNCTION_FACTORER
 	};
 
 	dsp::BooleanTrigger btReset[kMaxModuleSections];
@@ -236,9 +236,9 @@ struct Vimina : SanguineModule {
 
 			for (int section = 0; section < kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_MODE + section * 2;
-				lights[currentLight].setBrightnessSmooth((channelFunction[section] == SECTION_FUNCTION_FACTORER) *
+				lights[currentLight].setBrightnessSmooth((channelFunction[section] == FUNCTION_FACTORER) *
 					kSanguineButtonLightValue, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth((channelFunction[section] != SECTION_FUNCTION_FACTORER) *
+				lights[currentLight + 1].setBrightnessSmooth((channelFunction[section] != FUNCTION_FACTORER) *
 					kSanguineButtonLightValue, sampleTime);
 
 				float sectionFactor = params[PARAM_FACTOR_1 + section].getValue();
@@ -248,13 +248,13 @@ struct Vimina : SanguineModule {
 					int factorIndex = 0;
 
 					switch (channelFunction[section]) {
-					case SECTION_FUNCTION_SWING:
+					case FUNCTION_SWING:
 						swingFactor = params[PARAM_FACTOR_1 + section].getValue() / kSwingConversionFactor + kSwingFactorMin;
 
 						sectionTooltips[section] = vimina::clockPrefix + string::f("Swing %.2f%%", swingFactor);
 						break;
 
-					case SECTION_FUNCTION_FACTORER:
+					case FUNCTION_FACTORER:
 						factorIndex = static_cast<int16_t>(std::round(params[PARAM_FACTOR_1 + section].getValue() /
 							kFactorerConversionFactor - kFactorerBypassIndex));
 
@@ -290,10 +290,10 @@ struct Vimina : SanguineModule {
 
 	void handleReset(const uint8_t section, const int channel) {
 		switch (channelFunction[section]) {
-		case SECTION_FUNCTION_FACTORER:
+		case FUNCTION_FACTORER:
 			resetDivision(section, channel);
 			break;
-		case SECTION_FUNCTION_SWING:
+		case FUNCTION_SWING:
 			resetSwing(section, channel);
 			break;
 		}
@@ -302,7 +302,7 @@ struct Vimina : SanguineModule {
 	void handleTriggers(const uint8_t section, const bool isTrigger, const bool isReset, const int channel) {
 		if (isTrigger) {
 			switch (channelFunction[section]) {
-			case SECTION_FUNCTION_FACTORER:
+			case FUNCTION_FACTORER:
 				if (isDivideEnabled(section, channel)) {
 					if (divisionCounters[section][channel] <= 0) {
 						channelStates[section][channel] = CHANNEL_GENERATED; // Divide converts thru to exec on every division.
@@ -319,7 +319,7 @@ struct Vimina : SanguineModule {
 					triggerCounts[section][channel] = 0;
 				}
 				break;
-			case SECTION_FUNCTION_SWING:
+			case FUNCTION_SWING:
 				switch (swingCounters[section][channel]) {
 				case 0: // Thru beat.
 					channelStates[section][channel] = CHANNEL_THRU;
@@ -447,7 +447,7 @@ struct Vimina : SanguineModule {
 
 		switch (channelFunction[section])
 		{
-		case SECTION_FUNCTION_FACTORER:
+		case FUNCTION_FACTORER:
 			int16_t factorIndex;
 			factorIndex = std::round(channelVoltage[section][channel] /
 				kFactorerConversionFactor - kFactorerBypassIndex);
@@ -460,7 +460,7 @@ struct Vimina : SanguineModule {
 				channelFactors[section][channel] = ++factorIndex;
 			}
 			break;
-		case SECTION_FUNCTION_SWING:
+		case FUNCTION_SWING:
 			channelSwings[section][channel] = channelVoltage[section][channel] /
 				kSwingConversionFactor + kSwingFactorMin;
 			break;
@@ -469,7 +469,7 @@ struct Vimina : SanguineModule {
 
 	void transformClock(const uint8_t section, const int channel) {
 		switch (channelFunction[section]) {
-		case SECTION_FUNCTION_FACTORER:
+		case FUNCTION_FACTORER:
 			if (isMultiplyEnabled(section, channel) && isPulseTrackerPeriod(channel) &&
 				isMultiplyStrikeTurn(section, getPulseTrackerElapsed(channel), channel) &&
 				triggerCounts[section][channel] >= channelFactors[section][channel]) {
@@ -478,7 +478,7 @@ struct Vimina : SanguineModule {
 				--triggerCounts[section][channel];
 			}
 			break;
-		case SECTION_FUNCTION_SWING:
+		case FUNCTION_SWING:
 			if (isSwingStrikeTurn(section, getPulseTrackerElapsed(channel), channel)) {
 				channelStates[section][channel] = CHANNEL_GENERATED;
 				resetSwing(section, channel);
