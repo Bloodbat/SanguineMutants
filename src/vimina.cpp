@@ -145,7 +145,8 @@ struct Vimina : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int section = 0; section < kMaxModuleSections; ++section) {
 			const int sectionNumber = section + 1;
-			configParam(PARAM_FACTOR_1 + section, 0.f, kMaxParamValue, 0.5f, string::f("Channel %d factor", sectionNumber));
+			configParam(PARAM_FACTOR_1 + section, 0.f, kMaxParamValue, 0.5f,
+				string::f("Channel %d factor", sectionNumber), "%", 0.f, 100.f);
 			configSwitch(PARAM_RESET_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d reset", sectionNumber));
 
 			configInput(INPUT_CV1 + section, string::f("Channel %d factor", sectionNumber));
