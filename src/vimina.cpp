@@ -238,7 +238,7 @@ struct Vimina : SanguineModule {
 				int currentLight = LIGHTS_MODE + section * 2;
 				lights[currentLight].setBrightnessSmooth((channelFunction[section] == SECTION_FUNCTION_FACTORER) *
 					kSanguineButtonLightValue, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth((!channelFunction[section] == SECTION_FUNCTION_FACTORER) *
+				lights[currentLight + 1].setBrightnessSmooth((channelFunction[section] != SECTION_FUNCTION_FACTORER) *
 					kSanguineButtonLightValue, sampleTime);
 
 				float sectionFactor = params[PARAM_FACTOR_1 + section].getValue();
@@ -390,7 +390,7 @@ struct Vimina : SanguineModule {
 	bool isRisingEdge(const uint8_t section, const int port, const float threshold, const int channel) {
 		bool bLastGateState = inputGateState[section][channel];
 		inputGateState[section][channel] = inputs[port].getVoltage(channel) >= threshold;
-		return inputGateState[section][channel] & !(bLastGateState);
+		return inputGateState[section][channel] & (!bLastGateState);
 	}
 
 	bool isSwingStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
