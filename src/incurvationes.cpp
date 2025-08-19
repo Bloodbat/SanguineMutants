@@ -43,7 +43,7 @@ struct Incurvationes : SanguineModule {
 
 
 	int frames[PORT_MAX_CHANNELS] = {};
-	static const int kLightFrequency = 128;
+	static const int kLightsFrequency = 128;
 
 	warps::Modulator modulators[PORT_MAX_CHANNELS];
 	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
@@ -87,7 +87,7 @@ struct Incurvationes : SanguineModule {
 			parameters[channel] = modulators[channel].mutable_parameters();
 		}
 
-		lightsDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {

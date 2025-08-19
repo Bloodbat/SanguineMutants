@@ -62,7 +62,7 @@ struct Scalaria : SanguineModule {
 
     int frames[PORT_MAX_CHANNELS] = {};
 
-    static const int kLightFrequency = 128;
+    static const int kLightsFrequency = 128;
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator modulators[PORT_MAX_CHANNELS];
@@ -105,7 +105,7 @@ struct Scalaria : SanguineModule {
             parameters[channel] = modulators[channel].mutableParameters();
         }
 
-        lightsDivider.setDivision(kLightFrequency);
+        lightsDivider.setDivision(kLightsFrequency);
     }
 
     void process(const ProcessArgs& args) override {
@@ -176,7 +176,7 @@ struct Scalaria : SanguineModule {
         outputs[OUTPUT_AUX].setChannels(channelCount);
 
         if (lightsDivider.process()) {
-            const float sampleTime = kLightFrequency * args.sampleTime;
+            const float sampleTime = kLightsFrequency * args.sampleTime;
 
             bool bHaveInternalOscillator = !parameters[0]->oscillatorShape == 0;
 

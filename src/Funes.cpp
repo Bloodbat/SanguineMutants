@@ -86,7 +86,7 @@ struct Funes : SanguineModule {
 	float lastLPGDecay = 0.5f;
 	float lastModelVoltage = 0.f;
 
-	static const int kLightsUpdateFrequency = 16;
+	static const int kLightsFrequency = 16;
 
 	static const int kMaxUserDataSize = 4096;
 
@@ -179,7 +179,7 @@ struct Funes : SanguineModule {
 
 		octaveQuantizer.Init(9, 0.01f, false);
 
-		lightsDivider.setDivision(kLightsUpdateFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 
 		resetCustomDataStates();
 
