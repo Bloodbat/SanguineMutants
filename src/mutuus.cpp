@@ -52,7 +52,7 @@ struct Mutuus : SanguineModule {
 	int featureMode = 0;
 	int frames[PORT_MAX_CHANNELS] = {};
 
-	const int kLightsFrequency = 128;
+	static const int kLightsFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
