@@ -15,4 +15,14 @@ namespace aleae {
         ROLL_HEADS,
         ROLL_TAILS
     };
+
+    static const std::vector<std::string> rollModeLabels{
+        "Direct",
+        "Toggle"
+    };
+
+    static const std::vector<std::string> outModeLabels{
+        "Trigger",
+        "Latch"
+    };
 }
