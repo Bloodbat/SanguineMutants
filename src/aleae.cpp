@@ -59,8 +59,8 @@ struct Aleae : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int section = 0; section < kMaxModuleSections; ++section) {
 			configParam(PARAM_THRESHOLD_1 + section, 0.f, 1.f, 0.5f, string::f("Channel %d probability", section + 1), "%", 0, 100);
-			configSwitch(PARAM_ROLL_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", section + 1), { "Direct", "Toggle" });
-			configSwitch(PARAM_OUT_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d out mode", section + 1), { "Trigger", "Latch" });
+			configSwitch(PARAM_ROLL_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d coin mode", section + 1), { aleae::rollModeLabels });
+			configSwitch(PARAM_OUT_MODE_1 + section, 0.f, 1.f, 0.f, string::f("Channel %d out mode", section + 1), { aleae::outModeLabels });
 			configInput(INPUT_IN_1 + section, string::f("Channel %d", section + 1));
 			configInput(INPUT_P_1 + section, string::f("Channel %d probability", section + 1));
 			configOutput(OUTPUT_OUT_1A + section, string::f("Channel %d A", section + 1));
