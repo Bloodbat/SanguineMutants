@@ -28,6 +28,8 @@
 
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
 
+- Vimina: swing/factor tooltips not updating until the knob is moved when the mode of a section is changed.
+
 ## Additions
 
 - Aestus family: modules are fully polyphonic.
