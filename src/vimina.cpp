@@ -114,6 +114,8 @@ struct Vimina : SanguineModule {
 	static constexpr float swingConversionFactor = kMaxParamValue / (kSwingFactorMax - kSwingFactorMin);
 	static constexpr float factorerConversionFactor = kMaxParamValue / (kFactorCount - 1.f);
 
+	static constexpr float kEdgeVoltageThreshold = 2.f;
+
 	float channelVoltage[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	float lastSectionFactors[kMaxModuleSections] = { 0.5f, 0.5f };
@@ -184,10 +186,12 @@ struct Vimina : SanguineModule {
 			bool bIsTrigger = false;
 
 			if (bIsClockConnected) {
-				if (isRisingEdge(kClockChannel, inputs[INPUT_CLOCK].getVoltage(channel) >= 2.f, channel)) {
-					/* Pulse tracker is always recording. this should help smooth transitions
-					   between functions even though divide doesn't use it. */
-					   // Shift
+				if (isRisingEdge(kClockChannel, INPUT_CLOCK, kEdgeVoltageThreshold, channel)) {
+					/*
+					   Pulse tracker is always recording. this should help smooth transitions
+					   between functions even though divide doesn't use it.
+					*/
+					// Shift
 					pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel];
 					pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel];
 					if (pulseTrackerRecordedCounts[channel] < kPulseTrackerBufferSize) {
@@ -199,7 +203,7 @@ struct Vimina : SanguineModule {
 
 			bool bIsReset = false;
 			if (bIsResetConnected) {
-				bIsReset = isRisingEdge(kResetChannel, inputs[INPUT_RESET].getVoltage(channel) >= 2.f, channel);
+				bIsReset = isRisingEdge(kResetChannel, INPUT_RESET, kEdgeVoltageThreshold, channel);
 			}
 
 			for (uint8_t section = 0; section < kMaxModuleSections; ++section) {
@@ -381,10 +385,10 @@ struct Vimina : SanguineModule {
 		return pulseTrackerRecordedCounts[channel] >= kPulseTrackerBufferSize;
 	}
 
-	bool isRisingEdge(const uint8_t section, const bool voltageAboveThreshold, const int channel) {
+	bool isRisingEdge(const uint8_t section, const int port, const float threshold, const int channel) {
 		bool bLastGateState = inputGateState[section][channel];
-		inputGateState[section][channel] = voltageAboveThreshold;
-		return inputGateState[section][channel] && !bLastGateState;
+		inputGateState[section][channel] = inputs[port].getVoltage(channel) >= threshold;
+		return inputGateState[section][channel] & !(bLastGateState);
 	}
 
 	bool isSwingStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
