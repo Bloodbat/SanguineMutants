@@ -52,7 +52,7 @@ struct Mutuus : SanguineModule {
 	int featureMode = 0;
 	int frames[PORT_MAX_CHANNELS] = {};
 
-	const int kLightFrequency = 128;
+	const int kLightsFrequency = 128;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
@@ -108,7 +108,7 @@ struct Mutuus : SanguineModule {
 		}
 
 		featureMode = mutuus::FEATURE_MODE_META;
-		lightsDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -216,7 +216,7 @@ struct Mutuus : SanguineModule {
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			const float sampleTime = kLightFrequency * args.sampleTime;
+			const float sampleTime = kLightsFrequency * args.sampleTime;
 
 			lights[LIGHT_CARRIER].setBrightness(((parameters[0]->carrier_shape == 1) |
 				(parameters[0]->carrier_shape == 2)) * kSanguineButtonLightValue);

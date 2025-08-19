@@ -72,7 +72,7 @@ struct Explorator : SanguineModule {
 		NOISE_MODES_COUNT
 	};
 
-	const int kLightFrequency = 128;
+	const int kLightsFrequency = 128;
 	int lastSampleAndHoldChannels = 0;
 
 	dsp::ClockDivider lightsDivider;
@@ -119,7 +119,7 @@ struct Explorator : SanguineModule {
 
 		configButton(PARAM_AVERAGER, "3:1 hardware behavior (averager)");
 
-		lightsDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 
 		for (int noise = 0; noise < PORT_MAX_CHANNELS; ++noise) {
 			uint32_t seedTime = std::round(system::getUnixTime() * noise);
@@ -275,7 +275,7 @@ struct Explorator : SanguineModule {
 		// Lights
 
 		if (lightsDivider.process()) {
-			const float sampleTime = args.sampleTime * kLightFrequency;
+			const float sampleTime = args.sampleTime * kLightsFrequency;
 
 			// 1:3
 			float voltage1to3Sum = 0;
