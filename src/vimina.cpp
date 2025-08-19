@@ -111,8 +111,8 @@ struct Vimina : SanguineModule {
 	// Scaling constant
 	static constexpr float kMaxParamValue = 1.f;
 
-	static constexpr float swingConversionFactor = kMaxParamValue / (kSwingFactorMax - kSwingFactorMin);
-	static constexpr float factorerConversionFactor = kMaxParamValue / (kFactorCount - 1.f);
+	static constexpr float kSwingConversionFactor = kMaxParamValue / (kSwingFactorMax - kSwingFactorMin);
+	static constexpr float kFactorerConversionFactor = kMaxParamValue / (kFactorCount - 1.f);
 
 	static constexpr float kEdgeVoltageThreshold = 2.f;
 
@@ -192,8 +192,10 @@ struct Vimina : SanguineModule {
 					   between functions even though divide doesn't use it.
 					*/
 					// Shift
-					pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel] = pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel];
-					pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] = tmrModuleClock[channel];
+					pulseTrackerBuffers[kPulseTrackerBufferSize - 2][channel] =
+						pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel];
+					pulseTrackerBuffers[kPulseTrackerBufferSize - 1][channel] =
+						tmrModuleClock[channel];
 					if (pulseTrackerRecordedCounts[channel] < kPulseTrackerBufferSize) {
 						++pulseTrackerRecordedCounts[channel];
 					}
@@ -247,14 +249,14 @@ struct Vimina : SanguineModule {
 
 					switch (channelFunction[section]) {
 					case SECTION_FUNCTION_SWING:
-						swingFactor = params[PARAM_FACTOR_1 + section].getValue() / swingConversionFactor + kSwingFactorMin;
+						swingFactor = params[PARAM_FACTOR_1 + section].getValue() / kSwingConversionFactor + kSwingFactorMin;
 
 						sectionTooltips[section] = vimina::clockPrefix + string::f("Swing %.2f%%", swingFactor);
 						break;
 
 					case SECTION_FUNCTION_FACTORER:
 						factorIndex = static_cast<int16_t>(std::round(params[PARAM_FACTOR_1 + section].getValue() /
-							factorerConversionFactor - kFactorerBypassIndex));
+							kFactorerConversionFactor - kFactorerBypassIndex));
 
 						if (factorIndex < 0) {
 							factorIndex = -factorIndex; // abs
@@ -448,7 +450,7 @@ struct Vimina : SanguineModule {
 		case SECTION_FUNCTION_FACTORER:
 			int16_t factorIndex;
 			factorIndex = std::round(channelVoltage[section][channel] /
-				factorerConversionFactor - kFactorerBypassIndex);
+				kFactorerConversionFactor - kFactorerBypassIndex);
 			// Offset result so that there are no -1 or 0 factors, but values are still evenly spaced.
 			if (factorIndex == 0) {
 				channelFactors[section][channel] = kFactorerBypassValue;
@@ -460,7 +462,7 @@ struct Vimina : SanguineModule {
 			break;
 		case SECTION_FUNCTION_SWING:
 			channelSwings[section][channel] = channelVoltage[section][channel] /
-				swingConversionFactor + kSwingFactorMin;
+				kSwingConversionFactor + kSwingFactorMin;
 			break;
 		}
 	}
