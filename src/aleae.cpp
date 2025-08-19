@@ -115,10 +115,10 @@ struct Aleae : SanguineModule {
 				}
 
 				// Output gate logic
-				bool bIsGateAActive = (rollResults[section][channel] == aleae::ROLL_HEADS &&
-					(outModes[section] == aleae::OUT_MODE_LATCH || bIsGatePresent));
-				bool bIsGateBActive = (rollResults[section][channel] == aleae::ROLL_TAILS &&
-					(outModes[section] == aleae::OUT_MODE_LATCH || bIsGatePresent));
+				bool bIsGateAActive = ((rollResults[section][channel] == aleae::ROLL_HEADS) &
+					((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
+				bool bIsGateBActive = ((rollResults[section][channel] == aleae::ROLL_TAILS) &
+					((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
 
 				if (channel == ledsChannel) {
 					bIsLightAActive = bIsGateAActive;
