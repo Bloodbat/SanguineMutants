@@ -126,7 +126,7 @@ struct Nebulae : SanguineModule {
 	int channelCount;
 	int displayChannel = 0;
 
-	const int kLightsFrequency = 64;
+	static const int kLightsFrequency = 64;
 
 	bool lastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
