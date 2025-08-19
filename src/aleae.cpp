@@ -37,7 +37,7 @@ struct Aleae : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	static const int kLightFrequency = 16;
+	static const int kLightsFrequency = 16;
 	static const int kMaxModuleSections = 2;
 	int ledsChannel = 0;
 	int channelCount = 0;
@@ -69,7 +69,7 @@ struct Aleae : SanguineModule {
 				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
 		}
-		lightsDivider.setDivision(kLightFrequency);
+		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -140,7 +140,7 @@ struct Aleae : SanguineModule {
 					ledsChannel = channelCount - 1;
 				}
 
-				const float sampleTime = args.sampleTime * kLightFrequency;
+				const float sampleTime = args.sampleTime * kLightsFrequency;
 				int currentLight = LIGHTS_STATE + section * 2;
 				lights[currentLight + 1].setBrightnessSmooth(bIsLightAActive, sampleTime);
 				lights[currentLight].setBrightnessSmooth(bIsLightBActive, sampleTime);
