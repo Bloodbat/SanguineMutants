@@ -85,7 +85,7 @@ struct Aleae : SanguineModule {
 			Input* input = &inputs[INPUT_IN_1 + section];
 			// 2nd input is normalized to 1st.
 			if (section == 1 && !input->isConnected()) {
-				input = &inputs[INPUT_IN_1 + 0];
+				input = &inputs[INPUT_IN_1];
 			}
 			channelCount = std::max(input->getChannels(), 1);
 
@@ -124,7 +124,7 @@ struct Aleae : SanguineModule {
 				}
 
 				// Set output gates
-				if (bOutputsConnected[0 + section]) {
+				if (bOutputsConnected[section]) {
 					outputs[OUTPUT_OUT_1A + section].setVoltage(bIsGateAActive ? 10.f : 0.f, channel);
 				}
 				if (bOutputsConnected[2 + section]) {
@@ -132,7 +132,7 @@ struct Aleae : SanguineModule {
 				}
 			}
 
-			if (bOutputsConnected[0 + section]) {
+			if (bOutputsConnected[section]) {
 				outputs[OUTPUT_OUT_1A + section].setChannels(channelCount);
 			}
 			if (bOutputsConnected[2 + section]) {
@@ -147,10 +147,10 @@ struct Aleae : SanguineModule {
 				const float sampleTime = args.sampleTime * kLightFrequency;
 				int currentLight = LIGHTS_STATE + section * 2;
 				lights[currentLight + 1].setBrightnessSmooth(bIsLightAActive, sampleTime);
-				lights[currentLight + 0].setBrightnessSmooth(bIsLightBActive, sampleTime);
+				lights[currentLight].setBrightnessSmooth(bIsLightBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + section * 2;
-				lights[currentLight + 0].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
+				lights[currentLight].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
 					kSanguineButtonLightValue : 0.f, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT ?
 					0.f : kSanguineButtonLightValue, sampleTime);
@@ -205,21 +205,21 @@ struct AleaeWidget : SanguineModuleWidget {
 
 		// Channel 1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,
-			Aleae::PARAM_ROLL_MODE_1, Aleae::LIGHTS_ROLL_MODE + 0 * 2));
+			Aleae::PARAM_ROLL_MODE_1, Aleae::LIGHTS_ROLL_MODE));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(25.863, 16.723), module,
-			Aleae::PARAM_OUT_MODE_1, Aleae::LIGHTS_OUT_MODE + 0));
+			Aleae::PARAM_OUT_MODE_1, Aleae::LIGHTS_OUT_MODE));
 
 		addParam(createParamCentered<Sanguine1PSRed>(millimetersToPixelsVec(15.24, 27.904), module, Aleae::PARAM_THRESHOLD_1));
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 44.303), module, Aleae::INPUT_IN_1));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 44.303), module, Aleae::INPUT_P_1));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 59.959), module, Aleae::OUTPUT_OUT_1A));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Aleae::LIGHTS_STATE + 0 * 2));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 59.959), module, Aleae::LIGHTS_STATE));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 59.959), module, Aleae::OUTPUT_OUT_1B));
 
 		// Channel 2
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 74.653), module,
-			Aleae::PARAM_ROLL_MODE_2, Aleae::LIGHTS_ROLL_MODE + 1 * 2));
+			Aleae::PARAM_ROLL_MODE_2, Aleae::LIGHTS_ROLL_MODE + 2));
 
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<OrangeLight>>>(millimetersToPixelsVec(25.863, 74.653), module,
 			Aleae::PARAM_OUT_MODE_2, Aleae::LIGHTS_OUT_MODE + 1));
@@ -228,7 +228,7 @@ struct AleaeWidget : SanguineModuleWidget {
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(6.012, 102.232), module, Aleae::INPUT_IN_2));
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(24.481, 102.232), module, Aleae::INPUT_P_2));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(6.012, 117.888), module, Aleae::OUTPUT_OUT_2A));
-		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 117.888), module, Aleae::LIGHTS_STATE + 1 * 2));
+		addChild(createLightCentered<MediumLight<GreenRedLight>>(millimetersToPixelsVec(15.24, 117.888), module, Aleae::LIGHTS_STATE + 2));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(24.481, 117.888), module, Aleae::OUTPUT_OUT_2B));
 	}
 
