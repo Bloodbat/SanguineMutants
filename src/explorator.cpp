@@ -72,7 +72,7 @@ struct Explorator : SanguineModule {
 		NOISE_MODES_COUNT
 	};
 
-	const int kLightsFrequency = 128;
+	static const int kLightsFrequency = 128;
 	int lastSampleAndHoldChannels = 0;
 
 	dsp::ClockDivider lightsDivider;
