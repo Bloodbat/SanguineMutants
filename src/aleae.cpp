@@ -70,8 +70,8 @@ struct Aleae : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
-			lightsDivider.setDivision(kLightFrequency);
 		}
+		lightsDivider.setDivision(kLightFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
