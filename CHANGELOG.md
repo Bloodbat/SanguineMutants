@@ -4,6 +4,8 @@
 
 - Aestus family: use the proper knob for the FM parameter.
 
+- Aleae: "Out mode" button didn't follow button light brightness standards.
+
 - Anuli: FX button light didn't follow plugin button light standards.
 
 - Apices family: go back to parameter values set by the knobs when expanders are connected and a cable is disconnected from one of the expander inputs.
