@@ -127,6 +127,11 @@ struct Vimina : SanguineModule {
 		FUNCTION_FACTORER
 	};
 
+	SectionFunctions lastSectionFunctions[kMaxModuleSections] = {
+		FUNCTION_SWING,
+		FUNCTION_FACTORER
+	};
+
 	dsp::BooleanTrigger btResetSection1;
 	dsp::BooleanTrigger btResetSection2;
 	dsp::ClockDivider lightsDivider;
@@ -504,10 +509,8 @@ struct Vimina : SanguineModule {
 	}
 
 	void updateTooltips(const int section) {
-		// TODO: tooltips not updating when mode for a section is changed.
-		float sectionFactor = sectionKnobValues[section];
-
-		if (lastSectionFactors[section] != sectionFactor) {
+		if (lastSectionFactors[section] != sectionKnobValues[section] ||
+			lastSectionFunctions[section] != channelFunction[section]) {
 			switch (channelFunction[section]) {
 			case FUNCTION_SWING:
 				setSwingTooltips(section);
@@ -517,7 +520,8 @@ struct Vimina : SanguineModule {
 				setFactorerTooltips(section);
 				break;
 			}
-			lastSectionFactors[section] = sectionFactor;
+			lastSectionFactors[section] = sectionKnobValues[section];
+			lastSectionFunctions[section] = channelFunction[section];
 
 			getParamQuantity(PARAM_FACTOR_1 + section)->description = sectionTooltips[section];
 		}
