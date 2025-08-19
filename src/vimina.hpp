@@ -25,4 +25,7 @@ namespace vimina {
     };
 
     static const std::string clockPrefix = "Clock: ";
+
+    // LED constants
+    static const int ledDurations[3] = { 0 , 256, 128 };
 }
