@@ -120,17 +120,13 @@ struct Aleae : SanguineModule {
 				bool bIsGateBActive = ((rollResults[section][channel] == aleae::ROLL_TAILS) &
 					((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
 
+				// Set output gates
+				outputs[OUTPUT_OUT_1A + section].setVoltage(bIsGateAActive * 10.f, channel);
+				outputs[OUTPUT_OUT_1B + section].setVoltage(bIsGateBActive * 10.f, channel);
+
 				if (channel == ledsChannel) {
 					bIsLightAActive = bIsGateAActive;
 					bIsLightBActive = bIsGateBActive;
-				}
-
-				// Set output gates
-				if (bOutputsConnected[section]) {
-					outputs[OUTPUT_OUT_1A + section].setVoltage(bIsGateAActive ? 10.f : 0.f, channel);
-				}
-				if (bOutputsConnected[2 + section]) {
-					outputs[OUTPUT_OUT_1B + section].setVoltage(bIsGateBActive ? 10.f : 0.f, channel);
 				}
 			}
 
