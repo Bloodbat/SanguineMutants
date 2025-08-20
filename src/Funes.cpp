@@ -186,6 +186,8 @@ struct Funes : SanguineModule {
 
 		bWantHoldModulations = static_cast<bool>(params[PARAM_HOLD_MODULATIONS].getValue());
 
+		int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
+
 		if (drbOutputBuffers.empty()) {
 			const int kBlockSize = 12;
 
@@ -200,8 +202,8 @@ struct Funes : SanguineModule {
 						displayModelNum = patch.engine;
 					}
 				}
-			} else if (params[PARAM_MODEL].getValue() != patch.engine) {
-				patch.engine = params[PARAM_MODEL].getValue();
+			} else if (knobModel != patch.engine) {
+				patch.engine = knobModel;
 				displayModelNum = patch.engine;
 			}
 
