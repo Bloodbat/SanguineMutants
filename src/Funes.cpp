@@ -282,7 +282,7 @@ struct Funes : SanguineModule {
 
 				// Convert output to frames
 				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
-					outputFrames[blockNum].samples[channel * 2 + 0] = output[blockNum].out / 32768.f;
+					outputFrames[blockNum].samples[channel * 2] = output[blockNum].out / 32768.f;
 					outputFrames[blockNum].samples[channel * 2 + 1] = output[blockNum].aux / 32768.f;
 				}
 
@@ -347,7 +347,7 @@ struct Funes : SanguineModule {
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
 			for (int channel = 0; channel < channelCount; ++channel) {
 				// Inverting op-amp on outputs
-				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[channel * 2 + 0] * 5.f, channel);
+				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[channel * 2] * 5.f, channel);
 				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[channel * 2 + 1] * 5.f, channel);
 			}
 		}
@@ -368,7 +368,7 @@ struct Funes : SanguineModule {
 
 			lights[LIGHT_FACTORY_DATA].setBrightness(((customDataStates[patch.engine] == funes::DataFactory) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
-			lights[LIGHT_CUSTOM_DATA + 0].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) &
+			lights[LIGHT_CUSTOM_DATA].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
 			lights[LIGHT_CUSTOM_DATA + 1].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) |
 				(errorTimeOut > 0)) * kSanguineButtonLightValue);
@@ -383,11 +383,11 @@ struct Funes : SanguineModule {
 
 			bool bEngineHasChords = (patch.engine == 6) | (patch.engine == 7) | (patch.engine == 14);
 
-			lights[LIGHT_CHORD_BANK + 0].setBrightness((bEngineHasChords & ((chordBank == 0) | (chordBank == 2))) *
+			lights[LIGHT_CHORD_BANK].setBrightness((bEngineHasChords & ((chordBank == 0) | (chordBank == 2))) *
 				kSanguineButtonLightValue);
 			lights[LIGHT_CHORD_BANK + 1].setBrightness((bEngineHasChords & (chordBank > 0)) * kSanguineButtonLightValue);
 
-			lights[LIGHT_AUX_SUBOSCILLATOR + 0].setBrightness((suboscillatorMode > funes::SUBOSCILLATOR_SQUARE) *
+			lights[LIGHT_AUX_SUBOSCILLATOR].setBrightness((suboscillatorMode > funes::SUBOSCILLATOR_SQUARE) *
 				kSanguineButtonLightValue);
 
 			lights[LIGHT_AUX_SUBOSCILLATOR + 1].setBrightness(((suboscillatorMode == funes::SUBOSCILLATOR_SQUARE) |
