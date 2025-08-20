@@ -190,9 +190,9 @@ struct Funes : SanguineModule {
 
 		bWantHoldModulations = static_cast<bool>(params[PARAM_HOLD_MODULATIONS].getValue());
 
-		int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
-
 		if (drbOutputBuffers.empty()) {
+			int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
+
 			// Switch models
 			if (bNotesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
 				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
