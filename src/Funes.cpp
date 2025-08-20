@@ -256,25 +256,25 @@ struct Funes : SanguineModule {
 			for (int channel = 0; channel < channelCount; ++channel) {
 				// Construct modulations.
 				if (!bNotesModelSelection) {
-					modulations[channel].engine = inputs[INPUT_ENGINE].getPolyVoltage(channel) / 5.f;
+					modulations[channel].engine = inputs[INPUT_ENGINE].getVoltage(channel) / 5.f;
 				}
 
 				modulations[channel].note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
 				modulations[channel].frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
-				modulations[channel].frequency = inputs[INPUT_FREQUENCY].getPolyVoltage(channel) * 6.f;
-				modulations[channel].harmonics = (inputs[INPUT_HARMONICS].getPolyVoltage(channel) / 5.f) *
+				modulations[channel].frequency = inputs[INPUT_FREQUENCY].getVoltage(channel) * 6.f;
+				modulations[channel].harmonics = (inputs[INPUT_HARMONICS].getVoltage(channel) / 5.f) *
 					params[PARAM_HARMONICS_CV].getValue();
 				modulations[channel].timbre_patched = inputs[INPUT_TIMBRE].isConnected();
-				modulations[channel].timbre = inputs[INPUT_TIMBRE].getPolyVoltage(channel) / 8.f;
+				modulations[channel].timbre = inputs[INPUT_TIMBRE].getVoltage(channel) / 8.f;
 				modulations[channel].morph_patched = inputs[INPUT_MORPH].isConnected();
-				modulations[channel].morph = inputs[INPUT_MORPH].getPolyVoltage(channel) / 8.f;
+				modulations[channel].morph = inputs[INPUT_MORPH].getVoltage(channel) / 8.f;
 				modulations[channel].trigger_patched = inputs[INPUT_TRIGGER].isConnected();
 				// Triggers at around 0.7 V
-				modulations[channel].trigger = inputs[INPUT_TRIGGER].getPolyVoltage(channel) / 3.f;
+				modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
 				modulations[channel].level_patched = inputs[INPUT_LEVEL].isConnected();
-				modulations[channel].level = inputs[INPUT_LEVEL].getPolyVoltage(channel) / 8.f;
+				modulations[channel].level = inputs[INPUT_LEVEL].getVoltage(channel) / 8.f;
 
-				modulations[channel].auxCrossfade = inputs[INPUT_AUX_CROSSFADE].getPolyVoltage(channel) / 5.f;
+				modulations[channel].auxCrossfade = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel) / 5.f;
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
