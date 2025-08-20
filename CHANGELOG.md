@@ -12,6 +12,8 @@
 
 - Funes: custom data not loading under certain conditions.
 
+- Funes: default LPG values were not reflected in the knobs or respected in the engine when resetting the module.
+
 - Mortuus: button lights.
 
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
