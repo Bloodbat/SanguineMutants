@@ -404,6 +404,9 @@ struct Funes : SanguineModule {
 		setEngine(8);
 		patch.lpg_colour = 0.5f;
 		patch.decay = 0.5f;
+
+		params[PARAM_LPG_COLOR].setValue(0.5f);
+		params[PARAM_LPG_DECAY].setValue(0.5f);
 	}
 
 	void onReset(const ResetEvent& e) override {

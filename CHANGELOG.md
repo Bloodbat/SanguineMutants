@@ -22,6 +22,8 @@
 
 - Funes: custom data not loading under certain conditions.
 
+- Funes: default LPG values were not reflected in the knobs or respected in the engine when resetting the module.
+
 - Mortuus: button lights.
 
 - Nebulae family: proper tooltips on startup.
