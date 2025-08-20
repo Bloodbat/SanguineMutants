@@ -96,6 +96,8 @@ struct Funes : SanguineModule {
 	int channelCount = 0;
 	int errorTimeOut = 0;
 
+	static const int kBlockSize = 12;
+
 	uint8_t chordBank = 0;
 
 	funes::SuboscillatorModes suboscillatorMode = funes::SUBOSCILLATOR_OFF;
@@ -180,6 +182,8 @@ struct Funes : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		chordBank = params[PARAM_CHORD_BANK].getValue();
@@ -189,8 +193,6 @@ struct Funes : SanguineModule {
 		int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
 
 		if (drbOutputBuffers.empty()) {
-			const int kBlockSize = 12;
-
 			// Switch models
 			if (bNotesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
 				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
@@ -256,27 +258,42 @@ struct Funes : SanguineModule {
 			// Render output buffer for each voice.
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
+				float_4 inputVoltages1;
+				float_4 inputVoltages2;
+
+				inputVoltages1[0] = inputs[INPUT_ENGINE].getVoltage(channel);
+				inputVoltages1[1] = inputs[INPUT_HARMONICS].getVoltage(channel);
+				inputVoltages1[2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
+
+				inputVoltages2[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
+				inputVoltages2[1] = inputs[INPUT_MORPH].getVoltage(channel);
+				inputVoltages2[2] = inputs[INPUT_LEVEL].getVoltage(channel);
+
+				inputVoltages1 /= 5.f;
+				inputVoltages2 /= 8.f;
+
 				// Construct modulations.
 				if (!bNotesModelSelection) {
-					modulations[channel].engine = inputs[INPUT_ENGINE].getVoltage(channel) / 5.f;
+					modulations[channel].engine = inputVoltages1[0];
 				}
+				modulations[channel].harmonics = inputVoltages1[1] * params[PARAM_HARMONICS_CV].getValue();
+				modulations[channel].auxCrossfade = inputVoltages1[2];
+
+				modulations[channel].timbre = inputVoltages2[0];
+				modulations[channel].morph = inputVoltages2[1];
+				modulations[channel].level = inputVoltages2[2];
 
 				modulations[channel].note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
-				modulations[channel].frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
 				modulations[channel].frequency = inputs[INPUT_FREQUENCY].getVoltage(channel) * 6.f;
-				modulations[channel].harmonics = (inputs[INPUT_HARMONICS].getVoltage(channel) / 5.f) *
-					params[PARAM_HARMONICS_CV].getValue();
-				modulations[channel].timbre_patched = inputs[INPUT_TIMBRE].isConnected();
-				modulations[channel].timbre = inputs[INPUT_TIMBRE].getVoltage(channel) / 8.f;
-				modulations[channel].morph_patched = inputs[INPUT_MORPH].isConnected();
-				modulations[channel].morph = inputs[INPUT_MORPH].getVoltage(channel) / 8.f;
-				modulations[channel].trigger_patched = inputs[INPUT_TRIGGER].isConnected();
+
 				// Triggers at around 0.7 V
 				modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
-				modulations[channel].level_patched = inputs[INPUT_LEVEL].isConnected();
-				modulations[channel].level = inputs[INPUT_LEVEL].getVoltage(channel) / 8.f;
 
-				modulations[channel].auxCrossfade = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel) / 5.f;
+				modulations[channel].frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
+				modulations[channel].level_patched = inputs[INPUT_LEVEL].isConnected();
+				modulations[channel].timbre_patched = inputs[INPUT_TIMBRE].isConnected();
+				modulations[channel].morph_patched = inputs[INPUT_MORPH].isConnected();
+				modulations[channel].trigger_patched = inputs[INPUT_TRIGGER].isConnected();
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
