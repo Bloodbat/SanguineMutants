@@ -82,8 +82,6 @@ struct Funes : SanguineModule {
 	char sharedBuffers[PORT_MAX_CHANNELS][50176] = {};
 
 	float triPhase = 0.f;
-	float lastLPGColor = 0.5f;
-	float lastLPGDecay = 0.5f;
 	float lastModelVoltage = 0.f;
 
 	static const int kLightsFrequency = 16;
@@ -91,15 +89,12 @@ struct Funes : SanguineModule {
 	static const int kMaxUserDataSize = 4096;
 
 	int frequencyMode = 10;
-	int lastFrequencyMode = 10;
 	int displayModelNum = 0;
 
 	int displayChannel = 0;
 
 	int channelCount = 0;
 	int errorTimeOut = 0;
-
-	uint32_t displayTimeout = 0;
 
 	uint8_t chordBank = 0;
 
@@ -119,8 +114,6 @@ struct Funes : SanguineModule {
 	bool bNotesModelSelection = false;
 
 	bool bWantHoldModulations = false;
-
-	funes::LEDModes ledsMode = funes::LEDNormal;
 
 	std::string displayText = "";
 
@@ -208,11 +201,6 @@ struct Funes : SanguineModule {
 					}
 				}
 			} else if (params[PARAM_MODEL].getValue() != patch.engine) {
-				ledsMode = funes::LEDNormal;
-				displayTimeout = 0;
-				lastLPGColor = params[PARAM_LPG_COLOR].getValue();
-				lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
-				lastFrequencyMode = params[PARAM_FREQ_MODE].getValue();
 				patch.engine = params[PARAM_MODEL].getValue();
 				displayModelNum = patch.engine;
 			}
@@ -258,11 +246,6 @@ struct Funes : SanguineModule {
 			patch.auxSuboscillatorOctave = suboscillatorOctave;
 
 			patch.wantHoldModulations = bWantHoldModulations;
-
-			if (params[PARAM_LPG_COLOR].getValue() != lastLPGColor || params[PARAM_LPG_DECAY].getValue() != lastLPGDecay) {
-				ledsMode = funes::LEDLPG;
-				--displayTimeout;
-			}
 
 			bool activeLights[PORT_MAX_CHANNELS] = {};
 
@@ -342,91 +325,21 @@ struct Funes : SanguineModule {
 			}
 			const float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
-			switch (ledsMode) {
-			case funes::LEDNormal: {
-				// Set model lights.
-				const int clampedEngine = patch.engine % 8;
-				for (int led = 0; led < 8; ++led) {
-					const int currentLight = led * 2;
-					float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
-					float brightnessGreen = static_cast<float>(activeLights[currentLight]);
+			// Set model lights.
+			const int clampedEngine = patch.engine % 8;
+			for (int led = 0; led < 8; ++led) {
+				const int currentLight = led * 2;
+				float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
+				float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
-					if (bPulseLight && clampedEngine == led) {
-						brightnessRed = ((patch.engine < 8) | (patch.engine > 15)) * tri;
-						brightnessGreen = ((patch.engine < 16)) * tri;
-					}
-					// Lights are GreenRed and need a signal on each pin.
-					lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
-					lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessRed);
+				if (bPulseLight && clampedEngine == led) {
+					brightnessRed = ((patch.engine < 8) | (patch.engine > 15)) * tri;
+					brightnessGreen = ((patch.engine < 16)) * tri;
 				}
-				break;
+				// Lights are GreenRed and need a signal on each pin.
+				lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
+				lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessRed);
 			}
-			case funes::LEDLPG: {
-				for (int parameter = 0; parameter < 2; ++parameter) {
-					float value;
-					int startLight;
-					// nextLight should be a multiple of 2: LEDs are RedGreen lights and each color is a separate "light".
-					int nextLight;
-					if (parameter == 0) {
-						value = params[PARAM_LPG_COLOR].getValue();
-						startLight = LIGHT_MODEL + 3 * 2;
-						nextLight = -2;
-					} else {
-						value = params[PARAM_LPG_DECAY].getValue();
-						startLight = LIGHT_MODEL + 4 * 2;
-						nextLight = 2;
-					}
-
-					float lightValue = value > 0.f ? math::rescale(value, 0.f, 0.25f, 0.f, 1.f) : 0.f;
-					lights[startLight + 0].setBrightness(lightValue);
-					lights[startLight + 1].setBrightness(lightValue);
-					startLight += nextLight;
-					lightValue = value >= 0.251f ? math::rescale(value, 0.251f, 0.50f, 0.f, 1.f) : 0.f;
-					lights[startLight + 0].setBrightness(lightValue);
-					lights[startLight + 1].setBrightness(lightValue);
-					startLight += nextLight;
-					lightValue = value >= 0.501f ? math::rescale(value, 0.501f, 0.75f, 0.f, 1.f) : 0.f;
-					lights[startLight + 0].setBrightness(lightValue);
-					lights[startLight + 1].setBrightness(lightValue);
-					startLight += nextLight;
-					lightValue = value >= 0.751f ? math::rescale(value, 0.751f, 1.f, 0.f, 1.f) : 0.f;
-					lights[startLight + 0].setBrightness(lightValue);
-					lights[startLight + 1].setBrightness(lightValue);
-				}
-				break;
-			}
-			case funes::LEDOctave: {
-				int octave = params[PARAM_FREQ_MODE].getValue();
-				for (int led = 0; led < 8; ++led) {
-					float ledValue = 0.f;
-					int triangle = tri;
-
-					if (octave == 0) {
-						ledValue = led == (triangle >> 1) ? 0.f : 1.f;
-					} else if (octave == 10) {
-						ledValue = 1.f;
-					} else if (octave == 9) {
-						ledValue = (led & 1) == ((triangle >> 3) & 1) ? 0.f : 1.f;
-					} else {
-						ledValue = (octave - 1) == led ? 1.f : 0.f;
-					}
-					lights[(LIGHT_MODEL + 7 * 2) - led * 2 + 0].setBrightness(ledValue);
-					lights[(LIGHT_MODEL + 7 * 2) - led * 2 + 1].setBrightness(ledValue);
-				}
-				break;
-			}
-			}
-		}
-
-		if (ledsMode != funes::LEDNormal) {
-			++displayTimeout;
-		}
-		if (displayTimeout > args.sampleRate * 3) {
-			ledsMode = funes::LEDNormal;
-			displayTimeout = 0;
-			lastLPGColor = params[PARAM_LPG_COLOR].getValue();
-			lastLPGDecay = params[PARAM_LPG_DECAY].getValue();
-			lastFrequencyMode = params[PARAM_FREQ_MODE].getValue();
 		}
 
 		// Set output
@@ -452,11 +365,6 @@ struct Funes : SanguineModule {
 			}
 
 			frequencyMode = params[PARAM_FREQ_MODE].getValue();
-
-			if (frequencyMode != lastFrequencyMode) {
-				ledsMode = funes::LEDOctave;
-				--displayTimeout;
-			}
 
 			lights[LIGHT_FACTORY_DATA].setBrightness(((customDataStates[patch.engine] == funes::DataFactory) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
