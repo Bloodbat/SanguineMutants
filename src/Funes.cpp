@@ -258,30 +258,30 @@ struct Funes : SanguineModule {
 			// Render output buffer for each voice.
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
-				float_4 inputVoltages1;
-				float_4 inputVoltages2;
+				float_4 inputVoltages;
 
-				inputVoltages1[0] = inputs[INPUT_ENGINE].getVoltage(channel);
-				inputVoltages1[1] = inputs[INPUT_HARMONICS].getVoltage(channel);
-				inputVoltages1[2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
+				inputVoltages[0] = inputs[INPUT_ENGINE].getVoltage(channel);
+				inputVoltages[1] = inputs[INPUT_HARMONICS].getVoltage(channel);
+				inputVoltages[2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
 
-				inputVoltages2[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
-				inputVoltages2[1] = inputs[INPUT_MORPH].getVoltage(channel);
-				inputVoltages2[2] = inputs[INPUT_LEVEL].getVoltage(channel);
-
-				inputVoltages1 /= 5.f;
-				inputVoltages2 /= 8.f;
+				inputVoltages /= 5.f;
 
 				// Construct modulations.
 				if (!bNotesModelSelection) {
-					modulations[channel].engine = inputVoltages1[0];
+					modulations[channel].engine = inputVoltages[0];
 				}
-				modulations[channel].harmonics = inputVoltages1[1] * params[PARAM_HARMONICS_CV].getValue();
-				modulations[channel].auxCrossfade = inputVoltages1[2];
+				modulations[channel].harmonics = inputVoltages[1] * params[PARAM_HARMONICS_CV].getValue();
+				modulations[channel].auxCrossfade = inputVoltages[2];
 
-				modulations[channel].timbre = inputVoltages2[0];
-				modulations[channel].morph = inputVoltages2[1];
-				modulations[channel].level = inputVoltages2[2];
+				inputVoltages[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
+				inputVoltages[1] = inputs[INPUT_MORPH].getVoltage(channel);
+				inputVoltages[2] = inputs[INPUT_LEVEL].getVoltage(channel);
+
+				inputVoltages /= 8.f;
+
+				modulations[channel].timbre = inputVoltages[0];
+				modulations[channel].morph = inputVoltages[1];
+				modulations[channel].level = inputVoltages[2];
 
 				modulations[channel].note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
 				modulations[channel].frequency = inputs[INPUT_FREQUENCY].getVoltage(channel) * 6.f;
