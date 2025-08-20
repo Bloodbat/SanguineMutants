@@ -63,6 +63,8 @@ without the backticks.
 
 - Anuli: Note polyphony display.
 
+- Funes: emulation of hardware lights for LPG and Frequency mode (the knobs are always on the faceplate).
+
 - Nebulae family: emulation of hardware parameter and quality light patterns: not very useful when the modules are polyphonic (and every parameter is on the faceplate showing its value at all times).
 
 - Nebulae family: OLED displays when running under MetaModule.
