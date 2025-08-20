@@ -307,82 +307,18 @@ struct Funes : SanguineModule {
 					displayModelNum = voices[channel].active_engine();
 				}
 
-				if (ledsMode == funes::LEDNormal) {
-					// Model lights
-					// Get the active engines for current channel.
-					int currentLight;
-					int activeEngine = voices[channel].active_engine();
-					int clampedEngine = (activeEngine % 8) * 2;
+				// Model lights
+				// Get the active engines for current channel.
+				int activeEngine = voices[channel].active_engine();
+				int clampedEngine = (activeEngine % 8) * 2;
 
-					bool bIsNoiseModel = activeEngine & 0x10;
-					bool bIsPitchedModel = activeEngine & 0x08;
+				bool bIsNewModel = activeEngine < 8;
 
-					if (bIsNoiseModel) {
-						currentLight = clampedEngine + 1;
-						activeLights[currentLight] = true;
-					} else if (bIsPitchedModel) {
-						currentLight = clampedEngine;
-						activeLights[currentLight] = true;
-					} else {
-						currentLight = clampedEngine;
-						activeLights[currentLight] = true;
-						currentLight = clampedEngine + 1;
-						activeLights[currentLight] = true;
-					}
+				activeLights[clampedEngine] = (activeEngine & 0x08) | bIsNewModel;
+				activeLights[clampedEngine + 1] = (activeEngine & 0x10) | bIsNewModel;
 
-					// Pulse the light if at least one voice is using a different engine.
-					bPulseLight = activeEngine != patch.engine;
-				}
-			}
-
-			// Update model text, custom data lights, chord bank light and frequency mode every 16 samples only.
-			if (lightsDivider.process()) {
-				if (displayChannel >= channelCount) {
-					displayChannel = channelCount - 1;
-				}
-
-				if (bDisplayModulatedModel) {
-					displayText = funes::displayLabels[displayModelNum];
-				}
-
-				frequencyMode = params[PARAM_FREQ_MODE].getValue();
-
-				if (frequencyMode != lastFrequencyMode) {
-					ledsMode = funes::LEDOctave;
-					--displayTimeout;
-				}
-
-				lights[LIGHT_FACTORY_DATA].setBrightness(customDataStates[patch.engine] == funes::DataFactory &&
-					errorTimeOut == 0 ? kSanguineButtonLightValue : 0.f);
-				lights[LIGHT_CUSTOM_DATA + 0].setBrightness(customDataStates[patch.engine] == funes::DataCustom &&
-					errorTimeOut == 0 ? kSanguineButtonLightValue : 0.f);
-				lights[LIGHT_CUSTOM_DATA + 1].setBrightness(customDataStates[patch.engine] == funes::DataCustom ||
-					errorTimeOut > 0 ? kSanguineButtonLightValue : 0.f);
-
-				if (errorTimeOut != 0) {
-					--errorTimeOut;
-
-					if (errorTimeOut <= 0) {
-						errorTimeOut = 0;
-					}
-				}
-
-				bool bEngineHasChords = patch.engine == 6 || patch.engine == 7 || patch.engine == 14;
-
-				lights[LIGHT_CHORD_BANK + 0].setBrightness(bEngineHasChords && (chordBank == 0 || chordBank == 2) ?
-					kSanguineButtonLightValue : 0.f);
-				lights[LIGHT_CHORD_BANK + 1].setBrightness(bEngineHasChords && chordBank > 0 ? kSanguineButtonLightValue : 0.f);
-
-				lights[LIGHT_AUX_SUBOSCILLATOR + 0].setBrightness(suboscillatorMode > funes::SUBOSCILLATOR_SQUARE ?
-					kSanguineButtonLightValue : 0.f);
-
-				lights[LIGHT_AUX_SUBOSCILLATOR + 1].setBrightness(suboscillatorMode == funes::SUBOSCILLATOR_SQUARE ||
-					suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_ONE ? kSanguineButtonLightValue : 0.f);
-
-				lights[LIGHT_AUX_SUBOSCILLATOR + 2].setBrightness(suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_TWO ?
-					kSanguineButtonLightValue : 0.f);
-
-				lights[LIGHT_HOLD_MODULATIONS].setBrightness(bWantHoldModulations ? kSanguineButtonLightValue : 0.f);
+				// Pulse the light if at least one voice is using a different engine.
+				bPulseLight = activeEngine != patch.engine;
 			}
 
 			// Convert output.
@@ -404,43 +340,20 @@ struct Funes : SanguineModule {
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
 			}
-			float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
+			const float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
 			switch (ledsMode) {
 			case funes::LEDNormal: {
 				// Set model lights.
-				int clampedEngine = patch.engine % 8;
+				const int clampedEngine = patch.engine % 8;
 				for (int led = 0; led < 8; ++led) {
-					int currentLight = led * 2;
+					const int currentLight = led * 2;
 					float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 					float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
 					if (bPulseLight && clampedEngine == led) {
-						switch (patch.engine) {
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						case 6:
-						case 7:
-							brightnessRed = tri;
-							brightnessGreen = tri;
-							break;
-						case 8:
-						case 9:
-						case 10:
-						case 11:
-						case 12:
-						case 13:
-						case 14:
-						case 15:
-							brightnessGreen = tri;
-							break;
-						default:
-							brightnessRed = tri;
-						}
+						brightnessRed = ((patch.engine < 8) | (patch.engine > 15)) * tri;
+						brightnessGreen = ((patch.engine < 16)) * tri;
 					}
 					// Lights are GreenRed and need a signal on each pin.
 					lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
@@ -527,6 +440,56 @@ struct Funes : SanguineModule {
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 		outputs[OUTPUT_AUX].setChannels(channelCount);
+
+		// Update model text, custom data lights, chord bank light and frequency mode every 16 samples only.
+		if (lightsDivider.process()) {
+			if (displayChannel >= channelCount) {
+				displayChannel = channelCount - 1;
+			}
+
+			if (bDisplayModulatedModel) {
+				displayText = funes::displayLabels[displayModelNum];
+			}
+
+			frequencyMode = params[PARAM_FREQ_MODE].getValue();
+
+			if (frequencyMode != lastFrequencyMode) {
+				ledsMode = funes::LEDOctave;
+				--displayTimeout;
+			}
+
+			lights[LIGHT_FACTORY_DATA].setBrightness(((customDataStates[patch.engine] == funes::DataFactory) &
+				(errorTimeOut == 0)) * kSanguineButtonLightValue);
+			lights[LIGHT_CUSTOM_DATA + 0].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) &
+				(errorTimeOut == 0)) * kSanguineButtonLightValue);
+			lights[LIGHT_CUSTOM_DATA + 1].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) |
+				(errorTimeOut > 0)) * kSanguineButtonLightValue);
+
+			if (errorTimeOut != 0) {
+				--errorTimeOut;
+
+				if (errorTimeOut <= 0) {
+					errorTimeOut = 0;
+				}
+			}
+
+			bool bEngineHasChords = (patch.engine == 6) | (patch.engine == 7) | (patch.engine == 14);
+
+			lights[LIGHT_CHORD_BANK + 0].setBrightness((bEngineHasChords & ((chordBank == 0) | (chordBank == 2))) *
+				kSanguineButtonLightValue);
+			lights[LIGHT_CHORD_BANK + 1].setBrightness((bEngineHasChords & (chordBank > 0)) * kSanguineButtonLightValue);
+
+			lights[LIGHT_AUX_SUBOSCILLATOR + 0].setBrightness((suboscillatorMode > funes::SUBOSCILLATOR_SQUARE) *
+				kSanguineButtonLightValue);
+
+			lights[LIGHT_AUX_SUBOSCILLATOR + 1].setBrightness(((suboscillatorMode == funes::SUBOSCILLATOR_SQUARE) |
+				(suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_ONE)) * kSanguineButtonLightValue);
+
+			lights[LIGHT_AUX_SUBOSCILLATOR + 2].setBrightness((suboscillatorMode == funes::SUBOSCILLATOR_SINE_MINUS_TWO) *
+				kSanguineButtonLightValue);
+
+			lights[LIGHT_HOLD_MODULATIONS].setBrightness(bWantHoldModulations * kSanguineButtonLightValue);
+		}
 	}
 
 	void init() {
