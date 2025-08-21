@@ -76,9 +76,9 @@ struct Marmora : SanguineModule {
 		ENUMS(LIGHT_T_RANGE, 2),
 		ENUMS(LIGHT_X_RANGE, 2),
 		ENUMS(LIGHT_EXTERNAL, 2),
-		ENUMS(LIGHT_T1, 2),
-		ENUMS(LIGHT_T2, 2),
-		ENUMS(LIGHT_T3, 2),
+		LIGHT_T1,
+		LIGHT_T2,
+		LIGHT_T3,
 		ENUMS(LIGHT_Y, 2),
 		ENUMS(LIGHT_X1, 2),
 		ENUMS(LIGHT_X2, 2),
@@ -373,13 +373,10 @@ struct Marmora : SanguineModule {
 
 				// T1 and T3 are booleans: they'll never go negative.
 				lights[LIGHT_T1].setBrightnessSmooth(bGates[blockIndex * 2], sampleTime);
-				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 0], sampleTime);
 
 				lights[LIGHT_T2].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
-				//lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
 
 				lights[LIGHT_T3].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
-				//lights[LIGHT_T3 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 1], sampleTime);
 
 				float outputVoltage = 0.f;
 
@@ -867,11 +864,11 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		addInput(createInput<BananutPurple>(millimetersToPixelsVec(126.562, 88.803), module, Marmora::INPUT_X_BIAS));
 
-		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(5.701, 105.889), module, Marmora::LIGHT_T1));
+		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(5.701, 105.889), module, Marmora::LIGHT_T1));
 
-		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(18.123, 105.889), module, Marmora::LIGHT_T2));
+		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(18.123, 105.889), module, Marmora::LIGHT_T2));
 
-		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(30.545, 105.889), module, Marmora::LIGHT_T3));
+		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(30.545, 105.889), module, Marmora::LIGHT_T3));
 
 		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(69.582, 105.889), module, Marmora::LIGHT_Y));
 
