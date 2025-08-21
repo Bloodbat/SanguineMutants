@@ -86,6 +86,8 @@ struct Funes : SanguineModule {
 
 	static const int kMaxUserDataSize = 4096;
 
+	static const int kBlockSize = 12;
+
 	int frequencyMode = 10;
 	int displayModelNum = 0;
 
@@ -93,8 +95,6 @@ struct Funes : SanguineModule {
 
 	int channelCount = 0;
 	int errorTimeOut = 0;
-
-	static const int kBlockSize = 12;
 
 	uint8_t chordBank = 0;
 
