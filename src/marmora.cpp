@@ -501,7 +501,7 @@ struct Marmora : SanguineModule {
 		float tJitter = clamp(params[PARAM_T_JITTER].getValue() + inputs[INPUT_T_JITTER].getVoltage() / 5.f, 0.f, 1.f);
 		tGenerator.set_jitter(tJitter);
 		if (dejaVuLockModeT != marmora::DEJA_VU_SUPER_LOCK) {
-			tGenerator.set_deja_vu(bDejaVuTEnabled ? dejaVu : 0.f);
+			tGenerator.set_deja_vu(bDejaVuTEnabled * dejaVu);
 		} else {
 			tGenerator.set_deja_vu(0.5f);
 		}
@@ -522,8 +522,10 @@ struct Marmora : SanguineModule {
 			x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
 			x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
 			// TODO: Fix the scaling.
-			/* I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
-			   custom scales seem to behave nicely when NOT doing that...) -Bat */
+			/*
+			   I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
+			   custom scales seem to behave nicely when NOT doing that...) -Bat
+			*/
 			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
 			// NOTE: WTF is u? (A leftover from marbles.cc -Bat Ed.)
 			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
@@ -534,7 +536,7 @@ struct Marmora : SanguineModule {
 			x.bias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
 			x.steps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
 			if (dejaVuLockModeX != marmora::DEJA_VU_SUPER_LOCK) {
-				x.deja_vu = bDejaVuXEnabled ? dejaVu : 0.f;
+				x.deja_vu = bDejaVuXEnabled * dejaVu;
 			} else {
 				x.deja_vu = 0.5f;
 			}
