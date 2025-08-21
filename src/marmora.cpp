@@ -351,23 +351,23 @@ struct Marmora : SanguineModule {
 			drawLight(LIGHT_T_MODE, marmora::tModeLights[tMode][0], sampleTime, systemTimeMs);
 			drawLight(LIGHT_T_MODE + 1, marmora::tModeLights[tMode][1], sampleTime, systemTimeMs);
 
-			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue()) % 3;
-			lights[LIGHT_X_MODE].setBrightness(xMode == 0 || xMode == 1 ? kSanguineButtonLightValue : 0.f);
-			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2 ? kSanguineButtonLightValue : 0.f);
+			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue());
+			lights[LIGHT_X_MODE].setBrightness(((xMode == 0) | (xMode == 1)) * kSanguineButtonLightValue);
+			lights[LIGHT_X_MODE + 1].setBrightness(((xMode == 1) | (xMode == 2)) * kSanguineButtonLightValue);
 
-			int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue()) % 3;
-			lights[LIGHT_T_RANGE].setBrightness(tRange == 0 || tRange == 1 ? kSanguineButtonLightValue : 0.f);
-			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2 ? kSanguineButtonLightValue : 0.f);
+			int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue());
+			lights[LIGHT_T_RANGE].setBrightness(((tRange == 0) | (tRange == 1)) * kSanguineButtonLightValue);
+			lights[LIGHT_T_RANGE + 1].setBrightness(((tRange == 1) | (tRange == 2)) * kSanguineButtonLightValue);
 
-			int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue()) % 3;
-			lights[LIGHT_X_RANGE].setBrightness(xRange == 0 || xRange == 1 ? kSanguineButtonLightValue : 0.f);
-			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? kSanguineButtonLightValue : 0.f);
+			int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue());
+			lights[LIGHT_X_RANGE].setBrightness(((xRange == 0) | (xRange == 1)) * kSanguineButtonLightValue);
+			lights[LIGHT_X_RANGE + 1].setBrightness(((xRange == 1) | (xRange == 2)) * kSanguineButtonLightValue);
 
 			drawLight(LIGHT_SCALE, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
 			drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
 
 			if (!bScaleEditMode) {
-				float lightExternalBrightness = params[PARAM_EXTERNAL].getValue() ? kSanguineButtonLightValue : 0.f;
+				float lightExternalBrightness = static_cast<bool>(params[PARAM_EXTERNAL].getValue()) * kSanguineButtonLightValue;
 				lights[LIGHT_EXTERNAL].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 
@@ -443,10 +443,12 @@ struct Marmora : SanguineModule {
 			lights[light].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 			break;
 		case LIGHT_BLINK_SLOW:
-			lights[light].setBrightnessSmooth((systemTimeMs & 255) > 128 ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth(((systemTimeMs & 255) > 128) *
+				kSanguineButtonLightValue, sampleTime);
 			break;
 		case LIGHT_BLINK_FAST:
-			lights[light].setBrightnessSmooth((systemTimeMs & 127) > 64 ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth(((systemTimeMs & 127) > 64) *
+				kSanguineButtonLightValue, sampleTime);
 			break;
 		default:
 			break;
@@ -463,7 +465,7 @@ struct Marmora : SanguineModule {
 			slowTriangle = (systemTimeMs & 1023) >> 5;
 			slowTriangle = slowTriangle >= 16 ? 31 - slowTriangle : slowTriangle;
 			pulseWidth = systemTimeMs & 15;
-			lights[light].setBrightnessSmooth(slowTriangle >= pulseWidth ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((slowTriangle >= pulseWidth) * kSanguineButtonLightValue, sampleTime);
 			break;
 		case marmora::DEJA_VU_LOCK_OFF:
 			lights[light].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
@@ -472,7 +474,7 @@ struct Marmora : SanguineModule {
 			fastTriangle = (systemTimeMs & 511) >> 4;
 			fastTriangle = fastTriangle >= 16 ? 31 - fastTriangle : fastTriangle;
 			pulseWidth = systemTimeMs & 15;
-			lights[light].setBrightnessSmooth(fastTriangle >= pulseWidth ? kSanguineButtonLightValue : 0.f, sampleTime);
+			lights[light].setBrightnessSmooth((fastTriangle >= pulseWidth) * kSanguineButtonLightValue, sampleTime);
 			break;
 		}
 	}
