@@ -90,6 +90,8 @@ struct Funes : SanguineModule {
 
 	static const int kBlockSize = 12;
 
+	static const int kModelLightsCount = 8;
+
 	int frequencyMode = 10;
 	int displayModelNum = 0;
 
@@ -251,7 +253,7 @@ struct Funes : SanguineModule {
 
 			patch.wantHoldModulations = bWantHoldModulations;
 
-			bool activeLights[PORT_MAX_CHANNELS] = {};
+			bool activeLights[kModelLightsCount * 2] = {};
 
 			bool bPulseLight = false;
 
@@ -346,7 +348,7 @@ struct Funes : SanguineModule {
 
 			// Set model lights.
 			const int clampedEngine = patch.engine % 8;
-			for (int led = 0; led < 8; ++led) {
+			for (int led = 0; led < kModelLightsCount; ++led) {
 				const int currentLight = led * 2;
 				float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 				float brightnessGreen = static_cast<float>(activeLights[currentLight]);
