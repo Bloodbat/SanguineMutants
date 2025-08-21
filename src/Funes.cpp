@@ -317,10 +317,8 @@ struct Funes : SanguineModule {
 				// Get the active engine for current channel.
 				int clampedEngine = (activeEngine % 8) * 2;
 
-				bool bIsNewModel = activeEngine < 8;
-
-				activeLights[clampedEngine] = (activeEngine & 0x08) | bIsNewModel;
-				activeLights[clampedEngine + 1] = (activeEngine & 0x10) | bIsNewModel;
+				activeLights[clampedEngine] = activeEngine < 16;
+				activeLights[clampedEngine + 1] = (activeEngine & 0x10) | (activeEngine < 8);
 
 				// Pulse the light if at least one voice is using a different engine.
 				bPulseLight = activeEngine != patch.engine;
@@ -348,15 +346,16 @@ struct Funes : SanguineModule {
 			const float tri = (triPhase < 0.5f) ? triPhase * 2.f : (1.f - triPhase) * 2.f;
 
 			// Set model lights.
-			const int clampedEngine = patch.engine % 8;
+			const int baseEngine = patch.engine;
+			const int clampedEngine = baseEngine % 8;
 			for (int led = 0; led < kModelLightsCount; ++led) {
 				const int currentLight = led * 2;
 				float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 				float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
 				if (bPulseLight && clampedEngine == led) {
-					brightnessRed = ((patch.engine < 8) | (patch.engine > 15)) * tri;
-					brightnessGreen = ((patch.engine < 16)) * tri;
+					brightnessRed = ((baseEngine < 8) | (baseEngine & 0x10)) * tri;
+					brightnessGreen = ((baseEngine < 16)) * tri;
 				}
 				// Lights are GreenRed and need a signal on each pin.
 				lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
