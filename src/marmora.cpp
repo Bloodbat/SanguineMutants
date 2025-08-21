@@ -390,16 +390,16 @@ struct Marmora : SanguineModule {
 		drawLight(LIGHT_T_MODE + 1, marmora::tModeLights[tMode][1], sampleTime, systemTimeMs);
 
 		int xMode = static_cast<int>(params[PARAM_X_MODE].getValue());
-		lights[LIGHT_X_MODE].setBrightness(((xMode == 0) | (xMode == 1)) * kSanguineButtonLightValue);
-		lights[LIGHT_X_MODE + 1].setBrightness(((xMode == 1) | (xMode == 2)) * kSanguineButtonLightValue);
+		lights[LIGHT_X_MODE].setBrightness((xMode < 2) * kSanguineButtonLightValue);
+		lights[LIGHT_X_MODE + 1].setBrightness((xMode > 0) * kSanguineButtonLightValue);
 
 		int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue());
-		lights[LIGHT_T_RANGE].setBrightness(((tRange == 0) | (tRange == 1)) * kSanguineButtonLightValue);
-		lights[LIGHT_T_RANGE + 1].setBrightness(((tRange == 1) | (tRange == 2)) * kSanguineButtonLightValue);
+		lights[LIGHT_T_RANGE].setBrightness((tRange < 2) * kSanguineButtonLightValue);
+		lights[LIGHT_T_RANGE + 1].setBrightness((tRange > 0) * kSanguineButtonLightValue);
 
 		int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue());
-		lights[LIGHT_X_RANGE].setBrightness(((xRange == 0) | (xRange == 1)) * kSanguineButtonLightValue);
-		lights[LIGHT_X_RANGE + 1].setBrightness(((xRange == 1) | (xRange == 2)) * kSanguineButtonLightValue);
+		lights[LIGHT_X_RANGE].setBrightness((xRange < 2) * kSanguineButtonLightValue);
+		lights[LIGHT_X_RANGE + 1].setBrightness((xRange > 0) * kSanguineButtonLightValue);
 
 		drawLight(LIGHT_SCALE, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
 		drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
