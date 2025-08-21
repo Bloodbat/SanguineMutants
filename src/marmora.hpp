@@ -224,18 +224,18 @@ namespace marmora {
     };
 
     static const std::vector<std::string> yDividerDescriptions = {
-        "X₂/64",
-        "X₂/48",
-        "X₂/32",
-        "X₂/24",
-        "X₂/16",
-        "X₂/12",
-        "X₂/8",
-        "X₂/6",
-        "X₂/4",
-        "X₂/3",
-        "X₂/2",
-        "X₂/1"
+        "X₂ / 64",
+        "X₂ / 48",
+        "X₂ / 32",
+        "X₂ / 24",
+        "X₂ / 16",
+        "X₂ / 12",
+        "X₂ / 8",
+        "X₂ / 6",
+        "X₂ / 4",
+        "X₂ / 3",
+        "X₂ / 2",
+        "X₂ / 1"
     };
 
     static const int loopLengths[] = {
