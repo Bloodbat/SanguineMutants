@@ -264,6 +264,52 @@ struct Marmora : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		bool bIsLightsTurn = lightsDivider.process();
+
+		if (!bScaleEditMode) {
+			setupCommon();
+
+			// Process block.
+			if (++blockIndex >= marmora::kBlockSize) {
+				blockIndex = 0;
+				stepBlock();
+			}
+
+			// Outputs.
+			setOutputs();
+			outputs[OUTPUT_Y].setVoltage(voltages[blockIndex * 4 + 3]);
+
+			// Lights.
+			if (bIsLightsTurn) {
+				const float sampleTime = kLightDivider * args.sampleTime;
+
+				setLightsCommon(sampleTime);
+				setLightsRegular(sampleTime);
+			}
+		} else {
+			setupCommon();
+
+			// Process block.
+			if (++blockIndex >= marmora::kBlockSize) {
+				blockIndex = 0;
+				stepBlockScaleEdit();
+			}
+
+			// Outputs.
+			setOutputsScaleEdit();
+			outputs[OUTPUT_Y].setVoltage(voltages[blockIndex * 4 + 3]);
+
+			// Lights.
+			if (bIsLightsTurn) {
+				const float sampleTime = kLightDivider * args.sampleTime;
+
+				setLightsCommon(sampleTime);
+				setLightsScaleEdit(sampleTime);
+			}
+		}
+	}
+
+	void setupCommon() {
 		// Clocks.
 		bool bTClockGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
 		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTClockGate);
@@ -302,132 +348,261 @@ struct Marmora : SanguineModule {
 		}
 
 		bWantMenuTReset = bWantMenuXReset = false;
+	}
 
-		// Process block.
-		if (++blockIndex >= marmora::kBlockSize) {
-			blockIndex = 0;
-			stepBlock();
-		}
+	void setOutputs() {
+		outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2] * 10.f);
+		outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) * 10.f);
+		outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] * 10.f);
 
-		// Outputs.
-		if (!bScaleEditMode) {
-			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2] * 10.f);
-			outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) * 10.f);
-			outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] * 10.f);
+		outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4]);
+		outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
+		outputs[OUTPUT_X3].setVoltage(voltages[blockIndex * 4 + 2]);
+	}
 
-			outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4]);
-			outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
-			outputs[OUTPUT_X3].setVoltage(voltages[blockIndex * 4 + 2]);
+	void setOutputsScaleEdit() {
+		outputs[OUTPUT_T1].setVoltage(bLastGate * 10.f);
+		outputs[OUTPUT_T2].setVoltage(bLastGate * 10.f);
+		outputs[OUTPUT_T3].setVoltage(bLastGate * 10.f);
+
+		outputs[OUTPUT_X1].setVoltage(newNoteVoltage);
+		outputs[OUTPUT_X2].setVoltage(newNoteVoltage);
+		outputs[OUTPUT_X3].setVoltage(newNoteVoltage);
+	}
+
+	void setLightsCommon(const float sampleTime) {
+		long long systemTimeMs = getSystemTimeMs();
+
+		if (bDejaVuTEnabled || dejaVuLockModeT == marmora::DEJA_VU_SUPER_LOCK) {
+			drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime, systemTimeMs);
 		} else {
-			outputs[OUTPUT_T1].setVoltage(bLastGate * 10.f);
-			outputs[OUTPUT_T2].setVoltage(bLastGate * 10.f);
-			outputs[OUTPUT_T3].setVoltage(bLastGate * 10.f);
-
-			outputs[OUTPUT_X1].setVoltage(newNoteVoltage);
-			outputs[OUTPUT_X2].setVoltage(newNoteVoltage);
-			outputs[OUTPUT_X3].setVoltage(newNoteVoltage);
+			lights[LIGHT_DEJA_VU_T].setBrightnessSmooth(0.f, sampleTime);
 		}
-		outputs[OUTPUT_Y].setVoltage(voltages[blockIndex * 4 + 3]);
 
-		// Lights.
-		if (lightsDivider.process()) {
-			long long systemTimeMs = getSystemTimeMs();
+		if (bDejaVuXEnabled || dejaVuLockModeX == marmora::DEJA_VU_SUPER_LOCK) {
+			drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime, systemTimeMs);
+		} else {
+			lights[LIGHT_DEJA_VU_X].setBrightnessSmooth(0.f, sampleTime);
+		}
 
-			const float sampleTime = kLightDivider * args.sampleTime;
+		int tMode = params[PARAM_T_MODE].getValue();
+		drawLight(LIGHT_T_MODE, marmora::tModeLights[tMode][0], sampleTime, systemTimeMs);
+		drawLight(LIGHT_T_MODE + 1, marmora::tModeLights[tMode][1], sampleTime, systemTimeMs);
 
-			if (bDejaVuTEnabled || dejaVuLockModeT == marmora::DEJA_VU_SUPER_LOCK) {
-				drawDejaVuLight(LIGHT_DEJA_VU_T, dejaVuLockModeT, sampleTime, systemTimeMs);
+		int xMode = static_cast<int>(params[PARAM_X_MODE].getValue());
+		lights[LIGHT_X_MODE].setBrightness(((xMode == 0) | (xMode == 1)) * kSanguineButtonLightValue);
+		lights[LIGHT_X_MODE + 1].setBrightness(((xMode == 1) | (xMode == 2)) * kSanguineButtonLightValue);
+
+		int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue());
+		lights[LIGHT_T_RANGE].setBrightness(((tRange == 0) | (tRange == 1)) * kSanguineButtonLightValue);
+		lights[LIGHT_T_RANGE + 1].setBrightness(((tRange == 1) | (tRange == 2)) * kSanguineButtonLightValue);
+
+		int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue());
+		lights[LIGHT_X_RANGE].setBrightness(((xRange == 0) | (xRange == 1)) * kSanguineButtonLightValue);
+		lights[LIGHT_X_RANGE + 1].setBrightness(((xRange == 1) | (xRange == 2)) * kSanguineButtonLightValue);
+
+		drawLight(LIGHT_SCALE, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
+		drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
+
+		float yVoltage = math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f);
+		lights[LIGHT_Y].setBrightnessSmooth(yVoltage, sampleTime);
+		lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
+
+		if (!bXClockSourceExternal) {
+			lights[LIGHT_INTERNAL_X_CLOCK_SOURCE].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].red, sampleTime);
+			lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].green, sampleTime);
+			lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].blue, sampleTime);
+		} else {
+			lights[LIGHT_INTERNAL_X_CLOCK_SOURCE].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
+			lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
+		}
+
+		getParamQuantity(PARAM_Y_RATE)->description = marmora::yDividerDescriptions[yDividerIndex];
+	}
+
+	void setLightsRegular(const float sampleTime) {
+		float lightExternalBrightness = static_cast<bool>(params[PARAM_EXTERNAL].getValue()) * kSanguineButtonLightValue;
+		lights[LIGHT_EXTERNAL].setBrightnessSmooth(lightExternalBrightness, sampleTime);
+		lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
+
+		// T1 and T3 are booleans: they'll never go negative.
+		lights[LIGHT_T1].setBrightnessSmooth(bGates[blockIndex * 2], sampleTime);
+
+		lights[LIGHT_T2].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
+
+		lights[LIGHT_T3].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
+
+		float outputVoltage = 0.f;
+
+		outputVoltage = math::rescale(voltages[blockIndex * 4], 0.f, 5.f, 0.f, 1.f);
+		lights[LIGHT_X1].setBrightnessSmooth(outputVoltage, sampleTime);
+		lights[LIGHT_X1 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
+
+		outputVoltage = math::rescale(voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f);
+		lights[LIGHT_X2].setBrightnessSmooth(outputVoltage, sampleTime);
+		lights[LIGHT_X2 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
+
+		outputVoltage = math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f);
+		lights[LIGHT_X3].setBrightnessSmooth(outputVoltage, sampleTime);
+		lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
+	}
+
+	void setLightsScaleEdit(const float sampleTime) {
+		lights[LIGHT_EXTERNAL].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+		lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
+
+		lights[LIGHT_T1].setBrightnessSmooth(bLastGate, sampleTime);
+
+		lights[LIGHT_T2].setBrightnessSmooth(bLastGate, sampleTime);
+
+		lights[LIGHT_T3].setBrightnessSmooth(bLastGate, sampleTime);
+
+		float scaledVoltage = math::rescale(newNoteVoltage, 0.f, 5.f, 0.f, 1.f);
+
+		lights[LIGHT_X1].setBrightnessSmooth(scaledVoltage, sampleTime);
+		lights[LIGHT_X1 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
+
+		lights[LIGHT_X2].setBrightnessSmooth(scaledVoltage, sampleTime);
+		lights[LIGHT_X2 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
+
+		lights[LIGHT_X3].setBrightnessSmooth(scaledVoltage, sampleTime);
+		lights[LIGHT_X3 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
+	}
+
+	void stepBlock() {
+		marbles::Ramps ramps;
+		ramps.master = rampMaster;
+		ramps.external = rampExternal;
+		ramps.slave[0] = rampSlave[0];
+		ramps.slave[1] = rampSlave[1];
+
+		float dejaVu = clamp(params[PARAM_DEJA_VU].getValue() + inputs[INPUT_DEJA_VU].getVoltage() / 5.f, 0.f, 1.f);
+
+		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmora::loopLengths) - 1);
+		int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
+
+		setupTGenerator(dejaVu, dejaVuLength, ramps);
+
+		setupXYGenerator(dejaVu, dejaVuLength, ramps);
+	}
+
+	void stepBlockScaleEdit() {
+		marbles::Ramps ramps;
+		ramps.master = rampMaster;
+		ramps.external = rampExternal;
+		ramps.slave[0] = rampSlave[0];
+		ramps.slave[1] = rampSlave[1];
+
+		float dejaVu = clamp(params[PARAM_DEJA_VU].getValue() + inputs[INPUT_DEJA_VU].getVoltage() / 5.f, 0.f, 1.f);
+
+		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmora::loopLengths) - 1);
+		int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
+
+		setupTGenerator(dejaVu, dejaVuLength, ramps);
+
+		stepScaleEditor();
+	}
+
+	void setupTGenerator(const float dejaVu, const int dejaVuLength, const marbles::Ramps& ramps) {
+		bool bTClockSourceExternal = inputs[INPUT_T_CLOCK].isConnected();
+
+		tGenerator.set_model(static_cast<marbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
+		tGenerator.set_range(static_cast<marbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
+		float tRate = 60.f * (params[PARAM_T_RATE].getValue() + inputs[INPUT_T_RATE].getVoltage() / 5.f);
+		tGenerator.set_rate(tRate);
+		float tBias = clamp(params[PARAM_T_BIAS].getValue() + inputs[INPUT_T_BIAS].getVoltage() / 5.f, 0.f, 1.f);
+		tGenerator.set_bias(tBias);
+		float tJitter = clamp(params[PARAM_T_JITTER].getValue() + inputs[INPUT_T_JITTER].getVoltage() / 5.f, 0.f, 1.f);
+		tGenerator.set_jitter(tJitter);
+		if (dejaVuLockModeT != marmora::DEJA_VU_SUPER_LOCK) {
+			tGenerator.set_deja_vu(bDejaVuTEnabled * dejaVu);
+		} else {
+			tGenerator.set_deja_vu(0.5f);
+		}
+		tGenerator.set_length(dejaVuLength);
+		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
+		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
+
+		tGenerator.Process(bTClockSourceExternal, &bWantTReset, tClocks, ramps, bGates, marmora::kBlockSize);
+	}
+
+	void setupXYGenerator(const float dejaVu, const int dejaVuLength, const marbles::Ramps& ramps) {
+		// Set up XYGenerator.
+		marbles::ClockSource xClockSource = xClockSourceInternal;
+
+		if (bXClockSourceExternal) {
+			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
+		}
+
+		marbles::GroupSettings x;
+		x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
+		x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
+		// TODO: Fix the scaling.
+		/*
+		   I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
+		   custom scales seem to behave nicely when NOT doing that...) -Bat
+		*/
+		float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+		// NOTE: WTF is u? (A leftover from marbles.cc -Bat Ed.)
+		float u = noteFilter.Process(0.5f * (noteCV + 1.f));
+		x.register_mode = params[PARAM_EXTERNAL].getValue();
+		x.register_value = u;
+
+		x.spread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
+		x.bias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
+		x.steps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
+		if (dejaVuLockModeX != marmora::DEJA_VU_SUPER_LOCK) {
+			x.deja_vu = bDejaVuXEnabled * dejaVu;
+		} else {
+			x.deja_vu = 0.5f;
+		}
+		x.length = dejaVuLength;
+		x.ratio.p = 1;
+		x.ratio.q = 1;
+		x.scale_index = xScale;
+
+		marbles::GroupSettings y;
+		y.control_mode = marbles::CONTROL_MODE_IDENTICAL;
+		y.voltage_range = marbles::VOLTAGE_RANGE_FULL;
+		y.register_mode = false;
+		y.register_value = 0.f;
+		y.spread = params[PARAM_Y_SPREAD].getValue();
+		y.bias = params[PARAM_Y_BIAS].getValue();
+		y.steps = params[PARAM_Y_STEPS].getValue();
+		y.deja_vu = 0.f;
+		y.length = 1;
+
+		unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(marmora::yDividerRatios);
+		if (index < LENGTHOF(marmora::yDividerRatios)) {
+			yDividerIndex = index;
+		}
+		y.ratio = marmora::yDividerRatios[yDividerIndex];
+		y.scale_index = xScale;
+
+		xyGenerator.Process(xClockSource, x, y, &bWantXReset, xyClocks, ramps, voltages, marmora::kBlockSize);
+	}
+
+	void stepScaleEditor() {
+		/* Was
+			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+		*/
+		newNoteVoltage = inputs[INPUT_X_SPREAD].getVoltage();
+		float noteCV = (newNoteVoltage / 5.f);
+		float u = noteFilter.Process(0.5f * (noteCV + 1.f));
+		if (inputs[INPUT_X_CLOCK].getVoltage() >= 0.5f) {
+			float voltage = (u - 0.5f) * 10.f;
+			if (!bLastGate) {
+				scaleRecorder.NewNote(voltage);
+				bLastGate = true;
 			} else {
-				lights[LIGHT_DEJA_VU_T].setBrightnessSmooth(0.f, sampleTime);
+				scaleRecorder.UpdateVoltage(voltage);
 			}
-
-			if (bDejaVuXEnabled || dejaVuLockModeX == marmora::DEJA_VU_SUPER_LOCK) {
-				drawDejaVuLight(LIGHT_DEJA_VU_X, dejaVuLockModeX, sampleTime, systemTimeMs);
-			} else {
-				lights[LIGHT_DEJA_VU_X].setBrightnessSmooth(0.f, sampleTime);
+		} else {
+			if (bLastGate) {
+				scaleRecorder.AcceptNote();
+				bLastGate = false;
 			}
-
-			int tMode = params[PARAM_T_MODE].getValue();
-			drawLight(LIGHT_T_MODE, marmora::tModeLights[tMode][0], sampleTime, systemTimeMs);
-			drawLight(LIGHT_T_MODE + 1, marmora::tModeLights[tMode][1], sampleTime, systemTimeMs);
-
-			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue());
-			lights[LIGHT_X_MODE].setBrightness(((xMode == 0) | (xMode == 1)) * kSanguineButtonLightValue);
-			lights[LIGHT_X_MODE + 1].setBrightness(((xMode == 1) | (xMode == 2)) * kSanguineButtonLightValue);
-
-			int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue());
-			lights[LIGHT_T_RANGE].setBrightness(((tRange == 0) | (tRange == 1)) * kSanguineButtonLightValue);
-			lights[LIGHT_T_RANGE + 1].setBrightness(((tRange == 1) | (tRange == 2)) * kSanguineButtonLightValue);
-
-			int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue());
-			lights[LIGHT_X_RANGE].setBrightness(((xRange == 0) | (xRange == 1)) * kSanguineButtonLightValue);
-			lights[LIGHT_X_RANGE + 1].setBrightness(((xRange == 1) | (xRange == 2)) * kSanguineButtonLightValue);
-
-			drawLight(LIGHT_SCALE, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
-			drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
-
-			if (!bScaleEditMode) {
-				float lightExternalBrightness = static_cast<bool>(params[PARAM_EXTERNAL].getValue()) * kSanguineButtonLightValue;
-				lights[LIGHT_EXTERNAL].setBrightnessSmooth(lightExternalBrightness, sampleTime);
-				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
-
-				// T1 and T3 are booleans: they'll never go negative.
-				lights[LIGHT_T1].setBrightnessSmooth(bGates[blockIndex * 2], sampleTime);
-
-				lights[LIGHT_T2].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
-
-				lights[LIGHT_T3].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
-
-				float outputVoltage = 0.f;
-
-				outputVoltage = math::rescale(voltages[blockIndex * 4], 0.f, 5.f, 0.f, 1.f);
-				lights[LIGHT_X1].setBrightnessSmooth(outputVoltage, sampleTime);
-				lights[LIGHT_X1 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
-
-				outputVoltage = math::rescale(voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f);
-				lights[LIGHT_X2].setBrightnessSmooth(outputVoltage, sampleTime);
-				lights[LIGHT_X2 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
-
-				outputVoltage = math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f);
-				lights[LIGHT_X3].setBrightnessSmooth(outputVoltage, sampleTime);
-				lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
-			} else {
-				lights[LIGHT_EXTERNAL].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
-
-				lights[LIGHT_T1].setBrightnessSmooth(bLastGate, sampleTime);
-
-				lights[LIGHT_T2].setBrightnessSmooth(bLastGate, sampleTime);
-
-				lights[LIGHT_T3].setBrightnessSmooth(bLastGate, sampleTime);
-
-				float scaledVoltage = math::rescale(newNoteVoltage, 0.f, 5.f, 0.f, 1.f);
-
-				lights[LIGHT_X1].setBrightnessSmooth(scaledVoltage, sampleTime);
-				lights[LIGHT_X1 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
-
-				lights[LIGHT_X2].setBrightnessSmooth(scaledVoltage, sampleTime);
-				lights[LIGHT_X2 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
-
-				lights[LIGHT_X3].setBrightnessSmooth(scaledVoltage, sampleTime);
-				lights[LIGHT_X3 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
-			}
-
-			float yVoltage = math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f);
-			lights[LIGHT_Y].setBrightnessSmooth(yVoltage, sampleTime);
-			lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
-
-			if (!bXClockSourceExternal) {
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].red, sampleTime);
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].green, sampleTime);
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].blue, sampleTime);
-			} else {
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
-
-			getParamQuantity(PARAM_Y_RATE)->description = marmora::yDividerDescriptions[yDividerIndex];
 		}
 	}
 
@@ -473,118 +648,6 @@ struct Marmora : SanguineModule {
 			pulseWidth = systemTimeMs & 15;
 			lights[light].setBrightnessSmooth((fastTriangle >= pulseWidth) * kSanguineButtonLightValue, sampleTime);
 			break;
-		}
-	}
-
-	void stepBlock() {
-		// Ramps.
-		marbles::Ramps ramps;
-		ramps.master = rampMaster;
-		ramps.external = rampExternal;
-		ramps.slave[0] = rampSlave[0];
-		ramps.slave[1] = rampSlave[1];
-
-		float dejaVu = clamp(params[PARAM_DEJA_VU].getValue() + inputs[INPUT_DEJA_VU].getVoltage() / 5.f, 0.f, 1.f);
-
-		float dejaVuLengthIndex = params[PARAM_DEJA_VU_LENGTH].getValue() * (LENGTHOF(marmora::loopLengths) - 1);
-		int dejaVuLength = marmora::loopLengths[static_cast<int>(roundf(dejaVuLengthIndex))];
-
-		// Set up TGenerator.
-		bool bTClockSourceExternal = inputs[INPUT_T_CLOCK].isConnected();
-
-		tGenerator.set_model(static_cast<marbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
-		tGenerator.set_range(static_cast<marbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
-		float tRate = 60.f * (params[PARAM_T_RATE].getValue() + inputs[INPUT_T_RATE].getVoltage() / 5.f);
-		tGenerator.set_rate(tRate);
-		float tBias = clamp(params[PARAM_T_BIAS].getValue() + inputs[INPUT_T_BIAS].getVoltage() / 5.f, 0.f, 1.f);
-		tGenerator.set_bias(tBias);
-		float tJitter = clamp(params[PARAM_T_JITTER].getValue() + inputs[INPUT_T_JITTER].getVoltage() / 5.f, 0.f, 1.f);
-		tGenerator.set_jitter(tJitter);
-		if (dejaVuLockModeT != marmora::DEJA_VU_SUPER_LOCK) {
-			tGenerator.set_deja_vu(bDejaVuTEnabled * dejaVu);
-		} else {
-			tGenerator.set_deja_vu(0.5f);
-		}
-		tGenerator.set_length(dejaVuLength);
-		tGenerator.set_pulse_width_mean(params[PARAM_GATE_BIAS].getValue());
-		tGenerator.set_pulse_width_std(params[PARAM_GATE_JITTER].getValue());
-
-		tGenerator.Process(bTClockSourceExternal, &bWantTReset, tClocks, ramps, bGates, marmora::kBlockSize);
-
-		// Set up XYGenerator.
-		marbles::ClockSource xClockSource = xClockSourceInternal;
-		if (bXClockSourceExternal) {
-			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
-		}
-
-		if (!bScaleEditMode) {
-			marbles::GroupSettings x;
-			x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
-			x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
-			// TODO: Fix the scaling.
-			/*
-			   I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
-			   custom scales seem to behave nicely when NOT doing that...) -Bat
-			*/
-			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
-			// NOTE: WTF is u? (A leftover from marbles.cc -Bat Ed.)
-			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
-			x.register_mode = params[PARAM_EXTERNAL].getValue();
-			x.register_value = u;
-
-			x.spread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
-			x.bias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
-			x.steps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
-			if (dejaVuLockModeX != marmora::DEJA_VU_SUPER_LOCK) {
-				x.deja_vu = bDejaVuXEnabled * dejaVu;
-			} else {
-				x.deja_vu = 0.5f;
-			}
-			x.length = dejaVuLength;
-			x.ratio.p = 1;
-			x.ratio.q = 1;
-			x.scale_index = xScale;
-
-			marbles::GroupSettings y;
-			y.control_mode = marbles::CONTROL_MODE_IDENTICAL;
-			y.voltage_range = marbles::VOLTAGE_RANGE_FULL;
-			y.register_mode = false;
-			y.register_value = 0.f;
-			y.spread = params[PARAM_Y_SPREAD].getValue();
-			y.bias = params[PARAM_Y_BIAS].getValue();
-			y.steps = params[PARAM_Y_STEPS].getValue();
-			y.deja_vu = 0.f;
-			y.length = 1;
-
-			unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(marmora::yDividerRatios);
-			if (index < LENGTHOF(marmora::yDividerRatios)) {
-				yDividerIndex = index;
-			}
-			y.ratio = marmora::yDividerRatios[yDividerIndex];
-			y.scale_index = xScale;
-
-			xyGenerator.Process(xClockSource, x, y, &bWantXReset, xyClocks, ramps, voltages, marmora::kBlockSize);
-		} else {
-			/* Was
-			float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
-			*/
-			newNoteVoltage = inputs[INPUT_X_SPREAD].getVoltage();
-			float noteCV = (newNoteVoltage / 5.f);
-			float u = noteFilter.Process(0.5f * (noteCV + 1.f));
-			if (inputs[INPUT_X_CLOCK].getVoltage() >= 0.5f) {
-				float voltage = (u - 0.5f) * 10.f;
-				if (!bLastGate) {
-					scaleRecorder.NewNote(voltage);
-					bLastGate = true;
-				} else {
-					scaleRecorder.UpdateVoltage(voltage);
-				}
-			} else {
-				if (bLastGate) {
-					scaleRecorder.AcceptNote();
-					bLastGate = false;
-				}
-			}
 		}
 	}
 
