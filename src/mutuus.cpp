@@ -116,6 +116,21 @@ struct Mutuus : SanguineModule {
 
 		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
 
+		int32_t internalOscillator = static_cast<int32_t>(params[PARAM_CARRIER].getValue());
+
+		float algorithmValue = 0.f;
+
+		float knobLevel1 = params[PARAM_LEVEL_1].getValue();
+		float knobLevel2 = params[PARAM_LEVEL_2].getValue();
+
+		float knobTimbre = params[PARAM_TIMBRE].getValue();
+
+		float knobAlgorithm = params[PARAM_ALGORITHM].getValue();
+
+		bool bHaveModeCable = static_cast<bool>(inputs[INPUT_MODE].isConnected());
+
+		bool bWantStereo = static_cast<bool>(params[PARAM_STEREO].getValue());
+
 		// TODO: FIX ME!!! Mode selection snapping to the wrong value when switching back to mode selection after first time.
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
 			bModeSwitchEnabled = !bModeSwitchEnabled;
@@ -131,17 +146,15 @@ struct Mutuus : SanguineModule {
 			bLastInModeSwitch = bModeSwitchEnabled;
 		}
 
-		float algorithmValue = 0.f;
-
 		if (!bModeSwitchEnabled) {
-			lastAlgorithmValue = params[PARAM_ALGORITHM].getValue();
+			lastAlgorithmValue = knobAlgorithm;
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			mutuus::FeatureMode channelFeatureMode = mutuus::FeatureMode(featureMode);
 
-			if (inputs[INPUT_MODE].isConnected()) {
+			if (bHaveModeCable) {
 				if (!bNotesModeSelection) {
 					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
 				} else {
@@ -152,9 +165,9 @@ struct Mutuus : SanguineModule {
 
 			modulators[channel].set_feature_mode(channelFeatureMode);
 
-			parameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+			parameters[channel]->carrier_shape = internalOscillator;
 
-			modulators[channel].set_alt_feature_mode(static_cast<bool>(params[PARAM_STEREO].getValue()));
+			modulators[channel].set_alt_feature_mode(bWantStereo);
 
 			float_4 f4Voltages;
 
@@ -170,8 +183,8 @@ struct Mutuus : SanguineModule {
 
 				f4Voltages /= 5.f;
 
-				parameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
-				parameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * f4Voltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * f4Voltages[1], 0.f, 1.f);
 
 				parameters[channel]->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
 				parameters[channel]->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
@@ -179,8 +192,8 @@ struct Mutuus : SanguineModule {
 				parameters[channel]->raw_level[0] = parameters[channel]->channel_drive[0];
 				parameters[channel]->raw_level[1] = parameters[channel]->channel_drive[1];
 
-				parameters[channel]->raw_level_pot[0] = clamp(params[PARAM_LEVEL_1].getValue(), 0.f, 1.f);
-				parameters[channel]->raw_level_pot[1] = clamp(params[PARAM_LEVEL_2].getValue(), 0.f, 1.f);
+				parameters[channel]->raw_level_pot[0] = clamp(knobLevel1, 0.f, 1.f);
+				parameters[channel]->raw_level_pot[1] = clamp(knobLevel2, 0.f, 1.f);
 
 				if (!bModeSwitchEnabled) {
 					parameters[channel]->raw_algorithm_pot = algorithmValue;
@@ -191,12 +204,12 @@ struct Mutuus : SanguineModule {
 					parameters[channel]->raw_algorithm = parameters[channel]->modulation_algorithm;
 				}
 
-				parameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(knobTimbre + f4Voltages[3], 0.f, 1.f);
 				parameters[channel]->raw_modulation = parameters[channel]->modulation_parameter;
-				parameters[channel]->raw_modulation_pot = clamp(params[PARAM_TIMBRE].getValue(), 0.f, 1.f);
+				parameters[channel]->raw_modulation_pot = clamp(knobTimbre, 0.f, 1.f);
 				parameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
 
-				parameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f
+				parameters[channel]->note = 60.f * knobLevel1 + 12.f
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				parameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
@@ -257,7 +270,7 @@ struct Mutuus : SanguineModule {
 				lights[LIGHT_ALGORITHM + 1].setBrightness(greenValue);
 				lights[LIGHT_ALGORITHM + 2].setBrightness(blueValue);
 			} else {
-				featureMode = static_cast<mutuus::FeatureMode>(params[PARAM_ALGORITHM].getValue());
+				featureMode = static_cast<mutuus::FeatureMode>(knobAlgorithm);
 				modulators[0].set_feature_mode(mutuus::FeatureMode(featureMode));
 
 				long long systemTimeMs = getSystemTimeMs();

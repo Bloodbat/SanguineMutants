@@ -95,13 +95,19 @@ struct Incurvationes : SanguineModule {
 
 		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
 
-		bEasterEggEnabled = params[PARAM_EASTER_EGG].getValue();
+		int32_t internalOscillator = static_cast<int32_t>(params[PARAM_CARRIER].getValue());
+
+		bEasterEggEnabled = static_cast<bool>(params[PARAM_EASTER_EGG].getValue());
 
 		float algorithmValue = params[PARAM_ALGORITHM].getValue() / 8.f;
 
-		for (int channel = 0; channel < channelCount; ++channel) {
+		float knobLevel1 = params[PARAM_LEVEL_1].getValue();
+		float knobLevel2 = params[PARAM_LEVEL_2].getValue();
 
-			parameters[channel]->carrier_shape = params[PARAM_CARRIER].getValue();
+		float knobTimbre = params[PARAM_TIMBRE].getValue();
+
+		for (int channel = 0; channel < channelCount; ++channel) {
+			parameters[channel]->carrier_shape = internalOscillator;
 
 			modulators[channel].set_easter_egg(bEasterEggEnabled);
 
@@ -119,18 +125,18 @@ struct Incurvationes : SanguineModule {
 
 				f4Voltages /= 5.f;
 
-				parameters[channel]->channel_drive[0] = clamp(params[PARAM_LEVEL_1].getValue() * f4Voltages[0], 0.f, 1.f);
-				parameters[channel]->channel_drive[1] = clamp(params[PARAM_LEVEL_2].getValue() * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * f4Voltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * f4Voltages[1], 0.f, 1.f);
 
 				parameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
 
-				parameters[channel]->modulation_parameter = clamp(params[PARAM_TIMBRE].getValue() + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(knobTimbre + f4Voltages[3], 0.f, 1.f);
 
 				parameters[channel]->frequency_shift_pot = algorithmValue;
 				parameters[channel]->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
 				parameters[channel]->phase_shift = parameters[channel]->modulation_algorithm;
 
-				parameters[channel]->note = 60.f * params[PARAM_LEVEL_1].getValue() + 12.f *
+				parameters[channel]->note = 60.f * knobLevel1 + 12.f *
 					inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
 				parameters[channel]->note += log2f(96000.f * args.sampleTime) * 12.f;
 
