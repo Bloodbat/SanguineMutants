@@ -311,11 +311,11 @@ struct Marmora : SanguineModule {
 
 		// Outputs.
 		if (!bScaleEditMode) {
-			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2 + 0] ? 10.f : 0.f);
+			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2] ? 10.f : 0.f);
 			outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) ? 10.f : 0.f);
 			outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] ? 10.f : 0.f);
 
-			outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4 + 0]);
+			outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4]);
 			outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
 			outputs[OUTPUT_X3].setVoltage(voltages[blockIndex * 4 + 2]);
 		} else {
@@ -348,84 +348,84 @@ struct Marmora : SanguineModule {
 			}
 
 			int tMode = params[PARAM_T_MODE].getValue();
-			drawLight(LIGHT_T_MODE + 0, marmora::tModeLights[tMode][0], sampleTime, systemTimeMs);
+			drawLight(LIGHT_T_MODE, marmora::tModeLights[tMode][0], sampleTime, systemTimeMs);
 			drawLight(LIGHT_T_MODE + 1, marmora::tModeLights[tMode][1], sampleTime, systemTimeMs);
 
 			int xMode = static_cast<int>(params[PARAM_X_MODE].getValue()) % 3;
-			lights[LIGHT_X_MODE + 0].setBrightness(xMode == 0 || xMode == 1 ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_X_MODE].setBrightness(xMode == 0 || xMode == 1 ? kSanguineButtonLightValue : 0.f);
 			lights[LIGHT_X_MODE + 1].setBrightness(xMode == 1 || xMode == 2 ? kSanguineButtonLightValue : 0.f);
 
 			int tRange = static_cast<int>(params[PARAM_T_RANGE].getValue()) % 3;
-			lights[LIGHT_T_RANGE + 0].setBrightness(tRange == 0 || tRange == 1 ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_T_RANGE].setBrightness(tRange == 0 || tRange == 1 ? kSanguineButtonLightValue : 0.f);
 			lights[LIGHT_T_RANGE + 1].setBrightness(tRange == 1 || tRange == 2 ? kSanguineButtonLightValue : 0.f);
 
 			int xRange = static_cast<int>(params[PARAM_X_RANGE].getValue()) % 3;
-			lights[LIGHT_X_RANGE + 0].setBrightness(xRange == 0 || xRange == 1 ? kSanguineButtonLightValue : 0.f);
+			lights[LIGHT_X_RANGE].setBrightness(xRange == 0 || xRange == 1 ? kSanguineButtonLightValue : 0.f);
 			lights[LIGHT_X_RANGE + 1].setBrightness(xRange == 1 || xRange == 2 ? kSanguineButtonLightValue : 0.f);
 
-			drawLight(LIGHT_SCALE + 0, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
+			drawLight(LIGHT_SCALE, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
 			drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
 
 			if (!bScaleEditMode) {
 				float lightExternalBrightness = params[PARAM_EXTERNAL].getValue() ? kSanguineButtonLightValue : 0.f;
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(lightExternalBrightness, sampleTime);
+				lights[LIGHT_EXTERNAL].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 
 				// T1 and T3 are booleans: they'll never go negative.
-				lights[LIGHT_T1 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 0], sampleTime);
+				lights[LIGHT_T1].setBrightnessSmooth(bGates[blockIndex * 2], sampleTime);
 				//lights[LIGHT_T1 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 0], sampleTime);
 
-				lights[LIGHT_T2 + 0].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
+				lights[LIGHT_T2].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
 				//lights[LIGHT_T2 + 1].setBrightnessSmooth(-(rampMaster[blockIndex] < 0.5f), sampleTime);
 
-				lights[LIGHT_T3 + 0].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
+				lights[LIGHT_T3].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
 				//lights[LIGHT_T3 + 1].setBrightnessSmooth(-bGates[blockIndex * 2 + 1], sampleTime);
 
 				float outputVoltage = 0.f;
 
-				outputVoltage = math::rescale(voltages[blockIndex * 4 + 0], 0.f, 5.f, 0.f, 1.f);
-				lights[LIGHT_X1 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
+				outputVoltage = math::rescale(voltages[blockIndex * 4], 0.f, 5.f, 0.f, 1.f);
+				lights[LIGHT_X1].setBrightnessSmooth(outputVoltage, sampleTime);
 				lights[LIGHT_X1 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 
 				outputVoltage = math::rescale(voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f);
-				lights[LIGHT_X2 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
+				lights[LIGHT_X2].setBrightnessSmooth(outputVoltage, sampleTime);
 				lights[LIGHT_X2 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 
 				outputVoltage = math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f);
-				lights[LIGHT_X3 + 0].setBrightnessSmooth(outputVoltage, sampleTime);
+				lights[LIGHT_X3].setBrightnessSmooth(outputVoltage, sampleTime);
 				lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 			} else {
-				lights[LIGHT_EXTERNAL + 0].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+				lights[LIGHT_EXTERNAL].setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 				lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(0.f, sampleTime);
 
-				lights[LIGHT_T1 + 0].setBrightnessSmooth(bLastGate, sampleTime);
+				lights[LIGHT_T1].setBrightnessSmooth(bLastGate, sampleTime);
 
-				lights[LIGHT_T2 + 0].setBrightnessSmooth(bLastGate, sampleTime);
+				lights[LIGHT_T2].setBrightnessSmooth(bLastGate, sampleTime);
 
-				lights[LIGHT_T3 + 0].setBrightnessSmooth(bLastGate, sampleTime);
+				lights[LIGHT_T3].setBrightnessSmooth(bLastGate, sampleTime);
 
 				float scaledVoltage = math::rescale(newNoteVoltage, 0.f, 5.f, 0.f, 1.f);
 
-				lights[LIGHT_X1 + 0].setBrightnessSmooth(scaledVoltage, sampleTime);
+				lights[LIGHT_X1].setBrightnessSmooth(scaledVoltage, sampleTime);
 				lights[LIGHT_X1 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
 
-				lights[LIGHT_X2 + 0].setBrightnessSmooth(scaledVoltage, sampleTime);
+				lights[LIGHT_X2].setBrightnessSmooth(scaledVoltage, sampleTime);
 				lights[LIGHT_X2 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
 
-				lights[LIGHT_X3 + 0].setBrightnessSmooth(scaledVoltage, sampleTime);
+				lights[LIGHT_X3].setBrightnessSmooth(scaledVoltage, sampleTime);
 				lights[LIGHT_X3 + 1].setBrightnessSmooth(-scaledVoltage, sampleTime);
 			}
 
 			float yVoltage = math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f);
-			lights[LIGHT_Y + 0].setBrightnessSmooth(yVoltage, sampleTime);
+			lights[LIGHT_Y].setBrightnessSmooth(yVoltage, sampleTime);
 			lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
 
 			if (!bXClockSourceExternal) {
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].red, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].red, sampleTime);
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].green, sampleTime);
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(marmora::paletteClockSources[xClockSourceInternal].blue, sampleTime);
 			} else {
-				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 0].setBrightnessSmooth(0.f, sampleTime);
+				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[LIGHT_INTERNAL_X_CLOCK_SOURCE + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
