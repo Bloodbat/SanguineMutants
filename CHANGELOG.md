@@ -88,6 +88,8 @@
 
 - Funes: relate knobs using color.
 
+- Marmora: make Y divider tooltips easier on the eyes.
+
 - Nebulae family: better parameter and input tooltips.
 
 - Nebulae family: OLED display text tweaks.
