@@ -253,6 +253,12 @@ struct Funes : SanguineModule {
 
 			patch.wantHoldModulations = bWantHoldModulations;
 
+			bool bHaveFrequencyCable = inputs[INPUT_FREQUENCY].isConnected();
+			bool bHaveLevelCable = inputs[INPUT_LEVEL].isConnected();
+			bool bHaveTimbreCable = inputs[INPUT_TIMBRE].isConnected();
+			bool bHaveMorphCable = inputs[INPUT_MORPH].isConnected();
+			bool bHaveTriggerCable = inputs[INPUT_TRIGGER].isConnected();
+
 			bool activeLights[kModelLightsCount * 2] = {};
 
 			bool bPulseLight = false;
@@ -291,11 +297,11 @@ struct Funes : SanguineModule {
 				// Triggers at around 0.7 V
 				modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
 
-				modulations[channel].frequency_patched = inputs[INPUT_FREQUENCY].isConnected();
-				modulations[channel].level_patched = inputs[INPUT_LEVEL].isConnected();
-				modulations[channel].timbre_patched = inputs[INPUT_TIMBRE].isConnected();
-				modulations[channel].morph_patched = inputs[INPUT_MORPH].isConnected();
-				modulations[channel].trigger_patched = inputs[INPUT_TRIGGER].isConnected();
+				modulations[channel].frequency_patched = bHaveFrequencyCable;
+				modulations[channel].level_patched = bHaveLevelCable;
+				modulations[channel].timbre_patched = bHaveTimbreCable;
+				modulations[channel].morph_patched = bHaveMorphCable;
+				modulations[channel].trigger_patched = bHaveTriggerCable;
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
