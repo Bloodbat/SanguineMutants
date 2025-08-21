@@ -3,6 +3,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinejson.hpp"
+#include "array"
 
 #include "mutuus/dsp/mutuus_modulator.h"
 
@@ -114,6 +115,8 @@ struct Mutuus : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
+		std::array <mutuus::FeatureMode, PORT_MAX_CHANNELS> channelFeatureModes;
+
 		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
 
 		int32_t internalOscillator = static_cast<int32_t>(params[PARAM_CARRIER].getValue());
@@ -151,21 +154,30 @@ struct Mutuus : SanguineModule {
 			algorithmValue = lastAlgorithmValue / 8.f;
 		}
 
-		for (int channel = 0; channel < channelCount; ++channel) {
-			mutuus::FeatureMode channelFeatureMode = mutuus::FeatureMode(featureMode);
+		channelFeatureModes.fill(static_cast<mutuus::FeatureMode>(featureMode));
 
-			if (bHaveModeCable) {
-				if (!bNotesModeSelection) {
-					channelFeatureMode = mutuus::FeatureMode(
-						clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
-				} else {
-					channelFeatureMode = mutuus::FeatureMode(
-						clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)),
-							0, 8));
+		if (bHaveModeCable) {
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				float_4 modeVoltages;
+
+				modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+				if (bNotesModeSelection) {
+					modeVoltages *= 12.f;
+					modeVoltages = simd::round(modeVoltages);
 				}
-			}
 
-			modulators[channel].set_feature_mode(channelFeatureMode);
+				modeVoltages = simd::clamp(modeVoltages, 0.f, 8.f);
+
+				channelFeatureModes[channel] = static_cast<mutuus::FeatureMode>(modeVoltages[0]);
+				channelFeatureModes[channel + 1] = static_cast<mutuus::FeatureMode>(modeVoltages[1]);
+				channelFeatureModes[channel + 2] = static_cast<mutuus::FeatureMode>(modeVoltages[2]);
+				channelFeatureModes[channel + 3] = static_cast<mutuus::FeatureMode>(modeVoltages[3]);
+			}
+		}
+
+		for (int channel = 0; channel < channelCount; ++channel) {
+			modulators[channel].set_feature_mode(channelFeatureModes[channel]);
 
 			parameters[channel]->carrier_shape = internalOscillator;
 
