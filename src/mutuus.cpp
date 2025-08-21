@@ -156,10 +156,12 @@ struct Mutuus : SanguineModule {
 
 			if (bHaveModeCable) {
 				if (!bNotesModeSelection) {
-					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
+					channelFeatureMode = mutuus::FeatureMode(
+						clamp(static_cast<int>(inputs[INPUT_MODE].getVoltage(channel)), 0, 8));
 				} else {
-					channelFeatureMode = mutuus::FeatureMode(clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)),
-						0, 8));
+					channelFeatureMode = mutuus::FeatureMode(
+						clamp(static_cast<int>(roundf(inputs[INPUT_MODE].getVoltage(channel) * 12.f)),
+							0, 8));
 				}
 			}
 
@@ -192,8 +194,8 @@ struct Mutuus : SanguineModule {
 				parameters[channel]->raw_level[0] = parameters[channel]->channel_drive[0];
 				parameters[channel]->raw_level[1] = parameters[channel]->channel_drive[1];
 
-				parameters[channel]->raw_level_pot[0] = clamp(knobLevel1, 0.f, 1.f);
-				parameters[channel]->raw_level_pot[1] = clamp(knobLevel2, 0.f, 1.f);
+				parameters[channel]->raw_level_pot[0] = knobLevel1;
+				parameters[channel]->raw_level_pot[1] = knobLevel2;
 
 				if (!bModeSwitchEnabled) {
 					parameters[channel]->raw_algorithm_pot = algorithmValue;
@@ -206,7 +208,7 @@ struct Mutuus : SanguineModule {
 
 				parameters[channel]->modulation_parameter = clamp(knobTimbre + f4Voltages[3], 0.f, 1.f);
 				parameters[channel]->raw_modulation = parameters[channel]->modulation_parameter;
-				parameters[channel]->raw_modulation_pot = clamp(knobTimbre, 0.f, 1.f);
+				parameters[channel]->raw_modulation_pot = knobTimbre;
 				parameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f
