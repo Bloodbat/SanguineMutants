@@ -307,13 +307,14 @@ struct Funes : SanguineModule {
 					outputFrames[blockNum].samples[channel * 2 + 1] = output[blockNum].aux / 32768.f;
 				}
 
+				int activeEngine = voices[channel].active_engine();
+
 				if (displayChannel == channel) {
-					displayModelNum = voices[channel].active_engine();
+					displayModelNum = activeEngine;
 				}
 
 				// Model lights
-				// Get the active engines for current channel.
-				int activeEngine = voices[channel].active_engine();
+				// Get the active engine for current channel.
 				int clampedEngine = (activeEngine % 8) * 2;
 
 				bool bIsNewModel = activeEngine < 8;
