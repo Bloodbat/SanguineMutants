@@ -293,12 +293,17 @@ struct Mutuus : SanguineModule {
 
 				mutuus::FeatureMode featureMode = modulators[channel].feature_mode();
 
-				lights[currentLight].setBrightnessSmooth(
-					(warpiespals::paletteParasiteFeatureMode[featureMode][0]) / 255.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(
-					(warpiespals::paletteParasiteFeatureMode[featureMode][1]) / 255.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(
-					(warpiespals::paletteParasiteFeatureMode[featureMode][2]) / 255.f, sampleTime);
+				float_4 rawFeatureMode;
+
+				rawFeatureMode[0] = warpiespals::paletteParasiteFeatureMode[featureMode][0];
+				rawFeatureMode[1] = warpiespals::paletteParasiteFeatureMode[featureMode][1];
+				rawFeatureMode[2] = warpiespals::paletteParasiteFeatureMode[featureMode][2];
+
+				rawFeatureMode /= 255.f;
+
+				lights[currentLight].setBrightnessSmooth(rawFeatureMode[0], sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(rawFeatureMode[1], sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(rawFeatureMode[2], sampleTime);
 			}
 
 			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
