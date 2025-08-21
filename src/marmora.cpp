@@ -311,17 +311,17 @@ struct Marmora : SanguineModule {
 
 		// Outputs.
 		if (!bScaleEditMode) {
-			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2] ? 10.f : 0.f);
-			outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) ? 10.f : 0.f);
-			outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] ? 10.f : 0.f);
+			outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2] * 10.f);
+			outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) * 10.f);
+			outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] * 10.f);
 
 			outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4]);
 			outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
 			outputs[OUTPUT_X3].setVoltage(voltages[blockIndex * 4 + 2]);
 		} else {
-			outputs[OUTPUT_T1].setVoltage(bLastGate ? 10.f : 0.f);
-			outputs[OUTPUT_T2].setVoltage(bLastGate ? 10.f : 0.f);
-			outputs[OUTPUT_T3].setVoltage(bLastGate ? 10.f : 0.f);
+			outputs[OUTPUT_T1].setVoltage(bLastGate * 10.f);
+			outputs[OUTPUT_T2].setVoltage(bLastGate * 10.f);
+			outputs[OUTPUT_T3].setVoltage(bLastGate * 10.f);
 
 			outputs[OUTPUT_X1].setVoltage(newNoteVoltage);
 			outputs[OUTPUT_X2].setVoltage(newNoteVoltage);
