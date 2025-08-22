@@ -37,6 +37,8 @@ without the backticks.
 
 - Nebulae family: better mode knob tooltips.
 
+- Nodi family: polyphonic CV control of Attack and Decay parameters.
+
 ## Changes
 
 - Plugin: performance tweaks.
