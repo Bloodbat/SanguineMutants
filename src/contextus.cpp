@@ -330,6 +330,7 @@ struct Contextus : SanguineModule {
 
 				// Check if pitch has changed enough to cause an auto-retrigger.
 				int16_t pitchDelta = pitch - previousPitches[channel];
+				// TODO: this wants to be bitwise!
 				triggersDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 ||
 					-pitchDelta >= 0x40);
 
@@ -420,17 +421,20 @@ struct Contextus : SanguineModule {
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].green, sampleTime);
 			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].blue, sampleTime);
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
-				if (channel < channelCount) {
-					lights[currentLight].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].red, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].green, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].blue, sampleTime);
-				} else {
-					for (int light = 0; light < 3; ++light) {
-						lights[currentLight + light].setBrightnessSmooth(0.f, sampleTime);
-					}
-				}
+
+				lights[currentLight].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].red, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].green, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].blue, sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 		}
 
@@ -554,9 +558,9 @@ struct Contextus : SanguineModule {
 
 	inline void pollSwitches(const float& sampleTime) {
 		// Handle switch lights.
-		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
-		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled ? kSanguineButtonLightValue : 0.f, sampleTime);
-		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger ? kSanguineButtonLightValue : 0.f, sampleTime);
+		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled * kSanguineButtonLightValue, sampleTime);
+		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled * kSanguineButtonLightValue, sampleTime);
+		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger * kSanguineButtonLightValue, sampleTime);
 	}
 
 	json_t* dataToJson() override {
