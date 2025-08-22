@@ -386,9 +386,9 @@ struct Aestus : SanguineModule {
 					kSanguineButtonLightValue, sampleTime);
 
 				lights[LIGHT_RANGE].setBrightnessSmooth(((displayRange == tides::GENERATOR_RANGE_LOW) &
-					!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
+					(!bHaveExternalSync)) * kSanguineButtonLightValue, sampleTime);
 				lights[LIGHT_RANGE + 1].setBrightnessSmooth(((displayRange == tides::GENERATOR_RANGE_HIGH) &
-					!bHaveExternalSync) * kSanguineButtonLightValue, sampleTime);
+					(!bHaveExternalSync)) * kSanguineButtonLightValue, sampleTime);
 
 				if (samples[displayChannel].flags & tides::FLAG_END_OF_ATTACK) {
 					unipolarFlags[displayChannel] *= -1.f;
@@ -396,7 +396,7 @@ struct Aestus : SanguineModule {
 				lights[LIGHT_PHASE].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
 
-				lights[LIGHT_SYNC].setBrightnessSmooth((bHaveExternalSync & !(getSystemTimeMs() & 128)) *
+				lights[LIGHT_SYNC].setBrightnessSmooth((bHaveExternalSync & (!(getSystemTimeMs() & 128))) *
 					kSanguineButtonLightValue, sampleTime);
 
 				displayModel = aestus::displayModels[static_cast<int>(channelIsSheep[displayChannel])];
