@@ -163,11 +163,11 @@ struct Velamina : SanguineModule {
 					}
 
 					float rescaledLight = rescale(voltageSum, 0.f, 10.f, 0.f, 1.f);
-					lights[currentLight + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
+					lights[currentLight].setBrightnessSmooth(-rescaledLight, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 
-					lights[(LIGHT_GAIN_1 + channel * 2) + 0].setBrightnessSmooth(0.f, sampleTime);
+					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(0.f, sampleTime);
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gain[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
 					float gainSum = 0.f;
@@ -184,12 +184,12 @@ struct Velamina : SanguineModule {
 					voltageSum = clamp(voltageSum, -10.f, 10.f);
 
 					float rescaledLight = rescale(voltageSum, 0.f, 10.f, 0.f, 1.f);
-					lights[currentLight + 0].setBrightnessSmooth(-rescaledLight, sampleTime);
+					lights[currentLight].setBrightnessSmooth(-rescaledLight, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(voltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 
 					rescaledLight = rescale(clamp(gainSum, 0.f, 5.f), 0.f, 5.f, 0.f, 5.f);
-					lights[(LIGHT_GAIN_1 + channel * 2) + 0].setBrightnessSmooth(rescaledLight, sampleTime);
+					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(rescaledLight, sampleTime);
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				}
 			}
