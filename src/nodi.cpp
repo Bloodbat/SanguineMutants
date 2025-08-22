@@ -239,7 +239,8 @@ struct Nodi : SanguineModule {
 			lastTriggers[channel] = bTriggerInput;
 
 			if (triggersDetected[channel]) {
-				triggerDelays[channel] = settings[channel].trig_delay ? (1 << settings[channel].trig_delay) : 0;
+				triggerDelays[channel] = settings[channel].trig_delay ?
+					(1 << settings[channel].trig_delay) : 0;
 				++triggerDelays[channel];
 				triggersDetected[channel] = false;
 			}
@@ -312,8 +313,7 @@ struct Nodi : SanguineModule {
 				int16_t pitch = (pitchV * 12.f + 60) * 128;
 
 				// Pitch range.
-				switch (settings[channel].pitch_range)
-				{
+				switch (settings[channel].pitch_range) {
 				case braids::PITCH_RANGE_EXTERNAL:
 				case braids::PITCH_RANGE_LFO:
 					// Do nothing: calibration not implemented.
@@ -336,9 +336,7 @@ struct Nodi : SanguineModule {
 
 				// Check if pitch has changed enough to cause an auto-retrigger.
 				int16_t pitchDelta = pitch - previousPitches[channel];
-				// TODO: this wants to be bitwise!
-				triggersDetected[channel] = settings[channel].auto_trig && (pitchDelta >= 0x40 ||
-					-pitchDelta >= 0x40);
+				triggersDetected[channel] = bAutoTrigger & ((pitchDelta >= 0x40) | (-pitchDelta >= 0x40));
 
 				previousPitches[channel] = pitch;
 
@@ -352,8 +350,8 @@ struct Nodi : SanguineModule {
 				}
 
 				// Pitch transposition.
-				int32_t transposition = settings[channel].pitch_range == braids::PITCH_RANGE_LFO ?
-					-(36 << 7) : 0;
+				int32_t transposition = (settings[channel].pitch_range == braids::PITCH_RANGE_LFO) *
+					(-(36 << 7));
 				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
 				oscillators[channel].set_pitch(pitch + transposition);
 
@@ -407,12 +405,12 @@ struct Nodi : SanguineModule {
 				}
 			}
 
-			// Output..
+			// Output.
 			if (!drbOutputBuffers[channel].empty()) {
 				dsp::Frame<1> outFrame = drbOutputBuffers[channel].shift();
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
-		} // Channels
+		} // Channels.
 
 		if (lightsDivider.process()) {
 			const float sampleTime = args.sampleTime * kLightsFrequency;
@@ -456,8 +454,8 @@ struct Nodi : SanguineModule {
 	}
 
 	inline void handleDisplay(const ProcessArgs& args) {
-		// Display handling..
-		// Display: return to model after 2s
+		// Display handling.
+		// Display: return to model after 2s.
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
 			if (!bPaques) {
 				displayText = nodi::displayLabels[settings[displayChannel].shape];
@@ -466,8 +464,7 @@ struct Nodi : SanguineModule {
 			}
 		} else {
 			int value;
-			switch (lastSettingChanged)
-			{
+			switch (lastSettingChanged) {
 			case braids::SETTING_RESOLUTION: {
 				value = settings[displayChannel].resolution;
 				displayText = nodiCommon::bitsStrings[value];
