@@ -62,6 +62,8 @@ struct Nodi : SanguineModule {
 		INPUT_TIMBRE,
 		INPUT_COLOR,
 		INPUT_META,
+		INPUT_ATTACK,
+		INPUT_DECAY,
 		INPUTS_COUNT
 	};
 
@@ -113,6 +115,9 @@ struct Nodi : SanguineModule {
 	bool bFlattenEnabled = false;
 	bool bPaques = false;
 	bool bVCAEnabled = false;
+
+	bool bHaveAttackCable = false;
+	bool bHaveDecayCable = false;
 
 	bool bWantLowCpu = false;
 
@@ -179,6 +184,9 @@ struct Nodi : SanguineModule {
 		configSwitch(PARAM_SIGN, 0.f, 4.f, 0.f, "Signature wave shaper", nodiCommon::intensityTooltipStrings);
 		configButton(PARAM_AUTO, "Toggle auto trigger");
 
+		configInput(INPUT_ATTACK, "Attack");
+		configInput(INPUT_DECAY, "Decay");
+
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			memset(&oscillators[channel], 0, sizeof(braids::MacroOscillator));
 			memset(&quantizers[channel], 0, sizeof(braids::Quantizer));
@@ -231,6 +239,8 @@ struct Nodi : SanguineModule {
 		uint8_t knobModel = params[PARAM_MODEL].getValue();
 
 		bool bHaveMetaCable = inputs[INPUT_META].isConnected();
+		bHaveAttackCable = inputs[INPUT_ATTACK].isConnected();
+		bHaveDecayCable = inputs[INPUT_DECAY].isConnected();
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			settings[channel].quantizer_scale = knobScale;
@@ -283,6 +293,24 @@ struct Nodi : SanguineModule {
 
 			// Render frames.
 			if (drbOutputBuffers[channel].empty()) {
+				if (bHaveAttackCable) {
+					float attackVoltage = inputs[INPUT_ATTACK].getVoltage(channel);
+					attackVoltage = roundf(attackVoltage);
+					attackVoltage = rescale(attackVoltage, -5.f, 5.f, -15.f, 15.f);
+					int modulatedAttack = settings[channel].ad_attack + static_cast<int>(attackVoltage);
+					modulatedAttack = clamp(modulatedAttack, 0, 15);
+					settings[channel].ad_attack = modulatedAttack;
+				}
+
+				if (bHaveDecayCable) {
+					float decayVoltage = inputs[INPUT_DECAY].getVoltage(channel);
+					decayVoltage = roundf(decayVoltage);
+					decayVoltage = rescale(decayVoltage, -5.f, 5.f, -15.f, 15.f);
+					int modulatedDecay = settings[channel].ad_decay + static_cast<int>(decayVoltage);
+					modulatedDecay = clamp(modulatedDecay, 0, 15);
+					settings[channel].ad_decay = modulatedDecay;
+				}
+
 				envelopes[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
 				uint32_t adValue = envelopes[channel].Render();
 
@@ -569,10 +597,20 @@ struct Nodi : SanguineModule {
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
 		const uint8_t* arraySettings = &settings[displayChannel].shape;
-		for (int i = 0; i <= braids::SETTING_LAST_EDITABLE_SETTING; ++i) {
-			if (arraySettings[i] != arrayLastSettings[i]) {
-				arrayLastSettings[i] = arraySettings[i];
-				lastSettingChanged = static_cast<braids::Setting>(i);
+		for (int setting = 0; setting <= braids::SETTING_LAST_EDITABLE_SETTING; ++setting) {
+			if (arraySettings[setting] != arrayLastSettings[setting]) {
+				if (bHaveAttackCable && setting == braids::SETTING_AD_ATTACK) {
+					lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
+					break;
+				}
+
+				if (bHaveDecayCable && setting == braids::SETTING_AD_DECAY) {
+					lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
+					break;
+				}
+
+				arrayLastSettings[setting] = arraySettings[setting];
+				lastSettingChanged = static_cast<braids::Setting>(setting);
 				displayTimeout = 0;
 				break;
 			}
@@ -732,6 +770,9 @@ struct NodiWidget : SanguineModuleWidget {
 
 
 		addParam(createParamCentered<Sanguine1PSGreen>(millimetersToPixelsVec(119.474, 36.666), module, Nodi::PARAM_ATTACK));
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(134.018, 36.606), module, Nodi::INPUT_ATTACK));
+
+		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(134.018, 52.992), module, Nodi::INPUT_DECAY));
 
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(35.151, 45.206), module, Nodi::PARAM_AD_TIMBRE));
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenLight>>>(millimetersToPixelsVec(107.074, 45.206),
