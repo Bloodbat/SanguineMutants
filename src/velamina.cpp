@@ -143,7 +143,6 @@ struct Velamina : SanguineModule {
 				}
 				portVoltages[channel][currentChannel] = outVoltages[currentChannel];
 
-
 				if (outputsConnected[channel]) {
 					outputs[OUTPUT_1 + channel].setVoltageSimd(outVoltages[currentChannel], polyChannel);
 					outVoltages[currentChannel] = 0.f;
