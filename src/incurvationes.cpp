@@ -206,7 +206,7 @@ struct Incurvationes : SanguineModule {
 				lights[currentLight + 2].setBrightness(0.f);
 			}
 
-			lights[LIGHT_ALGORITHM + 0].setBrightness(colorValues[0][0]);
+			lights[LIGHT_ALGORITHM].setBrightness(colorValues[0][0]);
 			lights[LIGHT_ALGORITHM + 1].setBrightness(colorValues[0][1]);
 			lights[LIGHT_ALGORITHM + 2].setBrightness(colorValues[0][2]);
 		}
@@ -250,7 +250,7 @@ struct IncurvationesWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(42.896, 112.172), module, Incurvationes::OUTPUT_AUX));
 
 		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module,
-			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 0 * 3));
+			Incurvationes::LIGHT_CHANNEL_ALGORITHM));
 		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module,
 			Incurvationes::LIGHT_CHANNEL_ALGORITHM + 1 * 3));
 		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module,
