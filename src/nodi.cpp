@@ -213,9 +213,7 @@ struct Nodi : SanguineModule {
 		bAutoTrigger = params[PARAM_AUTO].getValue();
 		bPaques = params[PARAM_MORSE].getValue();
 		waveShaperValue = params[PARAM_SIGN].getValue();
-		driftValue = params[PARAM_DRIFT].getValue();
-
-		outputs[OUTPUT_OUT].setChannels(channelCount);
+		driftValue = params[PARAM_DRIFT].getValue();		
 
 		bool bHaveMetaCable = inputs[INPUT_META].isConnected();
 
@@ -413,6 +411,8 @@ struct Nodi : SanguineModule {
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
 		} // Channels.
+
+		outputs[OUTPUT_OUT].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
 			const float sampleTime = args.sampleTime * kLightsFrequency;
