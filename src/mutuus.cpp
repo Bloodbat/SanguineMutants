@@ -409,7 +409,7 @@ struct MutuusWidget : SanguineModuleWidget {
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(32.044, 112.172), module, Mutuus::OUTPUT_MODULATOR));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(42.896, 112.172), module, Mutuus::OUTPUT_AUX));
 
-		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(13.849, 58.44), module, Mutuus::LIGHT_MODE + 0));
+		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(13.849, 58.44), module, Mutuus::LIGHT_MODE));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(3.776, 47.107), module, Mutuus::LIGHT_MODE + 1));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(2.716, 31.98), module, Mutuus::LIGHT_MODE + 2));
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(11.122, 19.359), module, Mutuus::LIGHT_MODE + 3));
@@ -420,7 +420,7 @@ struct MutuusWidget : SanguineModuleWidget {
 		addChild(createLightCentered<TinyLight<RedLight>>(millimetersToPixelsVec(36.952, 58.483), module, Mutuus::LIGHT_MODE + 8));
 
 		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(14.281, 62.532), module,
-			Mutuus::LIGHT_CHANNEL_MODE + 0 * 3));
+			Mutuus::LIGHT_CHANNEL_MODE));
 		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(16.398, 62.532), module,
 			Mutuus::LIGHT_CHANNEL_MODE + 1 * 3));
 		addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(18.516, 62.532), module,
