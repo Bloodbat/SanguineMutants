@@ -212,21 +212,36 @@ struct Contextus : SanguineModule {
 		waveShaperValue = params[PARAM_SIGN].getValue();
 		driftValue = params[PARAM_DRIFT].getValue();
 
+		uint8_t knobScale = params[PARAM_SCALE].getValue();
+		uint8_t  knobRoot = params[PARAM_ROOT].getValue();
+		uint8_t  knobPitchRange = params[PARAM_PITCH_RANGE].getValue();
+		uint8_t  knobPitchOctave = params[PARAM_PITCH_OCTAVE].getValue();
+		uint8_t  knobTriggerDelay = params[PARAM_TRIGGER_DELAY].getValue();
+		uint8_t  knobSampleRate = params[PARAM_RATE].getValue();
+		uint8_t  knobResolution = params[PARAM_BITS].getValue();
+		uint8_t  knobAttack = params[PARAM_ATTACK].getValue();
+		uint8_t  knobDecay = params[PARAM_DECAY].getValue();
+		uint8_t  knobAdTimbre = params[PARAM_AD_TIMBRE].getValue();
+		uint8_t  knobAdFm = params[PARAM_AD_MODULATION].getValue();
+		uint8_t  knobAdColor = params[PARAM_AD_COLOR].getValue();
+
+		uint8_t knobModel = params[PARAM_MODEL].getValue();
+
 		bool bHaveMetaCable = inputs[INPUT_META].isConnected();
 
 		for (int channel = 0; channel < channelCount; ++channel) {
-			settings[channel].quantizer_scale = params[PARAM_SCALE].getValue();
-			settings[channel].quantizer_root = params[PARAM_ROOT].getValue();
-			settings[channel].pitch_range = params[PARAM_PITCH_RANGE].getValue();
-			settings[channel].pitch_octave = params[PARAM_PITCH_OCTAVE].getValue();
-			settings[channel].trig_delay = params[PARAM_TRIGGER_DELAY].getValue();
-			settings[channel].sample_rate = params[PARAM_RATE].getValue();
-			settings[channel].resolution = params[PARAM_BITS].getValue();
-			settings[channel].ad_attack = params[PARAM_ATTACK].getValue();
-			settings[channel].ad_decay = params[PARAM_DECAY].getValue();
-			settings[channel].ad_timbre = params[PARAM_AD_TIMBRE].getValue();
-			settings[channel].ad_fm = params[PARAM_AD_MODULATION].getValue();
-			settings[channel].ad_color = params[PARAM_AD_COLOR].getValue();
+			settings[channel].quantizer_scale = knobScale;
+			settings[channel].quantizer_root = knobRoot;
+			settings[channel].pitch_range = knobPitchRange;
+			settings[channel].pitch_octave = knobPitchOctave;
+			settings[channel].trig_delay = knobTriggerDelay;
+			settings[channel].sample_rate = knobSampleRate;
+			settings[channel].resolution = knobResolution;
+			settings[channel].ad_attack = knobAttack;
+			settings[channel].ad_decay = knobDecay;
+			settings[channel].ad_timbre = knobAdTimbre;
+			settings[channel].ad_fm = knobAdFm;
+			settings[channel].ad_color = knobAdColor;
 
 			// Trigger.
 			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
@@ -271,7 +286,7 @@ struct Contextus : SanguineModule {
 				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
 
 				// Set model.
-				int model = params[PARAM_MODEL].getValue();
+				uint8_t model = knobModel;
 				if (bHaveMetaCable) {
 					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
 						renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
