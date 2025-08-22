@@ -115,8 +115,6 @@ struct Velamina : SanguineModule {
 		}
 
 		for (int channel = 0; channel < kMaxChannels; ++channel) {
-			outputs[OUTPUT_1 + channel].setChannels(polyChannelCount);
-
 			float_4 gain[4] = {};
 			float_4 inVoltages[4] = {};
 
@@ -191,6 +189,8 @@ struct Velamina : SanguineModule {
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				}
 			}
+
+			outputs[OUTPUT_1 + channel].setChannels(polyChannelCount);
 		}
 	}
 };
