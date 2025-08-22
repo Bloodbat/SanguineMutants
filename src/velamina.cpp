@@ -65,12 +65,16 @@ struct Velamina : SanguineModule {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		for (int channel = 0; channel < kMaxChannels; ++channel) {
-			configParam(PARAM_GAIN_1 + channel, 0.f, 1.f, 0.f, string::f("Channel %d gain", channel + 1), "%", 0.f, 100.f);
-			configParam(PARAM_RESPONSE_1 + channel, 0.f, 1.f, 0.f, string::f("Channel %d response (Exponential <-> Linear)", channel + 1));
-			configParam(PARAM_OFFSET_1 + channel, 0.f, 5.f, 0.f, string::f("Channel %d CV offset", channel + 1), "V");
-			configInput(INPUT_IN_1 + channel, string::f("Channel %d", channel + 1));
-			configInput(INPUT_CV_1 + channel, string::f("Channel %d CV", channel + 1));
-			configOutput(OUTPUT_1 + channel, string::f("Channel %d", channel + 1));
+			int channelNumber = channel + 1;
+			configParam(PARAM_GAIN_1 + channel, 0.f, 1.f, 0.f,
+				string::f("Channel %d gain", channelNumber), "%", 0.f, 100.f);
+			configParam(PARAM_RESPONSE_1 + channel, 0.f, 1.f, 0.f,
+				string::f("Channel %d response (Exponential <-> Linear)", channelNumber));
+			configParam(PARAM_OFFSET_1 + channel, 0.f, 5.f, 0.f,
+				string::f("Channel %d CV offset", channelNumber), "V");
+			configInput(INPUT_IN_1 + channel, string::f("Channel %d", channelNumber));
+			configInput(INPUT_CV_1 + channel, string::f("Channel %d CV", channelNumber));
+			configOutput(OUTPUT_1 + channel, string::f("Channel %d", channelNumber));
 		}
 
 		lightsDivider.setDivision(kLightsDivider);
