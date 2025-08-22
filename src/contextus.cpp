@@ -214,6 +214,8 @@ struct Contextus : SanguineModule {
 
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 
+		bool bHaveMetaCable = inputs[INPUT_META].isConnected();
+
 		for (int channel = 0; channel < channelCount; ++channel) {
 			settings[channel].quantizer_scale = params[PARAM_SCALE].getValue();
 			settings[channel].quantizer_root = params[PARAM_ROOT].getValue();
@@ -272,7 +274,7 @@ struct Contextus : SanguineModule {
 
 				// Set model.
 				int model = params[PARAM_MODEL].getValue();
-				if (inputs[INPUT_META].isConnected()) {
+				if (bHaveMetaCable) {
 					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
 						renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 				}
