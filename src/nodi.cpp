@@ -450,10 +450,10 @@ struct Nodi : SanguineModule {
 			}
 		}
 
-		handleDisplay(args);
+		handleDisplay(args.sampleRate);
 	}
 
-	inline void handleDisplay(const ProcessArgs& args) {
+	inline void handleDisplay(const float& sampleRate) {
 		// Display handling.
 		// Display: return to model after 2s.
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
@@ -463,99 +463,97 @@ struct Nodi : SanguineModule {
 				displayText = nodi::displayLabels[47];
 			}
 		} else {
-			int value;
 			switch (lastSettingChanged) {
-			case braids::SETTING_RESOLUTION: {
-				value = settings[displayChannel].resolution;
-				displayText = nodiCommon::bitsStrings[value];
+			case braids::SETTING_RESOLUTION:
+				displayText =
+					nodiCommon::bitsStrings[settings[displayChannel].resolution];
 				break;
-			}
-			case braids::SETTING_SAMPLE_RATE: {
-				value = settings[displayChannel].sample_rate;
-				displayText = nodiCommon::ratesStrings[value];
+
+			case braids::SETTING_SAMPLE_RATE:
+				displayText =
+					nodiCommon::ratesStrings[settings[displayChannel].sample_rate];
 				break;
-			}
-			case braids::SETTING_TRIG_SOURCE: {
+
+			case braids::SETTING_TRIG_SOURCE:
 				displayText = nodiCommon::autoLabel;
 				break;
-			}
-			case braids::SETTING_TRIG_DELAY: {
-				value = settings[displayChannel].trig_delay;
-				displayText = nodiCommon::triggerDelayStrings[value];
+
+			case braids::SETTING_TRIG_DELAY:
+				displayText =
+					nodiCommon::triggerDelayStrings[settings[displayChannel].trig_delay];
 				break;
-			}
-			case braids::SETTING_AD_ATTACK: {
-				value = settings[displayChannel].ad_attack;
-				displayText = nodiCommon::numberStrings15[value];
+
+			case braids::SETTING_AD_ATTACK:
+				displayText =
+					nodiCommon::numberStrings15[settings[displayChannel].ad_attack];
 				break;
-			}
-			case braids::SETTING_AD_DECAY: {
-				value = settings[displayChannel].ad_decay;
-				displayText = nodiCommon::numberStrings15[value];
+
+			case braids::SETTING_AD_DECAY:
+				displayText =
+					nodiCommon::numberStrings15[settings[displayChannel].ad_decay];
 				break;
-			}
-			case braids::SETTING_AD_FM: {
-				value = settings[displayChannel].ad_fm;
-				displayText = nodiCommon::numberStrings15[value];
+
+			case braids::SETTING_AD_FM:
+				displayText =
+					nodiCommon::numberStrings15[settings[displayChannel].ad_fm];
 				break;
-			}
-			case braids::SETTING_AD_TIMBRE: {
-				value = settings[displayChannel].ad_timbre;
-				displayText = nodiCommon::numberStrings15[value];
+
+			case braids::SETTING_AD_TIMBRE:
+				displayText =
+					nodiCommon::numberStrings15[settings[displayChannel].ad_timbre];
 				break;
-			}
-			case braids::SETTING_AD_COLOR: {
-				value = settings[displayChannel].ad_color;
-				displayText = nodiCommon::numberStrings15[value];
+
+			case braids::SETTING_AD_COLOR:
+				displayText =
+					nodiCommon::numberStrings15[settings[displayChannel].ad_color];
 				break;
-			}
-			case braids::SETTING_AD_VCA: {
+
+			case braids::SETTING_AD_VCA:
 				displayText = nodiCommon::vcaLabel;
 				break;
-			}
-			case braids::SETTING_PITCH_RANGE: {
-				value = settings[displayChannel].pitch_range;
-				displayText = nodiCommon::pitchRangeStrings[value];
+
+			case braids::SETTING_PITCH_RANGE:
+				displayText =
+					nodiCommon::pitchRangeStrings[settings[displayChannel].pitch_range];
 				break;
-			}
-			case braids::SETTING_PITCH_OCTAVE: {
-				value = settings[displayChannel].pitch_octave;
-				displayText = nodiCommon::octaveStrings[value];
+
+			case braids::SETTING_PITCH_OCTAVE:
+				displayText =
+					nodiCommon::octaveStrings[settings[displayChannel].pitch_octave];
 				break;
-			}
-			case braids::SETTING_QUANTIZER_SCALE: {
-				value = settings[displayChannel].quantizer_scale;
-				displayText = nodiCommon::quantizationStrings[value];
+
+			case braids::SETTING_QUANTIZER_SCALE:
+				displayText =
+					nodiCommon::quantizationStrings[settings[displayChannel].quantizer_scale];
 				break;
-			}
-			case braids::SETTING_QUANTIZER_ROOT: {
-				value = settings[displayChannel].quantizer_root;
-				displayText = nodiCommon::noteStrings[value];
+
+			case braids::SETTING_QUANTIZER_ROOT:
+				displayText =
+					nodiCommon::noteStrings[settings[displayChannel].quantizer_root];
 				break;
-			}
-			case braids::SETTING_VCO_FLATTEN: {
+
+			case braids::SETTING_VCO_FLATTEN:
 				displayText = nodiCommon::flatLabel;
 				break;
-			}
-			case braids::SETTING_VCO_DRIFT: {
-				value = settings[displayChannel].vco_drift;
-				displayText = nodiCommon::intensityDisplayStrings[value];
-				break;
-			}
-			case braids::SETTING_SIGNATURE: {
-				value = settings[displayChannel].signature;
-				displayText = nodiCommon::intensityDisplayStrings[value];
-				break;
-			}
-			default: {
-				break;
-			}
-			}
 
+			case braids::SETTING_VCO_DRIFT:
+				displayText =
+					nodiCommon::intensityDisplayStrings[settings[displayChannel].vco_drift];
+				break;
+
+			case braids::SETTING_SIGNATURE:
+				displayText =
+					nodiCommon::intensityDisplayStrings[settings[displayChannel].signature];
+				break;
+
+			default:
+				break;
+
+			}
 			++displayTimeout;
 		}
 
-		if (displayTimeout > args.sampleRate) {
+		if (displayTimeout > sampleRate) {
 			lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
 			displayTimeout = 0;
 		}
@@ -567,6 +565,7 @@ struct Nodi : SanguineModule {
 				arrayLastSettings[i] = arraySettings[i];
 				lastSettingChanged = static_cast<braids::Setting>(i);
 				displayTimeout = 0;
+				break;
 			}
 		}
 	}
