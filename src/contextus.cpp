@@ -212,8 +212,6 @@ struct Contextus : SanguineModule {
 		waveShaperValue = params[PARAM_SIGN].getValue();
 		driftValue = params[PARAM_DRIFT].getValue();
 
-		outputs[OUTPUT_OUT].setChannels(channelCount);
-
 		bool bHaveMetaCable = inputs[INPUT_META].isConnected();
 
 		for (int channel = 0; channel < channelCount; ++channel) {
@@ -405,6 +403,8 @@ struct Contextus : SanguineModule {
 				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
 			}
 		} // Channels.
+
+		outputs[OUTPUT_OUT].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
 			const float sampleTime = args.sampleTime * kLightsFrequency;
