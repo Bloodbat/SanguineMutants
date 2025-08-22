@@ -302,6 +302,7 @@ struct Nodi : SanguineModule {
 					// Setup oscillator from settings.
 					oscillators[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
 				} else {
+					settings[channel].shape = braids::MACRO_OSC_SHAPE_QUESTION_MARK;
 					oscillators[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
 				}
 
@@ -440,20 +441,14 @@ struct Nodi : SanguineModule {
 			}
 
 			// Handle model light.
-			if (!bPaques) {
-				lights[LIGHT_MODEL].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].red, sampleTime);
-				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].green, sampleTime);
-				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].blue, sampleTime);
-			} else {
-				lights[LIGHT_MODEL].setBrightnessSmooth(nodi::lightColors[47].red, sampleTime);
-				lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[47].green, sampleTime);
-				lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[47].blue, sampleTime);
-			}
+			lights[LIGHT_MODEL].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].red, sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].green, sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].blue, sampleTime);
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 
-				int selectedModel = bPaques != true ? settings[channel].shape : 47;
+				int selectedModel = settings[channel].shape;
 				lights[currentLight].setBrightnessSmooth(nodi::lightColors[selectedModel].red, sampleTime);
 				lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue, sampleTime);
@@ -475,11 +470,7 @@ struct Nodi : SanguineModule {
 		// Display handling.
 		// Display: return to model after 2s.
 		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
-			if (!bPaques) {
-				displayText = nodi::displayLabels[settings[displayChannel].shape];
-			} else {
-				displayText = nodi::displayLabels[47];
-			}
+			displayText = nodi::displayLabels[settings[displayChannel].shape];
 		} else {
 			switch (lastSettingChanged) {
 			case braids::SETTING_RESOLUTION:
