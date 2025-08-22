@@ -118,15 +118,19 @@ struct Velamina : SanguineModule {
 			float_4 gain[4] = {};
 			float_4 inVoltages[4] = {};
 
+			float sliderGain = params[PARAM_GAIN_1 + channel].getValue();
+			float knobOffset = params[PARAM_OFFSET_1 + channel].getValue();
+			float knobResponse = params[PARAM_RESPONSE_1 + channel].getValue();
+
 			for (int polyChannel = 0; polyChannel < polyChannelCount; polyChannel += 4) {
 				uint8_t currentChannel = polyChannel >> 2;
 				if (cvInputsConnected[channel]) {
 					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
 					gain[currentChannel] = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
-						params[PARAM_GAIN_1 + channel].getValue() + params[PARAM_OFFSET_1 + channel].getValue()), 0.f, 8.f) / 5.f, 0.f);
-					gain[currentChannel] = simd::pow(gain[currentChannel], 1 / (0.1f + 0.9f * params[PARAM_RESPONSE_1 + channel].getValue()));
+						sliderGain + knobOffset), 0.f, 8.f) / 5.f, 0.f);
+					gain[currentChannel] = simd::pow(gain[currentChannel], 1 / (0.1f + 0.9f * knobResponse));
 				} else {
-					gain[currentChannel] = params[PARAM_GAIN_1 + channel].getValue() + params[PARAM_OFFSET_1 + channel].getValue();
+					gain[currentChannel] = sliderGain + knobOffset;
 				}
 
 				if (signalInputsConnected[channel]) {
