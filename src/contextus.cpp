@@ -416,14 +416,14 @@ struct Contextus : SanguineModule {
 			}
 
 			// Handle model light.
-			lights[LIGHT_MODEL + 0].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
+			lights[LIGHT_MODEL].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].green, sampleTime);
 			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].blue, sampleTime);
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 				if (channel < channelCount) {
-					lights[currentLight + 0].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].red, sampleTime);
+					lights[currentLight].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].red, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].green, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].blue, sampleTime);
 				} else {
