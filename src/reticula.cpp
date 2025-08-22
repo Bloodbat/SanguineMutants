@@ -404,10 +404,10 @@ struct Reticula : SanguineModule {
                 break;
             }
 
-            lights[LIGHT_TAP + 0].setBrightnessSmooth((bClockPulseRequested && !bUseTapTempo) || (bClockPulseRequested && bUseExternalClock) ?
-                kSanguineButtonLightValue : 0.f, args.sampleTime);
-            lights[LIGHT_TAP + 1].setBrightnessSmooth((bClockPulseRequested && bUseTapTempo) || (bClockPulseRequested && bUseExternalClock) ?
-                kSanguineButtonLightValue : 0.f, args.sampleTime);
+            lights[LIGHT_TAP].setBrightnessSmooth(((bClockPulseRequested & (!bUseTapTempo)) |
+                (bClockPulseRequested & bUseExternalClock)) * kSanguineButtonLightValue, args.sampleTime);
+            lights[LIGHT_TAP + 1].setBrightnessSmooth(((bClockPulseRequested & bUseTapTempo) |
+                (bClockPulseRequested & bUseExternalClock)) * kSanguineButtonLightValue, args.sampleTime);
 
             if (bClockPulseRequested) {
                 pgClock.trigger();
@@ -446,27 +446,27 @@ struct Reticula : SanguineModule {
             }
         }
 
-        lights[LIGHT_RESET].setBrightnessSmooth(static_cast<bool>(outputs[OUTPUT_RESET].getVoltage()) ?
-            kSanguineButtonLightValue : 0.f, args.sampleTime);
+        lights[LIGHT_RESET].setBrightnessSmooth(static_cast<bool>(outputs[OUTPUT_RESET].getVoltage()) *
+            kSanguineButtonLightValue, args.sampleTime);
 
         if (lightsDivider.process()) {
             const float sampleTime = kLightsFrequency * args.sampleTime;
 
             sequencerMode = static_cast<reticula::PatternGeneratorModes>(params[PARAM_SEQUENCER_MODE].getValue());
-            lights[LIGHT_SEQUENCER_MODE + 0].setBrightnessSmooth(sequencerMode <= reticula::PATTERN_HENRI ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
-            lights[LIGHT_SEQUENCER_MODE + 1].setBrightnessSmooth(sequencerMode >= reticula::PATTERN_HENRI ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_SEQUENCER_MODE].setBrightnessSmooth((sequencerMode <= reticula::PATTERN_HENRI) *
+                kSanguineButtonLightValue, sampleTime);
+            lights[LIGHT_SEQUENCER_MODE + 1].setBrightnessSmooth((sequencerMode >= reticula::PATTERN_HENRI) *
+                kSanguineButtonLightValue, sampleTime);
 
             clockOutputSource = static_cast<reticula::ClockOutputSources>(params[PARAM_CLOCK_OUTPUT_SOURCE].getValue());
-            lights[LIGHT_CLOCK_OUTPUT_SOURCE + 0].setBrightnessSmooth(clockOutputSource <= reticula::CLOCK_SOURCE_BEAT ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
-            lights[LIGHT_CLOCK_OUTPUT_SOURCE + 1].setBrightnessSmooth(clockOutputSource >= reticula::CLOCK_SOURCE_BEAT ?
-                kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_CLOCK_OUTPUT_SOURCE].setBrightnessSmooth((clockOutputSource <= reticula::CLOCK_SOURCE_BEAT) *
+                kSanguineButtonLightValue, sampleTime);
+            lights[LIGHT_CLOCK_OUTPUT_SOURCE + 1].setBrightnessSmooth((clockOutputSource >= reticula::CLOCK_SOURCE_BEAT) *
+                kSanguineButtonLightValue, sampleTime);
 
             patternGenerator.setPatternMode(sequencerMode);
 
-            lights[LIGHT_RUN].setBrightnessSmooth(bIsModuleRunning ? kSanguineButtonLightValue : 0.f, sampleTime);
+            lights[LIGHT_RUN].setBrightnessSmooth(bIsModuleRunning * kSanguineButtonLightValue, sampleTime);
 
             if (!bUseExternalClock) {
                 int tempo = static_cast<int>(tempoParam);
