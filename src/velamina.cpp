@@ -84,11 +84,32 @@ struct Velamina : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
+		bool signalInputsConnected[kMaxChannels];
+
+		signalInputsConnected[0] = inputs[INPUT_IN_1].isConnected();
+		signalInputsConnected[1] = inputs[INPUT_IN_2].isConnected();
+		signalInputsConnected[2] = inputs[INPUT_IN_3].isConnected();
+		signalInputsConnected[3] = inputs[INPUT_IN_4].isConnected();
+
+		bool cvInputsConnected[kMaxChannels];
+
+		cvInputsConnected[0] = inputs[INPUT_CV_1].isConnected();
+		cvInputsConnected[1] = inputs[INPUT_CV_2].isConnected();
+		cvInputsConnected[2] = inputs[INPUT_CV_3].isConnected();
+		cvInputsConnected[3] = inputs[INPUT_CV_4].isConnected();
+
+		bool outputsConnected[kMaxChannels];
+
+		outputsConnected[0] = outputs[OUTPUT_1].isConnected();
+		outputsConnected[1] = outputs[OUTPUT_2].isConnected();
+		outputsConnected[2] = outputs[OUTPUT_3].isConnected();
+		outputsConnected[3] = outputs[OUTPUT_4].isConnected();
+
 		if (bIsLightsTurn) {
 			sampleTime = kLightsDivider * args.sampleTime;
 		}
 
-		if (inputs[INPUT_IN_1].isConnected() || inputs[INPUT_IN_2].isConnected() || inputs[INPUT_IN_3].isConnected() || inputs[INPUT_IN_4].isConnected()) {
+		if (signalInputsConnected[0] | signalInputsConnected[1] | signalInputsConnected[2] | signalInputsConnected[3]) {
 			polyChannelCount = std::max(std::max(std::max(inputs[INPUT_IN_1].getChannels(), inputs[INPUT_IN_2].getChannels()),
 				std::max(inputs[INPUT_IN_3].getChannels(), inputs[INPUT_IN_4].getChannels())), 1);
 		}
@@ -101,7 +122,7 @@ struct Velamina : SanguineModule {
 
 			for (int polyChannel = 0; polyChannel < polyChannelCount; polyChannel += 4) {
 				uint8_t currentChannel = polyChannel >> 2;
-				if (inputs[INPUT_CV_1 + channel].isConnected()) {
+				if (cvInputsConnected[channel]) {
 					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
 					gain[currentChannel] = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
 						params[PARAM_GAIN_1 + channel].getValue() + params[PARAM_OFFSET_1 + channel].getValue()), 0.f, 8.f) / 5.f, 0.f);
@@ -110,7 +131,7 @@ struct Velamina : SanguineModule {
 					gain[currentChannel] = params[PARAM_GAIN_1 + channel].getValue() + params[PARAM_OFFSET_1 + channel].getValue();
 				}
 
-				if (inputs[INPUT_IN_1 + channel].isConnected()) {
+				if (signalInputsConnected[channel]) {
 					inVoltages[currentChannel] = inputs[INPUT_IN_1 + channel].getVoltageSimd<float_4>(polyChannel);
 
 					float_4 voltages = gain[currentChannel] * inVoltages[currentChannel];
@@ -124,7 +145,7 @@ struct Velamina : SanguineModule {
 				portVoltages[channel][currentChannel] = outVoltages[currentChannel];
 
 
-				if (outputs[OUTPUT_1 + channel].isConnected()) {
+				if (outputsConnected[channel]) {
 					outputs[OUTPUT_1 + channel].setVoltageSimd(outVoltages[currentChannel], polyChannel);
 					outVoltages[currentChannel] = 0.f;
 				}
