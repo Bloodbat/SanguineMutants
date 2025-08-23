@@ -77,12 +77,32 @@ struct Anuli : SanguineModule {
 	rings::Strummer strummers[PORT_MAX_CHANNELS];
 	rings::PerformanceState performanceStates[PORT_MAX_CHANNELS] = {};
 
+	struct ParametersInfo {
+		float_4 knobValues;
+
+		float_4 modValues;
+
+		float frequency;
+
+		float modFrequency;
+
+		bool useInternalExciter;
+		bool useInternalStrum;
+		bool useInternalNote;
+
+		bool havePitchCable;
+	} parametersInfo;
+
 	bool strums[PORT_MAX_CHANNELS] = {};
 	bool lastStrums[PORT_MAX_CHANNELS] = {};
 
 	bool bNotesModeSelection = false;
 
 	bool bUseFrequencyOffset = true;
+
+	bool bHaveBothOutputs = false;
+	bool bHaveModeCable = false;
+	bool bHaveFxCable = false;
 
 	int channelCount = 0;
 	int polyphonyMode = 1;
@@ -101,22 +121,6 @@ struct Anuli : SanguineModule {
 	std::string displayText = "";
 
 	static const int kLightsFrequency = 64;
-
-	struct ParametersInfo {
-		float_4 knobValues;
-
-		float frequency;
-
-		float_4 modValues;
-
-		float modFrequency;
-
-		bool useInternalExciter;
-		bool useInternalStrum;
-		bool useInternalNote;
-
-		bool havePitchCable;
-	};
 
 	Anuli() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -167,6 +171,24 @@ struct Anuli : SanguineModule {
 			stringSynths[channel].Init(reverbBuffers[channel]);
 		}
 
+		parametersInfo.havePitchCable = false;
+		parametersInfo.useInternalExciter = true;
+		parametersInfo.useInternalNote = true;
+		parametersInfo.useInternalStrum = true;
+
+		parametersInfo.frequency = 30.f;
+		parametersInfo.knobValues[0] = 0.5f;
+		parametersInfo.knobValues[1] = 0.5f;
+		parametersInfo.knobValues[2] = 0.5f;
+		parametersInfo.knobValues[3] = 0.5f;
+
+		parametersInfo.modValues[0] = 0.f;
+		parametersInfo.modValues[1] = 0.f;
+		parametersInfo.modValues[2] = 0.f;
+		parametersInfo.modValues[3] = 0.f;
+
+		parametersInfo.modFrequency = 0.f;
+
 		lightsDivider.setDivision(kLightsFrequency);
 	}
 
@@ -184,8 +206,6 @@ struct Anuli : SanguineModule {
 
 		channelModes.fill(knobMode);
 
-		ParametersInfo parametersInfo;
-
 		parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
 		parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
 		parametersInfo.knobValues[2] = params[PARAM_DAMPING].getValue();
@@ -201,16 +221,6 @@ struct Anuli : SanguineModule {
 		parametersInfo.modValues = dsp::quadraticBipolar(parametersInfo.modValues);
 
 		parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
-
-		parametersInfo.useInternalExciter = !inputs[INPUT_IN].isConnected();
-		parametersInfo.useInternalStrum = !inputs[INPUT_STRUM].isConnected();
-		parametersInfo.useInternalNote = !inputs[INPUT_PITCH].isConnected();
-
-		parametersInfo.havePitchCable = inputs[INPUT_PITCH].isConnected();
-
-		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
-		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
-		bool bHaveFxCable = inputs[INPUT_FX].isConnected();
 
 		if (bHaveModeCable) {
 			if (!bNotesModeSelection) {
@@ -254,7 +264,7 @@ struct Anuli : SanguineModule {
 		for (int channel = 0; channel < channelCount; ++channel) {
 			setupChannel(channel);
 
-			renderFrames(channel, parametersInfo, args.sampleRate);
+			renderFrames(channel, args.sampleRate);
 
 			setOutputs(channel, bHaveBothOutputs);
 		}
@@ -328,7 +338,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupPatch(const int channel, rings::Patch& patch, float& structure, const ParametersInfo& parametersInfo) {
+	void setupPatch(const int channel, rings::Patch& patch, float& structure) {
 		float_4 voltages;
 
 		voltages[0] = inputs[INPUT_STRUCTURE_CV].getVoltage(channel);
@@ -353,8 +363,7 @@ struct Anuli : SanguineModule {
 		patch.position = voltages[3];
 	}
 
-	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float& structure,
-		const ParametersInfo& parametersInfo) {
+	void setupPerformance(const int channel, rings::PerformanceState& performanceState, const float& structure) {
 		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
@@ -416,7 +425,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void renderFrames(const int channel, const ParametersInfo& parametersInfo, const float& sampleRate) {
+	void renderFrames(const int channel, const float& sampleRate) {
 		if (drbOutputBuffers[channel].empty()) {
 			float in[anuli::kBlockSize] = {};
 
@@ -440,8 +449,8 @@ struct Anuli : SanguineModule {
 
 				stringSynths[channel].set_fx(rings::FxType(channelFx[channel]));
 
-				setupPatch(channel, patch, structure, parametersInfo);
-				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
+				setupPatch(channel, patch, structure);
+				setupPerformance(channel, performanceStates[channel], structure);
 
 				// Process audio.
 				strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
@@ -455,8 +464,8 @@ struct Anuli : SanguineModule {
 
 				parts[channel].set_model(resonatorModels[channel]);
 
-				setupPatch(channel, patch, structure, parametersInfo);
-				setupPerformance(channel, performanceStates[channel], structure, parametersInfo);
+				setupPatch(channel, patch, structure);
+				setupPerformance(channel, performanceStates[channel], structure);
 
 				// Process audio.
 				strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
@@ -485,6 +494,50 @@ struct Anuli : SanguineModule {
 			// strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
 			strummingFlagCounter = kLightsFrequency;
 			// strummingFlagInterval = 0;
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		switch (e.type) {
+		case Port::INPUT:
+			switch (e.portId) {
+			case INPUT_IN:
+				parametersInfo.useInternalExciter = !(e.connecting);
+				break;
+
+			case INPUT_STRUM:
+				parametersInfo.useInternalStrum = !(e.connecting);
+				break;
+
+			case INPUT_PITCH:
+				parametersInfo.useInternalNote = !(e.connecting);
+				parametersInfo.havePitchCable = e.connecting;
+				break;
+
+			case INPUT_MODE:
+				bHaveModeCable = e.connecting;
+				break;
+
+			case INPUT_FX:
+				bHaveFxCable = e.connecting;
+				break;
+
+			default:
+				break;
+			}
+			break;
+
+		case Port::OUTPUT:
+			switch (e.portId) {
+			case OUTPUT_ODD:
+				bHaveBothOutputs = e.connecting & outputs[OUTPUT_EVEN].isConnected();
+				break;
+
+			case OUTPUT_EVEN:
+				bHaveBothOutputs = e.connecting & outputs[OUTPUT_ODD].isConnected();
+				break;
+			}
+			break;
 		}
 	}
 
