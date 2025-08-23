@@ -126,7 +126,7 @@ struct Distortiones : SanguineModule {
 
 		float knobAlgorithm = params[PARAM_ALGORITHM].getValue();
 
-		bool bHaveModeCable = static_cast<bool>(inputs[INPUT_MODE].isConnected());
+		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
 		// TODO: FIX ME!!! Mode selection snapping to the wrong value when switching back to mode selection after first time.
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
