@@ -263,8 +263,7 @@ struct Apices : SanguineModule {
 			}
 
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-				int channel1Input = Nix::INPUT_PARAM_CV_1 + knob;
-				if (nixExpander->getInput(channel1Input).isConnected() ||
+				if (nixExpander->getChannel1PortConnected(knob) ||
 					nixExpander->getChannel1PortChanged(knob)) {
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
@@ -292,9 +291,7 @@ struct Apices : SanguineModule {
 				}
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-					int channel2Input = Nix::INPUT_PARAM_CV_CHANNEL_2_1 + knob;
-
-					if (nixExpander->getInput(channel2Input).isConnected() ||
+					if (nixExpander->getChannel2PortConnected(knob) ||
 						nixExpander->getChannel2PortChanged(knob)) {
 						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
 
