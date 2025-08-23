@@ -16,6 +16,9 @@ Ansa::Ansa() {
 
         expanderPorts1Changed[parameter] = false;
         expanderPorts2Changed[parameter] = false;
+
+        expanderPorts1Connected[parameter] = false;
+        expanderPorts2Connected[parameter] = false;
     }
 }
 
@@ -47,6 +50,12 @@ void Ansa::onPortChange(const PortChangeEvent& e) {
         } else {
             expanderPorts2Changed[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
         }
+    } else {
+        if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
+            expanderPorts1Connected[e.portId] = true;
+        } else {
+            expanderPorts2Connected[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
+        }
     }
 
     Module::onPortChange(e);
@@ -58,6 +67,14 @@ bool Ansa::getChannel1PortChanged(const int portNumber) const {
 
 bool Ansa::getChannel2PortChanged(const int portNumber) const {
     return expanderPorts2Changed[portNumber];
+}
+
+bool Ansa::getChannel1PortConnected(const int portNumber) const {
+    return expanderPorts1Connected[portNumber];
+}
+
+bool Ansa::getChannel2PortConnected(const int portNumber) const {
+    return expanderPorts2Connected[portNumber];
 }
 
 void Ansa::setChannel1PortChanged(const int portNumber, const bool value) {
