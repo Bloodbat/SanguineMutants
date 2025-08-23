@@ -112,6 +112,11 @@ struct Aestus : SanguineModule {
 	bool bUseCalibrationOffset = true;
 	bool lastExternalSyncs[PORT_MAX_CHANNELS];
 	bool bWantPeacocks = false;
+
+	bool bModelConnected = false;
+	bool bModeConnected = false;
+	bool bRangeConnected = false;
+
 	size_t frames[PORT_MAX_CHANNELS];
 	static const int kLightsFrequency = 16;
 	int channelCount = 1;
@@ -202,10 +207,6 @@ struct Aestus : SanguineModule {
 
 			channelModes.fill(selectedMode);
 			channelRanges.fill(selectedRange);
-
-			bool bModelConnected = inputs[INPUT_MODEL].isConnected();
-			bool bModeConnected = inputs[INPUT_MODE].isConnected();
-			bool bRangeConnected = inputs[INPUT_RANGE].isConnected();
 
 			float knobFrequency = params[PARAM_FREQUENCY].getValue();
 			float knobFm = params[PARAM_FM].getValue();
@@ -475,6 +476,24 @@ struct Aestus : SanguineModule {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			generators[channel].set_range(tides::GeneratorRange(random::u32() % 3));
 			generators[channel].set_mode(tides::GeneratorMode(random::u32() % 3));
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT) {
+			switch (e.portId) {
+			case INPUT_MODEL:
+				bModelConnected = e.connecting;
+				break;
+			case INPUT_RANGE:
+				bRangeConnected = e.connecting;
+				break;
+			case INPUT_MODE:
+				bModeConnected = e.connecting;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
