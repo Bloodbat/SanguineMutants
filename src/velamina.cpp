@@ -61,6 +61,10 @@ struct Velamina : SanguineModule {
 	static const int kLightsDivider = 64;
 	static const int kMaxChannels = 4;
 
+	bool signalInputsConnected[kMaxChannels];
+	bool cvInputsConnected[kMaxChannels];
+	bool outputsConnected[kMaxChannels];
+
 	Velamina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -75,6 +79,10 @@ struct Velamina : SanguineModule {
 			configInput(INPUT_IN_1 + channel, string::f("Channel %d", channelNumber));
 			configInput(INPUT_CV_1 + channel, string::f("Channel %d CV", channelNumber));
 			configOutput(OUTPUT_1 + channel, string::f("Channel %d", channelNumber));
+
+			signalInputsConnected[channel] = false;
+			cvInputsConnected[channel] = false;
+			outputsConnected[channel] = false;
 		}
 
 		lightsDivider.setDivision(kLightsDivider);
@@ -87,27 +95,6 @@ struct Velamina : SanguineModule {
 		int polyChannelCount = 1;
 
 		bool bIsLightsTurn = lightsDivider.process();
-
-		bool signalInputsConnected[kMaxChannels];
-
-		signalInputsConnected[0] = inputs[INPUT_IN_1].isConnected();
-		signalInputsConnected[1] = inputs[INPUT_IN_2].isConnected();
-		signalInputsConnected[2] = inputs[INPUT_IN_3].isConnected();
-		signalInputsConnected[3] = inputs[INPUT_IN_4].isConnected();
-
-		bool cvInputsConnected[kMaxChannels];
-
-		cvInputsConnected[0] = inputs[INPUT_CV_1].isConnected();
-		cvInputsConnected[1] = inputs[INPUT_CV_2].isConnected();
-		cvInputsConnected[2] = inputs[INPUT_CV_3].isConnected();
-		cvInputsConnected[3] = inputs[INPUT_CV_4].isConnected();
-
-		bool outputsConnected[kMaxChannels];
-
-		outputsConnected[0] = outputs[OUTPUT_1].isConnected();
-		outputsConnected[1] = outputs[OUTPUT_2].isConnected();
-		outputsConnected[2] = outputs[OUTPUT_3].isConnected();
-		outputsConnected[3] = outputs[OUTPUT_4].isConnected();
 
 		if (bIsLightsTurn) {
 			sampleTime = kLightsDivider * args.sampleTime;
@@ -198,6 +185,66 @@ struct Velamina : SanguineModule {
 			}
 
 			outputs[OUTPUT_1 + channel].setChannels(polyChannelCount);
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		switch (e.type) {
+		case Port::INPUT:
+			switch (e.portId) {
+			case INPUT_IN_1:
+				signalInputsConnected[0] = e.connecting;
+				break;
+
+			case INPUT_IN_2:
+				signalInputsConnected[1] = e.connecting;
+				break;
+
+			case INPUT_IN_3:
+				signalInputsConnected[2] = e.connecting;
+				break;
+
+			case INPUT_IN_4:
+				signalInputsConnected[3] = e.connecting;
+				break;
+
+			case INPUT_CV_1:
+				cvInputsConnected[0] = e.connecting;
+				break;
+
+			case INPUT_CV_2:
+				cvInputsConnected[1] = e.connecting;
+				break;
+
+			case INPUT_CV_3:
+				cvInputsConnected[2] = e.connecting;
+				break;
+
+			case INPUT_CV_4:
+				cvInputsConnected[3] = e.connecting;
+				break;
+			}
+			break;
+
+		case Port::OUTPUT:
+			switch (e.portId) {
+			case OUTPUT_1:
+				outputsConnected[0] = e.connecting;
+				break;
+
+			case OUTPUT_2:
+				outputsConnected[1] = e.connecting;
+				break;
+
+			case OUTPUT_3:
+				outputsConnected[2] = e.connecting;
+				break;
+
+			case OUTPUT_4:
+				outputsConnected[3] = e.connecting;
+				break;
+			}
+			break;
 		}
 	}
 };
