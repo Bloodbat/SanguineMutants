@@ -122,6 +122,11 @@ struct Temulenti : SanguineModule {
 	bool bUseCalibrationOffset = true;
 	bool lastExternalSyncs[PORT_MAX_CHANNELS];
 
+	bool bModelConnected = false;
+	bool bModeConnected = false;
+	bool bRangeConnected = false;
+	bool bQuantizerConnected = false;
+
 	static const int kLightsFrequency = 16;
 	int channelCount = 1;
 	int displayChannel = 0;
@@ -204,11 +209,6 @@ struct Temulenti : SanguineModule {
 		if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
 			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
 		}
-
-		bool bModelConnected = inputs[INPUT_MODEL].isConnected();
-		bool bModeConnected = inputs[INPUT_MODE].isConnected();
-		bool bRangeConnected = inputs[INPUT_RANGE].isConnected();
-		bool bQuantizerConnected = inputs[INPUT_QUANTIZER].isConnected();
 
 		float knobFrequency = params[PARAM_FREQUENCY].getValue();
 		float knobFm = params[PARAM_FM].getValue();
@@ -524,6 +524,27 @@ struct Temulenti : SanguineModule {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			generators[channel].set_range(bumps::GeneratorRange(random::u32() % 3));
 			generators[channel].set_mode(bumps::GeneratorMode(random::u32() % 3));
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT) {
+			switch (e.portId) {
+			case INPUT_MODEL:
+				bModelConnected = e.connecting;
+				break;
+			case INPUT_RANGE:
+				bRangeConnected = e.connecting;
+				break;
+			case INPUT_MODE:
+				bModeConnected = e.connecting;
+				break;
+			case INPUT_QUANTIZER:
+				bQuantizerConnected = e.connecting;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
