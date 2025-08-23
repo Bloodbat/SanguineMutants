@@ -23,20 +23,22 @@ Nix::Nix() {
 }
 
 void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
-    Module* apicesMaster = getLeftExpander().module;
-    bool bHasMaster = (apicesMaster && apicesMaster->getModel() == modelApices);
-    lights[LIGHT_MASTER_MODULE].setBrightness(bHasMaster ? kSanguineButtonLightValue : 0.f);
-    lights[LIGHT_SPLIT_CHANNEL_2].setBrightness(0.f);
+    if (e.side == 0) {
+        Module* apicesMaster = getLeftExpander().module;
+        bool bHasMaster = (apicesMaster && apicesMaster->getModel() == modelApices);
+        lights[LIGHT_MASTER_MODULE].setBrightness(bHasMaster ? kSanguineButtonLightValue : 0.f);
+        lights[LIGHT_SPLIT_CHANNEL_2].setBrightness(0.f);
 
-    for (int light = 0; light < 3; ++light) {
-        lights[LIGHT_SPLIT_CHANNEL_1 + light].setBrightness(0.f);
-    }
+        for (int light = 0; light < 3; ++light) {
+            lights[LIGHT_SPLIT_CHANNEL_1 + light].setBrightness(0.f);
+        }
 
-    if (!bHasMaster) {
-        for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
-            int currentLight = LIGHT_PARAM_1 + light * 3;
-            for (int lightColor = 0; lightColor < 3; ++lightColor) {
-                lights[currentLight + lightColor].setBrightness(0.f);
+        if (!bHasMaster) {
+            for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
+                int currentLight = LIGHT_PARAM_1 + light * 3;
+                for (int lightColor = 0; lightColor < 3; ++lightColor) {
+                    lights[currentLight + lightColor].setBrightness(0.f);
+                }
             }
         }
     }
