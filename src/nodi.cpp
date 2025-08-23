@@ -116,6 +116,7 @@ struct Nodi : SanguineModule {
 	bool bPaques = false;
 	bool bVCAEnabled = false;
 
+	bool bHaveMetaCable = false;
 	bool bHaveAttackCable = false;
 	bool bHaveDecayCable = false;
 
@@ -237,10 +238,6 @@ struct Nodi : SanguineModule {
 		uint8_t  knobAdColor = params[PARAM_AD_COLOR].getValue();
 
 		uint8_t knobModel = params[PARAM_MODEL].getValue();
-
-		bool bHaveMetaCable = inputs[INPUT_META].isConnected();
-		bHaveAttackCable = inputs[INPUT_ATTACK].isConnected();
-		bHaveDecayCable = inputs[INPUT_DECAY].isConnected();
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			settings[channel].quantizer_scale = knobScale;
@@ -623,6 +620,27 @@ struct Nodi : SanguineModule {
 		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled * kSanguineButtonLightValue, sampleTime);
 		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled * kSanguineButtonLightValue, sampleTime);
 		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger * kSanguineButtonLightValue, sampleTime);
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT) {
+			switch (e.portId) {
+			case INPUT_META:
+				bHaveMetaCable = e.connecting;
+				break;
+
+			case INPUT_ATTACK:
+				bHaveAttackCable = e.connecting;
+				break;
+
+			case INPUT_DECAY:
+				bHaveDecayCable = e.connecting;
+				break;
+
+			default:
+				break;
+			}
+		}
 	}
 
 	json_t* dataToJson() override {
