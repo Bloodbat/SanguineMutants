@@ -130,7 +130,7 @@ struct Mutuus : SanguineModule {
 
 		float knobAlgorithm = params[PARAM_ALGORITHM].getValue();
 
-		bool bHaveModeCable = static_cast<bool>(inputs[INPUT_MODE].isConnected());
+		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
 		bool bWantStereo = static_cast<bool>(params[PARAM_STEREO].getValue());
 
