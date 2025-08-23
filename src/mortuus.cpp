@@ -276,8 +276,7 @@ struct Mortuus : SanguineModule {
 			}
 
 			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-				int channel1Input = Ansa::INPUT_PARAM_CV_1 + knob;
-				if (ansaExpander->getInput(channel1Input).isConnected() ||
+				if (ansaExpander->getChannel1PortConnected(knob) ||
 					ansaExpander->getChannel1PortChanged(knob)) {
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
@@ -305,9 +304,7 @@ struct Mortuus : SanguineModule {
 				}
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-					int channel2Input = Ansa::INPUT_PARAM_CV_CHANNEL_2_1 + knob;
-
-					if (ansaExpander->getInput(channel2Input).isConnected() ||
+					if (ansaExpander->getChannel2PortConnected(knob) ||
 						ansaExpander->getChannel2PortChanged(knob)) {
 						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
 
