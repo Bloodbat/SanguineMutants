@@ -61,10 +61,17 @@ struct Ansa : SanguineModule {
     bool getChannel1PortChanged(const int portNumber) const;
     bool getChannel2PortChanged(const int portNumber) const;
 
+    bool getChannel1PortConnected(const int portNumber) const;
+    bool getChannel2PortConnected(const int portNumber) const;
+
     void setChannel1PortChanged(const int portNumber, const bool value);
     void setChannel2PortChanged(const int portNumber, const bool value);
 
 private:
     bool expanderPorts1Changed[apicesCommon::kKnobCount];
     bool expanderPorts2Changed[apicesCommon::kKnobCount];
+
+
+    bool expanderPorts1Connected[apicesCommon::kKnobCount];
+    bool expanderPorts2Connected[apicesCommon::kKnobCount];
 };
