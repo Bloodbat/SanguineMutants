@@ -54,6 +54,7 @@ struct Aleae : SanguineModule {
 	aleae::RollModes rollModes[kMaxModuleSections] = { aleae::ROLL_DIRECT, aleae::ROLL_DIRECT };
 	aleae::OutModes outModes[kMaxModuleSections] = { aleae::OUT_MODE_TRIGGER, aleae::OUT_MODE_TRIGGER };
 	bool bOutputsConnected[OUTPUTS_COUNT] = {};
+	bool bHaveSection2Input = false;
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -75,18 +76,13 @@ struct Aleae : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		bOutputsConnected[0] = outputs[OUTPUT_OUT_1A].isConnected();
-		bOutputsConnected[1] = outputs[OUTPUT_OUT_2A].isConnected();
-		bOutputsConnected[2] = outputs[OUTPUT_OUT_1B].isConnected();
-		bOutputsConnected[3] = outputs[OUTPUT_OUT_2B].isConnected();
-
 		bool bIsLightsTurn = lightsDivider.process();
 
 		for (int section = 0; section < kMaxModuleSections; ++section) {
 			// Get input.
 			Input* input = &inputs[INPUT_IN_1 + section];
 			// 2nd input is normalized to 1st.
-			if (section == 1 && !input->isConnected()) {
+			if (section == 1 && !bHaveSection2Input) {
 				input = &inputs[INPUT_IN_1];
 			}
 			channelCount = std::max(input->getChannels(), 1);
@@ -159,7 +155,6 @@ struct Aleae : SanguineModule {
 		}
 	}
 
-
 	void onReset(const ResetEvent& e) override {
 		for (int section = 0; section < kMaxModuleSections; ++section) {
 			params[PARAM_ROLL_MODE_1 + section].setValue(0);
@@ -167,6 +162,37 @@ struct Aleae : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		switch (e.type) {
+		case Port::INPUT:
+			switch (e.portId) {
+			case INPUT_IN_2:
+				bHaveSection2Input = e.connecting;
+				break;
+			default:
+				break;
+			}
+			break;
+
+		case Port::OUTPUT:
+			switch (e.portId) {
+			case OUTPUT_OUT_1A:
+				bOutputsConnected[0] = e.connecting;
+				break;
+			case OUTPUT_OUT_2A:
+				bOutputsConnected[1] = e.connecting;
+				break;
+			case OUTPUT_OUT_1B:
+				bOutputsConnected[2] = e.connecting;
+				break;
+			case OUTPUT_OUT_2B:
+				bOutputsConnected[3] = e.connecting;
+				break;
+			}
+			break;
 		}
 	}
 
