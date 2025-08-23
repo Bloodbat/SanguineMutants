@@ -116,6 +116,8 @@ struct Anuli : SanguineModule {
 		bool useInternalExciter;
 		bool useInternalStrum;
 		bool useInternalNote;
+
+		bool havePitchCable;
 	};
 
 	Anuli() {
@@ -205,6 +207,8 @@ struct Anuli : SanguineModule {
 		parametersInfo.useInternalExciter = !inputs[INPUT_IN].isConnected();
 		parametersInfo.useInternalStrum = !inputs[INPUT_STRUM].isConnected();
 		parametersInfo.useInternalNote = !inputs[INPUT_PITCH].isConnected();
+
+		parametersInfo.havePitchCable = inputs[INPUT_PITCH].isConnected();
 
 		bool bHaveBothOutputs = outputs[OUTPUT_ODD].isConnected() && outputs[OUTPUT_EVEN].isConnected();
 		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
@@ -359,7 +363,7 @@ struct Anuli : SanguineModule {
 
 		float transpose = parametersInfo.frequency;
 		// Quantize transpose if pitch input is connected.
-		if (inputs[INPUT_PITCH].isConnected()) {
+		if (parametersInfo.havePitchCable) {
 			transpose = roundf(transpose);
 		}
 		performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
