@@ -122,6 +122,10 @@ struct Vimina : SanguineModule {
 	bool inputGateStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	bool multipliesDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
+	bool bHaveReset = false;
+	bool bHaveClock = false;
+
+
 	SectionFunctions sectionFunctions[kMaxModuleSections] = {
 		FUNCTION_SWING,
 		FUNCTION_FACTORER
@@ -173,8 +177,6 @@ struct Vimina : SanguineModule {
 		channelCount = std::max(inputs[INPUT_CLOCK].getChannels(), 1);
 
 		bool resetRequests[kMaxModuleSections] = {};
-		bool bHaveReset = inputs[INPUT_RESET].isConnected();
-		bool bHaveClock = inputs[INPUT_CLOCK].isConnected();
 
 		SectionFunctions functionSection1 =
 			static_cast<SectionFunctions>(params[PARAM_MODE_1].getValue());
@@ -564,6 +566,20 @@ struct Vimina : SanguineModule {
 		params[PARAM_MODE_2].setValue(0);
 		params[PARAM_FACTOR_1].setValue(0.5f);
 		params[PARAM_FACTOR_2].setValue(0.5f);
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT) {
+			switch (e.portId) {
+			case INPUT_RESET:
+				bHaveReset = e.connecting;
+				break;
+			case INPUT_CLOCK:
+				bHaveClock = e.connecting;
+			default:
+				break;
+			}
+		}
 	}
 
 	json_t* dataToJson() override {
