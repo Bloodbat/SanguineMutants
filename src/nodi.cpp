@@ -143,22 +143,17 @@ struct Nodi : SanguineModule {
 		configParam(PARAM_MODULATION, -1.f, 1.f, 0.f, "Modulation");
 		configParam(PARAM_COARSE, -5.f, 3.f, -1.f, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
 		configParam(PARAM_FINE, -1.f, 1.f, 0.f, "Fine frequency", " semitones");
-		configParam(PARAM_ATTACK, 0.f, 15.f, 0.f, "Attack");
-		paramQuantities[PARAM_ATTACK]->snapEnabled = true;
+		configSwitch(PARAM_ATTACK, 0.f, 15.f, 0.f, "Attack", nodiCommon::numberStrings15);
 
-		configParam(PARAM_AD_TIMBRE, 0.f, 15.f, 0.f, "Timbre AD");
-		paramQuantities[PARAM_AD_TIMBRE]->snapEnabled = true;
+		configSwitch(PARAM_AD_TIMBRE, 0.f, 15.f, 0.f, "Timbre AD", nodiCommon::numberStrings15);
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0.f, 100.f);
 		configSwitch(PARAM_ROOT, 0.f, 11.f, 0.f, "Quantizer root note", nodiCommon::noteStrings);
 		configSwitch(PARAM_SCALE, 0.f, 48.f, 0.f, "Quantizer scale", nodiCommon::scaleStrings);
-		configParam(PARAM_DECAY, 0.f, 15.f, 7.f, "Decay");
-		paramQuantities[PARAM_DECAY]->snapEnabled = true;
+		configSwitch(PARAM_DECAY, 0.f, 15.f, 7.f, "Decay", nodiCommon::numberStrings15);
 
-		configParam(PARAM_AD_COLOR, 0.f, 15.f, 0.f, "Color AD");
-		paramQuantities[PARAM_AD_COLOR]->snapEnabled = true;
-		configParam(PARAM_AD_MODULATION, 0.f, 15.f, 0.f, "FM AD");
-		paramQuantities[PARAM_AD_MODULATION]->snapEnabled = true;
+		configSwitch(PARAM_AD_COLOR, 0.f, 15.f, 0.f, "Color AD", nodiCommon::numberStrings15);
+		configSwitch(PARAM_AD_MODULATION, 0.f, 15.f, 0.f, "FM AD", nodiCommon::numberStrings15);
 
 		configParam(PARAM_COLOR, 0.f, 1.f, 0.5f, "Color", "%", 0.f, 100.f);
 		configSwitch(PARAM_PITCH_OCTAVE, 0.f, 4.f, 2.f, "Octave", nodiCommon::octaveStrings);
