@@ -17,7 +17,7 @@ namespace apices {
         FUNCTION_LAST
     };
 
-    static const std::vector<std::string> modeLabels{
+    static const std::vector<std::string> modeDisplayLabels{
         "ENVELOPE",
         "LFO",
         "TAP LFO",
@@ -28,6 +28,19 @@ namespace apices {
         "DIGI DRUMS*",
         "NUMBER STAT&",
         "BOUNCE BALL@"
+    };
+
+    static const std::vector<std::string> modeKnobLabels{
+       "Envelope",
+       "LFO",
+       "Tap LFO",
+       "Drum generator",
+       "Sequencer",
+       "Trigger delayer / shaper",
+       "Trigger stream randomizer",
+       "Digital drum synthesizer",
+       "Number station",
+       "Bouncing ball envelope"
     };
 
     static const std::vector<apicesCommon::KnobLabels> knobLabelsSplitMode{
