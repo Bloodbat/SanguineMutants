@@ -140,6 +140,11 @@ struct Etesia : SanguineModule {
 	bool bTriggersAreGates = true;
 	bool lastTriggered[PORT_MAX_CHANNELS];
 
+	bool bHaveModeCable = false;
+	bool bRightInputConnected = false;
+	bool bLeftOutputConnected = false;
+	bool bRightOutputConnected = false;
+
 	uint8_t* buffersLarge[PORT_MAX_CHANNELS];
 	uint8_t* buffersSmall[PORT_MAX_CHANNELS];
 
@@ -245,12 +250,6 @@ struct Etesia : SanguineModule {
 		bool bFrozen = static_cast<bool>(std::round(params[PARAM_FREEZE].getValue()));
 		bool bReversed = static_cast<bool>(std::round(params[PARAM_REVERSE].getValue()));
 #endif
-		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
-
-		bool bRightInputConnected = inputs[INPUT_RIGHT].isConnected();
-
-		bool bLeftOutputConnected = outputs[OUTPUT_LEFT].isConnected();
-		bool bRightOutputConnected = outputs[OUTPUT_RIGHT].isConnected();
 
 		float_4 knobValues;
 		float_4 sliderValues;
@@ -579,6 +578,37 @@ struct Etesia : SanguineModule {
 			lights[LIGHT_STEREO].setBrightnessSmooth(params[PARAM_STEREO].getValue() *
 				kSanguineButtonLightValue, sampleTime);
 		} // lightsDivider
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		switch (e.type) {
+		case Port::INPUT:
+			switch (e.portId) {
+			case INPUT_MODE:
+				bHaveModeCable = e.connecting;
+				break;
+
+			case INPUT_RIGHT:
+				bRightInputConnected = e.connecting;
+				break;
+
+			default:
+				break;
+			}
+			break;
+
+		case Port::OUTPUT:
+			switch (e.portId) {
+			case OUTPUT_LEFT:
+				bLeftOutputConnected = e.connecting;
+				break;
+
+			case OUTPUT_RIGHT:
+				bRightOutputConnected = e.connecting;
+				break;
+			}
+			break;
+		}
 	}
 
 	json_t* dataToJson() override {
