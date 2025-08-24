@@ -131,8 +131,7 @@ struct Anuli : SanguineModule {
 
 		configSwitch(PARAM_FX, 0.f, 5.f, 0.f, "Disastrous peace FX", anuli::fxLabels);
 
-		configParam(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Note polyphony");
-		paramQuantities[PARAM_POLYPHONY]->snapEnabled = true;
+		configSwitch(PARAM_POLYPHONY, 1.f, 4.f, 1.f, "Note polyphony", anuli::polyphonyLabels);
 
 		configParam(PARAM_FREQUENCY, 0.f, 60.f, 30.f, "Frequency", " semitones", 0.f, 1.f, -30.f);
 		configParam(PARAM_STRUCTURE, 0.f, 1.f, 0.5f, "Structure", "%", 0.f, 100.f);

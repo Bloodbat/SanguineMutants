@@ -32,6 +32,13 @@ namespace anuli {
         "Disastrous Peace"
     };
 
+    static const std::vector<std::string> polyphonyLabels = {
+        "1",
+        "2",
+        "3",
+        "4"
+    };
+
     static const int kMaxModes = 7;
 
     static const LightModes modeLights[kMaxModes][3] = {
