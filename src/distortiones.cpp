@@ -66,6 +66,8 @@ struct Distortiones : SanguineModule {
 
 	bool bNotesModeSelection = false;
 
+	bool bHaveModeCable = false;
+
 	float lastAlgorithmValue = 0.f;
 
 	distortiones::Parameters* parameters[PORT_MAX_CHANNELS];
@@ -125,8 +127,6 @@ struct Distortiones : SanguineModule {
 		float knobTimbre = params[PARAM_TIMBRE].getValue();
 
 		float knobAlgorithm = params[PARAM_ALGORITHM].getValue();
-
-		bool bHaveModeCable = inputs[INPUT_MODE].isConnected();
 
 		// TODO: FIX ME!!! Mode selection snapping to the wrong value when switching back to mode selection after first time.
 		if (btModeSwitch.process(params[PARAM_MODE_SWITCH].getValue())) {
@@ -308,6 +308,12 @@ struct Distortiones : SanguineModule {
 				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
 				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT && e.portId == INPUT_MODE) {
+			bHaveModeCable = e.connecting;
 		}
 	}
 
