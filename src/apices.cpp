@@ -143,8 +143,7 @@ struct Apices : SanguineModule {
 
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODE, 0.f, 9.f, 0.f, "Mode", "", 0.f, 1.f, 1.f);
-		paramQuantities[PARAM_MODE]->snapEnabled = true;
+		configSwitch(PARAM_MODE, 0.f, 9.f, 0.f, "Mode", apices::modeKnobLabels);
 
 		configParam(PARAM_KNOB_1, 0.f, 65535.f, 32678.f, "Knob 1", "%", 0.f, (1.f / 65535.f) * 100);
 		configParam(PARAM_KNOB_2, 0.f, 65535.f, 32678.f, "Knob 2", "%", 0.f, (1.f / 65535.f) * 100);
@@ -578,8 +577,8 @@ struct Apices : SanguineModule {
 		settings.processorFunctions[1] = processorFunctions[1];
 		std::copy(&potValues[0], &potValues[7], &settings.potValues[0]);
 		settings.snapMode = bSnapMode;
-		displayText1 = apices::modeLabels[settings.processorFunctions[0]];
-		displayText2 = apices::modeLabels[settings.processorFunctions[1]];
+		displayText1 = apices::modeDisplayLabels[settings.processorFunctions[0]];
+		displayText2 = apices::modeDisplayLabels[settings.processorFunctions[1]];
 	}
 
 	void refreshLeds(const ProcessArgs& args, const float& sampleTime) {
@@ -1191,11 +1190,11 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		apicesFramebuffer->addChild(displayChannel1);
-		displayChannel1->fallbackString = apices::modeLabels[0];
+		displayChannel1->fallbackString = apices::modeDisplayLabels[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
 		apicesFramebuffer->addChild(displayChannel2);
-		displayChannel2->fallbackString = apices::modeLabels[0];
+		displayChannel2->fallbackString = apices::modeDisplayLabels[0];
 
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(99.527, 34.261), module, Apices::PARAM_MODE));
 
@@ -1262,8 +1261,8 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		if (module) {
 #ifdef METAMODULE
-			module->displayText1 = apices::modeLabels[0];
-			module->displayText2 = apices::modeLabels[0];
+			module->displayText1 = apices::modeDisplayLabels[0];
+			module->displayText2 = apices::modeDisplayLabels[0];
 #endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;

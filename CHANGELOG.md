@@ -27,6 +27,8 @@
 - Apices family: knob tooltips for the different modes.
 
 - Apices family expanders: mode dependent tooltips for the trimpots and inputs.
+
+- Apices family: mode selector knob tooltips.
 - Mortuus: PLO phase values are now saved to and restored from patches and presets.
 
 - Nodi family: display channel also affects the big knob's light.

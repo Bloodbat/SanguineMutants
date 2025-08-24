@@ -32,7 +32,7 @@ namespace mortuus {
         FUNCTION_LAST
     };
 
-    static const std::vector<std::string> modeLabels{
+    static const std::vector<std::string> modeDisplayLabels{
         "ENVELOPE",
         "LFO",
         "TAP LFO",
@@ -52,12 +52,40 @@ namespace mortuus {
         "TRG. SHAPE*",
         "TRG. RANDOM*",
         "TURING#",
-        "BYTE BEATS#",
+        "BYTEBEATS#",
         "DIGI DRUMS*",
         "CYMBAL#",
         "RANDOM DRUM#",
         "RAND. HIHAT#",
         "NUMBER STAT&"
+    };
+
+    static const std::vector<std::string> modeKnobLabels{
+        "Envelope",
+        "LFO",
+        "Tap LFO",
+        "Bass / snare drums",
+        "Double attack envelope",
+        "Repeating attack envelope",
+        "Looping envelope",
+        "Randomized AD envelope",
+        "Bouncing ball envelope",
+        "Folded sine frequency modulated LFO",
+        "Random frequency modulated LFO",
+        "Folded sine varying wave shape LFO",
+        "Random varying wave shape LFO",
+        "Phase-locked loop oscillator",
+        "Sequencer",
+        "Modified sequencer",
+        "Trigger delayer / shaper",
+        "Trigger stream randomizer",
+        "Turing machine",
+        "Bytebeats",
+        "Digital drum synthesizer",
+        "Cymbal",
+        "Randomized bass and snare drum generator",
+        "Randomized hi-hat",
+        "Number station"
     };
 
     static const std::vector<apicesCommon::KnobLabels> knobLabelsSplitMode{
