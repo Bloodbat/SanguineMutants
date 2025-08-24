@@ -156,8 +156,7 @@ struct Mortuus : SanguineModule {
 
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configParam(PARAM_MODE, 0.f, mortuus::FUNCTION_LAST - 1, 0.f, "Mode", "", 0.f, 1.f, 1.f);
-		paramQuantities[PARAM_MODE]->snapEnabled = true;
+		configSwitch(PARAM_MODE, 0.f, mortuus::FUNCTION_LAST - 1, 0.f, "Mode", mortuus::modeKnobLabels);
 
 		configParam(PARAM_KNOB_1, 0.f, 65535.f, 32678.f, "Knob 1", "%", 0.f, (1.f / 65535.f) * 100);
 		configParam(PARAM_KNOB_2, 0.f, 65535.f, 32678.f, "Knob 2", "%", 0.f, (1.f / 65535.f) * 100);
@@ -593,8 +592,8 @@ struct Mortuus : SanguineModule {
 		settings.processorFunctions[1] = processorFunctions[1];
 		std::copy(&potValues[0], &potValues[7], &settings.potValues[0]);
 		settings.snapMode = bSnapMode;
-		displayText1 = mortuus::modeLabels[settings.processorFunctions[0]];
-		displayText2 = mortuus::modeLabels[settings.processorFunctions[1]];
+		displayText1 = mortuus::modeDisplayLabels[settings.processorFunctions[0]];
+		displayText2 = mortuus::modeDisplayLabels[settings.processorFunctions[1]];
 	}
 
 	void refreshLeds(const ProcessArgs& args, const float& sampleTime) {
@@ -1241,11 +1240,11 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		SanguineMatrixDisplay* displayChannel1 = new SanguineMatrixDisplay(12, module, 52.833, 27.965);
 		mortuusFramebuffer->addChild(displayChannel1);
-		displayChannel1->fallbackString = mortuus::modeLabels[0];
+		displayChannel1->fallbackString = mortuus::modeDisplayLabels[0];
 
 		SanguineMatrixDisplay* displayChannel2 = new SanguineMatrixDisplay(12, module, 52.833, 40.557);
 		mortuusFramebuffer->addChild(displayChannel2);
-		displayChannel2->fallbackString = mortuus::modeLabels[0];
+		displayChannel2->fallbackString = mortuus::modeDisplayLabels[0];
 
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(99.527, 34.261), module, Mortuus::PARAM_MODE));
 
@@ -1312,8 +1311,8 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		if (module) {
 #ifdef METAMODULE
-			module->displayText1 = mortuus::modeLabels[0];
-			module->displayText2 = mortuus::modeLabels[0];
+			module->displayText1 = mortuus::modeDisplayLabels[0];
+			module->displayText2 = mortuus::modeDisplayLabels[0];
 #endif
 			displayChannel1->values.displayText = &module->displayText1;
 			displayChannel2->values.displayText = &module->displayText2;
