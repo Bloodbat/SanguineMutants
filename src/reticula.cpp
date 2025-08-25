@@ -86,6 +86,8 @@ struct Reticula : SanguineModule {
     bool bUseTapTempo = false;
     bool bWantSequencerResets = true;
 
+    bool bIsRunConnected = false;
+
     // Drum triggers.
     bool gateStates[kMaxDrumPorts];
 
@@ -228,8 +230,6 @@ struct Reticula : SanguineModule {
     void process(const ProcessArgs& args) override {
         using simd::float_4;
 
-        bool bIsRunConnected = inputs[INPUT_RUN].isConnected();
-
         if (runMode == reticula::MODE_TRIGGER) {
             if (!bIsRunConnected && (btRun.process(params[PARAM_RUN].getValue()) ||
                 stRun.process(inputs[INPUT_RUN].getVoltage()))) {
@@ -278,8 +278,6 @@ struct Reticula : SanguineModule {
             bUseTapTempo = false;
             lastKnobTempo = newKnobTempo;
         }
-
-        bUseExternalClock = inputs[INPUT_EXTERNAL_CLOCK].isConnected();
 
         if (bIsModuleRunning) {
             if (tempoParam >= 30 && tempoParam <= 480) {
@@ -495,6 +493,23 @@ struct Reticula : SanguineModule {
         params[PARAM_SD_DENSITY].setValue(random::uniform());
         params[PARAM_HH_DENSITY].setValue(random::uniform());
         params[PARAM_SWING].setValue(random::uniform());
+    }
+
+    void onPortChange(const PortChangeEvent& e) override {
+        if (e.type == Port::INPUT) {
+            switch (e.portId) {
+            case INPUT_RUN:
+                bIsRunConnected = e.connecting;
+                break;
+
+            case INPUT_EXTERNAL_CLOCK:
+                bUseExternalClock = e.connecting;
+                break;
+
+            default:
+                break;
+            }
+        }
     }
 
     json_t* dataToJson() override {
