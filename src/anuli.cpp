@@ -100,7 +100,8 @@ struct Anuli : SanguineModule {
 
 	bool bUseFrequencyOffset = true;
 
-	bool bHaveBothOutputs = false;
+	bool bHaveOutputOdd = false;
+	bool bHaveOutputEven = false;
 	bool bHaveModeCable = false;
 	bool bHaveFxCable = false;
 
@@ -265,7 +266,7 @@ struct Anuli : SanguineModule {
 
 			renderFrames(channel, args.sampleRate);
 
-			setOutputs(channel, bHaveBothOutputs);
+			setOutputs(channel);
 		}
 
 		setStrummingFlag(performanceStates[displayChannel].strum);
@@ -390,14 +391,14 @@ struct Anuli : SanguineModule {
 			0, rings::kNumChords - 1);
 	}
 
-	void setOutputs(const int channel, const bool withBothOutputs) {
+	void setOutputs(const int channel) {
 		if (!drbOutputBuffers[channel].empty()) {
 			dsp::Frame<2> outputFrame = drbOutputBuffers[channel].shift();
 			/*
 			"Note: you need to insert a jack into each output to split the signals:
 				   when only one jack is inserted, both signals are mixed together."
 			*/
-			if (withBothOutputs) {
+			if (bHaveOutputEven & bHaveOutputOdd) {
 				outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
 				outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
 			} else {
@@ -529,11 +530,11 @@ struct Anuli : SanguineModule {
 		case Port::OUTPUT:
 			switch (e.portId) {
 			case OUTPUT_ODD:
-				bHaveBothOutputs = e.connecting & outputs[OUTPUT_EVEN].isConnected();
+				bHaveOutputOdd = e.connecting;
 				break;
 
 			case OUTPUT_EVEN:
-				bHaveBothOutputs = e.connecting & outputs[OUTPUT_ODD].isConnected();
+				bHaveOutputEven = e.connecting;
 				break;
 			}
 			break;
