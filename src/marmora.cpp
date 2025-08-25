@@ -103,6 +103,7 @@ struct Marmora : SanguineModule {
 
 	bool bDejaVuTEnabled = false;
 	bool bDejaVuXEnabled = false;
+	bool bTClockSourceExternal = false;
 	bool bXClockSourceExternal = false;
 	bool bWantTReset = false;
 	bool bWantXReset = false;
@@ -338,7 +339,6 @@ struct Marmora : SanguineModule {
 
 		xScale = params[PARAM_SCALE].getValue();
 		xClockSourceInternal = static_cast<marbles::ClockSource>(params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue());
-		bXClockSourceExternal = inputs[INPUT_X_CLOCK].isConnected();
 
 		bWantTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage()) || bWantMenuTReset;
 		bWantXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage()) || bWantMenuXReset;
@@ -505,8 +505,6 @@ struct Marmora : SanguineModule {
 	}
 
 	void setupTGenerator(const float dejaVu, const int dejaVuLength, const marbles::Ramps& ramps) {
-		bool bTClockSourceExternal = inputs[INPUT_T_CLOCK].isConnected();
-
 		tGenerator.set_model(static_cast<marbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
 		tGenerator.set_range(static_cast<marbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
 		float tRate = 60.f * (params[PARAM_T_RATE].getValue() + inputs[INPUT_T_RATE].getVoltage() / 5.f);
@@ -678,6 +676,23 @@ struct Marmora : SanguineModule {
 		} else {
 			for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 				xyGenerator.LoadScale(scale, marmoraScales[scale].scale);
+			}
+		}
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT) {
+			switch (e.portId) {
+			case INPUT_X_CLOCK:
+				bXClockSourceExternal = e.connecting;
+				break;
+
+			case INPUT_T_CLOCK:
+				bTClockSourceExternal = e.connecting;
+				break;
+
+			default:
+				break;
 			}
 		}
 	}
