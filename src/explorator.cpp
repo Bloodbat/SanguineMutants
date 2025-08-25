@@ -84,6 +84,21 @@ struct Explorator : SanguineModule {
 
 	noiseModes noiseMode = NOISE_PRISM;
 
+	bool bhaveInput1To3 = false;
+	bool bHaveInputSign = false;
+	bool bHaveInput2To2A = false;
+	bool bHaveInput2To2B = false;
+	bool bHaveInputLogicA = false;
+	bool bHaveInputLogicB = false;
+	bool bHaveInput3To1A = false;
+	bool bHaveInput3To1B = false;
+	bool bHaveInput3To1C = false;
+	bool bHaveInputTrigger = false;
+	bool bHaveInputVoltage = false;
+
+	bool bHaveOutputNoise = false;
+	bool bHaveOutputVoltage = false;
+
 	Explorator() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -134,11 +149,7 @@ struct Explorator : SanguineModule {
 		// 1:3
 		int channels1to3 = inputs[INPUT_1_TO_3].getChannels();
 
-		outputs[OUTPUT_1_TO_3_A].setChannels(channels1to3);
-		outputs[OUTPUT_1_TO_3_B].setChannels(channels1to3);
-		outputs[OUTPUT_1_TO_3_C].setChannels(channels1to3);
-
-		if (inputs[INPUT_1_TO_3].isConnected()) {
+		if (bhaveInput1To3) {
 			float_4 voltages1to3;
 			for (int channel = 0; channel < channels1to3; channel += 4) {
 				voltages1to3 = inputs[INPUT_1_TO_3].getVoltageSimd<float_4>(channel);
@@ -148,14 +159,14 @@ struct Explorator : SanguineModule {
 			}
 		}
 
+		outputs[OUTPUT_1_TO_3_A].setChannels(channels1to3);
+		outputs[OUTPUT_1_TO_3_B].setChannels(channels1to3);
+		outputs[OUTPUT_1_TO_3_C].setChannels(channels1to3);
+
 		// Sign
 		int channelsSign = inputs[INPUT_SIGN].getChannels();
 
-		outputs[OUTPUT_SIGN_INVERTED].setChannels(channelsSign);
-		outputs[OUTPUT_SIGN_HALF_RECTIFIER].setChannels(channelsSign);
-		outputs[OUTPUT_SIGN_FULL_RECTIFIER].setChannels(channelsSign);
-
-		if (inputs[INPUT_SIGN].isConnected()) {
+		if (bHaveInputSign) {
 			float_4 voltagesSign;
 			for (int channel = 0; channel < channelsSign; channel += 4) {
 				voltagesSign = inputs[INPUT_SIGN].getVoltageSimd<float_4>(channel);
@@ -165,29 +176,31 @@ struct Explorator : SanguineModule {
 			}
 		}
 
+		outputs[OUTPUT_SIGN_INVERTED].setChannels(channelsSign);
+		outputs[OUTPUT_SIGN_HALF_RECTIFIER].setChannels(channelsSign);
+		outputs[OUTPUT_SIGN_FULL_RECTIFIER].setChannels(channelsSign);
+
 		// 2:2
 		int channels2to2 = std::max(std::max(inputs[INPUT_2_TO_2_A].getChannels(), inputs[INPUT_2_TO_2_B].getChannels()), 0);
 
-		outputs[OUTPUT_2_TO_2_A].setChannels(channels2to2);
-		outputs[OUTPUT_2_TO_2_B].setChannels(channels2to2);
-
-		if (inputs[INPUT_2_TO_2_A].isConnected() || inputs[INPUT_2_TO_2_B].isConnected()) {
+		if (bHaveInput2To2A || bHaveInput2To2B) {
 			float_4 voltages2to2;
+
 			for (int channel = 0; channel < channels2to2; channel += 4) {
-				voltages2to2 = inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel) +
-					inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel);
+				voltages2to2 = inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel);
+				voltages2to2 += inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel);
 				outputs[OUTPUT_2_TO_2_A].setVoltageSimd(voltages2to2, channel);
 				outputs[OUTPUT_2_TO_2_B].setVoltageSimd(voltages2to2, channel);
 			}
 		}
 
+		outputs[OUTPUT_2_TO_2_A].setChannels(channels2to2);
+		outputs[OUTPUT_2_TO_2_B].setChannels(channels2to2);
+
 		// Logic
 		int channelsLogic = std::max(std::max(inputs[INPUT_LOGIC_A].getChannels(), inputs[INPUT_LOGIC_B].getChannels()), 0);
 
-		outputs[OUTPUT_LOGIC_MIN].setChannels(channelsLogic);
-		outputs[OUTPUT_LOGIC_MAX].setChannels(channelsLogic);
-
-		if (inputs[INPUT_LOGIC_A].isConnected() || inputs[INPUT_LOGIC_B].isConnected()) {
+		if (bHaveInputLogicA || bHaveInputLogicB) {
 			for (int channel = 0; channel < channelsLogic; channel += 4) {
 				float_4 voltagesLogicA = inputs[INPUT_LOGIC_A].getVoltageSimd<float_4>(channel);
 				float_4 voltagesLogicB = inputs[INPUT_LOGIC_B].getVoltageSimd<float_4>(channel);
@@ -196,13 +209,14 @@ struct Explorator : SanguineModule {
 			}
 		}
 
+		outputs[OUTPUT_LOGIC_MIN].setChannels(channelsLogic);
+		outputs[OUTPUT_LOGIC_MAX].setChannels(channelsLogic);
+
 		// 3:1
 		int channels3to1 = std::max(std::max(std::max(inputs[INPUT_3_TO_1_A].getChannels(), inputs[INPUT_3_TO_1_B].getChannels()),
 			inputs[INPUT_3_TO_1_C].getChannels()), 0);
 
-		outputs[OUTPUT_3_TO_1].setChannels(channels3to1);
-
-		if (inputs[INPUT_3_TO_1_A].isConnected() || inputs[INPUT_3_TO_1_B].isConnected() || inputs[INPUT_3_TO_1_C].isConnected()) {
+		if (bHaveInput3To1A || bHaveInput3To1B || bHaveInput3To1C) {
 			for (int channel = 0; channel < channels3to1; channel += 4) {
 				float_4 voltages3to1A = inputs[INPUT_3_TO_1_A].getVoltageSimd<float_4>(channel);
 				float_4 voltages3to1B = inputs[INPUT_3_TO_1_B].getVoltageSimd<float_4>(channel);
@@ -218,11 +232,10 @@ struct Explorator : SanguineModule {
 			}
 		}
 
+		outputs[OUTPUT_3_TO_1].setChannels(channels3to1);
+
 		// Sample & hold
 		float noises[PORT_MAX_CHANNELS] = {};
-		bool bIsTriggerConnected = inputs[INPUT_SH_TRIGGER].isConnected();
-		bool bIsNoiseConnected = outputs[OUTPUT_SH_NOISE].isConnected();
-		bool bHaveInputVoltage = inputs[INPUT_SH_VOLTAGE].isConnected();
 
 		int channelsSampleAndHold = inputs[INPUT_SH_TRIGGER].getChannels();
 
@@ -234,7 +247,7 @@ struct Explorator : SanguineModule {
 		int noiseChannels = std::max(channelsSampleAndHold, 1);
 		outputs[OUTPUT_SH_NOISE].setChannels(noiseChannels);
 
-		if (bIsNoiseConnected || (bIsTriggerConnected && !bHaveInputVoltage)) {
+		if (bHaveOutputNoise || (bHaveInputTrigger && !bHaveInputVoltage)) {
 			switch (noiseMode) {
 			case NOISE_PRISM:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
@@ -250,7 +263,7 @@ struct Explorator : SanguineModule {
 			}
 		}
 
-		if (bIsTriggerConnected) {
+		if (bHaveInputTrigger) {
 			for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
 				if (stSampleAndHolds[channel].process(inputs[INPUT_SH_TRIGGER].getVoltage(channel))) {
 					if (bHaveInputVoltage) {
@@ -262,18 +275,17 @@ struct Explorator : SanguineModule {
 			}
 		}
 
-		if (outputs[OUTPUT_SH_VOLTAGE].isConnected() && lastSampleAndHoldChannels > 0) {
+		if (bHaveOutputVoltage && lastSampleAndHoldChannels > 0) {
 			outputs[OUTPUT_SH_VOLTAGE].writeVoltages(sampleAndHoldVoltages);
 		}
 
-		if (bIsNoiseConnected) {
+		if (bHaveOutputNoise) {
 			for (int channel = 0; channel < noiseChannels; ++channel) {
 				outputs[OUTPUT_SH_NOISE].setVoltage(noises[channel], channel);
 			}
 		}
 
 		// Lights
-
 		if (lightsDivider.process()) {
 			const float sampleTime = args.sampleTime * kLightsFrequency;
 
@@ -426,6 +438,73 @@ struct Explorator : SanguineModule {
 
 	int getNoiseMode() {
 		return static_cast<int>(noiseMode);
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		switch (e.type) {
+		case Port::INPUT:
+			switch (e.portId) {
+			case INPUT_1_TO_3:
+				bhaveInput1To3 = e.connecting;
+				break;
+
+			case INPUT_SIGN:
+				bHaveInputSign = e.connecting;
+				break;
+
+			case INPUT_2_TO_2_A:
+				bHaveInput2To2A = e.connecting;
+				break;
+
+			case INPUT_2_TO_2_B:
+				bHaveInput2To2B = e.connecting;
+				break;
+
+			case INPUT_LOGIC_A:
+				bHaveInputLogicA = e.connecting;
+				break;
+
+			case INPUT_LOGIC_B:
+				bHaveInputLogicB = e.connecting;
+				break;
+
+			case INPUT_3_TO_1_A:
+				bHaveInput3To1A = e.connecting;
+				break;
+
+			case INPUT_3_TO_1_B:
+				bHaveInput3To1B = e.connecting;
+				break;
+
+			case INPUT_3_TO_1_C:
+				bHaveInput3To1C = e.connecting;
+				break;
+
+			case INPUT_SH_TRIGGER:
+				bHaveInputTrigger = e.connecting;
+				break;
+
+			case INPUT_SH_VOLTAGE:
+				bHaveInputVoltage = e.connecting;
+				break;
+			}
+			break;
+
+		case Port::OUTPUT:
+			switch (e.portId) {
+			case OUTPUT_SH_NOISE:
+				bHaveOutputNoise = e.connecting;
+				break;
+
+			case OUTPUT_SH_VOLTAGE:
+				bHaveOutputVoltage = e.connecting;
+				break;
+
+			default:
+				break;
+			}
+			break;
+		}
 	}
 
 	json_t* dataToJson() override {
