@@ -119,6 +119,13 @@ struct Funes : SanguineModule {
 
 	bool bWantHoldModulations = false;
 
+	bool bHaveInputEngine = false;
+	bool bHaveInputFrequency = false;
+	bool bHaveInputLevel = false;
+	bool bHaveInputTimbre = false;
+	bool bHaveInputMorph = false;
+	bool bHaveInputTrigger = false;
+
 	std::string displayText = "";
 
 	dsp::ClockDivider lightsDivider;
@@ -196,7 +203,7 @@ struct Funes : SanguineModule {
 			int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
 
 			// Switch models
-			if (bNotesModelSelection && inputs[INPUT_ENGINE].isConnected()) {
+			if (bNotesModelSelection && bHaveInputEngine) {
 				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
 				if (currentModelVoltage != lastModelVoltage) {
 					lastModelVoltage = currentModelVoltage;
@@ -253,12 +260,6 @@ struct Funes : SanguineModule {
 
 			patch.wantHoldModulations = bWantHoldModulations;
 
-			bool bHaveFrequencyCable = inputs[INPUT_FREQUENCY].isConnected();
-			bool bHaveLevelCable = inputs[INPUT_LEVEL].isConnected();
-			bool bHaveTimbreCable = inputs[INPUT_TIMBRE].isConnected();
-			bool bHaveMorphCable = inputs[INPUT_MORPH].isConnected();
-			bool bHaveTriggerCable = inputs[INPUT_TRIGGER].isConnected();
-
 			bool activeLights[kModelLightsCount * 2] = {};
 
 			bool bPulseLight = false;
@@ -297,11 +298,11 @@ struct Funes : SanguineModule {
 				// Triggers at around 0.7 V
 				modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
 
-				modulations[channel].frequency_patched = bHaveFrequencyCable;
-				modulations[channel].level_patched = bHaveLevelCable;
-				modulations[channel].timbre_patched = bHaveTimbreCable;
-				modulations[channel].morph_patched = bHaveMorphCable;
-				modulations[channel].trigger_patched = bHaveTriggerCable;
+				modulations[channel].frequency_patched = bHaveInputFrequency;
+				modulations[channel].level_patched = bHaveInputLevel;
+				modulations[channel].timbre_patched = bHaveInputTimbre;
+				modulations[channel].morph_patched = bHaveInputMorph;
+				modulations[channel].trigger_patched = bHaveInputTrigger;
 
 				// Render frames
 				plaits::Voice::Frame output[kBlockSize];
@@ -444,6 +445,33 @@ struct Funes : SanguineModule {
 		int newEngine;
 		newEngine = random::u32() % 24;
 		setEngine(newEngine);
+	}
+
+	void onPortChange(const PortChangeEvent& e) override {
+		if (e.type == Port::INPUT) {
+			switch (e.portId) {
+			case INPUT_ENGINE:
+				bHaveInputEngine = e.connecting;
+				break;
+			case INPUT_FREQUENCY:
+				bHaveInputFrequency = e.connecting;
+				break;
+			case INPUT_LEVEL:
+				bHaveInputLevel = e.connecting;
+				break;
+			case INPUT_TIMBRE:
+				bHaveInputTimbre = e.connecting;
+				break;
+			case INPUT_MORPH:
+				bHaveInputMorph = e.connecting;
+				break;
+			case INPUT_TRIGGER:
+				bHaveInputTrigger = e.connecting;
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	json_t* dataToJson() override {
