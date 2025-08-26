@@ -71,8 +71,8 @@ struct Apices : SanguineModule {
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
 #ifndef METAMODULE
-	bool bHasExpander = false;
-	bool bWasExpanderConnected = false;
+	bool bExpanderConnected = false;
+	bool bHadExpander = false;
 #endif
 
 	// Update descriptions/oleds every 16 samples.
@@ -140,7 +140,6 @@ struct Apices : SanguineModule {
 	};
 
 	Apices() {
-
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configSwitch(PARAM_MODE, 0.f, 9.f, 0.f, "Mode", apices::modeKnobLabels);
@@ -186,7 +185,7 @@ struct Apices : SanguineModule {
 			updateOleds();
 
 #ifndef METAMODULE
-			lights[LIGHT_EXPANDER].setBrightnessSmooth((bHasExpander) * (kSanguineButtonLightValue), sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth((bExpanderConnected) * (kSanguineButtonLightValue), sampleTime);
 #endif
 		}
 
@@ -198,8 +197,8 @@ struct Apices : SanguineModule {
 		}
 
 #ifndef METAMODULE
-		if (bHasExpander) {
-			bWasExpanderConnected = true;
+		if (bExpanderConnected) {
+			bHadExpander = true;
 
 			// Channel 1 strip.
 			simd::float_4 expanderCVValues1;
@@ -779,7 +778,7 @@ struct Apices : SanguineModule {
 				oledText4 = apices::displayLabelsSplitMode[processorFunctions[0]].knob4;
 #endif
 
-				if (bHasExpander) {
+				if (bExpanderConnected) {
 					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_1]->name =
 						apices::knobLabelsSplitMode[processorFunctions[0]].knob1 + apicesCommon::kSuffixCV;
 					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_2]->name =
@@ -818,7 +817,7 @@ struct Apices : SanguineModule {
 					channelTextDisplay = "1&2. ";
 					channelTextKnob = apicesCommon::kPrefixChannelTwin;
 
-					if (bHasExpander) {
+					if (bExpanderConnected) {
 						std::string toolTipText;
 
 						toolTipText = channelTextKnob + apices::knobLabelsTwinMode[currentFunction].knob1;
@@ -857,7 +856,7 @@ struct Apices : SanguineModule {
 					channelTextDisplay = string::f("%d. ", calculatedChannel);
 					channelTextKnob = string::f(apicesCommon::kPrefixChannelExpert, calculatedChannel);
 
-					if (bHasExpander) {
+					if (bExpanderConnected) {
 						int processor1Function = processorFunctions[0];
 						int processor2Function = processorFunctions[1];
 
@@ -1112,7 +1111,7 @@ struct Apices : SanguineModule {
 
 #ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
-		if (bHasExpander) {
+		if (bExpanderConnected) {
 			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(0.f);
 			setExpanderChannel1Lights(false);
 		}
@@ -1120,7 +1119,7 @@ struct Apices : SanguineModule {
 	}
 
 	void onUnBypass(const UnBypassEvent& e) override {
-		if (bHasExpander) {
+		if (bExpanderConnected) {
 			nixExpander->getLight(Nix::LIGHT_MASTER_MODULE).setBrightness(kSanguineButtonLightValue);
 			setExpanderChannel1Lights(true);
 		}
@@ -1130,13 +1129,14 @@ struct Apices : SanguineModule {
 	void onExpanderChange(const ExpanderChangeEvent& e) override {
 		if (e.side == 1) {
 			Module* rightModule = getRightExpander().module;
-			bHasExpander = (rightModule && rightModule->getModel() == modelNix && !rightModule->isBypassed());
+			bExpanderConnected =
+				(rightModule && rightModule->getModel() == modelNix && !rightModule->isBypassed());
 
-			if (bHasExpander) {
+			if (bExpanderConnected) {
 				nixExpander = dynamic_cast<Nix*>(rightModule);
 			}
 
-			if (bWasExpanderConnected) {
+			if (bHadExpander && (bHadExpander != bExpanderConnected)) {
 				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
@@ -1161,7 +1161,7 @@ struct Apices : SanguineModule {
 						break;
 					}
 				}
-				bWasExpanderConnected = false;
+				bHadExpander = false;
 			}
 		}
 		Module::onExpanderChange(e);
@@ -1285,7 +1285,7 @@ struct ApicesWidget : SanguineModuleWidget {
 
 #ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
-		if (apices->bHasExpander) {
+		if (apices->bExpanderConnected) {
 			menu->addChild(createMenuLabel("Nix expander already connected"));
 		} else {
 			menu->addChild(createMenuItem("Add Nix expander", "", [=]() {
