@@ -70,8 +70,8 @@ struct Mortuus : SanguineModule {
 	bool bSnapped[apicesCommon::kKnobCount] = {};
 
 #ifndef METAMODULE
-	bool bHasExpander = false;
-	bool bWasExpanderConnected = false;
+	bool bExpanderConnected = false;
+	bool bHadExpander = false;
 #endif
 
 	// Update descriptions/oleds every 16 samples.
@@ -153,7 +153,6 @@ struct Mortuus : SanguineModule {
 	};
 
 	Mortuus() {
-
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
 		configSwitch(PARAM_MODE, 0.f, mortuus::FUNCTION_LAST - 1, 0.f, "Mode", mortuus::modeKnobLabels);
@@ -199,7 +198,7 @@ struct Mortuus : SanguineModule {
 			updateOleds();
 
 #ifndef METAMODULE
-			lights[LIGHT_EXPANDER].setBrightnessSmooth((bHasExpander) * (kSanguineButtonLightValue), sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth((bExpanderConnected) * (kSanguineButtonLightValue), sampleTime);
 #endif
 		}
 
@@ -211,8 +210,8 @@ struct Mortuus : SanguineModule {
 		}
 
 #ifndef METAMODULE
-		if (bHasExpander) {
-			bWasExpanderConnected = true;
+		if (bExpanderConnected) {
+			bHadExpander = true;
 
 			// Channel 1 strip.
 			simd::float_4 expanderCVValues1;
@@ -805,7 +804,7 @@ struct Mortuus : SanguineModule {
 				oledText4 = mortuus::displayLabelsSplitMode[processorFunctions[0]].knob4;
 #endif
 
-				if (bHasExpander) {
+				if (bExpanderConnected) {
 					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_1]->name =
 						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob1 + apicesCommon::kSuffixCV;
 					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_2]->name =
@@ -844,7 +843,7 @@ struct Mortuus : SanguineModule {
 					channelTextDisplay = "1&2. ";
 					channelTextKnob = apicesCommon::kPrefixChannelTwin;
 
-					if (bHasExpander) {
+					if (bExpanderConnected) {
 						std::string toolTipText;
 
 						toolTipText = channelTextKnob + mortuus::knobLabelsTwinMode[currentFunction].knob1;
@@ -883,7 +882,7 @@ struct Mortuus : SanguineModule {
 					channelTextDisplay = string::f("%d. ", calculatedChannel);
 					channelTextKnob = string::f(apicesCommon::kPrefixChannelExpert, calculatedChannel);
 
-					if (bHasExpander) {
+					if (bExpanderConnected) {
 						int processor1Function = processorFunctions[0];
 						int processor2Function = processorFunctions[1];
 
@@ -1162,7 +1161,7 @@ struct Mortuus : SanguineModule {
 
 #ifndef METAMODULE
 	void onBypass(const BypassEvent& e) override {
-		if (bHasExpander) {
+		if (bExpanderConnected) {
 			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(0.f);
 			setExpanderChannel1Lights(false);
 		}
@@ -1170,7 +1169,7 @@ struct Mortuus : SanguineModule {
 	}
 
 	void onUnBypass(const UnBypassEvent& e) override {
-		if (bHasExpander) {
+		if (bExpanderConnected) {
 			ansaExpander->getLight(Ansa::LIGHT_MASTER_MODULE).setBrightness(kSanguineButtonLightValue);
 			setExpanderChannel1Lights(true);
 		}
@@ -1180,13 +1179,14 @@ struct Mortuus : SanguineModule {
 	void onExpanderChange(const ExpanderChangeEvent& e) override {
 		if (e.side == 1) {
 			Module* rightModule = getRightExpander().module;
-			bHasExpander = (rightModule && rightModule->getModel() == modelAnsa && !rightModule->isBypassed());
+			bExpanderConnected =
+				(rightModule && rightModule->getModel() == modelAnsa && !rightModule->isBypassed());
 
-			if (bHasExpander) {
+			if (bExpanderConnected) {
 				ansaExpander = dynamic_cast<Ansa*>(rightModule);
 			}
 
-			if (bWasExpanderConnected) {
+			if (bHadExpander && (bHadExpander != bExpanderConnected)) {
 				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
 					switch (editMode) {
 					case apicesCommon::EDIT_MODE_TWIN:
@@ -1211,7 +1211,7 @@ struct Mortuus : SanguineModule {
 						break;
 					}
 				}
-				bWasExpanderConnected = false;
+				bHadExpander = false;
 			}
 		}
 		Module::onExpanderChange(e);
@@ -1336,7 +1336,7 @@ struct MortuusWidget : SanguineModuleWidget {
 
 #ifndef METAMODULE
 		menu->addChild(new MenuSeparator());
-		if (mortuus->bHasExpander) {
+		if (mortuus->bExpanderConnected) {
 			menu->addChild(createMenuLabel("Ansa expander already connected"));
 		} else {
 			menu->addChild(createMenuItem("Add Ansa expander", "", [=]() {
