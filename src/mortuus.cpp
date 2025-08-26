@@ -188,6 +188,10 @@ struct Mortuus : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
+#ifndef METAMODULE
+		bool bExpanderAvailable = bExpanderConnected && !(ansaExpander->isBypassed());
+#endif
+
 		// Update knobs / lights every 16 samples only.
 		if (bIsLightsTurn) {
 			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
@@ -198,7 +202,7 @@ struct Mortuus : SanguineModule {
 			updateOleds();
 
 #ifndef METAMODULE
-			lights[LIGHT_EXPANDER].setBrightnessSmooth((bExpanderConnected) * (kSanguineButtonLightValue), sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth(bExpanderAvailable * kSanguineButtonLightValue, sampleTime);
 #endif
 		}
 
@@ -213,163 +217,165 @@ struct Mortuus : SanguineModule {
 		if (bExpanderConnected) {
 			bHadExpander = true;
 
-			// Channel 1 strip.
-			simd::float_4 expanderCVValues1;
+			if (bExpanderAvailable) {
+				// Channel 1 strip.
+				simd::float_4 expanderCVValues1;
 
-			expanderCVValues1[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_1).getVoltage();
-			expanderCVValues1[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_2).getVoltage();
-			expanderCVValues1[2] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_3).getVoltage();
-			expanderCVValues1[3] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_4).getVoltage();
+				expanderCVValues1[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_1).getVoltage();
+				expanderCVValues1[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_2).getVoltage();
+				expanderCVValues1[2] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_3).getVoltage();
+				expanderCVValues1[3] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_4).getVoltage();
 
-			expanderCVValues1 /= 5.f;
-			expanderCVValues1 = clamp(expanderCVValues1, -1.f, 1.f);
-			expanderCVValues1 *= 255.f;
+				expanderCVValues1 /= 5.f;
+				expanderCVValues1 = clamp(expanderCVValues1, -1.f, 1.f);
+				expanderCVValues1 *= 255.f;
 
-			expanderCVValues1[0] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_1).getValue();
-			expanderCVValues1[1] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_2).getValue();
-			expanderCVValues1[2] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_3).getValue();
-			expanderCVValues1[3] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_4).getValue();
+				expanderCVValues1[0] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_1).getValue();
+				expanderCVValues1[1] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_2).getValue();
+				expanderCVValues1[2] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_3).getValue();
+				expanderCVValues1[3] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_4).getValue();
 
-			simd::int32_4 expanderModulatedValues1 = expanderCVValues1;
+				simd::int32_4 expanderModulatedValues1 = expanderCVValues1;
 
-			expanderModulatedValues1[0] += potValues[0];
-			expanderModulatedValues1[1] += potValues[1];
-			expanderModulatedValues1[2] += potValues[2];
-			expanderModulatedValues1[3] += potValues[3];
+				expanderModulatedValues1[0] += potValues[0];
+				expanderModulatedValues1[1] += potValues[1];
+				expanderModulatedValues1[2] += potValues[2];
+				expanderModulatedValues1[3] += potValues[3];
 
-			expanderModulatedValues1 = expanderModulatedValues1 << 8;
+				expanderModulatedValues1 = expanderModulatedValues1 << 8;
 
-			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
+				expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
-			// Channel 2 strip.
-			simd::int32_4 expanderModulatedValues2 = {};
-
-			if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-				simd::float_4 expanderCVValues2;
-
-				expanderCVValues2[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
-				expanderCVValues2[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
-				expanderCVValues2[2] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
-				expanderCVValues2[3] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
-
-				expanderCVValues2 /= 5.f;
-				expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
-				expanderCVValues2 *= 255.f;
-
-				expanderCVValues2[0] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
-				expanderCVValues2[1] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
-				expanderCVValues2[2] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
-				expanderCVValues2[3] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
-
-				expanderModulatedValues2 = expanderCVValues2;
-
-				expanderModulatedValues2[0] += potValues[4];
-				expanderModulatedValues2[1] += potValues[5];
-				expanderModulatedValues2[2] += potValues[6];
-				expanderModulatedValues2[3] += potValues[7];
-
-				expanderModulatedValues2 = expanderModulatedValues2 << 8;
-
-				expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
-			}
-
-			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-				if (ansaExpander->getChannel1PortConnected(knob) ||
-					ansaExpander->getChannel1PortChanged(knob)) {
-					switch (editMode) {
-					case apicesCommon::EDIT_MODE_TWIN:
-						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-						processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
-						break;
-
-					case apicesCommon::EDIT_MODE_SPLIT:
-						if (knob < 2) {
-							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-						} else {
-							processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
-						}
-						break;
-
-					case apicesCommon::EDIT_MODE_FIRST:
-					case apicesCommon::EDIT_MODE_SECOND:
-						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-						break;
-					default:
-						break;
-					}
-
-					ansaExpander->setChannel1PortChanged(knob, false);
-				}
+				// Channel 2 strip.
+				simd::int32_4 expanderModulatedValues2 = {};
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-					if (ansaExpander->getChannel2PortConnected(knob) ||
-						ansaExpander->getChannel2PortChanged(knob)) {
-						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
+					simd::float_4 expanderCVValues2;
 
-						ansaExpander->setChannel2PortChanged(knob, false);
-					}
+					expanderCVValues2[0] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
+					expanderCVValues2[1] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
+					expanderCVValues2[2] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
+					expanderCVValues2[3] = ansaExpander->getInput(Ansa::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
+
+					expanderCVValues2 /= 5.f;
+					expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
+					expanderCVValues2 *= 255.f;
+
+					expanderCVValues2[0] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
+					expanderCVValues2[1] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
+					expanderCVValues2[2] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
+					expanderCVValues2[3] *= ansaExpander->getParam(Ansa::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
+
+					expanderModulatedValues2 = expanderCVValues2;
+
+					expanderModulatedValues2[0] += potValues[4];
+					expanderModulatedValues2[1] += potValues[5];
+					expanderModulatedValues2[2] += potValues[6];
+					expanderModulatedValues2[3] += potValues[7];
+
+					expanderModulatedValues2 = expanderModulatedValues2 << 8;
+
+					expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
 				}
 
-				if (bIsLightsTurn) {
-					int currentLightRed = Ansa::LIGHT_PARAM_1 + knob * 3;
-					int currentLightGreen = (Ansa::LIGHT_PARAM_1 + knob * 3) + 1;
-					int currentLightBlue = (Ansa::LIGHT_PARAM_1 + knob * 3) + 2;
+				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+					if (ansaExpander->getChannel1PortConnected(knob) ||
+						ansaExpander->getChannel1PortChanged(knob)) {
+						switch (editMode) {
+						case apicesCommon::EDIT_MODE_TWIN:
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+							processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
+							break;
 
-					switch (editMode) {
-					case apicesCommon::EDIT_MODE_TWIN:
-						ansaExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-						ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						break;
+						case apicesCommon::EDIT_MODE_SPLIT:
+							if (knob < 2) {
+								processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+							} else {
+								processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
+							}
+							break;
 
-					case apicesCommon::EDIT_MODE_SPLIT:
-						if (knob < 2) {
-							ansaExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-						} else {
-							ansaExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
-							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						case apicesCommon::EDIT_MODE_FIRST:
+						case apicesCommon::EDIT_MODE_SECOND:
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+							break;
+						default:
+							break;
 						}
-						break;
 
-					case apicesCommon::EDIT_MODE_FIRST:
-					case apicesCommon::EDIT_MODE_SECOND:
-						ansaExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
-						ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-						break;
-					default:
-						break;
+						ansaExpander->setChannel1PortChanged(knob, false);
 					}
 
-					Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
-					Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
-					Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
+					if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
+						if (ansaExpander->getChannel2PortConnected(knob) ||
+							ansaExpander->getChannel2PortChanged(knob)) {
+							processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
 
-					switch (editMode) {
-					case apicesCommon::EDIT_MODE_FIRST:
-					case apicesCommon::EDIT_MODE_SECOND:
-						channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-						channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(true, sampleTime);
-						break;
-					case apicesCommon::EDIT_MODE_TWIN:
-						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-						channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						switchExpanderChannel2Lights(false, sampleTime);
-						break;
-					case apicesCommon::EDIT_MODE_SPLIT:
-						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(false, sampleTime);
-						break;
-					default:
-						break;
+							ansaExpander->setChannel2PortChanged(knob, false);
+						}
+					}
+
+					if (bIsLightsTurn) {
+						int currentLightRed = Ansa::LIGHT_PARAM_1 + knob * 3;
+						int currentLightGreen = (Ansa::LIGHT_PARAM_1 + knob * 3) + 1;
+						int currentLightBlue = (Ansa::LIGHT_PARAM_1 + knob * 3) + 2;
+
+						switch (editMode) {
+						case apicesCommon::EDIT_MODE_TWIN:
+							ansaExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							break;
+
+						case apicesCommon::EDIT_MODE_SPLIT:
+							if (knob < 2) {
+								ansaExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+								ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+								ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
+							} else {
+								ansaExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
+								ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+								ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							}
+							break;
+
+						case apicesCommon::EDIT_MODE_FIRST:
+						case apicesCommon::EDIT_MODE_SECOND:
+							ansaExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
+							break;
+						default:
+							break;
+						}
+
+						Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
+						Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
+						Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
+
+						switch (editMode) {
+						case apicesCommon::EDIT_MODE_FIRST:
+						case apicesCommon::EDIT_MODE_SECOND:
+							channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
+							channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+							switchExpanderChannel2Lights(true, sampleTime);
+							break;
+						case apicesCommon::EDIT_MODE_TWIN:
+							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+							channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							switchExpanderChannel2Lights(false, sampleTime);
+							break;
+						case apicesCommon::EDIT_MODE_SPLIT:
+							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+							switchExpanderChannel2Lights(false, sampleTime);
+							break;
+						default:
+							break;
+						}
 					}
 				}
 			}

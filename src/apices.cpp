@@ -175,6 +175,10 @@ struct Apices : SanguineModule {
 
 		bool bIsLightsTurn = lightsDivider.process();
 
+#ifndef METAMODULE
+		bool bExpanderAvailable = bExpanderConnected && !(nixExpander->isBypassed());
+#endif
+
 		// Update knobs / lights / displays every 16 samples only.
 		if (bIsLightsTurn) {
 			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
@@ -185,7 +189,7 @@ struct Apices : SanguineModule {
 			updateOleds();
 
 #ifndef METAMODULE
-			lights[LIGHT_EXPANDER].setBrightnessSmooth((bExpanderConnected) * (kSanguineButtonLightValue), sampleTime);
+			lights[LIGHT_EXPANDER].setBrightnessSmooth(bExpanderAvailable * kSanguineButtonLightValue, sampleTime);
 #endif
 		}
 
@@ -200,163 +204,165 @@ struct Apices : SanguineModule {
 		if (bExpanderConnected) {
 			bHadExpander = true;
 
-			// Channel 1 strip.
-			simd::float_4 expanderCVValues1;
+			if (bExpanderAvailable) {
+				// Channel 1 strip.
+				simd::float_4 expanderCVValues1;
 
-			expanderCVValues1[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_1).getVoltage();
-			expanderCVValues1[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_2).getVoltage();
-			expanderCVValues1[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_3).getVoltage();
-			expanderCVValues1[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_4).getVoltage();
+				expanderCVValues1[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_1).getVoltage();
+				expanderCVValues1[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_2).getVoltage();
+				expanderCVValues1[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_3).getVoltage();
+				expanderCVValues1[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_4).getVoltage();
 
-			expanderCVValues1 /= 5.f;
-			expanderCVValues1 = clamp(expanderCVValues1, -1.f, 1.f);
-			expanderCVValues1 *= 255.f;
+				expanderCVValues1 /= 5.f;
+				expanderCVValues1 = clamp(expanderCVValues1, -1.f, 1.f);
+				expanderCVValues1 *= 255.f;
 
-			expanderCVValues1[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_1).getValue();
-			expanderCVValues1[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_2).getValue();
-			expanderCVValues1[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_3).getValue();
-			expanderCVValues1[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_4).getValue();
+				expanderCVValues1[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_1).getValue();
+				expanderCVValues1[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_2).getValue();
+				expanderCVValues1[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_3).getValue();
+				expanderCVValues1[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_4).getValue();
 
-			simd::int32_4 expanderModulatedValues1 = expanderCVValues1;
+				simd::int32_4 expanderModulatedValues1 = expanderCVValues1;
 
-			expanderModulatedValues1[0] += potValues[0];
-			expanderModulatedValues1[1] += potValues[1];
-			expanderModulatedValues1[2] += potValues[2];
-			expanderModulatedValues1[3] += potValues[3];
+				expanderModulatedValues1[0] += potValues[0];
+				expanderModulatedValues1[1] += potValues[1];
+				expanderModulatedValues1[2] += potValues[2];
+				expanderModulatedValues1[3] += potValues[3];
 
-			expanderModulatedValues1 = expanderModulatedValues1 << 8;
+				expanderModulatedValues1 = expanderModulatedValues1 << 8;
 
-			expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
+				expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
-			// Channel 2 strip.
-			simd::int32_4 expanderModulatedValues2 = {};
-
-			if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-				simd::float_4 expanderCVValues2 = {};
-
-				expanderCVValues2[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
-				expanderCVValues2[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
-				expanderCVValues2[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
-				expanderCVValues2[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
-
-				expanderCVValues2 /= 5.f;
-				expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
-				expanderCVValues2 *= 255.f;
-
-				expanderCVValues2[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
-				expanderCVValues2[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
-				expanderCVValues2[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
-				expanderCVValues2[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
-
-				expanderModulatedValues2 = expanderCVValues2;
-
-				expanderModulatedValues2[0] += potValues[4];
-				expanderModulatedValues2[1] += potValues[5];
-				expanderModulatedValues2[2] += potValues[6];
-				expanderModulatedValues2[3] += potValues[7];
-
-				expanderModulatedValues2 = expanderModulatedValues2 << 8;
-
-				expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
-			}
-
-			for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-				if (nixExpander->getChannel1PortConnected(knob) ||
-					nixExpander->getChannel1PortChanged(knob)) {
-					switch (editMode) {
-					case apicesCommon::EDIT_MODE_TWIN:
-						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-						processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
-						break;
-
-					case apicesCommon::EDIT_MODE_SPLIT:
-						if (knob < 2) {
-							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-						} else {
-							processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
-						}
-						break;
-
-					case apicesCommon::EDIT_MODE_FIRST:
-					case apicesCommon::EDIT_MODE_SECOND:
-						processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-						break;
-					default:
-						break;
-					}
-
-					nixExpander->setChannel1PortChanged(knob, false);
-				}
+				// Channel 2 strip.
+				simd::int32_4 expanderModulatedValues2 = {};
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-					if (nixExpander->getChannel2PortConnected(knob) ||
-						nixExpander->getChannel2PortChanged(knob)) {
-						processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
+					simd::float_4 expanderCVValues2 = {};
 
-						nixExpander->setChannel2PortChanged(knob, false);
-					}
+					expanderCVValues2[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
+					expanderCVValues2[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
+					expanderCVValues2[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
+					expanderCVValues2[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
+
+					expanderCVValues2 /= 5.f;
+					expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
+					expanderCVValues2 *= 255.f;
+
+					expanderCVValues2[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
+					expanderCVValues2[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
+					expanderCVValues2[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
+					expanderCVValues2[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
+
+					expanderModulatedValues2 = expanderCVValues2;
+
+					expanderModulatedValues2[0] += potValues[4];
+					expanderModulatedValues2[1] += potValues[5];
+					expanderModulatedValues2[2] += potValues[6];
+					expanderModulatedValues2[3] += potValues[7];
+
+					expanderModulatedValues2 = expanderModulatedValues2 << 8;
+
+					expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
 				}
 
-				if (bIsLightsTurn) {
-					int currentLightRed = Nix::LIGHT_PARAM_1 + knob * 3;
-					int currentLightGreen = (Nix::LIGHT_PARAM_1 + knob * 3) + 1;
-					int currentLightBlue = (Nix::LIGHT_PARAM_1 + knob * 3) + 2;
+				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+					if (nixExpander->getChannel1PortConnected(knob) ||
+						nixExpander->getChannel1PortChanged(knob)) {
+						switch (editMode) {
+						case apicesCommon::EDIT_MODE_TWIN:
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+							processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
+							break;
 
-					switch (editMode) {
-					case apicesCommon::EDIT_MODE_TWIN:
-						nixExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-						nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						break;
+						case apicesCommon::EDIT_MODE_SPLIT:
+							if (knob < 2) {
+								processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+							} else {
+								processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
+							}
+							break;
 
-					case apicesCommon::EDIT_MODE_SPLIT:
-						if (knob < 2) {
-							nixExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-						} else {
-							nixExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
-							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						case apicesCommon::EDIT_MODE_FIRST:
+						case apicesCommon::EDIT_MODE_SECOND:
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+							break;
+						default:
+							break;
 						}
-						break;
 
-					case apicesCommon::EDIT_MODE_FIRST:
-					case apicesCommon::EDIT_MODE_SECOND:
-						nixExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
-						nixExpander->getLight(currentLightGreen).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-						break;
-					default:
-						break;
+						nixExpander->setChannel1PortChanged(knob, false);
 					}
 
-					Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
-					Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
-					Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);
+					if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
+						if (nixExpander->getChannel2PortConnected(knob) ||
+							nixExpander->getChannel2PortChanged(knob)) {
+							processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
 
-					switch (editMode) {
-					case apicesCommon::EDIT_MODE_FIRST:
-					case apicesCommon::EDIT_MODE_SECOND:
-						channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-						channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(true, sampleTime);
-						break;
-					case apicesCommon::EDIT_MODE_TWIN:
-						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-						channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						switchExpanderChannel2Lights(false, sampleTime);
-						break;
-					case apicesCommon::EDIT_MODE_SPLIT:
-						channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-						channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-						channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-						switchExpanderChannel2Lights(false, sampleTime);
-						break;
-					default:
-						break;
+							nixExpander->setChannel2PortChanged(knob, false);
+						}
+					}
+
+					if (bIsLightsTurn) {
+						int currentLightRed = Nix::LIGHT_PARAM_1 + knob * 3;
+						int currentLightGreen = (Nix::LIGHT_PARAM_1 + knob * 3) + 1;
+						int currentLightBlue = (Nix::LIGHT_PARAM_1 + knob * 3) + 2;
+
+						switch (editMode) {
+						case apicesCommon::EDIT_MODE_TWIN:
+							nixExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							break;
+
+						case apicesCommon::EDIT_MODE_SPLIT:
+							if (knob < 2) {
+								nixExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+								nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+								nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
+							} else {
+								nixExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
+								nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+								nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							}
+							break;
+
+						case apicesCommon::EDIT_MODE_FIRST:
+						case apicesCommon::EDIT_MODE_SECOND:
+							nixExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
+							break;
+						default:
+							break;
+						}
+
+						Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
+						Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
+						Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);
+
+						switch (editMode) {
+						case apicesCommon::EDIT_MODE_FIRST:
+						case apicesCommon::EDIT_MODE_SECOND:
+							channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
+							channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+							switchExpanderChannel2Lights(true, sampleTime);
+							break;
+						case apicesCommon::EDIT_MODE_TWIN:
+							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+							channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							switchExpanderChannel2Lights(false, sampleTime);
+							break;
+						case apicesCommon::EDIT_MODE_SPLIT:
+							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
+							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
+							switchExpanderChannel2Lights(false, sampleTime);
+							break;
+						default:
+							break;
+						}
 					}
 				}
 			}
