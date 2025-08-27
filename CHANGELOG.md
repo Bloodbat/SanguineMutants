@@ -30,6 +30,8 @@
 
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
 
+- Velamina: proper rescaling of gain lights when channels are polyphonic.
+
 - Vimina: swing/factor tooltips not updating until the knob is moved when the mode of a section is changed.
 
 ## Additions
