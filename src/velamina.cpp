@@ -178,7 +178,7 @@ struct Velamina : SanguineModule {
 					lights[currentLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(voltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 
-					rescaledLight = rescale(clamp(gainSum, 0.f, 5.f), 0.f, 5.f, 0.f, 5.f);
+					rescaledLight = rescale(clamp(gainSum, 0.f, 5.f), 0.f, 5.f, 0.f, 1.f);
 					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(rescaledLight, sampleTime);
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				}
