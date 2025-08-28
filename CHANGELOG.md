@@ -25,6 +25,8 @@ without the backticks.
 
 - Plugin: include HP sizes in module descriptions.
 
+- Explorator: Sanguine white noise model.
+
 
 ---
 
