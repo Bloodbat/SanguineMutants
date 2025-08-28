@@ -16,7 +16,8 @@ using namespace sanguineCommonCode;
 namespace explorator {
 	static const std::vector<std::string> noiseModeLabels{
 		"White noise (High CPU)",
-		"Prism noise (Low CPU)"
+		"Prism noise (Low CPU)",
+		"Sanguine white noise (Medium CPU)"
 	};
 }
 
@@ -69,6 +70,7 @@ struct Explorator : SanguineModule {
 	enum noiseModes {
 		NOISE_WHITE,
 		NOISE_PRISM,
+		NOISE_SANGUINE_WHITE,
 		NOISE_MODES_COUNT
 	};
 
@@ -79,6 +81,7 @@ struct Explorator : SanguineModule {
 	dsp::SchmittTrigger stSampleAndHolds[PORT_MAX_CHANNELS];
 	pcg32 pcgNoises[PORT_MAX_CHANNELS];
 	pcg32 pcgMultipliers[PORT_MAX_CHANNELS];
+	sanguineRandom::SanguineRandomNormal sanguineNoises[PORT_MAX_CHANNELS];
 
 	float sampleAndHoldVoltages[PORT_MAX_CHANNELS] = {};
 
@@ -140,6 +143,8 @@ struct Explorator : SanguineModule {
 			uint32_t seedTime = std::round(system::getUnixTime() * noise);
 			pcgNoises[noise] = pcg32(seedTime * 13);
 			pcgMultipliers[noise] = pcg32(seedTime * 127);
+
+			sanguineNoises[noise].init(seedTime * 29);
 		}
 	}
 
@@ -249,6 +254,11 @@ struct Explorator : SanguineModule {
 
 		if (bHaveOutputNoise || (bHaveInputTrigger && !bHaveInputVoltage)) {
 			switch (noiseMode) {
+			case NOISE_SANGUINE_WHITE:
+				for (int channel = 0; channel < noiseChannels; ++channel) {
+					noises[channel] = 2.f * sanguineNoises->normal();
+				}
+				break;
 			case NOISE_PRISM:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
 					float noiseMultiplier = static_cast<float>(pcgMultipliers[channel](16) + 1);
@@ -596,7 +606,6 @@ struct ExploratorWidget : SanguineModuleWidget {
 		Explorator* module = dynamic_cast<Explorator*>(this->module);
 
 		menu->addChild(new MenuSeparator);
-
 
 		menu->addChild(createIndexSubmenuItem("Noise mode", explorator::noiseModeLabels,
 			[=]() {return module->getNoiseMode(); },
