@@ -82,7 +82,7 @@ struct Explorator : SanguineModule {
 	dsp::SchmittTrigger stSampleAndHolds[PORT_MAX_CHANNELS];
 	pcg32 pcgNoises[PORT_MAX_CHANNELS];
 	pcg32 pcgMultipliers[PORT_MAX_CHANNELS];
-	sanguineRandom::SanguineRandomNormal sanguineNoises[PORT_MAX_CHANNELS];
+	sanguineRandom::SanguineRandomNormalCustom sanguineNoises[PORT_MAX_CHANNELS];
 
 	float sampleAndHoldVoltages[PORT_MAX_CHANNELS] = {};
 
@@ -143,7 +143,7 @@ struct Explorator : SanguineModule {
 			pcgNoises[noise] = pcg32((seedTime) * ((5868 + noise) * noise));
 			pcgMultipliers[noise] = pcg32(seedTime * 127);
 
-			sanguineNoises[noise].init(seedTime * 29);
+			sanguineNoises[noise].init(0.f, 1.f);
 		}
 	}
 
@@ -255,7 +255,7 @@ struct Explorator : SanguineModule {
 			switch (noiseMode) {
 			case NOISE_SANGUINE_WHITE:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
-					noises[channel] = 2.f * sanguineNoises->normal();
+					noises[channel] = 2.f * sanguineNoises->normal(pcgNoises[channel]);
 				}
 				break;
 			case NOISE_PRISM:
