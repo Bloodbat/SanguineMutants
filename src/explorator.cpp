@@ -141,7 +141,7 @@ struct Explorator : SanguineModule {
 
 		for (int noise = 0; noise < PORT_MAX_CHANNELS; ++noise) {
 			uint32_t seedTime = std::round(system::getUnixTime() * noise);
-			pcgNoises[noise] = pcg32(seedTime * 13);
+			pcgNoises[noise] = pcg32((seedTime) * ((5868 + noise) * noise));
 			pcgMultipliers[noise] = pcg32(seedTime * 127);
 
 			sanguineNoises[noise].init(0.f, 1.f);
