@@ -47,9 +47,9 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
 
 void Nix::onPortChange(const PortChangeEvent& e) {
     if (!e.connecting) {
-        if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
+    if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
             expanderPorts1Changed[e.portId] = true;
-        } else {
+    } else {
             expanderPorts2Changed[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
         }
     } else {
@@ -61,30 +61,6 @@ void Nix::onPortChange(const PortChangeEvent& e) {
     }
 
     Module::onPortChange(e);
-}
-
-bool Nix::getChannel1PortChanged(const int portNumber) const {
-    return expanderPorts1Changed[portNumber];
-}
-
-bool Nix::getChannel2PortChanged(const int portNumber) const {
-    return expanderPorts2Changed[portNumber];
-}
-
-bool Nix::getChannel1PortConnected(const int portNumber) const {
-    return expanderPorts1Connected[portNumber];
-}
-
-bool Nix::getChannel2PortConnected(const int portNumber) const {
-    return expanderPorts2Connected[portNumber];
-}
-
-void Nix::setChannel1PortChanged(const int portNumber, const bool value) {
-    expanderPorts1Changed[portNumber] = value;
-}
-
-void Nix::setChannel2PortChanged(const int portNumber, const bool value) {
-    expanderPorts2Changed[portNumber] = value;
 }
 
 struct NixWidget : SanguineModuleWidget {
