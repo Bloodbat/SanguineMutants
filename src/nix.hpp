@@ -81,6 +81,16 @@ struct Nix : SanguineModule {
         expanderPorts2Changed[portNumber] = value;
     }
 
+    inline void setChannel1PortConnected(const int portNumber, const bool value) {
+        expanderPorts1Connected[portNumber] = value;
+        expanderPorts1Changed[portNumber] = true;
+    }
+
+    inline void setChannel2PortConnected(const int portNumber, const bool value) {
+        expanderPorts2Connected[portNumber] = value;
+        expanderPorts2Changed[portNumber] = true;
+    }
+
 private:
     bool expanderPorts1Changed[apicesCommon::kKnobCount];
     bool expanderPorts2Changed[apicesCommon::kKnobCount];
