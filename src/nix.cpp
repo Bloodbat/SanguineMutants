@@ -46,18 +46,10 @@ void Nix::onExpanderChange(const ExpanderChangeEvent& e) {
 }
 
 void Nix::onPortChange(const PortChangeEvent& e) {
-    if (!e.connecting) {
     if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
-            expanderPorts1Changed[e.portId] = true;
+        setChannel1PortConnected(e.portId, e.connecting);
     } else {
-            expanderPorts2Changed[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
-        }
-    } else {
-        if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
-            expanderPorts1Connected[e.portId] = true;
-        } else {
-            expanderPorts2Connected[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
-        }
+        setChannel2PortConnected(e.portId - INPUT_PARAM_CV_CHANNEL_2_1, e.connecting);
     }
 
     Module::onPortChange(e);
