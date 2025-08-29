@@ -46,45 +46,13 @@ void Ansa::onExpanderChange(const ExpanderChangeEvent& e) {
 }
 
 void Ansa::onPortChange(const PortChangeEvent& e) {
-    if (!e.connecting) {
-        if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
-            expanderPorts1Changed[e.portId] = true;
-        } else {
-            expanderPorts2Changed[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
-        }
+    if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
+        setChannel1PortConnected(e.portId, e.connecting);
     } else {
-        if (e.portId < INPUT_PARAM_CV_CHANNEL_2_1) {
-            expanderPorts1Connected[e.portId] = true;
-        } else {
-            expanderPorts2Connected[e.portId - INPUT_PARAM_CV_CHANNEL_2_1] = true;
-        }
+        setChannel2PortConnected(e.portId - INPUT_PARAM_CV_CHANNEL_2_1, e.connecting);
     }
 
     Module::onPortChange(e);
-}
-
-bool Ansa::getChannel1PortChanged(const int portNumber) const {
-    return expanderPorts1Changed[portNumber];
-}
-
-bool Ansa::getChannel2PortChanged(const int portNumber) const {
-    return expanderPorts2Changed[portNumber];
-}
-
-bool Ansa::getChannel1PortConnected(const int portNumber) const {
-    return expanderPorts1Connected[portNumber];
-}
-
-bool Ansa::getChannel2PortConnected(const int portNumber) const {
-    return expanderPorts2Connected[portNumber];
-}
-
-void Ansa::setChannel1PortChanged(const int portNumber, const bool value) {
-    expanderPorts1Changed[portNumber] = value;
-}
-
-void Ansa::setChannel2PortChanged(const int portNumber, const bool value) {
-    expanderPorts2Changed[portNumber] = value;
 }
 
 struct AnsaWidget : SanguineModuleWidget {

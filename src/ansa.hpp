@@ -58,14 +58,39 @@ struct Ansa : SanguineModule {
     void onExpanderChange(const ExpanderChangeEvent& e) override;
     void onPortChange(const PortChangeEvent& e) override;
 
-    bool getChannel1PortChanged(const int portNumber) const;
-    bool getChannel2PortChanged(const int portNumber) const;
+    inline bool getChannel1PortChanged(const int portNumber) const {
+        return expanderPorts1Changed[portNumber];
+    }
 
-    bool getChannel1PortConnected(const int portNumber) const;
-    bool getChannel2PortConnected(const int portNumber) const;
+    inline bool getChannel2PortChanged(const int portNumber) const {
+        return expanderPorts2Changed[portNumber];
+    }
 
-    void setChannel1PortChanged(const int portNumber, const bool value);
-    void setChannel2PortChanged(const int portNumber, const bool value);
+    inline bool getChannel1PortConnected(const int portNumber) const {
+        return expanderPorts1Connected[portNumber];
+    }
+
+    inline bool getChannel2PortConnected(const int portNumber) const {
+        return expanderPorts2Connected[portNumber];
+    }
+
+    inline void setChannel1PortChanged(const int portNumber, const bool value) {
+        expanderPorts1Changed[portNumber] = value;
+    }
+
+    inline void setChannel2PortChanged(const int portNumber, const bool value) {
+        expanderPorts2Changed[portNumber] = value;
+    }
+
+    inline void setChannel1PortConnected(const int portNumber, const bool value) {
+        expanderPorts1Connected[portNumber] = value;
+        expanderPorts1Changed[portNumber] = true;
+    }
+
+    inline void setChannel2PortConnected(const int portNumber, const bool value) {
+        expanderPorts2Connected[portNumber] = value;
+        expanderPorts2Changed[portNumber] = true;
+    }
 
 private:
     bool expanderPorts1Changed[apicesCommon::kKnobCount];
