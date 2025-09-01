@@ -250,8 +250,9 @@ struct Explorator : SanguineModule {
 		if (bHaveOutputNoise || (bHaveInputTrigger && !bHaveInputVoltage)) {
 			switch (noiseMode) {
 			case NOISE_PRISM:
+				float noiseMultiplier;
 				for (int channel = 0; channel < noiseChannels; ++channel) {
-					float noiseMultiplier = static_cast<float>(pcgMultipliers[channel](16) + 1);
+					noiseMultiplier = static_cast<float>(pcgMultipliers[channel](16) + 1);
 					noises[channel] = ldexpf(pcgNoises[channel](), -32) * noiseMultiplier - (noiseMultiplier / 2.f);
 				}
 				break;
