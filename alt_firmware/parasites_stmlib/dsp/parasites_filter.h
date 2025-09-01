@@ -250,14 +250,15 @@ namespace parasites_stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size) {
+      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        float bp = g_ * hp + state_1;
+        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        float lp = g_ * bp + state_2;
+        lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -281,14 +282,15 @@ namespace parasites_stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size, size_t stride) {
+      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        float  hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        float  bp = g_ * hp + state_1;
+        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        float  lp = g_ * bp + state_2;
+        lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -311,6 +313,7 @@ namespace parasites_stmlib {
     }
 
     inline void ProcessMultimode(const float* in, float* out, size_t size, float mode) {
+      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
@@ -321,10 +324,10 @@ namespace parasites_stmlib {
       float bp_gain = mode < 0.5f ? 0.0f : mode * 2.0f - 1.0f;
 
       while (size--) {
-        float hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        float bp = g_ * hp + state_1;
+        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        float lp = g_ * bp + state_2;
+        lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
         *out = hp_gain * hp + bp_gain * bp + lp_gain * lp;
         ++in;
@@ -337,14 +340,15 @@ namespace parasites_stmlib {
     template<FilterMode mode>
     inline void Process(const float* in, float* out_1, float* out_2, size_t size,
       float gain_1, float gain_2) {
+      float hp, bp, lp;
       float state_1 = state_1_;
       float state_2 = state_2_;
 
       while (size--) {
-        float  hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
-        float  bp = g_ * hp + state_1;
+        hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+        bp = g_ * hp + state_1;
         state_1 = g_ * hp + bp;
-        float lp = g_ * bp + state_2;
+        lp = g_ * bp + state_2;
         state_2 = g_ * bp + lp;
 
         float value;
@@ -443,13 +447,14 @@ namespace parasites_stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size) {
+      float hp, notch, bp_normalized;
       float lp = lp_;
       float bp = bp_;
       while (size--) {
-        float  bp_normalized = bp * damp_;
-        float notch = *in++ - bp_normalized;
+        bp_normalized = bp * damp_;
+        notch = *in++ - bp_normalized;
         lp += f_ * bp;
-        float hp = notch - lp;
+        hp = notch - lp;
         bp += f_ * hp;
 
         if (mode == FILTER_MODE_LOW_PASS) {
@@ -467,13 +472,14 @@ namespace parasites_stmlib {
     }
 
     inline void Split(const float* in, float* low, float* high, size_t size) {
+      float hp, notch, bp_normalized;
       float lp = lp_;
       float bp = bp_;
       while (size--) {
-        float  bp_normalized = bp * damp_;
-        float  notch = *in++ - bp_normalized;
+        bp_normalized = bp * damp_;
+        notch = *in++ - bp_normalized;
         lp += f_ * bp;
-        float  hp = notch - lp;
+        hp = notch - lp;
         bp += f_ * hp;
         *low++ = lp;
         *high++ = hp;
@@ -484,14 +490,15 @@ namespace parasites_stmlib {
 
     template<FilterMode mode>
     inline void Process(const float* in, float* out, size_t size, size_t decimate) {
+      float hp, notch, bp_normalized;
       float lp = lp_;
       float bp = bp_;
       size_t n = decimate - 1;
       while (size--) {
-        float bp_normalized = bp * damp_;
-        float notch = *in++ - bp_normalized;
+        bp_normalized = bp * damp_;
+        notch = *in++ - bp_normalized;
         lp += f_ * bp;
-        float hp = notch - lp;
+        hp = notch - lp;
         bp += f_ * hp;
 
         ++n;
@@ -587,7 +594,7 @@ namespace parasites_stmlib {
 
   /*
      Two passes of modified Chamberlin SVF with the same coefficients -
-     to implement Linkwitzâ€“Riley (Butterworth squared) crossover filters.
+     to implement Linkwitz–Riley (Butterworth squared) crossover filters.
   */
   class CrossoverSvf {
   public:
