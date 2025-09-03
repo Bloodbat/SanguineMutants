@@ -454,8 +454,8 @@ struct Nebulae : SanguineModule {
 			channelModes.fill(knobPlaybackMode);
 
 			if (bHaveModeCable) {
+				float_4 modeVoltages;
 				for (int channel = 0; channel < channelCount; channel += 4) {
-					float_4 modeVoltages;
 					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 					modeVoltages = simd::round(modeVoltages);
 					modeVoltages = simd::clamp(modeVoltages, 0.f, 3.f);
@@ -468,12 +468,13 @@ struct Nebulae : SanguineModule {
 				channelPlaybackMode = channelModes[displayChannel];
 			}
 
+			int currentLight;
+			clouds::PlaybackMode currentChannelMode;
+			bool bIsChannelActive;
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
-
-				clouds::PlaybackMode currentChannelMode = cloudsProcessors[channel]->playback_mode();
-
-				bool bIsChannelActive = channel < channelCount;
+				currentLight = LIGHT_CHANNEL_1 + channel * 3;
+				currentChannelMode = cloudsProcessors[channel]->playback_mode();
+				bIsChannelActive = channel < channelCount;
 
 				lights[currentLight].setBrightnessSmooth(bIsChannelActive &
 					((currentChannelMode == clouds::PLAYBACK_MODE_STRETCH) |
