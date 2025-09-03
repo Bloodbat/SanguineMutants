@@ -293,13 +293,16 @@ struct Anuli : SanguineModule {
 
 			displayText = anuli::modeLabels[channelModes[displayChannel]];
 
+			int currentLight;
+			bool bIsChannelActive;
+			LightModes lightMode;
+			float lightValue;
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				const int currentLight = LIGHT_RESONATOR + channel * 3;
+				currentLight = LIGHT_RESONATOR + channel * 3;
+				bIsChannelActive = channel < channelCount;
 
-				const bool bIsChannelActive = channel < channelCount;
-
-				LightModes lightMode = anuli::modeLights[channelModes[channel]][0];
-				float lightValue = static_cast<float>(bIsChannelActive &
+				lightMode = anuli::modeLights[channelModes[channel]][0];
+				lightValue = static_cast<float>(bIsChannelActive &
 					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
 				lights[currentLight].setBrightnessSmooth(lightValue, sampleTime);
 
@@ -314,7 +317,7 @@ struct Anuli : SanguineModule {
 				lights[currentLight + 2].setBrightnessSmooth(lightValue, sampleTime);
 			}
 
-			float lightValue = ((channelModes[displayChannel] == 6) &
+			lightValue = ((channelModes[displayChannel] == 6) &
 				((anuli::fxModeLights[channelFx[displayChannel]][0] == LIGHT_ON) |
 					((anuli::fxModeLights[channelFx[displayChannel]][0] == LIGHT_BLINK) & bIsTrianglePulse))) *
 				kSanguineButtonLightValue;
