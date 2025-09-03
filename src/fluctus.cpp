@@ -472,8 +472,8 @@ struct Fluctus : SanguineModule {
 			channelModes.fill(knobPlaybackMode);
 
 			if (bHaveModeCable) {
+				float_4 modeVoltages;
 				for (int channel = 0; channel < channelCount; channel += 4) {
-					float_4 modeVoltages;
 					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 					modeVoltages = simd::round(modeVoltages);
 					modeVoltages = simd::clamp(modeVoltages, 0.f, 4.f);
@@ -486,12 +486,13 @@ struct Fluctus : SanguineModule {
 				channelPlaybackMode = channelModes[displayChannel];
 			}
 
+			int currentLight;
+			fluctus::PlaybackMode currentChannelMode;
+			bool bIsChannelActive;
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
-
-				fluctus::PlaybackMode currentChannelMode = fluctusProcessors[channel]->playback_mode();
-
-				bool bIsChannelActive = channel < channelCount;
+				currentLight = LIGHT_CHANNEL_1 + channel * 3;
+				currentChannelMode = fluctusProcessors[channel]->playback_mode();
+				bIsChannelActive = channel < channelCount;
 
 				lights[currentLight].setBrightnessSmooth(bIsChannelActive &
 					((currentChannelMode == fluctus::PLAYBACK_MODE_STRETCH) |
