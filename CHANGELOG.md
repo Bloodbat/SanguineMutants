@@ -177,6 +177,8 @@ without the backticks.
 
 - Funes: relate knobs using color.
 
+- Funes: Model input bananut color from purple to black.
+
 - Marmora: make Y divider tooltips easier on the eyes.
 
 - Nebulae family: better parameter and input tooltips.
