@@ -53,6 +53,8 @@ without the backticks.
 
 - Aestus family: turn off Range button LED when PLL/Sync mode is enabled.
 
+- Funes: Model input bananut color from purple to black.
+
 - Nebulae family: OLED display text tweaks.
 
 ## Removals

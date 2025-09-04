@@ -713,7 +713,7 @@ struct FunesWidget : SanguineModuleWidget {
 		}
 
 		addParam(createParamCentered<Rogan2SGray>(millimetersToPixelsVec(115.088, 32.314), module, Funes::PARAM_MODEL));
-		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(126.4772, 28.3256), module, Funes::INPUT_ENGINE));
+		addInput(createInput<BananutBlackPoly>(millimetersToPixelsVec(126.4772, 28.3256), module, Funes::INPUT_ENGINE));
 
 		addInput(createInput<BananutPurplePoly>(millimetersToPixelsVec(2.546, 50.836), module, Funes::INPUT_FREQUENCY));
 		addParam(createParam<Trimpot>(millimetersToPixelsVec(17.552, 51.836), module, Funes::PARAM_FREQUENCY_CV));
