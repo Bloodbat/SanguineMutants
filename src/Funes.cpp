@@ -203,7 +203,7 @@ struct Funes : SanguineModule {
 			int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
 
 			// Switch models
-			if (bNotesModelSelection && bHaveInputEngine) {
+			if (bHaveInputEngine && bNotesModelSelection) {
 				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
 				if (currentModelVoltage != lastModelVoltage) {
 					lastModelVoltage = currentModelVoltage;
