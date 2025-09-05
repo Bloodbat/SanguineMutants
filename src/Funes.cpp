@@ -92,7 +92,7 @@ struct Funes : SanguineModule {
 
 	static const int kModelLightsCount = 8;
 
-	int frequencyMode = 10;
+	int frequencyMode = funes::FM_FULL;
 	int displayModelNum = 0;
 
 	int displayChannel = 0;
@@ -147,7 +147,7 @@ struct Funes : SanguineModule {
 		configParam(PARAM_TIMBRE_CV, -1.f, 1.f, 0.f, "Timbre CV", "%", 0.f, 100.f);
 		configParam(PARAM_FREQUENCY_CV, -1.f, 1.f, 0.f, "Frequency CV", "%", 0.f, 100.f);
 		configParam(PARAM_MORPH_CV, -1.f, 1.f, 0.f, "Morph CV", "%", 0.f, 100.f);
-		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funes::frequencyModes);
+		configSwitch(PARAM_FREQ_MODE, 0.f, 10.f, 10.f, "Frequency mode", funes::frequencyModeLabels);
 		configParam(PARAM_HARMONICS_CV, -1.f, 1.f, 0.f, "Harmonics CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_COLOR_CV, -1.f, 1.f, 0.f, "Lowpass gate response CV", "%", 0.f, 100.f);
 		configParam(PARAM_LPG_DECAY_CV, -1.f, 1.f, 0.f, "Lowpass gate decay CV", "%", 0.f, 100.f);
@@ -228,12 +228,12 @@ struct Funes : SanguineModule {
 
 			// Similar implementation to original Plaits ui.cc code.
 			// TODO: Check with low cpu mode.
-			if (frequencyMode == 0) {
+			if (frequencyMode == funes::FM_LFO) {
 				patch.note = -48.37f + pitch * 15.f;
-			} else if (frequencyMode == 9) {
+			} else if (frequencyMode == funes::FM_OCTAVES) {
 				float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
 				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
-			} else if (frequencyMode == 10) {
+			} else if (frequencyMode == funes::FM_FULL) {
 				patch.note = 60.f + pitch * 12.f;
 			} else {
 				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
@@ -813,7 +813,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 
-		menu->addChild(createIndexSubmenuItem("Frequency mode", funes::frequencyModes,
+		menu->addChild(createIndexSubmenuItem("Frequency mode", funes::frequencyModeLabels,
 			[=]() {return module->frequencyMode; },
 			[=](int i) {module->setFrequencyMode(i); }
 		));
