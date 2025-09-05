@@ -30,7 +30,7 @@ namespace funes {
     "HI-HAT",
   };
 
-  static const std::vector<std::string> frequencyModes = {
+  static const std::vector<std::string> frequencyModeLabels = {
       "LFO mode",
       "C0 +/- 7 semitones",
       "C1 +/- 7 semitones",
@@ -75,7 +75,7 @@ namespace funes {
       "Original",
       "Alternate 1 (Jon Butler)",
       "Alternate 2 (Joe McMullen)"
-  };  
+  };
 
   enum CustomDataStates {
     DataNotAvailable,
@@ -89,6 +89,20 @@ namespace funes {
     SUBOSCILLATOR_SINE,
     SUBOSCILLATOR_SINE_MINUS_ONE,
     SUBOSCILLATOR_SINE_MINUS_TWO
+  };
+
+  enum FrequencyModes {
+    FM_LFO,
+    FM_C0,
+    FM_C1,
+    FM_C2,
+    FM_C3,
+    FM_C4,
+    FM_C5,
+    FM_C6,
+    FM_C7,
+    FM_OCTAVES,
+    FM_FULL
   };
 
   static const std::vector<std::string> suboscillatorLabels = {
