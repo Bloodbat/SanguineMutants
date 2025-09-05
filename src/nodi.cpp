@@ -191,6 +191,8 @@ struct Nodi : SanguineModule {
 			memset(&waveShapers[channel], 0, sizeof(braids::SignatureWaveshaper));
 			memset(&settings[channel], 0, sizeof(braids::SettingsData));
 
+			settings[channel].meta_modulation = 1;
+
 			oscillators[channel].Init();
 			quantizers[channel].Init();
 			envelopes[channel].Init();
@@ -277,7 +279,6 @@ struct Nodi : SanguineModule {
 			}
 
 			// Handle switches.
-			settings[channel].meta_modulation = 1;
 			settings[channel].ad_vca = bVCAEnabled;
 			settings[channel].vco_drift = driftValue;
 			settings[channel].vco_flatten = bFlattenEnabled;
