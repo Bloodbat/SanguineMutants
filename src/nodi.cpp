@@ -234,6 +234,13 @@ struct Nodi : SanguineModule {
 
 		uint8_t knobModel = params[PARAM_MODEL].getValue();
 
+		float knobFm = params[PARAM_FM].getValue();
+		float knobTimbre = params[PARAM_TIMBRE].getValue();
+		float knobModulation = params[PARAM_MODULATION].getValue();
+		float knobColor = params[PARAM_COLOR].getValue();
+		float knobCoarse = params[PARAM_COARSE].getValue();
+		float knobFine = params[PARAM_FINE].getValue();
+
 		for (int channel = 0; channel < channelCount; ++channel) {
 			settings[channel].quantizer_scale = knobScale;
 			settings[channel].quantizer_root = knobRoot;
@@ -306,7 +313,7 @@ struct Nodi : SanguineModule {
 				envelopes[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
 				uint32_t adValue = envelopes[channel].Render();
 
-				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
+				float fm = knobFm * inputs[INPUT_FM].getVoltage(channel);
 
 				// Set model.
 				if (!bPaques) {
@@ -327,9 +334,8 @@ struct Nodi : SanguineModule {
 				}
 
 				// Set timbre/modulation.
-				float timbre = params[PARAM_TIMBRE].getValue() + params[PARAM_MODULATION].getValue() *
-					inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
-				float modulation = params[PARAM_COLOR].getValue() + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
+				float timbre = knobTimbre + knobModulation * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
+				float modulation = knobColor + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
 
 				timbre += adValue / 65535.f * settings[channel].ad_timbre / 16.f;
 				modulation += adValue / 65535.f * settings[channel].ad_color / 16.f;
@@ -339,8 +345,7 @@ struct Nodi : SanguineModule {
 				oscillators[channel].set_parameters(param1, param2);
 
 				// Set pitch.
-				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + params[PARAM_COARSE].getValue() +
-					params[PARAM_FINE].getValue() / 12.f;
+				float pitchV = inputs[INPUT_PITCH].getVoltage(channel) + knobCoarse + knobFine / 12.f;
 				pitchV += fm;
 
 				if (bWantLowCpu) {
