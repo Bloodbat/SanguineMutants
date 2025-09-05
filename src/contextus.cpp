@@ -189,6 +189,8 @@ struct Contextus : SanguineModule {
 			memset(&waveShapers[channel], 0, sizeof(renaissance::SignatureWaveshaper));
 			memset(&settings[channel], 0, sizeof(renaissance::SettingsData));
 
+			settings[channel].meta_modulation = 1;
+
 			oscillators[channel].Init();
 			quantizers[channel].Init();
 			envelopes[channel].Init();
@@ -275,7 +277,6 @@ struct Contextus : SanguineModule {
 			}
 
 			// Handle switches.
-			settings[channel].meta_modulation = 1;
 			settings[channel].ad_vca = bVCAEnabled;
 			settings[channel].vco_drift = driftValue;
 			settings[channel].vco_flatten = bFlattenEnabled;
