@@ -156,7 +156,7 @@ struct Funes : SanguineModule {
 
 		configSwitch(PARAM_CHORD_BANK, 0.f, 2.f, 0.f, "Chord bank", { funes::chordBankLabels });
 
-		configParam(PARAM_AUX_CROSSFADE, 0.f, 1.f, 0.f, "Main Out → Aux cross-fader", "%", 0.f, 100.f);
+		configParam(PARAM_AUX_CROSSFADE, 0.f, 1.f, 0.f, "Main Out → Aux crossfader", "%", 0.f, 100.f);
 
 		configSwitch(PARAM_AUX_SUBOSCILLATOR, 0.f, 4.f, 0.f, "Aux sub-oscillator", { funes::suboscillatorLabels });
 
@@ -171,7 +171,7 @@ struct Funes : SanguineModule {
 		configInput(INPUT_LGP_COLOR, "Lowpass gate response");
 		configInput(INPUT_LPG_DECAY, "Lowpass gate decay");
 
-		configInput(INPUT_AUX_CROSSFADE, "Main Out → Aux cross-fader");
+		configInput(INPUT_AUX_CROSSFADE, "Main Out → Aux crossfader");
 
 		configOutput(OUTPUT_OUT, "Main");
 		configOutput(OUTPUT_AUX, "Auxiliary");
