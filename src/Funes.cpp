@@ -265,6 +265,7 @@ struct Funes : SanguineModule {
 			bool bPulseLight = false;
 
 			// Render output buffer for each voice.
+			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				float_4 inputVoltages;
@@ -279,7 +280,7 @@ struct Funes : SanguineModule {
 				if (!bNotesModelSelection) {
 					modulations[channel].engine = inputVoltages[0];
 				}
-				modulations[channel].harmonics = inputVoltages[1] * params[PARAM_HARMONICS_CV].getValue();
+				modulations[channel].harmonics = inputVoltages[1] * attenHarmonics;
 				modulations[channel].auxCrossfade = inputVoltages[2];
 
 				inputVoltages[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
