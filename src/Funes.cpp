@@ -310,9 +310,10 @@ struct Funes : SanguineModule {
 				voices[channel].Render(patch, modulations[channel], output, kBlockSize);
 
 				// Convert output to frames
+				const int channelFrame = channel * 2;
 				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
-					outputFrames[blockNum].samples[channel * 2] = output[blockNum].out / 32768.f;
-					outputFrames[blockNum].samples[channel * 2 + 1] = output[blockNum].aux / 32768.f;
+					outputFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
+					outputFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
 				}
 
 				int activeEngine = voices[channel].active_engine();
@@ -374,10 +375,12 @@ struct Funes : SanguineModule {
 		// Set output
 		if (!drbOutputBuffers.empty()) {
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
+			int currentSample;
 			for (int channel = 0; channel < channelCount; ++channel) {
+				currentSample = channel * 2;
 				// Inverting op-amp on outputs
-				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[channel * 2] * 5.f, channel);
-				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[channel * 2 + 1] * 5.f, channel);
+				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[currentSample] * 5.f, channel);
+				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[currentSample + 1] * 5.f, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
