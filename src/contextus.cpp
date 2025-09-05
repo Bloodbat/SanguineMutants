@@ -310,6 +310,7 @@ struct Contextus : SanguineModule {
 
 				envelopes[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
 				uint32_t adValue = envelopes[channel].Render();
+				const float scaledAdValue = adValue / 65535.f;
 
 				float fm = knobFm * inputs[INPUT_FM].getVoltage(channel);
 
@@ -329,8 +330,8 @@ struct Contextus : SanguineModule {
 				float timbre = knobTimbre + knobModulation * inputs[INPUT_TIMBRE].getVoltage(channel) / 5.f;
 				float modulation = knobColor + inputs[INPUT_COLOR].getVoltage(channel) / 5.f;
 
-				timbre += adValue / 65535.f * settings[channel].ad_timbre / 16.f;
-				modulation += adValue / 65535.f * settings[channel].ad_color / 16.f;
+				timbre += scaledAdValue * settings[channel].ad_timbre / 16.f;
+				modulation += scaledAdValue * settings[channel].ad_color / 16.f;
 
 				int16_t param1 = math::rescale(clamp(timbre, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
 				int16_t param2 = math::rescale(clamp(modulation, 0.f, 1.f), 0.f, 1.f, 0, INT16_MAX);
