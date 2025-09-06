@@ -228,15 +228,21 @@ struct Funes : SanguineModule {
 
 			// Similar implementation to original Plaits ui.cc code.
 			// TODO: Check with low cpu mode.
-			if (frequencyMode == funes::FM_LFO) {
+			switch (frequencyMode) {
+			case funes::FM_LFO:
 				patch.note = -48.37f + pitch * 15.f;
-			} else if (frequencyMode == funes::FM_OCTAVES) {
+				break;
+			case funes::FM_OCTAVES: {
 				float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
 				patch.note = 53.f + fineTune * 14.f + 12.f * static_cast<float>(octaveQuantizer.Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
-			} else if (frequencyMode == funes::FM_FULL) {
+				break;
+			}
+			case funes::FM_FULL:
 				patch.note = 60.f + pitch * 12.f;
-			} else {
+				break;
+			default:
 				patch.note = static_cast<float>(frequencyMode) * 12.f + pitch * 7.f / 4.f;
+				break;
 			}
 
 			patch.harmonics = params[PARAM_HARMONICS].getValue();
