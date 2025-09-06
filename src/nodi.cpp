@@ -461,8 +461,6 @@ struct Nodi : SanguineModule {
 		if (lightsDivider.process()) {
 			const float sampleTime = args.sampleTime * kLightsFrequency;
 
-			pollSwitches(sampleTime);
-
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
 			}
@@ -472,22 +470,25 @@ struct Nodi : SanguineModule {
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].green, sampleTime);
 			lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].blue, sampleTime);
 
-			for (int channel = 0; channel < channelCount; ++channel) {
-				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+			bool bIsChannelActive;
+			int currentLight;
+			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+				bIsChannelActive = channel < channelCount;
 
 				int selectedModel = settings[channel].shape;
-				lights[currentLight].setBrightnessSmooth(nodi::lightColors[selectedModel].red, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue, sampleTime);
+				lights[currentLight].setBrightnessSmooth(nodi::lightColors[selectedModel].red *
+					bIsChannelActive, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green *
+					bIsChannelActive, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue *
+					bIsChannelActive, sampleTime);
 			}
 
-			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
-				const int currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
-
-				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-			}
+			lights[LIGHT_MORSE].setBrightnessSmooth(bPaques * kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled * kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled * kSanguineButtonLightValue, sampleTime);
+			lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger * kSanguineButtonLightValue, sampleTime);
 		}
 
 		handleDisplay(args.sampleRate);
@@ -614,14 +615,6 @@ struct Nodi : SanguineModule {
 				break;
 			}
 		}
-	}
-
-	inline void pollSwitches(const float& sampleTime) {
-		// Handle switch lights.
-		lights[LIGHT_MORSE].setBrightnessSmooth(bPaques * kSanguineButtonLightValue, sampleTime);
-		lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled * kSanguineButtonLightValue, sampleTime);
-		lights[LIGHT_FLAT].setBrightnessSmooth(bFlattenEnabled * kSanguineButtonLightValue, sampleTime);
-		lights[LIGHT_AUTO].setBrightnessSmooth(bAutoTrigger * kSanguineButtonLightValue, sampleTime);
 	}
 
 	void onPortChange(const PortChangeEvent& e) override {
