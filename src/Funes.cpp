@@ -257,12 +257,10 @@ struct Funes : SanguineModule {
 			patch.morph_modulation_amount = params[PARAM_MORPH_CV].getValue();
 			patch.chordBank = chordBank;
 			patch.auxCrossfade = params[PARAM_AUX_CROSSFADE].getValue();
-			float suboscillatorOption = params[PARAM_AUX_SUBOSCILLATOR].getValue();
-			suboscillatorMode = static_cast<funes::SuboscillatorModes>(suboscillatorOption);
-			patch.auxSuboscillatorWave = suboscillatorOption > funes::SUBOSCILLATOR_SINE ? funes::SUBOSCILLATOR_SINE :
-				suboscillatorMode;
-			int8_t suboscillatorOctave = suboscillatorMode > funes::SUBOSCILLATOR_SINE ? suboscillatorMode - 2 : 0;
-			patch.auxSuboscillatorOctave = suboscillatorOctave;
+			suboscillatorMode = static_cast<funes::SuboscillatorModes>(params[PARAM_AUX_SUBOSCILLATOR].getValue());
+			bool bIsSubOscillatorOctave = suboscillatorMode > funes::SUBOSCILLATOR_SINE;
+			patch.auxSuboscillatorWave = bIsSubOscillatorOctave ? funes::SUBOSCILLATOR_SINE : suboscillatorMode;
+			patch.auxSuboscillatorOctave = (suboscillatorMode - 2) * bIsSubOscillatorOctave;
 
 			patch.wantHoldModulations = bWantHoldModulations;
 
