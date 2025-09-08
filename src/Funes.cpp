@@ -270,7 +270,7 @@ struct Funes : SanguineModule {
 
 			// Render output buffer for each voice.
 			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
-			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames[kBlockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				float_4 inputVoltages;
 
@@ -316,8 +316,8 @@ struct Funes : SanguineModule {
 				// Convert output to frames
 				const int channelFrame = channel * 2;
 				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
-					outputFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
-					outputFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
+					renderFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
+					renderFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
 				}
 
 				int activeEngine = voices[channel].active_engine();
@@ -343,11 +343,11 @@ struct Funes : SanguineModule {
 				int inLen = kBlockSize;
 				int outLen = drbOutputBuffers.capacity();
 				srcOutputs.setChannels(channelCount * 2);
-				srcOutputs.process(outputFrames, &inLen, drbOutputBuffers.endData(), &outLen);
+				srcOutputs.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
 				drbOutputBuffers.endIncr(outLen);
 			} else {
 				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), kBlockSize);
-				std::memcpy(drbOutputBuffers.endData(), outputFrames, len * sizeof(outputFrames[0]));
+				std::memcpy(drbOutputBuffers.endData(), renderFrames, len * sizeof(renderFrames[0]));
 				drbOutputBuffers.endIncr(len);
 			}
 
