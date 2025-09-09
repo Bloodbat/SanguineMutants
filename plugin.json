@@ -354,6 +354,19 @@
         "Hardware clone",
         "Sequencer"
       ]
+    },
+    {
+      "slug" : "FunesMk2",
+      "name" : "Funes Mk2",
+      "description" : "Powerful, remixed polyphonic macro oscillator based on Mutable Instruments' Plaits 1.2",
+      "tags" : [
+        "Digital",
+        "Drum",
+        "Hardware clone",
+        "Noise",
+        "Speech",
+        "Synth voice"
+      ]
     }
   ]
 }
