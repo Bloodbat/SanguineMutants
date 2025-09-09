@@ -37,6 +37,7 @@ extern Model* modelTemulenti;
 extern Model* modelVimina;
 extern Model* modelScalaria;
 extern Model* modelReticula;
+extern Model* modelFunesMk2;
 
 // MetaModule disabled modules go here!
 #ifndef METAMODULE
