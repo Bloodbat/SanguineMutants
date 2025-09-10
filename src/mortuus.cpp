@@ -401,7 +401,6 @@ struct Mortuus : SanguineModule {
 
 			/* Prepare sample rate conversion.
 			   Peaks is sampling at 48kHZ. */
-			srcOutput.setRates(apicesCommon::kSampleRate, args.sampleRate);
 			int inLen = apicesCommon::kBlockSize;
 			int outLen = drbOutputBuffer.capacity();
 			dsp::Frame<apicesCommon::kChannelCount> frame[apicesCommon::kBlockSize];
@@ -952,6 +951,10 @@ struct Mortuus : SanguineModule {
 			lastProcessorFunctions[0] = processorFunctions[0];
 			lastProcessorFunctions[1] = processorFunctions[1];
 		}
+	}
+
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		srcOutput.setRates(apicesCommon::kSampleRate, static_cast<int>(e.sampleRate));
 	}
 
 #ifndef METAMODULE
