@@ -32,6 +32,8 @@
 
 - Velamina: proper rescaling of gain lights when channels are polyphonic.
 
+- Velamina: output port lights did not reflect port voltage averages when dealing with polyphonic channels properly.
+
 - Vimina: swing/factor tooltips not updating until the knob is moved when the mode of a section is changed.
 
 ## Additions
