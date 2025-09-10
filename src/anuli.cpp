@@ -479,9 +479,9 @@ struct Anuli : SanguineModule {
 
 			// Convert output buffer.
 			dsp::Frame<2> outputFrames[anuli::kBlockSize];
-			for (int frame = 0; frame < anuli::kBlockSize; ++frame) {
-				outputFrames[frame].samples[0] = out[frame];
-				outputFrames[frame].samples[1] = aux[frame];
+			for (int block = 0; block < anuli::kBlockSize; ++block) {
+				outputFrames[block].samples[0] = out[block];
+				outputFrames[block].samples[1] = aux[block];
 			}
 
 			int inCount = anuli::kBlockSize;
