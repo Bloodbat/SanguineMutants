@@ -146,14 +146,14 @@ struct Velamina : SanguineModule {
 
 			if (bIsLightsTurn) {
 				int currentLight = LIGHT_OUT_1 + channel * 3;
-				float voltageSum = 0.f;
+				float channelVoltage = 0.f;
 
 				if (polyChannelCount < 2) {
 					if (polyChannelCount > 0) {
-						voltageSum = clamp(portVoltages[channel][0][0], -10.f, 10.f);
+						channelVoltage = clamp(portVoltages[channel][0][0], -10.f, 10.f);
 					}
 
-					float rescaledLight = rescale(voltageSum, 0.f, 10.f, 0.f, 1.f);
+					float rescaledLight = rescale(channelVoltage, 0.f, 10.f, 0.f, 1.f);
 					lights[currentLight].setBrightnessSmooth(-rescaledLight, sampleTime);
 					lights[currentLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
@@ -161,11 +161,14 @@ struct Velamina : SanguineModule {
 					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(0.f, sampleTime);
 					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gains[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
+					float voltageSum = 0.f;
 					float gainSum = 0.f;
-					for (int offset = 0; offset < kMaxChannels; ++offset) {
-						for (int polyChannel = 0; polyChannel < kMaxChannels; ++polyChannel) {
-							voltageSum += portVoltages[polyChannel][offset][polyChannel];
-							gainSum += gains[offset][polyChannel];
+					int currentChannel;
+					for (int offset = 0; offset < 4; ++offset) {
+						for (int polyChannel = 0; polyChannel < polyChannelCount; ++polyChannel) {
+							currentChannel = polyChannel % 4;
+							voltageSum += portVoltages[channel][offset][currentChannel];
+							gainSum += gains[offset][currentChannel];
 						}
 					}
 
