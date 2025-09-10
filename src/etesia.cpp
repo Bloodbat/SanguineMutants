@@ -302,7 +302,6 @@ struct Etesia : SanguineModule {
 				etesia::ShortFrame input[cloudyCommon::kMaxFrames] = {};
 
 				// Convert input buffer.
-				srcInputs[channel].setRates(args.sampleRate, 32000);
 				dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
 				int inputLength = drbInputBuffers[channel].size();
 				int outputLength = cloudyCommon::kMaxFrames;
@@ -396,7 +395,6 @@ struct Etesia : SanguineModule {
 					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
-				srcOutputs[channel].setRates(32000, args.sampleRate);
 				int inCount = cloudyCommon::kMaxFrames;
 				int outCount = drbOutputBuffers[channel].capacity();
 				srcOutputs[channel].process(outputFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
@@ -609,6 +607,13 @@ struct Etesia : SanguineModule {
 				break;
 			}
 			break;
+		}
+	}
+
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), 32000);
+			srcOutputs[channel].setRates(32000, static_cast<int>(e.sampleRate));
 		}
 	}
 
