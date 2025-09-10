@@ -339,7 +339,6 @@ struct Funes : SanguineModule {
 
 			// Convert output.
 			if (!bWantLowCpu) {
-				srcOutputs.setRates(48000, static_cast<int>(args.sampleRate));
 				int inLen = kBlockSize;
 				int outLen = drbOutputBuffers.capacity();
 				srcOutputs.setChannels(channelCount * 2);
@@ -480,6 +479,10 @@ struct Funes : SanguineModule {
 				break;
 			}
 		}
+	}
+
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		srcOutputs.setRates(48000, static_cast<int>(e.sampleRate));
 	}
 
 	json_t* dataToJson() override {
