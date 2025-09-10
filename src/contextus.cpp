@@ -424,7 +424,6 @@ struct Contextus : SanguineModule {
 					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
 						in[block].samples[0] = renderBuffer[block] / 32768.f;
 					}
-					sampleRateConverters[channel].setRates(96000, args.sampleRate);
 
 					int inLen = nodiCommon::kBlockSize;
 					int outLen = drbOutputBuffers[channel].capacity();
@@ -699,6 +698,10 @@ struct Contextus : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		log2SampleRate = log2f(96000.f / e.sampleRate);
+
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			sampleRateConverters[channel].setRates(96000, static_cast<int>(e.sampleRate));
+		}
 	}
 
 	int getModelParam() {
