@@ -435,7 +435,6 @@ struct Anuli : SanguineModule {
 			float in[anuli::kBlockSize] = {};
 
 			// Convert input buffer.
-			srcInputs[channel].setRates(static_cast<int>(sampleRate), 48000);
 			int inLen = drbInputBuffers[channel].size();
 			int outLen = anuli::kBlockSize;
 			srcInputs[channel].process(drbInputBuffers[channel].startData(), &inLen,
@@ -485,7 +484,6 @@ struct Anuli : SanguineModule {
 				outputFrames[frame].samples[1] = aux[frame];
 			}
 
-			srcOutputs[channel].setRates(48000, static_cast<int>(sampleRate));
 			int inCount = anuli::kBlockSize;
 			int outCount = drbOutputBuffers[channel].capacity();
 			srcOutputs[channel].process(outputFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
@@ -543,6 +541,13 @@ struct Anuli : SanguineModule {
 				break;
 			}
 			break;
+		}
+	}
+
+	void onSampleRateChange(const SampleRateChangeEvent& e) override {
+		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), 48000);
+			srcOutputs[channel].setRates(48000, static_cast<int>(e.sampleRate));
 		}
 	}
 
