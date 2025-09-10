@@ -106,7 +106,7 @@ struct Velamina : SanguineModule {
 		}
 
 		for (int channel = 0; channel < kMaxChannels; ++channel) {
-			float_4 gain[4] = {};
+			float_4 gains[4] = {};
 			float_4 inVoltages[4] = {};
 
 			float sliderGain = params[PARAM_GAIN_1 + channel].getValue();
@@ -117,17 +117,17 @@ struct Velamina : SanguineModule {
 				uint8_t currentChannel = polyChannel >> 2;
 				if (cvInputsConnected[channel]) {
 					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
-					gain[currentChannel] = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
+					gains[currentChannel] = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
 						sliderGain + knobOffset), 0.f, 8.f) / 5.f, 0.f);
-					gain[currentChannel] = simd::pow(gain[currentChannel], 1 / (0.1f + 0.9f * knobResponse));
+					gains[currentChannel] = simd::pow(gains[currentChannel], 1 / (0.1f + 0.9f * knobResponse));
 				} else {
-					gain[currentChannel] = sliderGain + knobOffset;
+					gains[currentChannel] = sliderGain + knobOffset;
 				}
 
 				if (signalInputsConnected[channel]) {
 					inVoltages[currentChannel] = inputs[INPUT_IN_1 + channel].getVoltageSimd<float_4>(polyChannel);
 
-					float_4 voltages = gain[currentChannel] * inVoltages[currentChannel];
+					float_4 voltages = gains[currentChannel] * inVoltages[currentChannel];
 
 					outVoltages[currentChannel] += voltages;
 
@@ -158,13 +158,13 @@ struct Velamina : SanguineModule {
 					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 
 					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(0.f, sampleTime);
-					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gain[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
+					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gains[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
 					float gainSum = 0.f;
 					for (int offset = 0; offset < kMaxChannels; ++offset) {
 						for (int polyChannel = 0; polyChannel < kMaxChannels; ++polyChannel) {
 							voltageSum += portVoltages[polyChannel][offset][polyChannel];
-							gainSum += gain[offset][polyChannel];
+							gainSum += gains[offset][polyChannel];
 						}
 					}
 
