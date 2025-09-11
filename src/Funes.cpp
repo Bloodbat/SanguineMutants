@@ -86,8 +86,6 @@ struct Funes : SanguineModule {
 
 	static const int kLightsFrequency = 16;
 
-	static const int kMaxUserDataSize = 4096;
-
 	static const int kBlockSize = 12;
 
 	static const int kModelLightsCount = 8;
@@ -526,13 +524,13 @@ struct Funes : SanguineModule {
 			if (userDataVector.size() > 0) {
 				const uint8_t* userDataBuffer = &userDataVector[0];
 				userData.setBuffer(userDataBuffer);
-				if (userDataBuffer[kMaxUserDataSize - 2] == 'U') {
+				if (userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
 					for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 						voices[channel].ReloadUserData();
 					}
 
 					resetCustomDataStates();
-					customDataStates[userDataBuffer[kMaxUserDataSize - 1] - ' '] = funes::DataCustom;
+					customDataStates[userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 1] - ' '] = funes::DataCustom;
 				}
 			}
 		}
