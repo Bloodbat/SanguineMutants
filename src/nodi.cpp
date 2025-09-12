@@ -710,10 +710,10 @@ struct Nodi : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		log2SampleRate = log2f(96000.f / e.sampleRate);
+		log2SampleRate = log2f(nodiCommon::kHardwareRate / e.sampleRate);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			sampleRateConverters[channel].setRates(96000, static_cast<int>(e.sampleRate));
+			sampleRateConverters[channel].setRates(nodiCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 		}
 	}
 
