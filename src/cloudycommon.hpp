@@ -50,4 +50,6 @@ namespace cloudyCommon {
 
 	static const int kBigBufferLength = 118784;
 	static const int kSmallBufferLength = 65536 - 128;
+
+	static const int kHardwareRate = 32000;
 }
