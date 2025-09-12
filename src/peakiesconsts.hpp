@@ -7,7 +7,7 @@ namespace apicesCommon {
     static const size_t kChannelCount = 2;
     static const size_t kFunctionLightCount = 4;
     static const size_t kKnobCount = 4;
-    static const size_t kSampleRate = 48000;
+    static const size_t kHardwareRate = 48000;
 
     static const uint8_t kAdcChannelCount = 4;
 
