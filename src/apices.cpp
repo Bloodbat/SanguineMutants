@@ -925,7 +925,7 @@ struct Apices : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		srcOutput.setRates(apicesCommon::kSampleRate, static_cast<int>(e.sampleRate));
+		srcOutput.setRates(apicesCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 	}
 
 #ifndef METAMODULE
