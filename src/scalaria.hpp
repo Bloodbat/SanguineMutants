@@ -20,5 +20,5 @@ namespace scalaria {
     { 192, 0, 192 }
   };
 
-  static const float ksampleRate = 96000.f;
+  static const float kHardwareRate = 96000.f;
 }
