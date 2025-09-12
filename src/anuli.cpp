@@ -546,8 +546,8 @@ struct Anuli : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), 48000);
-			srcOutputs[channel].setRates(48000, static_cast<int>(e.sampleRate));
+			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), anuli::kHardwareRate);
+			srcOutputs[channel].setRates(anuli::kHardwareRate, static_cast<int>(e.sampleRate));
 		}
 	}
 
