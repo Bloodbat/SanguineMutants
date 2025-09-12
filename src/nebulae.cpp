@@ -582,8 +582,8 @@ struct Nebulae : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), 32000);
-			srcOutputs[channel].setRates(32000, static_cast<int>(e.sampleRate));
+			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), cloudyCommon::kHardwareRate);
+			srcOutputs[channel].setRates(cloudyCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 		}
 	}
 
