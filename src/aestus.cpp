@@ -531,7 +531,7 @@ struct Aestus : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		log2SampleRate = log2f(48000.f / e.sampleRate);
+		log2SampleRate = log2f(aestusCommon::kHardwareRate / e.sampleRate);
 	}
 
 	void setModel(int modelNum) {
