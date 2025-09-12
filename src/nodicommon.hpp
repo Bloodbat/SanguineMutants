@@ -232,6 +232,8 @@ namespace nodiCommon {
 
 	static const int kBlockSize = 24;
 
+	static const int kHardwareRate = 96000;
+
 	struct NodiDisplay : SanguineAlphaDisplay {
 		uint32_t* displayTimeout = nullptr;
 
