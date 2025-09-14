@@ -86,8 +86,6 @@ struct Funes : SanguineModule {
 
 	static const int kLightsFrequency = 16;
 
-	static const int kBlockSize = 12;
-
 	static const int kModelLightsCount = 8;
 
 	int frequencyMode = funes::FM_FULL;
@@ -268,7 +266,7 @@ struct Funes : SanguineModule {
 
 			// Render output buffer for each voice.
 			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[kBlockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[funes::kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				float_4 inputVoltages;
 
@@ -308,12 +306,12 @@ struct Funes : SanguineModule {
 				modulations[channel].trigger_patched = bHaveInputTrigger;
 
 				// Render frames
-				plaits::Voice::Frame output[kBlockSize];
-				voices[channel].Render(patch, modulations[channel], output, kBlockSize);
+				plaits::Voice::Frame output[funes::kBlockSize];
+				voices[channel].Render(patch, modulations[channel], output, funes::kBlockSize);
 
 				// Convert output to frames
 				const int channelFrame = channel * 2;
-				for (int blockNum = 0; blockNum < kBlockSize; ++blockNum) {
+				for (int blockNum = 0; blockNum < funes::kBlockSize; ++blockNum) {
 					renderFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
 					renderFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
 				}
@@ -337,19 +335,19 @@ struct Funes : SanguineModule {
 
 			// Convert output.
 			if (!bWantLowCpu) {
-				int inLen = kBlockSize;
+				int inLen = funes::kBlockSize;
 				int outLen = drbOutputBuffers.capacity();
 				srcOutputs.setChannels(channelCount * 2);
 				srcOutputs.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
 				drbOutputBuffers.endIncr(outLen);
 			} else {
-				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), kBlockSize);
+				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), funes::kBlockSize);
 				std::memcpy(drbOutputBuffers.endData(), renderFrames, len * sizeof(renderFrames[0]));
 				drbOutputBuffers.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz.
-			triPhase += 2.f * args.sampleTime * kBlockSize;
+			triPhase += 2.f * args.sampleTime * funes::kBlockSize;
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
 			}
