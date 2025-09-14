@@ -114,4 +114,6 @@ namespace funes {
   };
 
   static const int kHardwareRate = 48000;
+
+  static const int kBlockSize = 12;
 }
