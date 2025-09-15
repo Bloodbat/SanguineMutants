@@ -11,8 +11,6 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
-using simd::float_4;
-
 struct Etesia : SanguineModule {
 	enum ParamIds {
 		PARAM_MODE,
@@ -128,8 +126,6 @@ struct Etesia : SanguineModule {
 
 	float freezeLight = 0.f;
 
-	float_4 voltages1[PORT_MAX_CHANNELS];
-
 	int channelCount;
 	int displayChannel = 0;
 
@@ -241,6 +237,8 @@ struct Etesia : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		int stereoChannels = static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1;
 		bool bWantLoFi = !static_cast<bool>(params[PARAM_HI_FI].getValue());
 #ifndef METAMODULE
@@ -279,6 +277,8 @@ struct Etesia : SanguineModule {
 		}
 
 		etesia::Parameters* etesiaParameters[PORT_MAX_CHANNELS];
+
+		float_4 voltages1[PORT_MAX_CHANNELS];
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			// Get input.
