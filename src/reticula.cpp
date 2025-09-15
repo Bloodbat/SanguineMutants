@@ -304,8 +304,8 @@ struct Reticula : SanguineModule {
                 metronome.process();
             }
 
-            float_4 paramVoltages1 = {};
-            float_4 paramVoltages2 = {};
+            float_4 paramVoltages1;
+            float_4 paramVoltages2;
 
             paramVoltages1[0] = inputs[INPUT_MAP_X].getVoltage();
             paramVoltages1[1] = inputs[INPUT_MAP_Y].getVoltage();
