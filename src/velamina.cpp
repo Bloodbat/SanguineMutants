@@ -146,9 +146,9 @@ struct Velamina : SanguineModule {
 
 			if (bIsLightsTurn) {
 				int currentLight = LIGHT_OUT_1 + channel * 3;
-				float channelVoltage = 0.f;
 
 				if (polyChannelCount < 2) {
+					float channelVoltage = 0.f;
 					if (polyChannelCount > 0) {
 						channelVoltage = clamp(portVoltages[channel][0][0], -10.f, 10.f);
 					}
