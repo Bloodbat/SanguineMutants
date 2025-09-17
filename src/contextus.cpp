@@ -101,8 +101,8 @@ struct Contextus : SanguineModule {
 	int displayChannel = 0;
 	static const int kLightsFrequency = 16;
 
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<1> sampleRateConverters[PORT_MAX_CHANNELS];
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS>, 256> drbOutputBuffers;
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS> srcOutput;
 	dsp::ClockDivider lightsDivider;
 
 	bool triggersDetected[PORT_MAX_CHANNELS] = {};
@@ -240,56 +240,58 @@ struct Contextus : SanguineModule {
 		float knobCoarse = params[PARAM_COARSE].getValue();
 		float knobFine = params[PARAM_FINE].getValue();
 
-		for (int channel = 0; channel < channelCount; ++channel) {
-			settings[channel].quantizer_scale = knobScale;
-			settings[channel].quantizer_root = knobRoot;
-			settings[channel].pitch_range = knobPitchRange;
-			settings[channel].pitch_octave = knobPitchOctave;
-			settings[channel].trig_delay = knobTriggerDelay;
-			settings[channel].sample_rate = knobSampleRate;
-			settings[channel].resolution = knobResolution;
-			settings[channel].ad_attack = knobAttack;
-			settings[channel].ad_decay = knobDecay;
-			settings[channel].ad_timbre = knobAdTimbre;
-			settings[channel].ad_fm = knobAdFm;
-			settings[channel].ad_color = knobAdColor;
+		// Render frames.
+		if (drbOutputBuffers.empty()) {
+			dsp::Frame<PORT_MAX_CHANNELS> renderFrames[nodiCommon::kBlockSize];
 
-			// Trigger.
-			bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
-			if (!lastTriggers[channel] && bTriggerInput) {
-				triggersDetected[channel] = bTriggerInput;
-			}
-			lastTriggers[channel] = bTriggerInput;
+			for (int channel = 0; channel < channelCount; ++channel) {
+				settings[channel].quantizer_scale = knobScale;
+				settings[channel].quantizer_root = knobRoot;
+				settings[channel].pitch_range = knobPitchRange;
+				settings[channel].pitch_octave = knobPitchOctave;
+				settings[channel].trig_delay = knobTriggerDelay;
+				settings[channel].sample_rate = knobSampleRate;
+				settings[channel].resolution = knobResolution;
+				settings[channel].ad_attack = knobAttack;
+				settings[channel].ad_decay = knobDecay;
+				settings[channel].ad_timbre = knobAdTimbre;
+				settings[channel].ad_fm = knobAdFm;
+				settings[channel].ad_color = knobAdColor;
 
-			if (triggersDetected[channel]) {
-				triggerDelays[channel] = settings[channel].trig_delay ?
-					(1 << settings[channel].trig_delay) : 0;
-				++triggerDelays[channel];
-				triggersDetected[channel] = false;
-			}
-
-			if (triggerDelays[channel]) {
-				--triggerDelays[channel];
-				if (triggerDelays[channel] == 0) {
-					triggeredChannels[channel] = true;
+				// Trigger.
+				bool bTriggerInput = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
+				if (!lastTriggers[channel] && bTriggerInput) {
+					triggersDetected[channel] = bTriggerInput;
 				}
-			}
+				lastTriggers[channel] = bTriggerInput;
 
-			// Handle switches.
-			settings[channel].ad_vca = bVCAEnabled;
-			settings[channel].vco_drift = driftValue;
-			settings[channel].vco_flatten = bFlattenEnabled;
-			settings[channel].signature = waveShaperValue;
-			settings[channel].auto_trig = bAutoTrigger;
+				if (triggersDetected[channel]) {
+					triggerDelays[channel] = settings[channel].trig_delay ?
+						(1 << settings[channel].trig_delay) : 0;
+					++triggerDelays[channel];
+					triggersDetected[channel] = false;
+				}
 
-			// Quantizer.
-			if (selectedScales[channel] != settings[channel].quantizer_scale) {
-				selectedScales[channel] = settings[channel].quantizer_scale;
-				quantizers[channel].Configure(renaissance::scales[selectedScales[channel]]);
-			}
+				if (triggerDelays[channel]) {
+					--triggerDelays[channel];
+					if (triggerDelays[channel] == 0) {
+						triggeredChannels[channel] = true;
+					}
+				}
 
-			// Render frames.
-			if (drbOutputBuffers[channel].empty()) {
+				// Handle switches.
+				settings[channel].ad_vca = bVCAEnabled;
+				settings[channel].vco_drift = driftValue;
+				settings[channel].vco_flatten = bFlattenEnabled;
+				settings[channel].signature = waveShaperValue;
+				settings[channel].auto_trig = bAutoTrigger;
+
+				// Quantizer.
+				if (selectedScales[channel] != settings[channel].quantizer_scale) {
+					selectedScales[channel] = settings[channel].quantizer_scale;
+					quantizers[channel].Configure(renaissance::scales[selectedScales[channel]]);
+				}
+
 				if (bHaveAttackCable) {
 					float attackVoltage = inputs[INPUT_ATTACK].getVoltage(channel);
 					attackVoltage = roundf(attackVoltage);
@@ -416,34 +418,32 @@ struct Contextus : SanguineModule {
 					gainLps[channel] += (gain - gainLps[channel]) >> 4;
 					int16_t warped = waveShapers[channel].Transform(sample);
 					renderBuffer[block] = stmlib::Mix(sample, warped, signature);
+
+					renderFrames[block].samples[channel] = renderBuffer[block] / 32768.f;
 				}
+			} // Channels.
 
-				if (!bWantLowCpu) {
-					// Sample rate convert.
-					dsp::Frame<1> in[nodiCommon::kBlockSize];
-					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
-						in[block].samples[0] = renderBuffer[block] / 32768.f;
-					}
-
-					int inLen = nodiCommon::kBlockSize;
-					int outLen = drbOutputBuffers[channel].capacity();
-					sampleRateConverters[channel].process(in, &inLen, drbOutputBuffers[channel].endData(), &outLen);
-					drbOutputBuffers[channel].endIncr(outLen);
-				} else {
-					for (int block = 0; block < nodiCommon::kBlockSize; ++block) {
-						dsp::Frame<1> inFrame;
-						inFrame.samples[0] = renderBuffer[block] / 32768.f;
-						drbOutputBuffers[channel].push(inFrame);
-					}
-				}
+			if (!bWantLowCpu) {
+				// Convert sample rate.
+				int inLen = nodiCommon::kBlockSize;
+				int outLen = drbOutputBuffers.capacity();
+				srcOutput.setChannels(channelCount);
+				srcOutput.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
+				drbOutputBuffers.endIncr(outLen);
+			} else {
+				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), nodiCommon::kBlockSize);
+				std::memcpy(drbOutputBuffers.endData(), renderFrames, len * sizeof(renderFrames[0]));
+				drbOutputBuffers.endIncr(len);
 			}
+		}
 
-			// Output.
-			if (!drbOutputBuffers[channel].empty()) {
-				dsp::Frame<1> outFrame = drbOutputBuffers[channel].shift();
-				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[0], channel);
+		// Output.
+		if (!drbOutputBuffers.empty()) {
+			dsp::Frame<PORT_MAX_CHANNELS> outFrame = drbOutputBuffers.shift();
+			for (int channel = 0; channel < channelCount; ++channel) {
+				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[channel], channel);
 			}
-		} // Channels.
+		}
 
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 
@@ -699,9 +699,7 @@ struct Contextus : SanguineModule {
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		log2SampleRate = log2f(nodiCommon::kHardwareRate / e.sampleRate);
 
-		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			sampleRateConverters[channel].setRates(nodiCommon::kHardwareRate, static_cast<int>(e.sampleRate));
-		}
+		srcOutput.setRates(nodiCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 	}
 
 	int getModelParam() {
