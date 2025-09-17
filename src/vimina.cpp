@@ -405,7 +405,7 @@ struct Vimina : SanguineModule {
 			}
 		}
 
-		int currentLight = LIGHTS_STATE + section * 2;
+		int currentLight = LIGHTS_STATE + (section << 1);
 		switch (ledStates[section][channel]) {
 		case CHANNEL_REST:
 			setStateLedRest(currentLight, sampleTime);
@@ -488,7 +488,7 @@ struct Vimina : SanguineModule {
 	bool isSwingStrikeTurn(const uint8_t section, const uint32_t elapsed, const int channel) {
 		if (swingCounters[section][channel] >= 2 && channelSwings[section][channel] > kSwingFactorMin) {
 			uint32_t period = getPulseTrackerPeriod(channel);
-			uint32_t interval = ((10 * (period * 2)) / (1000 / channelSwings[section][channel])) - period;
+			uint32_t interval = ((10 * (period << 1)) / (1000 / channelSwings[section][channel])) - period;
 			return (elapsed >= interval && elapsed <= interval + kTimingErrorCorrectionAmount);
 		} else {
 			// Thru.
