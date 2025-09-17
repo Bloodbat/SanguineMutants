@@ -311,7 +311,7 @@ struct Nodi : SanguineModule {
 					settings[channel].ad_decay = modulatedDecay;
 				}
 
-				envelopes[channel].Update(settings[channel].ad_attack * 8, settings[channel].ad_decay * 8);
+				envelopes[channel].Update(settings[channel].ad_attack << 3, settings[channel].ad_decay << 3);
 				uint32_t adValue = envelopes[channel].Render();
 				const float scaledAdValue = adValue / 65535.f;
 
