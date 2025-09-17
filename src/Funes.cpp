@@ -310,7 +310,7 @@ struct Funes : SanguineModule {
 				voices[channel].Render(patch, modulations[channel], output, funes::kBlockSize);
 
 				// Convert output to frames
-				const int channelFrame = channel * 2;
+				const int channelFrame = channel << 1;
 				for (int blockNum = 0; blockNum < funes::kBlockSize; ++blockNum) {
 					renderFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
 					renderFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
@@ -324,7 +324,7 @@ struct Funes : SanguineModule {
 
 				// Model lights
 				// Get the active engine for current channel.
-				int clampedEngine = (activeEngine % 8) * 2;
+				int clampedEngine = (activeEngine % 8) << 1;
 
 				activeLights[clampedEngine] = activeEngine < 16;
 				activeLights[clampedEngine + 1] = (activeEngine & 0x10) | (activeEngine < 8);
@@ -337,7 +337,7 @@ struct Funes : SanguineModule {
 			if (!bWantLowCpu) {
 				int inLen = funes::kBlockSize;
 				int outLen = drbOutputBuffers.capacity();
-				srcOutputs.setChannels(channelCount * 2);
+				srcOutputs.setChannels(channelCount << 1);
 				srcOutputs.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
 				drbOutputBuffers.endIncr(outLen);
 			} else {
@@ -357,7 +357,7 @@ struct Funes : SanguineModule {
 			const int baseEngine = patch.engine;
 			const int clampedEngine = baseEngine % 8;
 			for (int led = 0; led < kModelLightsCount; ++led) {
-				const int currentLight = led * 2;
+				const int currentLight = led << 1;
 				float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 				float brightnessGreen = static_cast<float>(activeLights[currentLight]);
 
@@ -376,7 +376,7 @@ struct Funes : SanguineModule {
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
 			int currentSample;
 			for (int channel = 0; channel < channelCount; ++channel) {
-				currentSample = channel * 2;
+				currentSample = channel << 1;
 				// Inverting op-amp on outputs
 				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[currentSample] * 5.f, channel);
 				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[currentSample + 1] * 5.f, channel);
