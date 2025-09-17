@@ -145,7 +145,8 @@ struct Velamina : SanguineModule {
 			}
 
 			if (bIsLightsTurn) {
-				int currentLight = LIGHT_OUT_1 + channel * 3;
+				int outputLight = LIGHT_OUT_1 + channel * 3;
+				int channelLight = channel << 1;
 
 				if (polyChannelCount < 2) {
 					float channelVoltage = 0.f;
@@ -154,12 +155,12 @@ struct Velamina : SanguineModule {
 					}
 
 					float rescaledLight = rescale(channelVoltage, 0.f, 10.f, 0.f, 1.f);
-					lights[currentLight].setBrightnessSmooth(-rescaledLight, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
+					lights[outputLight].setBrightnessSmooth(-rescaledLight, sampleTime);
+					lights[outputLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
+					lights[outputLight + 2].setBrightnessSmooth(0.f, sampleTime);
 
-					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(0.f, sampleTime);
-					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescale(gains[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
+					lights[LIGHT_GAIN_1 + channelLight].setBrightnessSmooth(0.f, sampleTime);
+					lights[(LIGHT_GAIN_1 + channelLight) + 1].setBrightnessSmooth(rescale(gains[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
 					float voltageSum = 0.f;
 					float gainSum = 0.f;
@@ -178,13 +179,13 @@ struct Velamina : SanguineModule {
 					voltageSum = clamp(voltageSum, -10.f, 10.f);
 
 					float rescaledLight = rescale(voltageSum, 0.f, 10.f, 0.f, 1.f);
-					lights[currentLight].setBrightnessSmooth(-rescaledLight, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(voltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
+					lights[outputLight].setBrightnessSmooth(-rescaledLight, sampleTime);
+					lights[outputLight + 1].setBrightnessSmooth(rescaledLight, sampleTime);
+					lights[outputLight + 2].setBrightnessSmooth(voltageSum < 0 ? -rescaledLight : rescaledLight, sampleTime);
 
 					rescaledLight = rescale(clamp(gainSum, 0.f, 5.f), 0.f, 5.f, 0.f, 1.f);
-					lights[LIGHT_GAIN_1 + channel * 2].setBrightnessSmooth(rescaledLight, sampleTime);
-					lights[(LIGHT_GAIN_1 + channel * 2) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
+					lights[LIGHT_GAIN_1 + channelLight].setBrightnessSmooth(rescaledLight, sampleTime);
+					lights[(LIGHT_GAIN_1 + channelLight) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				}
 			}
 
