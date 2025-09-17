@@ -278,7 +278,7 @@ struct Marmora : SanguineModule {
 
 			// Outputs.
 			setOutputs();
-			outputs[OUTPUT_Y].setVoltage(voltages[blockIndex * 4 + 3]);
+			outputs[OUTPUT_Y].setVoltage(voltages[(blockIndex << 2) + 3]);
 
 			// Lights.
 			if (bIsLightsTurn) {
@@ -298,7 +298,7 @@ struct Marmora : SanguineModule {
 
 			// Outputs.
 			setOutputsScaleEdit();
-			outputs[OUTPUT_Y].setVoltage(voltages[blockIndex * 4 + 3]);
+			outputs[OUTPUT_Y].setVoltage(voltages[(blockIndex << 2) + 3]);
 
 			// Lights.
 			if (bIsLightsTurn) {
@@ -351,13 +351,15 @@ struct Marmora : SanguineModule {
 	}
 
 	void setOutputs() {
-		outputs[OUTPUT_T1].setVoltage(bGates[blockIndex * 2] * 10.f);
+		int tBlockIndex = blockIndex << 1;
+		int xBlockIndex = blockIndex << 2;
+		outputs[OUTPUT_T1].setVoltage(bGates[tBlockIndex] * 10.f);
 		outputs[OUTPUT_T2].setVoltage((rampMaster[blockIndex] < 0.5f) * 10.f);
-		outputs[OUTPUT_T3].setVoltage(bGates[blockIndex * 2 + 1] * 10.f);
+		outputs[OUTPUT_T3].setVoltage(bGates[tBlockIndex + 1] * 10.f);
 
-		outputs[OUTPUT_X1].setVoltage(voltages[blockIndex * 4]);
-		outputs[OUTPUT_X2].setVoltage(voltages[blockIndex * 4 + 1]);
-		outputs[OUTPUT_X3].setVoltage(voltages[blockIndex * 4 + 2]);
+		outputs[OUTPUT_X1].setVoltage(voltages[xBlockIndex]);
+		outputs[OUTPUT_X2].setVoltage(voltages[xBlockIndex + 1]);
+		outputs[OUTPUT_X3].setVoltage(voltages[xBlockIndex + 2]);
 	}
 
 	void setOutputsScaleEdit() {
@@ -404,7 +406,8 @@ struct Marmora : SanguineModule {
 		drawLight(LIGHT_SCALE, marmora::scaleLights[xScale][0], sampleTime, systemTimeMs);
 		drawLight(LIGHT_SCALE + 1, marmora::scaleLights[xScale][1], sampleTime, systemTimeMs);
 
-		float yVoltage = math::rescale(voltages[blockIndex * 4 + 3], 0.f, 5.f, 0.f, 1.f);
+		int yBlockIndex = (blockIndex << 2) + 3;
+		float yVoltage = math::rescale(voltages[yBlockIndex], 0.f, 5.f, 0.f, 1.f);
 		lights[LIGHT_Y].setBrightnessSmooth(yVoltage, sampleTime);
 		lights[LIGHT_Y + 1].setBrightnessSmooth(-yVoltage, sampleTime);
 
@@ -427,23 +430,25 @@ struct Marmora : SanguineModule {
 		lights[LIGHT_EXTERNAL + 1].setBrightnessSmooth(lightExternalBrightness, sampleTime);
 
 		// T1 and T3 are booleans: they'll never go negative.
-		lights[LIGHT_T1].setBrightnessSmooth(bGates[blockIndex * 2], sampleTime);
+		int tBlockIndex = blockIndex << 1;
+		int xBlockIndex = blockIndex << 2;
+		lights[LIGHT_T1].setBrightnessSmooth(bGates[tBlockIndex], sampleTime);
 
 		lights[LIGHT_T2].setBrightnessSmooth(rampMaster[blockIndex] < 0.5f, sampleTime);
 
-		lights[LIGHT_T3].setBrightnessSmooth(bGates[blockIndex * 2 + 1], sampleTime);
+		lights[LIGHT_T3].setBrightnessSmooth(bGates[tBlockIndex + 1], sampleTime);
 
 		float outputVoltage = 0.f;
 
-		outputVoltage = math::rescale(voltages[blockIndex * 4], 0.f, 5.f, 0.f, 1.f);
+		outputVoltage = math::rescale(voltages[xBlockIndex], 0.f, 5.f, 0.f, 1.f);
 		lights[LIGHT_X1].setBrightnessSmooth(outputVoltage, sampleTime);
 		lights[LIGHT_X1 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 
-		outputVoltage = math::rescale(voltages[blockIndex * 4 + 1], 0.f, 5.f, 0.f, 1.f);
+		outputVoltage = math::rescale(voltages[xBlockIndex + 1], 0.f, 5.f, 0.f, 1.f);
 		lights[LIGHT_X2].setBrightnessSmooth(outputVoltage, sampleTime);
 		lights[LIGHT_X2 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 
-		outputVoltage = math::rescale(voltages[blockIndex * 4 + 2], 0.f, 5.f, 0.f, 1.f);
+		outputVoltage = math::rescale(voltages[xBlockIndex + 2], 0.f, 5.f, 0.f, 1.f);
 		lights[LIGHT_X3].setBrightnessSmooth(outputVoltage, sampleTime);
 		lights[LIGHT_X3 + 1].setBrightnessSmooth(-outputVoltage, sampleTime);
 	}
