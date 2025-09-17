@@ -66,10 +66,10 @@ struct Anuli : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	dsp::SampleRateConverter<1> srcInputs[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<2> srcOutputs[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<1>, 256> drbInputBuffers[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS> srcInputs;
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcOutputs;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS>, 256> drbInputBuffers;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> drbOutputBuffers;
 
 	dsp::ClockDivider lightsDivider;
 
@@ -119,6 +119,7 @@ struct Anuli : SanguineModule {
 	std::array<int, PORT_MAX_CHANNELS> channelModes = {};
 
 	rings::ResonatorModel resonatorModels[PORT_MAX_CHANNELS] = {};
+
 	rings::FxType fxModel = rings::FX_FORMANT;
 
 	std::array<rings::FxType, PORT_MAX_CHANNELS> channelFx = {};
@@ -196,15 +197,124 @@ struct Anuli : SanguineModule {
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
 
-		for (int channel = 0; channel < channelCount; ++channel) {
-			setupChannel(channel);
-
-			renderFrames(channel, args.sampleRate);
-
-			setOutputs(channel);
+		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
+		if (!drbInputBuffers.full()) {
+			dsp::Frame<PORT_MAX_CHANNELS> frames;
+			for (int channel = 0; channel < channelCount; ++channel) {
+				frames.samples[channel] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
+			}
+			drbInputBuffers.push(frames);
 		}
 
-		setStrummingFlag(performanceStates[displayChannel].strum);
+		if (drbOutputBuffers.empty()) {
+			dsp::Frame<PORT_MAX_CHANNELS> inFrames[anuli::kBlockSize] = {};
+
+			// Convert input buffer.
+			int inLen = drbInputBuffers.size();
+			int outLen = anuli::kBlockSize;
+			srcInputs.setChannels(channelCount);
+			srcInputs.process(drbInputBuffers.startData(), &inLen, inFrames, &outLen);
+			drbInputBuffers.startIncr(inLen);
+
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[anuli::kBlockSize];
+
+			float in[anuli::kBlockSize];
+
+			for (int channel = 0; channel < channelCount; ++channel) {
+				if (!strums[channel]) {
+					strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+				}
+
+				float out[anuli::kBlockSize];
+				float aux[anuli::kBlockSize];
+				float structure;
+
+				rings::Patch patch;
+
+				for (int block = 0; block < anuli::kBlockSize; ++block) {
+					in[block] = inFrames[block].samples[channel];
+				}
+
+				switch (channelModes[channel]) {
+				case 6: // Disastrous peace.
+					if (stringSynths[channel].polyphony() != polyphonyMode) {
+						stringSynths[channel].set_polyphony(polyphonyMode);
+					}
+
+					stringSynths[channel].set_fx(rings::FxType(channelFx[channel]));
+
+					setupPatch(channel, patch, structure);
+					setupPerformance(channel, performanceStates[channel], structure);
+
+					// Process audio.
+					strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
+					stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
+					break;
+
+				default:
+					if (parts[channel].polyphony() != polyphonyMode) {
+						parts[channel].set_polyphony(polyphonyMode);
+					}
+
+					parts[channel].set_model(resonatorModels[channel]);
+
+					setupPatch(channel, patch, structure);
+					setupPerformance(channel, performanceStates[channel], structure);
+
+					// Process audio.
+					strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
+					parts[channel].Process(performanceStates[channel], patch, in,
+						out, aux, anuli::kBlockSize);
+					break;
+				}
+
+				// Convert output buffer.
+				const int channelFrame = channel << 1;
+				for (int block = 0; block < anuli::kBlockSize; ++block) {
+					renderedFrames[block].samples[channelFrame] = out[block];
+					renderedFrames[block].samples[channelFrame + 1] = aux[block];
+				}
+			}
+
+			int inCount = anuli::kBlockSize;
+			int outCount = drbOutputBuffers.capacity();
+			srcOutputs.setChannels(channelCount << 1);
+			srcOutputs.process(renderedFrames, &inCount, drbOutputBuffers.endData(), &outCount);
+			drbOutputBuffers.endIncr(outCount);
+		}
+
+		if (!drbOutputBuffers.empty()) {
+			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
+			int currentSample;
+			/*
+				"Note: you need to insert a jack into each output to split the signals:
+					   when only one jack is inserted, both signals are mixed together."
+			*/
+			if (bHaveOutputEven & bHaveOutputOdd) {
+				for (int channel = 0; channel < channelCount; ++channel) {
+					currentSample = channel << 1;
+					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrames.samples[currentSample], -1.f, 1.f) *
+						5.f, channel);
+					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrames.samples[currentSample + 1], -1.f, 1.f) *
+						5.f, channel);
+				}
+			} else {
+				for (int channel = 0; channel < channelCount; ++channel) {
+					currentSample = channel << 1;
+					float outVoltage = clamp(outputFrames.samples[currentSample] +
+						outputFrames.samples[currentSample + 1], -1.f, 1.f) * 5.f;
+					outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
+					outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
+				}
+			}
+		}
+
+		if (performanceStates[displayChannel].strum) {
+			// Make sure the LED is off for a short enough time (ui.cc).
+			// strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
+			strummingFlagCounter = jitteredLightsFrequency;
+			// strummingFlagInterval = 0;
+		}
 
 		outputs[OUTPUT_ODD].setChannels(channelCount);
 
@@ -241,45 +351,6 @@ struct Anuli : SanguineModule {
 
 			parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
 
-			if (bHaveModeCable) {
-				if (!bNotesModeSelection) {
-					float_4 inputVoltages;
-					for (int channel = 0; channel < channelCount; channel += 4) {
-						inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-						inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
-						channelModes[channel] = static_cast<int>(inputVoltages[0]);
-						channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
-						channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
-						channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
-					}
-				} else {
-					float_4 inputVoltages;
-					for (int channel = 0; channel < channelCount; channel += 4) {
-						inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-						inputVoltages *= 12.f;
-						inputVoltages = simd::round(inputVoltages);
-						inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
-						channelModes[channel] = static_cast<int>(inputVoltages[0]);
-						channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
-						channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
-						channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
-					}
-				}
-			}
-
-			if (bHaveFxCable) {
-				float_4 inputVoltages;
-				for (int channel = 0; channel < channelCount; channel += 4) {
-					inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
-					inputVoltages = simd::round(inputVoltages);
-					inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
-					channelFx[channel] = static_cast<rings::FxType>(inputVoltages[0]);
-					channelFx[channel + 1] = static_cast<rings::FxType>(inputVoltages[1]);
-					channelFx[channel + 2] = static_cast<rings::FxType>(inputVoltages[2]);
-					channelFx[channel + 3] = static_cast<rings::FxType>(inputVoltages[3]);
-				}
-			}
-
 			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
 			uint8_t triangle = (systemTimeMs >> 5) & 31;
 			triangle = triangle < 16 ? triangle : 31 - triangle;
@@ -289,13 +360,45 @@ struct Anuli : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			displayText = anuli::modeLabels[channelModes[displayChannel]];
-
 			int currentLight;
 			bool bIsChannelActive;
 			LightModes lightMode;
 			float lightValue;
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				if (channel < channelCount && (channel % 4 == 0)) {
+					float_4 inputVoltages;
+					if (bHaveModeCable) {
+						if (!bNotesModeSelection) {
+							inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+							inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+							channelModes[channel] = static_cast<int>(inputVoltages[0]);
+							channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
+							channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
+							channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
+
+						} else {
+							inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+							inputVoltages *= 12.f;
+							inputVoltages = simd::round(inputVoltages);
+							inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+							channelModes[channel] = static_cast<int>(inputVoltages[0]);
+							channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
+							channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
+							channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
+						}
+					}
+
+					if (bHaveFxCable) {
+						inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
+						inputVoltages = simd::round(inputVoltages);
+						inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
+						channelFx[channel] = static_cast<rings::FxType>(inputVoltages[0]);
+						channelFx[channel + 1] = static_cast<rings::FxType>(inputVoltages[1]);
+						channelFx[channel + 2] = static_cast<rings::FxType>(inputVoltages[2]);
+						channelFx[channel + 3] = static_cast<rings::FxType>(inputVoltages[3]);
+					}
+				}
+
 				resonatorModels[channel] = channelModes[channel] == 6 ? rings::RESONATOR_MODEL_MODAL :
 					static_cast<rings::ResonatorModel>(channelModes[channel]);
 
@@ -334,6 +437,8 @@ struct Anuli : SanguineModule {
 			lights[LIGHT_POLYPHONY].setBrightness(polyphonyMode < 4);
 			lights[LIGHT_POLYPHONY + 1].setBrightness(((polyphonyMode == 2) | (polyphonyMode == 4)) |
 				((polyphonyMode == 3) & bIsTrianglePulse));
+
+			displayText = anuli::modeLabels[channelModes[displayChannel]];
 
 			// ++strummingFlagInterval;
 			if (strummingFlagCounter) {
@@ -397,109 +502,6 @@ struct Anuli : SanguineModule {
 			0, rings::kNumChords - 1);
 	}
 
-	void setOutputs(const int channel) {
-		if (!drbOutputBuffers[channel].empty()) {
-			dsp::Frame<2> outputFrame = drbOutputBuffers[channel].shift();
-			/*
-			"Note: you need to insert a jack into each output to split the signals:
-				   when only one jack is inserted, both signals are mixed together."
-			*/
-			if (bHaveOutputEven & bHaveOutputOdd) {
-				outputs[OUTPUT_ODD].setVoltage(clamp(outputFrame.samples[0], -1.f, 1.f) * 5.f, channel);
-				outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrame.samples[1], -1.f, 1.f) * 5.f, channel);
-			} else {
-				float outVoltage = clamp(outputFrame.samples[0] + outputFrame.samples[1], -1.f, 1.f) * 5.f;
-				outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
-				outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
-			}
-		}
-	}
-
-	void setupChannel(const int channel) {
-		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
-		if (!drbInputBuffers[channel].full()) {
-			dsp::Frame<1> frame;
-			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
-			drbInputBuffers[channel].push(frame);
-		}
-	}
-
-	void renderFrames(const int channel, const float& sampleRate) {
-		if (drbOutputBuffers[channel].empty()) {
-			if (!strums[channel]) {
-				strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
-			}
-
-			float in[anuli::kBlockSize] = {};
-
-			// Convert input buffer.
-			int inLen = drbInputBuffers[channel].size();
-			int outLen = anuli::kBlockSize;
-			srcInputs[channel].process(drbInputBuffers[channel].startData(), &inLen,
-				reinterpret_cast<dsp::Frame<1>*>(in), &outLen);
-			drbInputBuffers[channel].startIncr(inLen);
-
-			float out[anuli::kBlockSize];
-			float aux[anuli::kBlockSize];
-
-			rings::Patch patch;
-			float structure;
-
-			switch (channelModes[channel]) {
-			case 6: // Disastrous peace.
-				if (stringSynths[channel].polyphony() != polyphonyMode) {
-					stringSynths[channel].set_polyphony(polyphonyMode);
-				}
-
-				stringSynths[channel].set_fx(rings::FxType(channelFx[channel]));
-
-				setupPatch(channel, patch, structure);
-				setupPerformance(channel, performanceStates[channel], structure);
-
-				// Process audio.
-				strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
-				stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
-				break;
-
-			default:
-				if (parts[channel].polyphony() != polyphonyMode) {
-					parts[channel].set_polyphony(polyphonyMode);
-				}
-
-				parts[channel].set_model(resonatorModels[channel]);
-
-				setupPatch(channel, patch, structure);
-				setupPerformance(channel, performanceStates[channel], structure);
-
-				// Process audio.
-				strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
-				parts[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
-				break;
-			}
-
-			// Convert output buffer.
-			dsp::Frame<2> outputFrames[anuli::kBlockSize];
-			for (int block = 0; block < anuli::kBlockSize; ++block) {
-				outputFrames[block].samples[0] = out[block];
-				outputFrames[block].samples[1] = aux[block];
-			}
-
-			int inCount = anuli::kBlockSize;
-			int outCount = drbOutputBuffers[channel].capacity();
-			srcOutputs[channel].process(outputFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
-			drbOutputBuffers[channel].endIncr(outCount);
-		}
-	}
-
-	void setStrummingFlag(bool flag) {
-		if (flag) {
-			// Make sure the LED is off for a short enough time (ui.cc).
-			// strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
-			strummingFlagCounter = jitteredLightsFrequency;
-			// strummingFlagInterval = 0;
-		}
-	}
-
 	void onPortChange(const PortChangeEvent& e) override {
 		switch (e.type) {
 		case Port::INPUT:
@@ -545,10 +547,8 @@ struct Anuli : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), anuli::kHardwareRate);
-			srcOutputs[channel].setRates(anuli::kHardwareRate, static_cast<int>(e.sampleRate));
-		}
+		srcInputs.setRates(static_cast<int>(e.sampleRate), anuli::kHardwareRate);
+		srcOutputs.setRates(anuli::kHardwareRate, static_cast<int>(e.sampleRate));
 	}
 
 	void onAdd(const AddEvent& e) override {
