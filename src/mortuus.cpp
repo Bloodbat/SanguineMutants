@@ -76,6 +76,7 @@ struct Mortuus : SanguineModule {
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
+	int jitteredLightsFrequency;
 
 	int32_t adcLp[apicesCommon::kAdcChannelCount] = {};
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = {};
@@ -178,8 +179,6 @@ struct Mortuus : SanguineModule {
 			processors[channel].Init(channel);
 		}
 
-		lightsDivider.setDivision(kLightsFrequency);
-
 		init();
 	}
 
@@ -195,7 +194,7 @@ struct Mortuus : SanguineModule {
 		// Update knobs / lights every 16 samples only.
 		if (bIsLightsTurn) {
 			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
-			sampleTime = args.sampleTime * kLightsFrequency;
+			sampleTime = args.sampleTime * jitteredLightsFrequency;
 
 			pollSwitches(args, sampleTime);
 			pollPots();
@@ -955,6 +954,11 @@ struct Mortuus : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		srcOutput.setRates(apicesCommon::kHardwareRate, static_cast<int>(e.sampleRate));
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 #ifndef METAMODULE
