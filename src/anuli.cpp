@@ -424,14 +424,14 @@ struct Anuli : SanguineModule {
 			frame.samples[0] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
 			drbInputBuffers[channel].push(frame);
 		}
-
-		if (!strums[channel]) {
-			strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
-		}
 	}
 
 	void renderFrames(const int channel, const float& sampleRate) {
 		if (drbOutputBuffers[channel].empty()) {
+			if (!strums[channel]) {
+				strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+			}
+
 			float in[anuli::kBlockSize] = {};
 
 			// Convert input buffer.
