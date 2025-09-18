@@ -449,7 +449,9 @@ struct Anuli : SanguineModule {
 
 			switch (channelModes[channel]) {
 			case 6: // Disastrous peace.
-				stringSynths[channel].set_polyphony(polyphonyMode);
+				if (stringSynths[channel].polyphony() != polyphonyMode) {
+					stringSynths[channel].set_polyphony(polyphonyMode);
+				}
 
 				stringSynths[channel].set_fx(rings::FxType(channelFx[channel]));
 
