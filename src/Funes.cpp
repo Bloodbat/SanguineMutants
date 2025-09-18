@@ -96,6 +96,8 @@ struct Funes : SanguineModule {
 	int channelCount = 0;
 	int errorTimeOut = 0;
 
+	int jitteredLightsFrequency;
+
 	uint8_t chordBank = 0;
 
 	funes::SuboscillatorModes suboscillatorMode = funes::SUBOSCILLATOR_OFF;
@@ -178,8 +180,6 @@ struct Funes : SanguineModule {
 		}
 
 		octaveQuantizer.Init(9, 0.01f, false);
-
-		lightsDivider.setDivision(kLightsFrequency);
 
 		resetCustomDataStates();
 
@@ -479,6 +479,11 @@ struct Funes : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		srcOutputs.setRates(funes::kHardwareRate, static_cast<int>(e.sampleRate));
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {
