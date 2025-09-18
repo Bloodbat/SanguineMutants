@@ -130,6 +130,7 @@ struct Etesia : SanguineModule {
 	int displayChannel = 0;
 
 	static const int kLightsFrequency = 64;
+	int jitteredLightsFrequency;
 
 	bool lastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
@@ -224,8 +225,6 @@ struct Etesia : SanguineModule {
 		}
 
 		channelModes.fill(etesia::PLAYBACK_MODE_GRANULAR);
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	~Etesia() {
@@ -421,7 +420,7 @@ struct Etesia : SanguineModule {
 
 		// Lights.
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
-			const float sampleTime = args.sampleTime * kLightsFrequency;
+			const float sampleTime = args.sampleTime * jitteredLightsFrequency;
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
 				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
@@ -615,6 +614,11 @@ struct Etesia : SanguineModule {
 			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), cloudyCommon::kHardwareRate);
 			srcOutputs[channel].setRates(cloudyCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {
