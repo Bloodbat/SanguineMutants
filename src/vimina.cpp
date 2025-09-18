@@ -75,6 +75,8 @@ struct Vimina : SanguineModule {
 
 	static const int kPulseTrackerBufferSize = 2;
 
+	int jitteredLightsFrequency;
+
 	int channelCount = 0;
 	int ledsChannel = 0;
 	int triggerCounts[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
@@ -167,8 +169,6 @@ struct Vimina : SanguineModule {
 		configBypass(INPUT_CLOCK, OUTPUT_OUT_2B);
 
 		init();
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -253,7 +253,7 @@ struct Vimina : SanguineModule {
 		outputs[OUTPUT_OUT_2B].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			const float sampleTime = kLightsFrequency * args.sampleTime;
+			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 			if (ledsChannel >= channelCount) {
 				ledsChannel = channelCount - 1;
@@ -578,6 +578,11 @@ struct Vimina : SanguineModule {
 				break;
 			}
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {

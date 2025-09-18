@@ -119,6 +119,7 @@ struct Aestus : SanguineModule {
 	static const int kLightsFrequency = 16;
 	int channelCount = 1;
 	int displayChannel = 0;
+	int jitteredLightsFrequency;
 	uint8_t lastGates[PORT_MAX_CHANNELS];
 
 	tides::GeneratorMode selectedMode = tides::GENERATOR_MODE_LOOPING;
@@ -176,8 +177,6 @@ struct Aestus : SanguineModule {
 		}
 
 		init();
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -353,7 +352,7 @@ struct Aestus : SanguineModule {
 			}
 
 			if (bIsLightsTurn) {
-				const float sampleTime = kLightsFrequency * args.sampleTime;
+				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 					if (lastSheepFirmwares[channel] != channelIsSheep[channel]) {
@@ -419,7 +418,7 @@ struct Aestus : SanguineModule {
 			}
 
 			if (bIsLightsTurn) {
-				const float sampleTime = kLightsFrequency * args.sampleTime;
+				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 					int currentLight = LIGHT_CHANNEL_1 + channel * 3;
@@ -493,6 +492,11 @@ struct Aestus : SanguineModule {
 				break;
 			}
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {

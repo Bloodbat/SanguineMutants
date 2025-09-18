@@ -41,7 +41,7 @@ struct Aleae : SanguineModule {
 	static const int kMaxModuleSections = 2;
 	int ledsChannel = 0;
 	int channelCount = 0;
-
+	int jitteredLightsFrequency;
 
 	dsp::BooleanTrigger btGateTriggers[kMaxModuleSections][PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
@@ -70,7 +70,6 @@ struct Aleae : SanguineModule {
 				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
 		}
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -136,7 +135,7 @@ struct Aleae : SanguineModule {
 					ledsChannel = channelCount - 1;
 				}
 
-				const float sampleTime = args.sampleTime * kLightsFrequency;
+				const float sampleTime = args.sampleTime * jitteredLightsFrequency;
 				int currentLight = LIGHTS_STATE + (section << 1);
 				lights[currentLight + 1].setBrightnessSmooth(bIsLightAActive, sampleTime);
 				lights[currentLight].setBrightnessSmooth(bIsLightBActive, sampleTime);
@@ -192,6 +191,11 @@ struct Aleae : SanguineModule {
 			}
 			break;
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {

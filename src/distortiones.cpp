@@ -52,6 +52,7 @@ struct Distortiones : SanguineModule {
 	int frames[PORT_MAX_CHANNELS] = {};
 
 	static const int kLightsFrequency = 128;
+	int jitteredLightsFrequency;
 
 	dsp::BooleanTrigger btModeSwitch;
 	dsp::ClockDivider lightsDivider;
@@ -105,7 +106,6 @@ struct Distortiones : SanguineModule {
 		}
 
 		featureMode = distortiones::FEATURE_MODE_META;
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -226,7 +226,7 @@ struct Distortiones : SanguineModule {
 		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			const float sampleTime = kLightsFrequency * args.sampleTime;
+			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 			lights[LIGHT_CARRIER].setBrightness(((parameters[0]->carrier_shape == 1) |
 				(parameters[0]->carrier_shape == 2)) * kSanguineButtonLightValue);
@@ -313,6 +313,11 @@ struct Distortiones : SanguineModule {
 		if (e.type == Port::INPUT && e.portId == INPUT_MODE) {
 			bHaveModeCable = e.connecting;
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {

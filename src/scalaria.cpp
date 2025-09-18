@@ -63,6 +63,7 @@ struct Scalaria : SanguineModule {
     int frames[PORT_MAX_CHANNELS] = {};
 
     static const int kLightsFrequency = 128;
+    int jitteredLightsFrequency;
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator modulators[PORT_MAX_CHANNELS];
@@ -104,8 +105,6 @@ struct Scalaria : SanguineModule {
             modulators[channel].Init(scalaria::kHardwareRate);
             parameters[channel] = modulators[channel].mutableParameters();
         }
-
-        lightsDivider.setDivision(kLightsFrequency);
     }
 
     void process(const ProcessArgs& args) override {
@@ -176,7 +175,7 @@ struct Scalaria : SanguineModule {
         outputs[OUTPUT_AUX].setChannels(channelCount);
 
         if (lightsDivider.process()) {
-            const float sampleTime = kLightsFrequency * args.sampleTime;
+            const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
             bool bHaveInternalOscillator = !parameters[0]->oscillatorShape == 0;
 
@@ -242,6 +241,11 @@ struct Scalaria : SanguineModule {
                 lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
             }
         }
+    }
+
+    void onAdd(const AddEvent& e) override {
+        jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+        lightsDivider.setDivision(jitteredLightsFrequency);
     }
 };
 

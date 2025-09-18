@@ -77,6 +77,7 @@ struct Apices : SanguineModule {
 
 	// Update descriptions/oleds every 16 samples.
 	static const int kLightsFrequency = 16;
+	int jitteredLightsFrequency;
 
 	int32_t adcLp[apicesCommon::kAdcChannelCount] = {};
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = {};
@@ -165,8 +166,6 @@ struct Apices : SanguineModule {
 			processors[channel].Init(channel);
 		}
 
-		lightsDivider.setDivision(kLightsFrequency);
-
 		init();
 	}
 
@@ -182,7 +181,7 @@ struct Apices : SanguineModule {
 		// Update knobs / lights / displays every 16 samples only.
 		if (bIsLightsTurn) {
 			// For refreshLeds(): it is only updated every n samples, for proper light smoothing.
-			sampleTime = args.sampleTime * kLightsFrequency;
+			sampleTime = args.sampleTime * jitteredLightsFrequency;
 
 			pollSwitches(args, sampleTime);
 			pollPots();
@@ -734,6 +733,11 @@ struct Apices : SanguineModule {
 
 	void onReset(const ResetEvent& e) override {
 		init();
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	void init() {
