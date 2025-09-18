@@ -111,6 +111,8 @@ struct Anuli : SanguineModule {
 	int polyphonyMode = 1;
 	int strummingFlagCounter = 0;
 	// int strummingFlagInterval = 0;
+	static const int kLightsFrequency = 64;
+	int jitteredLightsFrequency;
 
 	int displayChannel = 0;
 
@@ -122,8 +124,6 @@ struct Anuli : SanguineModule {
 	std::array<rings::FxType, PORT_MAX_CHANNELS> channelFx = {};
 
 	std::string displayText = "";
-
-	static const int kLightsFrequency = 64;
 
 	Anuli() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -190,8 +190,6 @@ struct Anuli : SanguineModule {
 		parametersInfo.modValues[3] = 0.f;
 
 		parametersInfo.modFrequency = 0.f;
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -213,7 +211,7 @@ struct Anuli : SanguineModule {
 		outputs[OUTPUT_EVEN].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			const float sampleTime = kLightsFrequency * args.sampleTime;
+			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 			long long systemTimeMs = getSystemTimeMs();
 
@@ -497,7 +495,7 @@ struct Anuli : SanguineModule {
 		if (flag) {
 			// Make sure the LED is off for a short enough time (ui.cc).
 			// strummingFlagCounter = std::min(50, strummingFlagInterval >> 2);
-			strummingFlagCounter = kLightsFrequency;
+			strummingFlagCounter = jitteredLightsFrequency;
 			// strummingFlagInterval = 0;
 		}
 	}
@@ -551,6 +549,11 @@ struct Anuli : SanguineModule {
 			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), anuli::kHardwareRate);
 			srcOutputs[channel].setRates(anuli::kHardwareRate, static_cast<int>(e.sampleRate));
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {
