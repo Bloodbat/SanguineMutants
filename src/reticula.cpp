@@ -66,6 +66,7 @@ struct Reticula : SanguineModule {
     static const int kMaxChannels = 3;
     static const int kMaxDrumPorts = 6;
     static const int kLightsFrequency = 16;
+    int jitteredLightsFrequency;
 
     int elapsedTicks = 0;
     int sequenceStep = 0;
@@ -212,8 +213,6 @@ struct Reticula : SanguineModule {
         configOutput(OUTPUT_ACCENT_BD, "Bass drum accent");
         configOutput(OUTPUT_ACCENT_SD, "Snare drum accent");
         configOutput(OUTPUT_ACCENT_HH, "Hi-hat accent");
-
-        lightsDivider.setDivision(kLightsFrequency);
 
         metronome = Metronome(120, APP->engine->getSampleRate(), 24.f, 0.f);
         metronome.setUndividedClockTap(true);
@@ -448,7 +447,7 @@ struct Reticula : SanguineModule {
             kSanguineButtonLightValue, args.sampleTime);
 
         if (lightsDivider.process()) {
-            const float sampleTime = kLightsFrequency * args.sampleTime;
+            const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
             sequencerMode = static_cast<reticula::PatternGeneratorModes>(params[PARAM_SEQUENCER_MODE].getValue());
             lights[LIGHT_SEQUENCER_MODE].setBrightnessSmooth((sequencerMode <= reticula::PATTERN_HENRI) *
@@ -510,6 +509,11 @@ struct Reticula : SanguineModule {
                 break;
             }
         }
+    }
+
+    void onAdd(const AddEvent& e) override {
+        jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+        lightsDivider.setDivision(jitteredLightsFrequency);
     }
 
     json_t* dataToJson() override {

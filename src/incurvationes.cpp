@@ -44,6 +44,7 @@ struct Incurvationes : SanguineModule {
 
 	int frames[PORT_MAX_CHANNELS] = {};
 	static const int kLightsFrequency = 128;
+	int jitteredLightsFrequency;
 
 	warps::Modulator modulators[PORT_MAX_CHANNELS];
 	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
@@ -86,8 +87,6 @@ struct Incurvationes : SanguineModule {
 			modulators[channel].Init(warpiescommon::kHardwareRate);
 			parameters[channel] = modulators[channel].mutable_parameters();
 		}
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -210,6 +209,11 @@ struct Incurvationes : SanguineModule {
 			lights[LIGHT_ALGORITHM + 1].setBrightness(colorValues[0][1]);
 			lights[LIGHT_ALGORITHM + 2].setBrightness(colorValues[0][2]);
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 };
 

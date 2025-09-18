@@ -128,6 +128,7 @@ struct Temulenti : SanguineModule {
 	bool bQuantizerConnected = false;
 
 	static const int kLightsFrequency = 16;
+	int jitteredLightsFrequency;
 	int channelCount = 1;
 	int displayChannel = 0;
 
@@ -191,8 +192,6 @@ struct Temulenti : SanguineModule {
 		}
 
 		init();
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -406,7 +405,7 @@ struct Temulenti : SanguineModule {
 		outputs[OUTPUT_BI].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			const float sampleTime = kLightsFrequency * args.sampleTime;
+			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 			selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 
@@ -581,6 +580,11 @@ struct Temulenti : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		log2SampleRate = log2f(aestusCommon::kHardwareRate / e.sampleRate);
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	void setModel(int modelNum) {

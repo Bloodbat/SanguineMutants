@@ -100,6 +100,7 @@ struct Contextus : SanguineModule {
 	int channelCount = 0;
 	int displayChannel = 0;
 	static const int kLightsFrequency = 16;
+	int jitteredLightsFrequency;
 
 	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS>, 256> drbOutputBuffers;
 	dsp::SampleRateConverter<PORT_MAX_CHANNELS> srcOutput;
@@ -204,8 +205,6 @@ struct Contextus : SanguineModule {
 			previousPitches[channel] = 0;
 		}
 		memset(&lastSettings, 0, sizeof(renaissance::SettingsData));
-
-		lightsDivider.setDivision(kLightsFrequency);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -448,7 +447,7 @@ struct Contextus : SanguineModule {
 		outputs[OUTPUT_OUT].setChannels(channelCount);
 
 		if (lightsDivider.process()) {
-			const float sampleTime = args.sampleTime * kLightsFrequency;
+			const float sampleTime = args.sampleTime * jitteredLightsFrequency;
 
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
@@ -694,6 +693,9 @@ struct Contextus : SanguineModule {
 			userSignSeed = getInstanceSeed();
 			setWaveShaperSeed(userSignSeed);
 		}
+
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
