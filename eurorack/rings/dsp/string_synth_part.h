@@ -97,6 +97,10 @@ namespace rings {
       fx_type_ = fx_type;
     }
 
+    inline int32_t polyphony() const {
+      return polyphony_;
+    }
+
   private:
     void ProcessEnvelopes(float shape, const uint8_t* flags, float* values);
     void ComputeRegistration(float gain, float registration, float* amplitudes);
