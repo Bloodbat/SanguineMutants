@@ -124,7 +124,8 @@ struct Marmora : SanguineModule {
 	int blockIndex = 0;
 	uint32_t userSeed = 1;
 
-	static const int kLightDivider = 64;
+	static const int kLightsFrequency = 64;
+	int jitteredLightsFrequency;
 
 	dsp::ClockDivider lightsDivider;
 	dsp::SchmittTrigger stTReset;
@@ -248,8 +249,6 @@ struct Marmora : SanguineModule {
 		configParam(PARAM_Y_STEPS, 0.f, 1.f, 0.f, "Y smoothness", "%", 0.f, 100.f);
 		configOutput(OUTPUT_Y, "Y");
 
-		lightsDivider.setDivision(kLightDivider);
-
 		randomGenerator.Init(userSeed);
 		randomStream.Init(&randomGenerator);
 		noteFilter.Init();
@@ -282,7 +281,7 @@ struct Marmora : SanguineModule {
 
 			// Lights.
 			if (bIsLightsTurn) {
-				const float sampleTime = kLightDivider * args.sampleTime;
+				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 				setLightsCommon(sampleTime);
 				setLightsRegular(sampleTime);
@@ -302,7 +301,7 @@ struct Marmora : SanguineModule {
 
 			// Lights.
 			if (bIsLightsTurn) {
-				const float sampleTime = kLightDivider * args.sampleTime;
+				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 				setLightsCommon(sampleTime);
 				setLightsScaleEdit(sampleTime);
@@ -700,6 +699,11 @@ struct Marmora : SanguineModule {
 				break;
 			}
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	json_t* dataToJson() override {

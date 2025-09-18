@@ -58,8 +58,9 @@ struct Velamina : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	SaturatorFloat_4 saturator;
 
-	static const int kLightsDivider = 64;
+	static const int kLightsFrequency = 64;
 	static const int kMaxChannels = 4;
+	int jitteredLightsFrequency;
 
 	bool signalInputsConnected[kMaxChannels];
 	bool cvInputsConnected[kMaxChannels];
@@ -84,8 +85,6 @@ struct Velamina : SanguineModule {
 			cvInputsConnected[channel] = false;
 			outputsConnected[channel] = false;
 		}
-
-		lightsDivider.setDivision(kLightsDivider);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -97,7 +96,7 @@ struct Velamina : SanguineModule {
 		bool bIsLightsTurn = lightsDivider.process();
 
 		if (bIsLightsTurn) {
-			sampleTime = kLightsDivider * args.sampleTime;
+			sampleTime = jitteredLightsFrequency * args.sampleTime;
 		}
 
 		if (signalInputsConnected[0] | signalInputsConnected[1] | signalInputsConnected[2] | signalInputsConnected[3]) {
@@ -251,6 +250,11 @@ struct Velamina : SanguineModule {
 			}
 			break;
 		}
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 };
 
