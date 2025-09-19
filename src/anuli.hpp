@@ -25,7 +25,7 @@ namespace anuli {
     static const std::vector<std::string> menuModeLabels = {
         "Modal resonator",
         "Sympathetic strings",
-        "Modulated/inharmonic string",
+        "Modulated / inharmonic string",
         "FM voice",
         "Quantized sympathetic strings",
         "Reverb string",
