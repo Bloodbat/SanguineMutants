@@ -119,9 +119,13 @@ namespace plaits {
         voice_[i].set_modulations(voice_[0].lfo());
       }
     } else {
+      // Note: fix glitchy voices when loading patches with trigger input connected. -Bat
+      for (int voice = 0; voice < kNumSixOpVoices; ++voice) {
+        voice_[voice].LoadPatch(&patches_[patch_index]);
+      }
+
       if (parameters.trigger & TRIGGER_RISING_EDGE) {
         active_voice_ = (active_voice_ + 1) % kNumSixOpVoices;
-        voice_[active_voice_].LoadPatch(&patches_[patch_index]);
         voice_[active_voice_].mutable_lfo()->Reset();
       }
       Voice<6>::Parameters* p = voice_[active_voice_].mutable_parameters();
