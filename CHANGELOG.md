@@ -14,6 +14,8 @@
 
 - Funes: default LPG values were not reflected in the knobs or respected in the engine when resetting the module.
 
+- Funes: audio glitch when the trigger input is connected and a 6 OP FM model is selected without setting it with the trigger unpatched beforehand.
+
 - Mortuus: button lights.
 
 - Nodi: wrong channel indicator light colors when morse code easter egg is activated.
