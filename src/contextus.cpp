@@ -41,7 +41,7 @@ struct Contextus : SanguineModule {
 		PARAM_SCALE,
 		PARAM_ROOT,
 
-		// Unused: kept for compatibility. ----->
+		// Unused; but kept for compatibility with existing patches. ----->
 		PARAM_META,
 		// <-----
 
@@ -89,6 +89,7 @@ struct Contextus : SanguineModule {
 	renaissance::Quantizer quantizers[PORT_MAX_CHANNELS];
 
 	uint8_t selectedScales[PORT_MAX_CHANNELS] = {};
+
 	uint8_t waveShaperValue = 0;
 	uint8_t driftValue = 0;
 
@@ -111,6 +112,9 @@ struct Contextus : SanguineModule {
 	uint8_t knobAdColor = 0;
 
 	uint8_t knobModel = 0;
+
+	uint8_t modulatedAttacks[PORT_MAX_CHANNELS] = {};
+	uint8_t modulatedDecays[PORT_MAX_CHANNELS];
 
 	int channelCount = 0;
 	int displayChannel = 0;
@@ -219,17 +223,17 @@ struct Contextus : SanguineModule {
 
 			jitterSources[channel].Init();
 			waveShapers[channel].Init(userSignSeed);
-
-			lastTriggers[channel] = false;
-
-			selectedScales[channel] = 0xff;
-
-			previousPitches[channel] = 0;
 		}
+		memset(lastTriggers, 0, sizeof(bool) * PORT_MAX_CHANNELS);
+		memset(selectedScales, 0xff, sizeof(uint8_t) * PORT_MAX_CHANNELS);
+		memset(previousPitches, 0, sizeof(int16_t) * PORT_MAX_CHANNELS);
 		memset(&lastSettings, 0, sizeof(renaissance::SettingsData));
+		memset(modulatedDecays, 7, sizeof(uint8_t) * PORT_MAX_CHANNELS);
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(),
 			inputs[INPUT_TRIGGER].getChannels()), 1);
 
@@ -245,8 +249,8 @@ struct Contextus : SanguineModule {
 				settings[channel].trig_delay = knobTriggerDelay;
 				settings[channel].sample_rate = knobSampleRate;
 				settings[channel].resolution = knobResolution;
-				settings[channel].ad_attack = knobAttack;
-				settings[channel].ad_decay = knobDecay;
+				settings[channel].ad_attack = modulatedAttacks[channel];
+				settings[channel].ad_decay = modulatedDecays[channel];
 				settings[channel].ad_timbre = knobAdTimbre;
 				settings[channel].ad_fm = knobAdFm;
 				settings[channel].ad_color = knobAdColor;
@@ -283,24 +287,6 @@ struct Contextus : SanguineModule {
 				if (selectedScales[channel] != settings[channel].quantizer_scale) {
 					selectedScales[channel] = settings[channel].quantizer_scale;
 					quantizers[channel].Configure(renaissance::scales[selectedScales[channel]]);
-				}
-
-				if (bHaveAttackCable) {
-					float attackVoltage = inputs[INPUT_ATTACK].getVoltage(channel);
-					attackVoltage = roundf(attackVoltage);
-					attackVoltage = rescale(attackVoltage, -5.f, 5.f, -15.f, 15.f);
-					int modulatedAttack = settings[channel].ad_attack + static_cast<int>(attackVoltage);
-					modulatedAttack = clamp(modulatedAttack, 0, 15);
-					settings[channel].ad_attack = modulatedAttack;
-				}
-
-				if (bHaveDecayCable) {
-					float decayVoltage = inputs[INPUT_DECAY].getVoltage(channel);
-					decayVoltage = roundf(decayVoltage);
-					decayVoltage = rescale(decayVoltage, -5.f, 5.f, -15.f, 15.f);
-					int modulatedDecay = settings[channel].ad_decay + static_cast<int>(decayVoltage);
-					modulatedDecay = clamp(modulatedDecay, 0, 15);
-					settings[channel].ad_decay = modulatedDecay;
 				}
 
 				envelopes[channel].Update(settings[channel].ad_attack << 3, settings[channel].ad_decay << 3);
@@ -475,6 +461,9 @@ struct Contextus : SanguineModule {
 			knobCoarse = params[PARAM_COARSE].getValue();
 			knobFine = params[PARAM_FINE].getValue();
 
+			memset(modulatedAttacks, knobAttack, sizeof(uint8_t) * channelCount);
+			memset(modulatedDecays, knobDecay, sizeof(uint8_t) * channelCount);
+
 			// Handle model light.
 			lights[LIGHT_MODEL].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
 			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].green, sampleTime);
@@ -483,6 +472,34 @@ struct Contextus : SanguineModule {
 			bool bIsChannelActive;
 			int currentLight;
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				if (channel < channelCount && (channel % 4) == 0) {
+					float_4 inVoltages;
+
+					if (bHaveAttackCable) {
+						inVoltages = inputs[INPUT_ATTACK].getVoltageSimd<float_4>(channel);
+						inVoltages = simd::round(inVoltages);
+						inVoltages = simd::rescale(inVoltages, -5.f, 5.f, -15.f, 15.f);
+						inVoltages += knobAttack;
+						inVoltages = clamp(inVoltages, 0, 15);
+						modulatedAttacks[channel] = static_cast<uint8_t>(inVoltages[0]);
+						modulatedAttacks[channel + 1] = static_cast<uint8_t>(inVoltages[1]);
+						modulatedAttacks[channel + 2] = static_cast<uint8_t>(inVoltages[2]);
+						modulatedAttacks[channel + 3] = static_cast<uint8_t>(inVoltages[3]);
+					}
+
+					if (bHaveDecayCable) {
+						inVoltages = inputs[INPUT_DECAY].getVoltageSimd<float_4>(channel);
+						inVoltages = simd::round(inVoltages);
+						inVoltages = simd::rescale(inVoltages, -5.f, 5.f, -15.f, 15.f);
+						inVoltages += knobDecay;
+						inVoltages = clamp(inVoltages, 0, 15);
+						modulatedDecays[channel] = static_cast<uint8_t>(inVoltages[0]);
+						modulatedDecays[channel + 1] = static_cast<uint8_t>(inVoltages[1]);
+						modulatedDecays[channel + 2] = static_cast<uint8_t>(inVoltages[2]);
+						modulatedDecays[channel + 3] = static_cast<uint8_t>(inVoltages[3]);
+					}
+				}
+
 				currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
 				bIsChannelActive = channel < channelCount;
 
