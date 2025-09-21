@@ -97,6 +97,21 @@ struct Contextus : SanguineModule {
 	uint16_t gainLps[PORT_MAX_CHANNELS] = {};
 	uint16_t triggerDelays[PORT_MAX_CHANNELS] = {};
 
+	uint8_t knobScale = 0;
+	uint8_t knobRoot = 0;
+	uint8_t knobPitchRange = 0;
+	uint8_t knobPitchOctave = 2;
+	uint8_t knobTriggerDelay = 0;
+	uint8_t knobSampleRate = 6;
+	uint8_t knobResolution = 6;
+	uint8_t knobAttack = 0;
+	uint8_t knobDecay = 7;
+	uint8_t knobAdTimbre = 0;
+	uint8_t knobAdFm = 0;
+	uint8_t knobAdColor = 0;
+
+	uint8_t knobModel = 0;
+
 	int channelCount = 0;
 	int displayChannel = 0;
 	static const int kLightsFrequency = 16;
@@ -132,7 +147,14 @@ struct Contextus : SanguineModule {
 
 	std::string displayText = "";
 
-	float log2SampleRate = 1.f;
+	float log2SampleRate;
+
+	float knobFm = 0.f;
+	float knobTimbre = 0.5f;
+	float knobModulation = 0.f;
+	float knobColor = 0.5f;
+	float knobCoarse = -1.f;
+	float knobFine = 0.f;
 
 	Contextus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -162,7 +184,7 @@ struct Contextus : SanguineModule {
 		configSwitch(PARAM_TRIGGER_DELAY, 0.f, 6.f, 0.f, "Trigger delay", nodiCommon::triggerDelayStrings);
 
 		configSwitch(PARAM_BITS, 0.f, 6.f, 6.f, "Bit crusher resolution", nodiCommon::bitsStrings);
-		configSwitch(PARAM_RATE, 0.f, 6.0f, 6.0f, "Bit crusher sample rate", nodiCommon::ratesStrings);
+		configSwitch(PARAM_RATE, 0.f, 6.f, 6.f, "Bit crusher sample rate", nodiCommon::ratesStrings);
 
 		configInput(INPUT_TRIGGER, "Trigger");
 		configInput(INPUT_PITCH, "Pitch (1V/oct)");
@@ -210,34 +232,6 @@ struct Contextus : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(),
 			inputs[INPUT_TRIGGER].getChannels()), 1);
-
-		bVCAEnabled = params[PARAM_VCA].getValue();
-		bFlattenEnabled = params[PARAM_FLAT].getValue();
-		bAutoTrigger = params[PARAM_AUTO].getValue();
-		waveShaperValue = params[PARAM_SIGN].getValue();
-		driftValue = params[PARAM_DRIFT].getValue();
-
-		uint8_t knobScale = params[PARAM_SCALE].getValue();
-		uint8_t  knobRoot = params[PARAM_ROOT].getValue();
-		uint8_t  knobPitchRange = params[PARAM_PITCH_RANGE].getValue();
-		uint8_t  knobPitchOctave = params[PARAM_PITCH_OCTAVE].getValue();
-		uint8_t  knobTriggerDelay = params[PARAM_TRIGGER_DELAY].getValue();
-		uint8_t  knobSampleRate = params[PARAM_RATE].getValue();
-		uint8_t  knobResolution = params[PARAM_BITS].getValue();
-		uint8_t  knobAttack = params[PARAM_ATTACK].getValue();
-		uint8_t  knobDecay = params[PARAM_DECAY].getValue();
-		uint8_t  knobAdTimbre = params[PARAM_AD_TIMBRE].getValue();
-		uint8_t  knobAdFm = params[PARAM_AD_MODULATION].getValue();
-		uint8_t  knobAdColor = params[PARAM_AD_COLOR].getValue();
-
-		uint8_t knobModel = params[PARAM_MODEL].getValue();
-
-		float knobFm = params[PARAM_FM].getValue();
-		float knobTimbre = params[PARAM_TIMBRE].getValue();
-		float knobModulation = params[PARAM_MODULATION].getValue();
-		float knobColor = params[PARAM_COLOR].getValue();
-		float knobCoarse = params[PARAM_COARSE].getValue();
-		float knobFine = params[PARAM_FINE].getValue();
 
 		// Render frames.
 		if (drbOutputBuffers.empty()) {
@@ -452,6 +446,34 @@ struct Contextus : SanguineModule {
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
 			}
+
+			bVCAEnabled = params[PARAM_VCA].getValue();
+			bFlattenEnabled = params[PARAM_FLAT].getValue();
+			bAutoTrigger = params[PARAM_AUTO].getValue();
+			waveShaperValue = params[PARAM_SIGN].getValue();
+			driftValue = params[PARAM_DRIFT].getValue();
+
+			knobScale = params[PARAM_SCALE].getValue();
+			knobRoot = params[PARAM_ROOT].getValue();
+			knobPitchRange = params[PARAM_PITCH_RANGE].getValue();
+			knobPitchOctave = params[PARAM_PITCH_OCTAVE].getValue();
+			knobTriggerDelay = params[PARAM_TRIGGER_DELAY].getValue();
+			knobSampleRate = params[PARAM_RATE].getValue();
+			knobResolution = params[PARAM_BITS].getValue();
+			knobAttack = params[PARAM_ATTACK].getValue();
+			knobDecay = params[PARAM_DECAY].getValue();
+			knobAdTimbre = params[PARAM_AD_TIMBRE].getValue();
+			knobAdFm = params[PARAM_AD_MODULATION].getValue();
+			knobAdColor = params[PARAM_AD_COLOR].getValue();
+
+			knobModel = params[PARAM_MODEL].getValue();
+
+			knobFm = params[PARAM_FM].getValue();
+			knobTimbre = params[PARAM_TIMBRE].getValue();
+			knobModulation = params[PARAM_MODULATION].getValue();
+			knobColor = params[PARAM_COLOR].getValue();
+			knobCoarse = params[PARAM_COARSE].getValue();
+			knobFine = params[PARAM_FINE].getValue();
 
 			// Handle model light.
 			lights[LIGHT_MODEL].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
