@@ -419,8 +419,11 @@ struct Contextus : SanguineModule {
 		// Output.
 		if (!drbOutputBuffers.empty()) {
 			dsp::Frame<PORT_MAX_CHANNELS> outFrame = drbOutputBuffers.shift();
-			for (int channel = 0; channel < channelCount; ++channel) {
-				outputs[OUTPUT_OUT].setVoltage(5.f * outFrame.samples[channel], channel);
+			float_4 outVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				outVoltages = simd::float_4::load(&outFrame.samples[channel]);
+				outVoltages *= 5;
+				outputs[OUTPUT_OUT].setVoltageSimd(outVoltages, channel);
 			}
 		}
 
