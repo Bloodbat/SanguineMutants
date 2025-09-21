@@ -199,9 +199,12 @@ struct Anuli : SanguineModule {
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
 		if (!drbInputBuffers.full()) {
+			float_4 inVoltages;
 			dsp::Frame<PORT_MAX_CHANNELS> frames;
-			for (int channel = 0; channel < channelCount; ++channel) {
-				frames.samples[channel] = inputs[INPUT_IN].getVoltage(channel) / 5.f;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				inVoltages = inputs[INPUT_IN].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages.store(&frames.samples[channel]);
 			}
 			drbInputBuffers.push(frames);
 		}
@@ -290,21 +293,48 @@ struct Anuli : SanguineModule {
 				"Note: you need to insert a jack into each output to split the signals:
 					   when only one jack is inserted, both signals are mixed together."
 			*/
+			float_4 outVoltagesOdd;
+			float_4 outVoltagesEven;
 			if (bHaveOutputEven & bHaveOutputOdd) {
-				for (int channel = 0; channel < channelCount; ++channel) {
+				for (int channel = 0; channel < channelCount; channel += 4) {
 					currentSample = channel << 1;
-					outputs[OUTPUT_ODD].setVoltage(clamp(outputFrames.samples[currentSample], -1.f, 1.f) *
-						5.f, channel);
-					outputs[OUTPUT_EVEN].setVoltage(clamp(outputFrames.samples[currentSample + 1], -1.f, 1.f) *
-						5.f, channel);
+					outVoltagesOdd[0] = outputFrames.samples[currentSample];
+					outVoltagesEven[0] = outputFrames.samples[currentSample + 1];
+					outVoltagesOdd[1] = outputFrames.samples[currentSample + 2];
+					outVoltagesEven[1] = outputFrames.samples[currentSample + 3];
+					outVoltagesOdd[2] = outputFrames.samples[currentSample + 4];
+					outVoltagesEven[2] = outputFrames.samples[currentSample + 5];
+					outVoltagesOdd[3] = outputFrames.samples[currentSample + 6];
+					outVoltagesEven[3] = outputFrames.samples[currentSample + 7];
+
+					outVoltagesOdd = simd::clamp(outVoltagesOdd, -1.f, 1.f);
+					outVoltagesEven = simd::clamp(outVoltagesOdd, -1.f, 1.f);
+
+					outVoltagesOdd *= 5.f;
+					outVoltagesEven *= 5.f;
+
+					outputs[OUTPUT_ODD].setVoltageSimd(outVoltagesOdd, channel);
+					outputs[OUTPUT_EVEN].setVoltageSimd(outVoltagesEven, channel);
 				}
 			} else {
-				for (int channel = 0; channel < channelCount; ++channel) {
+				for (int channel = 0; channel < channelCount; channel += 4) {
 					currentSample = channel << 1;
-					float outVoltage = clamp(outputFrames.samples[currentSample] +
-						outputFrames.samples[currentSample + 1], -1.f, 1.f) * 5.f;
-					outputs[OUTPUT_ODD].setVoltage(outVoltage, channel);
-					outputs[OUTPUT_EVEN].setVoltage(outVoltage, channel);
+					outVoltagesOdd[0] = outputFrames.samples[currentSample];
+					outVoltagesEven[0] = outputFrames.samples[currentSample + 1];
+					outVoltagesOdd[1] = outputFrames.samples[currentSample + 2];
+					outVoltagesEven[1] = outputFrames.samples[currentSample + 3];
+					outVoltagesOdd[2] = outputFrames.samples[currentSample + 4];
+					outVoltagesEven[2] = outputFrames.samples[currentSample + 5];
+					outVoltagesOdd[3] = outputFrames.samples[currentSample + 6];
+					outVoltagesEven[3] = outputFrames.samples[currentSample + 7];
+
+					outVoltagesOdd += outVoltagesEven;
+
+					outVoltagesOdd = simd::clamp(outVoltagesOdd, -1.f, 1.f);
+					outVoltagesOdd *= 5.f;
+
+					outputs[OUTPUT_ODD].setVoltageSimd(outVoltagesOdd, channel);
+					outputs[OUTPUT_EVEN].setVoltageSimd(outVoltagesOdd, channel);
 				}
 			}
 		}
