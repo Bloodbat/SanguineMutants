@@ -374,12 +374,25 @@ struct Funes : SanguineModule {
 		// Set output
 		if (!drbOutputBuffers.empty()) {
 			dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
+			float_4 outVoltages;
+			float_4 auxVoltages;
 			int currentSample;
-			for (int channel = 0; channel < channelCount; ++channel) {
+			for (int channel = 0; channel < channelCount; channel += 4) {
 				currentSample = channel << 1;
 				// Inverting op-amp on outputs
-				outputs[OUTPUT_OUT].setVoltage(-outputFrames.samples[currentSample] * 5.f, channel);
-				outputs[OUTPUT_AUX].setVoltage(-outputFrames.samples[currentSample + 1] * 5.f, channel);
+				outVoltages[0] = -outputFrames.samples[currentSample];
+				auxVoltages[0] = -outputFrames.samples[currentSample + 1];
+				outVoltages[1] = -outputFrames.samples[currentSample + 2];
+				auxVoltages[1] = -outputFrames.samples[currentSample + 3];
+				outVoltages[2] = -outputFrames.samples[currentSample + 4];
+				auxVoltages[2] = -outputFrames.samples[currentSample + 5];
+				outVoltages[3] = -outputFrames.samples[currentSample + 6];
+				auxVoltages[3] = -outputFrames.samples[currentSample + 7];
+				outVoltages *= 5.f;
+				auxVoltages *= 5.f;
+
+				outputs[OUTPUT_OUT].setVoltageSimd(outVoltages, channel);
+				outputs[OUTPUT_AUX].setVoltageSimd(auxVoltages * 5.f, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
