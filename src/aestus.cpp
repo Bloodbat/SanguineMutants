@@ -117,6 +117,8 @@ struct Aestus : SanguineModule {
 	bool bModeConnected = false;
 	bool bRangeConnected = false;
 
+	bool bHaveExternalSync = false;
+
 	size_t frames[PORT_MAX_CHANNELS];
 	static const int kLightsFrequency = 16;
 	int channelCount = 1;
@@ -129,6 +131,9 @@ struct Aestus : SanguineModule {
 	tides::GeneratorRange selectedRange = tides::GENERATOR_RANGE_MEDIUM;
 	tides::GeneratorRange lastRanges[PORT_MAX_CHANNELS];
 
+	std::array<tides::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
+	std::array<tides::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
+
 	tides::Generator generators[PORT_MAX_CHANNELS];
 	tides::Plotter plotters[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
@@ -137,6 +142,12 @@ struct Aestus : SanguineModule {
 	std::string displayModel = aestus::displayModels[0];
 
 	float log2SampleRate = 0.f;
+
+	float knobFrequency = 0.f;
+	float knobFm = 0.f;
+	float knobShape = 0.f;
+	float knobSlope = 0.f;
+	float knobSmoothness = 0.f;
 
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -177,6 +188,8 @@ struct Aestus : SanguineModule {
 			plotters[channel].Init(tides::plotInstructions,
 				sizeof(tides::plotInstructions) / sizeof(tides::PlotInstruction));
 		}
+		channelModes.fill(tides::GENERATOR_MODE_LOOPING);
+		channelRanges.fill(tides::GENERATOR_RANGE_MEDIUM);
 
 		init();
 	}
@@ -189,62 +202,8 @@ struct Aestus : SanguineModule {
 		bool bIsLightsTurn = lightsDivider.process();
 
 		if (!bWantPeacocks) {
-			bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
-
-			bool bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
-
-			if (stMode.process(params[PARAM_MODE].getValue())) {
-				selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-			}
-
-			if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
-				selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-			}
-
-			std::array<tides::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
-			std::array<tides::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
-
-			channelModes.fill(selectedMode);
-			channelRanges.fill(selectedRange);
-
-			float knobFrequency = params[PARAM_FREQUENCY].getValue();
-			float knobFm = params[PARAM_FM].getValue();
-			float knobShape = params[PARAM_SHAPE].getValue();
-			float knobSlope = params[PARAM_SLOPE].getValue();
-			float knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
-
 			tides::GeneratorSample samples[PORT_MAX_CHANNELS];
 			float unipolarFlags[PORT_MAX_CHANNELS];
-
-			if (bModeConnected) {
-				float_4 modeVoltages;
-				for (int channel = 0; channel < channelCount; channel += 4) {
-					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-
-					modeVoltages = simd::round(modeVoltages);
-					modeVoltages = simd::clamp(modeVoltages, 0.f, 3.f);
-
-					channelModes[channel] = static_cast<tides::GeneratorMode>(modeVoltages[0]);
-					channelModes[channel + 1] = static_cast<tides::GeneratorMode>(modeVoltages[1]);
-					channelModes[channel + 2] = static_cast<tides::GeneratorMode>(modeVoltages[2]);
-					channelModes[channel + 3] = static_cast<tides::GeneratorMode>(modeVoltages[3]);
-				}
-			}
-
-			if (bRangeConnected) {
-				float_4 rangeVoltages;
-				for (int channel = 0; channel < channelCount; channel += 4) {
-					rangeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-
-					rangeVoltages = simd::round(rangeVoltages);
-					rangeVoltages = simd::clamp(rangeVoltages, 0.f, 3.f);
-
-					channelRanges[channel] = static_cast<tides::GeneratorRange>(rangeVoltages[0]);
-					channelRanges[channel + 1] = static_cast<tides::GeneratorRange>(rangeVoltages[1]);
-					channelRanges[channel + 2] = static_cast<tides::GeneratorRange>(rangeVoltages[2]);
-					channelRanges[channel + 3] = static_cast<tides::GeneratorRange>(rangeVoltages[3]);
-				}
-			}
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (lastModes[channel] != channelModes[channel]) {
@@ -256,9 +215,6 @@ struct Aestus : SanguineModule {
 					generators[channel].set_range(channelRanges[channel]);
 					lastRanges[channel] = channelRanges[channel];
 				}
-
-				channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
-					(bModelConnected && inputs[INPUT_MODEL].getVoltage(channel) >= 1.f);
 
 				// Buffer loop.
 				if (++frames[channel] >= tides::kBlockSize) {
@@ -356,7 +312,59 @@ struct Aestus : SanguineModule {
 			if (bIsLightsTurn) {
 				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
+				bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
+
+				bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+
+				if (stMode.process(params[PARAM_MODE].getValue())) {
+					selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+				}
+
+				if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
+					selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+				}
+
+				channelModes.fill(selectedMode);
+				channelRanges.fill(selectedRange);
+
+				knobFrequency = params[PARAM_FREQUENCY].getValue();
+				knobFm = params[PARAM_FM].getValue();
+				knobShape = params[PARAM_SHAPE].getValue();
+				knobSlope = params[PARAM_SLOPE].getValue();
+				knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
+
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+					channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
+						(bModelConnected && inputs[INPUT_MODEL].getVoltage(channel) >= 1.f);
+
+					if (channel < channelCount && (channel % 4 == 0)) {
+						float_4 inVoltages;
+
+						if (bModeConnected) {
+							inVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+							inVoltages = simd::round(inVoltages);
+							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+
+							channelModes[channel] = static_cast<tides::GeneratorMode>(inVoltages[0]);
+							channelModes[channel + 1] = static_cast<tides::GeneratorMode>(inVoltages[1]);
+							channelModes[channel + 2] = static_cast<tides::GeneratorMode>(inVoltages[2]);
+							channelModes[channel + 3] = static_cast<tides::GeneratorMode>(inVoltages[3]);
+						}
+
+						if (bRangeConnected) {
+							inVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+							inVoltages = simd::round(inVoltages);
+							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+
+							channelRanges[channel] = static_cast<tides::GeneratorRange>(inVoltages[0]);
+							channelRanges[channel + 1] = static_cast<tides::GeneratorRange>(inVoltages[1]);
+							channelRanges[channel + 2] = static_cast<tides::GeneratorRange>(inVoltages[2]);
+							channelRanges[channel + 3] = static_cast<tides::GeneratorRange>(inVoltages[3]);
+						}
+					}
+
 					if (lastSheepFirmwares[channel] != channelIsSheep[channel]) {
 						generators[channel].set_mode(lastModes[channel]);
 						generators[channel].set_range(lastRanges[channel]);
