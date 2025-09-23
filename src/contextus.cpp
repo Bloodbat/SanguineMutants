@@ -241,6 +241,8 @@ struct Contextus : SanguineModule {
 		if (drbOutputBuffers.empty()) {
 			dsp::Frame<PORT_MAX_CHANNELS> renderFrames[nodiCommon::kBlockSize];
 
+			bVCAEnabled = params[PARAM_VCA].getValue();
+
 			for (int channel = 0; channel < channelCount; ++channel) {
 				settings[channel].quantizer_scale = knobScale;
 				settings[channel].quantizer_root = knobRoot;
@@ -436,7 +438,6 @@ struct Contextus : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			bVCAEnabled = params[PARAM_VCA].getValue();
 			bFlattenEnabled = params[PARAM_FLAT].getValue();
 			bAutoTrigger = params[PARAM_AUTO].getValue();
 			waveShaperValue = params[PARAM_SIGN].getValue();
