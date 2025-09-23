@@ -7,6 +7,8 @@
 #include "warpiescommon.hpp"
 #include "scalaria.hpp"
 
+using simd::float_4;
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Scalaria : SanguineModule {
@@ -60,10 +62,12 @@ struct Scalaria : SanguineModule {
         LIGHTS_COUNT
     };
 
-    int frames[PORT_MAX_CHANNELS] = {};
+    short frames[PORT_MAX_CHANNELS] = {};
 
     static const int kLightsFrequency = 128;
     int jitteredLightsFrequency;
+
+    int32_t internalOscillator = 0.f;
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator modulators[PORT_MAX_CHANNELS];
@@ -71,6 +75,11 @@ struct Scalaria : SanguineModule {
     scalaria::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize];
 
     scalaria::Parameters* parameters[PORT_MAX_CHANNELS];
+
+    float knobFrequency = 0.f;
+    float knobResonance = 0.5f;
+
+    float_4 f4KnobValues;
 
     Scalaria() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -105,24 +114,16 @@ struct Scalaria : SanguineModule {
             modulators[channel].Init(scalaria::kHardwareRate);
             parameters[channel] = modulators[channel].mutableParameters();
         }
+
+        f4KnobValues[0] = 0.66f;
+        f4KnobValues[1] = 0.66f;
+        f4KnobValues[2] = 0.f;
+        f4KnobValues[3] = 0.f;
     }
 
     void process(const ProcessArgs& args) override {
-        using simd::float_4;
-
-        int channelCount = std::max(std::max(inputs[INPUT_CHANNEL_1].getChannels(), inputs[INPUT_CHANNEL_2].getChannels()), 1);
-
-        const int32_t internalOscillator = params[PARAM_INTERNAL_OSCILLATOR].getValue();
-
-        const float knobFrequency = params[PARAM_FREQUENCY].getValue();
-        const float knobResonance = params[PARAM_RESONANCE].getValue();
-
-        float_4 f4KnobValues;
-
-        f4KnobValues[0] = params[PARAM_CHANNEL_1_LEVEL].getValue();
-        f4KnobValues[1] = params[PARAM_CHANNEL_2_LEVEL].getValue();
-        f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
-        f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
+        int channelCount = std::max(std::max(inputs[INPUT_CHANNEL_1].getChannels(),
+            inputs[INPUT_CHANNEL_2].getChannels()), 1);
 
         float_4 f4Voltages;
 
@@ -176,6 +177,16 @@ struct Scalaria : SanguineModule {
 
         if (lightsDivider.process()) {
             const float sampleTime = jitteredLightsFrequency * args.sampleTime;
+
+            knobFrequency = params[PARAM_FREQUENCY].getValue();
+            knobResonance = params[PARAM_RESONANCE].getValue();
+
+            internalOscillator = params[PARAM_INTERNAL_OSCILLATOR].getValue();
+
+            f4KnobValues[0] = params[PARAM_CHANNEL_1_LEVEL].getValue();
+            f4KnobValues[1] = params[PARAM_CHANNEL_2_LEVEL].getValue();
+            f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
+            f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
 
             bool bHaveInternalOscillator = !parameters[0]->oscillatorShape == 0;
 
