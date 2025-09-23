@@ -329,16 +329,22 @@ struct Reticula : SanguineModule {
                 bNeedNextStep = false;
             }
 
-            patternGenerator.setMapX(paramVoltages1[0]);
-            patternGenerator.setMapY(paramVoltages1[1]);
             patternGenerator.setBDDensity(paramVoltages1[2]);
             patternGenerator.setSDDensity(paramVoltages1[3]);
             patternGenerator.setHHDensity(paramVoltages2[0]);
-            patternGenerator.setRandomness(paramVoltages2[1]);
+            switch (sequencerMode) {
+            case reticula::PATTERN_EUCLIDEAN:
+                patternGenerator.setEuclideanLength(0, paramVoltages1[0]);
+                patternGenerator.setEuclideanLength(1, paramVoltages1[1]);
+                patternGenerator.setEuclideanLength(2, paramVoltages2[1]);
+                break;
 
-            patternGenerator.setEuclideanLength(0, paramVoltages1[0]);
-            patternGenerator.setEuclideanLength(1, paramVoltages1[1]);
-            patternGenerator.setEuclideanLength(2, paramVoltages2[1]);
+            default:
+                patternGenerator.setMapX(paramVoltages1[0]);
+                patternGenerator.setMapY(paramVoltages1[1]);
+                patternGenerator.setRandomness(paramVoltages2[1]);
+                break;
+            }
 
             bool bClockPulseRequested = false;
 
