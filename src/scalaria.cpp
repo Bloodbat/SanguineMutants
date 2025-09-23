@@ -162,14 +162,55 @@ struct Scalaria : SanguineModule {
 
                 modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
             }
+        }
 
-            inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(inputs[INPUT_CHANNEL_1].getVoltage(channel) / 8.f * 32768),
-                -32768, 32767);
-            inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(inputs[INPUT_CHANNEL_2].getVoltage(channel) / 8.f * 32768),
-                -32768, 32767);
+        float_4 inVoltagesChannel1;
+        float_4 inVoltagesChannel2;
+        float_4 outVoltagesChannel1;
+        float_4 outVoltagesAux;
+        int currentChannel;
+        for (int channel = 0; channel < channelCount; channel += 4) {
+            inVoltagesChannel1 = inputs[INPUT_CHANNEL_1].getVoltageSimd<float_4>(channel);
+            inVoltagesChannel2 = inputs[INPUT_CHANNEL_2].getVoltageSimd<float_4>(channel);
 
-            outputs[OUTPUT_CHANNEL_1_PLUS_2].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
-            outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
+            inVoltagesChannel1 /= 8.f;
+            inVoltagesChannel2 /= 8.f;
+            inVoltagesChannel1 *= 32768.f;
+            inVoltagesChannel2 *= 32768.f;
+
+            inVoltagesChannel1 = simd::clamp(inVoltagesChannel1, -32768.f, 32767.f);
+            inVoltagesChannel2 = simd::clamp(inVoltagesChannel2, -32768.f, 32767.f);
+
+            inputFrames[channel][frames[channel]].l = static_cast<short>(inVoltagesChannel1[0]);
+            inputFrames[channel][frames[channel]].r = static_cast<short>(inVoltagesChannel2[0]);
+            outVoltagesChannel1[0] = static_cast<float>(outputFrames[channel][frames[channel]].l);
+            outVoltagesAux[0] = static_cast<float>(outputFrames[channel][frames[channel]].r);
+
+            currentChannel = channel + 1;
+            inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[1]);
+            inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[1]);
+            outVoltagesChannel1[1] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].l);
+            outVoltagesAux[1] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].r);
+
+            currentChannel = channel + 2;
+            inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[2]);
+            inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[2]);
+            outVoltagesChannel1[2] = static_cast<float>(outputFrames[currentChannel][currentChannel].l);
+            outVoltagesAux[2] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].r);
+
+            currentChannel = channel + 3;
+            inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[3]);
+            inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[3]);
+            outVoltagesChannel1[3] = static_cast<float>(outputFrames[currentChannel][currentChannel].l);
+            outVoltagesAux[3] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].r);
+
+            outVoltagesChannel1 /= 32768.f;
+            outVoltagesAux /= 32768.f;
+            outVoltagesChannel1 *= 5.f;
+            outVoltagesAux *= 5.f;
+
+            outputs[OUTPUT_CHANNEL_1_PLUS_2].setVoltageSimd(outVoltagesChannel1, channel);
+            outputs[OUTPUT_AUX].setVoltageSimd(outVoltagesAux, channel);
         }
 
         outputs[OUTPUT_CHANNEL_1_PLUS_2].setChannels(channelCount);
