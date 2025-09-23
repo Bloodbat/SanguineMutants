@@ -200,7 +200,7 @@ struct Anuli : SanguineModule {
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
 		if (!drbInputBuffers.full()) {
 			float_4 inVoltages;
-			dsp::Frame<PORT_MAX_CHANNELS> frames;
+			dsp::Frame<PORT_MAX_CHANNELS> frames = {};
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				inVoltages = inputs[INPUT_IN].getVoltageSimd<float_4>(channel);
 				inVoltages /= 5.f;
