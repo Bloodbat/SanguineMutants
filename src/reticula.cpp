@@ -329,7 +329,7 @@ struct Reticula : SanguineModule {
             BDFill = paramVoltages1[2];
             SNFill = paramVoltages1[3];
             HHFill = paramVoltages2[0];
-            chaos = paramVoltages1[1];
+            chaos = paramVoltages2[1];
 
             if (bUseExternalClock) {
                 if (stClock.process(inputs[INPUT_EXTERNAL_CLOCK].getVoltage())) {
