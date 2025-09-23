@@ -117,13 +117,6 @@ struct Reticula : SanguineModule {
     float swingHighTempo = 0.f;
     float swingLowTempo = 0.f;
 
-    float mapX = 0.f;
-    float mapY = 0.f;
-    float chaos = 0.f;
-    float BDFill = 0.f;
-    float SNFill = 0.f;
-    float HHFill = 0.f;
-
     float lastKnobTempo = 0.f;
 
     std::string tempoDisplay = "120";
@@ -324,13 +317,6 @@ struct Reticula : SanguineModule {
             paramVoltages1 = simd::clamp(paramVoltages1, 0.f, kMaxKnobValue);
             paramVoltages2 = simd::clamp(paramVoltages2, 0.f, kMaxKnobValue);
 
-            mapX = paramVoltages1[0];
-            mapY = paramVoltages1[1];
-            BDFill = paramVoltages1[2];
-            SNFill = paramVoltages1[3];
-            HHFill = paramVoltages2[0];
-            chaos = paramVoltages2[1];
-
             if (bUseExternalClock) {
                 if (stClock.process(inputs[INPUT_EXTERNAL_CLOCK].getVoltage())) {
                     bNeedNextStep = true;
@@ -343,16 +329,16 @@ struct Reticula : SanguineModule {
                 bNeedNextStep = false;
             }
 
-            patternGenerator.setMapX(mapX);
-            patternGenerator.setMapY(mapY);
-            patternGenerator.setBDDensity(BDFill);
-            patternGenerator.setSDDensity(SNFill);
-            patternGenerator.setHHDensity(HHFill);
-            patternGenerator.setRandomness(chaos);
+            patternGenerator.setMapX(paramVoltages1[0]);
+            patternGenerator.setMapY(paramVoltages1[1]);
+            patternGenerator.setBDDensity(paramVoltages1[2]);
+            patternGenerator.setSDDensity(paramVoltages1[3]);
+            patternGenerator.setHHDensity(paramVoltages2[0]);
+            patternGenerator.setRandomness(paramVoltages2[1]);
 
-            patternGenerator.setEuclideanLength(0, mapX);
-            patternGenerator.setEuclideanLength(1, mapY);
-            patternGenerator.setEuclideanLength(2, chaos);
+            patternGenerator.setEuclideanLength(0, paramVoltages1[0]);
+            patternGenerator.setEuclideanLength(1, paramVoltages1[1]);
+            patternGenerator.setEuclideanLength(2, paramVoltages2[1]);
 
             bool bClockPulseRequested = false;
 
