@@ -229,18 +229,18 @@ struct Scalaria : SanguineModule {
             f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
             f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
 
-            bool bHaveInternalOscillator = !parameters[0]->oscillatorShape == 0;
+            bool bHaveInternalOscillator = internalOscillator != 0;
 
             lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(!bHaveInternalOscillator * kSanguineButtonLightValue,
                 sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth((parameters[0]->oscillatorShape == 1) *
+            lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth((internalOscillator == 1) *
                 kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth((parameters[0]->oscillatorShape == 2) *
+            lights[LIGHT_INTERNAL_OSCILLATOR_SAW].setBrightnessSmooth((internalOscillator == 2) *
                 kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth((parameters[0]->oscillatorShape == 3) *
+            lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth((internalOscillator == 3) *
                 kSanguineButtonLightValue, sampleTime);
 
             lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator *
