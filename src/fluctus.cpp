@@ -224,8 +224,8 @@ struct Fluctus : SanguineModule {
 	~Fluctus() {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			delete fluctusProcessors[channel];
-			delete[] buffersLarge[channel];
 			delete[] buffersSmall[channel];
+			delete[] buffersLarge[channel];
 		}
 	}
 
