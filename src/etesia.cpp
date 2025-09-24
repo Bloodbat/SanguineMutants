@@ -230,8 +230,8 @@ struct Etesia : SanguineModule {
 	~Etesia() {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			delete etesiaProcessors[channel];
-			delete[] buffersLarge[channel];
 			delete[] buffersSmall[channel];
+			delete[] buffersLarge[channel];
 		}
 	}
 
