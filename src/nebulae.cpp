@@ -220,8 +220,8 @@ struct Nebulae : SanguineModule {
 	~Nebulae() {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			delete cloudsProcessors[channel];
-			delete[] buffersLarge[channel];
 			delete[] buffersSmall[channel];
+			delete[] buffersLarge[channel];
 		}
 	}
 
