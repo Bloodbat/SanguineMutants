@@ -301,11 +301,11 @@ struct Etesia : SanguineModule {
 				etesia::ShortFrame input[cloudyCommon::kMaxFrames] = {};
 
 				// Convert input buffer.
-				dsp::Frame<2> inputFrames[cloudyCommon::kMaxFrames];
+				dsp::Frame<2> convertedFrames[cloudyCommon::kMaxFrames];
 				int inputLength = drbInputBuffers[channel].size();
 				int outputLength = cloudyCommon::kMaxFrames;
 				srcInputs[channel].process(drbInputBuffers[channel].startData(), &inputLength,
-					inputFrames, &outputLength);
+					convertedFrames, &outputLength);
 				drbInputBuffers[channel].startIncr(inputLength);
 
 				/*
@@ -313,8 +313,8 @@ struct Etesia : SanguineModule {
 				   between the input and output SRC.
 				*/
 				for (int frame = 0; frame < outputLength; ++frame) {
-					input[frame].l = clamp(inputFrames[frame].samples[0] * 32767.0, -32768, 32767);
-					input[frame].r = clamp(inputFrames[frame].samples[1] * 32767.0, -32768, 32767);
+					input[frame].l = clamp(convertedFrames[frame].samples[0] * 32767.0, -32768, 32767);
+					input[frame].r = clamp(convertedFrames[frame].samples[1] * 32767.0, -32768, 32767);
 				}
 
 				// Set up Etesia processor.
@@ -388,15 +388,15 @@ struct Etesia : SanguineModule {
 				}
 
 				// Convert output buffer.
-				dsp::Frame<2> outputFrames[cloudyCommon::kMaxFrames];
+				dsp::Frame<2> renderedFrames[cloudyCommon::kMaxFrames];
 				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
-					outputFrames[frame].samples[0] = output[frame].l / 32768.f;
-					outputFrames[frame].samples[1] = output[frame].r / 32768.f;
+					renderedFrames[frame].samples[0] = output[frame].l / 32768.f;
+					renderedFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
 				int inCount = cloudyCommon::kMaxFrames;
 				int outCount = drbOutputBuffers[channel].capacity();
-				srcOutputs[channel].process(outputFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
+				srcOutputs[channel].process(renderedFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
 				drbOutputBuffers[channel].endIncr(outCount);
 			}
 
