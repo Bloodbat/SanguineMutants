@@ -124,8 +124,6 @@ struct Etesia : SanguineModule {
 
 	std::array<etesia::PlaybackMode, PORT_MAX_CHANNELS> channelModes;
 
-	float freezeLight = 0.f;
-
 	int channelCount;
 	int displayChannel = 0;
 
