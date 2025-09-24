@@ -117,8 +117,6 @@ struct Nebulae : SanguineModule {
 
 	std::array<clouds::PlaybackMode, PORT_MAX_CHANNELS> channelModes;
 
-	float freezeLight = 0.f;
-
 	int channelCount;
 	int displayChannel = 0;
 
