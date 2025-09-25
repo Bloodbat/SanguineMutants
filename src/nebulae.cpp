@@ -9,6 +9,8 @@
 
 #include "nebulae.hpp"
 
+using simd::float_4;
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Nebulae : SanguineModule {
@@ -123,6 +125,11 @@ struct Nebulae : SanguineModule {
 	static const int kLightsFrequency = 64;
 	int jitteredLightsFrequency;
 
+	int stereoChannels = 2;
+
+	uint8_t* buffersLarge[PORT_MAX_CHANNELS];
+	uint8_t* buffersSmall[PORT_MAX_CHANNELS];
+
 	bool lastFrozen[PORT_MAX_CHANNELS];
 	bool bDisplaySwitched = false;
 	bool bTriggersAreGates = true;
@@ -133,10 +140,23 @@ struct Nebulae : SanguineModule {
 	bool bLeftOutputConnected = false;
 	bool bRightOutputConnected = false;
 
-	uint8_t* buffersLarge[PORT_MAX_CHANNELS];
-	uint8_t* buffersSmall[PORT_MAX_CHANNELS];
+	bool bWantLoFi = false;
+	bool bFrozen = false;
 
 	clouds::GranularProcessor* cloudsProcessors[PORT_MAX_CHANNELS];
+	clouds::Parameters* cloudsParameters[PORT_MAX_CHANNELS];
+
+	float_4 knobValues;
+	float_4 sliderValues;
+	float_4 voltages1[PORT_MAX_CHANNELS];
+
+	float paramPitch = 0.f;
+
+	float inputGain = 0.5f;
+	float outputGain = 1.f;
+
+	dsp::Frame<2> inputFrames[PORT_MAX_CHANNELS];
+	dsp::Frame<2> outputFrames[PORT_MAX_CHANNELS] = {};
 
 	Nebulae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -224,43 +244,11 @@ struct Nebulae : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		using simd::float_4;
-
-		int stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
-		bool bWantLoFi = params[PARAM_HI_FI].getValue() < 1.f;
-
-		bool bFrozen = params[PARAM_FREEZE].getValue() >= 1.f;
-
-		float_4 knobValues;
-		float_4 sliderValues;
-
-		knobValues[0] = params[PARAM_BLEND].getValue();
-		knobValues[1] = params[PARAM_SPREAD].getValue();
-		knobValues[2] = params[PARAM_FEEDBACK].getValue();
-		knobValues[3] = params[PARAM_REVERB].getValue();
-
-		sliderValues[0] = params[PARAM_POSITION].getValue();
-		sliderValues[1] = params[PARAM_DENSITY].getValue();
-		sliderValues[2] = params[PARAM_SIZE].getValue();
-		sliderValues[3] = params[PARAM_TEXTURE].getValue();
-
-		float paramPitch = params[PARAM_PITCH].getValue();
-
-		float inputGain = params[PARAM_IN_GAIN].getValue();
-		float outputGain = params[PARAM_OUT_GAIN].getValue();
-
-		dsp::Frame<2> inputFrames[PORT_MAX_CHANNELS];
-		dsp::Frame<2> outputFrames[PORT_MAX_CHANNELS] = {};
-
 		channelCount = std::max(std::max(inputs[INPUT_LEFT].getChannels(), inputs[INPUT_RIGHT].getChannels()), 1);
 
 		if (displayChannel >= channelCount) {
 			displayChannel = channelCount - 1;
 		}
-
-		clouds::Parameters* cloudsParameters[PORT_MAX_CHANNELS];
-
-		float_4 voltages1[PORT_MAX_CHANNELS];
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			// Get input.
@@ -403,6 +391,26 @@ struct Nebulae : SanguineModule {
 		// Lights.
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * jitteredLightsFrequency;
+
+			stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
+			bWantLoFi = params[PARAM_HI_FI].getValue() < 1.f;
+
+			bFrozen = params[PARAM_FREEZE].getValue() >= 1.f;
+
+			knobValues[0] = params[PARAM_BLEND].getValue();
+			knobValues[1] = params[PARAM_SPREAD].getValue();
+			knobValues[2] = params[PARAM_FEEDBACK].getValue();
+			knobValues[3] = params[PARAM_REVERB].getValue();
+
+			sliderValues[0] = params[PARAM_POSITION].getValue();
+			sliderValues[1] = params[PARAM_DENSITY].getValue();
+			sliderValues[2] = params[PARAM_SIZE].getValue();
+			sliderValues[3] = params[PARAM_TEXTURE].getValue();
+
+			paramPitch = params[PARAM_PITCH].getValue();
+
+			inputGain = params[PARAM_IN_GAIN].getValue();
+			outputGain = params[PARAM_OUT_GAIN].getValue();
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
 				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
