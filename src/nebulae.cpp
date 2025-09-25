@@ -227,12 +227,9 @@ struct Nebulae : SanguineModule {
 		using simd::float_4;
 
 		int stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
-		bool bWantLoFi = !(static_cast<bool>(params[PARAM_HI_FI].getValue()));
-#ifndef METAMODULE
-		bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
-#else
-		bool bFrozen = static_cast<bool>(std::round(params[PARAM_FREEZE].getValue()));
-#endif
+		bool bWantLoFi = params[PARAM_HI_FI].getValue() < 1.f;
+
+		bool bFrozen = params[PARAM_FREEZE].getValue() >= 1.f;
 
 		float_4 knobValues;
 		float_4 sliderValues;
