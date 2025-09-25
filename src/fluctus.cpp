@@ -288,12 +288,12 @@ struct Fluctus : SanguineModule {
 
 			// Render frames.
 			if (drbOutputBuffers[channel].empty()) {
-				fluctus::ShortFrame input[cloudyCommon::kMaxFrames] = {};
+				fluctus::ShortFrame input[fluctus::kMaxBlockSize] = {};
 
 				// Convert input buffer.
-				dsp::Frame<2> convertedFrames[cloudyCommon::kMaxFrames];
+				dsp::Frame<2> convertedFrames[fluctus::kMaxBlockSize];
 				int inputLength = drbInputBuffers[channel].size();
-				int outputLength = cloudyCommon::kMaxFrames;
+				int outputLength = fluctus::kMaxBlockSize;
 				srcInputs[channel].process(drbInputBuffers[channel].startData(), &inputLength,
 					convertedFrames, &outputLength);
 				drbInputBuffers[channel].startIncr(inputLength);
@@ -371,8 +371,8 @@ struct Fluctus : SanguineModule {
 					pitchVoltage / 5.f), 0.f, 1.f);
 				fluctusParameters[channel]->pitch = clamp((paramPitch + pitchVoltage) * 12.f, -48.f, 48.f);
 
-				fluctus::ShortFrame output[cloudyCommon::kMaxFrames];
-				fluctusProcessors[channel]->Process(input, output, cloudyCommon::kMaxFrames);
+				fluctus::ShortFrame output[fluctus::kMaxBlockSize];
+				fluctusProcessors[channel]->Process(input, output, fluctus::kMaxBlockSize);
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
@@ -391,13 +391,13 @@ struct Fluctus : SanguineModule {
 				}
 
 				// Convert output buffer.
-				dsp::Frame<2> renderedFrames[cloudyCommon::kMaxFrames];
-				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
+				dsp::Frame<2> renderedFrames[fluctus::kMaxBlockSize];
+				for (size_t frame = 0; frame < fluctus::kMaxBlockSize; ++frame) {
 					renderedFrames[frame].samples[0] = output[frame].l / 32768.f;
 					renderedFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
-				int inCount = cloudyCommon::kMaxFrames;
+				int inCount = fluctus::kMaxBlockSize;
 				int outCount = drbOutputBuffers[channel].capacity();
 				srcOutputs[channel].process(renderedFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
 				drbOutputBuffers[channel].endIncr(outCount);
