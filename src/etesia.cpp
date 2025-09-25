@@ -296,12 +296,12 @@ struct Etesia : SanguineModule {
 
 			// Render frames.
 			if (drbOutputBuffers[channel].empty()) {
-				etesia::ShortFrame input[cloudyCommon::kMaxFrames] = {};
+				etesia::ShortFrame input[etesia::kMaxBlockSize] = {};
 
 				// Convert input buffer.
-				dsp::Frame<2> convertedFrames[cloudyCommon::kMaxFrames];
+				dsp::Frame<2> convertedFrames[etesia::kMaxBlockSize];
 				int inputLength = drbInputBuffers[channel].size();
-				int outputLength = cloudyCommon::kMaxFrames;
+				int outputLength = etesia::kMaxBlockSize;
 				srcInputs[channel].process(drbInputBuffers[channel].startData(), &inputLength,
 					convertedFrames, &outputLength);
 				drbInputBuffers[channel].startIncr(inputLength);
@@ -366,8 +366,8 @@ struct Etesia : SanguineModule {
 
 				etesiaParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
-				etesia::ShortFrame output[cloudyCommon::kMaxFrames];
-				etesiaProcessors[channel]->Process(input, output, cloudyCommon::kMaxFrames);
+				etesia::ShortFrame output[etesia::kMaxBlockSize];
+				etesiaProcessors[channel]->Process(input, output, etesia::kMaxBlockSize);
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
@@ -386,13 +386,13 @@ struct Etesia : SanguineModule {
 				}
 
 				// Convert output buffer.
-				dsp::Frame<2> renderedFrames[cloudyCommon::kMaxFrames];
-				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
+				dsp::Frame<2> renderedFrames[etesia::kMaxBlockSize];
+				for (size_t frame = 0; frame < etesia::kMaxBlockSize; ++frame) {
 					renderedFrames[frame].samples[0] = output[frame].l / 32768.f;
 					renderedFrames[frame].samples[1] = output[frame].r / 32768.f;
 				}
 
-				int inCount = cloudyCommon::kMaxFrames;
+				int inCount = etesia::kMaxBlockSize;
 				int outCount = drbOutputBuffers[channel].capacity();
 				srcOutputs[channel].process(renderedFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
 				drbOutputBuffers[channel].endIncr(outCount);
