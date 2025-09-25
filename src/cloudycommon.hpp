@@ -46,8 +46,6 @@ namespace cloudyCommon {
 		LED_MODES_LAST
 	};
 
-	static const int kMaxFrames = 32;
-
 	static const int kBigBufferLength = 118784;
 	static const int kSmallBufferLength = 65536 - 128;
 
