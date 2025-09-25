@@ -424,8 +424,8 @@ struct Etesia : SanguineModule {
 				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
 				lastLedMode = ledMode;
 
-				paramQuantities[PARAM_LEDS_MODE]->name = cloudyCommon::kLedButtonPrefix +
-					cloudyCommon::vuButtonLabels[ledMode];
+				paramQuantities[PARAM_LEDS_MODE]->name =
+					string::f(cloudyCommon::kLedButtonTooltip, cloudyCommon::vuButtonLabels[ledMode]);
 
 				bDisplaySwitched = lastFrozen[displayChannel];
 			}
