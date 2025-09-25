@@ -217,7 +217,7 @@ struct Etesia : SanguineModule {
 			buffersLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
 			buffersSmall[channel] = new uint8_t[cloudyCommon::kSmallBufferLength]();
 			etesiaProcessors[channel] = new etesia::EtesiaGranularProcessor();
-			memset(etesiaProcessors[channel], 0, sizeof(etesiaProcessors));
+			memset(etesiaProcessors[channel], 0, sizeof(etesia::EtesiaGranularProcessor));
 			etesiaProcessors[channel]->Init(buffersLarge[channel], cloudyCommon::kBigBufferLength,
 				buffersSmall[channel], cloudyCommon::kSmallBufferLength);
 		}

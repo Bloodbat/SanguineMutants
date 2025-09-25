@@ -211,7 +211,7 @@ struct Fluctus : SanguineModule {
 			buffersLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
 			buffersSmall[channel] = new uint8_t[cloudyCommon::kSmallBufferLength]();
 			fluctusProcessors[channel] = new fluctus::FluctusGranularProcessor();
-			memset(fluctusProcessors[channel], 0, sizeof(fluctusProcessors));
+			memset(fluctusProcessors[channel], 0, sizeof(fluctus::FluctusGranularProcessor));
 			fluctusProcessors[channel]->Init(buffersLarge[channel], cloudyCommon::kBigBufferLength,
 				buffersSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
