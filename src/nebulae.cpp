@@ -207,7 +207,7 @@ struct Nebulae : SanguineModule {
 			buffersLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
 			buffersSmall[channel] = new uint8_t[cloudyCommon::kSmallBufferLength]();
 			cloudsProcessors[channel] = new clouds::GranularProcessor();
-			memset(cloudsProcessors[channel], 0, sizeof(cloudsProcessors));
+			memset(cloudsProcessors[channel], 0, sizeof(clouds::GranularProcessor));
 			cloudsProcessors[channel]->Init(buffersLarge[channel], cloudyCommon::kBigBufferLength,
 				buffersSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
