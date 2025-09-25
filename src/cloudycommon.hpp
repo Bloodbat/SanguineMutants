@@ -18,7 +18,7 @@ namespace cloudyCommon {
 		std::string labelReverb;
 	};
 
-	static const std::string kLedButtonPrefix = "LED display value: ";
+	static const std::string kLedButtonTooltip = "LED display value: %s";
 
 	static const std::vector<std::string> vuButtonLabels{
 		"Input",
