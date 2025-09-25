@@ -226,8 +226,8 @@ struct Nebulae : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		using simd::float_4;
 
-		int stereoChannels = static_cast<bool>(params[PARAM_STEREO].getValue()) ? 2 : 1;
-		bool bWantLoFi = !static_cast<bool>(params[PARAM_HI_FI].getValue());
+		int stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
+		bool bWantLoFi = !(static_cast<bool>(params[PARAM_HI_FI].getValue()));
 #ifndef METAMODULE
 		bool bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
 #else
