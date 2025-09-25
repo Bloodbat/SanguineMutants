@@ -271,15 +271,15 @@ struct Etesia : SanguineModule {
 				drbInputBuffers[channel].push(inputFrames[channel]);
 			}
 
-			etesiaParameters[channel] = etesiaProcessors[channel]->mutable_parameters();
-
-			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
-			voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
-			voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
-			voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
-
 			// Render frames.
 			if (drbOutputBuffers[channel].empty()) {
+				etesiaParameters[channel] = etesiaProcessors[channel]->mutable_parameters();
+
+				voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
+				voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
+				voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
+				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
+
 				etesia::ShortFrame input[etesia::kMaxBlockSize] = {};
 
 				// Convert input buffer.
