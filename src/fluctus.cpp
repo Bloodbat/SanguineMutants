@@ -264,15 +264,15 @@ struct Fluctus : SanguineModule {
 				drbInputBuffers[channel].push(inputFrames[channel]);
 			}
 
-			fluctusParameters[channel] = fluctusProcessors[channel]->mutable_parameters();
-
-			voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
-			voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
-			voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
-			voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
-
 			// Render frames.
 			if (drbOutputBuffers[channel].empty()) {
+				fluctusParameters[channel] = fluctusProcessors[channel]->mutable_parameters();
+
+				voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
+				voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
+				voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
+				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
+
 				fluctus::ShortFrame input[fluctus::kMaxBlockSize] = {};
 
 				// Convert input buffer.
