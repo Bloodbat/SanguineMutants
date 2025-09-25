@@ -284,12 +284,12 @@ struct Nebulae : SanguineModule {
 
 			// Render frames.
 			if (drbOutputBuffers[channel].empty()) {
-				clouds::ShortFrame input[cloudyCommon::kMaxFrames] = {};
+				clouds::ShortFrame input[clouds::kMaxBlockSize] = {};
 
 				// Convert input buffer.
-				dsp::Frame<2> convertedFrames[cloudyCommon::kMaxFrames];
+				dsp::Frame<2> convertedFrames[clouds::kMaxBlockSize];
 				int inputLength = drbInputBuffers[channel].size();
-				int outputLength = cloudyCommon::kMaxFrames;
+				int outputLength = clouds::kMaxBlockSize;
 				srcInputs[channel].process(drbInputBuffers[channel].startData(), &inputLength,
 					convertedFrames, &outputLength);
 				drbInputBuffers[channel].startIncr(inputLength);
@@ -298,9 +298,9 @@ struct Nebulae : SanguineModule {
 				   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
 				   between the input and output SRC.
 				*/
-				for (int frame = 0; frame < outputLength; ++frame) {
-					input[frame].l = clamp(convertedFrames[frame].samples[0] * 32767.0, -32768, 32767);
-					input[frame].r = clamp(convertedFrames[frame].samples[1] * 32767.0, -32768, 32767);
+				for (int block = 0; block < outputLength; ++block) {
+					input[block].l = clamp(convertedFrames[block].samples[0] * 32767.0, -32768, 32767);
+					input[block].r = clamp(convertedFrames[block].samples[1] * 32767.0, -32768, 32767);
 				}
 
 				// Set up Clouds processor.
@@ -353,8 +353,8 @@ struct Nebulae : SanguineModule {
 
 				cloudsParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
-				clouds::ShortFrame output[cloudyCommon::kMaxFrames];
-				cloudsProcessors[channel]->Process(input, output, cloudyCommon::kMaxFrames);
+				clouds::ShortFrame output[clouds::kMaxBlockSize];
+				cloudsProcessors[channel]->Process(input, output, clouds::kMaxBlockSize);
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
@@ -373,13 +373,13 @@ struct Nebulae : SanguineModule {
 				}
 
 				// Convert output buffer.
-				dsp::Frame<2> renderedFrames[cloudyCommon::kMaxFrames];
-				for (int frame = 0; frame < cloudyCommon::kMaxFrames; ++frame) {
-					renderedFrames[frame].samples[0] = output[frame].l / 32768.f;
-					renderedFrames[frame].samples[1] = output[frame].r / 32768.f;
+				dsp::Frame<2> renderedFrames[clouds::kMaxBlockSize];
+				for (size_t block = 0; block < clouds::kMaxBlockSize; ++block) {
+					renderedFrames[block].samples[0] = output[block].l / 32768.f;
+					renderedFrames[block].samples[1] = output[block].r / 32768.f;
 				}
 
-				int inCount = cloudyCommon::kMaxFrames;
+				int inCount = clouds::kMaxBlockSize;
 				int outCount = drbOutputBuffers[channel].capacity();
 				srcOutputs[channel].process(renderedFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
 				drbOutputBuffers[channel].endIncr(outCount);
