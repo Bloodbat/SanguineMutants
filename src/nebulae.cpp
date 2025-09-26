@@ -625,9 +625,10 @@ struct Nebulae : SanguineModule {
 			displayChannel = intValue;
 		}
 
-		// TODO: fix tooltip!
 		if (getJsonInt(rootJ, "LEDsMode", intValue)) {
 			ledMode = static_cast<cloudyCommon::LedModes>(intValue);
+			paramQuantities[PARAM_LEDS_MODE]->name =
+				string::f(cloudyCommon::kLedButtonTooltip, cloudyCommon::vuButtonLabels[ledMode]);
 		}
 
 		getJsonBoolean(rootJ, "triggersAreGates", bTriggersAreGates);
