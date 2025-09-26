@@ -106,10 +106,10 @@ struct Nebulae : SanguineModule {
 	std::string textTrigger = nebulae::modeDisplays[0].labelTrigger;
 #endif
 
-	dsp::SampleRateConverter<2> srcInputs[PORT_MAX_CHANNELS];
-	dsp::SampleRateConverter<2> srcOutputs[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbInputBuffers[PORT_MAX_CHANNELS];
-	dsp::DoubleRingBuffer<dsp::Frame<2>, 256> drbOutputBuffers[PORT_MAX_CHANNELS];
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcInputs;
+	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcOutputs;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> drbInputBuffers;
+	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> drbOutputBuffers;
 	dsp::VuMeter2 vuMeter;
 	dsp::ClockDivider lightsDivider;
 	dsp::BooleanTrigger btLedsMode;
@@ -155,8 +155,8 @@ struct Nebulae : SanguineModule {
 	float inputGain = 0.5f;
 	float outputGain = 1.f;
 
-	dsp::Frame<2> inputFrames[PORT_MAX_CHANNELS];
-	dsp::Frame<2> outputFrames[PORT_MAX_CHANNELS] = {};
+	dsp::Frame<PORT_MAX_CHANNELS * 2> inputFrames;
+	dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = {};
 
 	Nebulae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -250,43 +250,51 @@ struct Nebulae : SanguineModule {
 			displayChannel = channelCount - 1;
 		}
 
-		for (int channel = 0; channel < channelCount; ++channel) {
-			// Get input.
-			if (!drbInputBuffers[channel].full()) {
+		int currentChannel;
+		// Get input.
+		if (!drbInputBuffers.full()) {
+			for (int channel = 0; channel < channelCount; ++channel) {
+				currentChannel = channel << 1;
 				float finalInputGain = clamp(inputGain + (inputs[INPUT_IN_GAIN].getVoltage(channel) / 5.f), 0.f, 1.f);
-				inputFrames[channel].samples[0] = inputs[INPUT_LEFT].getVoltage(channel) * finalInputGain / 5.f;
-				inputFrames[channel].samples[1] = bRightInputConnected ? inputs[INPUT_RIGHT].getVoltage(channel)
-					* finalInputGain / 5.f : inputFrames[channel].samples[0];
-				drbInputBuffers[channel].push(inputFrames[channel]);
+				inputFrames.samples[currentChannel] = inputs[INPUT_LEFT].getVoltage(channel) * finalInputGain / 5.f;
+				inputFrames.samples[currentChannel + 1] = bRightInputConnected ? inputs[INPUT_RIGHT].getVoltage(channel)
+					* finalInputGain / 5.f : inputFrames.samples[currentChannel];
 			}
+			drbInputBuffers.push(inputFrames);
+		}
 
-			// Render frames.
-			if (drbOutputBuffers[channel].empty()) {
-				cloudsParameters[channel] = cloudsProcessors[channel]->mutable_parameters();
+		// Render frames.
+		if (drbOutputBuffers.empty()) {
+			// Convert input buffer.
+			dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[clouds::kMaxBlockSize];
+			int inputLength = drbInputBuffers.size();
+			int outputLength = clouds::kMaxBlockSize;
+			srcInputs.setChannels(channelCount << 1);
+			srcInputs.process(drbInputBuffers.startData(), &inputLength, convertedFrames, &outputLength);
+			drbInputBuffers.startIncr(inputLength);
 
-				voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
-				voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
-				voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
-				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[clouds::kMaxBlockSize];
+
+			for (int channel = 0; channel < channelCount; ++channel) {
+				currentChannel = channel << 1;
 
 				clouds::ShortFrame input[clouds::kMaxBlockSize] = {};
-
-				// Convert input buffer.
-				dsp::Frame<2> convertedFrames[clouds::kMaxBlockSize];
-				int inputLength = drbInputBuffers[channel].size();
-				int outputLength = clouds::kMaxBlockSize;
-				srcInputs[channel].process(drbInputBuffers[channel].startData(), &inputLength,
-					convertedFrames, &outputLength);
-				drbInputBuffers[channel].startIncr(inputLength);
 
 				/*
 				   We might not fill all of the input buffer if there is a deficiency, but this cannot be avoided due to imprecisions
 				   between the input and output SRC.
 				*/
 				for (int block = 0; block < outputLength; ++block) {
-					input[block].l = clamp(convertedFrames[block].samples[0] * 32767.0, -32768, 32767);
-					input[block].r = clamp(convertedFrames[block].samples[1] * 32767.0, -32768, 32767);
+					input[block].l = clamp(convertedFrames[block].samples[currentChannel] * 32767.0, -32768, 32767);
+					input[block].r = clamp(convertedFrames[block].samples[currentChannel + 1] * 32767.0, -32768, 32767);
 				}
+
+				cloudsParameters[channel] = cloudsProcessors[channel]->mutable_parameters();
+
+				voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
+				voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
+				voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
+				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
 
 				// Set up Clouds processor.
 				cloudsProcessors[channel]->set_playback_mode(channelModes[channel]);
@@ -338,9 +346,6 @@ struct Nebulae : SanguineModule {
 
 				cloudsParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
-				clouds::ShortFrame output[clouds::kMaxBlockSize];
-				cloudsProcessors[channel]->Process(input, output, clouds::kMaxBlockSize);
-
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
 					if (!bDisplaySwitched && displayChannel == channel) {
@@ -357,30 +362,37 @@ struct Nebulae : SanguineModule {
 					}
 				}
 
-				// Convert output buffer.
-				dsp::Frame<2> renderedFrames[clouds::kMaxBlockSize];
-				for (size_t block = 0; block < clouds::kMaxBlockSize; ++block) {
-					renderedFrames[block].samples[0] = output[block].l / 32768.f;
-					renderedFrames[block].samples[1] = output[block].r / 32768.f;
-				}
+				clouds::ShortFrame output[clouds::kMaxBlockSize];
+				cloudsProcessors[channel]->Process(input, output, clouds::kMaxBlockSize);
 
-				int inCount = clouds::kMaxBlockSize;
-				int outCount = drbOutputBuffers[channel].capacity();
-				srcOutputs[channel].process(renderedFrames, &inCount, drbOutputBuffers[channel].endData(), &outCount);
-				drbOutputBuffers[channel].endIncr(outCount);
+				// Convert output buffer.
+				for (size_t block = 0; block < clouds::kMaxBlockSize; ++block) {
+					renderedFrames[block].samples[currentChannel] = output[block].l / 32768.f;
+					renderedFrames[block].samples[currentChannel + 1] = output[block].r / 32768.f;
+				}
 			}
 
-			// Set output.
-			if (!drbOutputBuffers[channel].empty()) {
-				outputFrames[channel] = drbOutputBuffers[channel].shift();
+			int inCount = clouds::kMaxBlockSize;
+			int outCount = drbOutputBuffers.capacity();
+			srcOutputs.setChannels(channelCount << 1);
+			srcOutputs.process(renderedFrames, &inCount, drbOutputBuffers.endData(), &outCount);
+			drbOutputBuffers.endIncr(outCount);
+		}
+
+		// Set output.
+		if (!drbOutputBuffers.empty()) {
+			outputFrames = drbOutputBuffers.shift();
+			for (int channel = 0; channel < channelCount; ++channel) {
+				currentChannel = channel << 1;
 				float finalOutputGain = clamp(outputGain + (inputs[INPUT_OUT_GAIN].getVoltage(channel) / 5.f), 0.f, 2.f);
 				if (bLeftOutputConnected) {
-					outputFrames[channel].samples[0] *= finalOutputGain;
-					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrames[channel].samples[0], channel);
+					outputFrames.samples[currentChannel] *= finalOutputGain;
+					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrames.samples[currentChannel], channel);
 				}
+				int currentSample = currentChannel + 1;
 				if (bRightOutputConnected) {
-					outputFrames[channel].samples[1] *= finalOutputGain;
-					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrames[channel].samples[1], channel);
+					outputFrames.samples[currentSample] *= finalOutputGain;
+					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrames.samples[currentSample], channel);
 				}
 			}
 		}
@@ -422,14 +434,16 @@ struct Nebulae : SanguineModule {
 				bDisplaySwitched = lastFrozen[displayChannel];
 			}
 
+			int vuChannel = displayChannel << 1;
 			dsp::Frame<2> lightFrame = {};
-
 			switch (ledMode) {
 			case cloudyCommon::LEDS_OUTPUT:
-				lightFrame = outputFrames[displayChannel];
+				lightFrame.samples[0] = outputFrames.samples[vuChannel];
+				lightFrame.samples[1] = outputFrames.samples[vuChannel + 1];
 				break;
 			default:
-				lightFrame = inputFrames[displayChannel];
+				lightFrame.samples[0] = inputFrames.samples[vuChannel];
+				lightFrame.samples[1] = inputFrames.samples[vuChannel + 1];
 				break;
 			}
 
@@ -583,10 +597,8 @@ struct Nebulae : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			srcInputs[channel].setRates(static_cast<int>(e.sampleRate), cloudyCommon::kHardwareRate);
-			srcOutputs[channel].setRates(cloudyCommon::kHardwareRate, static_cast<int>(e.sampleRate));
-		}
+		srcInputs.setRates(static_cast<int>(e.sampleRate), cloudyCommon::kHardwareRate);
+		srcOutputs.setRates(cloudyCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 	}
 
 	void onAdd(const AddEvent& e) override {
@@ -613,6 +625,7 @@ struct Nebulae : SanguineModule {
 			displayChannel = intValue;
 		}
 
+		// TODO: fix tooltip!
 		if (getJsonInt(rootJ, "LEDsMode", intValue)) {
 			ledMode = static_cast<cloudyCommon::LedModes>(intValue);
 		}
