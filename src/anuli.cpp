@@ -169,7 +169,7 @@ struct Anuli : SanguineModule {
 			memset(&strummers[channel], 0, sizeof(rings::Strummer));
 			memset(&parts[channel], 0, sizeof(rings::Part));
 			memset(&stringSynths[channel], 0, sizeof(rings::StringSynthPart));
-			strummers[channel].Init(0.01f, 44100.f / anuli::kBlockSize);
+			strummers[channel].Init(0.01f, 44100.f / rings::kMaxBlockSize);
 			parts[channel].Init(reverbBuffers[channel]);
 			stringSynths[channel].Init(reverbBuffers[channel]);
 		}
@@ -210,31 +210,31 @@ struct Anuli : SanguineModule {
 		}
 
 		if (drbOutputBuffers.empty()) {
-			dsp::Frame<PORT_MAX_CHANNELS> inFrames[anuli::kBlockSize] = {};
+			dsp::Frame<PORT_MAX_CHANNELS> inFrames[rings::kMaxBlockSize] = {};
 
 			// Convert input buffer.
 			int inLen = drbInputBuffers.size();
-			int outLen = anuli::kBlockSize;
+			int outLen = rings::kMaxBlockSize;
 			srcInputs.setChannels(channelCount);
 			srcInputs.process(drbInputBuffers.startData(), &inLen, inFrames, &outLen);
 			drbInputBuffers.startIncr(inLen);
 
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[anuli::kBlockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[rings::kMaxBlockSize];
 
-			float in[anuli::kBlockSize];
+			float in[rings::kMaxBlockSize];
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (!strums[channel]) {
 					strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
 				}
 
-				float out[anuli::kBlockSize];
-				float aux[anuli::kBlockSize];
+				float out[rings::kMaxBlockSize];
+				float aux[rings::kMaxBlockSize];
 				float structure;
 
 				rings::Patch patch;
 
-				for (int block = 0; block < anuli::kBlockSize; ++block) {
+				for (size_t block = 0; block < rings::kMaxBlockSize; ++block) {
 					in[block] = inFrames[block].samples[channel];
 				}
 
@@ -250,8 +250,8 @@ struct Anuli : SanguineModule {
 					setupPerformance(channel, performanceStates[channel], structure);
 
 					// Process audio.
-					strummers[channel].Process(NULL, anuli::kBlockSize, &performanceStates[channel]);
-					stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, anuli::kBlockSize);
+					strummers[channel].Process(NULL, rings::kMaxBlockSize, &performanceStates[channel]);
+					stringSynths[channel].Process(performanceStates[channel], patch, in, out, aux, rings::kMaxBlockSize);
 					break;
 
 				default:
@@ -265,21 +265,21 @@ struct Anuli : SanguineModule {
 					setupPerformance(channel, performanceStates[channel], structure);
 
 					// Process audio.
-					strummers[channel].Process(in, anuli::kBlockSize, &performanceStates[channel]);
+					strummers[channel].Process(in, rings::kMaxBlockSize, &performanceStates[channel]);
 					parts[channel].Process(performanceStates[channel], patch, in,
-						out, aux, anuli::kBlockSize);
+						out, aux, rings::kMaxBlockSize);
 					break;
 				}
 
 				// Convert output buffer.
 				const int channelFrame = channel << 1;
-				for (int block = 0; block < anuli::kBlockSize; ++block) {
+				for (size_t block = 0; block < rings::kMaxBlockSize; ++block) {
 					renderedFrames[block].samples[channelFrame] = out[block];
 					renderedFrames[block].samples[channelFrame + 1] = aux[block];
 				}
 			}
 
-			int inCount = anuli::kBlockSize;
+			int inCount = rings::kMaxBlockSize;
 			int outCount = drbOutputBuffers.capacity();
 			srcOutputs.setChannels(channelCount << 1);
 			srcOutputs.process(renderedFrames, &inCount, drbOutputBuffers.endData(), &outCount);
