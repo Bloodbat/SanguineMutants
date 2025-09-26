@@ -266,7 +266,7 @@ struct Funes : SanguineModule {
 
 			// Render output buffer for each voice.
 			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[funes::kBlockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[plaits::kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				float_4 inputVoltages;
 
@@ -306,12 +306,12 @@ struct Funes : SanguineModule {
 				modulations[channel].trigger_patched = bHaveInputTrigger;
 
 				// Render frames
-				plaits::Voice::Frame output[funes::kBlockSize];
-				voices[channel].Render(patch, modulations[channel], output, funes::kBlockSize);
+				plaits::Voice::Frame output[plaits::kBlockSize];
+				voices[channel].Render(patch, modulations[channel], output, plaits::kBlockSize);
 
 				// Convert output to frames
 				const int channelFrame = channel << 1;
-				for (int blockNum = 0; blockNum < funes::kBlockSize; ++blockNum) {
+				for (size_t blockNum = 0; blockNum < plaits::kBlockSize; ++blockNum) {
 					renderFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
 					renderFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
 				}
@@ -335,19 +335,19 @@ struct Funes : SanguineModule {
 
 			// Convert output.
 			if (!bWantLowCpu) {
-				int inLen = funes::kBlockSize;
+				int inLen = plaits::kBlockSize;
 				int outLen = drbOutputBuffers.capacity();
 				srcOutputs.setChannels(channelCount << 1);
 				srcOutputs.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
 				drbOutputBuffers.endIncr(outLen);
 			} else {
-				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), funes::kBlockSize);
+				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), static_cast<int>(plaits::kBlockSize));
 				std::memcpy(drbOutputBuffers.endData(), renderFrames, len * sizeof(renderFrames[0]));
 				drbOutputBuffers.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz.
-			triPhase += 2.f * args.sampleTime * funes::kBlockSize;
+			triPhase += 2.f * args.sampleTime * plaits::kBlockSize;
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
 			}
