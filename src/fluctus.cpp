@@ -156,8 +156,8 @@ struct Fluctus : SanguineModule {
 
 	float paramPitch = 0.f;
 
-	float inputGain = 0.5f;
-	float outputGain = 1.f;
+	float knobInputGain = 0.5f;
+	float knobOutputGain = 1.f;
 
 	dsp::Frame<PORT_MAX_CHANNELS * 2> inputFrames;
 	dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = {};
@@ -257,12 +257,41 @@ struct Fluctus : SanguineModule {
 		int currentChannel;
 		// Get input.
 		if (!drbInputBuffers.full()) {
-			for (int channel = 0; channel < channelCount; ++channel) {
+			float_4 inChannelGains;
+			float_4 inVoltagesLeft;
+			float_4 inVoltagesRight;
+			for (int channel = 0; channel < channelCount; channel += 4) {
 				currentChannel = channel << 1;
-				float finalInputGain = clamp(inputGain + (inputs[INPUT_IN_GAIN].getVoltage(channel) / 5.f), 0.f, 1.f);
-				inputFrames.samples[currentChannel] = inputs[INPUT_LEFT].getVoltage(channel) * finalInputGain / 5.f;
-				inputFrames.samples[currentChannel + 1] = bRightInputConnected ? inputs[INPUT_RIGHT].getVoltage(channel)
-					* finalInputGain / 5.f : inputFrames.samples[currentChannel];
+
+				inChannelGains = inputs[INPUT_IN_GAIN].getVoltageSimd<float_4>(channel);
+				inChannelGains /= 5.f;
+				inChannelGains += knobInputGain;
+				inChannelGains = simd::clamp(inChannelGains, 0.f, 1.f);
+
+				inVoltagesLeft = inputs[INPUT_LEFT].getVoltageSimd<float_4>(channel);
+				inVoltagesLeft *= inChannelGains;
+				inVoltagesLeft /= 5.f;
+
+				inputFrames.samples[currentChannel] = inVoltagesLeft[0];
+				inputFrames.samples[currentChannel + 2] = inVoltagesLeft[1];
+				inputFrames.samples[currentChannel + 4] = inVoltagesLeft[2];
+				inputFrames.samples[currentChannel + 6] = inVoltagesLeft[3];
+
+				if (bRightInputConnected) {
+					inVoltagesRight = inputs[INPUT_RIGHT].getVoltageSimd<float_4>(channel);
+					inVoltagesRight *= inChannelGains;
+					inVoltagesRight /= 5.f;
+
+					inputFrames.samples[currentChannel + 1] = inVoltagesRight[0];
+					inputFrames.samples[currentChannel + 3] = inVoltagesRight[1];
+					inputFrames.samples[currentChannel + 5] = inVoltagesRight[2];
+					inputFrames.samples[currentChannel + 7] = inVoltagesRight[3];
+				} else {
+					inputFrames.samples[currentChannel + 1] = inVoltagesLeft[0];
+					inputFrames.samples[currentChannel + 3] = inVoltagesLeft[1];
+					inputFrames.samples[currentChannel + 5] = inVoltagesLeft[2];
+					inputFrames.samples[currentChannel + 7] = inVoltagesLeft[3];
+				}
 			}
 			drbInputBuffers.push(inputFrames);
 		}
@@ -402,17 +431,41 @@ struct Fluctus : SanguineModule {
 		// Set output.
 		if (!drbOutputBuffers.empty()) {
 			outputFrames = drbOutputBuffers.shift();
-			for (int channel = 0; channel < channelCount; ++channel) {
+
+			float_4 outChannelGains;
+			float_4 outVoltagesLeft;
+			float_4 outVoltagesRight;
+
+			for (int channel = 0; channel < channelCount; channel += 4) {
 				currentChannel = channel << 1;
-				float finalOutputGain = clamp(outputGain + (inputs[INPUT_OUT_GAIN].getVoltage(channel) / 5.f), 0.f, 2.f);
+
+				outChannelGains = inputs[INPUT_OUT_GAIN].getVoltageSimd<float_4>(channel);
+				outChannelGains /= 5.f;
+				outChannelGains += knobOutputGain;
+				outChannelGains = simd::clamp(outChannelGains, 0.f, 2.f);
+
 				if (bLeftOutputConnected) {
-					outputFrames.samples[currentChannel] *= finalOutputGain;
-					outputs[OUTPUT_LEFT].setVoltage(5.f * outputFrames.samples[currentChannel], channel);
+					outVoltagesLeft[0] = outputFrames.samples[currentChannel];
+					outVoltagesLeft[1] = outputFrames.samples[currentChannel + 2];
+					outVoltagesLeft[2] = outputFrames.samples[currentChannel + 4];
+					outVoltagesLeft[3] = outputFrames.samples[currentChannel + 6];
+
+					outVoltagesLeft *= outChannelGains;
+					outVoltagesLeft *= 5.f;
+
+					outputs[OUTPUT_LEFT].setVoltageSimd(outVoltagesLeft, channel);
 				}
-				int currentSample = currentChannel + 1;
+
 				if (bRightOutputConnected) {
-					outputFrames.samples[currentSample] *= finalOutputGain;
-					outputs[OUTPUT_RIGHT].setVoltage(5.f * outputFrames.samples[currentSample], channel);
+					outVoltagesRight[0] = outputFrames.samples[currentChannel + 1];
+					outVoltagesRight[1] = outputFrames.samples[currentChannel + 3];
+					outVoltagesRight[2] = outputFrames.samples[currentChannel + 5];
+					outVoltagesRight[3] = outputFrames.samples[currentChannel + 7];
+
+					outVoltagesRight *= outChannelGains;
+					outVoltagesRight *= 5.f;
+
+					outputs[OUTPUT_RIGHT].setVoltageSimd(outVoltagesRight, channel);
 				}
 			}
 		}
@@ -442,8 +495,8 @@ struct Fluctus : SanguineModule {
 
 			paramPitch = params[PARAM_PITCH].getValue();
 
-			inputGain = params[PARAM_IN_GAIN].getValue();
-			outputGain = params[PARAM_OUT_GAIN].getValue();
+			knobInputGain = params[PARAM_IN_GAIN].getValue();
+			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
 				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
