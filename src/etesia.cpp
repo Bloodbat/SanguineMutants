@@ -363,6 +363,8 @@ struct Etesia : SanguineModule {
 					if (!bDisplaySwitched && displayChannel == channel) {
 						ledMode = cloudyCommon::LEDS_OUTPUT;
 						lastLedMode = cloudyCommon::LEDS_OUTPUT;
+					} else {
+						bDisplaySwitched = false;
 					}
 				} else if (!bFrozen && lastFrozen[channel]) {
 					lastFrozen[channel] = false;
