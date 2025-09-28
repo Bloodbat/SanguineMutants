@@ -127,6 +127,16 @@ struct Scalaria : SanguineModule {
 
         float_4 f4Voltages;
 
+        knobFrequency = params[PARAM_FREQUENCY].getValue();
+        knobResonance = params[PARAM_RESONANCE].getValue();
+
+        internalOscillator = params[PARAM_INTERNAL_OSCILLATOR].getValue();
+
+        f4KnobValues[0] = params[PARAM_CHANNEL_1_LEVEL].getValue();
+        f4KnobValues[1] = params[PARAM_CHANNEL_2_LEVEL].getValue();
+        f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
+        f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
+
         for (int channel = 0; channel < channelCount; ++channel) {
             parameters[channel]->oscillatorShape = internalOscillator;
 
@@ -218,16 +228,6 @@ struct Scalaria : SanguineModule {
 
         if (lightsDivider.process()) {
             const float sampleTime = jitteredLightsFrequency * args.sampleTime;
-
-            knobFrequency = params[PARAM_FREQUENCY].getValue();
-            knobResonance = params[PARAM_RESONANCE].getValue();
-
-            internalOscillator = params[PARAM_INTERNAL_OSCILLATOR].getValue();
-
-            f4KnobValues[0] = params[PARAM_CHANNEL_1_LEVEL].getValue();
-            f4KnobValues[1] = params[PARAM_CHANNEL_2_LEVEL].getValue();
-            f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
-            f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
 
             bool bHaveInternalOscillator = internalOscillator != 0;
 
