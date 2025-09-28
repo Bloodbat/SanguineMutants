@@ -314,10 +314,16 @@ struct Etesia : SanguineModule {
 			drbInputBuffers.startIncr(inputLength);
 
 			stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
-			bWantLoFi = params[PARAM_HI_FI].getValue() < 1.f;
 
-			bFrozen = params[PARAM_FREEZE].getValue() >= 1.f;
-			bReversed = params[PARAM_REVERSE].getValue() >= 1.f;
+#ifndef METAMODULE
+			bWantLoFi = !(static_cast<bool>(params[PARAM_HI_FI].getValue()));
+			bFrozen = static_cast<bool>(params[PARAM_FREEZE].getValue());
+			bReversed = static_cast<bool>(params[PARAM_REVERSE].getValue());
+#else
+			bWantLoFi = !(static_cast<bool>(static_cast<int>(params[PARAM_HI_FI].getValue())));
+			bFrozen = static_cast<bool>(static_cast<int>(params[PARAM_FREEZE].getValue()));
+			bReversed = static_cast<bool>(static_cast<int>(params[PARAM_REVERSE].getValue()));
+#endif
 
 			knobValues[0] = params[PARAM_BLEND].getValue();
 			knobValues[1] = params[PARAM_SPREAD].getValue();
