@@ -219,6 +219,32 @@ struct Anuli : SanguineModule {
 			srcInputs.process(drbInputBuffers.startData(), &inLen, inFrames, &outLen);
 			drbInputBuffers.startIncr(inLen);
 
+			polyphonyMode = params[PARAM_POLYPHONY].getValue();
+
+			fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
+
+			channelFx.fill(fxModel);
+
+			int knobMode = static_cast<int>(params[PARAM_MODE].getValue());
+
+			channelModes.fill(knobMode);
+
+			parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
+			parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
+			parametersInfo.knobValues[2] = params[PARAM_DAMPING].getValue();
+			parametersInfo.knobValues[3] = params[PARAM_POSITION].getValue();
+
+			parametersInfo.frequency = params[PARAM_FREQUENCY].getValue();
+
+			parametersInfo.modValues[0] = params[PARAM_STRUCTURE_MOD].getValue();
+			parametersInfo.modValues[1] = params[PARAM_BRIGHTNESS_MOD].getValue();
+			parametersInfo.modValues[2] = params[PARAM_DAMPING_MOD].getValue();
+			parametersInfo.modValues[3] = params[PARAM_POSITION_MOD].getValue();
+
+			parametersInfo.modValues = dsp::quadraticBipolar(parametersInfo.modValues);
+
+			parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
+
 			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[rings::kMaxBlockSize];
 
 			float in[rings::kMaxBlockSize];
@@ -354,32 +380,6 @@ struct Anuli : SanguineModule {
 			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
 			long long systemTimeMs = getSystemTimeMs();
-
-			polyphonyMode = params[PARAM_POLYPHONY].getValue();
-
-			fxModel = static_cast<rings::FxType>(params[PARAM_FX].getValue());
-
-			channelFx.fill(fxModel);
-
-			int knobMode = static_cast<int>(params[PARAM_MODE].getValue());
-
-			channelModes.fill(knobMode);
-
-			parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
-			parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
-			parametersInfo.knobValues[2] = params[PARAM_DAMPING].getValue();
-			parametersInfo.knobValues[3] = params[PARAM_POSITION].getValue();
-
-			parametersInfo.frequency = params[PARAM_FREQUENCY].getValue();
-
-			parametersInfo.modValues[0] = params[PARAM_STRUCTURE_MOD].getValue();
-			parametersInfo.modValues[1] = params[PARAM_BRIGHTNESS_MOD].getValue();
-			parametersInfo.modValues[2] = params[PARAM_DAMPING_MOD].getValue();
-			parametersInfo.modValues[3] = params[PARAM_POSITION_MOD].getValue();
-
-			parametersInfo.modValues = dsp::quadraticBipolar(parametersInfo.modValues);
-
-			parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
 
 			uint8_t pulseWidthModulationCounter = systemTimeMs & 15;
 			uint8_t triangle = (systemTimeMs >> 5) & 31;
