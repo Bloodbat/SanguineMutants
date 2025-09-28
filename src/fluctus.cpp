@@ -343,8 +343,10 @@ struct Fluctus : SanguineModule {
 				   between the input and output SRC.
 				*/
 				for (int block = 0; block < outputLength; ++block) {
-					input[block].l = clamp(convertedFrames[block].samples[currentChannel] * 32767.f, -32768.f, 32767.f);
-					input[block].r = clamp(convertedFrames[block].samples[currentChannel + 1] * 32767.f, -32768.f, 32767.f);
+					input[block].l = static_cast<short>(
+						clamp(convertedFrames[block].samples[currentChannel] * 32767.f, -32768.f, 32767.f));
+					input[block].r = static_cast<short>(
+						clamp(convertedFrames[block].samples[currentChannel + 1] * 32767.f, -32768.f, 32767.f));
 				}
 
 				fluctusParameters[channel] = fluctusProcessors[channel]->mutable_parameters();
@@ -441,8 +443,8 @@ struct Fluctus : SanguineModule {
 
 				// Convert output buffer.
 				for (size_t block = 0; block < fluctus::kMaxBlockSize; ++block) {
-					renderedFrames[block].samples[currentChannel] = output[block].l / 32768.f;
-					renderedFrames[block].samples[currentChannel + 1] = output[block].r / 32768.f;
+					renderedFrames[block].samples[currentChannel] = static_cast<float>(output[block].l / 32768.f);
+					renderedFrames[block].samples[currentChannel + 1] = static_cast<float>(output[block].r / 32768.f);
 				}
 			}
 
