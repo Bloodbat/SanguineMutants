@@ -340,8 +340,8 @@ struct Nebulae : SanguineModule {
 				   between the input and output SRC.
 				*/
 				for (int block = 0; block < outputLength; ++block) {
-					input[block].l = clamp(convertedFrames[block].samples[currentChannel] * 32767.0, -32768, 32767);
-					input[block].r = clamp(convertedFrames[block].samples[currentChannel + 1] * 32767.0, -32768, 32767);
+					input[block].l = clamp(convertedFrames[block].samples[currentChannel] * 32767.f, -32768.f, 32767.f);
+					input[block].r = clamp(convertedFrames[block].samples[currentChannel + 1] * 32767.f, -32768.f, 32767.f);
 				}
 
 				cloudsParameters[channel] = cloudsProcessors[channel]->mutable_parameters();
