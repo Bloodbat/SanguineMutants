@@ -264,6 +264,17 @@ struct Reticula : SanguineModule {
             }
         }
 
+        float newKnobTempo = params[PARAM_CLOCK].getValue();
+        if (newKnobTempo != lastKnobTempo) {
+            tempoParam = newKnobTempo;
+            bUseTapTempo = false;
+            lastKnobTempo = newKnobTempo;
+        }
+
+        sequencerMode = static_cast<reticula::PatternGeneratorModes>(params[PARAM_SEQUENCER_MODE].getValue());
+
+        clockOutputSource = static_cast<reticula::ClockOutputSources>(params[PARAM_CLOCK_OUTPUT_SOURCE].getValue());
+
         if (bIsModuleRunning) {
             if (tempoParam >= 30 && tempoParam <= 480) {
                 swing = clamp(params[PARAM_SWING].getValue() + inputs[INPUT_SWING].getVoltage() / 5.f, 0.f, 0.9f);
@@ -434,20 +445,11 @@ struct Reticula : SanguineModule {
         if (lightsDivider.process()) {
             const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
-            float newKnobTempo = params[PARAM_CLOCK].getValue();
-            if (newKnobTempo != lastKnobTempo) {
-                tempoParam = newKnobTempo;
-                bUseTapTempo = false;
-                lastKnobTempo = newKnobTempo;
-            }
-
-            sequencerMode = static_cast<reticula::PatternGeneratorModes>(params[PARAM_SEQUENCER_MODE].getValue());
             lights[LIGHT_SEQUENCER_MODE].setBrightnessSmooth((sequencerMode <= reticula::PATTERN_HENRI) *
                 kSanguineButtonLightValue, sampleTime);
             lights[LIGHT_SEQUENCER_MODE + 1].setBrightnessSmooth((sequencerMode >= reticula::PATTERN_HENRI) *
                 kSanguineButtonLightValue, sampleTime);
 
-            clockOutputSource = static_cast<reticula::ClockOutputSources>(params[PARAM_CLOCK_OUTPUT_SOURCE].getValue());
             lights[LIGHT_CLOCK_OUTPUT_SOURCE].setBrightnessSmooth((clockOutputSource <= reticula::CLOCK_SOURCE_BEAT) *
                 kSanguineButtonLightValue, sampleTime);
             lights[LIGHT_CLOCK_OUTPUT_SOURCE + 1].setBrightnessSmooth((clockOutputSource >= reticula::CLOCK_SOURCE_BEAT) *
