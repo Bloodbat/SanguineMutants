@@ -243,6 +243,36 @@ struct Contextus : SanguineModule {
 
 			bVCAEnabled = params[PARAM_VCA].getValue();
 
+			bFlattenEnabled = params[PARAM_FLAT].getValue();
+			bAutoTrigger = params[PARAM_AUTO].getValue();
+			waveShaperValue = params[PARAM_SIGN].getValue();
+			driftValue = params[PARAM_DRIFT].getValue();
+
+			knobScale = params[PARAM_SCALE].getValue();
+			knobRoot = params[PARAM_ROOT].getValue();
+			knobPitchRange = params[PARAM_PITCH_RANGE].getValue();
+			knobPitchOctave = params[PARAM_PITCH_OCTAVE].getValue();
+			knobTriggerDelay = params[PARAM_TRIGGER_DELAY].getValue();
+			knobSampleRate = params[PARAM_RATE].getValue();
+			knobResolution = params[PARAM_BITS].getValue();
+			knobAttack = params[PARAM_ATTACK].getValue();
+			knobDecay = params[PARAM_DECAY].getValue();
+			knobAdTimbre = params[PARAM_AD_TIMBRE].getValue();
+			knobAdFm = params[PARAM_AD_MODULATION].getValue();
+			knobAdColor = params[PARAM_AD_COLOR].getValue();
+
+			knobModel = params[PARAM_MODEL].getValue();
+
+			knobFm = params[PARAM_FM].getValue();
+			knobTimbre = params[PARAM_TIMBRE].getValue();
+			knobModulation = params[PARAM_MODULATION].getValue();
+			knobColor = params[PARAM_COLOR].getValue();
+			knobCoarse = params[PARAM_COARSE].getValue();
+			knobFine = params[PARAM_FINE].getValue();
+
+			memset(modulatedAttacks, knobAttack, sizeof(uint8_t) * channelCount);
+			memset(modulatedDecays, knobDecay, sizeof(uint8_t) * channelCount);
+
 			for (int channel = 0; channel < channelCount; ++channel) {
 				settings[channel].quantizer_scale = knobScale;
 				settings[channel].quantizer_root = knobRoot;
@@ -437,36 +467,6 @@ struct Contextus : SanguineModule {
 			if (displayChannel >= channelCount) {
 				displayChannel = channelCount - 1;
 			}
-
-			bFlattenEnabled = params[PARAM_FLAT].getValue();
-			bAutoTrigger = params[PARAM_AUTO].getValue();
-			waveShaperValue = params[PARAM_SIGN].getValue();
-			driftValue = params[PARAM_DRIFT].getValue();
-
-			knobScale = params[PARAM_SCALE].getValue();
-			knobRoot = params[PARAM_ROOT].getValue();
-			knobPitchRange = params[PARAM_PITCH_RANGE].getValue();
-			knobPitchOctave = params[PARAM_PITCH_OCTAVE].getValue();
-			knobTriggerDelay = params[PARAM_TRIGGER_DELAY].getValue();
-			knobSampleRate = params[PARAM_RATE].getValue();
-			knobResolution = params[PARAM_BITS].getValue();
-			knobAttack = params[PARAM_ATTACK].getValue();
-			knobDecay = params[PARAM_DECAY].getValue();
-			knobAdTimbre = params[PARAM_AD_TIMBRE].getValue();
-			knobAdFm = params[PARAM_AD_MODULATION].getValue();
-			knobAdColor = params[PARAM_AD_COLOR].getValue();
-
-			knobModel = params[PARAM_MODEL].getValue();
-
-			knobFm = params[PARAM_FM].getValue();
-			knobTimbre = params[PARAM_TIMBRE].getValue();
-			knobModulation = params[PARAM_MODULATION].getValue();
-			knobColor = params[PARAM_COLOR].getValue();
-			knobCoarse = params[PARAM_COARSE].getValue();
-			knobFine = params[PARAM_FINE].getValue();
-
-			memset(modulatedAttacks, knobAttack, sizeof(uint8_t) * channelCount);
-			memset(modulatedDecays, knobDecay, sizeof(uint8_t) * channelCount);
 
 			// Handle model light.
 			lights[LIGHT_MODEL].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
