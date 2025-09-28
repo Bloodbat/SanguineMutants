@@ -778,15 +778,19 @@ struct ContextusWidget : SanguineModuleWidget {
 		FramebufferWidget* nodiFramebuffer = new FramebufferWidget();
 		addChild(nodiFramebuffer);
 
+		SanguineLedDisplayRounded* ledDisplay =
+			new SanguineLedDisplayRounded(20.894f, 22.308, 33.759, 7.753, 2.724f);
+		nodiFramebuffer->addChild(ledDisplay);
+
 		const float lightXBase = 6.894f;
 		const float lightXDelta = 4.0f;
 
 		const int offset = 8;
 		float currentX = lightXBase;
 		for (int component = 0; component < 8; ++component) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 20.308),
+			addChild(createLightCentered<SmallSimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 20.308),
 				module, Contextus::LIGHT_CHANNEL_MODEL + component * 3));
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308),
+			addChild(createLightCentered<SmallSimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 24.308),
 				module, Contextus::LIGHT_CHANNEL_MODEL + ((component + offset) * 3)));
 			currentX += lightXDelta;
 		}

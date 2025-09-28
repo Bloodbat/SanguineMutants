@@ -185,6 +185,8 @@ without the backticks.
 
 - Nebulae family: improve lights response.
 
+- Nodi family: use a more discrete and modern LED window for channel LEDs.
+
 - Temulenti: better tooltips and Range menu entry for Two Bumps mode.
 
 - Vimina: produce slightly longer triggers.
