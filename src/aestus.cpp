@@ -205,6 +205,27 @@ struct Aestus : SanguineModule {
 			tides::GeneratorSample samples[PORT_MAX_CHANNELS];
 			float unipolarFlags[PORT_MAX_CHANNELS];
 
+			bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
+
+			bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+
+			if (stMode.process(params[PARAM_MODE].getValue())) {
+				selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+			}
+
+			if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
+				selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+			}
+
+			channelModes.fill(selectedMode);
+			channelRanges.fill(selectedRange);
+
+			knobFrequency = params[PARAM_FREQUENCY].getValue();
+			knobFm = params[PARAM_FM].getValue();
+			knobShape = params[PARAM_SHAPE].getValue();
+			knobSlope = params[PARAM_SLOPE].getValue();
+			knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
+
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (lastModes[channel] != channelModes[channel]) {
 					generators[channel].set_mode(channelModes[channel]);
@@ -311,27 +332,6 @@ struct Aestus : SanguineModule {
 
 			if (bIsLightsTurn) {
 				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
-
-				bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
-
-				bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
-
-				if (stMode.process(params[PARAM_MODE].getValue())) {
-					selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-				}
-
-				if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
-					selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-				}
-
-				channelModes.fill(selectedMode);
-				channelRanges.fill(selectedRange);
-
-				knobFrequency = params[PARAM_FREQUENCY].getValue();
-				knobFm = params[PARAM_FM].getValue();
-				knobShape = params[PARAM_SHAPE].getValue();
-				knobSlope = params[PARAM_SLOPE].getValue();
-				knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
 
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 					channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
