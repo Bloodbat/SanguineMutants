@@ -147,6 +147,8 @@ struct Temulenti : SanguineModule {
 	std::array<bumps::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
 	std::array<bumps::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
 
+	std::array<bumps::Generator::FeatureMode, PORT_MAX_CHANNELS> channelModels;
+
 	bumps::Generator generators[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
@@ -216,6 +218,31 @@ struct Temulenti : SanguineModule {
 
 		bumps::GeneratorSample samples[PORT_MAX_CHANNELS];
 		float unipolarFlags[PORT_MAX_CHANNELS];
+
+		bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+
+		if (stMode.process(params[PARAM_MODE].getValue())) {
+			selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+		}
+
+		if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
+			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+		}
+
+		knobFrequency = params[PARAM_FREQUENCY].getValue();
+		knobFm = params[PARAM_FM].getValue();
+		knobQuantizer = params[PARAM_QUANTIZER].getValue();
+		knobShape = params[PARAM_SHAPE].getValue();
+		knobSlope = params[PARAM_SLOPE].getValue();
+		knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
+
+		channelModes.fill(selectedMode);
+		channelRanges.fill(selectedRange);
+		quantizers.fill(static_cast<uint8_t>(knobQuantizer));
+
+		selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
+
+		channelModels.fill(selectedFeatureMode);
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			if (lastModes[channel] != channelModes[channel]) {
@@ -352,32 +379,6 @@ struct Temulenti : SanguineModule {
 
 		if (lightsDivider.process()) {
 			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
-
-			bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
-
-			if (stMode.process(params[PARAM_MODE].getValue())) {
-				selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-			}
-
-			if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
-				selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-			}
-
-			knobFrequency = params[PARAM_FREQUENCY].getValue();
-			knobFm = params[PARAM_FM].getValue();
-			knobQuantizer = params[PARAM_QUANTIZER].getValue();
-			knobShape = params[PARAM_SHAPE].getValue();
-			knobSlope = params[PARAM_SLOPE].getValue();
-			knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
-
-			channelModes.fill(selectedMode);
-			channelRanges.fill(selectedRange);
-			quantizers.fill(static_cast<uint8_t>(knobQuantizer));
-
-			selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
-
-			std::array<bumps::Generator::FeatureMode, PORT_MAX_CHANNELS> channelModels;
-			channelModels.fill(selectedFeatureMode);
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				if (channel < channelCount) {
