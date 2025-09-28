@@ -313,6 +313,27 @@ struct Etesia : SanguineModule {
 			srcInputs.process(drbInputBuffers.startData(), &inputLength, convertedFrames, &outputLength);
 			drbInputBuffers.startIncr(inputLength);
 
+			stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
+			bWantLoFi = params[PARAM_HI_FI].getValue() < 1.f;
+
+			bFrozen = params[PARAM_FREEZE].getValue() >= 1.f;
+			bReversed = params[PARAM_REVERSE].getValue() >= 1.f;
+
+			knobValues[0] = params[PARAM_BLEND].getValue();
+			knobValues[1] = params[PARAM_SPREAD].getValue();
+			knobValues[2] = params[PARAM_FEEDBACK].getValue();
+			knobValues[3] = params[PARAM_REVERB].getValue();
+
+			sliderValues[0] = params[PARAM_POSITION].getValue();
+			sliderValues[1] = params[PARAM_DENSITY].getValue();
+			sliderValues[2] = params[PARAM_SIZE].getValue();
+			sliderValues[3] = params[PARAM_TEXTURE].getValue();
+
+			paramPitch = params[PARAM_PITCH].getValue();
+
+			knobInputGain = params[PARAM_IN_GAIN].getValue();
+			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
+
 			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[etesia::kMaxBlockSize];
 
 			for (int channel = 0; channel < channelCount; ++channel) {
@@ -470,27 +491,6 @@ struct Etesia : SanguineModule {
 		// Lights.
 		if (lightsDivider.process()) { // Expensive, so call this infrequently!
 			const float sampleTime = args.sampleTime * jitteredLightsFrequency;
-
-			stereoChannels = static_cast<int>(params[PARAM_STEREO].getValue()) + 1;
-			bWantLoFi = params[PARAM_HI_FI].getValue() < 1.f;
-
-			bFrozen = params[PARAM_FREEZE].getValue() >= 1.f;
-			bReversed = params[PARAM_REVERSE].getValue() >= 1.f;
-
-			knobValues[0] = params[PARAM_BLEND].getValue();
-			knobValues[1] = params[PARAM_SPREAD].getValue();
-			knobValues[2] = params[PARAM_FEEDBACK].getValue();
-			knobValues[3] = params[PARAM_REVERB].getValue();
-
-			sliderValues[0] = params[PARAM_POSITION].getValue();
-			sliderValues[1] = params[PARAM_DENSITY].getValue();
-			sliderValues[2] = params[PARAM_SIZE].getValue();
-			sliderValues[3] = params[PARAM_TEXTURE].getValue();
-
-			paramPitch = params[PARAM_PITCH].getValue();
-
-			knobInputGain = params[PARAM_IN_GAIN].getValue();
-			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
 
 			if (btLedsMode.process(params[PARAM_LEDS_MODE].getValue())) {
 				ledMode = cloudyCommon::LedModes((ledMode + 1) % cloudyCommon::LED_MODES_LAST);
