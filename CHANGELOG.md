@@ -57,6 +57,8 @@ without the backticks.
 
 - Nebulae family: OLED display text tweaks.
 
+- Nodi family: use a more discrete and modern LED window for channel LEDs.
+
 ## Removals
 
 - Anuli: Note polyphony display.
