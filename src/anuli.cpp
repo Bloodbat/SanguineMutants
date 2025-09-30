@@ -334,7 +334,7 @@ struct Anuli : SanguineModule {
 					outVoltagesEven[3] = outputFrames.samples[currentSample + 7];
 
 					outVoltagesOdd = simd::clamp(outVoltagesOdd, -1.f, 1.f);
-					outVoltagesEven = simd::clamp(outVoltagesOdd, -1.f, 1.f);
+					outVoltagesEven = simd::clamp(outVoltagesEven, -1.f, 1.f);
 
 					outVoltagesOdd *= 5.f;
 					outVoltagesEven *= 5.f;
