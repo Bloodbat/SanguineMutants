@@ -631,6 +631,14 @@ struct AnuliWidget : SanguineModuleWidget {
 		FramebufferWidget* anuliFramebuffer = new FramebufferWidget();
 		addChild(anuliFramebuffer);
 
+		SanguineLedDisplayRounded* ledDisplay1 =
+			new SanguineLedDisplayRounded(37.007f, 14.973f, 29.073f, 2.54f, 3.248f);
+		anuliFramebuffer->addChild(ledDisplay1);
+
+		SanguineLedDisplayRounded* ledDisplay2 =
+			new SanguineLedDisplayRounded(69.71f, 14.973f, 29.073f, 2.54f, 3.248f);
+		anuliFramebuffer->addChild(ledDisplay2);
+
 		const float xDelta = 3.71f;
 		const int lightIdOffset = 8;
 
@@ -638,9 +646,9 @@ struct AnuliWidget : SanguineModuleWidget {
 		float currentXB = 56.725f;
 
 		for (int component = 0; component < 8; ++component) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXA, 14.973),
+			addChild(createLightCentered<SmallSimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXA, 14.973),
 				module, Anuli::LIGHT_RESONATOR + component * 3));
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXB, 14.973),
+			addChild(createLightCentered<SmallSimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentXB, 14.973),
 				module, Anuli::LIGHT_RESONATOR + ((component + lightIdOffset) * 3)));
 			currentXA += xDelta;
 			currentXB += xDelta;
