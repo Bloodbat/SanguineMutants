@@ -88,6 +88,8 @@
 
 - Aestus family: turn off Range button LED when PLL/Sync mode is enabled.
 
+- Anuli: use a more discrete and modern LED window for channel LEDs.
+
 - Apices family: display knob values as percentages.
 
 - Apices family expanders: display trimpot values as percentages.
