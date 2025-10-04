@@ -48,6 +48,8 @@
 
 - Aestus family: turn off Range button LED when PLL/Sync mode is enabled.
 
+- Anuli: use a more discrete and modern LED window for channel LEDs.
+
 - Nebulae family: OLED display text tweaks.
 
 ## Removals
