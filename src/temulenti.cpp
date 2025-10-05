@@ -640,6 +640,10 @@ struct TemulentiWidget : SanguineModuleWidget {
 			displayModel->values.displayText = &module->displayModel;
 		}
 
+		SanguineLedDisplayRounded* ledDisplay =
+			new SanguineLedDisplayRounded(41.062f, 17.302f, 16.082f, 4.15f, 1.78f);
+		temulentiFrameBuffer->addChild(ledDisplay);
+
 		const float kFirstRowY = 16.307f;
 		const float kSecondRowY = 18.297f;
 		const float kDeltaX = 1.993;
@@ -649,9 +653,9 @@ struct TemulentiWidget : SanguineModuleWidget {
 		const int kLightOffset = 8;
 
 		for (int light = 0; light < kLightOffset; ++light) {
-			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kFirstRowY),
+			addChild(createLightCentered<TinySimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kFirstRowY),
 				module, Temulenti::LIGHT_CHANNEL_1 + light * 3));
-			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kSecondRowY),
+			addChild(createLightCentered<TinySimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kSecondRowY),
 				module, Temulenti::LIGHT_CHANNEL_1 + (light + kLightOffset) * 3));
 			currentX += kDeltaX;
 		}

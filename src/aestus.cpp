@@ -587,6 +587,10 @@ struct AestusWidget : SanguineModuleWidget {
 			displayModel->values.displayText = &module->displayModel;
 		}
 
+		SanguineLedDisplayRounded* ledDisplay =
+			new SanguineLedDisplayRounded(44.919f, 17.302f, 21.777f, 5.883f, 2.524f);
+		aestusFrameBuffer->addChild(ledDisplay);
+
 		const float kFirstRowY = 15.972f;
 		const float kSecondRowY = 18.632f;
 		const float kDeltaX = 2.656f;
@@ -596,9 +600,9 @@ struct AestusWidget : SanguineModuleWidget {
 		const int kLightOffset = 8;
 
 		for (int light = 0; light < kLightOffset; ++light) {
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kFirstRowY),
+			addChild(createLightCentered<SmallSimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kFirstRowY),
 				module, Aestus::LIGHT_CHANNEL_1 + light * 3));
-			addChild(createLightCentered<SmallLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kSecondRowY),
+			addChild(createLightCentered<SmallSimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, kSecondRowY),
 				module, Aestus::LIGHT_CHANNEL_1 + (light + kLightOffset) * 3));
 			currentX += kDeltaX;
 		}
