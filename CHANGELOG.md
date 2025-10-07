@@ -59,6 +59,8 @@ without the backticks.
 
 - Funes: Model input bananut color from purple to black.
 
+- Funes: use a more discrete and modern LED window for channel LEDs.
+
 - Nebulae family: OLED display text tweaks.
 
 - Nodi family: use a more discrete and modern LED window for channel LEDs.

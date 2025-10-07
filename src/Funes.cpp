@@ -711,6 +711,17 @@ struct FunesWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		FramebufferWidget* funesFramebuffer = new FramebufferWidget();
+		addChild(funesFramebuffer);
+
+		SanguineLedDisplayRounded* modelDisplay =
+			new SanguineLedDisplayRounded(53.122f, 13.696f, 41.329f, 4.999f, 6.392f);
+		funesFramebuffer->addChild(modelDisplay);
+
+		SanguineLedDisplayRounded* customDataDisplay =
+			new SanguineLedDisplayRounded(95.422f, 13.696f, 16.289f, 4.999f, 6.392f);
+		funesFramebuffer->addChild(customDataDisplay);
+
 		const float baseX = 33.9955f;
 
 		const float lightOffsetX = 5.f;
@@ -718,16 +729,15 @@ struct FunesWidget : SanguineModuleWidget {
 		float currentX = baseX;
 
 		for (int light = 0; light < 8; ++light) {
-			addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module,
+			addChild(createLight<MediumSimpleLight<GreenRedLight>>(millimetersToPixelsVec(currentX, 12.1653f), module,
 				Funes::LIGHT_MODEL + light * 2));
 			currentX += lightOffsetX;
 		}
 
-		addChild(createLight<MediumLight<GreenLight>>(millimetersToPixelsVec(89.0271, 12.1653), module, Funes::LIGHT_FACTORY_DATA));
-		addChild(createLight<MediumLight<GreenRedLight>>(millimetersToPixelsVec(98.7319, 12.1653), module, Funes::LIGHT_CUSTOM_DATA));
-
-		FramebufferWidget* funesFramebuffer = new FramebufferWidget();
-		addChild(funesFramebuffer);
+		addChild(createLight<MediumSimpleLight<GreenLight>>(millimetersToPixelsVec(89.0271, 12.1653), module,
+			Funes::LIGHT_FACTORY_DATA));
+		addChild(createLight<MediumSimpleLight<GreenRedLight>>(millimetersToPixelsVec(98.7319, 12.1653), module,
+			Funes::LIGHT_CUSTOM_DATA));
 
 		SanguineAlphaDisplay* alphaDisplay = new SanguineAlphaDisplay(8, module, 53.122, 32.314);
 		funesFramebuffer->addChild(alphaDisplay);
