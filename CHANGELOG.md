@@ -104,6 +104,8 @@
 
 - Funes: Model input bananut color from purple to black.
 
+- Funes: use a more discrete and modern LED window for channel LEDs.
+
 - Marmora: make Y divider tooltips easier on the eyes.
 
 - Nebulae family: better parameter and input tooltips.
