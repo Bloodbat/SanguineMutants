@@ -107,7 +107,7 @@ struct Mutuus : SanguineModule {
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 			memset(&modulators[channel], 0, sizeof(mutuus::MutuusModulator));
-			modulators[channel].Init(warpiescommon::kHardwareRate, reverbBuffers[channel]);
+			modulators[channel].Init(mutuus::kInternalOscillatorSampleRate, reverbBuffers[channel]);
 			parameters[channel] = modulators[channel].mutable_parameters();
 		}
 
@@ -225,7 +225,8 @@ struct Mutuus : SanguineModule {
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
-				parameters[channel]->note += log2f(warpiescommon::kHardwareRate * args.sampleTime) * 12.f;
+				parameters[channel]->note += log2f(mutuus::kInternalOscillatorSampleRate *
+					args.sampleTime) * 12.f;
 
 				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
