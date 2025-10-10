@@ -577,8 +577,8 @@ struct Anuli : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		srcInputs.setRates(static_cast<int>(e.sampleRate), anuli::kHardwareRate);
-		srcOutputs.setRates(anuli::kHardwareRate, static_cast<int>(e.sampleRate));
+		srcInputs.setRates(static_cast<int>(e.sampleRate), static_cast<int>(rings::kSampleRate));
+		srcOutputs.setRates(static_cast<int>(rings::kSampleRate), static_cast<int>(e.sampleRate));
 	}
 
 	void onAdd(const AddEvent& e) override {
