@@ -37,8 +37,7 @@
 #include "distortiones/distortiones_resources.h"
 
 namespace distortiones {
-
-  const float kInternalOscillatorSampleRate = 96000.0f;
+  static const float kInternalOscillatorSampleRate = 96000.0f;
 
   class Oscillator {
   public:
@@ -90,5 +89,4 @@ namespace distortiones {
     DISALLOW_COPY_AND_ASSIGN(Oscillator);
   };
 }  // namespace distortiones
-
 #endif  // DISTORTIONES_DSP_OSCILLATOR_H_
