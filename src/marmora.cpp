@@ -662,12 +662,11 @@ struct Marmora : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		float sampleRate = e.sampleRate;
 		memset(&tGenerator, 0, sizeof(marbles::TGenerator));
 		memset(&xyGenerator, 0, sizeof(marbles::XYGenerator));
 
-		tGenerator.Init(&randomStream, sampleRate);
-		xyGenerator.Init(&randomStream, sampleRate);
+		tGenerator.Init(&randomStream, e.sampleRate);
+		xyGenerator.Init(&randomStream, e.sampleRate);
 
 		// Set scales.
 		if (!bModuleAdded) {
