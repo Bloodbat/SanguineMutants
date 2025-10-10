@@ -67,7 +67,5 @@ namespace anuli {
         1.501f
     };
 
-    static const int kHardwareRate = 48000;
-
     static constexpr float kVoltPerOctave = 1.f / 12.f;
 }
