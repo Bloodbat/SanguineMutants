@@ -37,8 +37,7 @@
 #include "mutuus/mutuus_resources.h"
 
 namespace mutuus {
-
-  const float kInternalOscillatorSampleRate = 96000.0f;
+  static const float kInternalOscillatorSampleRate = 96000.0f;
 
   class Oscillator {
   public:
@@ -90,5 +89,4 @@ namespace mutuus {
     DISALLOW_COPY_AND_ASSIGN(Oscillator);
   };
 }  // namespace mutuus
-
 #endif  // MUTUUS_DSP_OSCILLATOR_H_
