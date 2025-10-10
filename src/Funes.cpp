@@ -217,7 +217,7 @@ struct Funes : SanguineModule {
 			// Calculate pitch for low cpu mode, if needed.
 			float pitch = params[PARAM_FREQUENCY].getValue();
 			if (bWantLowCpu) {
-				pitch += std::log2(funes::kHardwareRate * args.sampleTime);
+				pitch += std::log2(plaits::kSampleRate * args.sampleTime);
 			}
 
 			// Update patch
@@ -491,7 +491,7 @@ struct Funes : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		srcOutputs.setRates(funes::kHardwareRate, static_cast<int>(e.sampleRate));
+		srcOutputs.setRates(static_cast<int>(plaits::kSampleRate), static_cast<int>(e.sampleRate));
 	}
 
 	void onAdd(const AddEvent& e) override {
