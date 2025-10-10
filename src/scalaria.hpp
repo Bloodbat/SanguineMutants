@@ -19,6 +19,4 @@ namespace scalaria {
     { 0, 0, 255 },
     { 192, 0, 192 }
   };
-
-  static const float kHardwareRate = 96000.f;
 }
