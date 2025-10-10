@@ -111,7 +111,7 @@ struct Scalaria : SanguineModule {
 
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
             memset(&modulators[channel], 0, sizeof(scalaria::ScalariaModulator));
-            modulators[channel].Init(scalaria::kHardwareRate);
+            modulators[channel].Init(scalaria::kInternalOscillatorSampleRate);
             parameters[channel] = modulators[channel].mutableParameters();
         }
 
@@ -168,7 +168,8 @@ struct Scalaria : SanguineModule {
 
                 parameters[channel]->note = 60.f * f4KnobValues[0] + 12.f *
                     inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
-                parameters[channel]->note += log2f(scalaria::kHardwareRate * args.sampleTime) * 12.f;
+                parameters[channel]->note += log2f(scalaria::kInternalOscillatorSampleRate *
+                    args.sampleTime) * 12.f;
 
                 modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
             }
