@@ -37,8 +37,7 @@
 #include "scalaria/scalaria_resources.h"
 
 namespace scalaria {
-
-  const float kInternalOscillatorSampleRate = 96000.0f;
+  static const float kInternalOscillatorSampleRate = 96000.0f;
 
   class Oscillator {
   public:
@@ -86,7 +85,5 @@ namespace scalaria {
 
     DISALLOW_COPY_AND_ASSIGN(Oscillator);
   };
-
 }  // namespace scalaria
-
 #endif  // SCALARIA_DSP_OSCILLATOR_H_
