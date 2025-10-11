@@ -118,23 +118,83 @@ A port for MetaModule, courtesy of Eric Gao, is available!
 
 The modules available in the MetaModule port are the following:
 
-|                                                        |                                                  |                                                          |
-| :----------------------------------------------------: | :----------------------------------------------: | :------------------------------------------------------: |
-|       ![Aestus](meta_pics/aestus_metamodule.png)       |     ![Aleae](meta_pics/aleae_metamodule.png)     |         ![Anuli](meta_pics/anuli_metamodule.png)         |
-|                         Aestus                         |                      Aleae                       |                          Anuli                           |
-|       ![Apices](meta_pics/apices_metamodule.png)       |     ![Blank](meta_pics/blank_metamodule.png)     |     ![Contextus](meta_pics/contextus_metamodule.png)     |
-|                         Apices                         |                      Blank                       |                        Contextus                         |
-| ![Distortiones](meta_pics/distortiones_metamodule.png) |    ![Etesia](meta_pics/etesia_metamodule.png)    |    ![Explorator](meta_pics/explorator_metamodule.png)    |
-|                      Distortiones                      |                      Etesia                      |                        Explorator                        |
-|      ![Fluctus](meta_pics/fluctus_metamodule.png)      |     ![Funes](meta_pics/funes_metamodule.png)     | ![Incurvationes](meta_pics/incurvationes_metamodule.png) |
-|                        Fluctus                         |                      Funes                       |                      Incurvationes                       |
-|      ![Marmora](meta_pics/marmora_metamodule.png)      |   ![Mortuus](meta_pics/mortuus_metamodule.png)   |        ![Mutuus](meta_pics/mutuus_metamodule.png)        |
-|                        Marmora                         |                     Mortuus                      |                          Mutuus                          |
-|      ![Nebulae](meta_pics/nebulae_metamodule.png)      |      ![Nodi](meta_pics/nodi_metamodule.png)      |      ![Reticula](meta_pics/reticula_metamodule.png)      |
-|                        Nebulae                         |                       Nodi                       |                         Reticula                         |
-|     ![Scalaria](meta_pics/scalaria_metamodule.png)     | ![Temulenti](meta_pics/temulenti_metamodule.png) |      ![Velamina](meta_pics/velamina_metamodule.png)      |
-|                        Scalaria                        |                    Temulenti                     |                         Velamina                         |
-|       ![Vimina](meta_pics/vimina_metamodule.png)       |                                                  |                                                          |
-|                         Vimina                         |                                                  |                                                          |
+<table>
+<tr>
+<td align="center"><img src="meta_pics/aestus_metamodule.png"></td>
+<td align="center"><img src="meta_pics/aleae_metamodule.png"></td>
+<td align="center"><img src="meta_pics/anuli_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Aestus</td>
+<td align="center">Aleae</td>
+<td align="center">Anuli</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/apices_metamodule.png"></td>
+<td align="center"><img src="meta_pics/blank_metamodule.png"></td>
+<td align="center"><img src="meta_pics/contextus_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Apices</td>
+<td align="center">Sanguine Mutants Blank</td>
+<td align="center">Contextus</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/distortiones_metamodule.png"></td>
+<td align="center"><img src="meta_pics/etesia_metamodule.png"></td>
+<td align="center"><img src="meta_pics/explorator_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Distortiones</td>
+<td align="center">Etesia</td>
+<td align="center">Explorator</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/fluctus_metamodule.png"></td>
+<td align="center"><img src="meta_pics/funes_metamodule.png"></td>
+<td align="center"><img src="meta_pics/incurvationes_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Fluctus</td>
+<td align="center">Funes</td>
+<td align="center">Incurvationes</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/marmora_metamodule.png"></td>
+<td align="center"><img src="meta_pics/mortuus_metamodule.png"></td>
+<td align="center"><img src="meta_pics/mutuus_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Marmora</td>
+<td align="center">Mortuus</td>
+<td align="center">Mutuus</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/nebulae_metamodule.png"></td>
+<td align="center"><img src="meta_pics/nodi_metamodule.png"></td>
+<td align="center"><img src="meta_pics/reticula_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Nebulae</td>
+<td align="center">Nodi</td>
+<td align="center">Reticula</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/scalaria_metamodule.png"></td>
+<td align="center"><img src="meta_pics/temulenti_metamodule.png"></td>
+<td align="center"><img src="meta_pics/velamina_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Scalaria</td>
+<td align="center">Temulenti</td>
+<td align="center">Velamina</td>
+</tr>
+<tr>
+<td align="center"><img src="meta_pics/vimina_metamodule.png"></td>
+</tr>
+<tr>
+<td align="center">Vimina</td>
+</tr>
+</table>
 
 Keep in mind we're not in charge of building or releasing the MetaModule plugin; so available modules and their faceplates may be out of sync with those presented here.
