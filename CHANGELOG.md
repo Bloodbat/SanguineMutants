@@ -63,6 +63,8 @@ without the backticks.
 
 - Nebulae family: OLED display text tweaks.
 
+- Nebulae family: use a more discrete and modern LED window for channel LEDs.
+
 - Nodi family: use a more discrete and modern LED window for channel LEDs.
 
 ## Removals

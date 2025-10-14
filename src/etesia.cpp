@@ -750,10 +750,18 @@ struct EtesiaWidget : SanguineModuleWidget {
 		FramebufferWidget* etesiaFramebuffer = new FramebufferWidget();
 		addChild(etesiaFramebuffer);
 
-		addChild(createLightCentered<MediumLight<GreenLight>>(millimetersToPixelsVec(68.374, 13.96), module, Etesia::LIGHT_BLEND));
-		addChild(createLightCentered<MediumLight<GreenLight>>(millimetersToPixelsVec(79.578, 13.96), module, Etesia::LIGHT_SPREAD));
-		addChild(createLightCentered<MediumLight<YellowLight>>(millimetersToPixelsVec(90.781, 13.96), module, Etesia::LIGHT_FEEDBACK));
-		addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(101.985, 13.96), module, Etesia::LIGHT_REVERB));
+		SanguineLedDisplayRounded* vuDisplay =
+			new SanguineLedDisplayRounded(85.18f, 13.96f, 38.346f, 4.5f, 5.754f);
+		etesiaFramebuffer->addChild(vuDisplay);
+
+		addChild(createLightCentered<MediumSimpleLight<GreenLight>>(millimetersToPixelsVec(68.374, 13.96), module,
+			Etesia::LIGHT_BLEND));
+		addChild(createLightCentered<MediumSimpleLight<GreenLight>>(millimetersToPixelsVec(79.578, 13.96), module,
+			Etesia::LIGHT_SPREAD));
+		addChild(createLightCentered<MediumSimpleLight<YellowLight>>(millimetersToPixelsVec(90.781, 13.96), module,
+			Etesia::LIGHT_FEEDBACK));
+		addChild(createLightCentered<MediumSimpleLight<RedLight>>(millimetersToPixelsVec(101.985, 13.96), module,
+			Etesia::LIGHT_REVERB));
 
 		addParam(createParamCentered<TL1105>(millimetersToPixelsVec(111.383, 13.96), module, Etesia::PARAM_LEDS_MODE));
 
@@ -781,12 +789,16 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(29.904, 35.987), module, Etesia::INPUT_REVERSE));
 
+		SanguineLedDisplayRounded* channelDisplay =
+			new SanguineLedDisplayRounded(85.18f, 35.318f, 35.664f, 1.82f, 1.563f);
+		etesiaFramebuffer->addChild(channelDisplay);
+
 		const float xDelta = 2.241f;
 
 		float currentX = 68.374;
 
 		for (int light = 0; light < PORT_MAX_CHANNELS; ++light) {
-			addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 35.318), module,
+			addChild(createLightCentered<TinySimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(currentX, 35.318), module,
 				Etesia::LIGHT_CHANNEL_1 + light * 3));
 			currentX += xDelta;
 		}
