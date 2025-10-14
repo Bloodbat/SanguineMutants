@@ -114,6 +114,8 @@
 
 - Nebulae family: improve lights response.
 
+- Nebulae family: use a more discrete and modern LED window for channel LEDs.
+
 - Nodi family: use a more discrete and modern LED window for channel LEDs.
 
 - Temulenti: better tooltips and Range menu entry for Two Bumps mode.
