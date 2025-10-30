@@ -77,12 +77,6 @@ namespace funes {
       "Alternate 2 (Joe McMullen)"
   };
 
-  enum CustomDataStates {
-    DataNotAvailable,
-    DataFactory,
-    DataCustom
-  };
-
   enum SuboscillatorModes {
     SUBOSCILLATOR_OFF,
     SUBOSCILLATOR_SQUARE,
