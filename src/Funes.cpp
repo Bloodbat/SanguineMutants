@@ -416,7 +416,7 @@ struct Funes : SanguineModule {
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
 			lights[LIGHT_CUSTOM_DATA].setBrightness(((bCanUseCustomData & bHasCustomData) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
-			lights[LIGHT_CUSTOM_DATA + 1].setBrightness(((bCanUseCustomData & bHasCustomData) |
+			lights[LIGHT_CUSTOM_DATA + 1].setBrightness((bCanUseCustomData &
 				(errorTimeOut > 0)) * kSanguineButtonLightValue);
 
 			if (errorTimeOut != 0) {
