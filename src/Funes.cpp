@@ -128,7 +128,7 @@ struct Funes : SanguineModule {
 
 	dsp::ClockDivider lightsDivider;
 
-	funes::CustomDataStates customDataStates[plaits::kMaxEngines] = {};
+	int customDataState = 0;
 
 	Funes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -180,8 +180,6 @@ struct Funes : SanguineModule {
 		}
 
 		octaveQuantizer.Init(9, 0.01f, false);
-
-		resetCustomDataStates();
 
 		init();
 	}
@@ -410,11 +408,15 @@ struct Funes : SanguineModule {
 
 			frequencyMode = params[PARAM_FREQ_MODE].getValue();
 
-			lights[LIGHT_FACTORY_DATA].setBrightness(((customDataStates[patch.engine] == funes::DataFactory) &
+			bool bCanUseCustomData = ((patch.engine >= 2) & (patch.engine <= 5)) | (patch.engine == 13);
+
+			bool bHasCustomData = customDataState == patch.engine;
+
+			lights[LIGHT_FACTORY_DATA].setBrightness(((bCanUseCustomData & !bHasCustomData) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
-			lights[LIGHT_CUSTOM_DATA].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) &
+			lights[LIGHT_CUSTOM_DATA].setBrightness(((bCanUseCustomData & bHasCustomData) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
-			lights[LIGHT_CUSTOM_DATA + 1].setBrightness(((customDataStates[patch.engine] == funes::DataCustom) |
+			lights[LIGHT_CUSTOM_DATA + 1].setBrightness(((bCanUseCustomData & bHasCustomData) |
 				(errorTimeOut > 0)) * kSanguineButtonLightValue);
 
 			if (errorTimeOut != 0) {
@@ -545,8 +547,7 @@ struct Funes : SanguineModule {
 						voices[channel].ReloadUserData();
 					}
 
-					resetCustomDataStates();
-					customDataStates[userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 1] - ' '] = funes::DataCustom;
+					customDataState = userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
 				}
 			}
 		}
@@ -558,7 +559,7 @@ struct Funes : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				voices[channel].ReloadUserData();
 			}
-			resetCustomDataStates();
+			customDataState = 0;
 		}
 	}
 
@@ -582,20 +583,11 @@ struct Funes : SanguineModule {
 					voices[channel].ReloadUserData();
 				}
 				// Only 1 engine can use custom data at a time.
-				resetCustomDataStates();
-				customDataStates[patch.engine] = funes::DataCustom;
+				customDataState = patch.engine;
 			} else {
 				errorTimeOut = 4;
 			}
 		}
-	}
-
-	void resetCustomDataStates() {
-		customDataStates[2] = funes::DataFactory;
-		customDataStates[3] = funes::DataFactory;
-		customDataStates[4] = funes::DataFactory;
-		customDataStates[5] = funes::DataFactory;
-		customDataStates[13] = funes::DataFactory;
 	}
 
 	void showCustomDataLoadDialog() {
