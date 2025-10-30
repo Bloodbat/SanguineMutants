@@ -585,7 +585,8 @@ struct Funes : SanguineModule {
 				// Only 1 engine can use custom data at a time.
 				customDataState = patch.engine;
 			} else {
-				errorTimeOut = 4;
+				errorTimeOut = static_cast<int>((APP->engine->getSampleRate() * 2) /
+					static_cast<float>(kLightsFrequency));
 			}
 		}
 	}
