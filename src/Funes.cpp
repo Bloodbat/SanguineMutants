@@ -406,7 +406,7 @@ struct Funes : SanguineModule {
 
 			frequencyMode = params[PARAM_FREQ_MODE].getValue();
 
-			bool bCanUseCustomData = ((patch.engine >= 2) & (patch.engine <= 5)) | (patch.engine == 13);
+			bool bCanUseCustomData = isEngineCustomizable();
 
 			bool bHasCustomData = customDataState == patch.engine;
 
@@ -688,6 +688,10 @@ struct Funes : SanguineModule {
 		bWantHoldModulations = !bWantHoldModulations;
 		params[PARAM_HOLD_MODULATIONS].setValue(static_cast<float>(bWantHoldModulations));
 	}
+
+	bool isEngineCustomizable() {
+		return ((patch.engine >= 2) & (patch.engine <= 5)) | (patch.engine == 13);
+	}
 };
 
 struct FunesWidget : SanguineModuleWidget {
@@ -891,9 +895,7 @@ struct FunesWidget : SanguineModuleWidget {
 
 		menu->addChild(createSubmenuItem("Custom data", "",
 			[=](Menu* menu) {
-
-				int engineNum = module->patch.engine;
-				if (engineNum == 2 || engineNum == 3 || engineNum == 4 || engineNum == 5 || engineNum == 13) {
+				if (module->isEngineCustomizable()) {
 					menu->addChild(createMenuItem("Load...", "", [=]() {
 						module->showCustomDataLoadDialog();
 						}));
