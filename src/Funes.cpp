@@ -390,7 +390,7 @@ struct Funes : SanguineModule {
 				auxVoltages *= 5.f;
 
 				outputs[OUTPUT_OUT].setVoltageSimd(outVoltages, channel);
-				outputs[OUTPUT_AUX].setVoltageSimd(auxVoltages * 5.f, channel);
+				outputs[OUTPUT_AUX].setVoltageSimd(auxVoltages, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
