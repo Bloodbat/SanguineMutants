@@ -86,8 +86,6 @@ struct FunesMk2 : SanguineModule {
 
     static const int kLightsFrequency = 16;
 
-    static const int kMaxUserDataSize = 4096;
-
     int jitteredLightsFrequency;
 
     int frequencyMode = funes::FM_FULL;
