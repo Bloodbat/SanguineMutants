@@ -491,7 +491,7 @@ struct FunesMk2 : SanguineModule {
 
             bool bHasCustomData = customDataStates[displayChannel] == activeEngine;
 
-            lights[LIGHT_FACTORY_DATA].setBrightness(((bCanUseCustomData & !bHasCustomData) &
+            lights[LIGHT_FACTORY_DATA].setBrightness(((bCanUseCustomData & (!bHasCustomData)) &
                 (errorTimeOut == 0)) * kSanguineButtonLightValue);
             lights[LIGHT_CUSTOM_DATA].setBrightness(((bCanUseCustomData & bHasCustomData) &
                 (errorTimeOut == 0)) * kSanguineButtonLightValue);
