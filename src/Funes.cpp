@@ -412,7 +412,7 @@ struct Funes : SanguineModule {
 
 			bool bHasCustomData = customDataState == patch.engine;
 
-			lights[LIGHT_FACTORY_DATA].setBrightness(((bCanUseCustomData & !bHasCustomData) &
+			lights[LIGHT_FACTORY_DATA].setBrightness(((bCanUseCustomData & (!bHasCustomData)) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
 			lights[LIGHT_CUSTOM_DATA].setBrightness(((bCanUseCustomData & bHasCustomData) &
 				(errorTimeOut == 0)) * kSanguineButtonLightValue);
