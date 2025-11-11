@@ -1,7 +1,11 @@
 #pragma once
 
 #include <rack.hpp>
+#ifndef USING_CARDINAL_NOT_RACK
 #include "themes.hpp"
+#else
+#include "../SanguineModulesCommon/src/themes.hpp"
+#endif
 
 using namespace rack;
 
