@@ -82,7 +82,7 @@ struct Mortuus : SanguineModule {
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = {};
 	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = {};
 
-	deadman::Processors processors[apicesCommon::kChannelCount] = {};
+	deadman::Processors processors[apicesCommon::kChannelCount];
 
 	int16_t output[apicesCommon::kBlockSize] = {};
 	int16_t brightness[apicesCommon::kChannelCount] = {};
