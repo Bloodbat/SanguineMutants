@@ -577,8 +577,8 @@ struct ReticulaWidget : SanguineModuleWidget {
         setModule(module);
 
         moduleName = "reticula";
-        panelSize = SIZE_16;
-        backplateColor = PLATE_PURPLE;
+        panelSize = sanguineThemes::SIZE_16;
+        backplateColor = sanguineThemes::PLATE_PURPLE;
 
         makePanel();
 
