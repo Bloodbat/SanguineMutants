@@ -4,7 +4,8 @@
 #ifndef USING_CARDINAL_NOT_RACK
 #include "themes.hpp"
 #else
-#include "../../SanguineModulesCommon/src/themes.hpp"
+#define CARDINALMUTANTS
+#include "../SanguineModulesCommon/src/themes.hpp"
 #endif
 
 using namespace rack;
@@ -41,3 +42,7 @@ extern Model* modelScalaria;
 extern Model* modelNix;
 extern Model* modelAnsa;
 #endif
+
+inline void getMutantsDefaultTheme() {
+   sanguineThemes::getDefaultSanguineTheme();
+}
