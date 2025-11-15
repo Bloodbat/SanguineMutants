@@ -818,8 +818,8 @@ struct FunesMk2Widget : SanguineModuleWidget {
         setModule(module);
 
         moduleName = "funesmk2";
-        panelSize = SIZE_17;
-        backplateColor = PLATE_PURPLE;
+        panelSize = sanguineThemes::SIZE_17;
+        backplateColor = sanguineThemes::PLATE_PURPLE;
 
         makePanel();
 
