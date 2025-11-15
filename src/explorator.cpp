@@ -452,8 +452,8 @@ struct ExploratorWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "explorator";
-		panelSize = SIZE_10;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_10;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 

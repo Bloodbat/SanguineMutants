@@ -973,8 +973,8 @@ struct ApicesWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "apices";
-		panelSize = SIZE_22;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_22;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 

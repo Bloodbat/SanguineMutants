@@ -533,8 +533,8 @@ struct ViminaWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "vimina";
-		panelSize = SIZE_6;
-		backplateColor = PLATE_RED;
+		panelSize = sanguineThemes::SIZE_6;
+		backplateColor = sanguineThemes::PLATE_RED;
 
 		makePanel();
 

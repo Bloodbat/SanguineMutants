@@ -353,8 +353,8 @@ struct ScalariaWidget : SanguineModuleWidget {
         setModule(module);
 
         moduleName = "scalaria";
-        panelSize = SIZE_9;
-        backplateColor = PLATE_PURPLE;
+        panelSize = sanguineThemes::SIZE_9;
+        backplateColor = sanguineThemes::PLATE_PURPLE;
 
         makePanel();
 

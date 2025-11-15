@@ -326,8 +326,8 @@ struct MutuusWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "mutuus";
-		panelSize = SIZE_10;
-		backplateColor = PLATE_GREEN;
+		panelSize = sanguineThemes::SIZE_10;
+		backplateColor = sanguineThemes::PLATE_GREEN;
 
 		makePanel();
 

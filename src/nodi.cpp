@@ -673,8 +673,8 @@ struct NodiWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "nodi";
-		panelSize = SIZE_28;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_28;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 

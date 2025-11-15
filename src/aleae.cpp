@@ -193,8 +193,8 @@ struct AleaeWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "aleae";
-		panelSize = SIZE_6;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_6;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 

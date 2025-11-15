@@ -40,8 +40,8 @@ struct NixWidget : SanguineModuleWidget {
         setModule(module);
 
         moduleName = "nix";
-        panelSize = SIZE_9;
-        backplateColor = PLATE_PURPLE;
+        panelSize = sanguineThemes::SIZE_9;
+        backplateColor = sanguineThemes::PLATE_PURPLE;
 
         makePanel();
 

@@ -576,8 +576,8 @@ struct FluctusWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "fluctus";
-		panelSize = SIZE_27;
-		backplateColor = PLATE_GREEN;
+		panelSize = sanguineThemes::SIZE_27;
+		backplateColor = sanguineThemes::PLATE_GREEN;
 
 		makePanel();
 

@@ -40,8 +40,8 @@ struct AnsaWidget : SanguineModuleWidget {
         setModule(module);
 
         moduleName = "ansa";
-        panelSize = SIZE_9;
-        backplateColor = PLATE_RED;
+        panelSize = sanguineThemes::SIZE_9;
+        backplateColor = sanguineThemes::PLATE_RED;
 
         makePanel();
 

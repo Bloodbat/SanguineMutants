@@ -339,8 +339,8 @@ struct AestusWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "aestus";
-		panelSize = SIZE_14;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_14;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 

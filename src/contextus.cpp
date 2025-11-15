@@ -658,8 +658,8 @@ struct ContextusWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "contextus";
-		panelSize = SIZE_28;
-		backplateColor = PLATE_RED;
+		panelSize = sanguineThemes::SIZE_28;
+		backplateColor = sanguineThemes::PLATE_RED;
 
 		makePanel();
 

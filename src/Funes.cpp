@@ -1,4 +1,4 @@
-#include "plugin.hpp"
+﻿#include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 #include "sanguinechannels.hpp"
@@ -642,8 +642,8 @@ struct FunesWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "funes";
-		panelSize = SIZE_27;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_27;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 

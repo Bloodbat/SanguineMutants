@@ -310,8 +310,8 @@ struct DistortionesWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "distortiones";
-		panelSize = SIZE_10;
-		backplateColor = PLATE_RED;
+		panelSize = sanguineThemes::SIZE_10;
+		backplateColor = sanguineThemes::PLATE_RED;
 
 		makePanel();
 

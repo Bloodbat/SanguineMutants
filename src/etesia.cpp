@@ -585,8 +585,8 @@ struct EtesiaWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "etesia";
-		panelSize = SIZE_27;
-		backplateColor = PLATE_RED;
+		panelSize = sanguineThemes::SIZE_27;
+		backplateColor = sanguineThemes::PLATE_RED;
 
 		makePanel();
 

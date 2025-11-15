@@ -362,8 +362,8 @@ struct TemulentiWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "temulenti";
-		panelSize = SIZE_14;
-		backplateColor = PLATE_RED;
+		panelSize = sanguineThemes::SIZE_14;
+		backplateColor = sanguineThemes::PLATE_RED;
 
 		makePanel();
 

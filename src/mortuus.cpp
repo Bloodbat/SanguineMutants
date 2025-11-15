@@ -1003,8 +1003,8 @@ struct MortuusWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "mortuus";
-		panelSize = SIZE_22;
-		backplateColor = PLATE_RED;
+		panelSize = sanguineThemes::SIZE_22;
+		backplateColor = sanguineThemes::PLATE_RED;
 
 		makePanel();
 

@@ -496,8 +496,8 @@ struct AnuliWidget : SanguineModuleWidget {
 		setModule(module);
 
 		moduleName = "anuli";
-		panelSize = SIZE_21;
-		backplateColor = PLATE_PURPLE;
+		panelSize = sanguineThemes::SIZE_21;
+		backplateColor = sanguineThemes::PLATE_PURPLE;
 
 		makePanel();
 
