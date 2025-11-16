@@ -6,6 +6,8 @@
 
 #include "peakiesconsts.hpp"
 
+using namespace sanguineCommonCode;
+
 struct Ansa : SanguineModule {
 
     enum ParamIds {

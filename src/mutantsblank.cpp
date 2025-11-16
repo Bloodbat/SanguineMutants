@@ -2,6 +2,8 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinehelpers.hpp"
 
+using namespace sanguineCommonCode;
+
 struct MutantsBlank : SanguineModule {
 
 };

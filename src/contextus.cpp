@@ -16,7 +16,6 @@
 
 #include "contextus.hpp"
 
-
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Contextus : SanguineModule {

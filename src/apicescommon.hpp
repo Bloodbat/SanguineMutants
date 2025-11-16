@@ -2,6 +2,8 @@
 
 #include "peakiesconsts.hpp"
 
+using namespace sanguineCommonCode;
+
 namespace apicesCommon {
     enum SwitchIndexes {
         SWITCH_TWIN_MODE,

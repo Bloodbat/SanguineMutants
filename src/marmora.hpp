@@ -2,6 +2,8 @@
 
 #include "sanguinecomponents.hpp"
 
+using namespace sanguineCommonCode;
+
 namespace marmora {
     enum DejaVuLockModes {
         DEJA_VU_LOCK_ON,

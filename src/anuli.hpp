@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace sanguineCommonCode;
+
 namespace anuli {
     static const std::vector<std::string> modeLabels = {
         "Modal Reso.",

@@ -11,6 +11,8 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
+using namespace sanguineCommonCode;
+
 struct Distortiones : SanguineModule {
 	static const int kModeCount = 9;
 

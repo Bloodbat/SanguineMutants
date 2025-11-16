@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace sanguineCommonCode;
+
 namespace cloudyCommon {
 	struct ParasiteModeDisplay {
 		std::string labelFreeze;

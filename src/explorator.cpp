@@ -11,6 +11,8 @@
 
 using simd::float_4;
 
+using namespace sanguineCommonCode;
+
 namespace explorator {
 	static const std::vector<std::string> noiseModeLabels{
 		"White noise (High CPU)",

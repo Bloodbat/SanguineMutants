@@ -6,6 +6,8 @@
 
 #include "aleae.hpp"
 
+using namespace sanguineCommonCode;
+
 struct Aleae : SanguineModule {
 	enum ParamIds {
 		PARAM_THRESHOLD_1,

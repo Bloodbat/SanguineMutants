@@ -15,6 +15,8 @@
 
 #include "Funes.hpp"
 
+using namespace sanguineCommonCode;
+
 struct Funes : SanguineModule {
 	enum ParamIds {
 		PARAM_MODEL,

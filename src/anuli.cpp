@@ -14,6 +14,8 @@
 
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
+using namespace sanguineCommonCode;
+
 struct Anuli : SanguineModule {
 	enum ParamIds {
 		PARAM_FREQUENCY,

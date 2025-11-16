@@ -6,6 +6,8 @@
 
 #include "peakiesconsts.hpp"
 
+using namespace sanguineCommonCode;
+
 struct Nix : SanguineModule {
 
     enum ParamIds {

@@ -5,6 +5,8 @@
 #include "sanguinejson.hpp"
 #include "vimina.hpp"
 
+using namespace sanguineCommonCode;
+
 struct Vimina : SanguineModule {
 	enum ParamIds {
 		PARAM_FACTOR_1,

@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace sanguineCommonCode;
+
 namespace aestusCommon {
 	static const std::vector<std::string> modeMenuLabels = {
 		"AD Envelope",

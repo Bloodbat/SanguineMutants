@@ -2,7 +2,10 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinedsp.hpp"
 #include "sanguinehelpers.hpp"
+
 using simd::float_4;
+
+using namespace sanguineCommonCode;
 
 const float_4 SaturatorFloat_4::limit = 10.f;
 

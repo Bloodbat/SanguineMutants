@@ -9,6 +9,8 @@
 #include "aestuscommon.hpp"
 #include "aestus.hpp"
 
+using namespace sanguineCommonCode;
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Aestus : SanguineModule {

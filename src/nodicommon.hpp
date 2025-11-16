@@ -3,6 +3,8 @@
 #include "plugin.hpp"
 #include "sanguinecomponents.hpp"
 
+using namespace sanguineCommonCode;
+
 namespace nodiCommon {
 	static const std::vector<uint16_t> bitReductionMasks = {
 		0xc000,
