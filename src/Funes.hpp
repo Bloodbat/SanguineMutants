@@ -1,4 +1,7 @@
 #pragma once
+
+using namespace sanguineCommonCode;
+
 namespace funes {
   static const char CUSTOM_DATA_FILENAME_FILTERS[] = "BIN (*.bin):bin, BIN";
   static std::string customDataDir;
