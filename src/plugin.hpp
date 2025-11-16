@@ -43,6 +43,8 @@ extern Model* modelNix;
 extern Model* modelAnsa;
 #endif
 
+#ifdef USING_CARDINAL_NOT_RACK
 inline void getMutantsDefaultTheme() {
    sanguineThemes::getDefaultSanguineTheme();
 }
+#endif
