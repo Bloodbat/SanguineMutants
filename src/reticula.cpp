@@ -7,6 +7,8 @@
 #include "grids/reticula_pattern_generator.hpp"
 #include "reticula.hpp"
 
+using namespace sanguineCommonCode;
+
 struct Reticula : SanguineModule {
     enum ParamIds {
         PARAM_CLOCK,
