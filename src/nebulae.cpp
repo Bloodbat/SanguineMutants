@@ -812,8 +812,8 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.427), module, Nebulae::PARAM_REVERB));
 
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.677, 116.972), module, Nebulae::INPUT_LEFT));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.529, 116.972), module, Nebulae::INPUT_RIGHT));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.887, 116.972), module, Nebulae::INPUT_LEFT));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.739, 116.972), module, Nebulae::INPUT_RIGHT));
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(33.873, 117.002), module, Nebulae::INPUT_IN_GAIN));
 
@@ -823,8 +823,8 @@ struct NebulaeWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(103.25, 117.002), module, Nebulae::INPUT_OUT_GAIN));
 
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(115.161, 116.972), module, Nebulae::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(129.013, 116.972), module, Nebulae::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(115.371, 116.972), module, Nebulae::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(129.223, 116.972), module, Nebulae::OUTPUT_RIGHT));
 
 
 #ifndef METAMODULE

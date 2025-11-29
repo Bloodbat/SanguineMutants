@@ -193,6 +193,8 @@ without the backticks.
 
 - Nebulae family: use a more discrete and modern LED window for channel LEDs.
 
+- Nebulae family: tweak I/O ports positions.
+
 - Nodi family: use a more discrete and modern LED window for channel LEDs.
 
 - Temulenti: better tooltips and Range menu entry for Two Bumps mode.
