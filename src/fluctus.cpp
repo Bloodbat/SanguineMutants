@@ -842,8 +842,8 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PYellow>(millimetersToPixelsVec(125.214, 96.427), module, Fluctus::PARAM_REVERB));
 
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.677, 116.972), module, Fluctus::INPUT_LEFT));
-		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.529, 116.972), module, Fluctus::INPUT_RIGHT));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(7.887, 116.972), module, Fluctus::INPUT_LEFT));
+		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(21.739, 116.972), module, Fluctus::INPUT_RIGHT));
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(33.873, 117.002), module, Fluctus::INPUT_IN_GAIN));
 
@@ -853,8 +853,8 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(103.25, 117.002), module, Fluctus::INPUT_OUT_GAIN));
 
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(115.161, 116.972), module, Fluctus::OUTPUT_LEFT));
-		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(129.013, 116.972), module, Fluctus::OUTPUT_RIGHT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(115.371, 116.972), module, Fluctus::OUTPUT_LEFT));
+		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(129.223, 116.972), module, Fluctus::OUTPUT_RIGHT));
 
 
 #ifndef METAMODULE
