@@ -128,7 +128,6 @@ struct FunesMk2 : SanguineModule {
     bool bHaveInputLpgDecay = false;
     bool bHaveInputChordBank = false;
     bool bHaveInputAuxSuboscillator = false;
-    bool bHaveInputHoldModulations = false;
 
     bool holdModulations[PORT_MAX_CHANNELS] = {};
 
@@ -585,8 +584,6 @@ struct FunesMk2 : SanguineModule {
             case INPUT_AUX_SUBOSCILLATOR:
                 bHaveInputAuxSuboscillator = e.connecting;
                 break;
-            case INPUT_HOLD_MODULATIONS:
-                bHaveInputHoldModulations = e.connecting;
             default:
                 break;
             }
