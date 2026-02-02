@@ -229,7 +229,7 @@ struct FunesMk2 : SanguineModule {
 
         int individualChannel;
         bool bIsSubOscillatorOctave;
-        float_4 inputVoltages;
+        float_4 inputVoltages[PORT_MAX_CHANNELS];
 
         // Calculate pitch for low cpu mode, if needed.
         float pitch = knobFrequency;
@@ -245,7 +245,7 @@ struct FunesMk2 : SanguineModule {
             float_4 lpgColorVoltages[4];
             float_4 lpgDecayVoltages[4];
 
-            float_4 chordBankVoltages;
+            float_4 chordBankVoltages[4];
 
             for (int channel = 0; channel < channelCount; channel += 4) {
                 currentChannel = channel >> 2;
@@ -256,14 +256,14 @@ struct FunesMk2 : SanguineModule {
                     chordBanks[channel + 2] = selectedChordBank;
                     chordBanks[channel + 3] = selectedChordBank;
                 } else {
-                    chordBankVoltages = inputs[INPUT_CHORD_BANK].getVoltageSimd<float_4>(channel);
-                    chordBankVoltages = simd::round(chordBankVoltages);
-                    chordBankVoltages = simd::clamp(chordBankVoltages, 0.f, 2.f);
+                    chordBankVoltages[currentChannel] = inputs[INPUT_CHORD_BANK].getVoltageSimd<float_4>(channel);
+                    chordBankVoltages[currentChannel] = simd::round(chordBankVoltages[currentChannel]);
+                    chordBankVoltages[currentChannel] = simd::clamp(chordBankVoltages[currentChannel], 0.f, 2.f);
 
-                    chordBanks[channel] = static_cast<uint8_t>(chordBankVoltages[0]);
-                    chordBanks[channel + 1] = static_cast<uint8_t>(chordBankVoltages[1]);
-                    chordBanks[channel + 2] = static_cast<uint8_t>(chordBankVoltages[2]);
-                    chordBanks[channel + 3] = static_cast<uint8_t>(chordBankVoltages[3]);
+                    chordBanks[channel] = static_cast<uint8_t>(chordBankVoltages[currentChannel][0]);
+                    chordBanks[channel + 1] = static_cast<uint8_t>(chordBankVoltages[currentChannel][1]);
+                    chordBanks[channel + 2] = static_cast<uint8_t>(chordBankVoltages[currentChannel][2]);
+                    chordBanks[channel + 3] = static_cast<uint8_t>(chordBankVoltages[currentChannel][3]);
                 }
 
                 if (!bHaveInputAuxSuboscillator) {
@@ -364,29 +364,29 @@ struct FunesMk2 : SanguineModule {
                 patches[channel].wantHoldModulations = holdModulations[channel];
 
                 // Render output buffer for each channel.
-                inputVoltages[0] = inputs[INPUT_MODEL].getVoltage(channel);
-                inputVoltages[1] = inputs[INPUT_HARMONICS].getVoltage(channel);
-                inputVoltages[2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
+                inputVoltages[channel][0] = inputs[INPUT_MODEL].getVoltage(channel);
+                inputVoltages[channel][1] = inputs[INPUT_HARMONICS].getVoltage(channel);
+                inputVoltages[channel][2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
 
-                inputVoltages /= 5.f;
+                inputVoltages[channel] /= 5.f;
 
                 // Construct modulations.
                 if (!bNotesModelSelection) {
-                    modulations[channel].engine = inputVoltages[0];
+                    modulations[channel].engine = inputVoltages[channel][0];
                 }
 
-                modulations[channel].harmonics = inputVoltages[1] * attenHarmonics;
-                modulations[channel].auxCrossfade = inputVoltages[2];
+                modulations[channel].harmonics = inputVoltages[channel][1] * attenHarmonics;
+                modulations[channel].auxCrossfade = inputVoltages[channel][2];
 
                 inputVoltages[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
                 inputVoltages[1] = inputs[INPUT_MORPH].getVoltage(channel);
                 inputVoltages[2] = inputs[INPUT_LEVEL].getVoltage(channel);
 
-                inputVoltages /= 8.f;
+                inputVoltages[channel] /= 8.f;
 
-                modulations[channel].timbre = inputVoltages[0];
-                modulations[channel].morph = inputVoltages[1];
-                modulations[channel].level = inputVoltages[2];
+                modulations[channel].timbre = inputVoltages[channel][0];
+                modulations[channel].morph = inputVoltages[channel][1];
+                modulations[channel].level = inputVoltages[channel][2];
 
                 modulations[channel].note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
                 modulations[channel].frequency = inputs[INPUT_FREQUENCY].getVoltage(channel) * 6.f;
