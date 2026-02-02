@@ -504,8 +504,8 @@ struct FunesMk2 : SanguineModule {
                 }
             }
 
-            bool bEngineHasChords = (patches[displayChannel].engine == 6) |
-                (patches[displayChannel].engine == 7) | (patches[displayChannel].engine == 14);
+            bool bEngineHasChords = (voices[displayChannel].active_engine() == 6) |
+                (voices[displayChannel].active_engine() == 7) | (voices[displayChannel].active_engine() == 14);
 
             lights[LIGHT_CHORD_BANK].setBrightness((bEngineHasChords & ((chordBanks[displayChannel] == 0) |
                 (chordBanks[displayChannel] == 2))) * kSanguineButtonLightValue);
