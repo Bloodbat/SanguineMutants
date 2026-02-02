@@ -95,10 +95,9 @@ struct FunesMk2 : SanguineModule {
     int channelCount = 0;
     int errorTimeOut = 0;
 
-    int selectedChordBank = 0;
-
     int knobModel = 8;
 
+    uint8_t selectedChordBank = 0;
     uint8_t chordBanks[PORT_MAX_CHANNELS] = {};
 
     funes::SuboscillatorModes suboscillatorModes[PORT_MAX_CHANNELS] = {};
