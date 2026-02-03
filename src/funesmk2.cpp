@@ -18,6 +18,8 @@
 #include "Funes.hpp"
 #include "funesmk2.hpp"
 
+using simd::float_4;
+
 struct FunesMk2 : SanguineModule {
     enum ParamIds {
         PARAM_MODEL,
@@ -138,6 +140,17 @@ struct FunesMk2 : SanguineModule {
 
     float selectedSubOscillator = 0.f;
 
+    float_4 inputVoltages[PORT_MAX_CHANNELS];
+
+    float_4 auxSubOscillators[4];
+
+    float_4 selectedModels[4];
+
+    float_4 lpgColorVoltages[4];
+    float_4 lpgDecayVoltages[4];
+
+    float_4 chordBankVoltages[4];
+
     FunesMk2() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -193,8 +206,6 @@ struct FunesMk2 : SanguineModule {
     }
 
     void process(const ProcessArgs& args) override {
-        using simd::float_4;
-
         channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(),
             inputs[INPUT_TRIGGER].getChannels()), 1);
 
@@ -228,7 +239,6 @@ struct FunesMk2 : SanguineModule {
 
         int individualChannel;
         bool bIsSubOscillatorOctave;
-        float_4 inputVoltages[PORT_MAX_CHANNELS];
 
         // Calculate pitch for low cpu mode, if needed.
         float pitch = knobFrequency;
@@ -237,15 +247,6 @@ struct FunesMk2 : SanguineModule {
         }
 
         if (drbOutputBuffers.empty()) {
-            float_4 auxSubOscillators[4];
-
-            float_4 selectedModels[4];
-
-            float_4 lpgColorVoltages[4];
-            float_4 lpgDecayVoltages[4];
-
-            float_4 chordBankVoltages[4];
-
             for (int channel = 0; channel < channelCount; channel += 4) {
                 currentChannel = channel >> 2;
 
