@@ -431,6 +431,76 @@ struct AcrylicChannel16 : SanguineShapedAcrylicLed<RedGreenBlueLight> {
 };
 #endif
 
+#ifdef METAMODULE
+struct ScalariaChannelsDisplay : SanguineLedDisplayRounded {
+    using sanguineCommonCode::SanguineLedDisplayRounded::SanguineLedDisplayRounded;
+
+    void drawLayer(const DrawArgs& args, int layer) override {
+        if (layer == 1) {
+            static const std::vector<float> positionsX = {
+                mm2px(37.955 - 37.27),
+                mm2px(37.956 - 37.27),
+                mm2px(37.937 - 37.27),
+                mm2px(37.973 - 37.27),
+                mm2px(37.958 - 37.27),
+                mm2px(37.955 - 37.27),
+                mm2px(37.958 - 37.27),
+                mm2px(38.384 - 37.27),
+                mm2px(38.375 - 37.27),
+                mm2px(38.386 - 37.27),
+                mm2px(38.384 - 37.27),
+                mm2px(38.398 - 37.27),
+                mm2px(38.353 - 37.27),
+                mm2px(38.399 - 37.27),
+                mm2px(38.391 - 37.27),
+                mm2px(38.424 - 37.27)
+            };
+
+            static const std::vector<float> positionsY = {
+                mm2px(25.358 - 24.177),
+                mm2px(28.353 - 24.177),
+                mm2px(31.363 - 24.177),
+                mm2px(34.346 - 24.177),
+                mm2px(37.37 - 24.177),
+                mm2px(40.364 - 24.177),
+                mm2px(43.358 - 24.177),
+                mm2px(46.358 - 24.177),
+                mm2px(49.358 - 24.177),
+                mm2px(52.372 - 24.177),
+                mm2px(55.358 - 24.177),
+                mm2px(58.36 - 24.177),
+                mm2px(61.363 - 24.177),
+                mm2px(64.346 - 24.177),
+                mm2px(67.37 - 24.177),
+                mm2px(70.364 - 24.177)
+            };
+
+            static const std::vector<std::string> channelLabels = {
+                "16", "15", "14", "13", "12", "11", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1"
+            };
+
+            std::string fontPath = asset::system("res/fonts/Nunito-Bold.ttf");
+            std::shared_ptr<Font> font = APP->window->loadFont(fontPath);
+            if (!font)
+                return;
+
+            nvgSave(args.vg);
+            nvgFontFaceId(args.vg, font->handle);
+            nvgFontSize(args.vg, 11);
+            nvgTextLetterSpacing(args.vg, 0.0);
+            nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+            nvgFillColor(args.vg, nvgRGB(221, 218, 214));
+
+            for (int i = 0; i < PORT_MAX_CHANNELS; i++) {
+                nvgText(args.vg, positionsX[i], positionsY[i], channelLabels[i].c_str(), NULL);
+            }
+            nvgRestore(args.vg);
+        }
+        SanguineLedDisplayRounded::drawLayer(args, layer);
+    }
+};
+#endif
+
 struct ScalariaWidget : SanguineModuleWidget {
     explicit ScalariaWidget(Scalaria* module) {
         setModule(module);
@@ -530,10 +600,17 @@ struct ScalariaWidget : SanguineModuleWidget {
 
         addChild(createLightCentered<TinyLight<GreenLight>>(millimetersToPixelsVec(17.061, 93.944), module, Scalaria::LIGHT_CHANNEL_1_LEVEL));
 
+        FramebufferWidget* scalariaFramebuffer = new FramebufferWidget();
+        addChild(scalariaFramebuffer);
+
+        ScalariaChannelsDisplay* ledDisplay =
+            new ScalariaChannelsDisplay(37.27f, 24.177f, 5.0f, 48.5f, 2.58f, false);
+        scalariaFramebuffer->addChild(ledDisplay);
+
         int lightY = 70.927;
 
         for (int light = 0; light < PORT_MAX_CHANNELS; ++light) {
-            addChild(createLightCentered<TinyLight<RedGreenBlueLight>>(millimetersToPixelsVec(40.759, lightY),
+            addChild(createLightCentered<TinySimpleLight<RedGreenBlueLight>>(millimetersToPixelsVec(40.759, lightY),
                 module, Scalaria::LIGHT_CHANNEL_1 + light * 3));
             ++lightY;
         }
