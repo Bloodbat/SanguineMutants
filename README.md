@@ -56,9 +56,13 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
 - ### Funes
 
-  A powerful, polyphonic macro oscillator Based on MI's Plaits. It exposes every control and can access the 1.2 firmware modes.
+  A powerful, polyphonic macro oscillator Based on MI's Plaits. It exposes every control and can access the 1.2 firmware modes, including loading and using custom data for certain Models.
 
-  An editor for some of the new firmware modes is available! You can find it [here](https://bloodbat.github.io/Funes-Editors/)
+  A simple custom data editor is available! You can find it [here](https://bloodbat.github.io/Funes-Editors/)
+
+- ### Funes Mk2
+
+  A remixed version of Funes, based on MI's Plaits, with the ability to control more polyphonic parameters using CV, without compromising any of the power of the original Funes module, presented in a smaller form factor.
 
 - ### Incurvationes
 
