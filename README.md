@@ -65,6 +65,10 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
   A simple custom data editor is available! You can find it [here](https://bloodbat.github.io/Funes-Editors/)
 
+- ### Funes Mk2
+
+  A remixed version of Funes, based on MI's Plaits, with the ability to control more polyphonic parameters using CV, without compromising any of the power of the original Funes module, presented in a smaller form factor.
+
 - ### Incurvationes
 
   A fully polyphonic meta-modulator based on MI's Warps it has proper knob lights colors and access to the frequency shifter "Easter egg".
