@@ -156,47 +156,49 @@ The modules available in the MetaModule port are the following:
 <tr>
 <td align="center"><img src="meta_pics/fluctus_metamodule.png"></td>
 <td align="center"><img src="meta_pics/funes_metamodule.png"></td>
-<td align="center"><img src="meta_pics/incurvationes_metamodule.png"></td>
+<td align="center"><img src="meta_pics/funesmk2_metamodule.png"></td>
 </tr>
 <tr>
 <td align="center">Fluctus</td>
 <td align="center">Funes</td>
-<td align="center">Incurvationes</td>
+<td align="center">Funes Mk2</td>
 </tr>
 <tr>
+<td align="center"><img src="meta_pics/incurvationes_metamodule.png"></td>
 <td align="center"><img src="meta_pics/marmora_metamodule.png"></td>
 <td align="center"><img src="meta_pics/mortuus_metamodule.png"></td>
-<td align="center"><img src="meta_pics/mutuus_metamodule.png"></td>
 </tr>
 <tr>
+<td align="center">Incurvationes</td>
 <td align="center">Marmora</td>
 <td align="center">Mortuus</td>
-<td align="center">Mutuus</td>
 </tr>
 <tr>
+<td align="center"><img src="meta_pics/mutuus_metamodule.png"></td>
 <td align="center"><img src="meta_pics/nebulae_metamodule.png"></td>
 <td align="center"><img src="meta_pics/nodi_metamodule.png"></td>
-<td align="center"><img src="meta_pics/reticula_metamodule.png"></td>
 </tr>
 <tr>
+<td align="center">Mutuus</td>
 <td align="center">Nebulae</td>
 <td align="center">Nodi</td>
-<td align="center">Reticula</td>
 </tr>
 <tr>
+<td align="center"><img src="meta_pics/reticula_metamodule.png"></td>
 <td align="center"><img src="meta_pics/scalaria_metamodule.png"></td>
 <td align="center"><img src="meta_pics/temulenti_metamodule.png"></td>
-<td align="center"><img src="meta_pics/velamina_metamodule.png"></td>
 </tr>
 <tr>
+<td align="center">Reticula</td>
 <td align="center">Scalaria</td>
 <td align="center">Temulenti</td>
-<td align="center">Velamina</td>
 </tr>
 <tr>
+<td align="center"><img src="meta_pics/velamina_metamodule.png"></td>
 <td align="center"><img src="meta_pics/vimina_metamodule.png"></td>
 </tr>
 <tr>
+<td align="center">Velamina</td>
 <td align="center">Vimina</td>
 </tr>
 </table>
