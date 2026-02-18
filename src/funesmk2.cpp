@@ -826,12 +826,12 @@ struct FunesMk2Widget : SanguineModuleWidget {
         addChild(funesFramebuffer);
 
         SanguineLedDisplayRounded* customDataDisplay =
-            new SanguineLedDisplayRounded(76.999f, 11.244f, 11.201f, 2.835f, 3.625f);
+            new SanguineLedDisplayRounded(76.999f, 12.677f, 11.201f, 2.835f, 3.625f);
         funesFramebuffer->addChild(customDataDisplay);
 
-        addChild(createLightCentered<SmallSimpleLight<GreenLight>>(millimetersToPixelsVec(72.947, 11.244),
+        addChild(createLightCentered<SmallSimpleLight<GreenLight>>(millimetersToPixelsVec(72.947, 12.677),
             module, FunesMk2::LIGHT_FACTORY_DATA));
-        addChild(createLightCentered<SmallSimpleLight<GreenRedLight>>(millimetersToPixelsVec(80.952, 11.244),
+        addChild(createLightCentered<SmallSimpleLight<GreenRedLight>>(millimetersToPixelsVec(80.952, 12.677),
             module, FunesMk2::LIGHT_CUSTOM_DATA));
 
         addInput(createInputCentered<BananutBlackPoly>(millimetersToPixelsVec(7.821, 26.029), module,
