@@ -224,30 +224,33 @@ struct Temulenti : SanguineModule {
 		bumps::GeneratorSample samples[PORT_MAX_CHANNELS];
 		float unipolarFlags[PORT_MAX_CHANNELS];
 
+		selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 		bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
-
-		if (stMode.process(params[PARAM_MODE].getValue())) {
-			selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-		}
-
-		if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
-			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-		}
-
+		knobQuantizer = params[PARAM_QUANTIZER].getValue();
 		knobFrequency = params[PARAM_FREQUENCY].getValue();
 		knobFm = params[PARAM_FM].getValue();
-		knobQuantizer = params[PARAM_QUANTIZER].getValue();
 		knobShape = params[PARAM_SHAPE].getValue();
 		knobSlope = params[PARAM_SLOPE].getValue();
 		knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
 
-		channelModes.fill(selectedMode);
-		channelRanges.fill(selectedRange);
-		quantizers.fill(static_cast<uint8_t>(knobQuantizer));
 
-		selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
+		if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
+			selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+			channelModes.fill(selectedMode);
+		}
 
-		channelModels.fill(selectedFeatureMode);
+		if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bHaveExternalSync) {
+			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+			channelRanges.fill(selectedRange);
+		}
+
+		if (!bModelConnected) {
+			channelModels.fill(selectedFeatureMode);
+		}
+
+		if (!bQuantizerConnected) {
+			quantizers.fill(static_cast<uint8_t>(knobQuantizer));
+		}
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			if (lastModes[channel] != channelModes[channel]) {
