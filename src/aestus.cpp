@@ -265,7 +265,7 @@ struct Aestus : SanguineModule {
 					pitch += knobFm * inputVoltages[0];
 					pitch += 60.f;
 					// Scale to the global sample rate.
-					pitch += log2SampleRate * 12.f;
+					pitch += log2SampleRate;
 					generators[channel].set_pitch(static_cast<int>(
 						clamp(pitch * 128.f, static_cast<float>(-32768), static_cast<float>(32767))));
 
@@ -551,6 +551,7 @@ struct Aestus : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		log2SampleRate = log2f(aestusCommon::kHardwareRate / e.sampleRate);
+		log2SampleRate *= 12.f;
 	}
 
 	void setModel(int modelNum) {
