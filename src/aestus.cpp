@@ -491,9 +491,15 @@ struct Aestus : SanguineModule {
 				break;
 			case INPUT_RANGE:
 				bRangeConnected = e.connecting;
+				if (!bRangeConnected) {
+					channelRanges.fill(selectedRange);
+				}
 				break;
 			case INPUT_MODE:
 				bModeConnected = e.connecting;
+				if (!bModeConnected) {
+					channelModes.fill(selectedMode);
+				}
 				break;
 			default:
 				break;
