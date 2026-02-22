@@ -412,7 +412,7 @@ struct Temulenti : SanguineModule {
 							channelModes[channel + 3] = static_cast<bumps::GeneratorMode>(selectorVoltages[3]);
 						}
 
-						if (bRangeConnected) {
+						if (!bHaveExternalSync && bRangeConnected) {
 							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
 							selectorVoltages = simd::round(selectorVoltages);
