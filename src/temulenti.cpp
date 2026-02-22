@@ -301,7 +301,7 @@ struct Temulenti : SanguineModule {
 				}
 
 				// Scale to the global sample rate.
-				pitch += log2SampleRate * 12.f * 128;
+				pitch += log2SampleRate;
 
 				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 					generators[channel].set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
@@ -602,6 +602,7 @@ struct Temulenti : SanguineModule {
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		log2SampleRate = log2f(aestusCommon::kHardwareRate / e.sampleRate);
+		log2SampleRate = log2SampleRate * 12.f * 128.f;
 	}
 
 	void onAdd(const AddEvent& e) override {
