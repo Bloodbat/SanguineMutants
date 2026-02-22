@@ -120,6 +120,7 @@ struct Aestus : SanguineModule {
 	bool bRangeConnected = false;
 
 	bool bHaveExternalSync = false;
+	bool bClockConnected = false;
 
 	size_t frames[PORT_MAX_CHANNELS];
 	static const int kLightsFrequency = 16;
@@ -210,7 +211,7 @@ struct Aestus : SanguineModule {
 
 			bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
 
-			bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+			bHaveExternalSync = ((!bSheepSelected) & (bClockConnected)) | (static_cast<int>(params[PARAM_SYNC].getValue()));
 
 			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
 				selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
@@ -500,6 +501,9 @@ struct Aestus : SanguineModule {
 				if (!bModeConnected) {
 					channelModes.fill(selectedMode);
 				}
+				break;
+			case INPUT_CLOCK:
+				bClockConnected = e.connecting;
 				break;
 			default:
 				break;
