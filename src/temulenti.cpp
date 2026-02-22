@@ -13,6 +13,10 @@
 #include "aestuscommon.hpp"
 #include "temulenti.hpp"
 
+using namespace sanguineCommonCode;
+
+using simd::float_4;
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Temulenti : SanguineModule {
@@ -164,6 +168,9 @@ struct Temulenti : SanguineModule {
 	float knobSlope = 0.f;
 	float knobSmoothness = 0.f;
 
+	float_4 inputVoltages;
+	float_4 selectorVoltages;
+
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
@@ -212,8 +219,6 @@ struct Temulenti : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		using simd::float_4;
-
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		bumps::GeneratorSample samples[PORT_MAX_CHANNELS];
@@ -263,9 +268,6 @@ struct Temulenti : SanguineModule {
 					generators[channel].set_sync(bHaveExternalSync);
 					lastExternalSyncs[channel] = bHaveExternalSync;
 				}
-
-				// Setup SIMD voltages.
-				float_4 inputVoltages;
 
 				inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
 				inputVoltages[1] = inputs[INPUT_SHAPE].getVoltage(channel);
@@ -383,54 +385,52 @@ struct Temulenti : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				if (channel < channelCount) {
 					if (channel % 4 == 0) {
-						float_4 inVoltages;
-
 						if (bModelConnected) {
-							inVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+							selectorVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
 
-							inVoltages = simd::round(inVoltages);
-							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+							selectorVoltages = simd::round(selectorVoltages);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
 
-							channelModels[channel] = static_cast<bumps::Generator::FeatureMode>(inVoltages[0]);
-							channelModels[channel + 1] = static_cast<bumps::Generator::FeatureMode>(inVoltages[1]);
-							channelModels[channel + 2] = static_cast<bumps::Generator::FeatureMode>(inVoltages[2]);
-							channelModels[channel + 3] = static_cast<bumps::Generator::FeatureMode>(inVoltages[3]);
+							channelModels[channel] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[0]);
+							channelModels[channel + 1] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[1]);
+							channelModels[channel + 2] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[2]);
+							channelModels[channel + 3] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[3]);
 						}
 
 						if (bModeConnected) {
-							inVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+							selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 
-							inVoltages = simd::round(inVoltages);
-							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+							selectorVoltages = simd::round(selectorVoltages);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
 
-							channelModes[channel] = static_cast<bumps::GeneratorMode>(inVoltages[0]);
-							channelModes[channel + 1] = static_cast<bumps::GeneratorMode>(inVoltages[1]);
-							channelModes[channel + 2] = static_cast<bumps::GeneratorMode>(inVoltages[2]);
-							channelModes[channel + 3] = static_cast<bumps::GeneratorMode>(inVoltages[3]);
+							channelModes[channel] = static_cast<bumps::GeneratorMode>(selectorVoltages[0]);
+							channelModes[channel + 1] = static_cast<bumps::GeneratorMode>(selectorVoltages[1]);
+							channelModes[channel + 2] = static_cast<bumps::GeneratorMode>(selectorVoltages[2]);
+							channelModes[channel + 3] = static_cast<bumps::GeneratorMode>(selectorVoltages[3]);
 						}
 
 						if (bRangeConnected) {
-							inVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
+							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
-							inVoltages = simd::round(inVoltages);
-							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+							selectorVoltages = simd::round(selectorVoltages);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
 
-							channelRanges[channel] = static_cast<bumps::GeneratorRange>(inVoltages[0]);
-							channelRanges[channel + 1] = static_cast<bumps::GeneratorRange>(inVoltages[1]);
-							channelRanges[channel + 2] = static_cast<bumps::GeneratorRange>(inVoltages[2]);
-							channelRanges[channel + 3] = static_cast<bumps::GeneratorRange>(inVoltages[3]);
+							channelRanges[channel] = static_cast<bumps::GeneratorRange>(selectorVoltages[0]);
+							channelRanges[channel + 1] = static_cast<bumps::GeneratorRange>(selectorVoltages[1]);
+							channelRanges[channel + 2] = static_cast<bumps::GeneratorRange>(selectorVoltages[2]);
+							channelRanges[channel + 3] = static_cast<bumps::GeneratorRange>(selectorVoltages[3]);
 						}
 
 						if (bQuantizerConnected) {
-							inVoltages = inputs[INPUT_QUANTIZER].getVoltageSimd<float_4>(channel);
+							selectorVoltages = inputs[INPUT_QUANTIZER].getVoltageSimd<float_4>(channel);
 
-							inVoltages = simd::round(inVoltages);
-							inVoltages = simd::clamp(inVoltages, 0.f, 7.f);
+							selectorVoltages = simd::round(selectorVoltages);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 7.f);
 
-							quantizers[channel] = static_cast<uint8_t>(inVoltages[0]);
-							quantizers[channel + 1] = static_cast<uint8_t>(inVoltages[1]);
-							quantizers[channel + 2] = static_cast<uint8_t>(inVoltages[2]);
-							quantizers[channel + 3] = static_cast<uint8_t>(inVoltages[3]);
+							quantizers[channel] = static_cast<uint8_t>(selectorVoltages[0]);
+							quantizers[channel + 1] = static_cast<uint8_t>(selectorVoltages[1]);
+							quantizers[channel + 2] = static_cast<uint8_t>(selectorVoltages[2]);
+							quantizers[channel + 3] = static_cast<uint8_t>(selectorVoltages[3]);
 						}
 					}
 
