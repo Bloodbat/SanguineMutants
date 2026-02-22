@@ -541,15 +541,27 @@ struct Temulenti : SanguineModule {
 			switch (e.portId) {
 			case INPUT_MODEL:
 				bModelConnected = e.connecting;
+				if (!bModelConnected) {
+					channelModels.fill(selectedFeatureMode);
+				}
 				break;
 			case INPUT_RANGE:
 				bRangeConnected = e.connecting;
+				if (!bRangeConnected) {
+					channelRanges.fill(selectedRange);
+				}
 				break;
 			case INPUT_MODE:
 				bModeConnected = e.connecting;
+				if (!bModeConnected) {
+					channelModes.fill(selectedMode);
+				}
 				break;
 			case INPUT_QUANTIZER:
 				bQuantizerConnected = e.connecting;
+				if (!bQuantizerConnected) {
+					quantizers.fill(static_cast<uint8_t>(knobQuantizer));
+				}
 				break;
 			default:
 				break;
