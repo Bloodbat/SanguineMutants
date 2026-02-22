@@ -15,6 +15,8 @@
 
 using namespace sanguineCommonCode;
 
+using simd::float_4;
+
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Aestus : SanguineModule {
@@ -149,6 +151,9 @@ struct Aestus : SanguineModule {
 	float knobSlope = 0.f;
 	float knobSmoothness = 0.f;
 
+	float_4 inputVoltages;
+	float_4 selectorVoltages;
+
 	Aestus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		configButton<ModeParam>(PARAM_MODE, aestusCommon::modelModeHeaders[0]);
@@ -195,8 +200,6 @@ struct Aestus : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		using simd::float_4;
-
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
 		bool bIsLightsTurn = lightsDivider.process();
@@ -247,9 +250,6 @@ struct Aestus : SanguineModule {
 						generators[channel].set_sync(bHaveExternalSync);
 						lastExternalSyncs[channel] = bHaveExternalSync;
 					}
-
-					// Setup SIMD voltages.
-					float_4 inputVoltages;
 
 					inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
 					inputVoltages[1] = inputs[INPUT_SHAPE].getVoltage(channel);
@@ -338,30 +338,28 @@ struct Aestus : SanguineModule {
 						(bModelConnected && inputs[INPUT_MODEL].getVoltage(channel) >= 1.f);
 
 					if (channel < channelCount && (channel % 4 == 0)) {
-						float_4 inVoltages;
-
 						if (bModeConnected) {
-							inVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+							selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 
-							inVoltages = simd::round(inVoltages);
-							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+							selectorVoltages = simd::round(selectorVoltages);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
 
-							channelModes[channel] = static_cast<tides::GeneratorMode>(inVoltages[0]);
-							channelModes[channel + 1] = static_cast<tides::GeneratorMode>(inVoltages[1]);
-							channelModes[channel + 2] = static_cast<tides::GeneratorMode>(inVoltages[2]);
-							channelModes[channel + 3] = static_cast<tides::GeneratorMode>(inVoltages[3]);
+							channelModes[channel] = static_cast<tides::GeneratorMode>(selectorVoltages[0]);
+							channelModes[channel + 1] = static_cast<tides::GeneratorMode>(selectorVoltages[1]);
+							channelModes[channel + 2] = static_cast<tides::GeneratorMode>(selectorVoltages[2]);
+							channelModes[channel + 3] = static_cast<tides::GeneratorMode>(selectorVoltages[3]);
 						}
 
 						if (bRangeConnected) {
-							inVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
+							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
-							inVoltages = simd::round(inVoltages);
-							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
+							selectorVoltages = simd::round(selectorVoltages);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
 
-							channelRanges[channel] = static_cast<tides::GeneratorRange>(inVoltages[0]);
-							channelRanges[channel + 1] = static_cast<tides::GeneratorRange>(inVoltages[1]);
-							channelRanges[channel + 2] = static_cast<tides::GeneratorRange>(inVoltages[2]);
-							channelRanges[channel + 3] = static_cast<tides::GeneratorRange>(inVoltages[3]);
+							channelRanges[channel] = static_cast<tides::GeneratorRange>(selectorVoltages[0]);
+							channelRanges[channel + 1] = static_cast<tides::GeneratorRange>(selectorVoltages[1]);
+							channelRanges[channel + 2] = static_cast<tides::GeneratorRange>(selectorVoltages[2]);
+							channelRanges[channel + 3] = static_cast<tides::GeneratorRange>(selectorVoltages[3]);
 						}
 					}
 
