@@ -410,7 +410,7 @@ struct Temulenti : SanguineModule {
 						}
 
 						if (bRangeConnected) {
-							inVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+							inVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
 							inVoltages = simd::round(inVoltages);
 							inVoltages = simd::clamp(inVoltages, 0.f, 3.f);
