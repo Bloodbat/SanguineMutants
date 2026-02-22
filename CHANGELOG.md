@@ -38,8 +38,6 @@
 
 - Plugin: performance tweaks.
 
-- Aestus: due to how polyphonic mode selection works, Sync mode must be enabled to clock the module externally even when the Tidal Modulator model is selected.
-
 - Aestus family: reorganize the faceplates to accommodate the polyphonic versions of the modules.
 
 - Aestus family: signal PLL/Sync mode by blinking the Sync button on and off instead of yellow/red (closer to what the hardware does).
