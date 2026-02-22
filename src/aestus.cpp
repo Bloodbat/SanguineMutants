@@ -212,16 +212,15 @@ struct Aestus : SanguineModule {
 
 			bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 
-			if (stMode.process(params[PARAM_MODE].getValue())) {
+			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
 				selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+				channelModes.fill(selectedMode);
 			}
 
-			if (stRange.process(params[PARAM_RANGE].getValue()) && !bHaveExternalSync) {
+			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bHaveExternalSync) {
 				selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+				channelRanges.fill(selectedRange);
 			}
-
-			channelModes.fill(selectedMode);
-			channelRanges.fill(selectedRange);
 
 			knobFrequency = params[PARAM_FREQUENCY].getValue();
 			knobFm = params[PARAM_FM].getValue();
