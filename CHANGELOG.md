@@ -11,6 +11,12 @@ without the backticks.
 
 # Next version
 
+## New Modules
+
+### Funes Mk2
+
+- A remixed version of Funes with a smaller HP footprint and more polyphonic control capabilities.
+
 ## Fixes
 
 - Nebulae family: proper tooltips on startup.
