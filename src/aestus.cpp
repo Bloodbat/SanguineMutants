@@ -104,7 +104,11 @@ struct Aestus : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
-			return aestusCommon::rangeMenuLabels[moduleAestus->generators[moduleAestus->displayChannel].range()];
+			if (!moduleAestus->bHaveExternalSync) {
+				return aestusCommon::rangeMenuLabels[moduleAestus->generators[moduleAestus->displayChannel].range()];
+			} else {
+				return aestusCommon::rangeMenuLabels[3];
+			}
 		}
 	};
 

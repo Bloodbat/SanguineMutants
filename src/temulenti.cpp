@@ -119,7 +119,11 @@ struct Temulenti : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-			return aestusCommon::rangeMenuLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].range()];
+			if (!moduleTemulenti->bHaveExternalSync) {
+				return aestusCommon::rangeMenuLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].range()];
+			} else {
+				return aestusCommon::rangeMenuLabels[3];
+			}
 		}
 	};
 
