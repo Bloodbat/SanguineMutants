@@ -14,6 +14,8 @@
 
 - Aestus family: modules are fully polyphonic.
 
+- Aestus family: signal the Range button and input are disabled when Clock Sync/PLL mode is enabled by blinking the button's LED yellow.
+
 - Anuli: polyphonic CV selection of FX for Disastrous Peace channels.
 
 - Funes: new chord banks from Lyle Mills' firmware.
