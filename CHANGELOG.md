@@ -160,6 +160,8 @@
 
 - Nebulae family: tweak I/O ports positions.
 
+- Nebulae family: slider LED lights reflect the actual parameter value the module is using instead of the input voltage.
+
 - Nodi family: use a more discrete and modern LED window for channel LEDs.
 
 - Temulenti: better tooltips and Range menu entry for Two Bumps mode.
