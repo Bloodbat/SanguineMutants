@@ -68,10 +68,10 @@ struct Etesia : SanguineModule {
 		LIGHT_SPREAD,
 		LIGHT_FEEDBACK,
 		LIGHT_REVERB,
-		ENUMS(LIGHT_POSITION_CV, 2),
-		ENUMS(LIGHT_DENSITY_CV, 2),
-		ENUMS(LIGHT_SIZE_CV, 2),
-		ENUMS(LIGHT_TEXTURE_CV, 2),
+		LIGHT_POSITION,
+		LIGHT_DENSITY,
+		LIGHT_SIZE,
+		LIGHT_TEXTURE,
 		LIGHT_HI_FI,
 		LIGHT_STEREO,
 		LIGHT_REVERSE,
@@ -639,17 +639,13 @@ struct Etesia : SanguineModule {
 
 			voltages1[displayChannel] = simd::rescale(voltages1[displayChannel], 0.f, 5.f, 0.f, 1.f);
 
-			lights[LIGHT_POSITION_CV].setBrightness(voltages1[displayChannel][0]);
-			lights[LIGHT_POSITION_CV + 1].setBrightness(-voltages1[displayChannel][0]);
+			lights[LIGHT_POSITION].setBrightness(etesiaParameters[displayChannel]->position);
 
-			lights[LIGHT_DENSITY_CV].setBrightness(voltages1[displayChannel][1]);
-			lights[LIGHT_DENSITY_CV + 1].setBrightness(-voltages1[displayChannel][1]);
+			lights[LIGHT_DENSITY].setBrightness(etesiaParameters[displayChannel]->density);
 
-			lights[LIGHT_SIZE_CV].setBrightness(voltages1[displayChannel][2]);
-			lights[LIGHT_SIZE_CV + 1].setBrightness(-voltages1[displayChannel][2]);
+			lights[LIGHT_SIZE].setBrightness(etesiaParameters[displayChannel]->size);
 
-			lights[LIGHT_TEXTURE_CV].setBrightness(voltages1[displayChannel][3]);
-			lights[LIGHT_TEXTURE_CV + 1].setBrightness(-voltages1[displayChannel][3]);
+			lights[LIGHT_TEXTURE].setBrightness(etesiaParameters[displayChannel]->texture);
 
 			lights[LIGHT_HI_FI].setBrightnessSmooth(params[PARAM_HI_FI].getValue() *
 				kSanguineButtonLightValue, sampleTime);
@@ -807,17 +803,17 @@ struct EtesiaWidget : SanguineModuleWidget {
 
 		addParam(createParamCentered<Sanguine1PRed>(millimetersToPixelsVec(105.638, 44.869), module, Etesia::PARAM_PITCH));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(11.763, 57.169),
-			module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION_CV));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(11.763, 57.169),
+			module, Etesia::PARAM_POSITION, Etesia::LIGHT_POSITION));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(29.722, 57.169),
-			module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY_CV));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(29.722, 57.169),
+			module, Etesia::PARAM_DENSITY, Etesia::LIGHT_DENSITY));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(47.682, 57.169),
-			module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(47.682, 57.169),
+			module, Etesia::PARAM_SIZE, Etesia::LIGHT_SIZE));
 
-		addParam(createLightParamCentered<VCVLightSlider<GreenRedLight>>(millimetersToPixelsVec(65.644, 57.169),
-			module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE_CV));
+		addParam(createLightParamCentered<VCVLightSlider<RedLight>>(millimetersToPixelsVec(65.644, 57.169),
+			module, Etesia::PARAM_TEXTURE, Etesia::LIGHT_TEXTURE));
 
 		addInput(createInputCentered<BananutPurplePoly>(millimetersToPixelsVec(86.118, 63.587), module, Etesia::INPUT_BLEND));
 
