@@ -404,7 +404,7 @@ struct Temulenti : SanguineModule {
 							selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 
 							selectorVoltages = simd::round(selectorVoltages);
-							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
 
 							channelModes[channel] = static_cast<bumps::GeneratorMode>(selectorVoltages[0]);
 							channelModes[channel + 1] = static_cast<bumps::GeneratorMode>(selectorVoltages[1]);
@@ -416,7 +416,7 @@ struct Temulenti : SanguineModule {
 							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
 							selectorVoltages = simd::round(selectorVoltages);
-							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
+							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
 
 							channelRanges[channel] = static_cast<bumps::GeneratorRange>(selectorVoltages[0]);
 							channelRanges[channel + 1] = static_cast<bumps::GeneratorRange>(selectorVoltages[1]);
