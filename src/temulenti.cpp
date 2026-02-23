@@ -593,10 +593,12 @@ struct Temulenti : SanguineModule {
 
 		if (getJsonInt(rootJ, "mode", intValue)) {
 			selectedMode = static_cast<bumps::GeneratorMode>(intValue);
+			channelModes.fill(selectedMode);
 		}
 
 		if (getJsonInt(rootJ, "range", intValue)) {
 			selectedRange = static_cast<bumps::GeneratorRange>(intValue);
+			channelRanges.fill(selectedRange);
 		}
 
 		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);

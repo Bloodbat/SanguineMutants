@@ -540,10 +540,12 @@ struct Aestus : SanguineModule {
 
 		if (getJsonInt(rootJ, "mode", intValue)) {
 			selectedMode = static_cast<tides::GeneratorMode>(intValue);
+			channelModes.fill(selectedMode);
 		}
 
 		if (getJsonInt(rootJ, "range", intValue)) {
 			selectedRange = static_cast<tides::GeneratorRange>(intValue);
+			channelRanges.fill(selectedRange);
 		}
 
 		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
