@@ -12,7 +12,8 @@ namespace aestusCommon {
 	static const std::vector<std::string> rangeMenuLabels = {
 		"High",
 		"Medium",
-		"Low"
+		"Low",
+		"Sync"
 	};
 
 	static const std::vector<std::string> sheepMenuLabels = {
