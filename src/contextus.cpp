@@ -332,9 +332,10 @@ struct Contextus : SanguineModule {
 				if (bHaveMetaCable) {
 					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
 						renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+					model = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 				}
 
-				settings[channel].shape = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+				settings[channel].shape = model;
 
 				// Setup oscillator from settings.
 				oscillators[channel].set_shape(renaissance::MacroOscillatorShape(settings[channel].shape));
