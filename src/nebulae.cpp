@@ -607,8 +607,6 @@ struct Nebulae : SanguineModule {
 				lastPlaybackMode = channelPlaybackMode;
 			}
 
-			voltages1[displayChannel] = simd::rescale(voltages1[displayChannel], 0.f, 5.f, 0.f, 1.f);
-
 			lights[LIGHT_POSITION].setBrightness(cloudsParameters[displayChannel]->position);
 
 			lights[LIGHT_DENSITY].setBrightness(cloudsParameters[displayChannel]->density);
