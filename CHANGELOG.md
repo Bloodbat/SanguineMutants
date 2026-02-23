@@ -2,6 +2,10 @@
 
 ## New Modules
 
+### Funes Mk2
+
+- A remixed version of Funes with a smaller HP footprint and more polyphonic control capabilities.
+
 ### Reticula
 
 - A topographic drum sequencer based on Mutable Instruments' Grids, with capabilities exclusive to Sanguine Mutants.
