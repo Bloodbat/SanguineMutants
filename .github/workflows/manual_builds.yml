@@ -12,7 +12,6 @@ defaults:
     shell: bash
 
 jobs:
-
   modify-plugin-version:
     name: Modify plugin version
     runs-on: ubuntu-latest

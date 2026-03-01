@@ -4,13 +4,13 @@ name: Build and Upload Sanguine Mutants Nightly
 on:
   workflow_dispatch:
   schedule:
-   # It's always night... somewhere
-   #        +--------- minute (0 - 59)
-   #        Â¦ +--------- hour (0 - 23)
-   #        Â¦ Â¦ +--------- day of the month (1 - 31)
-   #        Â¦ Â¦ Â¦ +--------- month (1 - 12 or JAN-DEC)
-   #        Â¦ Â¦ Â¦ Â¦ +--------- day of the week (0 - 6 or SUN-SAT)
-   - cron: '46 18 * * *'  # Every day at 18:46 UTC
+    # It's always night... somewhere
+    #        +--------------- minute (0 - 59)
+    #        ¦  +------------ hour (0 - 23)
+    #        ¦  ¦  +--------- day of the month (1 - 31)
+    #        ¦  ¦  ¦ +------- month (1 - 12 or JAN-DEC)
+    #        ¦  ¦  ¦ ¦ +----- day of the week (0 - 6 or SUN-SAT)
+    - cron: "46 18 * * *" # Every day at 18:46 UTC
 
 env:
   rack-sdk-version: 2.6.6
@@ -21,7 +21,6 @@ defaults:
     shell: bash
 
 jobs:
-
   modify-plugin-version:
     name: Modify plugin version
     runs-on: ubuntu-latest

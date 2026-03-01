@@ -12,7 +12,6 @@ defaults:
     shell: bash
 
 jobs:
-
   get-tag:
     name: Get latest tag from Main
     runs-on: ubuntu-latest
@@ -103,7 +102,7 @@ jobs:
     env:
       GIT_TAG: ${{ needs.get-tag.outputs.codetag }}
     runs-on: ubuntu-latest
-    needs:  [build, build-mac, get-tag]
+    needs: [build, build-mac, get-tag]
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
