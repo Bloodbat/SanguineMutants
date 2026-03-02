@@ -34,37 +34,37 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/noise/clocked_noise.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-class NoiseEngine : public Engine {
- public:
-  NoiseEngine() { }
-  ~NoiseEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+  class NoiseEngine : public Engine {
+  public:
+    NoiseEngine() {}
+    ~NoiseEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  ClockedNoise clocked_noise_[2];
-  stmlib::Svf lp_hp_filter_;
-  stmlib::Svf bp_filter_[2];
-  
-  float previous_f0_;
-  float previous_f1_;
-  float previous_q_;
-  float previous_mode_;
-  
-  float* temp_buffer_;
-  
-  DISALLOW_COPY_AND_ASSIGN(NoiseEngine);
-};
 
-}  // namespace plaits
+  private:
+    ClockedNoise clocked_noise_[2];
+    stmlib::Svf lp_hp_filter_;
+    stmlib::Svf bp_filter_[2];
+
+    float previous_f0_;
+    float previous_f1_;
+    float previous_q_;
+    float previous_mode_;
+
+    float* temp_buffer_;
+
+    DISALLOW_COPY_AND_ASSIGN(NoiseEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_NOISE_ENGINE_H_

@@ -33,7 +33,7 @@
 #include "stmlib/dsp/cosine_oscillator.h"
 #include "plaits/dsp/oscillator/sine_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -118,4 +118,4 @@ namespace plaits {
 
     harmonic_oscillator_[2].Render<1>(f0, &amplitudes_[24], aux, size);
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

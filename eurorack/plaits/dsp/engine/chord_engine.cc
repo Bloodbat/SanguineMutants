@@ -32,7 +32,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -149,4 +149,4 @@ namespace plaits {
       aux[i] *= 3.0f;
     }
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

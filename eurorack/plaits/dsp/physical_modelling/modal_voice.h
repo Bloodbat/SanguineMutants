@@ -35,15 +35,15 @@
 
 #include "plaits/dsp/physical_modelling/resonator.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-class ModalVoice {
- public:
-  ModalVoice() { }
-  ~ModalVoice() { }
-  
-  void Init();
-  void Render(
+  class ModalVoice {
+  public:
+    ModalVoice() {}
+    ~ModalVoice() {}
+
+    void Init();
+    void Render(
       bool sustain,
       bool trigger,
       float accent,
@@ -55,14 +55,14 @@ class ModalVoice {
       float* out,
       float* aux,
       size_t size);
-  
- private:
-  ResonatorSvf<1> excitation_filter_;
-  Resonator resonator_;
-  
-  DISALLOW_COPY_AND_ASSIGN(ModalVoice);
-};
 
-}  // namespace plaits
+  private:
+    ResonatorSvf<1> excitation_filter_;
+    Resonator resonator_;
+
+    DISALLOW_COPY_AND_ASSIGN(ModalVoice);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_PHYSICAL_MODELLING_MODAL_VOICE_H_

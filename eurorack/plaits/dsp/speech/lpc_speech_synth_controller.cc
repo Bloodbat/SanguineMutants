@@ -35,7 +35,7 @@
 
 #include "plaits/dsp/oscillator/oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -299,4 +299,4 @@ namespace plaits {
       *output++ = this_sample[1] * gain;
     }
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

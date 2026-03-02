@@ -33,7 +33,7 @@
 
 #include "stmlib/utils/buffer_allocator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class BitStream {
   public:
     BitStream() {}
@@ -180,5 +180,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(LPCSpeechSynthController);
   };
-};  // namespace plaits
+};  // namespace sanguineplaits
 #endif  // PLAITS_DSP_SPEECH_LPC_SPEECH_SYNTH_CONTROLLER_H_

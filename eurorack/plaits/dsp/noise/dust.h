@@ -31,7 +31,7 @@
 
 #include "stmlib/utils/random.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
 inline float Dust(float frequency) {
   float inv_frequency = 1.0f / frequency;
@@ -43,6 +43,6 @@ inline float Dust(float frequency) {
   }
 }
 
-}  // namespace plaits
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_NOISE_DUST_H_

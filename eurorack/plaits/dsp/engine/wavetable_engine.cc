@@ -32,7 +32,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -204,4 +204,4 @@ namespace plaits {
       }
     }
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

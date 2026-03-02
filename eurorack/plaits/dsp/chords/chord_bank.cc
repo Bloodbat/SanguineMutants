@@ -30,7 +30,7 @@
 
 #include "stmlib/dsp/units.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace stmlib;
 
   static const float chords_[kChordNumChords][kChordNumNotes] = {
@@ -146,4 +146,4 @@ namespace plaits {
     }
     return mask;
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

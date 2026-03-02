@@ -32,38 +32,38 @@
 #include "stmlib/stmlib.h"
 #include "stmlib/utils/random.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-class SmoothRandomGenerator {
- public:
-  SmoothRandomGenerator() { }
-  ~SmoothRandomGenerator() { }
-  
-  void Init() {
-    phase_ = 0.0f;
-    from_ = 0.0f;
-    interval_ = 0.0f;
-  }
-  
-  float Render(float frequency) {
-    phase_ += frequency;
-    if (phase_ >= 1.0f) {
-      phase_ -= 1.0f;
-      from_ += interval_;
-      interval_ = stmlib::Random::GetFloat() * 2.0f - 1.0f - from_;
+  class SmoothRandomGenerator {
+  public:
+    SmoothRandomGenerator() {}
+    ~SmoothRandomGenerator() {}
+
+    void Init() {
+      phase_ = 0.0f;
+      from_ = 0.0f;
+      interval_ = 0.0f;
     }
-    float t = phase_ * phase_ * (3.0f - 2.0f * phase_);
-    return from_ + interval_ * t;
-  }
-  
- private:
-  float phase_;
-  float from_;
-  float interval_;
-  
-  DISALLOW_COPY_AND_ASSIGN(SmoothRandomGenerator);
-};
 
-}  // namespace plaits
+    float Render(float frequency) {
+      phase_ += frequency;
+      if (phase_ >= 1.0f) {
+        phase_ -= 1.0f;
+        from_ += interval_;
+        interval_ = stmlib::Random::GetFloat() * 2.0f - 1.0f - from_;
+      }
+      float t = phase_ * phase_ * (3.0f - 2.0f * phase_);
+      return from_ + interval_ * t;
+    }
+
+  private:
+    float phase_;
+    float from_;
+    float interval_;
+
+    DISALLOW_COPY_AND_ASSIGN(SmoothRandomGenerator);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_NOISE_SMOOTH_RANDOM_GENERATOR_H_

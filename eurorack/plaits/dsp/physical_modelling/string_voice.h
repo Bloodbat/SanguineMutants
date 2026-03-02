@@ -34,16 +34,16 @@
 
 #include "plaits/dsp/physical_modelling/string.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-class StringVoice {
- public:
-  StringVoice() { }
-  ~StringVoice() { }
-  
-  void Init(stmlib::BufferAllocator* allocator);
-  void Reset();
-  void Render(
+  class StringVoice {
+  public:
+    StringVoice() {}
+    ~StringVoice() {}
+
+    void Init(stmlib::BufferAllocator* allocator);
+    void Reset();
+    void Render(
       bool sustain,
       bool trigger,
       float accent,
@@ -55,15 +55,15 @@ class StringVoice {
       float* out,
       float* aux,
       size_t size);
-  
- private:
-  stmlib::Svf excitation_filter_;
-  String string_;
-  size_t remaining_noise_samples_;
-  
-  DISALLOW_COPY_AND_ASSIGN(StringVoice);
-};
 
-}  // namespace plaits
+  private:
+    stmlib::Svf excitation_filter_;
+    String string_;
+    size_t remaining_noise_samples_;
+
+    DISALLOW_COPY_AND_ASSIGN(StringVoice);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_PHYSICAL_STRING_VOICE_H_

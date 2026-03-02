@@ -30,50 +30,50 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace std;
-using namespace stmlib;
+  using namespace std;
+  using namespace stmlib;
 
-void StringEngine::Init(BufferAllocator* allocator) {
-  temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize);
-  for (int i = 0; i < kNumStrings; ++i) {
-    voice_[i].Init(allocator);
-    f0_[i] = 0.01f;
+  void StringEngine::Init(BufferAllocator* allocator) {
+    temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize);
+    for (int i = 0; i < kNumStrings; ++i) {
+      voice_[i].Init(allocator);
+      f0_[i] = 0.01f;
+    }
+    active_string_ = kNumStrings - 1;
+    f0_delay_.Init(allocator->Allocate<float>(16));
   }
-  active_string_ = kNumStrings - 1;
-  f0_delay_.Init(allocator->Allocate<float>(16));
-}
 
-void StringEngine::Reset() {
-  f0_delay_.Reset();
-  for (int i = 0; i < kNumStrings; ++i) {
-    voice_[i].Reset();
+  void StringEngine::Reset() {
+    f0_delay_.Reset();
+    for (int i = 0; i < kNumStrings; ++i) {
+      voice_[i].Reset();
+    }
   }
-}
 
-void StringEngine::Render(
+  void StringEngine::Render(
     const EngineParameters& parameters,
     float* out,
     float* aux,
     size_t size,
     bool* already_enveloped) {
-  if (parameters.trigger & TRIGGER_RISING_EDGE) {
-    // 8 in original firmware version.
-    // 05.01.18: mic.w: problem with microbrute.
-    f0_[active_string_] = f0_delay_.Read(14);
-    active_string_ = (active_string_ + 1) % kNumStrings;
-  }
-  
-  const float f0 = NoteToFrequency(parameters.note);
-  f0_[active_string_] = f0;
-  f0_delay_.Write(f0);
-  
-  fill(&out[0], &out[size], 0.0f);
-  fill(&aux[0], &aux[size], 0.0f);
-  
-  for (int i = 0; i < kNumStrings; ++i) {
-    voice_[i].Render(
+    if (parameters.trigger & TRIGGER_RISING_EDGE) {
+      // 8 in original firmware version.
+      // 05.01.18: mic.w: problem with microbrute.
+      f0_[active_string_] = f0_delay_.Read(14);
+      active_string_ = (active_string_ + 1) % kNumStrings;
+    }
+
+    const float f0 = NoteToFrequency(parameters.note);
+    f0_[active_string_] = f0;
+    f0_delay_.Write(f0);
+
+    fill(&out[0], &out[size], 0.0f);
+    fill(&aux[0], &aux[size], 0.0f);
+
+    for (int i = 0; i < kNumStrings; ++i) {
+      voice_[i].Render(
         parameters.trigger & TRIGGER_UNPATCHED && i == active_string_,
         parameters.trigger & TRIGGER_RISING_EDGE && i == active_string_,
         parameters.accent,
@@ -85,7 +85,7 @@ void StringEngine::Render(
         out,
         aux,
         size);
+    }
   }
-}
 
-}  // namespace plaits
+}  // namespace sanguineplaits

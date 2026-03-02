@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace plaits {
+namespace sanguineplaits {
   namespace fm {
     struct Patch {
       enum {
@@ -139,5 +139,5 @@ namespace plaits {
       }
     };
   }  // namespace fm
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_FM_PATCH_H_

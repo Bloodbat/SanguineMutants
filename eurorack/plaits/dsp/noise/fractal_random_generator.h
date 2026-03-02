@@ -31,43 +31,43 @@
 
 #include "stmlib/stmlib.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-template<typename T, int order>
-class FractalRandomGenerator {
- public:
-  FractalRandomGenerator() { }
-  ~FractalRandomGenerator() { }
-  
-  void Init() {
-    for (int i = 0; i < order; ++i) {
-      generator_[i].Init();
-    }
-  }
-  
-  float Render(float frequency) {
-    return Render(frequency, 0.5f);
-  }
-  
-  float Render(float frequency, float decay) {
-    float gain = 0.5f;
-    float sum = 0.0f;
+  template<typename T, int order>
+  class FractalRandomGenerator {
+  public:
+    FractalRandomGenerator() {}
+    ~FractalRandomGenerator() {}
 
-    for (int i = 0; i < order; ++i) {
-      sum += generator_[i].Render(frequency) * gain;
-      gain *= decay;
-      frequency *= 2.0f;
+    void Init() {
+      for (int i = 0; i < order; ++i) {
+        generator_[i].Init();
+      }
     }
 
-    return sum;
-  }
-  
- private:
-  T generator_[order];
-  
-  DISALLOW_COPY_AND_ASSIGN(FractalRandomGenerator);
-};
+    float Render(float frequency) {
+      return Render(frequency, 0.5f);
+    }
 
-}  // namespace plaits
+    float Render(float frequency, float decay) {
+      float gain = 0.5f;
+      float sum = 0.0f;
+
+      for (int i = 0; i < order; ++i) {
+        sum += generator_[i].Render(frequency) * gain;
+        gain *= decay;
+        frequency *= 2.0f;
+      }
+
+      return sum;
+    }
+
+  private:
+    T generator_[order];
+
+    DISALLOW_COPY_AND_ASSIGN(FractalRandomGenerator);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_NOISE_FRACTAL_RANDOM_GENERATOR_H_

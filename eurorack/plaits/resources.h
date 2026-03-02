@@ -38,39 +38,39 @@
 
 
 
-namespace plaits {
+namespace sanguineplaits {
 
-typedef uint8_t ResourceId;
+    typedef uint8_t ResourceId;
 
-extern const uint8_t* const fm_patches_table[];
+    extern const uint8_t* const fm_patches_table[];
 
-extern const float* const lookup_table_table[];
+    extern const float* const lookup_table_table[];
 
-extern const int16_t* const lookup_table_i16_table[];
+    extern const int16_t* const lookup_table_i16_table[];
 
-extern const int32_t* const lookup_table_i32_table[];
+    extern const int32_t* const lookup_table_i32_table[];
 
-extern const int8_t* const lookup_table_i8_table[];
+    extern const int8_t* const lookup_table_i8_table[];
 
-extern const int16_t* const wavetables_table[];
+    extern const int16_t* const wavetables_table[];
 
-extern const uint8_t syx_bank_0[];
-extern const uint8_t syx_bank_1[];
-extern const uint8_t syx_bank_2[];
-extern const float lut_sine[];
-extern const float lut_fm_frequency_quantizer[];
-extern const float lut_fold[];
-extern const float lut_fold_2[];
-extern const float lut_stiffness[];
-extern const float lut_svf_shift[];
-extern const float lut_4x_downsampler_fir[];
-extern const int16_t lut_ws_inverse_tan[];
-extern const int16_t lut_ws_inverse_sin[];
-extern const int16_t lut_ws_linear[];
-extern const int16_t lut_ws_bump[];
-extern const int16_t lut_ws_double_bump[];
-extern const int8_t lut_lpc_excitation_pulse[];
-extern const int16_t wav_integrated_waves[];
+    extern const uint8_t syx_bank_0[];
+    extern const uint8_t syx_bank_1[];
+    extern const uint8_t syx_bank_2[];
+    extern const float lut_sine[];
+    extern const float lut_fm_frequency_quantizer[];
+    extern const float lut_fold[];
+    extern const float lut_fold_2[];
+    extern const float lut_stiffness[];
+    extern const float lut_svf_shift[];
+    extern const float lut_4x_downsampler_fir[];
+    extern const int16_t lut_ws_inverse_tan[];
+    extern const int16_t lut_ws_inverse_sin[];
+    extern const int16_t lut_ws_linear[];
+    extern const int16_t lut_ws_bump[];
+    extern const int16_t lut_ws_double_bump[];
+    extern const int8_t lut_lpc_excitation_pulse[];
+    extern const int16_t wav_integrated_waves[];
 #define SYX_BANK_0 0
 #define SYX_BANK_0_SIZE 4096
 #define SYX_BANK_1 1
@@ -108,6 +108,6 @@ extern const int16_t wav_integrated_waves[];
 #define WAV_INTEGRATED_WAVES 0
 #define WAV_INTEGRATED_WAVES_SIZE 25344
 
-}  // namespace plaits
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_RESOURCES_H_

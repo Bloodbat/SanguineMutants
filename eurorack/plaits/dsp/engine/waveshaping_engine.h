@@ -32,32 +32,32 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/oscillator/oscillator.h"
 
-namespace plaits {
-  
-class WaveshapingEngine : public Engine {
- public:
-  WaveshapingEngine() { }
-  ~WaveshapingEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class WaveshapingEngine : public Engine {
+  public:
+    WaveshapingEngine() {}
+    ~WaveshapingEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  Oscillator slope_;
-  Oscillator triangle_;
-  float previous_shape_;
-  float previous_wavefolder_gain_;
-  float previous_overtone_gain_;
-  
-  DISALLOW_COPY_AND_ASSIGN(WaveshapingEngine);
-};
 
-}  // namespace plaits
+  private:
+    Oscillator slope_;
+    Oscillator triangle_;
+    float previous_shape_;
+    float previous_wavefolder_gain_;
+    float previous_overtone_gain_;
+
+    DISALLOW_COPY_AND_ASSIGN(WaveshapingEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_WAVESHAPING_ENGINE_H_

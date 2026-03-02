@@ -33,31 +33,31 @@
 #include "plaits/dsp/drums/hi_hat.h"
 #include "plaits/dsp/engine/engine.h"
 
-namespace plaits {
-  
-class HiHatEngine : public Engine {
- public:
-  HiHatEngine() { }
-  ~HiHatEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class HiHatEngine : public Engine {
+  public:
+    HiHatEngine() {}
+    ~HiHatEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
 
- private:
-  HiHat<SquareNoise, SwingVCA, true, false> hi_hat_1_;
-  HiHat<RingModNoise, LinearVCA, false, true> hi_hat_2_;
-  
-  float* temp_buffer_;
-  
-  DISALLOW_COPY_AND_ASSIGN(HiHatEngine);
-};
+  private:
+    HiHat<SquareNoise, SwingVCA, true, false> hi_hat_1_;
+    HiHat<RingModNoise, LinearVCA, false, true> hi_hat_2_;
 
-}  // namespace plaits
+    float* temp_buffer_;
+
+    DISALLOW_COPY_AND_ASSIGN(HiHatEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_HI_HAT_ENGINE_H_

@@ -30,33 +30,33 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace std;
-using namespace stmlib;
+  using namespace std;
+  using namespace stmlib;
 
-void ModalEngine::Init(BufferAllocator* allocator) {
-  temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize);
-  harmonics_lp_ = 0.0f;
-  Reset();
-}
+  void ModalEngine::Init(BufferAllocator* allocator) {
+    temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize);
+    harmonics_lp_ = 0.0f;
+    Reset();
+  }
 
-void ModalEngine::Reset() {
-  voice_.Init();
-}
+  void ModalEngine::Reset() {
+    voice_.Init();
+  }
 
-void ModalEngine::Render(
+  void ModalEngine::Render(
     const EngineParameters& parameters,
     float* out,
     float* aux,
     size_t size,
     bool* already_enveloped) {
-  fill(&out[0], &out[size], 0.0f);
-  fill(&aux[0], &aux[size], 0.0f);
-  
-  ONE_POLE(harmonics_lp_, parameters.harmonics, 0.01f);
-  
-  voice_.Render(
+    fill(&out[0], &out[size], 0.0f);
+    fill(&aux[0], &aux[size], 0.0f);
+
+    ONE_POLE(harmonics_lp_, parameters.harmonics, 0.01f);
+
+    voice_.Render(
       parameters.trigger & TRIGGER_UNPATCHED,
       parameters.trigger & TRIGGER_RISING_EDGE,
       parameters.accent,
@@ -68,6 +68,6 @@ void ModalEngine::Render(
       out,
       aux,
       size);
-}
+  }
 
-}  // namespace plaits
+}  // namespace sanguineplaits

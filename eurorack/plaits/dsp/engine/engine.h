@@ -34,7 +34,7 @@
 #include "stmlib/dsp/units.h"
 #include "stmlib/utils/buffer_allocator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   inline float NoteToFrequency(float midi_note) {
     midi_note -= 9.0f;
     CONSTRAIN(midi_note, -128.0f, 127.0f);
@@ -121,5 +121,5 @@ namespace plaits {
     Engine* engine_[max_size];
     int num_engines_;
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_ENGINE_H_

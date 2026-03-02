@@ -34,98 +34,98 @@
 
 using namespace std;
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace std;
-using namespace stmlib;
+    using namespace std;
+    using namespace stmlib;
 
-void VirtualAnalogVCFEngine::Init(BufferAllocator* allocator) {
-  oscillator_.Init();
-  sub_oscillator_.Init();
-  
-  svf_[0].Init();
-  svf_[1].Init();
-  
-  previous_sub_gain_ = 0.0f;
-  previous_cutoff_ = 0.0f;
-  previous_stage2_gain_ = 0.0f;
-  previous_q_ = 0.0f;
-  previous_gain_ = 0.0f;
-}
+    void VirtualAnalogVCFEngine::Init(BufferAllocator* allocator) {
+        oscillator_.Init();
+        sub_oscillator_.Init();
 
-void VirtualAnalogVCFEngine::Reset() {
-  
-}
+        svf_[0].Init();
+        svf_[1].Init();
 
-void VirtualAnalogVCFEngine::Render(
-    const EngineParameters& parameters,
-    float* out,
-    float* aux,
-    size_t size,
-    bool* already_enveloped) {
-  // VA Oscillator (saw or PW square) + sub
-  const float f0 = NoteToFrequency(parameters.note);
+        previous_sub_gain_ = 0.0f;
+        previous_cutoff_ = 0.0f;
+        previous_stage2_gain_ = 0.0f;
+        previous_q_ = 0.0f;
+        previous_gain_ = 0.0f;
+    }
 
-  float shape = (parameters.morph - 0.25f) * 2.0f + 0.5f;
-  CONSTRAIN(shape, 0.5f, 1.0f);
+    void VirtualAnalogVCFEngine::Reset() {
 
-  float pw = (parameters.morph - 0.5f) * 2.0f + 0.5f;
-  if (parameters.morph > 0.75f) {
-    pw = 2.5f - parameters.morph * 2.0f;
-  }
-  CONSTRAIN(pw, 0.5f, 0.98f);
-  
-  float sub_gain = max(fabsf(parameters.morph - 0.5f) - 0.3f, 0.0f) * 5.0f;
+    }
 
-  oscillator_.Render(f0, pw, shape, out, size);
-  sub_oscillator_.Render(f0 * 0.501f, 0.5f, 1.0f, aux, size);
-  
-  const float cutoff = f0 * SemitonesToRatio(
-      (parameters.timbre - 0.2f) * 120.0f);
+    void VirtualAnalogVCFEngine::Render(
+        const EngineParameters& parameters,
+        float* out,
+        float* aux,
+        size_t size,
+        bool* already_enveloped) {
+        // VA Oscillator (saw or PW square) + sub
+        const float f0 = NoteToFrequency(parameters.note);
 
-  float stage2_gain = 1.0f - (parameters.harmonics - 0.4f) * 4.0f;
-  CONSTRAIN(stage2_gain, 0.0f, 1.0f);
-  
-  const float resonance = 2.667f * \
-      max(fabsf(parameters.harmonics - 0.5f) - 0.125f, 0.0f);
-  const float resonance_sqr = resonance * resonance;
-  const float q = resonance_sqr * resonance_sqr * 48.0f;
-  float gain = (parameters.harmonics - 0.7f) + 0.85f;
-  CONSTRAIN(gain, 0.7f - resonance_sqr * 0.3f, 1.0f);
+        float shape = (parameters.morph - 0.25f) * 2.0f + 0.5f;
+        CONSTRAIN(shape, 0.5f, 1.0f);
 
-  ParameterInterpolator sub_gain_modulation(
-      &previous_sub_gain_, sub_gain, size);
-  ParameterInterpolator cutoff_modulation(
-      &previous_cutoff_, cutoff, size);
-  ParameterInterpolator stage2_gain_modulation(
-      &previous_stage2_gain_, stage2_gain, size);
-  ParameterInterpolator q_modulation(
-      &previous_q_, q, size);
-  ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
-  
-  for (size_t i = 0; i < size; ++i) {
-    const float cutoff = min(cutoff_modulation.Next(), 0.25f);
-    const float q = q_modulation.Next();
-    const float stage2_gain = stage2_gain_modulation.Next();
+        float pw = (parameters.morph - 0.5f) * 2.0f + 0.5f;
+        if (parameters.morph > 0.75f) {
+            pw = 2.5f - parameters.morph * 2.0f;
+        }
+        CONSTRAIN(pw, 0.5f, 0.98f);
 
-    svf_[0].set_f_q<FREQUENCY_FAST>(cutoff, 0.5f + q);
-    svf_[1].set_f_q<FREQUENCY_FAST>(cutoff, 0.5f + 0.025f * q);
-    
-    const float gain = gain_modulation.Next();
-    const float input = SoftClip(
-        (out[i] + aux[i] * sub_gain_modulation.Next()) * gain);
-    
-    float lp, hp;
-    svf_[0].Process<FILTER_MODE_LOW_PASS, FILTER_MODE_HIGH_PASS>(
-        input, &lp, &hp);
+        float sub_gain = max(fabsf(parameters.morph - 0.5f) - 0.3f, 0.0f) * 5.0f;
 
-    lp = SoftClip(lp * gain);
-    lp += stage2_gain * \
-        (SoftClip(svf_[1].Process<FILTER_MODE_LOW_PASS>(lp)) - lp);
-    
-    out[i] = lp;
-    aux[i] = SoftClip(hp * gain);
-  }
-}
+        oscillator_.Render(f0, pw, shape, out, size);
+        sub_oscillator_.Render(f0 * 0.501f, 0.5f, 1.0f, aux, size);
 
-}  // namespace plaits
+        const float cutoff = f0 * SemitonesToRatio(
+            (parameters.timbre - 0.2f) * 120.0f);
+
+        float stage2_gain = 1.0f - (parameters.harmonics - 0.4f) * 4.0f;
+        CONSTRAIN(stage2_gain, 0.0f, 1.0f);
+
+        const float resonance = 2.667f * \
+            max(fabsf(parameters.harmonics - 0.5f) - 0.125f, 0.0f);
+        const float resonance_sqr = resonance * resonance;
+        const float q = resonance_sqr * resonance_sqr * 48.0f;
+        float gain = (parameters.harmonics - 0.7f) + 0.85f;
+        CONSTRAIN(gain, 0.7f - resonance_sqr * 0.3f, 1.0f);
+
+        ParameterInterpolator sub_gain_modulation(
+            &previous_sub_gain_, sub_gain, size);
+        ParameterInterpolator cutoff_modulation(
+            &previous_cutoff_, cutoff, size);
+        ParameterInterpolator stage2_gain_modulation(
+            &previous_stage2_gain_, stage2_gain, size);
+        ParameterInterpolator q_modulation(
+            &previous_q_, q, size);
+        ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
+
+        for (size_t i = 0; i < size; ++i) {
+            const float cutoff = min(cutoff_modulation.Next(), 0.25f);
+            const float q = q_modulation.Next();
+            const float stage2_gain = stage2_gain_modulation.Next();
+
+            svf_[0].set_f_q<FREQUENCY_FAST>(cutoff, 0.5f + q);
+            svf_[1].set_f_q<FREQUENCY_FAST>(cutoff, 0.5f + 0.025f * q);
+
+            const float gain = gain_modulation.Next();
+            const float input = SoftClip(
+                (out[i] + aux[i] * sub_gain_modulation.Next()) * gain);
+
+            float lp, hp;
+            svf_[0].Process<FILTER_MODE_LOW_PASS, FILTER_MODE_HIGH_PASS>(
+                input, &lp, &hp);
+
+            lp = SoftClip(lp * gain);
+            lp += stage2_gain * \
+                (SoftClip(svf_[1].Process<FILTER_MODE_LOW_PASS>(lp)) - lp);
+
+            out[i] = lp;
+            aux[i] = SoftClip(hp * gain);
+        }
+    }
+
+}  // namespace sanguineplaits

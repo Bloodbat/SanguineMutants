@@ -37,7 +37,7 @@
 #include "plaits/dsp/fm/voice.h"
 #include "plaits/dsp/fm/patch.h"
 
-namespace plaits {
+namespace sanguineplaits {
   const int kNumSixOpVoices = 2;
 
   class FMVoice {
@@ -108,5 +108,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(SixOpEngine);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_SIX_OP_ENGINE_H_

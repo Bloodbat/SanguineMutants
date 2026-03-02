@@ -68,7 +68,7 @@
 
 #include "plaits/user_data.h"
 
-namespace plaits {
+namespace sanguineplaits {
   const int kMaxEngines = 24;
   const int kMaxTriggerDelay = 8;
   const int kTriggerDelay = 5;
@@ -265,5 +265,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(Voice);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_VOICE_H_

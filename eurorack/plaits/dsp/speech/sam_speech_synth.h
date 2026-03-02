@@ -31,21 +31,21 @@
 
 #include "plaits/dsp/dsp.h"
 
-namespace plaits {
-  
-const int kSAMNumFormants = 3;
-const int kSAMNumVowels = 9;
-const int kSAMNumConsonants = 8;
-const int kSAMNumPhonemes = kSAMNumVowels + kSAMNumConsonants;
+namespace sanguineplaits {
 
-class SAMSpeechSynth {
- public:
-  SAMSpeechSynth() { }
-  ~SAMSpeechSynth() { }
+  const int kSAMNumFormants = 3;
+  const int kSAMNumVowels = 9;
+  const int kSAMNumConsonants = 8;
+  const int kSAMNumPhonemes = kSAMNumVowels + kSAMNumConsonants;
 
-  void Init();
-  
-  void Render(
+  class SAMSpeechSynth {
+  public:
+    SAMSpeechSynth() {}
+    ~SAMSpeechSynth() {}
+
+    void Init();
+
+    void Render(
       bool consonant,
       float frequency,
       float vowel,
@@ -54,37 +54,37 @@ class SAMSpeechSynth {
       float* output,
       size_t size);
 
- private:
-  void InterpolatePhonemeData(
+  private:
+    void InterpolatePhonemeData(
       float phoneme,
       float formant_shift,
       uint32_t* formant_frequency,
       float* formant_amplitude);
-  
-  struct Formant {
-    uint8_t frequency;
-    uint8_t amplitude;
+
+    struct Formant {
+      uint8_t frequency;
+      uint8_t amplitude;
+    };
+    struct Phoneme {
+      Formant formant[kSAMNumFormants];
+    };
+
+    float phase_;
+    float frequency_;
+
+    float pulse_next_sample_;
+    float pulse_lp_;
+
+    uint32_t formant_phase_[3];
+    size_t consonant_samples_;
+    float consonant_index_;
+
+    static const Phoneme phonemes_[kSAMNumPhonemes + 1];
+    static const float formant_amplitude_lut[16];
+
+    DISALLOW_COPY_AND_ASSIGN(SAMSpeechSynth);
   };
-  struct Phoneme {
-    Formant formant[kSAMNumFormants]; 
-  };
 
-  float phase_;
-  float frequency_;
-
-  float pulse_next_sample_;
-  float pulse_lp_;
-
-  uint32_t formant_phase_[3];
-  size_t consonant_samples_;
-  float consonant_index_;
-  
-  static const Phoneme phonemes_[kSAMNumPhonemes + 1];
-  static const float formant_amplitude_lut[16];
-  
-  DISALLOW_COPY_AND_ASSIGN(SAMSpeechSynth);
-};
-  
-}  // namespace plaits
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_SPEECH_SAM_SPEECH_SYNTH_H_

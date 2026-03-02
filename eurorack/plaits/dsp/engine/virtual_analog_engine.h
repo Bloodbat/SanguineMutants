@@ -35,38 +35,38 @@
 
 #define VA_VARIANT 2
 
-namespace plaits {
-  
-class VirtualAnalogEngine : public Engine {
- public:
-  VirtualAnalogEngine() { }
-  ~VirtualAnalogEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class VirtualAnalogEngine : public Engine {
+  public:
+    VirtualAnalogEngine() {}
+    ~VirtualAnalogEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  float ComputeDetuning(float detune) const;
-  
-  VariableShapeOscillator primary_;
-  VariableShapeOscillator auxiliary_;
 
-  VariableShapeOscillator sync_;
-  VariableSawOscillator variable_saw_;
+  private:
+    float ComputeDetuning(float detune) const;
 
-  float auxiliary_amount_;
-  float xmod_amount_;
-  float* temp_buffer_;
-  
-  DISALLOW_COPY_AND_ASSIGN(VirtualAnalogEngine);
-};
+    VariableShapeOscillator primary_;
+    VariableShapeOscillator auxiliary_;
 
-}  // namespace plaits
+    VariableShapeOscillator sync_;
+    VariableSawOscillator variable_saw_;
+
+    float auxiliary_amount_;
+    float xmod_amount_;
+    float* temp_buffer_;
+
+    DISALLOW_COPY_AND_ASSIGN(VirtualAnalogEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_VIRTUAL_ANALOG_ENGINE_H_

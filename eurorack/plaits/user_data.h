@@ -33,8 +33,7 @@
 
 #include <cstring>
 
-namespace plaits {
-
+namespace sanguineplaits {
   class UserData {
   public:
     static const size_t MAX_USER_DATA_SIZE = 4096; // 0x1000
@@ -88,6 +87,5 @@ namespace plaits {
 
   };
 
-}  // namespace plaits
-
+}  // namespace sanguineplaits
 #endif  // PLAITS_USER_DATA_H_

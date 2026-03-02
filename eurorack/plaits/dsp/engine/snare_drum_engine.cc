@@ -30,29 +30,29 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace std;
-using namespace stmlib;
+  using namespace std;
+  using namespace stmlib;
 
-void SnareDrumEngine::Init(BufferAllocator* allocator) {
-  analog_snare_drum_.Init();
-  synthetic_snare_drum_.Init();
-}
+  void SnareDrumEngine::Init(BufferAllocator* allocator) {
+    analog_snare_drum_.Init();
+    synthetic_snare_drum_.Init();
+  }
 
-void SnareDrumEngine::Reset() {
-  
-}
+  void SnareDrumEngine::Reset() {
 
-void SnareDrumEngine::Render(
+  }
+
+  void SnareDrumEngine::Render(
     const EngineParameters& parameters,
     float* out,
     float* aux,
     size_t size,
     bool* already_enveloped) {
-  const float f0 = NoteToFrequency(parameters.note);
-  
-  analog_snare_drum_.Render(
+    const float f0 = NoteToFrequency(parameters.note);
+
+    analog_snare_drum_.Render(
       parameters.trigger & TRIGGER_UNPATCHED,
       parameters.trigger & TRIGGER_RISING_EDGE,
       parameters.accent,
@@ -62,8 +62,8 @@ void SnareDrumEngine::Render(
       parameters.harmonics,
       out,
       size);
-  
-  synthetic_snare_drum_.Render(
+
+    synthetic_snare_drum_.Render(
       parameters.trigger & TRIGGER_UNPATCHED,
       parameters.trigger & TRIGGER_RISING_EDGE,
       parameters.accent,
@@ -73,6 +73,6 @@ void SnareDrumEngine::Render(
       parameters.harmonics,
       aux,
       size);
-}
+  }
 
-}  // namespace plaits
+}  // namespace sanguineplaits

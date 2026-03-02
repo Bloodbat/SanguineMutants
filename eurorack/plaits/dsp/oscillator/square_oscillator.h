@@ -8,7 +8,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class SquareOscillator {
   public:
     SquareOscillator() {}
@@ -47,5 +47,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(SquareOscillator);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_OSCILLATOR_SQUARE_OSCILLATOR_H_

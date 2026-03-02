@@ -32,7 +32,7 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/oscillator/wavetable_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class WavetableEngine : public Engine {
   public:
     WavetableEngine() {}
@@ -72,5 +72,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(WavetableEngine);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_WAVETABLE_ENGINE_H_
