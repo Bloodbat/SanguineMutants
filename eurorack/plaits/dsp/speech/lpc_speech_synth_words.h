@@ -31,7 +31,7 @@
 
 #include "plaits/dsp/speech/lpc_speech_synth_controller.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
 #define LPC_SPEECH_SYNTH_NUM_WORD_BANKS 5
 
@@ -43,6 +43,6 @@ extern const uint8_t bank_4[4802];
 
 extern const LPCSpeechSynthWordBankData word_banks_[LPC_SPEECH_SYNTH_NUM_WORD_BANKS];
 
-}  // namespace plaits
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_SPEECH_LPC_SPEECH_SYNTH_WORDS_H_

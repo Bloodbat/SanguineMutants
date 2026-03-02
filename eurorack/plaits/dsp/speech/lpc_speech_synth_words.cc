@@ -28,7 +28,7 @@
 
 #include "plaits/dsp/speech/lpc_speech_synth_words.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
 /* extern */
 const uint8_t bank_0[] = {
@@ -1570,4 +1570,4 @@ const LPCSpeechSynthWordBankData word_banks_[] = {
   { bank_4, 4802 },
 };
 
-}  // namespace plaits
+}  // namespace sanguineplaits

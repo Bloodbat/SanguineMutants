@@ -31,39 +31,39 @@
 
 #include "plaits/dsp/engine/engine.h"
 
-namespace plaits {
-  
-class FMEngine : public Engine {
- public:
-  FMEngine() { }
-  ~FMEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class FMEngine : public Engine {
+  public:
+    FMEngine() {}
+    ~FMEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  uint32_t carrier_phase_;
-  uint32_t modulator_phase_;
-  uint32_t sub_phase_;
-  
-  float previous_carrier_frequency_;
-  float previous_modulator_frequency_;
-  float previous_amount_;
-  float previous_feedback_;
-  float previous_sample_;
-  
-  float sub_fir_;
-  float carrier_fir_;
-  
-  DISALLOW_COPY_AND_ASSIGN(FMEngine);
-};
 
-}  // namespace plaits
+  private:
+    uint32_t carrier_phase_;
+    uint32_t modulator_phase_;
+    uint32_t sub_phase_;
+
+    float previous_carrier_frequency_;
+    float previous_modulator_frequency_;
+    float previous_amount_;
+    float previous_feedback_;
+    float previous_sample_;
+
+    float sub_fir_;
+    float carrier_fir_;
+
+    DISALLOW_COPY_AND_ASSIGN(FMEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_FM_ENGINE_H_

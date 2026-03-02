@@ -33,30 +33,30 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/oscillator/variable_shape_oscillator.h"
 
-namespace plaits {
-  
-class PhaseDistortionEngine : public Engine {
- public:
-  PhaseDistortionEngine() { }
-  ~PhaseDistortionEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class PhaseDistortionEngine : public Engine {
+  public:
+    PhaseDistortionEngine() {}
+    ~PhaseDistortionEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  VariableShapeOscillator shaper_;
-  VariableShapeOscillator modulator_;
-  float* temp_buffer_;
-  
-  DISALLOW_COPY_AND_ASSIGN(PhaseDistortionEngine);
-};
 
-}  // namespace plaits
+  private:
+    VariableShapeOscillator shaper_;
+    VariableShapeOscillator modulator_;
+    float* temp_buffer_;
+
+    DISALLOW_COPY_AND_ASSIGN(PhaseDistortionEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_PHASE_DISTORTION_ENGINE_H_

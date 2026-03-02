@@ -33,78 +33,78 @@
 
 #include "plaits/dsp/dsp.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-const int kLPCOrder = 10;
+  const int kLPCOrder = 10;
 
-const float kLPCSpeechSynthDefaultF0 = 100.0f;
+  const float kLPCSpeechSynthDefaultF0 = 100.0f;
 
-class LPCSpeechSynth {
- public:
-  LPCSpeechSynth() { }
-  ~LPCSpeechSynth() { }
+  class LPCSpeechSynth {
+  public:
+    LPCSpeechSynth() {}
+    ~LPCSpeechSynth() {}
 
-  struct Frame {
-    // 14 bytes.
-    uint8_t energy;
-    uint8_t period;
-    int16_t k0;
-    int16_t k1;
-    int8_t k2;
-    int8_t k3;
-    int8_t k4;
-    int8_t k5;
-    int8_t k6;
-    int8_t k7;
-    int8_t k8;
-    int8_t k9;
-  };
+    struct Frame {
+      // 14 bytes.
+      uint8_t energy;
+      uint8_t period;
+      int16_t k0;
+      int16_t k1;
+      int8_t k2;
+      int8_t k3;
+      int8_t k4;
+      int8_t k5;
+      int8_t k6;
+      int8_t k7;
+      int8_t k8;
+      int8_t k9;
+    };
 
-  void Init();
-  
-  void Render(
+    void Init();
+
+    void Render(
       float prosody_amount,
       float pitch_shift,
       float* excitation,
       float* output,
       size_t size);
-  
-  void PlayFrame(const Frame* frames, float frame, bool interpolate) {
-    MAKE_INTEGRAL_FRACTIONAL(frame);
-    
-    if (!interpolate) {
-      frame_fractional = 0.0f;
-    }
-    PlayFrame(
+
+    void PlayFrame(const Frame* frames, float frame, bool interpolate) {
+      MAKE_INTEGRAL_FRACTIONAL(frame);
+
+      if (!interpolate) {
+        frame_fractional = 0.0f;
+      }
+      PlayFrame(
         frames[frame_integral],
         frames[frame_integral + 1],
         frame_fractional);
-  }
+    }
 
- private:
-  void PlayFrame(const Frame& f1, const Frame& f2, float blend);
-  
-  template <int scale, typename X>
-  float BlendCoefficient(X a, X b, float blend) {
-    float a_f = static_cast<float>(a) / float(scale);
-    float b_f = static_cast<float>(b) / float(scale);
-    return a_f + (b_f - a_f) * blend;
-  }
-  
-  float phase_;
-  float frequency_;
-  float noise_energy_;
-  float pulse_energy_;
-  
-  float next_sample_;
-  int excitation_pulse_sample_index_;
+  private:
+    void PlayFrame(const Frame& f1, const Frame& f2, float blend);
 
-  float k_[kLPCOrder];
-  float s_[kLPCOrder + 1];
+    template <int scale, typename X>
+    float BlendCoefficient(X a, X b, float blend) {
+      float a_f = static_cast<float>(a) / float(scale);
+      float b_f = static_cast<float>(b) / float(scale);
+      return a_f + (b_f - a_f) * blend;
+    }
 
-  DISALLOW_COPY_AND_ASSIGN(LPCSpeechSynth);
-};
+    float phase_;
+    float frequency_;
+    float noise_energy_;
+    float pulse_energy_;
 
-};  // namespace plaits
+    float next_sample_;
+    int excitation_pulse_sample_index_;
+
+    float k_[kLPCOrder];
+    float s_[kLPCOrder + 1];
+
+    DISALLOW_COPY_AND_ASSIGN(LPCSpeechSynth);
+  };
+
+};  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_SPEECH_LPC_SPEECH_SYNTH_H_

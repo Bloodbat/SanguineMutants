@@ -78,11 +78,11 @@ struct FunesMk2 : SanguineModule {
         LIGHTS_COUNT
     };
 
-    plaits::Voice voices[PORT_MAX_CHANNELS];
-    plaits::Patch patches[PORT_MAX_CHANNELS] = {};
-    plaits::Modulations modulations[PORT_MAX_CHANNELS] = {};
+    sanguineplaits::Voice voices[PORT_MAX_CHANNELS];
+    sanguineplaits::Patch patches[PORT_MAX_CHANNELS] = {};
+    sanguineplaits::Modulations modulations[PORT_MAX_CHANNELS] = {};
     // TODO: Are we still crashing??
-    plaits::UserData userDatas[PORT_MAX_CHANNELS];
+    sanguineplaits::UserData userDatas[PORT_MAX_CHANNELS];
     // Hardware uses 16384; but new chords crash Rack on mode change if left as such.
     uint8_t sharedBuffers[PORT_MAX_CHANNELS][50176] = {};
 
@@ -243,7 +243,7 @@ struct FunesMk2 : SanguineModule {
         // Calculate pitch for low cpu mode, if needed.
         float pitch = knobFrequency;
         if (bWantLowCpu) {
-            pitch += std::log2(plaits::kSampleRate * args.sampleTime);
+            pitch += std::log2(sanguineplaits::kSampleRate * args.sampleTime);
         }
 
         if (drbOutputBuffers.empty()) {
@@ -308,7 +308,7 @@ struct FunesMk2 : SanguineModule {
                 }
             }
 
-            dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[plaits::kBlockSize];
+            dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[sanguineplaits::kBlockSize];
 
             for (int channel = 0; channel < channelCount; ++channel) {
                 currentChannel = channel >> 2;
@@ -401,11 +401,11 @@ struct FunesMk2 : SanguineModule {
                 modulations[channel].trigger_patched = bHaveInputTrigger;
 
                 // Render frames
-                plaits::Voice::Frame output[plaits::kBlockSize];
-                voices[channel].Render(patches[channel], modulations[channel], output, plaits::kBlockSize);
+                sanguineplaits::Voice::Frame output[sanguineplaits::kBlockSize];
+                voices[channel].Render(patches[channel], modulations[channel], output, sanguineplaits::kBlockSize);
                 // Convert output to frames
                 const int channelFrame = channel << 1;
-                for (size_t blockNum = 0; blockNum < plaits::kBlockSize; ++blockNum) {
+                for (size_t blockNum = 0; blockNum < sanguineplaits::kBlockSize; ++blockNum) {
                     renderFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
                     renderFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
                 }
@@ -413,13 +413,13 @@ struct FunesMk2 : SanguineModule {
 
             // Convert output.
             if (!bWantLowCpu) {
-                int inLen = plaits::kBlockSize;
+                int inLen = sanguineplaits::kBlockSize;
                 int outLen = drbOutputBuffers.capacity();
                 srcOutputs.setChannels(channelCount << 1);
                 srcOutputs.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
                 drbOutputBuffers.endIncr(outLen);
             } else {
-                int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), static_cast<int>(plaits::kBlockSize));
+                int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), static_cast<int>(sanguineplaits::kBlockSize));
                 std::memcpy(drbOutputBuffers.endData(), renderFrames, len * sizeof(renderFrames[0]));
                 drbOutputBuffers.endIncr(len);
             }
@@ -591,7 +591,7 @@ struct FunesMk2 : SanguineModule {
     }
 
     void onSampleRateChange(const SampleRateChangeEvent& e) override {
-        srcOutputs.setRates(static_cast<int>(plaits::kSampleRate), static_cast<int>(e.sampleRate));
+        srcOutputs.setRates(static_cast<int>(sanguineplaits::kSampleRate), static_cast<int>(e.sampleRate));
     }
 
     void onAdd(const AddEvent& e) override {
@@ -607,14 +607,14 @@ struct FunesMk2 : SanguineModule {
             FILE* userDataFile = fopen(userDataFilePath.c_str(), "rb");
 
             if (userDataFile != NULL) {
-                uint8_t userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE];
+                uint8_t userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE];
 
-                fread(userDataBuffer, sizeof(uint8_t), plaits::UserData::MAX_USER_DATA_SIZE,
+                fread(userDataBuffer, sizeof(uint8_t), sanguineplaits::UserData::MAX_USER_DATA_SIZE,
                     userDataFile);
-                if (userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
+                if (userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
                     userDatas[channel].setBuffer(userDataBuffer);
                     voices[channel].ReloadUserData();
-                    customDataStates[channel] = userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
+                    customDataStates[channel] = userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
                 }
                 fclose(userDataFile);
             }
@@ -635,7 +635,7 @@ struct FunesMk2 : SanguineModule {
                 FILE* userDataFile = fopen(userDataFilePath.c_str(), "wb");
 
                 if (userDataFile != NULL) {
-                    fwrite(userDataBuffer, sizeof(uint8_t), plaits::UserData::MAX_USER_DATA_SIZE, userDataFile);
+                    fwrite(userDataBuffer, sizeof(uint8_t), sanguineplaits::UserData::MAX_USER_DATA_SIZE, userDataFile);
                     fclose(userDataFile);
                 }
             } else {

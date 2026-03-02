@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -117,4 +117,4 @@ namespace plaits {
       }
     }
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

@@ -36,7 +36,7 @@
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/cosine_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
 #define TAIL , -1
 
@@ -303,6 +303,6 @@ namespace plaits {
     DISALLOW_COPY_AND_ASSIGN(FxEngine);
   };
 
-}  // namespace plaits
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_FX_FX_ENGINE_H_

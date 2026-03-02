@@ -32,30 +32,30 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/physical_modelling/modal_voice.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-class ModalEngine : public Engine {
- public:
-  ModalEngine() { }
-  ~ModalEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+  class ModalEngine : public Engine {
+  public:
+    ModalEngine() {}
+    ~ModalEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  ModalVoice voice_;
-  float* temp_buffer_;
-  float harmonics_lp_;
-  
-  DISALLOW_COPY_AND_ASSIGN(ModalEngine);
-};
 
-}  // namespace plaits
+  private:
+    ModalVoice voice_;
+    float* temp_buffer_;
+    float harmonics_lp_;
+
+    DISALLOW_COPY_AND_ASSIGN(ModalEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_MODAL_ENGINE_H_

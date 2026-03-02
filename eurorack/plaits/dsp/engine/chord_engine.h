@@ -34,7 +34,7 @@
 #include "plaits/dsp/oscillator/string_synth_oscillator.h"
 #include "plaits/dsp/oscillator/wavetable_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
     const int kChordNumHarmonics = 3;
 
     class ChordEngine : public Engine {
@@ -61,5 +61,5 @@ namespace plaits {
 
         DISALLOW_COPY_AND_ASSIGN(ChordEngine);
     };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_CHORD_ENGINE_H_

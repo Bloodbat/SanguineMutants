@@ -35,7 +35,7 @@
 #include "plaits/dsp/oscillator/nes_triangle_oscillator.h"
 #include "plaits/dsp/oscillator/super_square_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class ChiptuneEngine : public Engine {
   public:
     ChiptuneEngine() {}
@@ -69,5 +69,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(ChiptuneEngine);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_CHIPTUNE_ENGINE_H_

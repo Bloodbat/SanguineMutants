@@ -28,7 +28,7 @@
 
 #include "plaits/dsp/voice.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -269,4 +269,4 @@ namespace plaits {
     aux_post_processor_.Process(pp_s.aux_gain, lpg_bypass, lpg_envelope_.gain(), lpg_envelope_.frequency(),
       lpg_envelope_.hf_bleed(), aux_buffer_, &frames->aux, size, 2);
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

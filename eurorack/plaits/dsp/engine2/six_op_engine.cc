@@ -32,7 +32,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace fm;
   using namespace std;
   using namespace stmlib;
@@ -168,4 +168,4 @@ namespace plaits {
       &temp_buffer_[kNumSixOpVoices * size],
       &acc_buffer_[0]);
   }
-}  // namespace plaits
+}  // namespace sanguineplaits
