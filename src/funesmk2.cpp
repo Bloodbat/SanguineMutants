@@ -151,6 +151,9 @@ struct FunesMk2 : SanguineModule {
 
     float_4 chordBankVoltages[4];
 
+    float_4 outVoltages;
+    float_4 auxVoltages;
+
     FunesMk2() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -428,8 +431,6 @@ struct FunesMk2 : SanguineModule {
         // Set output
         if (!drbOutputBuffers.empty()) {
             dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = drbOutputBuffers.shift();
-            float_4 outVoltages;
-            float_4 auxVoltages;
             int currentSample;
             for (int channel = 0; channel < channelCount; channel += 4) {
                 currentSample = channel << 1;
