@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
   const int kNumChordSetOpts = 3;
 
   const int kChordNumNotes = 4;
@@ -129,5 +129,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(ChordBank);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_CHORDS_CHORD_BANK_H_

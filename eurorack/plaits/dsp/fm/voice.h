@@ -43,7 +43,7 @@
    #define FAST_OP_LEVEL_MODULATION
 */
 
-namespace plaits {
+namespace sanguineplaits {
   namespace fm {
     template<int num_operators>
     class Voice {
@@ -251,5 +251,5 @@ namespace plaits {
       DISALLOW_COPY_AND_ASSIGN(Voice);
     };
   }  // namespace fm
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_FM_VOICE_H_

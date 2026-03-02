@@ -42,7 +42,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace plaits {
+namespace sanguineplaits {
 
   const float kSineLUTSize = 512.0f;
   const size_t kSineLUTQuadrature = 128;
@@ -253,6 +253,6 @@ namespace plaits {
     DISALLOW_COPY_AND_ASSIGN(FastSineOscillator);
   };
 
-}  // namespace plaits
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_OSCILLATOR_SINE_OSCILLATOR_H_

@@ -32,35 +32,35 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/physical_modelling/string_voice.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-const int kNumStrings = 3;
+  const int kNumStrings = 3;
 
-class StringEngine : public Engine {
- public:
-  StringEngine() { }
-  ~StringEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+  class StringEngine : public Engine {
+  public:
+    StringEngine() {}
+    ~StringEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
 
- private:
-  StringVoice voice_[kNumStrings];
+  private:
+    StringVoice voice_[kNumStrings];
 
-  float f0_[kNumStrings];
-  DelayLine<float, 16> f0_delay_;
-  int active_string_;
-  float* temp_buffer_;
-  
-  DISALLOW_COPY_AND_ASSIGN(StringEngine);
-};
+    float f0_[kNumStrings];
+    DelayLine<float, 16> f0_delay_;
+    int active_string_;
+    float* temp_buffer_;
 
-}  // namespace plaits
+    DISALLOW_COPY_AND_ASSIGN(StringEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_STRING_ENGINE_H_

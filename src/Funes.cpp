@@ -72,10 +72,10 @@ struct Funes : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	plaits::Voice voices[PORT_MAX_CHANNELS];
-	plaits::Patch patch = {};
-	plaits::Modulations modulations[PORT_MAX_CHANNELS];
-	plaits::UserData userData;
+	sanguineplaits::Voice voices[PORT_MAX_CHANNELS];
+	sanguineplaits::Patch patch = {};
+	sanguineplaits::Modulations modulations[PORT_MAX_CHANNELS];
+	sanguineplaits::UserData userData;
 	// Hardware uses 16384; but new chords crash Rack on mode change if left as such.
 	char sharedBuffers[PORT_MAX_CHANNELS][50176] = {};
 
@@ -213,7 +213,7 @@ struct Funes : SanguineModule {
 			// Calculate pitch for low cpu mode, if needed.
 			float pitch = params[PARAM_FREQUENCY].getValue();
 			if (bWantLowCpu) {
-				pitch += std::log2(plaits::kSampleRate * args.sampleTime);
+				pitch += std::log2(sanguineplaits::kSampleRate * args.sampleTime);
 			}
 
 			// Update patch
@@ -262,7 +262,7 @@ struct Funes : SanguineModule {
 
 			// Render output buffer for each voice.
 			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[plaits::kBlockSize];
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[sanguineplaits::kBlockSize];
 			for (int channel = 0; channel < channelCount; ++channel) {
 				float_4 inputVoltages;
 
@@ -302,12 +302,12 @@ struct Funes : SanguineModule {
 				modulations[channel].trigger_patched = bHaveInputTrigger;
 
 				// Render frames
-				plaits::Voice::Frame output[plaits::kBlockSize];
-				voices[channel].Render(patch, modulations[channel], output, plaits::kBlockSize);
+				sanguineplaits::Voice::Frame output[sanguineplaits::kBlockSize];
+				voices[channel].Render(patch, modulations[channel], output, sanguineplaits::kBlockSize);
 
 				// Convert output to frames
 				const int channelFrame = channel << 1;
-				for (size_t blockNum = 0; blockNum < plaits::kBlockSize; ++blockNum) {
+				for (size_t blockNum = 0; blockNum < sanguineplaits::kBlockSize; ++blockNum) {
 					renderFrames[blockNum].samples[channelFrame] = output[blockNum].out / 32768.f;
 					renderFrames[blockNum].samples[channelFrame + 1] = output[blockNum].aux / 32768.f;
 				}
@@ -331,19 +331,19 @@ struct Funes : SanguineModule {
 
 			// Convert output.
 			if (!bWantLowCpu) {
-				int inLen = plaits::kBlockSize;
+				int inLen = sanguineplaits::kBlockSize;
 				int outLen = drbOutputBuffers.capacity();
 				srcOutputs.setChannels(channelCount << 1);
 				srcOutputs.process(renderFrames, &inLen, drbOutputBuffers.endData(), &outLen);
 				drbOutputBuffers.endIncr(outLen);
 			} else {
-				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), static_cast<int>(plaits::kBlockSize));
+				int len = std::min(static_cast<int>(drbOutputBuffers.capacity()), static_cast<int>(sanguineplaits::kBlockSize));
 				std::memcpy(drbOutputBuffers.endData(), renderFrames, len * sizeof(renderFrames[0]));
 				drbOutputBuffers.endIncr(len);
 			}
 
 			// Pulse light at 2 Hz.
-			triPhase += 2.f * args.sampleTime * plaits::kBlockSize;
+			triPhase += 2.f * args.sampleTime * sanguineplaits::kBlockSize;
 			if (triPhase >= 1.f) {
 				triPhase -= 1.f;
 			}
@@ -491,7 +491,7 @@ struct Funes : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		srcOutputs.setRates(static_cast<int>(plaits::kSampleRate), static_cast<int>(e.sampleRate));
+		srcOutputs.setRates(static_cast<int>(sanguineplaits::kSampleRate), static_cast<int>(e.sampleRate));
 	}
 
 	void onAdd(const AddEvent& e) override {
@@ -510,7 +510,7 @@ struct Funes : SanguineModule {
 
 		const uint8_t* userDataBuffer = userData.getBuffer();
 		if (userDataBuffer != nullptr) {
-			std::string userDataString = rack::string::toBase64(userDataBuffer, plaits::UserData::MAX_USER_DATA_SIZE);
+			std::string userDataString = rack::string::toBase64(userDataBuffer, sanguineplaits::UserData::MAX_USER_DATA_SIZE);
 			setJsonString(rootJ, "userData", userDataString.c_str());
 		}
 
@@ -540,12 +540,12 @@ struct Funes : SanguineModule {
 			if (userDataVector.size() > 0) {
 				const uint8_t* userDataBuffer = &userDataVector[0];
 				userData.setBuffer(userDataBuffer);
-				if (userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
+				if (userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
 					for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 						voices[channel].ReloadUserData();
 					}
 
-					customDataState = userDataBuffer[plaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
+					customDataState = userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
 				}
 			}
 		}

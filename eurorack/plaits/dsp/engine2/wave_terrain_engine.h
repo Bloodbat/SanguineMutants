@@ -39,7 +39,7 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/oscillator/sine_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class WaveTerrainEngine : public Engine {
   public:
     WaveTerrainEngine() {}
@@ -66,5 +66,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(WaveTerrainEngine);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_WAVE_TERRAIN_ENGINE_H_

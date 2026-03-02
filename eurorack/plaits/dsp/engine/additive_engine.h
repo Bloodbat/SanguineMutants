@@ -32,7 +32,7 @@
 #include "plaits/dsp/engine/engine.h"
 #include "plaits/dsp/oscillator/harmonic_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
     const int kHarmonicBatchSize = 12;
     const int kNumHarmonics = 36;
     const int kNumHarmonicOscillators = kNumHarmonics / kHarmonicBatchSize;
@@ -58,5 +58,5 @@ namespace plaits {
 
         DISALLOW_COPY_AND_ASSIGN(AdditiveEngine);
     };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_ADDITIVE_ENGINE_H_

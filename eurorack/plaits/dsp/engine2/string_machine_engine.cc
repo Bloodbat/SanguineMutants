@@ -32,7 +32,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -123,4 +123,4 @@ namespace plaits {
     ensemble_.set_depth(depth);
     ensemble_.Process(out, aux, size);
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

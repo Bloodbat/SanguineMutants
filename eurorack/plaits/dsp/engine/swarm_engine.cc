@@ -30,46 +30,46 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace std;
-using namespace stmlib;
+  using namespace std;
+  using namespace stmlib;
 
-void SwarmEngine::Init(BufferAllocator* allocator) {
-  swarm_voice_ = allocator->Allocate<SwarmVoice>(kNumSwarmVoices);
-}
-
-void SwarmEngine::Reset() {
-  const float n = (kNumSwarmVoices - 1) / 2;
-  for (int i = 0; i < kNumSwarmVoices; ++i) {
-    float rank = (static_cast<float>(i) - n) / n;
-    swarm_voice_[i].Init(rank);
+  void SwarmEngine::Init(BufferAllocator* allocator) {
+    swarm_voice_ = allocator->Allocate<SwarmVoice>(kNumSwarmVoices);
   }
-}
 
-void SwarmEngine::Render(
+  void SwarmEngine::Reset() {
+    const float n = (kNumSwarmVoices - 1) / 2;
+    for (int i = 0; i < kNumSwarmVoices; ++i) {
+      float rank = (static_cast<float>(i) - n) / n;
+      swarm_voice_[i].Init(rank);
+    }
+  }
+
+  void SwarmEngine::Render(
     const EngineParameters& parameters,
     float* out,
     float* aux,
     size_t size,
     bool* already_enveloped) {
-  const float f0 = NoteToFrequency(parameters.note);
-  const float control_rate = static_cast<float>(size);
-  const float density = NoteToFrequency(parameters.timbre * 120.0f) * \
+    const float f0 = NoteToFrequency(parameters.note);
+    const float control_rate = static_cast<float>(size);
+    const float density = NoteToFrequency(parameters.timbre * 120.0f) * \
       0.025f * control_rate;
-  const float spread = parameters.harmonics * parameters.harmonics * \
+    const float spread = parameters.harmonics * parameters.harmonics * \
       parameters.harmonics;
-  float size_ratio = 0.25f * SemitonesToRatio(
+    float size_ratio = 0.25f * SemitonesToRatio(
       (1.0f - parameters.morph) * 84.0f);
-  
-  const bool burst_mode = !(parameters.trigger & TRIGGER_UNPATCHED);
-  const bool start_burst = parameters.trigger & TRIGGER_RISING_EDGE;
 
-  fill(&out[0], &out[size], 0.0f);
-  fill(&aux[0], &aux[size], 0.0f);
-  
-  for (int i = 0; i < kNumSwarmVoices; ++i) {
-    swarm_voice_[i].Render(
+    const bool burst_mode = !(parameters.trigger & TRIGGER_UNPATCHED);
+    const bool start_burst = parameters.trigger & TRIGGER_RISING_EDGE;
+
+    fill(&out[0], &out[size], 0.0f);
+    fill(&aux[0], &aux[size], 0.0f);
+
+    for (int i = 0; i < kNumSwarmVoices; ++i) {
+      swarm_voice_[i].Render(
         f0,
         density,
         burst_mode,
@@ -79,8 +79,8 @@ void SwarmEngine::Render(
         out,
         aux,
         size);
-    size_ratio *= 0.97f;
+      size_ratio *= 0.97f;
+    }
   }
-}
 
-}  // namespace plaits
+}  // namespace sanguineplaits

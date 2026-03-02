@@ -33,7 +33,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
   const size_t kOversampling = 4;
 
   class Downsampler {
@@ -64,5 +64,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(Downsampler);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_DOWNSAMPLER_4X_DOWNSAMPLER_H_

@@ -36,33 +36,33 @@
 #include "plaits/dsp/oscillator/vosim_oscillator.h"
 #include "plaits/dsp/oscillator/z_oscillator.h"
 
-namespace plaits {
-  
-class GrainEngine : public Engine {
- public:
-  GrainEngine() { }
-  ~GrainEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class GrainEngine : public Engine {
+  public:
+    GrainEngine() {}
+    ~GrainEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-    
- private:
-  GrainletOscillator grainlet_[2];
-  // VOSIMOscillator vosim_oscillator_;
-  ZOscillator z_oscillator_;
-  stmlib::OnePole dc_blocker_[2];
-  
-  float grain_balance_;
-  
-  DISALLOW_COPY_AND_ASSIGN(GrainEngine);
-};
 
-}  // namespace plaits
+  private:
+    GrainletOscillator grainlet_[2];
+    // VOSIMOscillator vosim_oscillator_;
+    ZOscillator z_oscillator_;
+    stmlib::OnePole dc_blocker_[2];
+
+    float grain_balance_;
+
+    DISALLOW_COPY_AND_ASSIGN(GrainEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_GRAIN_ENGINE_H_

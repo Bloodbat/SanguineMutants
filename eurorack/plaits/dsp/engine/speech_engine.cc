@@ -30,7 +30,7 @@
 
 #include "plaits/dsp/speech/lpc_speech_synth_words.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
 	using namespace std;
 	using namespace stmlib;
@@ -81,8 +81,7 @@ namespace plaits {
 					aux,
 					out,
 					size);
-			}
-			else {
+			} else {
 				lpc_speech_synth_controller_.Render(
 					parameters.trigger & TRIGGER_UNPATCHED,
 					parameters.trigger & TRIGGER_RISING_EDGE,
@@ -114,8 +113,7 @@ namespace plaits {
 				aux[i] += (temp_buffer_[0][i] - aux[i]) * blend;
 				out[i] += (temp_buffer_[1][i] - out[i]) * blend;
 			}
-		}
-		else {
+		} else {
 			// Change phonemes/words for LPC.
 			const int word_bank = word_bank_quantizer_.Process(
 				(group - 2.0f) * 0.275f) - 1;
@@ -141,4 +139,4 @@ namespace plaits {
 		}
 	}
 
-}  // namespace plaits
+}  // namespace sanguineplaits

@@ -37,7 +37,7 @@
 
 #include "plaits/dsp/oscillator/sine_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class ZOscillator {
   public:
     ZOscillator() {}
@@ -167,5 +167,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(ZOscillator);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_OSCILLATOR_Z_OSCILLATOR_H_
