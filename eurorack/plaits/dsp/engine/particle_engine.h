@@ -33,32 +33,32 @@
 #include "plaits/dsp/fx/diffuser.h"
 #include "plaits/dsp/noise/particle.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-const int kNumParticles = 6;
+  const int kNumParticles = 6;
 
-class ParticleEngine : public Engine {
- public:
-  ParticleEngine() { }
-  ~ParticleEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+  class ParticleEngine : public Engine {
+  public:
+    ParticleEngine() {}
+    ~ParticleEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
 
- private:
-  Particle particle_[kNumParticles];
-  Diffuser diffuser_;
-  stmlib::Svf post_filter_;
-  
-  DISALLOW_COPY_AND_ASSIGN(ParticleEngine);
-};
+  private:
+    Particle particle_[kNumParticles];
+    Diffuser diffuser_;
+    stmlib::Svf post_filter_;
 
-}  // namespace plaits
+    DISALLOW_COPY_AND_ASSIGN(ParticleEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_PARTICLE_ENGINE_H_

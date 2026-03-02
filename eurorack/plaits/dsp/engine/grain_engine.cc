@@ -30,60 +30,60 @@
 
 #include "plaits/dsp/engine/grain_engine.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace std;
-using namespace stmlib;
+  using namespace std;
+  using namespace stmlib;
 
-void GrainEngine::Init(BufferAllocator* allocator) {
-  grainlet_[0].Init();
-  grainlet_[1].Init();
-  // vosim_oscillator_.Init();
-  z_oscillator_.Init();
-  dc_blocker_[0].Init();
-  dc_blocker_[1].Init();
-}
+  void GrainEngine::Init(BufferAllocator* allocator) {
+    grainlet_[0].Init();
+    grainlet_[1].Init();
+    // vosim_oscillator_.Init();
+    z_oscillator_.Init();
+    dc_blocker_[0].Init();
+    dc_blocker_[1].Init();
+  }
 
-void GrainEngine::Reset() {
-  
-}
+  void GrainEngine::Reset() {
 
-void GrainEngine::Render(
+  }
+
+  void GrainEngine::Render(
     const EngineParameters& parameters,
     float* out,
     float* aux,
     size_t size,
     bool* already_enveloped) {
-  const float root = parameters.note;
-  const float f0 = NoteToFrequency(root);
-  
-  const float f1 = NoteToFrequency(24.0f + 84.0f * parameters.timbre);
-  const float ratio = SemitonesToRatio(-24.0f + 48.0f * parameters.harmonics);
-  const float carrier_bleed = parameters.harmonics < 0.5f
+    const float root = parameters.note;
+    const float f0 = NoteToFrequency(root);
+
+    const float f1 = NoteToFrequency(24.0f + 84.0f * parameters.timbre);
+    const float ratio = SemitonesToRatio(-24.0f + 48.0f * parameters.harmonics);
+    const float carrier_bleed = parameters.harmonics < 0.5f
       ? 1.0f - 2.0f * parameters.harmonics
       : 0.0f;
-  const float carrier_bleed_fixed = carrier_bleed * (2.0f - carrier_bleed);
-  const float carrier_shape = 0.33f + (parameters.morph - 0.33f) * \
+    const float carrier_bleed_fixed = carrier_bleed * (2.0f - carrier_bleed);
+    const float carrier_shape = 0.33f + (parameters.morph - 0.33f) * \
       max(1.0f - f0 * 24.0f, 0.0f);
-  
-  grainlet_[0].Render(f0, f1, carrier_shape, carrier_bleed_fixed, out, size);
-  grainlet_[1].Render(f0, f1 * ratio, carrier_shape, carrier_bleed_fixed, aux, size);
-  dc_blocker_[0].set_f<FREQUENCY_DIRTY>(0.3f * f0);
-  for (size_t i = 0; i < size; ++i) {
-    out[i] = dc_blocker_[0].Process<FILTER_MODE_HIGH_PASS>(out[i] + aux[i]);
-  }
 
-  const float cutoff = NoteToFrequency(root + 96.0f * parameters.timbre);
-  z_oscillator_.Render(
+    grainlet_[0].Render(f0, f1, carrier_shape, carrier_bleed_fixed, out, size);
+    grainlet_[1].Render(f0, f1 * ratio, carrier_shape, carrier_bleed_fixed, aux, size);
+    dc_blocker_[0].set_f<FREQUENCY_DIRTY>(0.3f * f0);
+    for (size_t i = 0; i < size; ++i) {
+      out[i] = dc_blocker_[0].Process<FILTER_MODE_HIGH_PASS>(out[i] + aux[i]);
+    }
+
+    const float cutoff = NoteToFrequency(root + 96.0f * parameters.timbre);
+    z_oscillator_.Render(
       f0,
       cutoff,
       parameters.morph,
       parameters.harmonics,
       aux,
       size);
-  
-  dc_blocker_[1].set_f<FREQUENCY_DIRTY>(0.3f * f0);
-  dc_blocker_[1].Process<FILTER_MODE_HIGH_PASS>(aux, size);
-}
 
-}  // namespace plaits
+    dc_blocker_[1].set_f<FREQUENCY_DIRTY>(0.3f * f0);
+    dc_blocker_[1].Process<FILTER_MODE_HIGH_PASS>(aux, size);
+  }
+
+}  // namespace sanguineplaits

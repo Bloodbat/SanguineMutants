@@ -35,36 +35,36 @@
 #include "plaits/dsp/oscillator/variable_saw_oscillator.h"
 #include "plaits/dsp/oscillator/variable_shape_oscillator.h"
 
-namespace plaits {
-  
-class VirtualAnalogVCFEngine : public Engine {
- public:
-  VirtualAnalogVCFEngine() { }
-  ~VirtualAnalogVCFEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class VirtualAnalogVCFEngine : public Engine {
+  public:
+    VirtualAnalogVCFEngine() {}
+    ~VirtualAnalogVCFEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
- private:
-  stmlib::Svf svf_[2];
-  VariableShapeOscillator oscillator_;
-  VariableShapeOscillator sub_oscillator_;
-  
-  float previous_cutoff_;
-  float previous_stage2_gain_;
-  float previous_q_;
-  float previous_gain_;
-  float previous_sub_gain_;
-  
-  DISALLOW_COPY_AND_ASSIGN(VirtualAnalogVCFEngine);
-};
 
-}  // namespace plaits
+  private:
+    stmlib::Svf svf_[2];
+    VariableShapeOscillator oscillator_;
+    VariableShapeOscillator sub_oscillator_;
+
+    float previous_cutoff_;
+    float previous_stage2_gain_;
+    float previous_q_;
+    float previous_gain_;
+    float previous_sub_gain_;
+
+    DISALLOW_COPY_AND_ASSIGN(VirtualAnalogVCFEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_VIRTUAL_ANALOG_VCF_ENGINE_H_

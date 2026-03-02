@@ -34,7 +34,7 @@
 #include "stmlib/dsp/filter.h"
 #include "plaits/dsp/fx/ensemble.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class StringMachineEngine : public Engine {
   public:
     StringMachineEngine() {}
@@ -60,5 +60,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(StringMachineEngine);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_ENGINE_STRING_MACHINE_ENGINE_H_

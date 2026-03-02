@@ -42,54 +42,54 @@
 
 #include <algorithm>
 
-namespace plaits {
+namespace sanguineplaits {
 
-class VariableShapeOscillator {
- public:
-  VariableShapeOscillator() { }
-  ~VariableShapeOscillator() { }
+  class VariableShapeOscillator {
+  public:
+    VariableShapeOscillator() {}
+    ~VariableShapeOscillator() {}
 
-  void Init() {
-    master_phase_ = 0.0f;
-    slave_phase_ = 0.0f;
-    next_sample_ = 0.0f;
-    previous_pw_ = 0.5f;
-    high_ = false;
-  
-    master_frequency_ = 0.0f;
-    slave_frequency_ = 0.01f;
-    pw_ = 0.5f;
-    waveshape_ = 0.0f;
-    phase_modulation_ = 0.0f;
-  }
+    void Init() {
+      master_phase_ = 0.0f;
+      slave_phase_ = 0.0f;
+      next_sample_ = 0.0f;
+      previous_pw_ = 0.5f;
+      high_ = false;
 
-  void Render(
+      master_frequency_ = 0.0f;
+      slave_frequency_ = 0.01f;
+      pw_ = 0.5f;
+      waveshape_ = 0.0f;
+      phase_modulation_ = 0.0f;
+    }
+
+    void Render(
       float frequency,
       float pw,
       float waveshape,
       float* out,
       size_t size) {
-    Render<false, false>(0.0f, frequency, pw, waveshape, 0.0f, out, size);
-  }
-  
-  void Render(
+      Render<false, false>(0.0f, frequency, pw, waveshape, 0.0f, out, size);
+    }
+
+    void Render(
       float master_frequency,
       float frequency,
       float pw,
       float waveshape,
       float* out,
       size_t size) {
-    Render<true, false>(
+      Render<true, false>(
         master_frequency,
         frequency,
         pw,
         waveshape,
         0.0f,
         out, size);
-  }
-  
-  template<bool enable_sync, bool output_phase>
-  void Render(
+    }
+
+    template<bool enable_sync, bool output_phase>
+    void Render(
       float master_frequency,
       float frequency,
       float pw,
@@ -97,189 +97,189 @@ class VariableShapeOscillator {
       float phase_modulation_amount,
       float* out,
       size_t size) {
-    if (master_frequency >= kMaxFrequency) {
-      master_frequency = kMaxFrequency;
-    }
-    if (frequency >= kMaxFrequency) {
-      frequency = kMaxFrequency;
-    }
-    
-    if (frequency >= 0.25f) {
-      pw = 0.5f;
-    } else {
-      CONSTRAIN(pw, frequency * 2.0f, 1.0f - 2.0f * frequency);
-    }
-    
-    stmlib::ParameterInterpolator master_fm(
+      if (master_frequency >= kMaxFrequency) {
+        master_frequency = kMaxFrequency;
+      }
+      if (frequency >= kMaxFrequency) {
+        frequency = kMaxFrequency;
+      }
+
+      if (frequency >= 0.25f) {
+        pw = 0.5f;
+      } else {
+        CONSTRAIN(pw, frequency * 2.0f, 1.0f - 2.0f * frequency);
+      }
+
+      stmlib::ParameterInterpolator master_fm(
         &master_frequency_, master_frequency, size);
-    stmlib::ParameterInterpolator fm(&slave_frequency_, frequency, size);
-    stmlib::ParameterInterpolator pwm(&pw_, pw, size);
-    stmlib::ParameterInterpolator waveshape_modulation(
+      stmlib::ParameterInterpolator fm(&slave_frequency_, frequency, size);
+      stmlib::ParameterInterpolator pwm(&pw_, pw, size);
+      stmlib::ParameterInterpolator waveshape_modulation(
         &waveshape_, waveshape, size);
-    stmlib::ParameterInterpolator phase_modulation(
+      stmlib::ParameterInterpolator phase_modulation(
         &phase_modulation_, phase_modulation_amount, size);
 
-    float next_sample = next_sample_;
-    
-    while (size--) {
-      bool reset = false;
-      bool transition_during_reset = false;
-      float reset_time = 0.0f;
+      float next_sample = next_sample_;
 
-      float this_sample = next_sample;
-      next_sample = 0.0f;
-    
-      const float master_frequency = master_fm.Next();
-      const float slave_frequency = fm.Next();
-      const float pw = pwm.Next();
-      const float waveshape = waveshape_modulation.Next();
-      
-      const float square_amount = std::max(waveshape - 0.5f, 0.0f) * 2.0f;
-      const float triangle_amount = std::max(1.0f - waveshape * 2.0f, 0.0f);
-      
-      const float slope_up = 1.0f / (pw);
-      const float slope_down = 1.0f / (1.0f - pw);
+      while (size--) {
+        bool reset = false;
+        bool transition_during_reset = false;
+        float reset_time = 0.0f;
 
-      if (enable_sync) {
-        master_phase_ += master_frequency;
-        if (master_phase_ >= 1.0f) {
-          master_phase_ -= 1.0f;
-          reset_time = master_phase_ / master_frequency;
-      
-          float slave_phase_at_reset = slave_phase_ + \
+        float this_sample = next_sample;
+        next_sample = 0.0f;
+
+        const float master_frequency = master_fm.Next();
+        const float slave_frequency = fm.Next();
+        const float pw = pwm.Next();
+        const float waveshape = waveshape_modulation.Next();
+
+        const float square_amount = std::max(waveshape - 0.5f, 0.0f) * 2.0f;
+        const float triangle_amount = std::max(1.0f - waveshape * 2.0f, 0.0f);
+
+        const float slope_up = 1.0f / (pw);
+        const float slope_down = 1.0f / (1.0f - pw);
+
+        if (enable_sync) {
+          master_phase_ += master_frequency;
+          if (master_phase_ >= 1.0f) {
+            master_phase_ -= 1.0f;
+            reset_time = master_phase_ / master_frequency;
+
+            float slave_phase_at_reset = slave_phase_ + \
               (1.0f - reset_time) * slave_frequency;
-          reset = true;
-          if (slave_phase_at_reset >= 1.0f) {
-            slave_phase_at_reset -= 1.0f;
-            transition_during_reset = true;
-          }
-          if (!high_ && slave_phase_at_reset >= pw) {
-            transition_during_reset = true;
-          }
-          float value = ComputeNaiveSample(
+            reset = true;
+            if (slave_phase_at_reset >= 1.0f) {
+              slave_phase_at_reset -= 1.0f;
+              transition_during_reset = true;
+            }
+            if (!high_ && slave_phase_at_reset >= pw) {
+              transition_during_reset = true;
+            }
+            float value = ComputeNaiveSample(
               slave_phase_at_reset,
               pw,
               slope_up,
               slope_down,
               triangle_amount,
               square_amount);
-          this_sample -= value * stmlib::ThisBlepSample(reset_time);
-          next_sample -= value * stmlib::NextBlepSample(reset_time);
-        }
-      } else if (output_phase) {
-        master_phase_ += master_frequency;
-        if (master_phase_ >= 1.0f) {
-          master_phase_ -= 1.0f;
-        }
-      }
-      
-      slave_phase_ += slave_frequency;
-      while (transition_during_reset || !reset) {
-        if (!high_) {
-          if (slave_phase_ < pw) {
-            break;
+            this_sample -= value * stmlib::ThisBlepSample(reset_time);
+            next_sample -= value * stmlib::NextBlepSample(reset_time);
           }
-          float t = (slave_phase_ - pw) / (previous_pw_ - pw + slave_frequency);
-          float triangle_step = (slope_up + slope_down) * slave_frequency;
-          triangle_step *= triangle_amount;
-          
-          this_sample += square_amount * stmlib::ThisBlepSample(t);
-          next_sample += square_amount * stmlib::NextBlepSample(t);
-          this_sample -= triangle_step * stmlib::ThisIntegratedBlepSample(t);
-          next_sample -= triangle_step * stmlib::NextIntegratedBlepSample(t);
-          high_ = true;
-        }
-      
-        if (high_) {
-          if (slave_phase_ < 1.0f) {
-            break;
+        } else if (output_phase) {
+          master_phase_ += master_frequency;
+          if (master_phase_ >= 1.0f) {
+            master_phase_ -= 1.0f;
           }
-          slave_phase_ -= 1.0f;
-          float t = slave_phase_ / slave_frequency;
-          float triangle_step = (slope_up + slope_down) * slave_frequency;
-          triangle_step *= triangle_amount;
+        }
 
-          this_sample -= (1.0f - triangle_amount) * stmlib::ThisBlepSample(t);
-          next_sample -= (1.0f - triangle_amount) * stmlib::NextBlepSample(t);
-          this_sample += triangle_step * stmlib::ThisIntegratedBlepSample(t);
-          next_sample += triangle_step * stmlib::NextIntegratedBlepSample(t);
+        slave_phase_ += slave_frequency;
+        while (transition_during_reset || !reset) {
+          if (!high_) {
+            if (slave_phase_ < pw) {
+              break;
+            }
+            float t = (slave_phase_ - pw) / (previous_pw_ - pw + slave_frequency);
+            float triangle_step = (slope_up + slope_down) * slave_frequency;
+            triangle_step *= triangle_amount;
+
+            this_sample += square_amount * stmlib::ThisBlepSample(t);
+            next_sample += square_amount * stmlib::NextBlepSample(t);
+            this_sample -= triangle_step * stmlib::ThisIntegratedBlepSample(t);
+            next_sample -= triangle_step * stmlib::NextIntegratedBlepSample(t);
+            high_ = true;
+          }
+
+          if (high_) {
+            if (slave_phase_ < 1.0f) {
+              break;
+            }
+            slave_phase_ -= 1.0f;
+            float t = slave_phase_ / slave_frequency;
+            float triangle_step = (slope_up + slope_down) * slave_frequency;
+            triangle_step *= triangle_amount;
+
+            this_sample -= (1.0f - triangle_amount) * stmlib::ThisBlepSample(t);
+            next_sample -= (1.0f - triangle_amount) * stmlib::NextBlepSample(t);
+            this_sample += triangle_step * stmlib::ThisIntegratedBlepSample(t);
+            next_sample += triangle_step * stmlib::NextIntegratedBlepSample(t);
+            high_ = false;
+          }
+        }
+
+        if (enable_sync && reset) {
+          slave_phase_ = reset_time * slave_frequency;
           high_ = false;
         }
-      }
-    
-      if (enable_sync && reset) {
-        slave_phase_ = reset_time * slave_frequency;
-        high_ = false;
-      }
-    
-      next_sample += ComputeNaiveSample(
+
+        next_sample += ComputeNaiveSample(
           slave_phase_,
           pw,
           slope_up,
           slope_down,
           triangle_amount,
           square_amount);
-      previous_pw_ = pw;
-      
-      if (output_phase) {
-        float phasor = master_phase_;
-        if (enable_sync) {
-          // A trick to prevent discontinuities when the phase wraps around.
-          const float w = 4.0f * (1.0f - master_phase_) * master_phase_;
-          this_sample *= w * (2.0f - w);
-          
-          // Apply some asymmetry on the main phasor too.
-          const float p2 = phasor * phasor;
-          phasor += (p2 * p2 - phasor) * fabsf(pw - 0.5f) * 2.0f;
+        previous_pw_ = pw;
+
+        if (output_phase) {
+          float phasor = master_phase_;
+          if (enable_sync) {
+            // A trick to prevent discontinuities when the phase wraps around.
+            const float w = 4.0f * (1.0f - master_phase_) * master_phase_;
+            this_sample *= w * (2.0f - w);
+
+            // Apply some asymmetry on the main phasor too.
+            const float p2 = phasor * phasor;
+            phasor += (p2 * p2 - phasor) * fabsf(pw - 0.5f) * 2.0f;
+          }
+          *out++ = phasor + phase_modulation.Next() * this_sample;
+        } else {
+          *out++ = (2.0f * this_sample - 1.0f);
         }
-        *out++ = phasor + phase_modulation.Next() * this_sample;
-      } else {
-        *out++ = (2.0f * this_sample - 1.0f);
       }
+
+      next_sample_ = next_sample;
     }
-    
-    next_sample_ = next_sample;
-  }
-  
-  inline void set_master_phase(float master_phase) {
-    master_phase_ = master_phase;
-  }
-  
- private:
-  inline float ComputeNaiveSample(
+
+    inline void set_master_phase(float master_phase) {
+      master_phase_ = master_phase;
+    }
+
+  private:
+    inline float ComputeNaiveSample(
       float phase,
       float pw,
       float slope_up,
       float slope_down,
       float triangle_amount,
       float square_amount) const {
-    float saw = phase;
-    float square = phase < pw ? 0.0f : 1.0f;
-    float triangle = phase < pw
+      float saw = phase;
+      float square = phase < pw ? 0.0f : 1.0f;
+      float triangle = phase < pw
         ? phase * slope_up
         : 1.0f - (phase - pw) * slope_down;
-    saw += (square - saw) * square_amount;
-    saw += (triangle - saw) * triangle_amount;
-    return saw;
-  }
+      saw += (square - saw) * square_amount;
+      saw += (triangle - saw) * triangle_amount;
+      return saw;
+    }
 
-  // Oscillator state.
-  float master_phase_;
-  float slave_phase_;
-  float next_sample_;
-  float previous_pw_;
-  bool high_;
+    // Oscillator state.
+    float master_phase_;
+    float slave_phase_;
+    float next_sample_;
+    float previous_pw_;
+    bool high_;
 
-  // For interpolation of parameters.
-  float master_frequency_;
-  float slave_frequency_;
-  float pw_;
-  float waveshape_;
-  float phase_modulation_;
+    // For interpolation of parameters.
+    float master_frequency_;
+    float slave_frequency_;
+    float pw_;
+    float waveshape_;
+    float phase_modulation_;
 
-  DISALLOW_COPY_AND_ASSIGN(VariableShapeOscillator);
-};
-  
-}  // namespace plaits
+    DISALLOW_COPY_AND_ASSIGN(VariableShapeOscillator);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_OSCILLATOR_VARIABLE_SHAPE_OSCILLATOR_H_

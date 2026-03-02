@@ -33,29 +33,29 @@
 #include "plaits/dsp/drums/synthetic_snare_drum.h"
 #include "plaits/dsp/engine/engine.h"
 
-namespace plaits {
-  
-class SnareDrumEngine : public Engine {
- public:
-  SnareDrumEngine() { }
-  ~SnareDrumEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class SnareDrumEngine : public Engine {
+  public:
+    SnareDrumEngine() {}
+    ~SnareDrumEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
 
- private:
-  AnalogSnareDrum analog_snare_drum_;
-  SyntheticSnareDrum synthetic_snare_drum_;
-  
-  DISALLOW_COPY_AND_ASSIGN(SnareDrumEngine);
-};
+  private:
+    AnalogSnareDrum analog_snare_drum_;
+    SyntheticSnareDrum synthetic_snare_drum_;
 
-}  // namespace plaits
+    DISALLOW_COPY_AND_ASSIGN(SnareDrumEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_SNARE_DRUM_ENGINE_H_

@@ -36,46 +36,46 @@
 #include "plaits/dsp/speech/naive_speech_synth.h"
 #include "plaits/dsp/speech/sam_speech_synth.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-class SpeechEngine : public Engine {
- public:
-  SpeechEngine() { }
-  ~SpeechEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+  class SpeechEngine : public Engine {
+  public:
+    SpeechEngine() {}
+    ~SpeechEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
-  
-  inline void set_prosody_amount(float prosody_amount) {
-    prosody_amount_ = prosody_amount;
-  }
-  
-  inline void set_speed(float speed) {
-    speed_ = speed;
-  }
 
- private:
-  stmlib::HysteresisQuantizer2 word_bank_quantizer_;
-  
-  NaiveSpeechSynth naive_speech_synth_;
-  SAMSpeechSynth sam_speech_synth_;
-  
-  LPCSpeechSynthController lpc_speech_synth_controller_;
-  LPCSpeechSynthWordBank lpc_speech_synth_word_bank_;
-  
-  float* temp_buffer_[2];
-  float prosody_amount_;
-  float speed_;
-  
-  DISALLOW_COPY_AND_ASSIGN(SpeechEngine);
-};
+    inline void set_prosody_amount(float prosody_amount) {
+      prosody_amount_ = prosody_amount;
+    }
 
-}  // namespace plaits
+    inline void set_speed(float speed) {
+      speed_ = speed;
+    }
+
+  private:
+    stmlib::HysteresisQuantizer2 word_bank_quantizer_;
+
+    NaiveSpeechSynth naive_speech_synth_;
+    SAMSpeechSynth sam_speech_synth_;
+
+    LPCSpeechSynthController lpc_speech_synth_controller_;
+    LPCSpeechSynthWordBank lpc_speech_synth_word_bank_;
+
+    float* temp_buffer_[2];
+    float prosody_amount_;
+    float speed_;
+
+    DISALLOW_COPY_AND_ASSIGN(SpeechEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_SPEECH_ENGINE_H_

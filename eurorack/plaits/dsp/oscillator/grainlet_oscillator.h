@@ -37,7 +37,7 @@
 #include "plaits/dsp/oscillator/oscillator.h"
 #include "plaits/dsp/oscillator/sine_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class GrainletOscillator {
   public:
     GrainletOscillator() {}
@@ -157,5 +157,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(GrainletOscillator);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_OSCILLATOR_GRAINLET_OSCILLATOR_H_

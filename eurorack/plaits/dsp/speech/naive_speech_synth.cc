@@ -37,7 +37,7 @@
 
 #include "plaits/resources.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
 using namespace std;
 using namespace stmlib;
@@ -157,4 +157,4 @@ void NaiveSpeechSynth::Render(
   }
 }
 
-}  // namespace plaits
+}  // namespace sanguineplaits

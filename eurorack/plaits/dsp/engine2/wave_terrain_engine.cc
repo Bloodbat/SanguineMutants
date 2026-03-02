@@ -33,7 +33,7 @@
 
 #include "plaits/dsp/oscillator/wavetable_oscillator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   using namespace std;
   using namespace stmlib;
 
@@ -225,4 +225,4 @@ namespace plaits {
       aux[i] = Sine(1.0f + 0.5f * kScale * aux_s);
     }
   }
-}  // namespace plaits
+}  // namespace sanguineplaits

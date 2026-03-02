@@ -29,29 +29,29 @@
 
 #include "plaits/dsp/engine/hi_hat_engine.h"
 
-namespace plaits {
+namespace sanguineplaits {
 
-using namespace stmlib;
+  using namespace stmlib;
 
-void HiHatEngine::Init(BufferAllocator* allocator) {
-  hi_hat_1_.Init();
-  hi_hat_2_.Init();
-  temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize * 2);
-}
+  void HiHatEngine::Init(BufferAllocator* allocator) {
+    hi_hat_1_.Init();
+    hi_hat_2_.Init();
+    temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize * 2);
+  }
 
-void HiHatEngine::Reset() {
-  
-}
+  void HiHatEngine::Reset() {
 
-void HiHatEngine::Render(
+  }
+
+  void HiHatEngine::Render(
     const EngineParameters& parameters,
     float* out,
     float* aux,
     size_t size,
     bool* already_enveloped) {
-  const float f0 = NoteToFrequency(parameters.note);
-  
-  hi_hat_1_.Render(
+    const float f0 = NoteToFrequency(parameters.note);
+
+    hi_hat_1_.Render(
       parameters.trigger & TRIGGER_UNPATCHED,
       parameters.trigger & TRIGGER_RISING_EDGE,
       parameters.accent,
@@ -63,8 +63,8 @@ void HiHatEngine::Render(
       temp_buffer_ + size,
       out,
       size);
-  
-  hi_hat_2_.Render(
+
+    hi_hat_2_.Render(
       parameters.trigger & TRIGGER_UNPATCHED,
       parameters.trigger & TRIGGER_RISING_EDGE,
       parameters.accent,
@@ -76,6 +76,6 @@ void HiHatEngine::Render(
       temp_buffer_ + size,
       aux,
       size);
-}
+  }
 
-}  // namespace plaits
+}  // namespace sanguineplaits

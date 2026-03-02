@@ -35,31 +35,31 @@
 #include "plaits/dsp/fx/overdrive.h"
 #include "plaits/dsp/fx/sample_rate_reducer.h"
 
-namespace plaits {
-  
-class BassDrumEngine : public Engine {
- public:
-  BassDrumEngine() { }
-  ~BassDrumEngine() { }
-  
-  virtual void Init(stmlib::BufferAllocator* allocator) override;
-  virtual void Reset() override;
-  virtual void LoadUserData(const uint8_t* user_data) override { }
-  virtual void Render(const EngineParameters& parameters,
+namespace sanguineplaits {
+
+  class BassDrumEngine : public Engine {
+  public:
+    BassDrumEngine() {}
+    ~BassDrumEngine() {}
+
+    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Reset() override;
+    virtual void LoadUserData(const uint8_t* user_data) override {}
+    virtual void Render(const EngineParameters& parameters,
       float* out,
       float* aux,
       size_t size,
       bool* already_enveloped) override;
 
- private:
-  AnalogBassDrum analog_bass_drum_;
-  SyntheticBassDrum synthetic_bass_drum_;
-  
-  Overdrive overdrive_;
-  
-  DISALLOW_COPY_AND_ASSIGN(BassDrumEngine);
-};
+  private:
+    AnalogBassDrum analog_bass_drum_;
+    SyntheticBassDrum synthetic_bass_drum_;
 
-}  // namespace plaits
+    Overdrive overdrive_;
+
+    DISALLOW_COPY_AND_ASSIGN(BassDrumEngine);
+  };
+
+}  // namespace sanguineplaits
 
 #endif  // PLAITS_DSP_ENGINE_BASS_DRUM_ENGINE_H_

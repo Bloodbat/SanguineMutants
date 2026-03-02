@@ -35,7 +35,7 @@
 #include "stmlib/dsp/filter.h"
 #include "stmlib/dsp/parameter_interpolator.h"
 
-namespace plaits {
+namespace sanguineplaits {
   class LowPassGate {
   public:
     LowPassGate() {}
@@ -73,5 +73,5 @@ namespace plaits {
 
     DISALLOW_COPY_AND_ASSIGN(LowPassGate);
   };
-}  // namespace plaits
+}  // namespace sanguineplaits
 #endif  // PLAITS_DSP_FX_LOW_PASS_GATE_H_
