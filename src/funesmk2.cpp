@@ -195,6 +195,10 @@ struct FunesMk2 : SanguineModule {
 
         configInput(INPUT_AUX_CROSSFADE, "Main Out → Aux crossfader");
 
+        configInput(INPUT_CHORD_BANK, "Chord bank select");
+        configInput(INPUT_AUX_SUBOSCILLATOR, "Aux suboscillator select");
+        configInput(INPUT_HOLD_MODULATIONS, "Hold modulations");
+
         configOutput(OUTPUT_OUT, "Main");
         configOutput(OUTPUT_AUX, "Auxiliary");
 
