@@ -41,6 +41,8 @@ without the backticks.
 
 - Funes: ability to hold Timbre, Morph, Harmonics, Level and Note voltages when trigger is received, adapted from Lyle Mills' firmware.
 
+- Marmora: ability to optionally generate and use different random seeds when a patch is loaded.
+
 - Nebulae family: modules are fully polyphonic.
 
 - Nebulae family: optional hardware-like handling of triggers: rising edge detection instead of treating them as gates.
