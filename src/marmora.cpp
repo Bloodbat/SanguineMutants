@@ -114,6 +114,8 @@ struct Marmora : SanguineModule {
 	bool bScaleEditMode = false;
 	bool bLastGate = false;
 
+	bool bSeedOnLoad = false;
+
 	bool bGates[marmora::kBlockSize * 2] = {};
 
 	marmora::DejaVuLockModes dejaVuLockModeT = marmora::DEJA_VU_LOCK_ON;
@@ -710,6 +712,7 @@ struct Marmora : SanguineModule {
 
 		setJsonInt(rootJ, "y_divider_index", yDividerIndex);
 		setJsonInt(rootJ, "userSeed", userSeed);
+		setJsonBoolean(rootJ, "SeedOnLoad", bSeedOnLoad);
 
 		for (int scale = 0; scale < marmora::kMaxScales; ++scale) {
 			if (marmoraScales[scale].bScaleDirty) {
@@ -743,6 +746,16 @@ struct Marmora : SanguineModule {
 
 		if (getJsonInt(rootJ, "userSeed", intValue)) {
 			userSeed = intValue;
+			randomGenerator.Init(userSeed);
+		}
+
+		getJsonBoolean(rootJ, "SeedOnLoad", bSeedOnLoad);
+
+		if (bSeedOnLoad) {
+			userSeed = random::u32();
+			if (userSeed < 1) {
+				userSeed = 1;
+			}
 			randomGenerator.Init(userSeed);
 		}
 
@@ -1083,6 +1096,10 @@ struct MarmoraWidget : SanguineModuleWidget {
 				menu->addChild(createMenuItem("Reseed rng", "", [=]() {
 					module->randomGenerator.GetWord();
 					}));
+
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createBoolPtrMenuItem("Random seed on patch load", "", &module->bSeedOnLoad));
 
 				menu->addChild(new MenuSeparator);
 
