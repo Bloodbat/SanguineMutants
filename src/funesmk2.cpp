@@ -603,27 +603,9 @@ struct FunesMk2 : SanguineModule {
         jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
         lightsDivider.setDivision(jitteredLightsFrequency);
 
-        const std::string patchStorageDir = getPatchStorageDirectory();
         const int64_t moduleId = getId();
 
-        for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-            const std::string userDataFilePath = system::join(patchStorageDir,
-                string::f(funesmk2::kUserDataFileName, moduleId, channel));
-            FILE* userDataFile = fopen(userDataFilePath.c_str(), "rb");
-
-            if (userDataFile != NULL) {
-                uint8_t userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE];
-
-                fread(userDataBuffer, sizeof(uint8_t), sanguineplaits::UserData::MAX_USER_DATA_SIZE,
-                    userDataFile);
-                if (userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
-                    userDatas[channel].setBuffer(userDataBuffer);
-                    voices[channel].ReloadUserData();
-                    customDataStates[channel] = userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
-                }
-                fclose(userDataFile);
-            }
-        }
+        loadCustomDataFromStorage(moduleId);
     }
 
     void onSave(const SaveEvent& e) override {
@@ -678,6 +660,8 @@ struct FunesMk2 : SanguineModule {
         if (getJsonInt(rootJ, "displayChannel", intValue)) {
             displayChannel = intValue;
         }
+
+        // ID = -1 when module has just been pasted...
     }
 
     void resetCustomData() {
@@ -713,6 +697,29 @@ struct FunesMk2 : SanguineModule {
                 customDataStates[displayChannel] = patches[displayChannel].engine;
             } else {
                 errorTimeOut = 4;
+            }
+        }
+    }
+
+    void loadCustomDataFromStorage(const int64_t moduleId) {
+        const std::string patchStorageDir = getPatchStorageDirectory();
+
+        for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            const std::string userDataFilePath = system::join(patchStorageDir,
+                string::f(funesmk2::kUserDataFileName, moduleId, channel));
+            FILE* userDataFile = fopen(userDataFilePath.c_str(), "rb");
+
+            if (userDataFile != NULL) {
+                uint8_t userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE];
+
+                fread(userDataBuffer, sizeof(uint8_t), sanguineplaits::UserData::MAX_USER_DATA_SIZE,
+                    userDataFile);
+                if (userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 2] == 'U') {
+                    userDatas[channel].setBuffer(userDataBuffer);
+                    voices[channel].ReloadUserData();
+                    customDataStates[channel] = userDataBuffer[sanguineplaits::UserData::MAX_USER_DATA_SIZE - 1] - ' ';
+                }
+                fclose(userDataFile);
             }
         }
     }
