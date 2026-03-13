@@ -81,7 +81,6 @@ struct FunesMk2 : SanguineModule {
     sanguineplaits::Voice voices[PORT_MAX_CHANNELS];
     sanguineplaits::Patch patches[PORT_MAX_CHANNELS] = {};
     sanguineplaits::Modulations modulations[PORT_MAX_CHANNELS] = {};
-    // TODO: Are we still crashing??
     sanguineplaits::UserData userDatas[PORT_MAX_CHANNELS];
     // Hardware uses 16384; but new chords crash Rack on mode change if left as such.
     uint8_t sharedBuffers[PORT_MAX_CHANNELS][50176] = {};
