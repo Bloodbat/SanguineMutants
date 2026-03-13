@@ -691,9 +691,7 @@ struct FunesMk2 : SanguineModule {
     void resetCustomData() {
         bool success = userDatas[displayChannel].Save(nullptr, patches[displayChannel].engine);
         if (success) {
-            for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-                voices[channel].ReloadUserData();
-            }
+            voices[displayChannel].ReloadUserData();
             customDataStates[displayChannel] = -1;
             customDataPaths[displayChannel] = "";
         }
