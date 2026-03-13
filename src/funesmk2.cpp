@@ -695,6 +695,7 @@ struct FunesMk2 : SanguineModule {
                 voices[channel].ReloadUserData();
             }
             customDataStates[displayChannel] = -1;
+            customDataPaths[displayChannel] = "";
         }
     }
 
