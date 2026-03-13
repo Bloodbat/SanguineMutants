@@ -99,6 +99,8 @@ struct FunesMk2 : SanguineModule {
 
     int knobModel = 8;
 
+    int customDataStates[PORT_MAX_CHANNELS];
+
     uint8_t selectedChordBank = 0;
     uint8_t chordBanks[PORT_MAX_CHANNELS] = {};
 
@@ -133,10 +135,9 @@ struct FunesMk2 : SanguineModule {
     bool holdModulations[PORT_MAX_CHANNELS] = {};
 
     std::string displayText = "";
+    std::string customDataPaths[PORT_MAX_CHANNELS] = {};
 
     dsp::ClockDivider lightsDivider;
-
-    int customDataStates[PORT_MAX_CHANNELS] = {};
 
     float selectedSubOscillator = 0.f;
 
@@ -207,6 +208,8 @@ struct FunesMk2 : SanguineModule {
             voices[channel].Init(&allocator, &userDatas[channel]);
 
             octaveQuantizers[channel].Init(9, 0.01f, false);
+
+            customDataStates[channel] = -1;
         }
 
         init();
@@ -642,6 +645,11 @@ struct FunesMk2 : SanguineModule {
         setJsonBoolean(rootJ, "notesModelSelection", bNotesModelSelection);
         setJsonInt(rootJ, "displayChannel", displayChannel);
 
+        for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            setJsonString(rootJ, string::f("customDataPath%d", channel).c_str(), customDataPaths[channel].c_str());
+            setJsonInt(rootJ, string::f("channelEngine%d", channel).c_str(), customDataStates[channel]);
+        }
+
         return rootJ;
     }
 
@@ -661,7 +669,24 @@ struct FunesMk2 : SanguineModule {
             displayChannel = intValue;
         }
 
-        // ID = -1 when module has just been pasted...
+        std::string filePath;
+        for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            bool bHaveChannel = getJsonInt(rootJ, string::f("channelEngine%d", channel).c_str(), intValue);
+
+            if (bHaveChannel) {
+                customDataStates[channel] = intValue;
+            }
+
+            bool bHavePath = getJsonString(rootJ, string::f("customDataPath%d", channel).c_str(), filePath);
+
+            if (bHavePath) {
+                customDataPaths[channel] = filePath;
+            }
+
+            if ((bHaveChannel && isEngineCustomizable(intValue)) && bHavePath) {
+                loadCustomData(filePath, channel, intValue);
+            }
+        }
     }
 
     void resetCustomData() {
@@ -670,11 +695,36 @@ struct FunesMk2 : SanguineModule {
             for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
                 voices[channel].ReloadUserData();
             }
-            customDataStates[displayChannel] = 0;
+            customDataStates[displayChannel] = -1;
         }
     }
 
+    std::vector<uint8_t> readFile(const std::string& path, bool& result) {
+        std::vector<uint8_t> data;
+        FILE* f = std::fopen(path.c_str(), "rb");
+
+        result = f;
+
+        if (result) {
+            DEFER({ std::fclose(f); });
+
+            // Get file size so we can make a single allocation
+            std::fseek(f, 0, SEEK_END);
+            size_t len = std::ftell(f);
+            std::fseek(f, 0, SEEK_SET);
+
+            data.resize(len);
+            std::fread(data.data(), 1, len, f);
+        }
+
+        return data;
+    }
+
     void loadCustomData(const std::string& filePath) {
+        loadCustomData(filePath, displayChannel, patches[displayChannel].engine);
+    }
+
+    void loadCustomData(const std::string& filePath, int channel, int slot) {
         bIsLoading = true;
         DEFER({ bIsLoading = false; });
         // HACK: Sleep 100us so DSP thread is likely to finish processing before we resize the vector.
@@ -686,15 +736,22 @@ struct FunesMk2 : SanguineModule {
         std::string fileExtension = string::lowercase(system::getExtension(filePath));
 
         if (fileExtension == ".bin") {
-            std::vector<uint8_t> buffer = system::readFile(filePath);
-            const uint8_t* dataBuffer = buffer.data();
-            bool success = userDatas[displayChannel].Save(dataBuffer, patches[displayChannel].engine);
-            if (success) {
-                for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            bool fileOk = false;
+            std::vector<uint8_t> buffer = readFile(filePath, fileOk);
+
+            if (fileOk) {
+                const uint8_t* dataBuffer = buffer.data();
+                bool success = userDatas[channel].Save(dataBuffer, slot);
+                if (success) {
                     voices[channel].ReloadUserData();
+
+                    // Only 1 engine per channel can use custom data at a time.
+                    customDataStates[channel] = slot;
+
+                    customDataPaths[channel] = filePath;
+                } else {
+                    errorTimeOut = 4;
                 }
-                // Only 1 engine per channel can use custom data at a time.
-                customDataStates[displayChannel] = patches[displayChannel].engine;
             } else {
                 errorTimeOut = 4;
             }
