@@ -120,7 +120,7 @@
 
 - Plugin: faceplate colors.
 
-- Plugin: work around Rack's SVG rendering defiencies.
+- Plugin: work around Rack's SVG rendering deficiencies.
 
 - Aestus family: restore "Frequency knob center is C4" user preference properly.
 
