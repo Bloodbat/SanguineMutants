@@ -804,15 +804,15 @@ struct Apices : SanguineModule {
 					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name =
 						apices::knobLabelsSplitMode[processorFunctions[0]].knob4;
 
-					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+					nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 
-					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+					nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 				}
 			} else {
 				int currentFunction = -1;
@@ -843,15 +843,15 @@ struct Apices : SanguineModule {
 						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_4]->name = toolTipText;
 						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_4]->name = toolTipText + apicesCommon::kSuffixCV;
 
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+						nixExpander->paramQuantities[Nix::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+						nixExpander->inputInfos[Nix::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 					}
 				}
 				// If expert, pick the active set of labels.

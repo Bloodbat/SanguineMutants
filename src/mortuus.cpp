@@ -827,15 +827,15 @@ struct Mortuus : SanguineModule {
 					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name =
 						mortuus::knobLabelsSplitMode[processorFunctions[0]].knob4;
 
-					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+					ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 
-					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+					ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 				}
 			} else {
 				int currentFunction = -1;
@@ -866,15 +866,15 @@ struct Mortuus : SanguineModule {
 						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_4]->name = toolTipText;
 						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_4]->name = toolTipText + apicesCommon::kSuffixCV;
 
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+						ansaExpander->paramQuantities[Ansa::PARAM_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kInactivedLabel;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kInactivedLabel;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kInactivedLabel;
-						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kInactivedLabel;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_1]->name = apicesCommon::kLabelInactive;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_2]->name = apicesCommon::kLabelInactive;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_3]->name = apicesCommon::kLabelInactive;
+						ansaExpander->inputInfos[Ansa::INPUT_PARAM_CV_CHANNEL_2_4]->name = apicesCommon::kLabelInactive;
 					}
 				}
 				// If expert, pick the active set of labels.
