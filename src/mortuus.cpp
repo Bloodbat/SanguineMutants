@@ -593,7 +593,7 @@ struct Mortuus : SanguineModule {
 		settings.editMode = editMode;
 		settings.processorFunctions[0] = processorFunctions[0];
 		settings.processorFunctions[1] = processorFunctions[1];
-		std::copy(&potValues[0], &potValues[7], &settings.potValues[0]);
+		std::copy(&potValues[0], &potValues[8], &settings.potValues[0]);
 		settings.snapMode = bSnapMode;
 		displayText1 = mortuus::modeDisplayLabels[settings.processorFunctions[0]];
 		displayText2 = mortuus::modeDisplayLabels[settings.processorFunctions[1]];
@@ -774,7 +774,7 @@ struct Mortuus : SanguineModule {
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
 		processorFunctions[0] = static_cast<mortuus::ProcessorFunctions>(settings.processorFunctions[0]);
 		processorFunctions[1] = static_cast<mortuus::ProcessorFunctions>(settings.processorFunctions[1]);
-		std::copy(&settings.potValues[0], &settings.potValues[7], &potValues[0]);
+		std::copy(&settings.potValues[0], &settings.potValues[8], &potValues[0]);
 
 		if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 			lockPots();

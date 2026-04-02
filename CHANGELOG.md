@@ -10,6 +10,10 @@
 
 - Apices family: go back to parameter values set by the knobs when expanders are connected and a cable is disconnected from one of the expander inputs.
 
+- Apices family: properly restore internal value of the last knob for Channel 2 of Expert mode when loading patches and copying and pasting modules.
+
+- Apices family: properly store internal value of the last knob for Channel 2 of Expert mode.
+
 - Funes: custom data not loading under certain conditions.
 
 - Funes: default LPG values were not reflected in the knobs or respected in the engine when resetting the module.

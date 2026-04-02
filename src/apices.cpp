@@ -576,7 +576,7 @@ struct Apices : SanguineModule {
 		settings.editMode = editMode;
 		settings.processorFunctions[0] = processorFunctions[0];
 		settings.processorFunctions[1] = processorFunctions[1];
-		std::copy(&potValues[0], &potValues[7], &settings.potValues[0]);
+		std::copy(&potValues[0], &potValues[8], &settings.potValues[0]);
 		settings.snapMode = bSnapMode;
 		displayText1 = apices::modeDisplayLabels[settings.processorFunctions[0]];
 		displayText2 = apices::modeDisplayLabels[settings.processorFunctions[1]];
@@ -751,7 +751,7 @@ struct Apices : SanguineModule {
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
 		processorFunctions[0] = static_cast<apices::ProcessorFunctions>(settings.processorFunctions[0]);
 		processorFunctions[1] = static_cast<apices::ProcessorFunctions>(settings.processorFunctions[1]);
-		std::copy(&settings.potValues[0], &settings.potValues[7], &potValues[0]);
+		std::copy(&settings.potValues[0], &settings.potValues[8], &potValues[0]);
 
 		if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 			lockPots();
@@ -1065,7 +1065,7 @@ struct Apices : SanguineModule {
 		size_t potValueId;
 		json_t* pJ;
 		json_array_foreach(potValuesJ, potValueId, pJ) {
-			if (potValueId < sizeof(potValues) / sizeof(potValues)[0]) {
+			if (potValueId < apicesCommon::kKnobCount * 2) {
 				settings.potValues[potValueId] = json_integer_value(pJ);
 			}
 		}
