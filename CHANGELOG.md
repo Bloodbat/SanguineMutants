@@ -59,7 +59,7 @@ without the backticks.
 
 - Aestus family: reorganize the faceplates to accommodate the polyphonic versions of the modules.
 
-- Aestus family: signal PLL/Sync mode by lighting up the Sync button red and blink the Range button  yellow.
+- Aestus family: signal PLL/Sync mode by lighting up the Sync button red and blink the Range button yellow.
 
 - Aestus family: ignore Range button and voltages when PLL/Sync mode is enabled (hardware behavior).
 
