@@ -1,3 +1,8 @@
+# Next version
+
+
+---
+
 # 2.6.10
 
 ## Fixes
