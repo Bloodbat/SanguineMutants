@@ -9,6 +9,11 @@ Just type:
 
 without the backticks.
 
+# Next version
+
+
+---
+
 # 2.6.11
 
 ## Fixes
