@@ -67,7 +67,19 @@ without the backticks.
 
 - Anuli: use a more discrete and modern LED window for channel LEDs.
 
+- Funes: Model input bananut color from purple to black.
+
+- Funes: use a more discrete and modern LED window for channel LEDs.
+
 - Nebulae family: OLED display text tweaks.
+
+- Nebulae family: use a more discrete and modern LED window for channel LEDs.
+
+- Nebulae family: tweak I/O ports positions.
+
+- Nebulae family: slider LED lights reflect the actual parameter value the module is using instead of the input voltage.
+
+- Nodi family: use a more discrete and modern LED window for channel LEDs.
 
 ## Removals
 
@@ -185,23 +197,11 @@ without the backticks.
 
 - Funes: relate knobs using color.
 
-- Funes: Model input bananut color from purple to black.
-
-- Funes: use a more discrete and modern LED window for channel LEDs.
-
 - Marmora: make Y divider tooltips easier on the eyes.
 
 - Nebulae family: better parameter and input tooltips.
 
 - Nebulae family: improve lights response.
-
-- Nebulae family: use a more discrete and modern LED window for channel LEDs.
-
-- Nebulae family: tweak I/O ports positions.
-
-- Nebulae family: slider LED lights reflect the actual parameter value the module is using instead of the input voltage.
-
-- Nodi family: use a more discrete and modern LED window for channel LEDs.
 
 - Temulenti: better tooltips and Range menu entry for Two Bumps mode.
 
