@@ -694,7 +694,7 @@ struct Mortuus : SanguineModule {
 			case mortuus::FUNCTION_RANDOMISED_DRUMS:
 			case mortuus::FUNCTION_RANDOM_HI_HAT:
 				buttonsBrightness[channel] = abs(lightsBrightness[channel]) >> 8;
-				buttonsBrightness[channel] = buttonsBrightness[channel] >= 255 ? 255 : buttonsBrightness[channel];
+				buttonsBrightness[channel] = buttonsBrightness[channel] > 255 ? 255 : buttonsBrightness[channel];
 				break;
 			case mortuus::FUNCTION_LFO:
 			case mortuus::FUNCTION_TAP_LFO:
