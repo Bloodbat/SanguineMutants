@@ -4,6 +4,8 @@
 
 - Apices family: more fixes regarding the last knob of Channel 2 when Expert mode is enabled.
 
+- Temulenti: missing FM knob model fix skipped in last release.
+
 
 ---
 
