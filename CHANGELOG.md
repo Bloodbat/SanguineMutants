@@ -2,6 +2,8 @@
 
 ## Fixes
 
+- Aestus: easter egg not respecting button light intensity.
+
 - Apices family: more fixes regarding the last knob of Channel 2 when Expert mode is enabled.
 
 - Fluctus: some parameters for Beat-repeat were not being handled.
