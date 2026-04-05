@@ -669,7 +669,7 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		uint8_t buttonsBrightness[apicesCommon::kChannelCount];
+		uint16_t buttonsBrightness[apicesCommon::kChannelCount];
 		for (uint8_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			switch (processorFunctions[channel]) {
 			case apices::FUNCTION_DRUM_GENERATOR:
