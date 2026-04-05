@@ -674,7 +674,7 @@ struct Apices : SanguineModule {
 			switch (processorFunctions[channel]) {
 			case apices::FUNCTION_DRUM_GENERATOR:
 			case apices::FUNCTION_FM_DRUM_GENERATOR:
-				buttonsBrightness[channel] = static_cast<int16_t>(abs(lightsBrightness[channel]) >> 8);
+				buttonsBrightness[channel] = abs(lightsBrightness[channel]) >> 8;
 				buttonsBrightness[channel] = buttonsBrightness[channel] >= 255 ? 255 : buttonsBrightness[channel];
 				break;
 			case apices::FUNCTION_LFO:

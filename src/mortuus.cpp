@@ -693,7 +693,7 @@ struct Mortuus : SanguineModule {
 			case mortuus::FUNCTION_FM_DRUM_GENERATOR:
 			case mortuus::FUNCTION_RANDOMISED_DRUMS:
 			case mortuus::FUNCTION_RANDOM_HI_HAT:
-				buttonsBrightness[channel] = static_cast<int16_t>(abs(lightsBrightness[channel]) >> 8);
+				buttonsBrightness[channel] = abs(lightsBrightness[channel]) >> 8;
 				buttonsBrightness[channel] = buttonsBrightness[channel] >= 255 ? 255 : buttonsBrightness[channel];
 				break;
 			case mortuus::FUNCTION_LFO:
