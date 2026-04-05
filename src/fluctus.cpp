@@ -278,10 +278,16 @@ struct Fluctus : SanguineModule {
 
 			scaledVoltages = voltages1 / 5.f;
 
+			fluctusParameters->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
+
+			float textureValue = params[PARAM_TEXTURE].getValue();
+
+			fluctusParameters->kammerl.slice_modulation = textureValue;
+
 			scaledVoltages[0] += params[PARAM_POSITION].getValue();
 			scaledVoltages[1] += params[PARAM_DENSITY].getValue();
 			scaledVoltages[2] += params[PARAM_SIZE].getValue();
-			scaledVoltages[3] += params[PARAM_TEXTURE].getValue();
+			scaledVoltages[3] += textureValue;
 
 			scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
 
@@ -289,6 +295,8 @@ struct Fluctus : SanguineModule {
 			fluctusParameters->density = scaledVoltages[1];
 			fluctusParameters->size = scaledVoltages[2];
 			fluctusParameters->texture = scaledVoltages[3];
+
+			fluctusParameters->kammerl.size_modulation = fluctusParameters->density;
 
 			fluctusParameters->trigger = bTriggered;
 			fluctusParameters->gate = bTriggered;
@@ -298,6 +306,7 @@ struct Fluctus : SanguineModule {
 			fluctusParameters->kammerl.clock_divider = fluctusParameters->stereo_spread;
 			fluctusParameters->kammerl.pitch_mode = fluctusParameters->feedback;
 			fluctusParameters->kammerl.distortion = fluctusParameters->reverb;
+			// TODO: the firmware subtracts -0.5f from incoming voltage...
 			fluctusParameters->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(), -2.f, 2.f, 0.f, 1.f) +
 				inputs[INPUT_PITCH].getVoltage() / 5.f), 0.f, 1.f);
 
