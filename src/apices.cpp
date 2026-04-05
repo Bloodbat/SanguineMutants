@@ -504,8 +504,8 @@ struct Apices : SanguineModule {
 
 	void lockPots() {
 		std::fill(&adcThreshold[0],
-			&adcThreshold[apicesCommon::kAdcChannelCount - 1], apicesCommon::kAdcThresholdLocked);
-		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
+			&adcThreshold[apicesCommon::kAdcChannelCount], apicesCommon::kAdcThresholdLocked);
+		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount], false);
 	}
 
 	void pollPots() {
@@ -741,12 +741,12 @@ struct Apices : SanguineModule {
 	}
 
 	void init() {
-		std::fill(&potValues[0], &potValues[7], 0);
-		std::fill(&brightness[0], &brightness[1], 0);
-		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount - 1], 0);
-		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount - 1], 0);
-		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount - 1], 0);
-		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount - 1], false);
+		std::fill(&potValues[0], &potValues[8], 0);
+		std::fill(&brightness[0], &brightness[2], 0);
+		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount], 0);
+		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount], 0);
+		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount], 0);
+		std::fill(&bSnapped[0], &bSnapped[apicesCommon::kAdcChannelCount], false);
 
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
 		processorFunctions[0] = static_cast<apices::ProcessorFunctions>(settings.processorFunctions[0]);

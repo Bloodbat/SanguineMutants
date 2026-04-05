@@ -1,3 +1,12 @@
+# 2.6.10
+
+## Fixes
+
+- Apices family: more fixes regarding the last knob of Channel 2 when Expert mode is enabled.
+
+
+---
+
 # 2.6.9
 
 ## Fixes
