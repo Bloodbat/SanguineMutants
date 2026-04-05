@@ -85,7 +85,7 @@ struct Mortuus : SanguineModule {
 	deadman::Processors processors[apicesCommon::kChannelCount] = {};
 
 	int16_t output[apicesCommon::kBlockSize] = {};
-	int16_t brightness[apicesCommon::kChannelCount] = {};
+	int16_t lightsBrightness[apicesCommon::kChannelCount] = {};
 
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
 
@@ -686,15 +686,15 @@ struct Mortuus : SanguineModule {
 			}
 		}
 
-		uint8_t buttonBrightness[apicesCommon::kChannelCount];
+		uint8_t buttonsBrightness[apicesCommon::kChannelCount];
 		for (uint8_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			switch (processorFunctions[channel]) {
 			case mortuus::FUNCTION_DRUM_GENERATOR:
 			case mortuus::FUNCTION_FM_DRUM_GENERATOR:
 			case mortuus::FUNCTION_RANDOMISED_DRUMS:
 			case mortuus::FUNCTION_RANDOM_HI_HAT:
-				buttonBrightness[channel] = static_cast<int16_t>(abs(brightness[channel]) >> 8);
-				buttonBrightness[channel] = buttonBrightness[channel] >= 255 ? 255 : buttonBrightness[channel];
+				buttonsBrightness[channel] = static_cast<int16_t>(abs(lightsBrightness[channel]) >> 8);
+				buttonsBrightness[channel] = buttonsBrightness[channel] >= 255 ? 255 : buttonsBrightness[channel];
 				break;
 			case mortuus::FUNCTION_LFO:
 			case mortuus::FUNCTION_TAP_LFO:
@@ -706,17 +706,17 @@ struct Mortuus : SanguineModule {
 			case mortuus::FUNCTION_MINI_SEQUENCER:
 			case mortuus::FUNCTION_MOD_SEQUENCER:
 				int32_t brightnessVal;
-				brightnessVal = static_cast<int32_t>(brightness[channel]) * 409 >> 8;
+				brightnessVal = static_cast<int32_t>(lightsBrightness[channel]) * 409 >> 8;
 				brightnessVal += 32768;
 				brightnessVal >>= 8;
 				brightnessVal = clamp(brightnessVal, 0, 255);
-				buttonBrightness[channel] = brightnessVal;
+				buttonsBrightness[channel] = brightnessVal;
 				break;
 			case mortuus::FUNCTION_TURING_MACHINE:
-				buttonBrightness[channel] = static_cast<uint16_t>(brightness[channel]) >> 5;
+				buttonsBrightness[channel] = static_cast<uint16_t>(lightsBrightness[channel]) >> 5;
 				break;
 			default:
-				buttonBrightness[channel] = brightness[channel] >> 7;
+				buttonsBrightness[channel] = lightsBrightness[channel] >> 7;
 				break;
 			}
 		}
@@ -746,16 +746,16 @@ struct Mortuus : SanguineModule {
 				}
 			}
 			if (bIsChannel1Station) {
-				buttonBrightness[0] = processors[0].number_station().gate() ? 255 : 0;
+				buttonsBrightness[0] = processors[0].number_station().gate() ? 255 : 0;
 			}
 			if (bIsChannel2Station) {
-				buttonBrightness[1] = processors[1].number_station().gate() ? 255 : 0;
+				buttonsBrightness[1] = processors[1].number_station().gate() ? 255 : 0;
 			}
 		}
 
-		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[0]),
+		lights[LIGHT_TRIGGER_1].setBrightnessSmooth(rescale(static_cast<float>(buttonsBrightness[0]),
 			0.f, 255.f, 0.f, kSanguineButtonLightValue), sampleTime);
-		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonBrightness[1]),
+		lights[LIGHT_TRIGGER_2].setBrightnessSmooth(rescale(static_cast<float>(buttonsBrightness[1]),
 			0.f, 255.f, 0.f, kSanguineButtonLightValue), sampleTime);
 	}
 
@@ -765,7 +765,7 @@ struct Mortuus : SanguineModule {
 
 	void init() {
 		std::fill(&potValues[0], &potValues[apicesCommon::kPotCount], 0);
-		std::fill(&brightness[0], &brightness[apicesCommon::kChannelCount], 0);
+		std::fill(&lightsBrightness[0], &lightsBrightness[apicesCommon::kChannelCount], 0);
 		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount], 0);
 		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount], 0);
 		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount], 0);
@@ -1156,7 +1156,7 @@ struct Mortuus : SanguineModule {
 	}
 
 	inline void setLedBrightness(int channel, int16_t value) {
-		brightness[channel] = value;
+		lightsBrightness[channel] = value;
 	}
 
 	inline void processChannels(Block* block, size_t size) {
