@@ -64,7 +64,7 @@ struct Mortuus : SanguineModule {
 	mortuus::ProcessorFunctions lastProcessorFunctions[apicesCommon::kChannelCount] = { mortuus::FUNCTION_LAST,mortuus::FUNCTION_LAST };
 	apicesCommon::Settings settings = {};
 
-	uint8_t potValues[apicesCommon::kKnobCount * 2] = {};
+	uint8_t potValues[apicesCommon::kPotCount] = {};
 
 	bool bSnapMode = false;
 	bool bSnapped[apicesCommon::kKnobCount] = {};
@@ -593,7 +593,7 @@ struct Mortuus : SanguineModule {
 		settings.editMode = editMode;
 		settings.processorFunctions[0] = processorFunctions[0];
 		settings.processorFunctions[1] = processorFunctions[1];
-		std::copy(&potValues[0], &potValues[8], &settings.potValues[0]);
+		std::copy(&potValues[0], &potValues[apicesCommon::kPotCount], &settings.potValues[0]);
 		settings.snapMode = bSnapMode;
 		displayText1 = mortuus::modeDisplayLabels[settings.processorFunctions[0]];
 		displayText2 = mortuus::modeDisplayLabels[settings.processorFunctions[1]];
@@ -764,8 +764,8 @@ struct Mortuus : SanguineModule {
 	}
 
 	void init() {
-		std::fill(&potValues[0], &potValues[8], 0);
-		std::fill(&brightness[0], &brightness[2], 0);
+		std::fill(&potValues[0], &potValues[apicesCommon::kPotCount], 0);
+		std::fill(&brightness[0], &brightness[apicesCommon::kChannelCount], 0);
 		std::fill(&adcLp[0], &adcLp[apicesCommon::kAdcChannelCount], 0);
 		std::fill(&adcValue[0], &adcValue[apicesCommon::kAdcChannelCount], 0);
 		std::fill(&adcThreshold[0], &adcThreshold[apicesCommon::kAdcChannelCount], 0);
@@ -774,7 +774,7 @@ struct Mortuus : SanguineModule {
 		editMode = static_cast<apicesCommon::EditModes>(settings.editMode);
 		processorFunctions[0] = static_cast<mortuus::ProcessorFunctions>(settings.processorFunctions[0]);
 		processorFunctions[1] = static_cast<mortuus::ProcessorFunctions>(settings.processorFunctions[1]);
-		std::copy(&settings.potValues[0], &settings.potValues[8], &potValues[0]);
+		std::copy(&settings.potValues[0], &settings.potValues[apicesCommon::kPotCount], &potValues[0]);
 
 		if (editMode >= apicesCommon::EDIT_MODE_FIRST) {
 			lockPots();
@@ -1105,7 +1105,7 @@ struct Mortuus : SanguineModule {
 		size_t potValueId;
 		json_t* pJ;
 		json_array_foreach(potValuesJ, potValueId, pJ) {
-			if (potValueId < sizeof(potValues) / sizeof(potValues)[0]) {
+			if (potValueId < apicesCommon::kPotCount) {
 				settings.potValues[potValueId] = json_integer_value(pJ);
 			}
 		}

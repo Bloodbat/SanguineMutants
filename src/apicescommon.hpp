@@ -24,7 +24,7 @@ namespace apicesCommon {
     struct Settings {
         uint8_t editMode;
         uint8_t processorFunctions[kChannelCount];
-        uint8_t potValues[kKnobCount * 2];
+        uint8_t potValues[kPotCount];
         bool snapMode;
     };
 
