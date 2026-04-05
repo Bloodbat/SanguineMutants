@@ -289,7 +289,7 @@ struct Nodi : SanguineModule {
 
 				// Set model.
 				if (!bPaques) {
-					uint8_t model = knobModel;
+					int model = knobModel;
 
 					if (bHaveMetaCable) {
 						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *

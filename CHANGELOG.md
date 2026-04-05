@@ -4,6 +4,8 @@
 
 - Apices family: more fixes regarding the last knob of Channel 2 when Expert mode is enabled.
 
+- Nodi family: voltages beyond the set limits, when connected to the Meta input, selected the wrong Model under certain circumstances.
+
 - Temulenti: missing FM knob model fix skipped in last release.
 
 

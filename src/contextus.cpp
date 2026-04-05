@@ -285,7 +285,7 @@ struct Contextus : SanguineModule {
 				float fm = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel);
 
 				// Set model.
-				uint8_t model = knobModel;
+				int model = knobModel;
 				if (bHaveMetaCable) {
 					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
 						renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
