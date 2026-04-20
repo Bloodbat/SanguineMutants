@@ -37,6 +37,10 @@ namespace apicesCommon {
 
     static const std::string kSuffixCV = " CV";
     static const std::string kPrefixChannelTwin = "Channels 1 & 2 - ";
+#ifndef USING_CARDINAL_NOT_RACK
     static const std::string kPrefixChannelExpert = "Channel %d - ";
+#else
+    static const char* kPrefixChannelExpert = "Channel %d - ";
+#endif
     static const std::string kLabelInactive = "Inactive";
 }
