@@ -15,11 +15,13 @@ without the backticks.
 
 ### Funes Mk2
 
-- A remixed version of Funes with a smaller HP footprint and more polyphonic control capabilities.
+- A remixed version of Funes with a smaller HP footprint and more
+  polyphonic control capabilities.
 
 ### Reticula
 
-- A topographic drum sequencer based on Mutable Instruments' Grids, with capabilities exclusive to Sanguine Mutants.
+- A topographic drum sequencer based on Mutable Instruments' Grids, with
+  capabilities exclusive to Sanguine Mutants.
 
 ## Fixes
 
@@ -29,23 +31,29 @@ without the backticks.
 
 - Aestus family: modules are fully polyphonic.
 
-- Aestus family: signal the Range button and input are disabled when Clock Sync/PLL mode is enabled by blinking the button's LED yellow.
+- Aestus family: signal the Range button and input are disabled when Clock
+  Sync/PLL mode is enabled by blinking the button's LED yellow.
 
 - Anuli: polyphonic CV selection of FX for Disastrous Peace channels.
 
 - Funes: new chord banks from Lyle Mills' firmware.
 
-- Funes: ability and controls to crossfade the main signal with the auxiliary signal and output it in the Aux output, adapted from Lyle Mills' firmware.
+- Funes: ability and controls to crossfade the main signal with the
+  auxiliary signal and output it in the Aux output, adapted from Lyle
+  Mills' firmware.
 
 - Funes: Aux suboscillator adapted from Lyle Mills' firmware.
 
-- Funes: ability to hold Timbre, Morph, Harmonics, Level and Note voltages when trigger is received, adapted from Lyle Mills' firmware.
+- Funes: ability to hold Timbre, Morph, Harmonics, Level and Note voltages
+  when trigger is received, adapted from Lyle Mills' firmware.
 
-- Marmora: ability to optionally generate and use different random seeds when a patch is loaded.
+- Marmora: ability to optionally generate and use different random seeds
+  when a patch is loaded.
 
 - Nebulae family: modules are fully polyphonic.
 
-- Nebulae family: optional hardware-like handling of triggers: rising edge detection instead of treating them as gates.
+- Nebulae family: optional hardware-like handling of triggers: rising edge
+  detection instead of treating them as gates.
 
 - Nebulae family: better button tooltips.
 
@@ -57,13 +65,17 @@ without the backticks.
 
 - Plugin: performance tweaks.
 
-- Aestus family: reorganize the faceplates to accommodate the polyphonic versions of the modules.
+- Aestus family: reorganize the faceplates to accommodate the polyphonic
+  versions of the modules.
 
-- Aestus family: signal PLL/Sync mode by lighting up the Sync button red and blink the Range button yellow.
+- Aestus family: signal PLL/Sync mode by lighting up the Sync button red
+  and blink the Range button yellow.
 
-- Aestus family: ignore Range button and voltages when PLL/Sync mode is enabled (hardware behavior).
+- Aestus family: ignore Range button and voltages when PLL/Sync mode is
+  enabled (hardware behavior).
 
-- Aestus family: use a more discrete and modern LED window for channel LEDs.
+- Aestus family: use a more discrete and modern LED window for channel
+  LEDs.
 
 - Anuli: use a more discrete and modern LED window for channel LEDs.
 
@@ -73,11 +85,13 @@ without the backticks.
 
 - Nebulae family: OLED display text tweaks.
 
-- Nebulae family: use a more discrete and modern LED window for channel LEDs.
+- Nebulae family: use a more discrete and modern LED window for channel
+  LEDs.
 
 - Nebulae family: tweak I/O ports positions.
 
-- Nebulae family: slider LED lights reflect the actual parameter value the module is using instead of the input voltage.
+- Nebulae family: slider LED lights reflect the actual parameter value the
+  module is using instead of the input voltage.
 
 - Nodi family: use a more discrete and modern LED window for channel LEDs.
 
@@ -85,9 +99,12 @@ without the backticks.
 
 - Anuli: Note polyphony display.
 
-- Funes: emulation of hardware lights for LPG and Frequency mode (the knobs are always on the faceplate).
+- Funes: emulation of hardware lights for LPG and Frequency mode (the
+  knobs are always on the faceplate).
 
-- Nebulae family: emulation of hardware parameter and quality light patterns: not very useful when the modules are polyphonic (and every parameter is on the faceplate showing its value at all times).
+- Nebulae family: emulation of hardware parameter and quality light
+  patterns: not very useful when the modules are polyphonic (and every
+  parameter is on the faceplate showing its value at all times).
 
 - Nebulae family: OLED displays when running under MetaModule.
 
