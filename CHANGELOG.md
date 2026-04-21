@@ -5,7 +5,7 @@ using a Linux terminal (or equivalent if sed is available)!
 
 Just type:
 
-`sed '/.*---.*/{s///;q;}' CHANGELOG.md`
+`tail -n +11 CHANGELOG.md | sed '/.*---.*/{s///;q;}'`
 
 without the backticks.
 
