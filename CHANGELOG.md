@@ -13,11 +13,13 @@
 
 - Aestus: easter egg not respecting button light intensity.
 
-- Apices family: more fixes regarding the last knob of Channel 2 when Expert mode is enabled.
+- Apices family: more fixes regarding the last knob of Channel 2 when
+  Expert mode is enabled.
 
 - Fluctus: some parameters for Beat-repeat were not being handled.
 
-- Nodi family: voltages beyond the set limits, when connected to the Meta input, selected the wrong Model under certain circumstances.
+- Nodi family: voltages beyond the set limits, when connected to the Meta
+  input, selected the wrong Model under certain circumstances.
 
 - Temulenti: missing FM knob model fix skipped in last release.
 
@@ -34,39 +36,53 @@
 
 - Anuli: FX button light didn't follow plugin button light standards.
 
-- Apices family: go back to parameter values set by the knobs when expanders are connected and a cable is disconnected from one of the expander inputs.
+- Apices family: go back to parameter values set by the knobs when
+  expanders are connected and a cable is disconnected from one of the
+  expander inputs.
 
-- Apices family: properly restore internal value of the last knob for Channel 2 of Expert mode when loading patches and copying and pasting modules.
+- Apices family: properly restore internal value of the last knob for
+  Channel 2 of Expert mode when loading patches and copying and pasting
+  modules.
 
-- Apices family: properly store internal value of the last knob for Channel 2 of Expert mode.
+- Apices family: properly store internal value of the last knob for
+  Channel 2 of Expert mode.
 
 - Funes: custom data not loading under certain conditions.
 
-- Funes: default LPG values were not reflected in the knobs or respected in the engine when resetting the module.
+- Funes: default LPG values were not reflected in the knobs or respected
+  in the engine when resetting the module.
 
-- Funes: audio glitch when the trigger input is connected and a 6 OP FM model is selected without setting it with the trigger unpatched beforehand.
+- Funes: audio glitch when the trigger input is connected and a 6 OP FM
+  model is selected without setting it with the trigger unpatched
+  beforehand.
 
 - Mortuus: button lights.
 
-- Nodi: wrong channel indicator light colors when morse code easter egg is activated.
+- Nodi: wrong channel indicator light colors when morse code easter egg is
+  activated.
 
 - Velamina: proper rescaling of gain lights when channels are polyphonic.
 
-- Velamina: output port lights did not reflect port voltage averages when dealing with polyphonic channels properly.
+- Velamina: output port lights did not reflect port voltage averages when
+  dealing with polyphonic channels properly.
 
-- Vimina: swing/factor tooltips not updating until the knob is moved when the mode of a section is changed.
+- Vimina: swing/factor tooltips not updating until the knob is moved when
+  the mode of a section is changed.
 
 ## Additions
 
-- Apices family: tap lfo tempo values are now saved to and restored from patches and presets.
+- Apices family: tap lfo tempo values are now saved to and restored from
+  patches and presets.
 
 - Apices family: knob tooltips for the different modes.
 
-- Apices family expanders: mode dependent tooltips for the trimpots and inputs.
+- Apices family expanders: mode dependent tooltips for the trimpots and
+  inputs.
 
 - Apices family: mode selector knob tooltips.
 
-- Mortuus: PLO phase values are now saved to and restored from patches and presets.
+- Mortuus: PLO phase values are now saved to and restored from patches and
+  presets.
 
 - Nodi family: display channel also affects the big knob's light.
 
@@ -78,7 +94,8 @@
 
 - Apices family expanders: display trimpot values as percentages.
 
-- Apices family expanders: reorder the faceplates to resemble the order of the base modules a bit more.
+- Apices family expanders: reorder the faceplates to resemble the order of
+  the base modules a bit more.
 
 - Contextus: make synthesis models light color palette more distinctive.
 
@@ -111,7 +128,8 @@
 
 - Scalaria: MetaModule: use special faceplate with regular LEDs.
 
-- Vimina: show current swing or active clock division or multiplication factors in the knob's tooltip using the description field.
+- Vimina: show current swing or active clock division or multiplication
+  factors in the knob's tooltip using the description field.
 
 ## Changes
 
@@ -124,9 +142,12 @@
 
 ## Fixes
 
-- Anuli: prevent the module from going to limbo when specific models are selected and extreme (and I do mean extreme) negative voltages are sent to the V/Oct input.
+- Anuli: prevent the module from going to limbo when specific models are
+  selected and extreme (and I do mean extreme) negative voltages are sent
+  to the V/Oct input.
 
-- Nodi family: properly restore the "Low CPU" option when it is enabled in either module in really old patches.
+- Nodi family: properly restore the "Low CPU" option when it is enabled in
+  either module in really old patches.
 
 - Vimina: timer manipulation stops working after about 10 minutes.
 
@@ -134,7 +155,8 @@
 
 ## Additions
 
-- Anuli: frequency knob units and display values that reflect what the knob actually controls (semi-tones).
+- Anuli: frequency knob units and display values that reflect what the
+  knob actually controls (semi-tones).
 
 - Anuli: knob units and display values friendlier to humans.
 
@@ -153,15 +175,18 @@
 
 - Plugin: work around Rack's SVG rendering deficiencies.
 
-- Aestus family: restore "Frequency knob center is C4" user preference properly.
+- Aestus family: restore "Frequency knob center is C4" user preference
+  properly.
 
-- Explorator: noise not working if the trigger input has not been connected at least once.
+- Explorator: noise not working if the trigger input has not been
+  connected at least once.
 
 ## Additions
 
 - Aestus family: measurement units and numbers friendlier to humans.
 
-- Aestus: restore the peacocks plotter easter egg (it can be accessed using the context menu).
+- Aestus: restore the peacocks plotter easter egg (it can be accessed
+  using the context menu).
 
 ## Changes
 
@@ -169,9 +194,11 @@
 
 - Plugin source: move common Sanguine Modules sources to submodule.
 
-- Explorator: produce Prism noise wave forms more akin to original implementation (Note: Prism noise is now LOUDER).
+- Explorator: produce Prism noise wave forms more akin to original
+  implementation (Note: Prism noise is now LOUDER).
 
-- Temulenti: remove clamping on pitch to allow reaching really low LFO frequencies.
+- Temulenti: remove clamping on pitch to allow reaching really low LFO
+  frequencies.
 
 
 ---
@@ -180,7 +207,8 @@
 
 ## Fixes
 
-- Apices family: engines should restore knob values when disconnecting expanders.
+- Apices family: engines should restore knob values when disconnecting
+  expanders.
 
 - Mortuus: rollover error on slow FM LFOs.
 
@@ -190,7 +218,8 @@
 
 ## Changes
 
-- Apices family expanders: make tooltips congruent with base module tooltips.
+- Apices family expanders: make tooltips congruent with base module
+  tooltips.
 
 - Apices family: performance improvements.
 
@@ -205,7 +234,8 @@
 
 ## Changes
 
-- Vimina: even out knob space distribution for clock multiplier/divider factors.
+- Vimina: even out knob space distribution for clock multiplier/divider
+  factors.
 
 
 ---
@@ -214,11 +244,13 @@
 
 ## Fixes
 
-- Marmora: entering Length values by right clicking the knob did not follow display values.
+- Marmora: entering Length values by right clicking the knob did not
+  follow display values.
 
 ## Additions
 
-- Explorator: per polyphonic channel noise generator for the S&H section, with two selectable noise generators with different CPU consumptions.
+- Explorator: per polyphonic channel noise generator for the S&H section,
+  with two selectable noise generators with different CPU consumptions.
 
 
 ---
@@ -240,7 +272,8 @@
 
 - Scalaria: outputs sometimes getting stuck at -5V.
 
-- Scalaria: faceplate tag did not follow the conventions of the rest of the modules.
+- Scalaria: faceplate tag did not follow the conventions of the rest of
+  the modules.
 
 - Scalaria: imperceptible lights on Apple.
 
@@ -252,7 +285,8 @@
 
 ## Changes
 
-- Scalaria: darker background for shaped lights (they look better that way).
+- Scalaria: darker background for shaped lights (they look better that
+  way).
 
 - Plugin: adjust button LED intensity (it was too low).
 
@@ -267,15 +301,18 @@
 
 ### Nix
 
-An expander for Apices that provides CV parameter modulation, inspired by the Rainier module.
+An expander for Apices that provides CV parameter modulation, inspired by
+the Rainier module.
 
 ### Ansa
 
-An expander for Mortuus that provides CV parameter modulation, inspired by the Rainier module.
+An expander for Mortuus that provides CV parameter modulation, inspired by
+the Rainier module.
 
 ### Scalaria
 
-A polyphonic Moog inspired ladder filter from the original Symbiote firmware for Mutable Instruments' Warps.
+A polyphonic Moog inspired ladder filter from the original Symbiote
+firmware for Mutable Instruments' Warps.
 
 ## Fixes
 
@@ -285,19 +322,25 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Explorator Plumbago faceplate.
 
-- Sync mode for the Aestus family should only be updated when it has changed in the front-end, not when processing every block.
+- Sync mode for the Aestus family should only be updated when it has
+  changed in the front-end, not when processing every block.
 
-- Nodi family: signature waveshaper and oscillator drift are not boolean settings: they have a range of values.
+- Nodi family: signature waveshaper and oscillator drift are not boolean
+  settings: they have a range of values.
 
-- Nodi family: restore LFO modes and prevent them from crashing with divisions by zero.
+- Nodi family: restore LFO modes and prevent them from crashing with
+  divisions by zero.
 
 - Nodi family: quantizer scale tooltips.
 
-- Temulenti: FM knob control of Two Drunks' gate durations now works as described in the manual (it was inverted).
+- Temulenti: FM knob control of Two Drunks' gate durations now works as
+  described in the manual (it was inverted).
 
-- Anuli: don't ignore module generated strums when dealing with strum light state.
+- Anuli: don't ignore module generated strums when dealing with strum
+  light state.
 
-- Nebulae family: LEDs sometimes getting "stuck" on temporary display modes.
+- Nebulae family: LEDs sometimes getting "stuck" on temporary display
+  modes.
 
 ## Additions
 
@@ -305,7 +348,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Marmora: Ability to reseed random generator from the context menu.
 
-- Marmora: Ability to set user defined random generator seeds (state) from the context menu.
+- Marmora: Ability to set user defined random generator seeds (state) from
+  the context menu.
 
 - Marmora: show selected loop length in knob's tooltip.
 
@@ -313,7 +357,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Etesia: CV control for Reverse parameter.
 
-- Aestus family: tune the modules to C4 when the Frequency knob is centered (can be disabled for compatibility).
+- Aestus family: tune the modules to C4 when the Frequency knob is
+  centered (can be disabled for compatibility).
 
 - Funes: attenuverter for Harmonics CV.
 
@@ -323,7 +368,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Aleae: hint Trigger 2 is normalled to Trigger 1 in the faceplate.
 
-- Nodi family: use different Signature Wave Shaper seeds per module instance (user controllable).
+- Nodi family: use different Signature Wave Shaper seeds per module
+  instance (user controllable).
 
 - Nodi family: ability to select scales from the context menu.
 
@@ -339,7 +385,8 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Anuli: reorganize faceplate and make it cleaner.
 
-- Anuli: change the polyphony knob's tooltip to be congruent with the nomenclature used in the manual.
+- Anuli: change the polyphony knob's tooltip to be congruent with the
+  nomenclature used in the manual.
 
 - Nodi family: faceplate tweaks.
 
@@ -359,7 +406,9 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 - Funes: rework faceplate to make it both more compact and more attractive.
 
-- Funes: LGP LED displays start at the center lights instead of the rightmost ones (it looks prettier and makes more sense for the horizontal arrangement).
+- Funes: LGP LED displays start at the center lights instead of the
+  rightmost ones (it looks prettier and makes more sense for the
+  horizontal arrangement).
 
 - Nebulae family: faceplate tweaks.
 
@@ -396,31 +445,45 @@ A polyphonic Moog inspired ladder filter from the original Symbiote firmware for
 
 ### Aestus
 
-Based on MI's Tides, it fixes PLL mode, separates it from the clock input; restores switching banks using the clock input when module is using the Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken "High" and "Low" outputs, and, hopefully, fixes a long-standing crash that occurs under specific circumstances.
+Based on MI's Tides, it fixes PLL mode, separates it from the clock input;
+restores switching banks using the clock input when module is using the
+Sheep firmware; fixes the inverted "Mode" light colors; fixes the broken
+"High" and "Low" outputs, and, hopefully, fixes a long-standing crash that
+occurs under specific circumstances.
 
 ### Temulenti
 
-Based on the Parasite firmware for MI's Tides: includes every Aestus fix, additionally: restores functionality when using the clock input in Two Bumps or Two Drunks modes; Sheep model can be used.
+Based on the Parasite firmware for MI's Tides: includes every Aestus fix,
+additionally: restores functionality when using the clock input in Two
+Bumps or Two Drunks modes; Sheep model can be used.
 
 ### Vimina
 
-A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for MI's Branches.
+A polyphonic dual clock divider, multiplier and swinger based on the Twigs
+firmware for MI's Branches.
 
 ## Additions
 
-- Polyphony for Incurvationes, Distortiones and Mutuus, active channels are shown using rows of LEDs around the INT. OSC. button.
+- Polyphony for Incurvationes, Distortiones and Mutuus, active channels
+  are shown using rows of LEDs around the INT. OSC. button.
 
-- Polyphonic indicator LED lights show the current algorithm for every channel in Incurvationes.
+- Polyphonic indicator LED lights show the current algorithm for every
+  channel in Incurvationes.
 
-- Polyphonic indicator LED lights show the current mode for every channel in Distortiones and Mutuus.
+- Polyphonic indicator LED lights show the current mode for every channel
+  in Distortiones and Mutuus.
 
-- Direct or note CV per channel mode selection for Anuli, Distortiones and Mutuus.
+- Direct or note CV per channel mode selection for Anuli, Distortiones and
+  Mutuus.
 
-- Per channel "Meta-modulation" is always available for Nodi and Contextus: the FM input always does FM.
+- Per channel "Meta-modulation" is always available for Nodi and
+  Contextus: the FM input always does FM.
 
-- Nebulae, Etesia and Fluctus always sum polyphonic input channels, per the voltage standards.
+- Nebulae, Etesia and Fluctus always sum polyphonic input channels, per
+  the voltage standards.
 
-- Ability to select the channel to show in the display for Anuli, Funes, Nodi and Contextus.
+- Ability to select the channel to show in the display for Anuli, Funes,
+  Nodi and Contextus.
 
 - Ability to select the channel to show in Aleae's LEDs.
 
@@ -430,13 +493,16 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 ## Changes
 
-- Anuli's channel counter is gone, replaced by a row of LEDs at the top that show active channels and their selected modes.
+- Anuli's channel counter is gone, replaced by a row of LEDs at the top
+  that show active channels and their selected modes.
 
 - Separate Sanguine Mutants and Sanguine Monsters in the browser.
 
-- Remove "Out" port label and use a "1 x 2" one that is closer to hardware faceplates for Incurvationes, Distortiones and Mutuus.
+- Remove "Out" port label and use a "1 x 2" one that is closer to hardware
+  faceplates for Incurvationes, Distortiones and Mutuus.
 
-- Input voltage scaling for Incurvationes, Distortiones and Mutuus (your old patches may be too loud! Adjust input gain).
+- Input voltage scaling for Incurvationes, Distortiones and Mutuus (your
+  old patches may be too loud! Adjust input gain).
 
 - Dim LED button's light intensity a little.
 
@@ -444,7 +510,9 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Disable "LFO" range in Nodi and Contextus.
 
-- Funes menu: reorder; better wording for custom data entries; make menu smarter: only show custom data entries when a Model that can load custom data is selected.
+- Funes menu: reorder; better wording for custom data entries; make menu
+  smarter: only show custom data entries when a Model that can load custom
+  data is selected.
 
 ## Fixes
 
@@ -461,7 +529,8 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 ## Additions
 
-- Theme support for existing modules with two available options: "Vitriol" the usual, colorful faceplate or "Plumbago" a black as night variation.
+- Theme support for existing modules with two available options: "Vitriol"
+  the usual, colorful faceplate or "Plumbago" a black as night variation.
 
 - Polyphonic ports are now shown with golden jacks.
 
@@ -469,31 +538,38 @@ A polyphonic dual clock divider, multiplier and swinger based on the Twigs firmw
 
 - Funes' menu is prettier and includes an entry to visit the data editors.
 
-- A pretty circle of LEDs that show the selected mode for Distortiones and Mutuus.
+- A pretty circle of LEDs that show the selected mode for Distortiones and
+  Mutuus.
 
 ## Fixes
 
-- Plugin no longer crashes Rack Pro when it is used as a guest of hosts such as Reaper and Ableton and patches are loaded.
+- Plugin no longer crashes Rack Pro when it is used as a guest of hosts
+  such as Reaper and Ableton and patches are loaded.
 
 - Plugin no longer crashes Rack when used headless.
 
-- Etesia, Fluctus and Nebulae LEDs are no longer as prone to get stuck in parameter mode when fiddling with the knobs.
+- Etesia, Fluctus and Nebulae LEDs are no longer as prone to get stuck in
+  parameter mode when fiddling with the knobs.
 
 - Faceplate tweaks to prevent rendering errors.
 
 - Apices' and Mortuus' inputs follow the hardware spec more closely.
 
-- Mortuus ByteBeats are more stable and every equation is interesting again.
+- Mortuus ByteBeats are more stable and every equation is interesting
+  again.
 
 - Display rendering order.
 
 ## Changes
 
-- Etesia and Distortiones use the Parasites lib internally instead of MI's one.
+- Etesia and Distortiones use the Parasites lib internally instead of MI's
+  one.
 
-- Better module tags, some are from modulargrid, others from functions I know they have (and now you should too :))
+- Better module tags, some are from modulargrid, others from functions I
+  know they have (and now you should too :))
 
-- Funes' Harmo input move to a location less prone to confusion (also, a connecting line has been added between the port and the Harmonics knob).
+- Funes' Harmo input move to a location less prone to confusion (also, a
+  connecting line has been added between the port and the Harmonics knob).
 
 
 ---
@@ -517,33 +593,44 @@ Based on the Kammerl Beat-Repeat firmware for Clouds.
 
 ### Incurvationes
 
-Based on MI's Warps, it has proper knob lights colors and enables access to the Frequency shifter "Easter egg".
+Based on MI's Warps, it has proper knob lights colors and enables access
+to the Frequency shifter "Easter egg".
 
 ### Distortiones
 
-Based on the Parasite firmware for Warps, it no longer crashes when multiple instances are used (and they don't interfere with each other...); it also includes a mode selector similar to the one used for the hardware module.
+Based on the Parasite firmware for Warps, it no longer crashes when
+multiple instances are used (and they don't interfere with each other...);
+it also includes a mode selector similar to the one used for the hardware
+module.
 
 ### Mutuus
 
-Based on the Symbiote firmware for Warps, it includes the improvements in Incurvationes and Distortiones.
+Based on the Symbiote firmware for Warps, it includes the improvements in
+Incurvationes and Distortiones.
 
 ### Explorator
 
 Based on MI's Kinks and Links, they are combined in a single module.
 
-The Kinks section is now fully polyphonic. The Links 3:1 section can optionally behave as the hardware module and average the connected voltages. All LEDs now reflect when polyphonic channels are used.
+The Kinks section is now fully polyphonic. The Links 3:1 section can
+optionally behave as the hardware module and average the connected
+voltages. All LEDs now reflect when polyphonic channels are used.
 
 ### Marmora
 
-Based on MI's Marbles, it exposes every control and adds missing features like user defined scales; super lock; t and X reset; restores missing light animations and showing polarity in the output port LEDs.
+Based on MI's Marbles, it exposes every control and adds missing features
+like user defined scales; super lock; t and X reset; restores missing
+light animations and showing polarity in the output port LEDs.
 
 ### Anuli
 
-Based on MI's Rings, it restores missing light animations; the "3" polyphony mode... and is completely polyphonic.
+Based on MI's Rings, it restores missing light animations; the "3"
+polyphony mode... and is completely polyphonic.
 
 ### Velamina
 
-My attempt at recreating Veils... the 2020 version. It is polyphonic and saturates outputs beyond 10V.
+My attempt at recreating Veils... the 2020 version. It is polyphonic and
+saturates outputs beyond 10V.
 
 ## Additions
 
@@ -577,7 +664,8 @@ My attempt at recreating Veils... the 2020 version. It is polyphonic and saturat
 
 ## Fixes
 
-- Stop Funes throat singing when trigger input is patched; VOWLSPCH is selected, and first trigger hasn't been received.
+- Stop Funes throat singing when trigger input is patched; VOWLSPCH is
+  selected, and first trigger hasn't been received.
 
 
 ---
@@ -644,7 +732,8 @@ Based on the Dead Man's Catch firmware for Peaks.
 
 ## Additions
 
-- Make Clouds based modules lights behave a little closer to their hardware counterparts.
+- Make Clouds based modules lights behave a little closer to their
+  hardware counterparts.
 
 ## Changes
 
@@ -701,9 +790,11 @@ Based in MI's Peaks.
 
 ## Additions
 
-- Missing blinking orange lights when modulating New Synthesis models in Funes.
+- Missing blinking orange lights when modulating New Synthesis models in
+  Funes.
 
-- Optionally display modulated model for first polyphonic channel (from suggestions).
+- Optionally display modulated model for first polyphonic channel (from
+  suggestions).
 
 - Modulate model using C0-B1 (from suggestions).
 
