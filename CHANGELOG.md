@@ -4,6 +4,9 @@
 
 - Compilation with current Cardinal trunk.
 
+
+---
+
 # 2.6.10
 
 ## Fixes
