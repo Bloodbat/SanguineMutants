@@ -33,7 +33,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
   class Correlator {
   public:
@@ -88,5 +88,5 @@ namespace clouds {
     DISALLOW_COPY_AND_ASSIGN(Correlator);
   };
 
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_CORRELATOR_H_

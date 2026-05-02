@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-namespace clouds {
+namespace sanguineclouds {
 
   using namespace std;
 
@@ -84,4 +84,4 @@ namespace clouds {
     size_ = size;
     done_ = false;
   }
-}  // namespace clouds
+}  // namespace sanguineclouds

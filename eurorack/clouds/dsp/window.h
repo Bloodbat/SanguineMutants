@@ -37,7 +37,7 @@
 
 #include "clouds/resources.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
 	enum WindowFlags {
 		WINDOW_FLAGS_HALF_DONE = 1,
@@ -47,8 +47,8 @@ namespace clouds {
 
 	class Window {
 	public:
-		Window() { }
-		~Window() { }
+		Window() {}
+		~Window() {}
 
 		void Init() {
 			done_ = true;
@@ -92,8 +92,7 @@ namespace clouds {
 			if (channels == 1) {
 				*samples++ += l;
 				*samples++ += l;
-			}
-			else if (channels == 2) {
+			} else if (channels == 2) {
 				float r = buffer[1].ReadHermite(sample_index, phase_fractional) * gain;
 				*samples++ += l;
 				*samples++ += r;
@@ -119,6 +118,6 @@ namespace clouds {
 		DISALLOW_COPY_AND_ASSIGN(Window);
 	};
 
-}  // namespace clouds
+}  // namespace sanguineclouds
 
 #endif  // CLOUDS_DSP_WINDOW_H_

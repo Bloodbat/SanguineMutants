@@ -35,7 +35,7 @@
 
 #include "clouds/resources.h"
 
-namespace clouds {
+namespace sanguineclouds {
   using namespace std;
   using namespace stmlib;
 
@@ -432,4 +432,4 @@ namespace clouds {
       correlator_.EvaluateSomeCandidates();
     }
   }
-}  // namespace clouds
+}  // namespace sanguineclouds

@@ -45,7 +45,7 @@
 #include "clouds/dsp/parameters.h"
 #include "clouds/resources.h"
 
-namespace clouds {
+namespace sanguineclouds {
 #ifndef METAMODULE
   const int32_t kMaxWSOLASize = 4096;
 #else
@@ -250,5 +250,5 @@ namespace clouds {
 
     DISALLOW_COPY_AND_ASSIGN(WSOLASamplePlayer);
   };
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_WSOLA_SAMPLE_PLAYER_H_
