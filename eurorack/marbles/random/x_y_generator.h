@@ -37,59 +37,59 @@
 #include "marbles/random/random_sequence.h"
 #include "marbles/random/t_generator.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
-enum VoltageRange {
-  VOLTAGE_RANGE_NARROW,  // +2V
-  VOLTAGE_RANGE_POSITIVE,  // +5V
-  VOLTAGE_RANGE_FULL  // +/- 5V
-};
+  enum VoltageRange {
+    VOLTAGE_RANGE_NARROW,  // +2V
+    VOLTAGE_RANGE_POSITIVE,  // +5V
+    VOLTAGE_RANGE_FULL  // +/- 5V
+  };
 
-enum ClockSource {
-  CLOCK_SOURCE_INTERNAL_T1_T2_T3,
-  CLOCK_SOURCE_INTERNAL_T1,
-  CLOCK_SOURCE_INTERNAL_T2,
-  CLOCK_SOURCE_INTERNAL_T3,
-  CLOCK_SOURCE_EXTERNAL
-};
+  enum ClockSource {
+    CLOCK_SOURCE_INTERNAL_T1_T2_T3,
+    CLOCK_SOURCE_INTERNAL_T1,
+    CLOCK_SOURCE_INTERNAL_T2,
+    CLOCK_SOURCE_INTERNAL_T3,
+    CLOCK_SOURCE_EXTERNAL
+  };
 
-enum ControlMode {
-  CONTROL_MODE_IDENTICAL,
-  CONTROL_MODE_BUMP,
-  CONTROL_MODE_TILT
-};
+  enum ControlMode {
+    CONTROL_MODE_IDENTICAL,
+    CONTROL_MODE_BUMP,
+    CONTROL_MODE_TILT
+  };
 
-enum OutputGroup {
-  OUTPUT_GROUP_X,
-  OUTPUT_GROUP_Y,
-  OUTPUT_GROUP_LAST
-};
+  enum OutputGroup {
+    OUTPUT_GROUP_X,
+    OUTPUT_GROUP_Y,
+    OUTPUT_GROUP_LAST
+  };
 
-const size_t kNumXChannels = 3;
-const size_t kNumYChannels = 1;
-const size_t kNumChannels = kNumXChannels + kNumYChannels;
+  const size_t kNumXChannels = 3;
+  const size_t kNumYChannels = 1;
+  const size_t kNumChannels = kNumXChannels + kNumYChannels;
 
-struct GroupSettings {
-  ControlMode control_mode;
-  VoltageRange voltage_range;
-  bool register_mode;
-  float register_value;
-  float spread;
-  float bias;
-  float steps;
-  float deja_vu;
-  int scale_index;
-  int length;
-  Ratio ratio;
-};
+  struct GroupSettings {
+    ControlMode control_mode;
+    VoltageRange voltage_range;
+    bool register_mode;
+    float register_value;
+    float spread;
+    float bias;
+    float steps;
+    float deja_vu;
+    int scale_index;
+    int length;
+    Ratio ratio;
+  };
 
-class XYGenerator {
- public:
-  XYGenerator() { }
-  ~XYGenerator() { }
-  
-  void Init(RandomStream* random_stream, float sr);
-  void Process(
+  class XYGenerator {
+  public:
+    XYGenerator() {}
+    ~XYGenerator() {}
+
+    void Init(RandomStream* random_stream, float sr);
+    void Process(
       ClockSource clock_source,
       const GroupSettings& x_settings,
       const GroupSettings& y_settings,
@@ -97,8 +97,8 @@ class XYGenerator {
       const Ramps& ramps,
       float* output,
       size_t size) {
-    bool reset = false;
-    Process(
+      bool reset = false;
+      Process(
         clock_source,
         x_settings,
         y_settings,
@@ -107,9 +107,9 @@ class XYGenerator {
         ramps,
         output,
         size);
-  }
-  
-  void Process(
+    }
+
+    void Process(
       ClockSource clock_source,
       const GroupSettings& x_settings,
       const GroupSettings& y_settings,
@@ -118,29 +118,29 @@ class XYGenerator {
       const Ramps& ramps,
       float* output,
       size_t size);
-  
-  void LoadScale(int channel, int scale_index, const Scale& scale) {
-    output_channel_[channel].LoadScale(scale_index, scale);
-  }
-  void LoadScale(int scale_index, const Scale& scale) {
-    for (size_t i = 0; i < kNumXChannels; ++i) {
-      output_channel_[i].LoadScale(scale_index, scale);
-    }
-  }
-  
- private:
-  RandomSequence random_sequence_[kNumChannels];
-  OutputChannel output_channel_[kNumChannels];
-  RampExtractor ramp_extractor_;
-  RampDivider ramp_divider_;
-  
-  int external_clock_stabilization_counter_;
-  
-  bool use_shifted_sequences_[kNumChannels];
-  
-  DISALLOW_COPY_AND_ASSIGN(XYGenerator);
-};
 
-}  // namespace marbles
+    void LoadScale(int channel, int scale_index, const Scale& scale) {
+      output_channel_[channel].LoadScale(scale_index, scale);
+    }
+    void LoadScale(int scale_index, const Scale& scale) {
+      for (size_t i = 0; i < kNumXChannels; ++i) {
+        output_channel_[i].LoadScale(scale_index, scale);
+      }
+    }
+
+  private:
+    RandomSequence random_sequence_[kNumChannels];
+    OutputChannel output_channel_[kNumChannels];
+    RampExtractor ramp_extractor_;
+    RampDivider ramp_divider_;
+
+    int external_clock_stabilization_counter_;
+
+    bool use_shifted_sequences_[kNumChannels];
+
+    DISALLOW_COPY_AND_ASSIGN(XYGenerator);
+  };
+
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RANDOM_X_Y_GENERATOR_H_

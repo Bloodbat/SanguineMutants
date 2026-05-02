@@ -33,29 +33,29 @@
 
 #include <cstdio>
 
-namespace marbles {
+namespace sanguinemarbles {
 
-class LagProcessor {
- public:
-  LagProcessor() { }
-  ~LagProcessor() { }
-  
-  void Init();
-  inline void ResetRamp() {
-    ramp_start_ = ramp_value_;
-  }
-  
-  float Process(float value, float smoothness, float phase);
+  class LagProcessor {
+  public:
+    LagProcessor() {}
+    ~LagProcessor() {}
 
- private:
-  float ramp_start_;
-  float ramp_value_;
-  float lp_state_;
-  float previous_phase_;
-  
-  DISALLOW_COPY_AND_ASSIGN(LagProcessor);
-};
+    void Init();
+    inline void ResetRamp() {
+      ramp_start_ = ramp_value_;
+    }
 
-}  // namespace marbles
+    float Process(float value, float smoothness, float phase);
+
+  private:
+    float ramp_start_;
+    float ramp_value_;
+    float lp_state_;
+    float previous_phase_;
+
+    DISALLOW_COPY_AND_ASSIGN(LagProcessor);
+  };
+
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RANDOM_LAG_PROCESSOR_H_

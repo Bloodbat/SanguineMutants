@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
 class RampGenerator {
  public:
@@ -58,6 +58,6 @@ class RampGenerator {
   DISALLOW_COPY_AND_ASSIGN(RampGenerator);
 };
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RAMP_RAMP_GENERATOR_H_

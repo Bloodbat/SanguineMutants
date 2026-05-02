@@ -33,7 +33,7 @@
 
 #include "marbles/ramp/ramp.h"
 
-namespace marbles {
+namespace sanguinemarbles {
   class SlaveRamp {
   public:
     SlaveRamp() {}
@@ -127,5 +127,5 @@ namespace marbles {
 
     DISALLOW_COPY_AND_ASSIGN(SlaveRamp);
   };
-}  // namespace marbles
+}  // namespace sanguinemarbles
 #endif  // MARBLES_RAMP_SLAVE_RAMP_H_

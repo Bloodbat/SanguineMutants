@@ -33,7 +33,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace marbles {
+namespace sanguinemarbles {
   using namespace std;
 
   void Quantizer::Init(const Scale& scale) {
@@ -136,4 +136,4 @@ namespace marbles {
     }
     return quantized_voltage;
   }
-}  // namespace marbles
+}  // namespace sanguinemarbles

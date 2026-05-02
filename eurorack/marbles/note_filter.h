@@ -32,7 +32,7 @@
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/delay_line.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
 // Note: this is a "slow" filter, since it takes about 10 samples to catch
 // up with an edge in the input signal.
@@ -77,6 +77,6 @@ class NoteFilter {
   DISALLOW_COPY_AND_ASSIGN(NoteFilter);
 };
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_NOTE_FILTER_H_

@@ -36,47 +36,47 @@
 
 #include "marbles/random/random_generator.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
-class RandomStream {
- public:
-  RandomStream() { }
-  ~RandomStream() { }
-  
-  inline void Init(RandomGenerator* fallback_generator) {
-    fallback_generator_ = fallback_generator;
-    buffer_.Init();
-  }
+  class RandomStream {
+  public:
+    RandomStream() {}
+    ~RandomStream() {}
 
-  inline void Write(uint32_t value) {
-    // buffer_.Swallow(1);
-    // buffer_.Overwrite(value);
-    if (buffer_.writable()) {
-      buffer_.Overwrite(value);
+    inline void Init(RandomGenerator* fallback_generator) {
+      fallback_generator_ = fallback_generator;
+      buffer_.Init();
     }
-    fallback_generator_->Mix(value);
-  }
-  
-  inline uint32_t GetWord() {
-    if (buffer_.readable()) {
-      return buffer_.ImmediateRead();
-    } else {
-      return fallback_generator_->GetWord();
-    }
-  }
-  
-  inline float GetFloat() {
-    uint32_t word = GetWord();
-    return static_cast<float>(word) / 4294967296.0f;
-  }
-  
- private:
-  stmlib::RingBuffer<uint32_t, 128> buffer_;
-  RandomGenerator* fallback_generator_;
-  
-  DISALLOW_COPY_AND_ASSIGN(RandomStream);
-};
 
-}  // namespace marbles
+    inline void Write(uint32_t value) {
+      // buffer_.Swallow(1);
+      // buffer_.Overwrite(value);
+      if (buffer_.writable()) {
+        buffer_.Overwrite(value);
+      }
+      fallback_generator_->Mix(value);
+    }
+
+    inline uint32_t GetWord() {
+      if (buffer_.readable()) {
+        return buffer_.ImmediateRead();
+      } else {
+        return fallback_generator_->GetWord();
+      }
+    }
+
+    inline float GetFloat() {
+      uint32_t word = GetWord();
+      return static_cast<float>(word) / 4294967296.0f;
+    }
+
+  private:
+    stmlib::RingBuffer<uint32_t, 128> buffer_;
+    RandomGenerator* fallback_generator_;
+
+    DISALLOW_COPY_AND_ASSIGN(RandomStream);
+  };
+
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RANDOM_RANDOM_STREAM_H_

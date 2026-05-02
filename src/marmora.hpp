@@ -17,7 +17,7 @@ namespace marmora {
     static const int kLightColorPins = 2;
     static const int kMaxClockSourceTypes = 4;
 
-    static const marbles::Scale presetScales[kMaxScales] = {
+    static const sanguinemarbles::Scale presetScales[kMaxScales] = {
         // C major
         {
             1.0f,
@@ -133,7 +133,7 @@ namespace marmora {
         },
     };
 
-    static const marbles::Ratio yDividerRatios[] = {
+    static const sanguinemarbles::Ratio yDividerRatios[] = {
         { 1, 64 },
         { 1, 48 },
         { 1, 32 },
