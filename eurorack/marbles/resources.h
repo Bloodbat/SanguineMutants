@@ -38,62 +38,62 @@
 
 
 
-namespace marbles {
+namespace sanguinemarbles {
 
-typedef uint8_t ResourceId;
+    typedef uint8_t ResourceId;
 
-extern const float* lookup_table_table[];
+    extern const float* lookup_table_table[];
 
-extern const float* distributions_table[];
+    extern const float* distributions_table[];
 
-extern const float lut_raised_cosine[];
-extern const float lut_sine[];
-extern const float lut_logit[];
-extern const float dist_icdf_0_0[];
-extern const float dist_icdf_0_1[];
-extern const float dist_icdf_0_2[];
-extern const float dist_icdf_0_3[];
-extern const float dist_icdf_0_4[];
-extern const float dist_icdf_0_5[];
-extern const float dist_icdf_0_6[];
-extern const float dist_icdf_0_7[];
-extern const float dist_icdf_0_8[];
-extern const float dist_icdf_1_0[];
-extern const float dist_icdf_1_1[];
-extern const float dist_icdf_1_2[];
-extern const float dist_icdf_1_3[];
-extern const float dist_icdf_1_4[];
-extern const float dist_icdf_1_5[];
-extern const float dist_icdf_1_6[];
-extern const float dist_icdf_1_7[];
-extern const float dist_icdf_1_8[];
-extern const float dist_icdf_2_0[];
-extern const float dist_icdf_2_1[];
-extern const float dist_icdf_2_2[];
-extern const float dist_icdf_2_3[];
-extern const float dist_icdf_2_4[];
-extern const float dist_icdf_2_5[];
-extern const float dist_icdf_2_6[];
-extern const float dist_icdf_2_7[];
-extern const float dist_icdf_2_8[];
-extern const float dist_icdf_3_0[];
-extern const float dist_icdf_3_1[];
-extern const float dist_icdf_3_2[];
-extern const float dist_icdf_3_3[];
-extern const float dist_icdf_3_4[];
-extern const float dist_icdf_3_5[];
-extern const float dist_icdf_3_6[];
-extern const float dist_icdf_3_7[];
-extern const float dist_icdf_3_8[];
-extern const float dist_icdf_4_0[];
-extern const float dist_icdf_4_1[];
-extern const float dist_icdf_4_2[];
-extern const float dist_icdf_4_3[];
-extern const float dist_icdf_4_4[];
-extern const float dist_icdf_4_5[];
-extern const float dist_icdf_4_6[];
-extern const float dist_icdf_4_7[];
-extern const float dist_icdf_4_8[];
+    extern const float lut_raised_cosine[];
+    extern const float lut_sine[];
+    extern const float lut_logit[];
+    extern const float dist_icdf_0_0[];
+    extern const float dist_icdf_0_1[];
+    extern const float dist_icdf_0_2[];
+    extern const float dist_icdf_0_3[];
+    extern const float dist_icdf_0_4[];
+    extern const float dist_icdf_0_5[];
+    extern const float dist_icdf_0_6[];
+    extern const float dist_icdf_0_7[];
+    extern const float dist_icdf_0_8[];
+    extern const float dist_icdf_1_0[];
+    extern const float dist_icdf_1_1[];
+    extern const float dist_icdf_1_2[];
+    extern const float dist_icdf_1_3[];
+    extern const float dist_icdf_1_4[];
+    extern const float dist_icdf_1_5[];
+    extern const float dist_icdf_1_6[];
+    extern const float dist_icdf_1_7[];
+    extern const float dist_icdf_1_8[];
+    extern const float dist_icdf_2_0[];
+    extern const float dist_icdf_2_1[];
+    extern const float dist_icdf_2_2[];
+    extern const float dist_icdf_2_3[];
+    extern const float dist_icdf_2_4[];
+    extern const float dist_icdf_2_5[];
+    extern const float dist_icdf_2_6[];
+    extern const float dist_icdf_2_7[];
+    extern const float dist_icdf_2_8[];
+    extern const float dist_icdf_3_0[];
+    extern const float dist_icdf_3_1[];
+    extern const float dist_icdf_3_2[];
+    extern const float dist_icdf_3_3[];
+    extern const float dist_icdf_3_4[];
+    extern const float dist_icdf_3_5[];
+    extern const float dist_icdf_3_6[];
+    extern const float dist_icdf_3_7[];
+    extern const float dist_icdf_3_8[];
+    extern const float dist_icdf_4_0[];
+    extern const float dist_icdf_4_1[];
+    extern const float dist_icdf_4_2[];
+    extern const float dist_icdf_4_3[];
+    extern const float dist_icdf_4_4[];
+    extern const float dist_icdf_4_5[];
+    extern const float dist_icdf_4_6[];
+    extern const float dist_icdf_4_7[];
+    extern const float dist_icdf_4_8[];
 #define LUT_RAISED_COSINE 0
 #define LUT_RAISED_COSINE_SIZE 257
 #define LUT_SINE 1
@@ -221,6 +221,6 @@ extern const float dist_icdf_4_8[];
 #define DIST_ICDF_4_8_GUARD_GUARD 59
 #define DIST_ICDF_4_8_GUARD_GUARD_SIZE 387
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RESOURCES_H_

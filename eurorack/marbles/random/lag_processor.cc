@@ -33,56 +33,56 @@
 
 #include "marbles/resources.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
-using namespace stmlib;
+  using namespace stmlib;
 
-void LagProcessor::Init() {
- ramp_start_ = 0.0f;
- ramp_value_ = 0.0f;
- lp_state_ = 0.0f;
- previous_phase_ = 0.0f;
-}
-
-float LagProcessor::Process(float value, float smoothness, float phase) {
-  float frequency = phase - previous_phase_;
-  if (frequency < 0.0f) {
-    frequency += 1.0f;
-  }
-  previous_phase_ = phase;
-  
-  // The frequency of the portamento/glide LP filter follows an exponential
-  // scale, with a minimum frequency corresponding to half the clock pulse
-  // frequency (giving a roughly linear glide), and a maximum value 7 octaves
-  // above.
-  //
-  // When smoothness approaches 0, the response curve is tweaked to give
-  // immediate voltage changes, without any lag.
-  frequency *= 0.25f;
-  frequency *= SemitonesToRatio(84.0f * (1.0f - smoothness));
-  if (frequency >= 1.0f) {
-    frequency = 1.0f;
-  }
-  if (smoothness <= 0.05f) {
-    frequency += 20.f * (0.05f - smoothness) * (1.0f - frequency);
+  void LagProcessor::Init() {
+    ramp_start_ = 0.0f;
+    ramp_value_ = 0.0f;
+    lp_state_ = 0.0f;
+    previous_phase_ = 0.0f;
   }
 
-  ONE_POLE(lp_state_, value, frequency);
-  
-  // The final output is a crossfade between a variable shape interpolation and
-  // the low-pass glide/lag.
-  float interp_amount = (smoothness - 0.6f) * 5.0f;
-  CONSTRAIN(interp_amount, 0.0f, 1.0f);
-  
-  float interp_linearity = (1.0f - smoothness) * 5.0f;
-  CONSTRAIN(interp_linearity, 0.0f, 1.0f);
-  float warped_phase = Interpolate(lut_raised_cosine, phase, 256.0f);
-  
-  float interp_phase = Crossfade(warped_phase, phase, interp_linearity);
-  float interp = Crossfade(ramp_start_, value, interp_phase);
-  ramp_value_ = interp;
-  
-  return Crossfade(lp_state_, interp, interp_amount);
-}
+  float LagProcessor::Process(float value, float smoothness, float phase) {
+    float frequency = phase - previous_phase_;
+    if (frequency < 0.0f) {
+      frequency += 1.0f;
+    }
+    previous_phase_ = phase;
 
-}  // namespace marbles
+    // The frequency of the portamento/glide LP filter follows an exponential
+    // scale, with a minimum frequency corresponding to half the clock pulse
+    // frequency (giving a roughly linear glide), and a maximum value 7 octaves
+    // above.
+    //
+    // When smoothness approaches 0, the response curve is tweaked to give
+    // immediate voltage changes, without any lag.
+    frequency *= 0.25f;
+    frequency *= SemitonesToRatio(84.0f * (1.0f - smoothness));
+    if (frequency >= 1.0f) {
+      frequency = 1.0f;
+    }
+    if (smoothness <= 0.05f) {
+      frequency += 20.f * (0.05f - smoothness) * (1.0f - frequency);
+    }
+
+    ONE_POLE(lp_state_, value, frequency);
+
+    // The final output is a crossfade between a variable shape interpolation and
+    // the low-pass glide/lag.
+    float interp_amount = (smoothness - 0.6f) * 5.0f;
+    CONSTRAIN(interp_amount, 0.0f, 1.0f);
+
+    float interp_linearity = (1.0f - smoothness) * 5.0f;
+    CONSTRAIN(interp_linearity, 0.0f, 1.0f);
+    float warped_phase = Interpolate(lut_raised_cosine, phase, 256.0f);
+
+    float interp_phase = Crossfade(warped_phase, phase, interp_linearity);
+    float interp = Crossfade(ramp_start_, value, interp_phase);
+    ramp_value_ = interp;
+
+    return Crossfade(lp_state_, interp, interp_amount);
+  }
+
+}  // namespace sanguinemarbles

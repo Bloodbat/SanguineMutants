@@ -34,7 +34,7 @@
 
 #include "marbles/resources.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
   using namespace std;
   using namespace stmlib;
@@ -403,4 +403,4 @@ namespace marbles {
     }
   }
 
-}  // namespace marbles
+}  // namespace sanguinemarbles

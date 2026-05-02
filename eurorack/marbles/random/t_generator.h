@@ -39,7 +39,7 @@
 #include "marbles/random/random_sequence.h"
 #include "stmlib/dsp/hysteresis_quantizer.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
   enum TGeneratorModel {
     T_GENERATOR_MODEL_COMPLEMENTARY_BERNOULLI,
@@ -203,6 +203,6 @@ namespace marbles {
     DISALLOW_COPY_AND_ASSIGN(TGenerator);
   };
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RANDOM_T_GENERATOR_H_

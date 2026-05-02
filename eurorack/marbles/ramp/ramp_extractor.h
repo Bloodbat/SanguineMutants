@@ -43,7 +43,7 @@
 
 #include "marbles/ramp/ramp_divider.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
 class RampExtractor {
  public:
@@ -143,6 +143,6 @@ class RampExtractor {
   DISALLOW_COPY_AND_ASSIGN(RampExtractor);
 };
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RAMP_RAMP_EXTRACTOR_H_

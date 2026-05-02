@@ -35,7 +35,7 @@
 #include "marbles/random/distributions.h"
 #include "marbles/random/quantizer.h"
 
-namespace marbles {
+namespace sanguinemarbles {
   const int kMaxDegrees = 16;
   const int kNumThresholds = 7;
 
@@ -84,5 +84,5 @@ namespace marbles {
 
     DISALLOW_COPY_AND_ASSIGN(Quantizer);
   };
-}  // namespace marbles
+}  // namespace sanguinemarbles
 #endif  // MARBLES_RANDOM_QUANTIZER_H_

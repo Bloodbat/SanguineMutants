@@ -32,7 +32,7 @@
 #include "stmlib/stmlib.h"
 #include "marbles/random/quantizer.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
   class ScaleRecorder {
   public:
@@ -142,6 +142,6 @@ namespace marbles {
     DISALLOW_COPY_AND_ASSIGN(ScaleRecorder);
   };
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_SCALE_RECORDER_H_
