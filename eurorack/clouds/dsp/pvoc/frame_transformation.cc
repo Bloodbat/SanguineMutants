@@ -37,7 +37,7 @@
 #include "clouds/dsp/frame.h"
 #include "clouds/dsp/parameters.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
   using namespace std;
   using namespace stmlib;
@@ -329,4 +329,4 @@ namespace clouds {
       xf_polar[i] = Crossfade(a[i], b[i], index_fractional);
     }
   }
-}  // namespace clouds
+}  // namespace sanguineclouds

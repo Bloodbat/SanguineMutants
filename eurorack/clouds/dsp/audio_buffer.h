@@ -41,7 +41,7 @@
 const int32_t kCrossFadeSize = 256;
 const int32_t kInterpolationTail = 8;
 
-namespace clouds {
+namespace sanguineclouds {
 
   enum Resolution {
     RESOLUTION_16_BIT,
@@ -287,5 +287,5 @@ namespace clouds {
 
     DISALLOW_COPY_AND_ASSIGN(AudioBuffer);
   };
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_AUDIO_BUFFER_H_

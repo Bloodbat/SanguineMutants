@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace clouds {
+namespace sanguineclouds {
   extern int16_t lut_ulaw[256];
 
   inline short MuLaw2Lin(uint8_t u_val) {
@@ -67,5 +67,5 @@ namespace clouds {
       return (uval ^ mask);
     }
   }
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_MU_LAW_H_

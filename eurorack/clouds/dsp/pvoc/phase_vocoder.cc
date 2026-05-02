@@ -32,7 +32,7 @@
 
 #include "stmlib/utils/buffer_allocator.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
   using namespace std;
   using namespace stmlib;
@@ -78,4 +78,4 @@ namespace clouds {
       stft_[i].Buffer();
     }
   }
-}  // namespace clouds
+}  // namespace sanguineclouds

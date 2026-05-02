@@ -31,14 +31,14 @@
 
 #include "stmlib/stmlib.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
-const int32_t kMaxNumChannels = 2;
-const size_t kMaxBlockSize = 32;
+    const int32_t kMaxNumChannels = 2;
+    const size_t kMaxBlockSize = 32;
 
-typedef struct { short l; short r; } ShortFrame;
-typedef struct { float l; float r; } FloatFrame;
+    typedef struct { short l; short r; } ShortFrame;
+    typedef struct { float l; float r; } FloatFrame;
 
-}  // namespace clouds
+}  // namespace sanguineclouds
 
 #endif  // CLOUDS_DSP_FRAME_H_

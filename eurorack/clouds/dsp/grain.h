@@ -37,7 +37,7 @@
 
 #include "clouds/resources.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
   enum GrainQuality {
     GRAIN_QUALITY_LOW,
@@ -190,5 +190,5 @@ namespace clouds {
     DISALLOW_COPY_AND_ASSIGN(Grain);
   };
 
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_GRAIN_H_

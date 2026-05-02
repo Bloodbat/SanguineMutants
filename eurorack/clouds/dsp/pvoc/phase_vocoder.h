@@ -37,7 +37,7 @@
 #include "clouds/dsp/pvoc/stft.h"
 #include "clouds/dsp/pvoc/frame_transformation.h"
 
-namespace clouds {
+namespace sanguineclouds {
     struct Parameters;
 
     class PhaseVocoder {
@@ -61,5 +61,5 @@ namespace clouds {
 
         DISALLOW_COPY_AND_ASSIGN(PhaseVocoder);
     };
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_PVOC_PHASE_VOCODER_H_

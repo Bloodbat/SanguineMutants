@@ -33,7 +33,7 @@
 #include "clouds/dsp/pvoc/frame_transformation.h"
 #include "stmlib/dsp/dsp.h"
 
-namespace clouds {
+namespace sanguineclouds {
 
   using namespace std;
   using namespace stmlib;
@@ -211,4 +211,4 @@ namespace clouds {
     }
   }
 
-}  // namespace clouds
+}  // namespace sanguineclouds
