@@ -90,16 +90,16 @@ struct Marmora : SanguineModule {
 
 	struct MarmoraScale {
 		bool bScaleDirty;
-		marbles::Scale scale;
+		sanguinemarbles::Scale scale;
 	};
 
-	marbles::RandomGenerator randomGenerator;
-	marbles::RandomStream randomStream;
-	marbles::TGenerator tGenerator;
-	marbles::XYGenerator xyGenerator;
-	marbles::NoteFilter noteFilter;
-	marbles::ScaleRecorder scaleRecorder;
-	marbles::ClockSource xClockSourceInternal = marbles::CLOCK_SOURCE_INTERNAL_T1_T2_T3;
+	sanguinemarbles::RandomGenerator randomGenerator;
+	sanguinemarbles::RandomStream randomStream;
+	sanguinemarbles::TGenerator tGenerator;
+	sanguinemarbles::XYGenerator xyGenerator;
+	sanguinemarbles::NoteFilter noteFilter;
+	sanguinemarbles::ScaleRecorder scaleRecorder;
+	sanguinemarbles::ClockSource xClockSourceInternal = sanguinemarbles::CLOCK_SOURCE_INTERNAL_T1_T2_T3;
 
 	bool bDejaVuTEnabled = false;
 	bool bDejaVuXEnabled = false;
@@ -339,7 +339,7 @@ struct Marmora : SanguineModule {
 		bDejaVuXEnabled = params[PARAM_DEJA_VU_X].getValue();
 
 		xScale = params[PARAM_SCALE].getValue();
-		xClockSourceInternal = static_cast<marbles::ClockSource>(params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue());
+		xClockSourceInternal = static_cast<sanguinemarbles::ClockSource>(params[PARAM_INTERNAL_X_CLOCK_SOURCE].getValue());
 
 		bWantTReset = stTReset.process(inputs[INPUT_T_RESET].getVoltage()) || bWantMenuTReset;
 		bWantXReset = stXReset.process(inputs[INPUT_X_RESET].getVoltage()) || bWantMenuXReset;
@@ -477,7 +477,7 @@ struct Marmora : SanguineModule {
 	}
 
 	void stepBlock() {
-		marbles::Ramps ramps;
+		sanguinemarbles::Ramps ramps;
 		ramps.master = rampMaster;
 		ramps.external = rampExternal;
 		ramps.slave[0] = rampSlave[0];
@@ -494,7 +494,7 @@ struct Marmora : SanguineModule {
 	}
 
 	void stepBlockScaleEdit() {
-		marbles::Ramps ramps;
+		sanguinemarbles::Ramps ramps;
 		ramps.master = rampMaster;
 		ramps.external = rampExternal;
 		ramps.slave[0] = rampSlave[0];
@@ -510,9 +510,9 @@ struct Marmora : SanguineModule {
 		stepScaleEditor();
 	}
 
-	void setupTGenerator(const float dejaVu, const int dejaVuLength, const marbles::Ramps& ramps) {
-		tGenerator.set_model(static_cast<marbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
-		tGenerator.set_range(static_cast<marbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
+	void setupTGenerator(const float dejaVu, const int dejaVuLength, const sanguinemarbles::Ramps& ramps) {
+		tGenerator.set_model(static_cast<sanguinemarbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
+		tGenerator.set_range(static_cast<sanguinemarbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
 		float tRate = 60.f * (params[PARAM_T_RATE].getValue() + inputs[INPUT_T_RATE].getVoltage() / 5.f);
 		tGenerator.set_rate(tRate);
 		float tBias = clamp(params[PARAM_T_BIAS].getValue() + inputs[INPUT_T_BIAS].getVoltage() / 5.f, 0.f, 1.f);
@@ -531,17 +531,17 @@ struct Marmora : SanguineModule {
 		tGenerator.Process(bTClockSourceExternal, &bWantTReset, tClocks, ramps, bGates, marmora::kBlockSize);
 	}
 
-	void setupXYGenerator(const float dejaVu, const int dejaVuLength, const marbles::Ramps& ramps) {
+	void setupXYGenerator(const float dejaVu, const int dejaVuLength, const sanguinemarbles::Ramps& ramps) {
 		// Set up XYGenerator.
-		marbles::ClockSource xClockSource = xClockSourceInternal;
+		sanguinemarbles::ClockSource xClockSource = xClockSourceInternal;
 
 		if (bXClockSourceExternal) {
-			xClockSource = marbles::CLOCK_SOURCE_EXTERNAL;
+			xClockSource = sanguinemarbles::CLOCK_SOURCE_EXTERNAL;
 		}
 
-		marbles::GroupSettings x;
-		x.control_mode = static_cast<marbles::ControlMode>(params[PARAM_X_MODE].getValue());
-		x.voltage_range = static_cast<marbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
+		sanguinemarbles::GroupSettings x;
+		x.control_mode = static_cast<sanguinemarbles::ControlMode>(params[PARAM_X_MODE].getValue());
+		x.voltage_range = static_cast<sanguinemarbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
 		// TODO: Fix the scaling.
 		/*
 		   I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
@@ -566,9 +566,9 @@ struct Marmora : SanguineModule {
 		x.ratio.q = 1;
 		x.scale_index = xScale;
 
-		marbles::GroupSettings y;
-		y.control_mode = marbles::CONTROL_MODE_IDENTICAL;
-		y.voltage_range = marbles::VOLTAGE_RANGE_FULL;
+		sanguinemarbles::GroupSettings y;
+		y.control_mode = sanguinemarbles::CONTROL_MODE_IDENTICAL;
+		y.voltage_range = sanguinemarbles::VOLTAGE_RANGE_FULL;
 		y.register_mode = false;
 		y.register_value = 0.f;
 		y.spread = params[PARAM_Y_SPREAD].getValue();
@@ -664,8 +664,8 @@ struct Marmora : SanguineModule {
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
-		memset(&tGenerator, 0, sizeof(marbles::TGenerator));
-		memset(&xyGenerator, 0, sizeof(marbles::XYGenerator));
+		memset(&tGenerator, 0, sizeof(sanguinemarbles::TGenerator));
+		memset(&xyGenerator, 0, sizeof(sanguinemarbles::XYGenerator));
 
 		tGenerator.Init(&randomStream, e.sampleRate);
 		xyGenerator.Init(&randomStream, e.sampleRate);
@@ -775,7 +775,7 @@ struct Marmora : SanguineModule {
 				std::string scaleDegrees = scaleHeader + "Degrees";
 				std::string scaleDataVoltages = scaleHeader + "DataVoltages";
 				std::string scaleDataWeights = scaleHeader + "DataWeights";
-				marbles::Scale customScale;
+				sanguinemarbles::Scale customScale;
 
 				customScale.Init();
 
@@ -820,7 +820,7 @@ struct Marmora : SanguineModule {
 
 	void toggleScaleEdit() {
 		if (bScaleEditMode) {
-			marbles::Scale customScale;
+			sanguinemarbles::Scale customScale;
 			bool bScaleSuccessful = scaleRecorder.ExtractScale(&customScale);
 			if (bScaleSuccessful) {
 				int currentScale = params[PARAM_SCALE].getValue();
@@ -844,7 +844,7 @@ struct Marmora : SanguineModule {
 		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 	}
 
-	void copyScale(const marbles::Scale& source, marbles::Scale& destination) {
+	void copyScale(const sanguinemarbles::Scale& source, sanguinemarbles::Scale& destination) {
 		destination.base_interval = source.base_interval;
 		destination.num_degrees = source.num_degrees;
 

@@ -34,32 +34,32 @@
 
 #include "stmlib/utils/ring_buffer.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
-class RandomGenerator {
- public:
-  RandomGenerator() { }
-  ~RandomGenerator() { }
-  
-  inline void Init(uint32_t seed) {
-    state_ = seed;
-  }
-  
-  inline void Mix(uint32_t word) {
-    // state_ ^= word;
-  }
-  
-  inline uint32_t GetWord() {
-    state_ = state_ * 1664525L + 1013904223L;
-    return state_;
-  }
- 
- private:
-  uint32_t state_;
-  
-  DISALLOW_COPY_AND_ASSIGN(RandomGenerator);
-};
+  class RandomGenerator {
+  public:
+    RandomGenerator() {}
+    ~RandomGenerator() {}
 
-}  // namespace marbles
+    inline void Init(uint32_t seed) {
+      state_ = seed;
+    }
+
+    inline void Mix(uint32_t word) {
+      // state_ ^= word;
+    }
+
+    inline uint32_t GetWord() {
+      state_ = state_ * 1664525L + 1013904223L;
+      return state_;
+    }
+
+  private:
+    uint32_t state_;
+
+    DISALLOW_COPY_AND_ASSIGN(RandomGenerator);
+  };
+
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RANDOM_RANDOM_GENERATOR_H_

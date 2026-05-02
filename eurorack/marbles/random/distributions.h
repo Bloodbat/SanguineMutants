@@ -37,7 +37,7 @@
 
 #include "marbles/resources.h"
 
-namespace marbles {
+namespace sanguinemarbles {
   const size_t kNumBiasValues = 5;
   const size_t kNumRangeValues = 9;
   const float kIcdfTableSize = 128.0f;
@@ -98,5 +98,5 @@ namespace marbles {
   inline float FastBetaDistributionSample(float uniform) {
     return stmlib::Interpolate(dist_icdf_4_3, uniform, kIcdfTableSize);
   }
-}  // namespace marbles
+}  // namespace sanguinemarbles
 #endif  // MARBLES_RANDOM_DISTRIBUTIONS_H_

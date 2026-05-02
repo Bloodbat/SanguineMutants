@@ -31,10 +31,10 @@
 
 #include "stmlib/stmlib.h"
 
-namespace marbles {
+namespace sanguinemarbles {
 
-const float kMaxRampValue = 0.9999f;
+    const float kMaxRampValue = 0.9999f;
 
-}  // namespace marbles
+}  // namespace sanguinemarbles
 
 #endif  // MARBLES_RAMP_RAMP_H_
