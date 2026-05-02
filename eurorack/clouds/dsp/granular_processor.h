@@ -44,7 +44,7 @@
 #include "clouds/dsp/sample_rate_converter.h"
 #include "clouds/dsp/wsola_sample_player.h"
 
-namespace clouds {
+namespace sanguineclouds {
   const int32_t kDownsamplingFactor = 2;
 
   enum PlaybackMode {
@@ -180,5 +180,5 @@ namespace clouds {
     DISALLOW_COPY_AND_ASSIGN(GranularProcessor);
   };
 
-}  // namespace clouds
+}  // namespace sanguineclouds
 #endif  // CLOUDS_DSP_GRANULAR_PROCESSOR_H_
