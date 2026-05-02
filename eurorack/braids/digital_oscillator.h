@@ -36,7 +36,7 @@
 
 #include <cstring>
 
-namespace braids {
+namespace sanguinebraids {
   static const size_t kWGBridgeLength = 1024;
   static const size_t kWGNeckLength = 4096;
   static const size_t kWGBoreLength = 2048;
@@ -371,5 +371,5 @@ namespace braids {
 
     DISALLOW_COPY_AND_ASSIGN(DigitalOscillator);
   };
-}  // namespace braids
+}  // namespace sanguinebraids
 #endif // BRAIDS_DIGITAL_OSCILLATOR_H_

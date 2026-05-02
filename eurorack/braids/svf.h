@@ -34,7 +34,7 @@
 #include "braids/resources.h"
 #include "stmlib/utils/dsp.h"
 
-namespace braids {
+namespace sanguinebraids {
 
 enum SvfMode {
   SVF_MODE_LP,
@@ -115,6 +115,6 @@ class Svf {
   DISALLOW_COPY_AND_ASSIGN(Svf);
 };
 
-}  // namespace braids
+}  // namespace sanguinebraids
 
 #endif  // BRAIDS_SVF_H_

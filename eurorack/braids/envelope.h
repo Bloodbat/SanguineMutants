@@ -31,7 +31,7 @@
 
 #include "braids/resources.h"
 
-namespace braids {
+namespace sanguinebraids {
   using namespace stmlib;
 
   enum EnvelopeSegment {
@@ -103,5 +103,5 @@ namespace braids {
 
     DISALLOW_COPY_AND_ASSIGN(Envelope);
   };
-}  // namespace braids
+}  // namespace sanguinebraids
 #endif  // BRAIDS_ENVELOPE_H_

@@ -31,41 +31,41 @@
 
 #include "stmlib/stmlib.h"
 
-namespace braids {
+namespace sanguinebraids {
 
-struct Scale {
-  int16_t span;
-  size_t num_notes;
-  int16_t notes[16];
-};
+  struct Scale {
+    int16_t span;
+    size_t num_notes;
+    int16_t notes[16];
+  };
 
-class Quantizer {
- public:
-  Quantizer() { }
-  ~Quantizer() { }
+  class Quantizer {
+  public:
+    Quantizer() {}
+    ~Quantizer() {}
 
-  void Init();
+    void Init();
 
-  int32_t Process(int32_t pitch) {
-    return Process(pitch, 0);
-  }
+    int32_t Process(int32_t pitch) {
+      return Process(pitch, 0);
+    }
 
-  int32_t Process(int32_t pitch, int32_t root);
+    int32_t Process(int32_t pitch, int32_t root);
 
-  void Configure(const Scale& scale) {
-    Configure(scale.notes, scale.span, scale.num_notes);
-  }
- private:
-  void Configure(const int16_t* notes, int16_t span, size_t num_notes);
-  bool enabled_;
-  int16_t codebook_[128];
-  int32_t codeword_;
-  int32_t previous_boundary_;
-  int32_t next_boundary_;
+    void Configure(const Scale& scale) {
+      Configure(scale.notes, scale.span, scale.num_notes);
+    }
+  private:
+    void Configure(const int16_t* notes, int16_t span, size_t num_notes);
+    bool enabled_;
+    int16_t codebook_[128];
+    int32_t codeword_;
+    int32_t previous_boundary_;
+    int32_t next_boundary_;
 
-  DISALLOW_COPY_AND_ASSIGN(Quantizer);
-};
+    DISALLOW_COPY_AND_ASSIGN(Quantizer);
+  };
 
-}  // namespace braids
+}  // namespace sanguinebraids
 
 #endif // BRAIDS_QUANTIZER_H_

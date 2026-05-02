@@ -36,7 +36,7 @@
 
 #include "braids/resources.h"
 
-namespace braids {
+namespace sanguinebraids {
   enum AnalogOscillatorShape {
     OSC_SHAPE_SAW,
     OSC_SHAPE_VARIABLE_SAW,
@@ -147,5 +147,5 @@ namespace braids {
 
     DISALLOW_COPY_AND_ASSIGN(AnalogOscillator);
   };
-}  // namespace braids
+}  // namespace sanguinebraids
 #endif // BRAIDS_ANALOG_OSCILLATOR_H_

@@ -82,12 +82,12 @@ struct Nodi : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	braids::MacroOscillator oscillators[PORT_MAX_CHANNELS];
-	braids::SettingsData settings[PORT_MAX_CHANNELS];
-	braids::VcoJitterSource jitterSources[PORT_MAX_CHANNELS];
-	braids::SignatureWaveshaper waveShapers[PORT_MAX_CHANNELS];
-	braids::Envelope envelopes[PORT_MAX_CHANNELS];
-	braids::Quantizer quantizers[PORT_MAX_CHANNELS];
+	sanguinebraids::MacroOscillator oscillators[PORT_MAX_CHANNELS];
+	sanguinebraids::SettingsData settings[PORT_MAX_CHANNELS];
+	sanguinebraids::VcoJitterSource jitterSources[PORT_MAX_CHANNELS];
+	sanguinebraids::SignatureWaveshaper waveShapers[PORT_MAX_CHANNELS];
+	sanguinebraids::Envelope envelopes[PORT_MAX_CHANNELS];
+	sanguinebraids::Quantizer quantizers[PORT_MAX_CHANNELS];
 
 	uint8_t selectedScales[PORT_MAX_CHANNELS] = {};
 
@@ -145,8 +145,8 @@ struct Nodi : SanguineModule {
 	bool bNeedSignSeed = true;
 
 	// Display stuff.
-	braids::SettingsData lastSettings = {};
-	braids::Setting lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
+	sanguinebraids::SettingsData lastSettings = {};
+	sanguinebraids::Setting lastSettingChanged = sanguinebraids::SETTING_OSCILLATOR_SHAPE;
 
 	uint32_t displayTimeout = 0;
 	uint32_t userSignSeed = 0;
@@ -165,7 +165,7 @@ struct Nodi : SanguineModule {
 	Nodi() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configSwitch(PARAM_MODEL, 0.f, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", nodi::menuLabels);
+		configSwitch(PARAM_MODEL, 0.f, sanguinebraids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, 0.f, "Model", nodi::menuLabels);
 		configParam(PARAM_MODULATION, -1.f, 1.f, 0.f, "Modulation");
 		configParam(PARAM_COARSE, -5.f, 3.f, -1.f, "Coarse frequency", " semitones", 0.f, 12.f, 12.f);
 		configParam(PARAM_FINE, -1.f, 1.f, 0.f, "Fine frequency", " semitones");
@@ -210,12 +210,12 @@ struct Nodi : SanguineModule {
 		configInput(INPUT_DECAY, "Decay");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&oscillators[channel], 0, sizeof(braids::MacroOscillator));
-			memset(&quantizers[channel], 0, sizeof(braids::Quantizer));
-			memset(&envelopes[channel], 0, sizeof(braids::Envelope));
-			memset(&jitterSources[channel], 0, sizeof(braids::VcoJitterSource));
-			memset(&waveShapers[channel], 0, sizeof(braids::SignatureWaveshaper));
-			memset(&settings[channel], 0, sizeof(braids::SettingsData));
+			memset(&oscillators[channel], 0, sizeof(sanguinebraids::MacroOscillator));
+			memset(&quantizers[channel], 0, sizeof(sanguinebraids::Quantizer));
+			memset(&envelopes[channel], 0, sizeof(sanguinebraids::Envelope));
+			memset(&jitterSources[channel], 0, sizeof(sanguinebraids::VcoJitterSource));
+			memset(&waveShapers[channel], 0, sizeof(sanguinebraids::SignatureWaveshaper));
+			memset(&settings[channel], 0, sizeof(sanguinebraids::SettingsData));
 
 			settings[channel].meta_modulation = 1;
 
@@ -229,7 +229,7 @@ struct Nodi : SanguineModule {
 		memset(lastTriggers, 0, sizeof(bool) * PORT_MAX_CHANNELS);
 		memset(selectedScales, 0xff, sizeof(uint8_t) * PORT_MAX_CHANNELS);
 		memset(previousPitches, 0, sizeof(int16_t) * PORT_MAX_CHANNELS);
-		memset(&lastSettings, 0, sizeof(braids::SettingsData));
+		memset(&lastSettings, 0, sizeof(sanguinebraids::SettingsData));
 		memset(modulatedDecays, 7, sizeof(uint8_t) * PORT_MAX_CHANNELS);
 	}
 
@@ -320,7 +320,7 @@ struct Nodi : SanguineModule {
 				// Quantizer.
 				if (selectedScales[channel] != settings[channel].quantizer_scale) {
 					selectedScales[channel] = settings[channel].quantizer_scale;
-					quantizers[channel].Configure(braids::scales[selectedScales[channel]]);
+					quantizers[channel].Configure(sanguinebraids::scales[selectedScales[channel]]);
 				}
 
 				envelopes[channel].Update(settings[channel].ad_attack << 3, settings[channel].ad_decay << 3);
@@ -335,18 +335,18 @@ struct Nodi : SanguineModule {
 
 					if (bHaveMetaCable) {
 						model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
-							braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+							sanguinebraids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 
-						model = clamp(model, 0, braids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
+						model = clamp(model, 0, sanguinebraids::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 					}
 
 					settings[channel].shape = model;
 
 					// Setup oscillator from settings.
-					oscillators[channel].set_shape(braids::MacroOscillatorShape(settings[channel].shape));
+					oscillators[channel].set_shape(sanguinebraids::MacroOscillatorShape(settings[channel].shape));
 				} else {
-					settings[channel].shape = braids::MACRO_OSC_SHAPE_QUESTION_MARK;
-					oscillators[channel].set_shape(braids::MACRO_OSC_SHAPE_QUESTION_MARK);
+					settings[channel].shape = sanguinebraids::MACRO_OSC_SHAPE_QUESTION_MARK;
+					oscillators[channel].set_shape(sanguinebraids::MACRO_OSC_SHAPE_QUESTION_MARK);
 				}
 
 				// Set timbre/modulation.
@@ -372,17 +372,17 @@ struct Nodi : SanguineModule {
 
 				// Pitch range.
 				switch (settings[channel].pitch_range) {
-				case braids::PITCH_RANGE_EXTERNAL:
-				case braids::PITCH_RANGE_LFO:
+				case sanguinebraids::PITCH_RANGE_EXTERNAL:
+				case sanguinebraids::PITCH_RANGE_LFO:
 					// Do nothing: calibration not implemented.
 					break;
-				case braids::PITCH_RANGE_FREE:
+				case sanguinebraids::PITCH_RANGE_FREE:
 					pitch -= 1638;
 					break;
-				case braids::PITCH_RANGE_440:
+				case sanguinebraids::PITCH_RANGE_440:
 					pitch = 69 << 7;
 					break;
-				case braids::PITCH_RANGE_EXTENDED:
+				case sanguinebraids::PITCH_RANGE_EXTENDED:
 				default:
 					pitch -= 60 << 7;
 					pitch = (pitch - 1638) * 9 >> 1;
@@ -404,18 +404,18 @@ struct Nodi : SanguineModule {
 				pitch = clamp(static_cast<int16_t>(pitch), 0, 16383);
 
 				if (settings[channel].vco_flatten) {
-					pitch = braids::Interpolate88(braids::lut_vco_detune, pitch << 2);
+					pitch = sanguinebraids::Interpolate88(sanguinebraids::lut_vco_detune, pitch << 2);
 				}
 
 				// Pitch transposition.
-				int32_t transposition = (settings[channel].pitch_range == braids::PITCH_RANGE_LFO) *
+				int32_t transposition = (settings[channel].pitch_range == sanguinebraids::PITCH_RANGE_LFO) *
 					(-(36 << 7));
 				transposition += (static_cast<int16_t>(settings[channel].pitch_octave) - 2) * 12 * 128;
 				oscillators[channel].set_pitch(pitch + transposition);
 
 				if (triggeredChannels[channel]) {
 					oscillators[channel].Strike();
-					envelopes[channel].Trigger(braids::ENV_SEGMENT_ATTACK);
+					envelopes[channel].Trigger(sanguinebraids::ENV_SEGMENT_ATTACK);
 					triggeredChannels[channel] = false;
 				}
 
@@ -538,88 +538,88 @@ struct Nodi : SanguineModule {
 	inline void handleDisplay(const float& sampleRate) {
 		// Display handling.
 		// Display: return to model after 2s.
-		if (lastSettingChanged == braids::SETTING_OSCILLATOR_SHAPE) {
+		if (lastSettingChanged == sanguinebraids::SETTING_OSCILLATOR_SHAPE) {
 			displayText = nodi::displayLabels[settings[displayChannel].shape];
 		} else {
 			switch (lastSettingChanged) {
-			case braids::SETTING_RESOLUTION:
+			case sanguinebraids::SETTING_RESOLUTION:
 				displayText =
 					nodiCommon::bitsStrings[settings[displayChannel].resolution];
 				break;
 
-			case braids::SETTING_SAMPLE_RATE:
+			case sanguinebraids::SETTING_SAMPLE_RATE:
 				displayText =
 					nodiCommon::ratesStrings[settings[displayChannel].sample_rate];
 				break;
 
-			case braids::SETTING_TRIG_SOURCE:
+			case sanguinebraids::SETTING_TRIG_SOURCE:
 				displayText = nodiCommon::autoLabel;
 				break;
 
-			case braids::SETTING_TRIG_DELAY:
+			case sanguinebraids::SETTING_TRIG_DELAY:
 				displayText =
 					nodiCommon::triggerDelayStrings[settings[displayChannel].trig_delay];
 				break;
 
-			case braids::SETTING_AD_ATTACK:
+			case sanguinebraids::SETTING_AD_ATTACK:
 				displayText =
 					nodiCommon::numberStrings15[settings[displayChannel].ad_attack];
 				break;
 
-			case braids::SETTING_AD_DECAY:
+			case sanguinebraids::SETTING_AD_DECAY:
 				displayText =
 					nodiCommon::numberStrings15[settings[displayChannel].ad_decay];
 				break;
 
-			case braids::SETTING_AD_FM:
+			case sanguinebraids::SETTING_AD_FM:
 				displayText =
 					nodiCommon::numberStrings15[settings[displayChannel].ad_fm];
 				break;
 
-			case braids::SETTING_AD_TIMBRE:
+			case sanguinebraids::SETTING_AD_TIMBRE:
 				displayText =
 					nodiCommon::numberStrings15[settings[displayChannel].ad_timbre];
 				break;
 
-			case braids::SETTING_AD_COLOR:
+			case sanguinebraids::SETTING_AD_COLOR:
 				displayText =
 					nodiCommon::numberStrings15[settings[displayChannel].ad_color];
 				break;
 
-			case braids::SETTING_AD_VCA:
+			case sanguinebraids::SETTING_AD_VCA:
 				displayText = nodiCommon::vcaLabel;
 				break;
 
-			case braids::SETTING_PITCH_RANGE:
+			case sanguinebraids::SETTING_PITCH_RANGE:
 				displayText =
 					nodiCommon::pitchRangeStrings[settings[displayChannel].pitch_range];
 				break;
 
-			case braids::SETTING_PITCH_OCTAVE:
+			case sanguinebraids::SETTING_PITCH_OCTAVE:
 				displayText =
 					nodiCommon::octaveStrings[settings[displayChannel].pitch_octave];
 				break;
 
-			case braids::SETTING_QUANTIZER_SCALE:
+			case sanguinebraids::SETTING_QUANTIZER_SCALE:
 				displayText =
 					nodiCommon::quantizationStrings[settings[displayChannel].quantizer_scale];
 				break;
 
-			case braids::SETTING_QUANTIZER_ROOT:
+			case sanguinebraids::SETTING_QUANTIZER_ROOT:
 				displayText =
 					nodiCommon::noteStrings[settings[displayChannel].quantizer_root];
 				break;
 
-			case braids::SETTING_VCO_FLATTEN:
+			case sanguinebraids::SETTING_VCO_FLATTEN:
 				displayText = nodiCommon::flatLabel;
 				break;
 
-			case braids::SETTING_VCO_DRIFT:
+			case sanguinebraids::SETTING_VCO_DRIFT:
 				displayText =
 					nodiCommon::intensityDisplayStrings[settings[displayChannel].vco_drift];
 				break;
 
-			case braids::SETTING_SIGNATURE:
+			case sanguinebraids::SETTING_SIGNATURE:
 				displayText =
 					nodiCommon::intensityDisplayStrings[settings[displayChannel].signature];
 				break;
@@ -632,26 +632,26 @@ struct Nodi : SanguineModule {
 		}
 
 		if (displayTimeout > sampleRate) {
-			lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
+			lastSettingChanged = sanguinebraids::SETTING_OSCILLATOR_SHAPE;
 			displayTimeout = 0;
 		}
 
 		uint8_t* arrayLastSettings = &lastSettings.shape;
 		const uint8_t* arraySettings = &settings[displayChannel].shape;
-		for (int setting = 0; setting <= braids::SETTING_LAST_EDITABLE_SETTING; ++setting) {
+		for (int setting = 0; setting <= sanguinebraids::SETTING_LAST_EDITABLE_SETTING; ++setting) {
 			if (arraySettings[setting] != arrayLastSettings[setting]) {
-				if (bHaveAttackCable && setting == braids::SETTING_AD_ATTACK) {
-					lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
+				if (bHaveAttackCable && setting == sanguinebraids::SETTING_AD_ATTACK) {
+					lastSettingChanged = sanguinebraids::SETTING_OSCILLATOR_SHAPE;
 					break;
 				}
 
-				if (bHaveDecayCable && setting == braids::SETTING_AD_DECAY) {
-					lastSettingChanged = braids::SETTING_OSCILLATOR_SHAPE;
+				if (bHaveDecayCable && setting == sanguinebraids::SETTING_AD_DECAY) {
+					lastSettingChanged = sanguinebraids::SETTING_OSCILLATOR_SHAPE;
 					break;
 				}
 
 				arrayLastSettings[setting] = arraySettings[setting];
-				lastSettingChanged = static_cast<braids::Setting>(setting);
+				lastSettingChanged = static_cast<sanguinebraids::Setting>(setting);
 				displayTimeout = 0;
 				break;
 			}

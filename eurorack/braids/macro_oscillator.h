@@ -38,7 +38,7 @@
 #include "braids/resources.h"
 #include "braids/settings.h"
 
-namespace braids {
+namespace sanguinebraids {
   class MacroOscillator {
   public:
     typedef void (MacroOscillator::* RenderFn)(const uint8_t*, int16_t*, size_t);
@@ -110,5 +110,5 @@ namespace braids {
 
     DISALLOW_COPY_AND_ASSIGN(MacroOscillator);
   };
-}  // namespace braids
+}  // namespace sanguinebraids
 #endif // BRAIDS_MACRO_OSCILLATOR_H_
