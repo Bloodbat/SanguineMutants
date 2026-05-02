@@ -37,7 +37,7 @@
 #include "stmlib/utils/dsp.h"
 #include "stmlib/utils/random.h"
 
-namespace braids {
+namespace sanguinebraids {
 
 using namespace stmlib;
 
@@ -75,6 +75,6 @@ class VcoJitterSource {
   DISALLOW_COPY_AND_ASSIGN(VcoJitterSource);
 };
 
-}  // namespace braids
+}  // namespace sanguinebraids
 
 #endif // BRAIDS_VCO_JITTER_SOURCE_H_

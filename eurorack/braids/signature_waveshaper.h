@@ -35,7 +35,7 @@
 
 #include "braids/resources.h"
 
-namespace braids {
+namespace sanguinebraids {
   class SignatureWaveshaper {
   public:
     SignatureWaveshaper() {}
@@ -84,5 +84,5 @@ namespace braids {
 
     DISALLOW_COPY_AND_ASSIGN(SignatureWaveshaper);
   };
-}  // namespace braids
+}  // namespace sanguinebraids
 #endif // BRAIDS_VCO_JITTER_SOURCE_H_

@@ -37,7 +37,7 @@
 #include "braids/parameter_interpolation.h"
 #include "braids/resources.h"
 
-namespace braids {
+namespace sanguinebraids {
   using namespace stmlib;
 
   static const uint16_t kHighestNote = 140 * 128;
@@ -2438,4 +2438,4 @@ namespace braids {
 
     &DigitalOscillator::RenderQuestionMark
   };
-}  // namespace braids
+}  // namespace sanguinebraids

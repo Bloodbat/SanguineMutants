@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace braids {
+namespace sanguinebraids {
   enum MacroOscillatorShape {
     MACRO_OSC_SHAPE_CSAW,
     MACRO_OSC_SHAPE_MORPH,
@@ -236,5 +236,5 @@ namespace braids {
   };
 
   extern Settings settings;
-}  // namespace braids
+}  // namespace sanguinebraids
 #endif  // BRAIDS_SETTINGS_H_

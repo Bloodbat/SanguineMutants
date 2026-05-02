@@ -33,7 +33,7 @@
 #include "braids/resources.h"
 #include "braids/parameter_interpolation.h"
 
-namespace braids {
+namespace sanguinebraids {
   using namespace stmlib;
 
   static const size_t kNumZones = 15;
@@ -608,4 +608,4 @@ namespace braids {
     &AnalogOscillator::RenderSineFold,
     &AnalogOscillator::RenderBuzz,
   };
-}  // namespace braids
+}  // namespace sanguinebraids

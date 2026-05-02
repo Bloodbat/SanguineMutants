@@ -35,7 +35,7 @@
 #include "braids/parameter_interpolation.h"
 #include "braids/resources.h"
 
-namespace braids {
+namespace sanguinebraids {
   using namespace stmlib;
 
   void MacroOscillator::Render(const uint8_t* sync, int16_t* buffer, size_t size) {
@@ -392,4 +392,4 @@ namespace braids {
     &MacroOscillator::RenderDigital,
     &MacroOscillator::RenderDigital
   };
-}  // namespace braids
+}  // namespace sanguinebraids
