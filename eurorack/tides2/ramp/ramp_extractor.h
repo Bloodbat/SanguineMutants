@@ -36,8 +36,8 @@ All prediction strategies are concurrently tested, and the output from the
 best performing one is selected (à la early Scheirer/Goto beat trackers).
 */
 
-#ifndef TIDES_RAMP_RAMP_EXTRACTOR_H_
-#define TIDES_RAMP_RAMP_EXTRACTOR_H_
+#ifndef TIDES2_RAMP_RAMP_EXTRACTOR_H_
+#define TIDES2_RAMP_RAMP_EXTRACTOR_H_
 
 #include "stmlib/stmlib.h"
 #include "stmlib/utils/gate_flags.h"
@@ -102,4 +102,4 @@ namespace tides2 {
     DISALLOW_COPY_AND_ASSIGN(RampExtractor);
   };
 }  // namespace tides2
-#endif  // TIDES_RAMP_RAMP_EXTRACTOR_H_
+#endif  // TIDES2_RAMP_RAMP_EXTRACTOR_H_
