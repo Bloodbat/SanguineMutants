@@ -34,7 +34,7 @@
 
 #include "warps/resources.h"
 
-namespace warps {
+namespace sanguinewarps {
 
   using namespace std;
   using namespace stmlib;
@@ -377,4 +377,4 @@ namespace warps {
     &Modulator::ProcessXmod<ALGORITHM_XOR, ALGORITHM_COMPARATOR>,
     &Modulator::ProcessXmod<ALGORITHM_COMPARATOR, ALGORITHM_NOP>,
   };
-}  // namespace warps
+}  // namespace sanguinewarps

@@ -31,56 +31,56 @@
 
 #include "stmlib/stmlib.h"
 
-namespace warps {
-  
-enum OscillatorShape {
-  OSCILLATOR_SHAPE_SINE,
-  OSCILLATOR_SHAPE_TRIANGLE,
-  OSCILLATOR_SHAPE_SAW,
-  OSCILLATOR_SHAPE_PULSE,
-  OSCILLATOR_SHAPE_NOISE_LP
-};
+namespace sanguinewarps {
 
-enum ModulationAlgorithm {
-  MODULATION_ALGORITHM_XFADE,
-  MODULATION_ALGORITHM_FOLD,
-  MODULATION_ALGORITHM_ANALOG_RINGMOD,
-  MODULATION_ALGORITHM_DIGITAL_RINGMOD,
-  MODULATION_ALGORITHM_XOR,
-  MODULATION_ALGORITHM_COMPARE,
-  MODULATION_ALGORITHM_SPECTRAL,
-  MODULATION_ALGORITHM_MORPH,
-  MODULATION_ALGORITHM_VOCODER
-};
+  enum OscillatorShape {
+    OSCILLATOR_SHAPE_SINE,
+    OSCILLATOR_SHAPE_TRIANGLE,
+    OSCILLATOR_SHAPE_SAW,
+    OSCILLATOR_SHAPE_PULSE,
+    OSCILLATOR_SHAPE_NOISE_LP
+  };
 
-struct Parameters {
-  float channel_drive[2];
-  float modulation_algorithm;
-  float modulation_parameter;
-  
-  // Easter egg parameters.
-  float frequency_shift_pot;
-  float frequency_shift_cv;
-  float phase_shift;
-  float note;
+  enum ModulationAlgorithm {
+    MODULATION_ALGORITHM_XFADE,
+    MODULATION_ALGORITHM_FOLD,
+    MODULATION_ALGORITHM_ANALOG_RINGMOD,
+    MODULATION_ALGORITHM_DIGITAL_RINGMOD,
+    MODULATION_ALGORITHM_XOR,
+    MODULATION_ALGORITHM_COMPARE,
+    MODULATION_ALGORITHM_SPECTRAL,
+    MODULATION_ALGORITHM_MORPH,
+    MODULATION_ALGORITHM_VOCODER
+  };
 
-  int32_t carrier_shape;  // 0 = external
-  
-  // Apply a non-linear response to the parameter of all algorithms between
-  // 1 and 4.
-  inline float skewed_modulation_parameter() const {
-    float skew = 0.0f;
-    if (modulation_algorithm <= 1.0f) {
-      skew = modulation_algorithm;
-    } else if (modulation_algorithm >= 5.0f) {
-      skew = 1.0f;
-    } else if (modulation_algorithm >= 4.0f) {
-      skew = 5.0f - modulation_algorithm;
+  struct Parameters {
+    float channel_drive[2];
+    float modulation_algorithm;
+    float modulation_parameter;
+
+    // Easter egg parameters.
+    float frequency_shift_pot;
+    float frequency_shift_cv;
+    float phase_shift;
+    float note;
+
+    int32_t carrier_shape;  // 0 = external
+
+    // Apply a non-linear response to the parameter of all algorithms between
+    // 1 and 4.
+    inline float skewed_modulation_parameter() const {
+      float skew = 0.0f;
+      if (modulation_algorithm <= 1.0f) {
+        skew = modulation_algorithm;
+      } else if (modulation_algorithm >= 5.0f) {
+        skew = 1.0f;
+      } else if (modulation_algorithm >= 4.0f) {
+        skew = 5.0f - modulation_algorithm;
+      }
+      return modulation_parameter * (1.0f + skew * (modulation_parameter - 1.0f));
     }
-    return modulation_parameter * (1.0f + skew * (modulation_parameter - 1.0f));
-  }
-};
+  };
 
-}  // namespace warps
+}  // namespace sanguinewarps
 
 #endif  // WARPS_DSP_PARAMETERS_H_

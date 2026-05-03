@@ -31,7 +31,7 @@
 #include "stmlib/dsp/parameter_interpolator.h"
 #include "stmlib/utils/random.h"
 
-namespace warps {
+namespace sanguinewarps {
 
   using namespace stmlib;
 
@@ -186,4 +186,4 @@ namespace warps {
     &Oscillator::RenderPolyblep<OSCILLATOR_SHAPE_PULSE>,
     &Oscillator::RenderNoise,
   };
-}  // namespace warps
+}  // namespace sanguinewarps
