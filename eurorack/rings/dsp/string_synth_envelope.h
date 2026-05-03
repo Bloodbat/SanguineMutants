@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace rings {
+namespace sanguinerings {
 
   enum EnvelopeShape {
     ENVELOPE_SHAPE_LINEAR,
@@ -124,6 +124,6 @@ namespace rings {
     DISALLOW_COPY_AND_ASSIGN(StringSynthEnvelope);
   };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // ELEMENTS_DSP_STRING_SYNTH_ENVELOPE_H_

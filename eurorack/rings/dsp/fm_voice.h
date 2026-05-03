@@ -40,14 +40,14 @@
 
 #include "rings/resources.h"
 
-namespace rings {
+namespace sanguinerings {
 
 	using namespace stmlib;
 
 	class FMVoice {
 	public:
-		FMVoice() { }
-		~FMVoice() { }
+		FMVoice() {}
+		~FMVoice() {}
 
 		void Init();
 		void Process(const float* in, float* out, float* aux, size_t size);
@@ -117,6 +117,6 @@ namespace rings {
 		DISALLOW_COPY_AND_ASSIGN(FMVoice);
 	};
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_FM_VOICE_H_

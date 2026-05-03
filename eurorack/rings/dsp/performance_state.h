@@ -29,22 +29,22 @@
 #ifndef RINGS_DSP_PERFORMANCE_STATE_H_
 #define RINGS_DSP_PERFORMANCE_STATE_H_
 
-namespace rings {
+namespace sanguinerings {
 
-const int32_t kNumChords = 11;
+  const int32_t kNumChords = 11;
 
-struct PerformanceState {
-  bool strum;
-  bool internal_exciter;
-  bool internal_strum;
-  bool internal_note;
+  struct PerformanceState {
+    bool strum;
+    bool internal_exciter;
+    bool internal_strum;
+    bool internal_note;
 
-  float tonic;
-  float note;
-  float fm;
-  int32_t chord;
-};
+    float tonic;
+    float note;
+    float fm;
+    int32_t chord;
+  };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_PERFORMANCE_STATE_H_

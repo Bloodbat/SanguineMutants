@@ -46,7 +46,7 @@
 #include "rings/dsp/resonator.h"
 #include "rings/dsp/string.h"
 
-namespace rings {
+namespace sanguinerings {
 
   enum ResonatorModel {
     RESONATOR_MODEL_MODAL,
@@ -161,6 +161,6 @@ namespace rings {
     DISALLOW_COPY_AND_ASSIGN(Part);
   };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_PART_H_
