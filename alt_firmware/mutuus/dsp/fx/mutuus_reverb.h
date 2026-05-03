@@ -34,7 +34,6 @@
 #include "mutuus/dsp/fx/mutuus_fx_engine.h"
 
 namespace mutuus {
-
 	enum ReverbType {
 		CAVEMAN,
 		RINGS,
@@ -125,8 +124,7 @@ namespace mutuus {
 				c.Load(apout);
 				if (is_clouds || is_elements) {
 					c.Interpolate(del2, is_clouds ? 4680.0f : 6211.0f, LFO_2, 100.0f, krt);
-				}
-				else {
+				} else {
 					c.Interpolate(del2, 6261.0f, LFO_2, 50.0f, krt);
 				}
 				c.Lp(lp_1, klp);
@@ -142,8 +140,7 @@ namespace mutuus {
 				c.Load(apout);
 				if (is_clouds || is_elements) {
 					c.Read(del1 TAIL, krt);
-				}
-				else {
+				} else {
 					c.Interpolate(del1, 4460.0f, LFO_1, 40.0f, krt);
 				}
 				c.Lp(lp_2, klp);
@@ -165,8 +162,7 @@ namespace mutuus {
 		}
 
 		inline void set_amount(float amount) {
-			switch (type_)
-			{
+			switch (type_) {
 			case CAVEMAN:
 				amount_ = 0.75f * amount;
 				break;
@@ -195,8 +191,7 @@ namespace mutuus {
 
 		inline void set_time(float reverb_time) {
 			frozen_ = false;
-			switch (type_)
-			{
+			switch (type_) {
 			case CAVEMAN:
 				reverb_time_ = 0.5f + 0.49f * reverb_time;
 				break;
@@ -268,7 +263,5 @@ namespace mutuus {
 
 		DISALLOW_COPY_AND_ASSIGN(Reverb);
 	};
-
 }  // namespace mutuus
-
 #endif  // RINGS_DSP_FX_REVERB_H_
