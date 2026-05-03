@@ -29,15 +29,15 @@
 #ifndef RINGS_DSP_PATCH_H_
 #define RINGS_DSP_PATCH_H_
 
-namespace rings {
+namespace sanguinerings {
 
-struct Patch {
-  float structure;
-  float brightness;
-  float damping;
-  float position;
-};
+  struct Patch {
+    float structure;
+    float brightness;
+    float damping;
+    float position;
+  };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_PATCH_H_

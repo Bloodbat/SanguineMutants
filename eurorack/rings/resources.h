@@ -38,21 +38,21 @@
 
 
 
-namespace rings {
+namespace sanguinerings {
 
-typedef uint8_t ResourceId;
+    typedef uint8_t ResourceId;
 
-extern const int16_t* lookup_table_int16_table[];
+    extern const int16_t* lookup_table_int16_table[];
 
-extern const uint32_t* lookup_table_uint32_table[];
+    extern const uint32_t* lookup_table_uint32_table[];
 
-extern const float* lookup_table_table[];
+    extern const float* lookup_table_table[];
 
-extern const float lut_sine[];
-extern const float lut_4_decades[];
-extern const float lut_svf_shift[];
-extern const float lut_stiffness[];
-extern const float lut_fm_frequency_quantizer[];
+    extern const float lut_sine[];
+    extern const float lut_4_decades[];
+    extern const float lut_svf_shift[];
+    extern const float lut_stiffness[];
+    extern const float lut_fm_frequency_quantizer[];
 #define LUT_SINE 0
 #define LUT_SINE_SIZE 5121
 #define LUT_4_DECADES 1
@@ -64,6 +64,6 @@ extern const float lut_fm_frequency_quantizer[];
 #define LUT_FM_FREQUENCY_QUANTIZER 4
 #define LUT_FM_FREQUENCY_QUANTIZER_SIZE 129
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_RESOURCES_H_

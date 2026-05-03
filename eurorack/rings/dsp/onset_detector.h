@@ -36,7 +36,7 @@
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/filter.h"
 
-namespace rings {
+namespace sanguinerings {
 
   using namespace std;
   using namespace stmlib;
@@ -219,6 +219,6 @@ namespace rings {
     DISALLOW_COPY_AND_ASSIGN(OnsetDetector);
   };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_ONSET_DETECTOR_H_

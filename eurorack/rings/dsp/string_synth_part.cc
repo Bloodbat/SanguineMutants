@@ -30,7 +30,7 @@
 
 #include "rings/dsp/dsp.h"
 
-namespace rings {
+namespace sanguinerings {
 
   using namespace std;
   using namespace stmlib;
@@ -409,4 +409,4 @@ namespace rings {
     limiter_.Process(out, aux, size, 1.0f);
   }
 
-}  // namespace rings
+}  // namespace sanguinerings

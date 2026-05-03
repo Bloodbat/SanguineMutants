@@ -37,7 +37,7 @@
 #include "stmlib/dsp/filter.h"
 #include "stmlib/dsp/delay_line.h"
 
-namespace rings {
+namespace sanguinerings {
 
   const int32_t kMaxModes = 64;
 
@@ -89,5 +89,5 @@ namespace rings {
 
     DISALLOW_COPY_AND_ASSIGN(Resonator);
   };
-}  // namespace rings
+}  // namespace sanguinerings
 #endif  // RINGS_DSP_RESONATOR_H_

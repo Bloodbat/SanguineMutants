@@ -32,7 +32,7 @@
 
 #include "rings/resources.h"
 
-namespace rings {
+namespace sanguinerings {
 
   using namespace std;
   using namespace stmlib;
@@ -529,4 +529,4 @@ namespace rings {
     1.4f,  // RESONATOR_MODEL_STRING_AND_REVERB
   };
 
-}  // namespace rings
+}  // namespace sanguinerings

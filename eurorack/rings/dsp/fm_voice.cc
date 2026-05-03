@@ -36,7 +36,7 @@
 
 #include "rings/resources.h"
 
-namespace rings {
+namespace sanguinerings {
 
 	using namespace stmlib;
 
@@ -137,4 +137,4 @@ namespace rings {
 		previous_sample_ = previous_sample;
 	}
 
-}  // namespace rings
+}  // namespace sanguinerings
