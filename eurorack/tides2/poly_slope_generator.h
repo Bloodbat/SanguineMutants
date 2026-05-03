@@ -38,7 +38,7 @@
 #include "tides2/ramp_shaper.h"
 #include "tides2/resources.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
 #define INSTANTIATE(x, y, z) render_fn_table_[x][y][z] = &PolySlopeGenerator::RenderInternal<x, y, z>;
 
 #define INSTANTIATE_RAM(x, y, z) render_fn_table_[x][y][z] = &PolySlopeGenerator::RenderInternal_RAM<x, y, z>;
@@ -376,5 +376,5 @@ namespace tides2 {
 
     DISALLOW_COPY_AND_ASSIGN(PolySlopeGenerator);
   };
-}  // namespace tides2
+}  // namespace sanguinetides2
 #endif  // TIDES2_POLY_SLOPE_GENERATOR_H_
