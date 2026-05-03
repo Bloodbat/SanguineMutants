@@ -47,7 +47,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   enum ProcessorFunction {
     PROCESSOR_FUNCTION_ENVELOPE,
@@ -180,5 +180,5 @@ namespace peaks {
 
   extern Processors processors[2];
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 #endif  // PEAKS_PROCESSORS_H_

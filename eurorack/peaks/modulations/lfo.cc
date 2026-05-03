@@ -35,7 +35,7 @@
 
 #include "peaks/resources.h"
 
-namespace peaks {
+namespace sanguinepeaks {
   const uint16_t kSlopeBits = 12;
   const uint32_t kSyncCounterMaxTime = 8 * 48000;
 
@@ -205,4 +205,4 @@ namespace peaks {
     &Lfo::ComputeSampleSteps,
     &Lfo::ComputeSampleNoise
   };
-}  // namespace peaks
+}  // namespace sanguinepeaks

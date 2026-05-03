@@ -34,59 +34,59 @@
 
 #include "peaks/resources.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
-using namespace stmlib;
+  using namespace stmlib;
 
-void BassDrum::Init() {
-  pulse_up_.Init();
-  pulse_down_.Init();
-  attack_fm_.Init();
-  resonator_.Init();
-  
-  pulse_up_.set_delay(0);
-  pulse_up_.set_decay(3340);
+  void BassDrum::Init() {
+    pulse_up_.Init();
+    pulse_down_.Init();
+    attack_fm_.Init();
+    resonator_.Init();
 
-  pulse_down_.set_delay(1.0e-3 * 48000);
-  pulse_down_.set_decay(3072);
+    pulse_up_.set_delay(0);
+    pulse_up_.set_decay(3340);
 
-  attack_fm_.set_delay(4.0e-3 * 48000);
-  attack_fm_.set_decay(4093);
-  
-  resonator_.set_punch(32768);
-  
-  set_frequency(0);
-  set_decay(32768);
-  set_tone(32768);
-  set_punch(65535);
-  
-  lp_state_ = 0;
-}
+    pulse_down_.set_delay(1.0e-3 * 48000);
+    pulse_down_.set_decay(3072);
 
-void BassDrum::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
-  while (size--) {
-    GateFlags gate_flag = *gate_flags++;
-    if (gate_flag & GATE_FLAG_RISING) {
-      pulse_up_.Trigger(12 * 32768 * 0.7);
-      pulse_down_.Trigger(-19662 * 0.7);
-      attack_fm_.Trigger(18000);
-    }
-    
-    int32_t excitation = 0;
-    excitation += pulse_up_.Process();
-    excitation += !pulse_down_.done() ? 16384 : 0;
-    excitation += pulse_down_.Process();
-    attack_fm_.Process();
-    resonator_.set_frequency(frequency_ + (attack_fm_.done() ? 0 : 17 << 7));
+    attack_fm_.set_delay(4.0e-3 * 48000);
+    attack_fm_.set_decay(4093);
 
-    int32_t resonator_output = (excitation >> 4) + \
-        resonator_.Process<SVF_MODE_BP>(excitation);
-    lp_state_ += (resonator_output - lp_state_) * lp_coefficient_ >> 15;
-    int32_t output = lp_state_;
-    CLIP(output);
-    
-    *out++ = output;
+    resonator_.set_punch(32768);
+
+    set_frequency(0);
+    set_decay(32768);
+    set_tone(32768);
+    set_punch(65535);
+
+    lp_state_ = 0;
   }
-}
 
-}  // namespace peaks
+  void BassDrum::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
+    while (size--) {
+      GateFlags gate_flag = *gate_flags++;
+      if (gate_flag & GATE_FLAG_RISING) {
+        pulse_up_.Trigger(12 * 32768 * 0.7);
+        pulse_down_.Trigger(-19662 * 0.7);
+        attack_fm_.Trigger(18000);
+      }
+
+      int32_t excitation = 0;
+      excitation += pulse_up_.Process();
+      excitation += !pulse_down_.done() ? 16384 : 0;
+      excitation += pulse_down_.Process();
+      attack_fm_.Process();
+      resonator_.set_frequency(frequency_ + (attack_fm_.done() ? 0 : 17 << 7));
+
+      int32_t resonator_output = (excitation >> 4) + \
+        resonator_.Process<SVF_MODE_BP>(excitation);
+      lp_state_ += (resonator_output - lp_state_) * lp_coefficient_ >> 15;
+      int32_t output = lp_state_;
+      CLIP(output);
+
+      *out++ = output;
+    }
+  }
+
+}  // namespace sanguinepeaks

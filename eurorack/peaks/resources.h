@@ -38,37 +38,37 @@
 
 
 
-namespace peaks {
+namespace sanguinepeaks {
 
-typedef uint8_t ResourceId;
+    typedef uint8_t ResourceId;
 
-extern const char* string_table[];
+    extern const char* string_table[];
 
-extern const uint16_t* lookup_table_table[];
+    extern const uint16_t* lookup_table_table[];
 
-extern const uint32_t* lookup_table_32_table[];
+    extern const uint32_t* lookup_table_32_table[];
 
-extern const uint8_t* waveform_8_table[];
+    extern const uint8_t* waveform_8_table[];
 
-extern const int16_t* waveform_table[];
+    extern const int16_t* waveform_table[];
 
-extern const uint16_t lut_delay_times[];
-extern const uint16_t lut_gravity[];
-extern const uint16_t lut_env_linear[];
-extern const uint16_t lut_env_expo[];
-extern const uint16_t lut_env_quartic[];
-extern const uint16_t lut_raised_cosine[];
-extern const uint16_t lut_svf_cutoff[];
-extern const uint16_t lut_svf_damp[];
-extern const uint16_t lut_svf_scale[];
-extern const uint32_t lut_lfo_increments[];
-extern const uint32_t lut_env_increments[];
-extern const uint32_t lut_oscillator_increments[];
-extern const uint8_t wav_digits[];
-extern const int16_t wav_sine[];
-extern const int16_t wav_fold_power[];
-extern const int16_t wav_fold_sine[];
-extern const int16_t wav_overdrive[];
+    extern const uint16_t lut_delay_times[];
+    extern const uint16_t lut_gravity[];
+    extern const uint16_t lut_env_linear[];
+    extern const uint16_t lut_env_expo[];
+    extern const uint16_t lut_env_quartic[];
+    extern const uint16_t lut_raised_cosine[];
+    extern const uint16_t lut_svf_cutoff[];
+    extern const uint16_t lut_svf_damp[];
+    extern const uint16_t lut_svf_scale[];
+    extern const uint32_t lut_lfo_increments[];
+    extern const uint32_t lut_env_increments[];
+    extern const uint32_t lut_oscillator_increments[];
+    extern const uint8_t wav_digits[];
+    extern const int16_t wav_sine[];
+    extern const int16_t wav_fold_power[];
+    extern const int16_t wav_fold_sine[];
+    extern const int16_t wav_overdrive[];
 #define STR_DUMMY 0  // dummy
 #define LUT_DELAY_TIMES 0
 #define LUT_DELAY_TIMES_SIZE 257
@@ -105,6 +105,6 @@ extern const int16_t wav_overdrive[];
 #define WAV_OVERDRIVE 3
 #define WAV_OVERDRIVE_SIZE 1025
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_RESOURCES_H_

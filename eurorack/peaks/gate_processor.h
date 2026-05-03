@@ -33,37 +33,37 @@
 
 #include "stmlib/utils/ring_buffer.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
-enum ControlMode {
-  CONTROL_MODE_FULL,
-  CONTROL_MODE_HALF
-};
+  enum ControlMode {
+    CONTROL_MODE_FULL,
+    CONTROL_MODE_HALF
+  };
 
-enum GateFlagsBits {
-  GATE_FLAG_LOW = 0,
-  GATE_FLAG_HIGH = 1,
-  GATE_FLAG_RISING = 2,
-  GATE_FLAG_FALLING = 4,
-  GATE_FLAG_FROM_BUTTON = 8,
-  
-  GATE_FLAG_AUXILIARY_LOW = 0,
-  GATE_FLAG_AUXILIARY_HIGH = 16,
-  GATE_FLAG_AUXILIARY_RISING = 32,
-  GATE_FLAG_AUXILIARY_FALLING = 64,
-};
+  enum GateFlagsBits {
+    GATE_FLAG_LOW = 0,
+    GATE_FLAG_HIGH = 1,
+    GATE_FLAG_RISING = 2,
+    GATE_FLAG_FALLING = 4,
+    GATE_FLAG_FROM_BUTTON = 8,
 
-typedef uint8_t GateFlags;
+    GATE_FLAG_AUXILIARY_LOW = 0,
+    GATE_FLAG_AUXILIARY_HIGH = 16,
+    GATE_FLAG_AUXILIARY_RISING = 32,
+    GATE_FLAG_AUXILIARY_FALLING = 64,
+  };
 
-inline GateFlags ExtractGateFlags(GateFlags previous, bool current) {
-  previous &= GATE_FLAG_HIGH;
-  if (current) {
-    return previous ? GATE_FLAG_HIGH : (GATE_FLAG_RISING | GATE_FLAG_HIGH);
-  } else {
-    return previous ? GATE_FLAG_FALLING : GATE_FLAG_LOW;
+  typedef uint8_t GateFlags;
+
+  inline GateFlags ExtractGateFlags(GateFlags previous, bool current) {
+    previous &= GATE_FLAG_HIGH;
+    if (current) {
+      return previous ? GATE_FLAG_HIGH : (GATE_FLAG_RISING | GATE_FLAG_HIGH);
+    } else {
+      return previous ? GATE_FLAG_FALLING : GATE_FLAG_LOW;
+    }
   }
-}
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_GATE_PROCESSOR_H_

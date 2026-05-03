@@ -34,7 +34,7 @@
 #include "peaks/drums/svf.h"
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   class NumberStation {
   public:
@@ -113,6 +113,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(NumberStation);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_NUMBER_STATION_NUMBER_STATION_H_

@@ -35,69 +35,69 @@
 
 #include "peaks/resources.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
-using namespace stmlib;
+  using namespace stmlib;
 
-void HighHat::Init() {
-  noise_.Init();
-  noise_.set_frequency(105 << 7);  // 8kHz
-  noise_.set_resonance(24000);
-  
-  vca_coloration_.Init();
-  vca_coloration_.set_frequency(110 << 7);  // 13kHz
-  vca_coloration_.set_resonance(0);
-  
-  vca_envelope_.Init();
-  vca_envelope_.set_delay(0);
-  vca_envelope_.set_decay(4093);
-}
+  void HighHat::Init() {
+    noise_.Init();
+    noise_.set_frequency(105 << 7);  // 8kHz
+    noise_.set_resonance(24000);
 
-void HighHat::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
-  while (size--) {
-    GateFlags gate_flag = *gate_flags++;
-    if (gate_flag & GATE_FLAG_RISING) {
-      vca_envelope_.Trigger(32768 * 15);
-    }
-  
-    phase_[0] += 48318382;
-    phase_[1] += 71582788;
-    phase_[2] += 37044092;
-    phase_[3] += 54313440;
-    phase_[4] += 66214079;
-    phase_[5] += 93952409;
+    vca_coloration_.Init();
+    vca_coloration_.set_frequency(110 << 7);  // 13kHz
+    vca_coloration_.set_resonance(0);
 
-    int16_t noise = 0;
-    noise += phase_[0] >> 31;
-    noise += phase_[1] >> 31;
-    noise += phase_[2] >> 31;
-    noise += phase_[3] >> 31;
-    noise += phase_[4] >> 31;
-    noise += phase_[5] >> 31;
-    noise <<= 12;
-  
-    // Run the SVF at the double of the original sample rate for stability.
-    int32_t filtered_noise = 0;
-    filtered_noise += noise_.Process<SVF_MODE_BP>(noise);
-    filtered_noise += noise_.Process<SVF_MODE_BP>(noise);
-
-    // The 808-style VCA amplifies only the positive section of the signal.
-    if (filtered_noise < 0) {
-      filtered_noise = 0;
-    } else if (filtered_noise > 32767) {
-      filtered_noise = 32767;
-    }
-  
-    int32_t envelope = vca_envelope_.Process() >> 4;
-    int32_t vca_noise = envelope * filtered_noise >> 14;
-    CLIP(vca_noise);
-    int32_t hh = 0;
-    hh += vca_coloration_.Process<SVF_MODE_HP>(vca_noise);
-    hh += vca_coloration_.Process<SVF_MODE_HP>(vca_noise);
-    hh <<= 1;
-    CLIP(hh);
-    *out++ = hh;
+    vca_envelope_.Init();
+    vca_envelope_.set_delay(0);
+    vca_envelope_.set_decay(4093);
   }
-}
 
-}  // namespace peaks
+  void HighHat::Process(const GateFlags* gate_flags, int16_t* out, size_t size) {
+    while (size--) {
+      GateFlags gate_flag = *gate_flags++;
+      if (gate_flag & GATE_FLAG_RISING) {
+        vca_envelope_.Trigger(32768 * 15);
+      }
+
+      phase_[0] += 48318382;
+      phase_[1] += 71582788;
+      phase_[2] += 37044092;
+      phase_[3] += 54313440;
+      phase_[4] += 66214079;
+      phase_[5] += 93952409;
+
+      int16_t noise = 0;
+      noise += phase_[0] >> 31;
+      noise += phase_[1] >> 31;
+      noise += phase_[2] >> 31;
+      noise += phase_[3] >> 31;
+      noise += phase_[4] >> 31;
+      noise += phase_[5] >> 31;
+      noise <<= 12;
+
+      // Run the SVF at the double of the original sample rate for stability.
+      int32_t filtered_noise = 0;
+      filtered_noise += noise_.Process<SVF_MODE_BP>(noise);
+      filtered_noise += noise_.Process<SVF_MODE_BP>(noise);
+
+      // The 808-style VCA amplifies only the positive section of the signal.
+      if (filtered_noise < 0) {
+        filtered_noise = 0;
+      } else if (filtered_noise > 32767) {
+        filtered_noise = 32767;
+      }
+
+      int32_t envelope = vca_envelope_.Process() >> 4;
+      int32_t vca_noise = envelope * filtered_noise >> 14;
+      CLIP(vca_noise);
+      int32_t hh = 0;
+      hh += vca_coloration_.Process<SVF_MODE_HP>(vca_noise);
+      hh += vca_coloration_.Process<SVF_MODE_HP>(vca_noise);
+      hh <<= 1;
+      CLIP(hh);
+      *out++ = hh;
+    }
+  }
+
+}  // namespace sanguinepeaks
