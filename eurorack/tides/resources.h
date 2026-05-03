@@ -36,7 +36,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace tides {
+namespace sanguinetides {
     typedef uint8_t ResourceId;
 
     extern const uint16_t* lookup_table_table[];
@@ -109,5 +109,5 @@ namespace tides {
 #define WT_WAVES_SIZE 45746
 #define WS_SMOOTH_BIPOLAR_FOLD 0
 #define WS_SMOOTH_BIPOLAR_FOLD_SIZE 1025
-}  // namespace tides
+}  // namespace sanguinetides
 #endif  // TIDES_RESOURCES_H_

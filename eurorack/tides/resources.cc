@@ -32,7 +32,7 @@
 
 #include "tides/resources.h"
 
-namespace tides {
+namespace sanguinetides {
   const uint16_t lut_attenuverter_curve[] = {
          0,      0,      0,      0,
          0,      0,      0,      0,
@@ -18765,4 +18765,4 @@ namespace tides {
   const int16_t* waveshaper_table[] = {
     ws_smooth_bipolar_fold,
   };
-}  // namespace tides
+}  // namespace sanguinetides
