@@ -26,8 +26,8 @@
 
 
 // 4 related slope generators.
-#ifndef TIDES_POLY_SLOPE_GENERATOR_H_
-#define TIDES_POLY_SLOPE_GENERATOR_H_
+#ifndef TIDES2_POLY_SLOPE_GENERATOR_H_
+#define TIDES2_POLY_SLOPE_GENERATOR_H_
 
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/parameter_interpolator.h"
@@ -376,6 +376,5 @@ namespace tides2 {
 
     DISALLOW_COPY_AND_ASSIGN(PolySlopeGenerator);
   };
-
 }  // namespace tides2
-#endif  // TIDES_POLY_SLOPE_GENERATOR_H_
+#endif  // TIDES2_POLY_SLOPE_GENERATOR_H_
