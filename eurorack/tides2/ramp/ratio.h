@@ -30,10 +30,10 @@
 
 #include "stmlib/stmlib.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   struct Ratio {
     float ratio;
     int q;
   };
-}  // namespace tides2
+}  // namespace sanguinetides2
 #endif  // TIDES2_RAMP_RATIO_H_

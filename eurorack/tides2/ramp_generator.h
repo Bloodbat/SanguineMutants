@@ -37,7 +37,7 @@
 
 #include "tides2/ramp/ratio.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   enum RampMode {
     RAMP_MODE_AD,
     RAMP_MODE_LOOPING,
@@ -221,5 +221,5 @@ namespace tides2 {
 
     DISALLOW_COPY_AND_ASSIGN(RampGenerator);
   };
-}  // namespace tides2
+}  // namespace sanguinetides2
 #endif  // TIDES2_RAMP_GENERATOR_H_
