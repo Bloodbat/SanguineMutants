@@ -38,50 +38,50 @@
 
 
 
-namespace warps {
+namespace sanguinewarps {
 
-typedef uint8_t ResourceId;
+    typedef uint8_t ResourceId;
 
-extern const float* filter_bank_table[];
+    extern const float* filter_bank_table[];
 
-extern const float* lookup_table_table[];
+    extern const float* lookup_table_table[];
 
-extern const float* wav_table[];
+    extern const float* wav_table[];
 
-extern const float fb__87_8000[];
-extern const float fb_110_8000[];
-extern const float fb_139_8000[];
-extern const float fb_175_8000[];
-extern const float fb_220_8000[];
-extern const float fb_277_8000[];
-extern const float fb_349_8000[];
-extern const float fb_440_8000[];
-extern const float fb_554_8000[];
-extern const float fb_698_8000[];
-extern const float fb_880_8000[];
-extern const float fb_1109_8000[];
-extern const float fb_1397_8000[];
-extern const float fb_1760_32000[];
-extern const float fb_2217_32000[];
-extern const float fb_2794_32000[];
-extern const float fb_3520_32000[];
-extern const float fb_4435_32000[];
-extern const float fb_5588_32000[];
-extern const float fb_7040_96000[];
-extern const float lut_sin[];
-extern const float lut_xfade_in[];
-extern const float lut_xfade_out[];
-extern const float lut_bipolar_fold[];
-extern const float lut_midi_to_f_high[];
-extern const float lut_midi_to_f_low[];
-extern const float lut_pot_curve[];
-extern const float lut_ap_poles[];
-extern const float wav_sine_i[];
-extern const float wav_sine_q[];
-extern const float wav_harmonics_i[];
-extern const float wav_harmonics_q[];
-extern const float wav_buzzy_i[];
-extern const float wav_buzzy_q[];
+    extern const float fb__87_8000[];
+    extern const float fb_110_8000[];
+    extern const float fb_139_8000[];
+    extern const float fb_175_8000[];
+    extern const float fb_220_8000[];
+    extern const float fb_277_8000[];
+    extern const float fb_349_8000[];
+    extern const float fb_440_8000[];
+    extern const float fb_554_8000[];
+    extern const float fb_698_8000[];
+    extern const float fb_880_8000[];
+    extern const float fb_1109_8000[];
+    extern const float fb_1397_8000[];
+    extern const float fb_1760_32000[];
+    extern const float fb_2217_32000[];
+    extern const float fb_2794_32000[];
+    extern const float fb_3520_32000[];
+    extern const float fb_4435_32000[];
+    extern const float fb_5588_32000[];
+    extern const float fb_7040_96000[];
+    extern const float lut_sin[];
+    extern const float lut_xfade_in[];
+    extern const float lut_xfade_out[];
+    extern const float lut_bipolar_fold[];
+    extern const float lut_midi_to_f_high[];
+    extern const float lut_midi_to_f_low[];
+    extern const float lut_pot_curve[];
+    extern const float lut_ap_poles[];
+    extern const float wav_sine_i[];
+    extern const float wav_sine_q[];
+    extern const float wav_harmonics_i[];
+    extern const float wav_harmonics_q[];
+    extern const float wav_buzzy_i[];
+    extern const float wav_buzzy_q[];
 #define FB__87_8000 0
 #define FB__87_8000_SIZE 7
 #define FB_110_8000 1
@@ -151,6 +151,6 @@ extern const float wav_buzzy_q[];
 #define WAV_BUZZY_Q 5
 #define WAV_BUZZY_Q_SIZE 1025
 
-}  // namespace warps
+}  // namespace sanguinewarps
 
 #endif  // WARPS_RESOURCES_H_

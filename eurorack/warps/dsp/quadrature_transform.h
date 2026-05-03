@@ -34,86 +34,86 @@
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/filter.h"
 
-namespace warps {
+namespace sanguinewarps {
 
-const int32_t kMaxNumFilters = 24;
+  const int32_t kMaxNumFilters = 24;
 
-class QuadratureTransform {
- public:
-  QuadratureTransform() { }
-  ~QuadratureTransform() { }
-  
-  void Init(const float* poles, int32_t num_filters) {
-    num_filters_ = num_filters;
-    for (int32_t i = 0; i < num_filters; ++i) {
-      filter_[i].Init(-poles[i]);
-    }
-  }
-  
-  inline void Process(float in, float* i_out, float* q_out) {
-    for (int32_t i = 0; i < num_filters_; ++i) {
-      float* destination = i & 1 ? q_out : i_out;
-      float source = i <= 1 ? in : *destination;
-      *destination = filter_[i].Process(source);
-    }
-  }
-  
-  void Process(const float* in, float* i_out, float* q_out, size_t size) {
-    for (int32_t i = 0; i < num_filters_; ++i) {
-      float* destination = i & 1 ? q_out : i_out;
-      const float* source = i <= 1 ? in : destination;
-      filter_[i].Process(source, destination, size);
-    }
-  }
-  
- private:
-  class AllPassFilter {
-   public:
-    AllPassFilter() { }
-    ~AllPassFilter() { }
+  class QuadratureTransform {
+  public:
+    QuadratureTransform() {}
+    ~QuadratureTransform() {}
 
-    void Init(float coefficient) {
-      x_ = 0.0f;
-      y_ = 0.0f;
-      coefficient_ = coefficient;
-    }
-
-    inline float Process(float in) {
-      float y = coefficient_ * (in - y_) + x_;
-      x_ = in;
-      y_ = y;
-      return y;
-    }
-
-    inline void Process(const float* in, float* out, size_t size) {
-      const float coefficient = coefficient_;
-      float xp = x_;
-      float yp = y_;
-      while (size--) {
-        float x = *in++;
-        float y = coefficient * (x - yp) + xp;
-        *out++ = y;
-        xp = x;
-        yp = y;
+    void Init(const float* poles, int32_t num_filters) {
+      num_filters_ = num_filters;
+      for (int32_t i = 0; i < num_filters; ++i) {
+        filter_[i].Init(-poles[i]);
       }
-      x_ = xp;
-      y_ = yp;
     }
 
-   private:
-    float x_;
-    float y_;
-    float coefficient_;
+    inline void Process(float in, float* i_out, float* q_out) {
+      for (int32_t i = 0; i < num_filters_; ++i) {
+        float* destination = i & 1 ? q_out : i_out;
+        float source = i <= 1 ? in : *destination;
+        *destination = filter_[i].Process(source);
+      }
+    }
 
-    DISALLOW_COPY_AND_ASSIGN(AllPassFilter);
+    void Process(const float* in, float* i_out, float* q_out, size_t size) {
+      for (int32_t i = 0; i < num_filters_; ++i) {
+        float* destination = i & 1 ? q_out : i_out;
+        const float* source = i <= 1 ? in : destination;
+        filter_[i].Process(source, destination, size);
+      }
+    }
+
+  private:
+    class AllPassFilter {
+    public:
+      AllPassFilter() {}
+      ~AllPassFilter() {}
+
+      void Init(float coefficient) {
+        x_ = 0.0f;
+        y_ = 0.0f;
+        coefficient_ = coefficient;
+      }
+
+      inline float Process(float in) {
+        float y = coefficient_ * (in - y_) + x_;
+        x_ = in;
+        y_ = y;
+        return y;
+      }
+
+      inline void Process(const float* in, float* out, size_t size) {
+        const float coefficient = coefficient_;
+        float xp = x_;
+        float yp = y_;
+        while (size--) {
+          float x = *in++;
+          float y = coefficient * (x - yp) + xp;
+          *out++ = y;
+          xp = x;
+          yp = y;
+        }
+        x_ = xp;
+        y_ = yp;
+      }
+
+    private:
+      float x_;
+      float y_;
+      float coefficient_;
+
+      DISALLOW_COPY_AND_ASSIGN(AllPassFilter);
+    };
+
+    AllPassFilter filter_[kMaxNumFilters];
+    int32_t num_filters_;
+
+    DISALLOW_COPY_AND_ASSIGN(QuadratureTransform);
   };
 
-  AllPassFilter filter_[kMaxNumFilters];
-  int32_t num_filters_;
-
-  DISALLOW_COPY_AND_ASSIGN(QuadratureTransform);
-};
-
-}  // namespace warps
+}  // namespace sanguinewarps
 
 #endif  // WARPS_DSP_QUADRATURE_TRANSFORM_H_
