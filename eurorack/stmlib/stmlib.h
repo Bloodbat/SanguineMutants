@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 
 #ifndef STMLIB_STMLIB_H_
@@ -58,7 +58,6 @@
   typedef impl::StaticAssertionTest<sizeof(JOIN(__static_assertion_at_line_, __LINE__))> JOIN(__static_assertion_test_at_line_, __LINE__)
 
 namespace impl {
-
   template <bool>
   struct StaticAssertion;
 
@@ -71,9 +70,7 @@ namespace impl {
   struct StaticAssertionTest
   {
   }; // StaticAssertionTest<int>
-
 } // namespace impl
-
 
 //#ifndef TEST
 //#define IN_RAM __attribute__ ((section (".ramtext")))
@@ -87,28 +84,24 @@ namespace impl {
 
 template<bool b>
 inline void StaticAssertImplementation() {
-	char static_assert_size_mismatch[b] = { 0 };
+  char static_assert_size_mismatch[b] = { 0 };
 }
- 
+
 namespace stmlib {
+  typedef union {
+    uint16_t value;
+    uint8_t bytes[2];
+  } Word;
 
-typedef union {
-  uint16_t value;
-  uint8_t bytes[2];
-} Word;
+  typedef union {
+    uint32_t value;
+    uint16_t words[2];
+    uint8_t bytes[4];
+  } LongWord;
 
-typedef union {
-  uint32_t value;
-  uint16_t words[2];
-  uint8_t bytes[4];
-} LongWord;
-
-
-template<uint32_t a, uint32_t b, uint32_t c, uint32_t d>
-struct FourCC {
-  static const uint32_t value = (((((d << 8) | c) << 8) | b) << 8) | a;
-};
-
+  template<uint32_t a, uint32_t b, uint32_t c, uint32_t d>
+  struct FourCC {
+    static const uint32_t value = (((((d << 8) | c) << 8) | b) << 8) | a;
+  };
 }  // namespace stmlib
-
 #endif   // STMLIB_STMLIB_H_
