@@ -83,7 +83,7 @@ struct Apices : SanguineModule {
 	int32_t adcValue[apicesCommon::kAdcChannelCount] = {};
 	int32_t adcThreshold[apicesCommon::kAdcChannelCount] = {};
 
-	peaks::Processors processors[apicesCommon::kChannelCount];
+	sanguinepeaks::Processors processors[apicesCommon::kChannelCount];
 
 	int16_t output[apicesCommon::kBlockSize] = {};
 	int16_t lightsBrightness[apicesCommon::kChannelCount] = {};
@@ -91,13 +91,13 @@ struct Apices : SanguineModule {
 	dsp::SchmittTrigger stSwitches[apicesCommon::kButtonCount];
 	dsp::ClockDivider lightsDivider;
 
-	peaks::GateFlags gateFlags[apicesCommon::kChannelCount] = {};
+	sanguinepeaks::GateFlags gateFlags[apicesCommon::kChannelCount] = {};
 
 	dsp::SampleRateConverter<apicesCommon::kChannelCount> srcOutput;
 	dsp::DoubleRingBuffer<dsp::Frame<apicesCommon::kChannelCount>, 256> drbOutputBuffer;
 
 	struct Block {
-		peaks::GateFlags input[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
+		sanguinepeaks::GateFlags input[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
 		uint16_t output[apicesCommon::kChannelCount][apicesCommon::kBlockSize] = {};
 	};
 
@@ -125,19 +125,19 @@ struct Apices : SanguineModule {
 	std::string oledText4 = "";
 #endif
 
-	const peaks::ProcessorFunction processorFunctionTable[apices::FUNCTION_LAST][apicesCommon::kChannelCount] = {
-		{ peaks::PROCESSOR_FUNCTION_ENVELOPE, peaks::PROCESSOR_FUNCTION_ENVELOPE },
-		{ peaks::PROCESSOR_FUNCTION_LFO, peaks::PROCESSOR_FUNCTION_LFO },
-		{ peaks::PROCESSOR_FUNCTION_TAP_LFO, peaks::PROCESSOR_FUNCTION_TAP_LFO },
-		{ peaks::PROCESSOR_FUNCTION_BASS_DRUM, peaks::PROCESSOR_FUNCTION_SNARE_DRUM },
+	const sanguinepeaks::ProcessorFunction processorFunctionTable[apices::FUNCTION_LAST][apicesCommon::kChannelCount] = {
+		{ sanguinepeaks::PROCESSOR_FUNCTION_ENVELOPE, sanguinepeaks::PROCESSOR_FUNCTION_ENVELOPE },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_LFO, sanguinepeaks::PROCESSOR_FUNCTION_LFO },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_TAP_LFO, sanguinepeaks::PROCESSOR_FUNCTION_TAP_LFO },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_BASS_DRUM, sanguinepeaks::PROCESSOR_FUNCTION_SNARE_DRUM },
 
-		{ peaks::PROCESSOR_FUNCTION_MINI_SEQUENCER, peaks::PROCESSOR_FUNCTION_MINI_SEQUENCER },
-		{ peaks::PROCESSOR_FUNCTION_PULSE_SHAPER, peaks::PROCESSOR_FUNCTION_PULSE_SHAPER },
-		{ peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, peaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
-		{ peaks::PROCESSOR_FUNCTION_FM_DRUM, peaks::PROCESSOR_FUNCTION_FM_DRUM },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_MINI_SEQUENCER, sanguinepeaks::PROCESSOR_FUNCTION_MINI_SEQUENCER },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_PULSE_SHAPER, sanguinepeaks::PROCESSOR_FUNCTION_PULSE_SHAPER },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER, sanguinepeaks::PROCESSOR_FUNCTION_PULSE_RANDOMIZER },
+		{ sanguinepeaks::PROCESSOR_FUNCTION_FM_DRUM, sanguinepeaks::PROCESSOR_FUNCTION_FM_DRUM },
 
-		{ peaks::PROCESSOR_FUNCTION_NUMBER_STATION, peaks::PROCESSOR_FUNCTION_NUMBER_STATION},
-		{ peaks::PROCESSOR_FUNCTION_BOUNCING_BALL, peaks::PROCESSOR_FUNCTION_BOUNCING_BALL}
+		{ sanguinepeaks::PROCESSOR_FUNCTION_NUMBER_STATION, sanguinepeaks::PROCESSOR_FUNCTION_NUMBER_STATION},
+		{ sanguinepeaks::PROCESSOR_FUNCTION_BOUNCING_BALL, sanguinepeaks::PROCESSOR_FUNCTION_BOUNCING_BALL}
 	};
 
 	Apices() {
@@ -162,7 +162,7 @@ struct Apices : SanguineModule {
 
 		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel)
 		{
-			memset(&processors[channel], 0, sizeof(peaks::Processors));
+			memset(&processors[channel], 0, sizeof(sanguinepeaks::Processors));
 			processors[channel].Init(channel);
 		}
 
@@ -394,7 +394,7 @@ struct Apices : SanguineModule {
 				Slice slice = NextSlice(1);
 
 				for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
-					gateFlags[channel] = peaks::ExtractGateFlags(gateFlags[channel], gateInputs & (1 << channel));
+					gateFlags[channel] = sanguinepeaks::ExtractGateFlags(gateFlags[channel], gateInputs & (1 << channel));
 
 					frame[blockNum].samples[channel] = slice.block->output[channel][slice.frame_index];
 				}
@@ -402,10 +402,10 @@ struct Apices : SanguineModule {
 				/* A hack to make channel 1 aware of what's going on in channel 2. Used to
 				   reset the sequencer. */
 				slice.block->input[0][slice.frame_index] = gateFlags[0] | (gateFlags[1] << 4) |
-					(buttons & 8 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
+					(buttons & 8 ? sanguinepeaks::GATE_FLAG_FROM_BUTTON : 0);
 
 				slice.block->input[1][slice.frame_index] = gateFlags[1] |
-					(buttons & 2 ? peaks::GATE_FLAG_FROM_BUTTON : 0);
+					(buttons & 2 ? sanguinepeaks::GATE_FLAG_FROM_BUTTON : 0);
 			}
 
 			srcOutput.process(frame, &inLen, drbOutputBuffer.endData(), &outLen);
@@ -432,18 +432,18 @@ struct Apices : SanguineModule {
 		case apicesCommon::EDIT_MODE_TWIN:
 			processors[0].CopyParameters(&parameters[0], apicesCommon::kKnobCount);
 			processors[1].CopyParameters(&parameters[0], apicesCommon::kKnobCount);
-			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
-			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
+			processors[0].set_control_mode(sanguinepeaks::CONTROL_MODE_FULL);
+			processors[1].set_control_mode(sanguinepeaks::CONTROL_MODE_FULL);
 			break;
 		case apicesCommon::EDIT_MODE_SPLIT:
 			processors[0].CopyParameters(&parameters[0], 2);
 			processors[1].CopyParameters(&parameters[2], 2);
-			processors[0].set_control_mode(peaks::CONTROL_MODE_HALF);
-			processors[1].set_control_mode(peaks::CONTROL_MODE_HALF);
+			processors[0].set_control_mode(sanguinepeaks::CONTROL_MODE_HALF);
+			processors[1].set_control_mode(sanguinepeaks::CONTROL_MODE_HALF);
 			break;
 		default:
-			processors[0].set_control_mode(peaks::CONTROL_MODE_FULL);
-			processors[1].set_control_mode(peaks::CONTROL_MODE_FULL);
+			processors[0].set_control_mode(sanguinepeaks::CONTROL_MODE_FULL);
+			processors[1].set_control_mode(sanguinepeaks::CONTROL_MODE_FULL);
 			break;
 		}
 	}
@@ -542,7 +542,7 @@ struct Apices : SanguineModule {
 		case apicesCommon::EDIT_MODE_SECOND:
 			uint8_t index;
 			index = knobId + (editMode - apicesCommon::EDIT_MODE_FIRST) * apicesCommon::kKnobCount;
-			peaks::Processors* processor;
+			sanguinepeaks::Processors* processor;
 			processor = &processors[editMode - apicesCommon::EDIT_MODE_FIRST];
 
 			int16_t delta;
@@ -693,8 +693,8 @@ struct Apices : SanguineModule {
 			}
 		}
 
-		bool bIsChannel1Station = processors[0].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
-		bool bIsChannel2Station = processors[1].function() == peaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+		bool bIsChannel1Station = processors[0].function() == sanguinepeaks::PROCESSOR_FUNCTION_NUMBER_STATION;
+		bool bIsChannel2Station = processors[1].function() == sanguinepeaks::PROCESSOR_FUNCTION_NUMBER_STATION;
 		if (bIsChannel1Station || bIsChannel2Station) {
 			if (editMode < apicesCommon::EDIT_MODE_FIRST) {
 				uint8_t pattern = processors[0].number_station().digit() ^ processors[1].number_station().digit();

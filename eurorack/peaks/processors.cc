@@ -30,58 +30,58 @@
 
 #include <algorithm>
 
-namespace peaks {
+namespace sanguinepeaks {
 
-using namespace stmlib;
-using namespace std;
+  using namespace stmlib;
+  using namespace std;
 
 #define REGISTER_PROCESSOR(ClassName) \
   { &Processors::ClassName ## Init, \
     &Processors::ClassName ## Process, \
     &Processors::ClassName ## Configure },
 
-/* static */
-const Processors::ProcessorCallbacks 
-Processors::callbacks_table_[PROCESSOR_FUNCTION_LAST] = {
-  REGISTER_PROCESSOR(MultistageEnvelope)
-  REGISTER_PROCESSOR(Lfo)
-  REGISTER_PROCESSOR(Lfo)
-  REGISTER_PROCESSOR(BassDrum)
-  REGISTER_PROCESSOR(SnareDrum)
-  REGISTER_PROCESSOR(HighHat)
-  REGISTER_PROCESSOR(FmDrum)
-  REGISTER_PROCESSOR(PulseShaper)
-  REGISTER_PROCESSOR(PulseRandomizer)
-  REGISTER_PROCESSOR(BouncingBall)
-  REGISTER_PROCESSOR(MiniSequencer)
-  REGISTER_PROCESSOR(NumberStation)
-};
+  /* static */
+  const Processors::ProcessorCallbacks
+    Processors::callbacks_table_[PROCESSOR_FUNCTION_LAST] = {
+      REGISTER_PROCESSOR(MultistageEnvelope)
+      REGISTER_PROCESSOR(Lfo)
+      REGISTER_PROCESSOR(Lfo)
+      REGISTER_PROCESSOR(BassDrum)
+      REGISTER_PROCESSOR(SnareDrum)
+      REGISTER_PROCESSOR(HighHat)
+      REGISTER_PROCESSOR(FmDrum)
+      REGISTER_PROCESSOR(PulseShaper)
+      REGISTER_PROCESSOR(PulseRandomizer)
+      REGISTER_PROCESSOR(BouncingBall)
+      REGISTER_PROCESSOR(MiniSequencer)
+      REGISTER_PROCESSOR(NumberStation)
+  };
 
-void Processors::Init(uint8_t index) {
-  for (uint16_t i = 0; i < PROCESSOR_FUNCTION_LAST; ++i) {
-    (this->*callbacks_table_[i].init_fn)();
+  void Processors::Init(uint8_t index) {
+    for (uint16_t i = 0; i < PROCESSOR_FUNCTION_LAST; ++i) {
+      (this->*callbacks_table_[i].init_fn)();
+    }
+
+    bass_drum_.Init();
+    snare_drum_.Init();
+    fm_drum_.Init();
+    fm_drum_.set_sd_range(index == 1);
+    high_hat_.Init();
+    bouncing_ball_.Init();
+    lfo_.Init();
+    envelope_.Init();
+    pulse_shaper_.Init();
+    pulse_randomizer_.Init();
+    mini_sequencer_.Init();
+    number_station_.Init();
+    number_station_.set_voice(index == 1);
+
+    control_mode_ = CONTROL_MODE_FULL;
+    set_function(PROCESSOR_FUNCTION_ENVELOPE);
+    std::fill(&parameter_[0], &parameter_[4], 32768);
   }
-  
-  bass_drum_.Init();
-  snare_drum_.Init();
-  fm_drum_.Init();
-  fm_drum_.set_sd_range(index == 1);
-  high_hat_.Init();
-  bouncing_ball_.Init();
-  lfo_.Init();
-  envelope_.Init();
-  pulse_shaper_.Init();
-  pulse_randomizer_.Init();
-  mini_sequencer_.Init();
-  number_station_.Init();
-  number_station_.set_voice(index == 1);
-  
-  control_mode_ = CONTROL_MODE_FULL;
-  set_function(PROCESSOR_FUNCTION_ENVELOPE);
-  std::fill(&parameter_[0], &parameter_[4], 32768);
-}
 
-/* extern */
-Processors processors[2];
+  /* extern */
+  Processors processors[2];
 
-}  // namespace peaks
+}  // namespace sanguinepeaks

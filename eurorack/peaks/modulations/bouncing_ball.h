@@ -38,7 +38,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   class BouncingBall {
   public:
@@ -121,6 +121,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(BouncingBall);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_MODULATIONS_BOUNCING_BALL_H_

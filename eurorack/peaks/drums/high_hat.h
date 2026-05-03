@@ -36,7 +36,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   class HighHat {
   public:
@@ -57,6 +57,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(HighHat);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_DRUMS_HIGH_HAT_H_

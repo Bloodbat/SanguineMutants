@@ -34,7 +34,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   enum EnvelopeShape {
     ENV_SHAPE_LINEAR,
@@ -198,6 +198,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(MultistageEnvelope);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_MODULATIONS_MULTISTAGE_ENVELOPE_H_

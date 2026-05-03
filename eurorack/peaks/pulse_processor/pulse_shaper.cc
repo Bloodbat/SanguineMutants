@@ -34,101 +34,101 @@
 
 #include "peaks/resources.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
-using namespace stmlib;
+  using namespace stmlib;
 
-void PulseShaper::Init() {
-  initial_delay_ = 0;
-  duration_ = 0;
-  delay_ = 0;
-  num_repetitions_ = 0;
+  void PulseShaper::Init() {
+    initial_delay_ = 0;
+    duration_ = 0;
+    delay_ = 0;
+    num_repetitions_ = 0;
 
-  Pulse p;
-  p.initial_delay_counter = 0;
-  p.duration_counter = 0;
-  p.delay_counter = 0;
-  p.repetition_counter = 0;
-  
-  std::fill(&pulse_buffer_[0], &pulse_buffer_[kPulseBufferSize], p);
-  
-  previous_num_pulses_ = 0;
-  retrig_counter_ = 0;
-}
+    Pulse p;
+    p.initial_delay_counter = 0;
+    p.duration_counter = 0;
+    p.delay_counter = 0;
+    p.repetition_counter = 0;
 
-inline uint16_t PulseShaper::delay() const {
-  return Interpolate88(lut_delay_times, delay_) - 1;
-}
+    std::fill(&pulse_buffer_[0], &pulse_buffer_[kPulseBufferSize], p);
 
-inline uint16_t PulseShaper::duration() const {
-  return Interpolate88(lut_delay_times, duration_);
-}
-
-inline uint16_t PulseShaper::initial_delay() const {
-  return Interpolate88(lut_delay_times, initial_delay_);
-}
-
-void PulseShaper::Process(
-    const GateFlags* gate_flags, int16_t* out, size_t size) {
-  bool new_pulse = false;
-  for (size_t i = 0; i < size; ++i) {
-    new_pulse |= gate_flags[i] & GATE_FLAG_RISING;
+    previous_num_pulses_ = 0;
+    retrig_counter_ = 0;
   }
-    
-  uint8_t num_pulses = 0;
-  for (uint8_t i = 0; i < kPulseBufferSize; ++i) {
-    Pulse& p = pulse_buffer_[i];
-    if (p.repetition_counter) {
-      // Handle the case when the duration of the pulse is larger than the
-      // delay time. In this case, set the duration to just a sample below
-      // the delay time.
-      if (p.delay_counter < p.duration_counter && p.repetition_counter > 1) {
-        p.duration_counter = p.delay_counter;
-      }
-      
-      if (p.initial_delay_counter == 0) {
-        if (p.duration_counter) {
-          // ON
-          --p.duration_counter;
-          ++num_pulses;
+
+  inline uint16_t PulseShaper::delay() const {
+    return Interpolate88(lut_delay_times, delay_) - 1;
+  }
+
+  inline uint16_t PulseShaper::duration() const {
+    return Interpolate88(lut_delay_times, duration_);
+  }
+
+  inline uint16_t PulseShaper::initial_delay() const {
+    return Interpolate88(lut_delay_times, initial_delay_);
+  }
+
+  void PulseShaper::Process(
+    const GateFlags* gate_flags, int16_t* out, size_t size) {
+    bool new_pulse = false;
+    for (size_t i = 0; i < size; ++i) {
+      new_pulse |= gate_flags[i] & GATE_FLAG_RISING;
+    }
+
+    uint8_t num_pulses = 0;
+    for (uint8_t i = 0; i < kPulseBufferSize; ++i) {
+      Pulse& p = pulse_buffer_[i];
+      if (p.repetition_counter) {
+        // Handle the case when the duration of the pulse is larger than the
+        // delay time. In this case, set the duration to just a sample below
+        // the delay time.
+        if (p.delay_counter < p.duration_counter && p.repetition_counter > 1) {
+          p.duration_counter = p.delay_counter;
         }
-        if (p.delay_counter) {
-          --p.delay_counter;
+
+        if (p.initial_delay_counter == 0) {
+          if (p.duration_counter) {
+            // ON
+            --p.duration_counter;
+            ++num_pulses;
+          }
+          if (p.delay_counter) {
+            --p.delay_counter;
+          } else {
+            // Retrigger
+            --p.repetition_counter;
+            p.duration_counter = duration();
+            p.delay_counter = delay();
+          }
         } else {
-          // Retrigger
-          --p.repetition_counter;
-          p.duration_counter = duration();
-          p.delay_counter = delay();
+          // Still in pre-delay phase...
+          --p.initial_delay_counter;
         }
       } else {
-        // Still in pre-delay phase...
-        --p.initial_delay_counter;
-      }
-    } else {
-      if (new_pulse) {
-        p.repetition_counter = num_repetitions_ + 1;
-        p.initial_delay_counter = initial_delay();
-        p.duration_counter = duration();
-        p.delay_counter = delay();
-        new_pulse = false;
-        num_pulses += p.initial_delay_counter ? 0 : 1;
+        if (new_pulse) {
+          p.repetition_counter = num_repetitions_ + 1;
+          p.initial_delay_counter = initial_delay();
+          p.duration_counter = duration();
+          p.delay_counter = delay();
+          new_pulse = false;
+          num_pulses += p.initial_delay_counter ? 0 : 1;
+        }
       }
     }
-  }
-    
-  // The output is already high, but a new pulse is arriving. Create
-  // a short dip in the output to retrigger.
-  if (previous_num_pulses_ && num_pulses > previous_num_pulses_) {
-    retrig_counter_ = 6;
-  }
-  previous_num_pulses_ = num_pulses;
 
-  if (retrig_counter_) {
-    --retrig_counter_;
-  }
-  
-  int16_t output = num_pulses > 0 && !retrig_counter_ ? 20480 : 0;
-  std::fill(&out[0], &out[size], output);
-}
+    // The output is already high, but a new pulse is arriving. Create
+    // a short dip in the output to retrigger.
+    if (previous_num_pulses_ && num_pulses > previous_num_pulses_) {
+      retrig_counter_ = 6;
+    }
+    previous_num_pulses_ = num_pulses;
 
-}  // namespace peaks
+    if (retrig_counter_) {
+      --retrig_counter_;
+    }
+
+    int16_t output = num_pulses > 0 && !retrig_counter_ ? 20480 : 0;
+    std::fill(&out[0], &out[size], output);
+  }
+
+}  // namespace sanguinepeaks

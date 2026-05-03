@@ -33,7 +33,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   class FmDrum {
   public:
@@ -110,6 +110,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(FmDrum);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_DRUMS_FM_DRUM_H_
