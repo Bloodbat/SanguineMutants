@@ -124,15 +124,15 @@ namespace sanguineplaits {
         amplitude *= 1.0f / (frequency * 131072.0f);
       }
 
-      stmlib::ParameterInterpolator frequency_modulation(
+      sanguinestmlib::ParameterInterpolator frequency_modulation(
         &frequency_,
         frequency,
         size);
-      stmlib::ParameterInterpolator amplitude_modulation(
+      sanguinestmlib::ParameterInterpolator amplitude_modulation(
         &amplitude_,
         amplitude,
         size);
-      stmlib::ParameterInterpolator waveform_modulation(
+      sanguinestmlib::ParameterInterpolator waveform_modulation(
         &waveform_,
         waveform * float(num_waves - 1.0001f),
         size);

@@ -36,7 +36,7 @@
 namespace sanguineclouds {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void STFT::Init(
     FFT* fft,

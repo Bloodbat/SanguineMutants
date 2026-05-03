@@ -65,8 +65,8 @@ namespace sanguinerings {
 
         // Clamp to 8Vpp, clipping softly towards 10Vpp
         float gain = (peak_ <= 1.0f ? 1.0f : 1.0f / peak_);
-        *l++ = stmlib::SoftLimit(l_pre * gain * 0.8f);
-        *r++ = stmlib::SoftLimit(r_pre * gain * 0.8f);
+        *l++ = sanguinestmlib::SoftLimit(l_pre * gain * 0.8f);
+        *r++ = sanguinestmlib::SoftLimit(r_pre * gain * 0.8f);
       }
     }
 

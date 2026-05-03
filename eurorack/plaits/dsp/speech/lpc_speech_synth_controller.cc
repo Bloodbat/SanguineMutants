@@ -37,7 +37,7 @@
 
 namespace sanguineplaits {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   /* static */
   const uint8_t LPCSpeechSynthWordBank::energy_lut_[16] = {

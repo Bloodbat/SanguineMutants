@@ -39,7 +39,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void SnareDrum::Init() {
 		excitation_1_up_.Init();
@@ -144,7 +144,7 @@ namespace deadman {
 			if (gate_flag & GATE_FLAG_RISING) {
 				// randomise parameters
 				// frequency
-				uint32_t random_value = stmlib::Random::GetWord();
+				uint32_t random_value = sanguinestmlib::Random::GetWord();
 				bool freq_up = (random_value > 2147483647) ? true : false;
 				int32_t randomised_frequency = freq_up ?
 					(last_frequency_ + (frequency_randomness_ >> 2)) :
@@ -177,7 +177,7 @@ namespace deadman {
 				//                                (last_random_hit_ + (hit_randomness_ >> 2));
 				// }
 
-				randomised_hit_ = last_random_hit_ + ((stmlib::Random::GetSample() * hit_randomness_) >> 16);
+				randomised_hit_ = last_random_hit_ + ((sanguinestmlib::Random::GetSample() * hit_randomness_) >> 16);
 				CONSTRAIN(randomised_hit_, 0, 65535);
 				last_random_hit_ = randomised_hit_;
 				set_tone(randomised_hit_);

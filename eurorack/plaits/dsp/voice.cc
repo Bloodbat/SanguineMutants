@@ -30,7 +30,7 @@
 
 namespace sanguineplaits {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void Voice::Init(BufferAllocator* allocator, UserData* user_data) {
     user_data_ = user_data;

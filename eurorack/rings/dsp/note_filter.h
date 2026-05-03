@@ -106,7 +106,7 @@ namespace sanguinerings {
     float previous_values_[N];
     float note_;
     float stable_note_;
-    stmlib::DelayLine<float, 16> delayed_stable_note_;
+    sanguinestmlib::DelayLine<float, 16> delayed_stable_note_;
 
     float coefficient_;
     float stable_coefficient_;

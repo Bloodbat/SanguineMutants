@@ -39,7 +39,7 @@
 namespace sanguinerings {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   class ZScorer {
   public:

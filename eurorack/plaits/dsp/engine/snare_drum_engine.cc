@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void SnareDrumEngine::Init(BufferAllocator* allocator) {
     analog_snare_drum_.Init();

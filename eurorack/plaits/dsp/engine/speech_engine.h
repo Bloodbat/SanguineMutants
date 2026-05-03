@@ -43,7 +43,7 @@ namespace sanguineplaits {
     SpeechEngine() {}
     ~SpeechEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters,
@@ -61,7 +61,7 @@ namespace sanguineplaits {
     }
 
   private:
-    stmlib::HysteresisQuantizer2 word_bank_quantizer_;
+    sanguinestmlib::HysteresisQuantizer2 word_bank_quantizer_;
 
     NaiveSpeechSynth naive_speech_synth_;
     SAMSpeechSynth sam_speech_synth_;

@@ -154,7 +154,7 @@ namespace deadman {
 
 		bool sync_;
 		uint32_t sync_counter_;
-		stmlib::PatternPredictor<32, 8> pattern_predictor_;
+		sanguinestmlib::PatternPredictor<32, 8> pattern_predictor_;
 
 		uint32_t phase_;
 		uint32_t phase_increment_;
@@ -504,7 +504,7 @@ namespace deadman {
 
 		bool sync_;
 		uint32_t sync_counter_;
-		stmlib::PatternPredictor<32, 8> pattern_predictor_;
+		sanguinestmlib::PatternPredictor<32, 8> pattern_predictor_;
 
 		uint32_t phase_;
 		uint32_t phase_increment_;

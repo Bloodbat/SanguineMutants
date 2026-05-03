@@ -35,7 +35,7 @@
 
 namespace sanguineplaits {
 
-    using namespace stmlib;
+    using namespace sanguinestmlib;
 
     void FMEngine::Init(BufferAllocator* allocator) {
         carrier_phase_ = 0;

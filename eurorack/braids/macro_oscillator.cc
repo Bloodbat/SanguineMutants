@@ -36,7 +36,7 @@
 #include "braids/resources.h"
 
 namespace sanguinebraids {
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void MacroOscillator::Render(const uint8_t* sync, int16_t* buffer, size_t size) {
     RenderFn fn = fn_table_[shape_];

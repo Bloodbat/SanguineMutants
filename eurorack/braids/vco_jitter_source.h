@@ -39,41 +39,41 @@
 
 namespace sanguinebraids {
 
-using namespace stmlib;
+  using namespace sanguinestmlib;
 
-class VcoJitterSource {
- public:
-  VcoJitterSource() { }
-  ~VcoJitterSource() { }
+  class VcoJitterSource {
+  public:
+    VcoJitterSource() {}
+    ~VcoJitterSource() {}
 
-  inline void Init() {
-    external_temperature_ = 0;
-    room_temperature_ = 0;
-    phase_ = 0;
-    phase_step_ = 0;
-  }
-
-  inline int16_t Render(int32_t intensity) {
-    // External temperature change, with 1-order filtering.
-    uint16_t external_temperature_toss = Random::GetWord();
-    if (external_temperature_toss == 0) {
-      phase_step_ = phase_step_ * 1664525L + 1013904223L;
-      phase_ += (phase_step_ >> 16) * (phase_step_ >> 16);
-      external_temperature_ = wav_sine[phase_ >> 24] << 8;
+    inline void Init() {
+      external_temperature_ = 0;
+      room_temperature_ = 0;
+      phase_ = 0;
+      phase_step_ = 0;
     }
-    room_temperature_ += (external_temperature_ - room_temperature_) >> 16;
-    int32_t pitch_noise = room_temperature_ * intensity >> 19;
-    return pitch_noise;
-  }
 
- private:
-  uint32_t phase_step_;
-  uint32_t phase_;
-  int32_t external_temperature_;
-  int32_t room_temperature_;
+    inline int16_t Render(int32_t intensity) {
+      // External temperature change, with 1-order filtering.
+      uint16_t external_temperature_toss = Random::GetWord();
+      if (external_temperature_toss == 0) {
+        phase_step_ = phase_step_ * 1664525L + 1013904223L;
+        phase_ += (phase_step_ >> 16) * (phase_step_ >> 16);
+        external_temperature_ = wav_sine[phase_ >> 24] << 8;
+      }
+      room_temperature_ += (external_temperature_ - room_temperature_) >> 16;
+      int32_t pitch_noise = room_temperature_ * intensity >> 19;
+      return pitch_noise;
+    }
 
-  DISALLOW_COPY_AND_ASSIGN(VcoJitterSource);
-};
+  private:
+    uint32_t phase_step_;
+    uint32_t phase_;
+    int32_t external_temperature_;
+    int32_t room_temperature_;
+
+    DISALLOW_COPY_AND_ASSIGN(VcoJitterSource);
+  };
 
 }  // namespace sanguinebraids
 

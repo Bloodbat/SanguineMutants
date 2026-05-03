@@ -438,7 +438,7 @@ struct Nodi : SanguineModule {
 					sample = sample * gainLps[channel] >> 16;
 					gainLps[channel] += (gain - gainLps[channel]) >> 4;
 					int16_t warped = waveShapers[channel].Transform(sample);
-					renderBuffer[block] = stmlib::Mix(sample, warped, signature);
+					renderBuffer[block] = sanguinestmlib::Mix(sample, warped, signature);
 
 					renderFrames[block].samples[channel] = renderBuffer[block] / 32768.f;
 				}

@@ -35,7 +35,7 @@
 
 namespace sanguinemarbles {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void LagProcessor::Init() {
     ramp_start_ = 0.0f;

@@ -7,7 +7,7 @@
 #include "stmlib/dsp/filter.h"
 #include "stmlib/dsp/units.h"
 
-using namespace stmlib;
+using namespace sanguinestmlib;
 
 namespace mutuus
 {

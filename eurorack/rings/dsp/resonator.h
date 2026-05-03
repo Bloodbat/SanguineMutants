@@ -85,7 +85,7 @@ namespace sanguinerings {
 
     int32_t resolution_;
 
-    stmlib::Svf f_[kMaxModes];
+    sanguinestmlib::Svf f_[kMaxModes];
 
     DISALLOW_COPY_AND_ASSIGN(Resonator);
   };

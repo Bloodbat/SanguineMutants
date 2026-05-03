@@ -13,7 +13,7 @@
 /*extern*/ renaissance::Quantizer quantizer;
 
 namespace renaissance {
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	const int kStackSize = 6;
 

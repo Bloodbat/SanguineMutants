@@ -76,7 +76,7 @@ namespace sanguineplaits {
 
       if (mode_ == ARPEGGIATOR_MODE_RANDOM) {
         while (true) {
-          uint32_t w = stmlib::Random::GetWord();
+          uint32_t w = sanguinestmlib::Random::GetWord();
           int octave = (w >> 4) % range_;
           int note = (w >> 20) % num_notes;
           if (octave != octave_ || note != note_) {

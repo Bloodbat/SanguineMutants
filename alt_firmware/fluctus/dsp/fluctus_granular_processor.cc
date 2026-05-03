@@ -37,7 +37,7 @@
 
 namespace fluctus {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
 #ifdef METAMODULE
   float* lut_sine_window_2048;

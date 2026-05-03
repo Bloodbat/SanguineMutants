@@ -69,7 +69,7 @@ namespace mutuus {
 		void Process(float drive, float limit, short* in, float* out, float* out_raw,
 			size_t in_stride, size_t size) {
 			// Process noise gate and compute raw output.
-			stmlib::ParameterInterpolator drive_modulation(&drive_, drive, size);
+			sanguinestmlib::ParameterInterpolator drive_modulation(&drive_, drive, size);
 			float level = level_;
 			for (size_t i = 0; i < size; ++i) {
 				float s = static_cast<float>(*in) / 32768.0f;
@@ -88,13 +88,13 @@ namespace mutuus {
 			float pre_gain_b = drive_2 * drive_2 * drive * 24.0f;
 			float pre_gain = pre_gain_a + (pre_gain_b - pre_gain_a) * drive_2;
 			float drive_squished = drive * (2.0f - drive);
-			float post_gain = 1.0f / stmlib::SoftClip(0.33f + drive_squished * (pre_gain - 0.33f));
-			stmlib::ParameterInterpolator pre_gain_modulation(&pre_gain_, pre_gain, size);
-			stmlib::ParameterInterpolator post_gain_modulation(&post_gain_, post_gain, size);
+			float post_gain = 1.0f / sanguinestmlib::SoftClip(0.33f + drive_squished * (pre_gain - 0.33f));
+			sanguinestmlib::ParameterInterpolator pre_gain_modulation(&pre_gain_, pre_gain, size);
+			sanguinestmlib::ParameterInterpolator post_gain_modulation(&post_gain_, post_gain, size);
 
 			for (size_t i = 0; i < size; ++i) {
 				float pre = pre_gain_modulation.Next() * out[i];
-				float post = stmlib::SoftClip(pre) * post_gain_modulation.Next();
+				float post = sanguinestmlib::SoftClip(pre) * post_gain_modulation.Next();
 				out[i] = pre + (post - pre) * limit;
 			}
 		}
@@ -336,7 +336,7 @@ namespace mutuus {
 		Vocoder vocoder_;
 		QuadratureTransform quadrature_transform_[2];
 
-		stmlib::OnePole filter_[4];
+		sanguinestmlib::OnePole filter_[4];
 
 		/* everything that follows will be used as delay buffer */
 		ShortFrame delay_buffer_[8192 + 4096];

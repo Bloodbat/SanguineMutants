@@ -11,7 +11,7 @@
 
 namespace renaissance {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void DigitalOscillator::RenderHarmonics(
 		const uint8_t* sync,
@@ -49,8 +49,7 @@ namespace renaissance {
 		for (size_t i = 0; i < kNumAdditiveHarmonics; ++i) {
 			if ((phase_increment >> 16) * (i + 1) > 0x4000) {
 				target_amplitude[i] = 0;
-			}
-			else {
+			} else {
 				target_amplitude[i] = target_amplitude[i] * attenuation >> 16;
 			}
 			amplitude[i] = state_.hrm.amplitude[i];

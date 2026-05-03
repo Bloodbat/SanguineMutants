@@ -38,78 +38,78 @@
 
 namespace mutuus {
 
-class QuadratureOscillator {
- public:
-  QuadratureOscillator() { }
-  ~QuadratureOscillator() { }
-  
-  void Init(float sample_rate) {
-    one_hertz_ = 1.0f / sample_rate;
-    frequency_ = 0.0f;
-    shape_ = 0.0f;
-    note_ = 0.0f;
-    phase_ = 0.0f;
-  }
-  
-  void Render(
+  class QuadratureOscillator {
+  public:
+    QuadratureOscillator() {}
+    ~QuadratureOscillator() {}
+
+    void Init(float sample_rate) {
+      one_hertz_ = 1.0f / sample_rate;
+      frequency_ = 0.0f;
+      shape_ = 0.0f;
+      note_ = 0.0f;
+      phase_ = 0.0f;
+    }
+
+    void Render(
       float shape,
       float frequency,
       float* i_out,
       float* q_out,
       size_t size) {
-    float normalized_frequency = frequency * one_hertz_;
-    CONSTRAIN(normalized_frequency, -0.25f, 0.25f);
-    stmlib::ParameterInterpolator frequency_parameter(
+      float normalized_frequency = frequency * one_hertz_;
+      CONSTRAIN(normalized_frequency, -0.25f, 0.25f);
+      sanguinestmlib::ParameterInterpolator frequency_parameter(
         &frequency_,
         normalized_frequency,
         size);
-    stmlib::ParameterInterpolator shape_parameter(&shape_, shape, size);
+      sanguinestmlib::ParameterInterpolator shape_parameter(&shape_, shape, size);
 
-    float phase = phase_;
-    while (size--) {
-      phase += frequency_parameter.Next();
-      
-      if (phase <= 0.0f) {
-        phase += 1.0f;
-      } else if (phase >= 1.0f) {
-        phase -= 1.0f;
-      }
-      
-      shape = shape_parameter.Next() * 1.9999f;
-      MAKE_INTEGRAL_FRACTIONAL(shape);
-      
-      float iq[2];
-      for (int32_t component = 0; component < 2; ++component) {
-        float a = stmlib::Interpolate(
+      float phase = phase_;
+      while (size--) {
+        phase += frequency_parameter.Next();
+
+        if (phase <= 0.0f) {
+          phase += 1.0f;
+        } else if (phase >= 1.0f) {
+          phase -= 1.0f;
+        }
+
+        shape = shape_parameter.Next() * 1.9999f;
+        MAKE_INTEGRAL_FRACTIONAL(shape);
+
+        float iq[2];
+        for (int32_t component = 0; component < 2; ++component) {
+          float a = sanguinestmlib::Interpolate(
             wav_table[2 * shape_integral + component],
             phase,
             1024);
-        
-        float b = stmlib::Interpolate(
+
+          float b = sanguinestmlib::Interpolate(
             wav_table[2 * shape_integral + 2 + component],
             phase,
             1024);
-        
-        iq[component] = a + (b - a) * shape_fractional;
-      }
-      
-      *i_out++ = iq[0];
-      *q_out++ = iq[1];
-    }
-    phase_ = phase;
-  }
-  
- private:
-  float one_hertz_;
-  
-  float phase_;
 
-  float frequency_;
-  float shape_;
-  float note_;
-  
-  DISALLOW_COPY_AND_ASSIGN(QuadratureOscillator);
-};
+          iq[component] = a + (b - a) * shape_fractional;
+        }
+
+        *i_out++ = iq[0];
+        *q_out++ = iq[1];
+      }
+      phase_ = phase;
+    }
+
+  private:
+    float one_hertz_;
+
+    float phase_;
+
+    float frequency_;
+    float shape_;
+    float note_;
+
+    DISALLOW_COPY_AND_ASSIGN(QuadratureOscillator);
+  };
 
 }  // namespace mutuus
 

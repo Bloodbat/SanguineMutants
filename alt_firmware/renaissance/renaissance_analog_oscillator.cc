@@ -34,7 +34,7 @@
 #include "renaissance/renaissance_parameter_interpolation.h"
 
 namespace renaissance {
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   static const size_t kNumZones = 15;
 

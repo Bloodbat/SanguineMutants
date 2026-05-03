@@ -40,7 +40,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void SAMSpeechSynth::Init() {
     phase_ = 0.0f;

@@ -136,11 +136,11 @@ namespace sanguinerings {
 
     Resonator resonator_[kMaxPolyphony];
     String string_[kNumStrings];
-    stmlib::CosineOscillator lfo_[kNumStrings];
+    sanguinestmlib::CosineOscillator lfo_[kNumStrings];
     FMVoice fm_voice_[kMaxPolyphony];
 
-    stmlib::Svf excitation_filter_[kMaxPolyphony];
-    stmlib::DCBlocker dc_blocker_[kMaxPolyphony];
+    sanguinestmlib::Svf excitation_filter_[kMaxPolyphony];
+    sanguinestmlib::DCBlocker dc_blocker_[kMaxPolyphony];
     Plucker plucker_[kMaxPolyphony];
 
     float note_[kMaxPolyphony];

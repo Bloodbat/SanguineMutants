@@ -111,7 +111,7 @@ namespace sanguinerings {
     StringSynthVoice<kNumHarmonics> voice_[kStringSynthVoices];
     VoiceGroup group_[kMaxStringSynthPolyphony];
 
-    stmlib::Svf formant_filter_[kNumFormants];
+    sanguinestmlib::Svf formant_filter_[kNumFormants];
     Ensemble ensemble_;
     Reverb reverb_;
     Chorus chorus_;

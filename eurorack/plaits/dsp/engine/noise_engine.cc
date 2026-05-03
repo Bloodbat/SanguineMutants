@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
     using namespace std;
-    using namespace stmlib;
+    using namespace sanguinestmlib;
 
     void NoiseEngine::Init(BufferAllocator* allocator) {
         clocked_noise_[0].Init();

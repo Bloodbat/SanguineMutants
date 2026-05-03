@@ -26,13 +26,13 @@
 //
 // Basic ringbuffer template
 
-#ifndef STMLIB_UTILS_RING_BUFFER_H_
-#define STMLIB_UTILS_RING_BUFFER_H_
+#ifndef SANGUINE_STMLIB_UTILS_RING_BUFFER_H_
+#define SANGUINE_STMLIB_UTILS_RING_BUFFER_H_
 
 #include "stmlib/stmlib.h"
 #include <algorithm>
 
-namespace stmlib {
+namespace sanguinestmlib {
   template<typename T, size_t size>
   class RingBuffer {
   public:
@@ -152,5 +152,5 @@ namespace stmlib {
   private:
     DISALLOW_COPY_AND_ASSIGN(RingBuffer);
   };
-}  // namespace stmlib
-#endif   // STMLIB_UTILS_RING_BUFFER_H_
+}  // namespace sanguinestmlib
+#endif   // SANGUINE_STMLIB_UTILS_RING_BUFFER_H_

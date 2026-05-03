@@ -75,13 +75,13 @@ namespace sanguinemarbles {
       uniform = (uniform - 0.95f) * 20.0f;
     }
 
-    float x1y1 = stmlib::Interpolate(distributions_table[cell] + offset, uniform,
+    float x1y1 = sanguinestmlib::Interpolate(distributions_table[cell] + offset, uniform,
       kIcdfTableSize);
-    float x2y1 = stmlib::Interpolate(distributions_table[cell + 1] + offset, uniform,
+    float x2y1 = sanguinestmlib::Interpolate(distributions_table[cell + 1] + offset, uniform,
       kIcdfTableSize);
-    float x1y2 = stmlib::Interpolate(distributions_table[cell + kNumRangeValues + 1] + offset, uniform,
+    float x1y2 = sanguinestmlib::Interpolate(distributions_table[cell + kNumRangeValues + 1] + offset, uniform,
       kIcdfTableSize);
-    float x2y2 = stmlib::Interpolate(distributions_table[cell + kNumRangeValues + 2] + offset, uniform,
+    float x2y2 = sanguinestmlib::Interpolate(distributions_table[cell + kNumRangeValues + 2] + offset, uniform,
       kIcdfTableSize);
 
     float y1 = x1y1 + (x2y1 - x1y1) * spread_fractional;
@@ -96,7 +96,7 @@ namespace sanguinemarbles {
 
   // Pre-computed beta(3, 3) with a fatter tail.
   inline float FastBetaDistributionSample(float uniform) {
-    return stmlib::Interpolate(dist_icdf_4_3, uniform, kIcdfTableSize);
+    return sanguinestmlib::Interpolate(dist_icdf_4_3, uniform, kIcdfTableSize);
   }
 }  // namespace sanguinemarbles
 #endif  // MARBLES_RANDOM_DISTRIBUTIONS_H_

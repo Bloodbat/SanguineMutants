@@ -45,7 +45,7 @@ namespace sanguineplaits {
     WaveTerrainEngine() {}
     ~WaveTerrainEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
 
     virtual void LoadUserData(const uint8_t* user_data) override {

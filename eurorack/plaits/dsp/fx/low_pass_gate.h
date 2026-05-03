@@ -47,29 +47,29 @@ namespace sanguineplaits {
     }
 
     void Process(float gain, float frequency, float hf_bleed, float* in_out, size_t size) {
-      stmlib::ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
-      filter_.set_f_q<stmlib::FREQUENCY_DIRTY>(frequency, 0.4f);
+      sanguinestmlib::ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
+      filter_.set_f_q<sanguinestmlib::FREQUENCY_DIRTY>(frequency, 0.4f);
       while (size--) {
         const float s = *in_out * gain_modulation.Next();
-        const float lp = filter_.Process<stmlib::FILTER_MODE_LOW_PASS>(s);
+        const float lp = filter_.Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(s);
         *in_out++ = lp + (s - lp) * hf_bleed;
       }
     }
 
     void Process(float gain, float frequency, float hf_bleed, const float* in, short* out, size_t size, size_t stride) {
-      stmlib::ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
-      filter_.set_f_q<stmlib::FREQUENCY_DIRTY>(frequency, 0.4f);
+      sanguinestmlib::ParameterInterpolator gain_modulation(&previous_gain_, gain, size);
+      filter_.set_f_q<sanguinestmlib::FREQUENCY_DIRTY>(frequency, 0.4f);
       while (size--) {
         const float s = *in++ * gain_modulation.Next();
-        const float lp = filter_.Process<stmlib::FILTER_MODE_LOW_PASS>(s);
-        *out = stmlib::Clip16(1 + static_cast<int32_t>(lp + (s - lp) * hf_bleed));
+        const float lp = filter_.Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(s);
+        *out = sanguinestmlib::Clip16(1 + static_cast<int32_t>(lp + (s - lp) * hf_bleed));
         out += stride;
       }
     }
 
   private:
     float previous_gain_;
-    stmlib::Svf filter_;
+    sanguinestmlib::Svf filter_;
 
     DISALLOW_COPY_AND_ASSIGN(LowPassGate);
   };

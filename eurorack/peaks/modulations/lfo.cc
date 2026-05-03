@@ -39,7 +39,7 @@ namespace sanguinepeaks {
   const uint16_t kSlopeBits = 12;
   const uint32_t kSyncCounterMaxTime = 8 * 48000;
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void Lfo::Init() {
     rate_ = 0;

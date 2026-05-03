@@ -90,7 +90,7 @@ namespace fluctus {
         if (use_lut_for_envelope) {
           if (quality == GRAIN_QUALITY_HIGH) {
             float window = 0.0f;
-            window = stmlib::Interpolate(lut_window, gain, 4096.0f);
+            window = sanguinestmlib::Interpolate(lut_window, gain, 4096.0f);
             gain += smoothness * (window - gain);
           }
         } else {

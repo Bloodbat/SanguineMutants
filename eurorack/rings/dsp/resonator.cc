@@ -37,7 +37,7 @@
 namespace sanguinerings {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void Resonator::Init() {
     for (int32_t i = 0; i < kMaxModes; ++i) {

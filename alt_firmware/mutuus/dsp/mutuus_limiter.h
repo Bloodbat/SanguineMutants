@@ -38,32 +38,32 @@
 
 namespace mutuus {
 
-class Limiter {
- public:
-  Limiter() { }
-  ~Limiter() { }
+  class Limiter {
+  public:
+    Limiter() {}
+    ~Limiter() {}
 
-  void Init() {
-    peak_ = 0.5f;
-  }
+    void Init() {
+      peak_ = 0.5f;
+    }
 
-  void Process(
+    void Process(
       float* in_out,
       float pre_gain,
       size_t size) {
-    while (size--) {
-      float s = *in_out * pre_gain;
-      SLOPE(peak_, fabs(s), 0.05f, 0.00002f);
-      float gain = (peak_ <= 1.0f ? 1.0f : 1.0f / peak_);
-      *in_out++ = stmlib::SoftLimit(s * gain * 0.8f);
+      while (size--) {
+        float s = *in_out * pre_gain;
+        SLOPE(peak_, fabs(s), 0.05f, 0.00002f);
+        float gain = (peak_ <= 1.0f ? 1.0f : 1.0f / peak_);
+        *in_out++ = sanguinestmlib::SoftLimit(s * gain * 0.8f);
+      }
     }
-  }
 
- private:
-  float peak_;
+  private:
+    float peak_;
 
-  DISALLOW_COPY_AND_ASSIGN(Limiter);
-};
+    DISALLOW_COPY_AND_ASSIGN(Limiter);
+  };
 
 }  // namespace mutuus
 

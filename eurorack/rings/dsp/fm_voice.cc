@@ -38,7 +38,7 @@
 
 namespace sanguinerings {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void FMVoice::Init() {
 		set_frequency(220.0f / kSampleRate);

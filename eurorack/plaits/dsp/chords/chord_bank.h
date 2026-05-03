@@ -65,7 +65,7 @@ namespace sanguineplaits {
     ChordBank() {}
     ~ChordBank() {}
 
-    void Init(stmlib::BufferAllocator* allocator);
+    void Init(sanguinestmlib::BufferAllocator* allocator);
     void Reset();
 
     int ComputeChordInversion(float inversion, float* ratios, float* amplitudes);
@@ -119,7 +119,7 @@ namespace sanguineplaits {
     }
 
   private:
-    stmlib::HysteresisQuantizer2 chord_index_quantizer_[kNumChordSetOpts];
+    sanguinestmlib::HysteresisQuantizer2 chord_index_quantizer_[kNumChordSetOpts];
 
     uint8_t chord_set_option_;
 

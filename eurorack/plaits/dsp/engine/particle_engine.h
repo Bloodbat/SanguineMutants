@@ -42,7 +42,7 @@ namespace sanguineplaits {
     ParticleEngine() {}
     ~ParticleEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters,
@@ -54,7 +54,7 @@ namespace sanguineplaits {
   private:
     Particle particle_[kNumParticles];
     Diffuser diffuser_;
-    stmlib::Svf post_filter_;
+    sanguinestmlib::Svf post_filter_;
 
     DISALLOW_COPY_AND_ASSIGN(ParticleEngine);
   };

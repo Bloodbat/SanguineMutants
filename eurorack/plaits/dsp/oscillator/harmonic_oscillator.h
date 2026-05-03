@@ -62,8 +62,8 @@ namespace sanguineplaits {
         frequency = 0.5f;
       }
 
-      stmlib::ParameterInterpolator am[num_harmonics];
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator am[num_harmonics];
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
 
       for (int i = 0; i < num_harmonics; ++i) {
         float f = frequency * static_cast<float>(first_harmonic_index + i);

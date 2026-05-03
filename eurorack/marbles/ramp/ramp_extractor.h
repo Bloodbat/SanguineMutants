@@ -45,103 +45,103 @@
 
 namespace sanguinemarbles {
 
-class RampExtractor {
- public:
-  RampExtractor() { }
-  ~RampExtractor() { }
-  
-  void Init(float max_frequency);
+  class RampExtractor {
+  public:
+    RampExtractor() {}
+    ~RampExtractor() {}
 
-  void Process(
+    void Init(float max_frequency);
+
+    void Process(
       Ratio r,
       bool always_ramp_to_maximum,
       bool* reset,
-      const stmlib::GateFlags* gate_flags,
+      const sanguinestmlib::GateFlags* gate_flags,
       float* ramp,
       size_t size);
 
-  inline void Process(
+    inline void Process(
       Ratio r,
       bool always_ramp_to_maximum,
-      const stmlib::GateFlags* gate_flags,
+      const sanguinestmlib::GateFlags* gate_flags,
       float* ramp,
       size_t size) {
-    bool reset = false;
-    Process(r, always_ramp_to_maximum, &reset, gate_flags, ramp, size);
-  }
+      bool reset = false;
+      Process(r, always_ramp_to_maximum, &reset, gate_flags, ramp, size);
+    }
 
-  void Reset();
-  
- private:
-  struct Pulse {
-    uint32_t on_duration;
-    uint32_t total_duration;
-    uint32_t bucket;  // 4xlog2(total_duration).
-    float pulse_width;
-  };
-  
-  struct Prediction {
-    float period;
-    float accuracy;
-  };
-  
-  enum Predictor {
-    PREDICTOR_SLOW_MOVING_AVERAGE,
-    PREDICTOR_FAST_MOVING_AVERAGE,
-    PREDICTOR_HASH,
-    PREDICTOR_PERIOD_1,
-    PREDICTOR_PERIOD_2,
-    PREDICTOR_PERIOD_3,
-    PREDICTOR_PERIOD_4,
-    PREDICTOR_PERIOD_5,
-    PREDICTOR_PERIOD_6,
-    PREDICTOR_PERIOD_7,
-    PREDICTOR_PERIOD_8,
-    PREDICTOR_PERIOD_9,
-    PREDICTOR_PERIOD_10,
-    PREDICTOR_LAST
-  };
-  
-  static const size_t kHistorySize = 16;
-  static const size_t kHashTableSize = 256;
-  
-  float ComputeAveragePulseWidth(float tolerance) const;
-  
-  Prediction PredictNextPeriod();
+    void Reset();
 
-  size_t current_pulse_;
-  Pulse history_[kHistorySize];
-  float next_bucket_;
-  
-  float prediction_hash_table_[kHashTableSize];
-  float predicted_period_[PREDICTOR_LAST];
-  float prediction_accuracy_[PREDICTOR_LAST];
-  float average_pulse_width_;
-  
-  float train_phase_;
-  float frequency_;
-  float max_output_phase_;
-  float max_train_phase_;
-  float reset_frequency_;
-  float target_frequency_;
-  float lp_coefficient_;
-  
-  float f_ratio_;
-  float next_f_ratio_;
-  float next_max_train_phase_;
-  int reset_counter_;
-  uint32_t reset_interval_;
-  bool audio_rate_;
-  int num_consistent_audio_rate_pulses_;
-  
-  float max_frequency_;
-  float audio_rate_period_;
-  float audio_rate_period_hysteresis_;
-  
-  bool reset_at_next_pulse_;
-  
-  DISALLOW_COPY_AND_ASSIGN(RampExtractor);
-};
+  private:
+    struct Pulse {
+      uint32_t on_duration;
+      uint32_t total_duration;
+      uint32_t bucket;  // 4xlog2(total_duration).
+      float pulse_width;
+    };
+
+    struct Prediction {
+      float period;
+      float accuracy;
+    };
+
+    enum Predictor {
+      PREDICTOR_SLOW_MOVING_AVERAGE,
+      PREDICTOR_FAST_MOVING_AVERAGE,
+      PREDICTOR_HASH,
+      PREDICTOR_PERIOD_1,
+      PREDICTOR_PERIOD_2,
+      PREDICTOR_PERIOD_3,
+      PREDICTOR_PERIOD_4,
+      PREDICTOR_PERIOD_5,
+      PREDICTOR_PERIOD_6,
+      PREDICTOR_PERIOD_7,
+      PREDICTOR_PERIOD_8,
+      PREDICTOR_PERIOD_9,
+      PREDICTOR_PERIOD_10,
+      PREDICTOR_LAST
+    };
+
+    static const size_t kHistorySize = 16;
+    static const size_t kHashTableSize = 256;
+
+    float ComputeAveragePulseWidth(float tolerance) const;
+
+    Prediction PredictNextPeriod();
+
+    size_t current_pulse_;
+    Pulse history_[kHistorySize];
+    float next_bucket_;
+
+    float prediction_hash_table_[kHashTableSize];
+    float predicted_period_[PREDICTOR_LAST];
+    float prediction_accuracy_[PREDICTOR_LAST];
+    float average_pulse_width_;
+
+    float train_phase_;
+    float frequency_;
+    float max_output_phase_;
+    float max_train_phase_;
+    float reset_frequency_;
+    float target_frequency_;
+    float lp_coefficient_;
+
+    float f_ratio_;
+    float next_f_ratio_;
+    float next_max_train_phase_;
+    int reset_counter_;
+    uint32_t reset_interval_;
+    bool audio_rate_;
+    int num_consistent_audio_rate_pulses_;
+
+    float max_frequency_;
+    float audio_rate_period_;
+    float audio_rate_period_hysteresis_;
+
+    bool reset_at_next_pulse_;
+
+    DISALLOW_COPY_AND_ASSIGN(RampExtractor);
+  };
 
 }  // namespace sanguinemarbles
 

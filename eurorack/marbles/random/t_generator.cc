@@ -37,7 +37,7 @@
 namespace sanguinemarbles {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   /* static */
   DividerPattern TGenerator::divider_patterns[kNumDividerPatterns] = {

@@ -34,7 +34,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 	using namespace std;
 
 #define REGISTER_PROCESSOR(ClassName) \

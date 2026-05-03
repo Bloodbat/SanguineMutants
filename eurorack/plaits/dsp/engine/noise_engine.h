@@ -41,7 +41,7 @@ namespace sanguineplaits {
     NoiseEngine() {}
     ~NoiseEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters,
@@ -52,8 +52,8 @@ namespace sanguineplaits {
 
   private:
     ClockedNoise clocked_noise_[2];
-    stmlib::Svf lp_hp_filter_;
-    stmlib::Svf bp_filter_[2];
+    sanguinestmlib::Svf lp_hp_filter_;
+    sanguinestmlib::Svf bp_filter_[2];
 
     float previous_f0_;
     float previous_f1_;

@@ -31,7 +31,7 @@
 #include "stmlib/dsp/units.h"
 
 namespace sanguineplaits {
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   static const float chords_[kChordNumChords][kChordNumNotes] = {
     ////// Jon Butler chords

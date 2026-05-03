@@ -137,11 +137,11 @@ namespace sanguinetides2 {
 
     typedef void (PolySlopeGenerator::* RenderFn)(
       float frequency, float pw, float shape, float smoothness, float shift,
-      const stmlib::GateFlags* gate_flags, const float* ramp,
+      const sanguinestmlib::GateFlags* gate_flags, const float* ramp,
       OutputSample* output, size_t size);
 
     void Render(RampMode ramp_mode, OutputMode output_mode, Range range, float frequency, float pw,
-      float shape, float smoothness, float shift, const stmlib::GateFlags* gate_flags, const float* ramp,
+      float shape, float smoothness, float shift, const sanguinestmlib::GateFlags* gate_flags, const float* ramp,
       OutputSample* out, size_t size) {
 
       /*
@@ -211,18 +211,18 @@ namespace sanguinetides2 {
       float shape,
       float smoothness,
       float shift,
-      const stmlib::GateFlags* gate_flags,
+      const sanguinestmlib::GateFlags* gate_flags,
       const float* ramp,
       OutputSample* out,
       size_t size) {
       const bool is_phasor = !(range == RANGE_AUDIO && ramp_mode == RAMP_MODE_LOOPING);
 
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
-      stmlib::ParameterInterpolator pwm(&pw_, pw, size);
-      stmlib::ParameterInterpolator shift_modulation(&shift_, 2.0f * shift - 1.0f, size);
-      stmlib::ParameterInterpolator shape_modulation(&shape_, is_phasor ? shape * 5.9999f +
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator pwm(&pw_, pw, size);
+      sanguinestmlib::ParameterInterpolator shift_modulation(&shift_, 2.0f * shift - 1.0f, size);
+      sanguinestmlib::ParameterInterpolator shape_modulation(&shape_, is_phasor ? shape * 5.9999f +
         5.0f : shape * 3.9999f, size);
-      stmlib::ParameterInterpolator fold_modulation(&fold_, std::max(2.0f * (smoothness - 0.5f), 0.0f), size);
+      sanguinestmlib::ParameterInterpolator fold_modulation(&fold_, std::max(2.0f * (smoothness - 0.5f), 0.0f), size);
 
       if (output_mode == OUTPUT_MODE_FREQUENCY) {
         const int ratio_index = ratio_index_quantizer_.Process(shift);
@@ -251,7 +251,7 @@ namespace sanguinetides2 {
         if (output_mode == OUTPUT_MODE_SLOPE_PHASE && ramp_mode == RAMP_MODE_AR) {
           if (ramp) {
             ramp_generator_.Step<ramp_mode, output_mode, range, true>(
-              f0, per_channel_pw, stmlib::GATE_FLAG_LOW, ramp[i]);
+              f0, per_channel_pw, sanguinestmlib::GATE_FLAG_LOW, ramp[i]);
           } else {
             ramp_generator_.Step<ramp_mode, output_mode, range, false>(
               f0, per_channel_pw, gate_flags[i], 0.0f);
@@ -259,7 +259,7 @@ namespace sanguinetides2 {
         } else {
           if (ramp) {
             ramp_generator_.Step<ramp_mode, output_mode, range, true>(
-              f0, &pw, stmlib::GATE_FLAG_LOW, ramp[i]);
+              f0, &pw, sanguinestmlib::GATE_FLAG_LOW, ramp[i]);
           } else {
             ramp_generator_.Step<ramp_mode, output_mode, range, false>(
               f0, &pw, gate_flags[i], 0.0f);
@@ -319,7 +319,7 @@ namespace sanguinetides2 {
 
     template<RampMode ramp_mode, OutputMode output_mode, Range range>
     void IN_RAM RenderInternal_RAM(float frequency, float pw, float shape, float smoothness, float shift,
-      const stmlib::GateFlags* gate_flags, const float* ramp, OutputSample* out, size_t size) {
+      const sanguinestmlib::GateFlags* gate_flags, const float* ramp, OutputSample* out, size_t size) {
       RenderInternal<ramp_mode, output_mode, range>(frequency, pw, shape, smoothness, shift,
         gate_flags, ramp, out, size);
     }
@@ -328,11 +328,11 @@ namespace sanguinetides2 {
     inline float Fold(float unipolar, float fold_amount) {
       if (ramp_mode == RAMP_MODE_LOOPING) {
         float bipolar = 2.0f * unipolar - 1.0f;
-        float folded = fold_amount > 0.0f ? stmlib::Interpolate(lut_bipolar_fold, 0.5f + bipolar *
+        float folded = fold_amount > 0.0f ? sanguinestmlib::Interpolate(lut_bipolar_fold, 0.5f + bipolar *
           (0.03f + 0.46f * fold_amount), 1024.0f) : 0.0f;
         return 5.0f * (bipolar + (folded - bipolar) * fold_amount);
       } else {
-        float folded = fold_amount > 0.0f ? stmlib::Interpolate(lut_unipolar_fold, unipolar * fold_amount,
+        float folded = fold_amount > 0.0f ? sanguinestmlib::Interpolate(lut_unipolar_fold, unipolar * fold_amount,
           1024.0f) : 0.0f;
         return 8.0f * (unipolar + (folded - unipolar) * fold_amount);
       }
@@ -361,7 +361,7 @@ namespace sanguinetides2 {
     float shape_;
     float fold_;
 
-    stmlib::HysteresisQuantizer2 ratio_index_quantizer_;
+    sanguinestmlib::HysteresisQuantizer2 ratio_index_quantizer_;
 
     RampGenerator<num_channels> ramp_generator_;
 

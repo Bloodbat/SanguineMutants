@@ -37,7 +37,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void PulseRandomizer::Init() {
 		repetition_probability_ = 32767;
@@ -59,8 +59,7 @@ namespace deadman {
 		delay += delay_average_ + (Random::GetSample() * delay_randomness_ >> 16);
 		if (delay < 0) {
 			delay = 0;
-		}
-		else if (delay > 0xffff) {
+		} else if (delay > 0xffff) {
 			delay = 0xffff;
 		}
 		return Interpolate88(lut_delay_times, delay);
@@ -88,16 +87,13 @@ namespace deadman {
 					delay_counter_[i] = delay();
 					new_pulse = false;
 				}
-			}
-			else if (delay_counter_[i]) {
+			} else if (delay_counter_[i]) {
 				--delay_counter_[i];
-			}
-			else {
+			} else {
 				if ((Random::GetWord() >> 16) < repetition_probability_) {
 					++num_pulses_;
 					delay_counter_[i] = delay();
-				}
-				else {
+				} else {
 					delay_counter_[i] = 0xffff;
 				}
 			}
@@ -105,8 +101,7 @@ namespace deadman {
 
 		if (retrig_counter_) {
 			--retrig_counter_;
-		}
-		else {
+		} else {
 			if (num_pulses_) {
 				retrig_counter_ = 12;
 				--num_pulses_;

@@ -36,7 +36,7 @@
 
 namespace sanguinepeaks {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void BassDrum::Init() {
     pulse_up_.Init();

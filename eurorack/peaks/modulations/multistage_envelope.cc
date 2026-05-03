@@ -34,7 +34,7 @@
 
 namespace sanguinepeaks {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void MultistageEnvelope::Init() {
     set_adsr(0, 8192, 16384, 32767);

@@ -34,15 +34,15 @@
 // * Keep the fixed size template signature, but also provide method for
 //   variable size (up to the fixed size).
 
-#ifndef STMLIB_FFT_SHY_FFT_H_
-#define STMLIB_FFT_SHY_FFT_H_
+#ifndef SANGUINE_STMLIB_FFT_SHY_FFT_H_
+#define SANGUINE_STMLIB_FFT_SHY_FFT_H_
 
 #include "stmlib/stmlib.h"
 
 #include <algorithm>
 #include <cmath>
 
-namespace stmlib {
+namespace sanguinestmlib {
   // Compile-time log 2
   template<size_t x>
   struct Log2 {
@@ -743,5 +743,5 @@ namespace stmlib {
   #define R6(n) R4(n), R4(n + 2*4 ), R4(n + 1*4 ), R4(n + 3*4 )
   R6(0), R6(2), R6(1), R6(3)
   };
-}  // namespace stmlib
-#endif  // STMLIB_FFT_SHY_FFT_H_
+}  // namespace sanguinestmlib
+#endif  // SANGUINE_STMLIB_FFT_SHY_FFT_H_

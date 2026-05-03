@@ -100,7 +100,7 @@ namespace sanguineplaits {
     LPCSpeechSynthWordBank() {}
     ~LPCSpeechSynthWordBank() {}
 
-    void Init(const LPCSpeechSynthWordBankData* word_banks, int num_banks, stmlib::BufferAllocator* allocator);
+    void Init(const LPCSpeechSynthWordBankData* word_banks, int num_banks, sanguinestmlib::BufferAllocator* allocator);
 
     bool Load(int index);
     void Reset();

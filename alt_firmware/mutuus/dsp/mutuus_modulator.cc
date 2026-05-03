@@ -38,7 +38,7 @@
 namespace mutuus {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void MutuusModulator::Init(float sample_rate, uint16_t* reverb_buffer) {
     feature_mode_ = FEATURE_MODE_META;
@@ -474,8 +474,8 @@ namespace mutuus {
     rate_end = rate_end * rate_end * rate_end;
     float rate_increment = (rate_end - rate) / static_cast<float>(size);
 
-    filter_[0].set_f<stmlib::FREQUENCY_FAST>(0.0008f);
-    filter_[1].set_f<stmlib::FREQUENCY_FAST>(0.0008f);
+    filter_[0].set_f<sanguinestmlib::FREQUENCY_FAST>(0.0008f);
+    filter_[1].set_f<sanguinestmlib::FREQUENCY_FAST>(0.0008f);
 
     while (size--) {
       ONE_POLE(delay_lp_time, time, 0.00002f);
@@ -502,14 +502,14 @@ namespace mutuus {
         fb.l = delay_feedback_sample.l + noise1 * 0.002f;
         fb.r = delay_feedback_sample.r + noise2 * 0.002f;
         // Apply filters: fixed high-pass and varying low-pass with attenuation.
-        filter_[2].set_f<stmlib::FREQUENCY_FAST>(feedback / 12.0f);
-        filter_[3].set_f<stmlib::FREQUENCY_FAST>(feedback / 12.0f);
-        fb.l = filter_[0].Process<stmlib::FILTER_MODE_HIGH_PASS>(fb.l);
-        fb.r = filter_[1].Process<stmlib::FILTER_MODE_HIGH_PASS>(fb.r);
+        filter_[2].set_f<sanguinestmlib::FREQUENCY_FAST>(feedback / 12.0f);
+        filter_[3].set_f<sanguinestmlib::FREQUENCY_FAST>(feedback / 12.0f);
+        fb.l = filter_[0].Process<sanguinestmlib::FILTER_MODE_HIGH_PASS>(fb.l);
+        fb.r = filter_[1].Process<sanguinestmlib::FILTER_MODE_HIGH_PASS>(fb.r);
         fb.l = feedback * (2.0f - feedback) * 1.1f *
-          filter_[2].Process<stmlib::FILTER_MODE_LOW_PASS>(fb.l);
+          filter_[2].Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(fb.l);
         fb.r = feedback * (2.0f - feedback) * 1.1f *
-          filter_[3].Process<stmlib::FILTER_MODE_LOW_PASS>(fb.r);
+          filter_[3].Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(fb.r);
         // Apply soft saturation with a bit of bias.
         fb.l = SoftLimit(fb.l * 1.4f + 0.1f) / 1.4f - SoftLimit(0.1f);
         fb.r = SoftLimit(fb.r * 1.4f + 0.1f) / 1.4f - SoftLimit(0.1f);

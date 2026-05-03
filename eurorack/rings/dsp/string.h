@@ -90,8 +90,8 @@ namespace sanguinerings {
     DISALLOW_COPY_AND_ASSIGN(DampingFilter);
   };
 
-  typedef stmlib::DelayLine<float, kDelayLineSize> StringDelayLine;
-  typedef stmlib::DelayLine<float, kDelayLineSize / 2> StiffnessDelayLine;
+  typedef sanguinestmlib::DelayLine<float, kDelayLineSize> StringDelayLine;
+  typedef sanguinestmlib::DelayLine<float, kDelayLineSize / 2> StiffnessDelayLine;
 
   class String {
   public:
@@ -156,8 +156,8 @@ namespace sanguinerings {
     StiffnessDelayLine stretch_;
 
     DampingFilter fir_damping_filter_;
-    stmlib::Svf iir_damping_filter_;
-    stmlib::DCBlocker dc_blocker_;
+    sanguinestmlib::Svf iir_damping_filter_;
+    sanguinestmlib::DCBlocker dc_blocker_;
 
     DISALLOW_COPY_AND_ASSIGN(String);
   };
