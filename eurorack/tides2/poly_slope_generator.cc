@@ -27,7 +27,7 @@
 // 4 related slope generators.
 #include "tides2/poly_slope_generator.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   /* static */
   Ratio PolySlopeGenerator::audio_ratio_table_[21][PolySlopeGenerator::num_channels] = {
     { { 1.0f, 1 }, { 0.5f, 2 }, { 0.25f, 4 }, { 0.125f, 8 } },
@@ -85,4 +85,4 @@ namespace tides2 {
   /* static */
   PolySlopeGenerator::RenderFn PolySlopeGenerator::render_fn_table_[RAMP_MODE_LAST][
     OUTPUT_MODE_LAST][RANGE_LAST];
-}  // namespace tides2
+}  // namespace sanguinetides2

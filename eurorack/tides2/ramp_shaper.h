@@ -38,7 +38,7 @@ slope waveforms (or variants, like EOA/EOR pulses).
 
 #include "tides2/ramp_generator.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   class RampShaper {
   public:
     RampShaper() {}
@@ -252,5 +252,5 @@ namespace tides2 {
     DISALLOW_COPY_AND_ASSIGN(RampWaveshaper);
   };
 
-}  // namespace tides2
+}  // namespace sanguinetides2
 #endif  // TIDES2_RAMP_SHAPER_H_

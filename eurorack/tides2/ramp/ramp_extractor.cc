@@ -42,7 +42,7 @@ best performing one is selected (à la early Scheirer/Goto beat trackers).
 
 #include "stmlib/dsp/dsp.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   using namespace std;
   using namespace stmlib;
 
@@ -270,4 +270,4 @@ namespace tides2 {
     }
     return smooth_audio_rate_tracking ? frequency_ : frequency_ * f_ratio_;
   }
-}  // namespace tides2
+}  // namespace sanguinetides2

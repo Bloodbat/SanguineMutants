@@ -36,7 +36,7 @@ make resources
 
 #include "stmlib/stmlib.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
     typedef uint8_t ResourceId;
 
     extern const float* lookup_table_table[];
@@ -56,5 +56,5 @@ namespace tides2 {
 #define LUT_WAVETABLE 0
 #define LUT_WAVETABLE_SIZE 12300
 
-}  // namespace tides2
+}  // namespace sanguinetides2
 #endif  // TIDES2_RESOURCES_H_

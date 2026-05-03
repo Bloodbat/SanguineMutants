@@ -44,7 +44,7 @@ best performing one is selected (à la early Scheirer/Goto beat trackers).
 
 #include "tides2/ramp/ratio.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   const int kMaxPatternPeriod = 8;
 
   class RampExtractor {
@@ -101,5 +101,5 @@ namespace tides2 {
 
     DISALLOW_COPY_AND_ASSIGN(RampExtractor);
   };
-}  // namespace tides2
+}  // namespace sanguinetides2
 #endif  // TIDES2_RAMP_RAMP_EXTRACTOR_H_

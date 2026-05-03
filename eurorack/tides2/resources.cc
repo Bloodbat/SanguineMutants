@@ -34,7 +34,7 @@ make resources
 
 #include "tides2/resources.h"
 
-namespace tides2 {
+namespace sanguinetides2 {
   const float lut_sine[] = {
      0.000000000e+00,  6.135884649e-03,  1.227153829e-02,  1.840672991e-02,
      2.454122852e-02,  3.067480318e-02,  3.680722294e-02,  4.293825693e-02,
@@ -3965,4 +3965,4 @@ namespace tides2 {
   const int16_t* lookup_table_i16_table[] = {
     lut_wavetable,
   };
-}  // namespace tides2
+}  // namespace sanguinetides2
