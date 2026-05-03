@@ -133,16 +133,16 @@ struct Aestus : SanguineModule {
 	int jitteredLightsFrequency;
 	uint8_t lastGates[PORT_MAX_CHANNELS];
 
-	tides::GeneratorMode selectedMode = tides::GENERATOR_MODE_LOOPING;
-	tides::GeneratorMode lastModes[PORT_MAX_CHANNELS];
-	tides::GeneratorRange selectedRange = tides::GENERATOR_RANGE_MEDIUM;
-	tides::GeneratorRange lastRanges[PORT_MAX_CHANNELS];
+	sanguinetides::GeneratorMode selectedMode = sanguinetides::GENERATOR_MODE_LOOPING;
+	sanguinetides::GeneratorMode lastModes[PORT_MAX_CHANNELS];
+	sanguinetides::GeneratorRange selectedRange = sanguinetides::GENERATOR_RANGE_MEDIUM;
+	sanguinetides::GeneratorRange lastRanges[PORT_MAX_CHANNELS];
 
-	std::array<tides::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
-	std::array<tides::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
+	std::array<sanguinetides::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
+	std::array<sanguinetides::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
 
-	tides::Generator generators[PORT_MAX_CHANNELS];
-	tides::Plotter plotters[PORT_MAX_CHANNELS];
+	sanguinetides::Generator generators[PORT_MAX_CHANNELS];
+	sanguinetides::Plotter plotters[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
 	dsp::SchmittTrigger stRange;
 	dsp::ClockDivider lightsDivider;
@@ -193,13 +193,13 @@ struct Aestus : SanguineModule {
 		configInput(INPUT_RANGE, "Range CV");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&generators[channel], 0, sizeof(tides::Generator));
+			memset(&generators[channel], 0, sizeof(sanguinetides::Generator));
 			generators[channel].Init();
-			plotters[channel].Init(tides::plotInstructions,
-				sizeof(tides::plotInstructions) / sizeof(tides::PlotInstruction));
+			plotters[channel].Init(sanguinetides::plotInstructions,
+				sizeof(sanguinetides::plotInstructions) / sizeof(sanguinetides::PlotInstruction));
 		}
-		channelModes.fill(tides::GENERATOR_MODE_LOOPING);
-		channelRanges.fill(tides::GENERATOR_RANGE_MEDIUM);
+		channelModes.fill(sanguinetides::GENERATOR_MODE_LOOPING);
+		channelRanges.fill(sanguinetides::GENERATOR_RANGE_MEDIUM);
 
 		init();
 	}
@@ -210,7 +210,7 @@ struct Aestus : SanguineModule {
 		bool bIsLightsTurn = lightsDivider.process();
 
 		if (!bWantPeacocks) {
-			tides::GeneratorSample samples[PORT_MAX_CHANNELS];
+			sanguinetides::GeneratorSample samples[PORT_MAX_CHANNELS];
 			float unipolarFlags[PORT_MAX_CHANNELS];
 
 			bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
@@ -218,12 +218,12 @@ struct Aestus : SanguineModule {
 			bHaveExternalSync = ((!bSheepSelected) & (bClockConnected)) | (static_cast<int>(params[PARAM_SYNC].getValue()));
 
 			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
-				selectedMode = static_cast<tides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+				selectedMode = static_cast<sanguinetides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
 				channelModes.fill(selectedMode);
 			}
 
 			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bHaveExternalSync) {
-				selectedRange = static_cast<tides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+				selectedRange = static_cast<sanguinetides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
 				channelRanges.fill(selectedRange);
 			}
 
@@ -245,7 +245,7 @@ struct Aestus : SanguineModule {
 				}
 
 				// Buffer loop.
-				if (++frames[channel] >= tides::kBlockSize) {
+				if (++frames[channel] >= sanguinetides::kBlockSize) {
 					frames[channel] = 0;
 
 					// Sync.
@@ -299,22 +299,22 @@ struct Aestus : SanguineModule {
 
 				uint8_t gate = 0;
 				if (inputs[INPUT_FREEZE].getVoltage(channel) >= 0.7f) {
-					gate |= tides::CONTROL_FREEZE;
+					gate |= sanguinetides::CONTROL_FREEZE;
 				}
 				if (inputs[INPUT_TRIGGER].getVoltage(channel) >= 0.7f) {
-					gate |= tides::CONTROL_GATE;
+					gate |= sanguinetides::CONTROL_GATE;
 				}
 				if (inputs[INPUT_CLOCK].getVoltage(channel) >= 0.7f) {
-					gate |= tides::CONTROL_CLOCK;
+					gate |= sanguinetides::CONTROL_CLOCK;
 				}
-				if (!(lastGates[channel] & tides::CONTROL_CLOCK) && (gate & tides::CONTROL_CLOCK)) {
-					gate |= tides::CONTROL_CLOCK_RISING;
+				if (!(lastGates[channel] & sanguinetides::CONTROL_CLOCK) && (gate & sanguinetides::CONTROL_CLOCK)) {
+					gate |= sanguinetides::CONTROL_CLOCK_RISING;
 				}
-				if (!(lastGates[channel] & tides::CONTROL_GATE) && (gate & tides::CONTROL_GATE)) {
-					gate |= tides::CONTROL_GATE_RISING;
+				if (!(lastGates[channel] & sanguinetides::CONTROL_GATE) && (gate & sanguinetides::CONTROL_GATE)) {
+					gate |= sanguinetides::CONTROL_GATE_RISING;
 				}
-				if ((lastGates[channel] & tides::CONTROL_GATE) && !(gate & tides::CONTROL_GATE)) {
-					gate |= tides::CONTROL_GATE_FALLING;
+				if ((lastGates[channel] & sanguinetides::CONTROL_GATE) && !(gate & sanguinetides::CONTROL_GATE)) {
+					gate |= sanguinetides::CONTROL_GATE_FALLING;
 				}
 				lastGates[channel] = gate;
 
@@ -327,8 +327,8 @@ struct Aestus : SanguineModule {
 				unipolarFlags[channel] = static_cast<float>(uni) / 65535;
 				float bipolarFlag = static_cast<float>(bi) / 32768;
 
-				outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & tides::FLAG_END_OF_ATTACK) * 5.f, channel);
-				outputs[OUTPUT_LOW].setVoltage((samples[channel].flags & tides::FLAG_END_OF_RELEASE) * 5.f, channel);
+				outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & sanguinetides::FLAG_END_OF_ATTACK) * 5.f, channel);
+				outputs[OUTPUT_LOW].setVoltage((samples[channel].flags & sanguinetides::FLAG_END_OF_RELEASE) * 5.f, channel);
 				outputs[OUTPUT_UNI].setVoltage(unipolarFlags[channel] * 8.f, channel);
 				outputs[OUTPUT_BI].setVoltage(bipolarFlag * 5.f, channel);
 			}
@@ -347,10 +347,10 @@ struct Aestus : SanguineModule {
 							selectorVoltages = simd::round(selectorVoltages);
 							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
 
-							channelModes[channel] = static_cast<tides::GeneratorMode>(selectorVoltages[0]);
-							channelModes[channel + 1] = static_cast<tides::GeneratorMode>(selectorVoltages[1]);
-							channelModes[channel + 2] = static_cast<tides::GeneratorMode>(selectorVoltages[2]);
-							channelModes[channel + 3] = static_cast<tides::GeneratorMode>(selectorVoltages[3]);
+							channelModes[channel] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[0]);
+							channelModes[channel + 1] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[1]);
+							channelModes[channel + 2] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[2]);
+							channelModes[channel + 3] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[3]);
 						}
 
 						if (!bHaveExternalSync && bRangeConnected) {
@@ -359,10 +359,10 @@ struct Aestus : SanguineModule {
 							selectorVoltages = simd::round(selectorVoltages);
 							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
 
-							channelRanges[channel] = static_cast<tides::GeneratorRange>(selectorVoltages[0]);
-							channelRanges[channel + 1] = static_cast<tides::GeneratorRange>(selectorVoltages[1]);
-							channelRanges[channel + 2] = static_cast<tides::GeneratorRange>(selectorVoltages[2]);
-							channelRanges[channel + 3] = static_cast<tides::GeneratorRange>(selectorVoltages[3]);
+							channelRanges[channel] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[0]);
+							channelRanges[channel + 1] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[1]);
+							channelRanges[channel + 2] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[2]);
+							channelRanges[channel + 3] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[3]);
 						}
 					}
 
@@ -386,22 +386,22 @@ struct Aestus : SanguineModule {
 					displayChannel = channelCount - 1;
 				}
 
-				tides::GeneratorMode displayMode = generators[displayChannel].mode();
-				tides::GeneratorRange displayRange = generators[displayChannel].range();
+				sanguinetides::GeneratorMode displayMode = generators[displayChannel].mode();
+				sanguinetides::GeneratorRange displayRange = generators[displayChannel].range();
 
-				lights[LIGHT_MODE].setBrightnessSmooth((displayMode == tides::GENERATOR_MODE_AD) *
+				lights[LIGHT_MODE].setBrightnessSmooth((displayMode == sanguinetides::GENERATOR_MODE_AD) *
 					kSanguineButtonLightValue, sampleTime);
-				lights[LIGHT_MODE + 1].setBrightnessSmooth((displayMode == tides::GENERATOR_MODE_AR) *
+				lights[LIGHT_MODE + 1].setBrightnessSmooth((displayMode == sanguinetides::GENERATOR_MODE_AR) *
 					kSanguineButtonLightValue, sampleTime);
 
 				bool bIsSystemTime = !(getSystemTimeMs() & 128);
 
-				lights[LIGHT_RANGE].setBrightnessSmooth((((displayRange == tides::GENERATOR_RANGE_LOW) &
+				lights[LIGHT_RANGE].setBrightnessSmooth((((displayRange == sanguinetides::GENERATOR_RANGE_LOW) &
 					(!bHaveExternalSync)) | ((bHaveExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
-				lights[LIGHT_RANGE + 1].setBrightnessSmooth((((displayRange == tides::GENERATOR_RANGE_HIGH) &
+				lights[LIGHT_RANGE + 1].setBrightnessSmooth((((displayRange == sanguinetides::GENERATOR_RANGE_HIGH) &
 					(!bHaveExternalSync)) | ((bHaveExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
 
-				if (samples[displayChannel].flags & tides::FLAG_END_OF_ATTACK) {
+				if (samples[displayChannel].flags & sanguinetides::FLAG_END_OF_ATTACK) {
 					unipolarFlags[displayChannel] *= -1.f;
 				}
 				lights[LIGHT_PHASE].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
@@ -420,7 +420,7 @@ struct Aestus : SanguineModule {
 			}
 		} else {
 			for (int channel = 0; channel < channelCount; ++channel) {
-				if (++frames[channel] >= tides::kBlockSize) {
+				if (++frames[channel] >= sanguinetides::kBlockSize) {
 					frames[channel] = 0;
 					plotters[channel].Run();
 					outputs[OUTPUT_UNI].setVoltage(rescale(
@@ -464,10 +464,10 @@ struct Aestus : SanguineModule {
 
 	void init() {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			generators[channel].set_mode(tides::GENERATOR_MODE_LOOPING);
-			generators[channel].set_range(tides::GENERATOR_RANGE_MEDIUM);
-			lastRanges[channel] = tides::GENERATOR_RANGE_MEDIUM;
-			lastModes[channel] = tides::GENERATOR_MODE_LOOPING;
+			generators[channel].set_mode(sanguinetides::GENERATOR_MODE_LOOPING);
+			generators[channel].set_range(sanguinetides::GENERATOR_RANGE_MEDIUM);
+			lastRanges[channel] = sanguinetides::GENERATOR_RANGE_MEDIUM;
+			lastModes[channel] = sanguinetides::GENERATOR_MODE_LOOPING;
 
 			lastGates[channel] = 0;
 			lastExternalSyncs[channel] = false;
@@ -484,8 +484,8 @@ struct Aestus : SanguineModule {
 
 	void onRandomize(const RandomizeEvent& e) override {
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			generators[channel].set_range(tides::GeneratorRange(random::u32() % 3));
-			generators[channel].set_mode(tides::GeneratorMode(random::u32() % 3));
+			generators[channel].set_range(sanguinetides::GeneratorRange(random::u32() % 3));
+			generators[channel].set_mode(sanguinetides::GeneratorMode(random::u32() % 3));
 		}
 	}
 
@@ -539,12 +539,12 @@ struct Aestus : SanguineModule {
 		json_int_t intValue = 0;
 
 		if (getJsonInt(rootJ, "mode", intValue)) {
-			selectedMode = static_cast<tides::GeneratorMode>(intValue);
+			selectedMode = static_cast<sanguinetides::GeneratorMode>(intValue);
 			channelModes.fill(selectedMode);
 		}
 
 		if (getJsonInt(rootJ, "range", intValue)) {
-			selectedRange = static_cast<tides::GeneratorRange>(intValue);
+			selectedRange = static_cast<sanguinetides::GeneratorRange>(intValue);
 			channelRanges.fill(selectedRange);
 		}
 
@@ -566,11 +566,11 @@ struct Aestus : SanguineModule {
 	}
 
 	void setMode(int modeNum) {
-		selectedMode = static_cast<tides::GeneratorMode>(modeNum);
+		selectedMode = static_cast<sanguinetides::GeneratorMode>(modeNum);
 	}
 
 	void setRange(int rangeNum) {
-		selectedRange = static_cast<tides::GeneratorRange>(rangeNum);
+		selectedRange = static_cast<sanguinetides::GeneratorRange>(rangeNum);
 	}
 };
 
