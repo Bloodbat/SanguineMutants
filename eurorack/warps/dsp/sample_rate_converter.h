@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // See http://creativecommons.org/licenses/MIT/ for more information.
 //
 // -----------------------------------------------------------------------------
@@ -34,7 +34,6 @@
 #include <algorithm>
 
 namespace sanguinewarps {
-
   enum SampleRateConversionDirection {
     SRC_UP,
     SRC_DOWN
@@ -42,19 +41,18 @@ namespace sanguinewarps {
 
   template <SampleRateConversionDirection direction, int32_t ratio, int32_t length>
   struct SRC_FIR {};
-
 }
 
 #include "warps/dsp/sample_rate_conversion_filters.h"
 
 namespace sanguinewarps {
-
   template<int32_t N>
   struct FilterState {
   public:
     enum {
       n = N
     };
+
     inline void Push(float value) {
       tail.Push(head);
       head = value;
@@ -85,6 +83,7 @@ namespace sanguinewarps {
     enum {
       n = 1
     };
+
     inline void Push(float value) {
       head = value;
     }
@@ -154,10 +153,7 @@ namespace sanguinewarps {
     inline void operator()(float*& y, const T& x, const IR& h) const {}
   };
 
-  template<
-    SampleRateConversionDirection direction,
-    int32_t ratio,
-    int32_t filter_size>
+  template<SampleRateConversionDirection direction, int32_t ratio, int32_t filter_size>
   class SampleRateConverter {};
 
   template<int32_t ratio, int32_t filter_size>
@@ -216,8 +212,10 @@ namespace sanguinewarps {
     inline int32_t delay() const { return filter_size / 2; }
 
     inline void Process(const float* in, float* out, size_t input_size) {
-      // When downsampling, the number of input samples must be a multiple
-      // of the downsampling ratio.
+      /*
+      When downsampling, the number of input samples must be a multiple
+      of the downsampling ratio.
+      */
       if ((input_size % ratio) != 0) {
         return;
       }
@@ -234,9 +232,11 @@ namespace sanguinewarps {
           input_size -= ratio;
         }
 
-        // From now on, all the samples we need to access are located inside
-        // the input buffer passed as an argument, and since the filter
-        // is small, we can unroll the summation loop.
+        /*
+        From now on, all the samples we need to access are located inside
+        the input buffer passed as an argument, and since the filter
+        is small, we can unroll the summation loop.
+        */
         if ((input_size / ratio) & 1) {
           while (input_size) {
             Accumulator<N, -1, 1, filter_size> accumulator;
@@ -280,7 +280,5 @@ namespace sanguinewarps {
 
     DISALLOW_COPY_AND_ASSIGN(SampleRateConverter);
   };
-
 }  // namespace sanguinewarps
-
 #endif  // WARPS_DSP_SAMPLE_RATE_CONVERTER_H_
