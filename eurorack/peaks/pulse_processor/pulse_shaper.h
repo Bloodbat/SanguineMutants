@@ -34,7 +34,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   struct Pulse {
     uint16_t initial_delay_counter;
@@ -101,6 +101,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(PulseShaper);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_PULSE_PROCESSOR_PULSE_SHAPER_H_

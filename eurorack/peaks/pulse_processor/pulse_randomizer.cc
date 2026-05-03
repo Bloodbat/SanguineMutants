@@ -35,81 +35,81 @@
 
 #include "peaks/resources.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
-using namespace stmlib;
+  using namespace stmlib;
 
-void PulseRandomizer::Init() {
-  repetition_probability_ = 32767;
-  acceptance_probability_ = 65535;
-  delay_average_ = 32767;
-  delay_randomness_ = 0;
+  void PulseRandomizer::Init() {
+    repetition_probability_ = 32767;
+    acceptance_probability_ = 65535;
+    delay_average_ = 32767;
+    delay_randomness_ = 0;
 
-  std::fill(
+    std::fill(
       &delay_counter_[0],
       &delay_counter_[kTriggerPulseBufferSize],
       0xffff);
-  
-  num_pulses_ = 0;
-  retrig_counter_ = 0;
-}
 
-inline uint16_t PulseRandomizer::delay() const {
-  int32_t delay = delay_average_;
-  delay += delay_average_ + (Random::GetSample() * delay_randomness_ >> 16);
-  if (delay < 0) {
-    delay = 0;
-  } else if (delay > 0xffff) {
-    delay = 0xffff;
+    num_pulses_ = 0;
+    retrig_counter_ = 0;
   }
-  return Interpolate88(lut_delay_times, delay);
-}
 
-void PulseRandomizer::Process(
+  inline uint16_t PulseRandomizer::delay() const {
+    int32_t delay = delay_average_;
+    delay += delay_average_ + (Random::GetSample() * delay_randomness_ >> 16);
+    if (delay < 0) {
+      delay = 0;
+    } else if (delay > 0xffff) {
+      delay = 0xffff;
+    }
+    return Interpolate88(lut_delay_times, delay);
+  }
+
+  void PulseRandomizer::Process(
     const GateFlags* gate_flags, int16_t* out, size_t size) {
-  bool new_pulse = false;
-  for (size_t i = 0; i < size; ++i) {
-    new_pulse |= gate_flags[i] & GATE_FLAG_RISING;
-  }
-    
-  if ((Random::GetWord() >> 16) > acceptance_probability_) {
-    // Randomly ignore incoming pulses.
-    new_pulse = false;
-  }
-  
-  if (new_pulse) {
-    ++num_pulses_;
-  }
-    
-  for (uint8_t i = 0; i < kTriggerPulseBufferSize; ++i) {
-    if (delay_counter_[i] == 0xffff) {
-      if (new_pulse) {
-        delay_counter_[i] = delay();
-        new_pulse = false;
-      }
-    } else if (delay_counter_[i]) {
-      --delay_counter_[i];
-    } else {
-      if ((Random::GetWord() >> 16) < repetition_probability_) {
-        ++num_pulses_;
-        delay_counter_[i] = delay();
-      } else {
-        delay_counter_[i] = 0xffff;
-      }
+    bool new_pulse = false;
+    for (size_t i = 0; i < size; ++i) {
+      new_pulse |= gate_flags[i] & GATE_FLAG_RISING;
     }
-  }
-    
-  if (retrig_counter_) {
-    --retrig_counter_;
-  } else {
-    if (num_pulses_) {
-      retrig_counter_ = 12;
-      --num_pulses_;
-    }
-  }
-    
-  int16_t output = retrig_counter_ > 6 ? 20480 : 0;
-  std::fill(&out[0], &out[size], output);
-}
 
-}  // namespace peaks
+    if ((Random::GetWord() >> 16) > acceptance_probability_) {
+      // Randomly ignore incoming pulses.
+      new_pulse = false;
+    }
+
+    if (new_pulse) {
+      ++num_pulses_;
+    }
+
+    for (uint8_t i = 0; i < kTriggerPulseBufferSize; ++i) {
+      if (delay_counter_[i] == 0xffff) {
+        if (new_pulse) {
+          delay_counter_[i] = delay();
+          new_pulse = false;
+        }
+      } else if (delay_counter_[i]) {
+        --delay_counter_[i];
+      } else {
+        if ((Random::GetWord() >> 16) < repetition_probability_) {
+          ++num_pulses_;
+          delay_counter_[i] = delay();
+        } else {
+          delay_counter_[i] = 0xffff;
+        }
+      }
+    }
+
+    if (retrig_counter_) {
+      --retrig_counter_;
+    } else {
+      if (num_pulses_) {
+        retrig_counter_ = 12;
+        --num_pulses_;
+      }
+    }
+
+    int16_t output = retrig_counter_ > 6 ? 20480 : 0;
+    std::fill(&out[0], &out[size], output);
+  }
+
+}  // namespace sanguinepeaks

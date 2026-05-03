@@ -33,7 +33,7 @@
 
 #include "peaks/resources.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   const uint8_t kDownsample = 4;
 
@@ -174,4 +174,4 @@ namespace peaks {
     }
   }
 
-}  // namespace peaks
+}  // namespace sanguinepeaks

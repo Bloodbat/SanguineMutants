@@ -34,7 +34,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   struct TriggerPulse {
     uint32_t delay_counter;
@@ -96,6 +96,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(PulseRandomizer);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_PULSE_PROCESSOR_PULSE_RANDOMIZER_H_

@@ -34,7 +34,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   enum LfoShape {
     LFO_SHAPE_SINE,
@@ -156,5 +156,5 @@ namespace peaks {
 
     DISALLOW_COPY_AND_ASSIGN(Lfo);
   };
-}  // namespace peaks
+}  // namespace sanguinepeaks
 #endif  // PEAKS_MODULATIONS_LFO_H_

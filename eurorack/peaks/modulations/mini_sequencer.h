@@ -35,7 +35,7 @@
 
 #include "peaks/gate_processor.h"
 
-namespace peaks {
+namespace sanguinepeaks {
 
   const uint8_t kMaxNumSteps = 4;
 
@@ -106,6 +106,6 @@ namespace peaks {
     DISALLOW_COPY_AND_ASSIGN(MiniSequencer);
   };
 
-}  // namespace peaks
+}  // namespace sanguinepeaks
 
 #endif  // PEAKS_MODULATIONS_MINI_SEQUENCER_H_
