@@ -36,7 +36,7 @@
 #include "warps/dsp/parameters.h"
 #include "warps/resources.h"
 
-namespace warps {
+namespace sanguinewarps {
   static const float kInternalOscillatorSampleRate = 96000.0f;
 
   class Oscillator {
@@ -88,5 +88,5 @@ namespace warps {
 
     DISALLOW_COPY_AND_ASSIGN(Oscillator);
   };
-}  // namespace warps
+}  // namespace sanguinewarps
 #endif  // WARPS_DSP_OSCILLATOR_H_

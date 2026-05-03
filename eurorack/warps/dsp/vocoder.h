@@ -34,7 +34,7 @@
 #include "warps/dsp/filter_bank.h"
 #include "warps/dsp/limiter.h"
 
-namespace warps {
+namespace sanguinewarps {
 
   const float kFollowerGain = sqrtf(kNumBands);
 
@@ -129,6 +129,6 @@ namespace warps {
 
     DISALLOW_COPY_AND_ASSIGN(Vocoder);
   };
-}  // namespace warps
+}  // namespace sanguinewarps
 
 #endif  // WARPS_DSP_VOCODER_H_

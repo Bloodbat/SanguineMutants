@@ -46,15 +46,15 @@ struct Incurvationes : SanguineModule {
 	static const int kLightsFrequency = 128;
 	int jitteredLightsFrequency;
 
-	warps::Modulator modulators[PORT_MAX_CHANNELS];
-	warps::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
-	warps::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
+	sanguinewarps::Modulator modulators[PORT_MAX_CHANNELS];
+	sanguinewarps::ShortFrame inputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
+	sanguinewarps::ShortFrame outputFrames[PORT_MAX_CHANNELS][warpiescommon::kBlockSize] = {};
 
 	bool bEasterEggEnabled = false;
 
 	dsp::ClockDivider lightsDivider;
 
-	warps::Parameters* parameters[PORT_MAX_CHANNELS];
+	sanguinewarps::Parameters* parameters[PORT_MAX_CHANNELS];
 
 	Incurvationes() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -83,8 +83,8 @@ struct Incurvationes : SanguineModule {
 		configBypass(INPUT_MODULATOR, OUTPUT_MODULATOR);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			memset(&modulators[channel], 0, sizeof(warps::Modulator));
-			modulators[channel].Init(warps::kInternalOscillatorSampleRate);
+			memset(&modulators[channel], 0, sizeof(sanguinewarps::Modulator));
+			modulators[channel].Init(sanguinewarps::kInternalOscillatorSampleRate);
 			parameters[channel] = modulators[channel].mutable_parameters();
 		}
 	}
@@ -137,7 +137,7 @@ struct Incurvationes : SanguineModule {
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f *
 					inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
-				parameters[channel]->note += log2f(warps::kInternalOscillatorSampleRate * args.sampleTime) * 12.f;
+				parameters[channel]->note += log2f(sanguinewarps::kInternalOscillatorSampleRate * args.sampleTime) * 12.f;
 
 				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}

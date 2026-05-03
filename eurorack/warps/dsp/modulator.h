@@ -41,7 +41,7 @@
 #include "warps/dsp/vocoder.h"
 #include "warps/resources.h"
 
-namespace warps {
+namespace sanguinewarps {
 
   const size_t kMaxBlockSize = 96;
   const size_t kOversampling = 6;
@@ -212,6 +212,6 @@ namespace warps {
     DISALLOW_COPY_AND_ASSIGN(Modulator);
   };
 
-}  // namespace warps
+}  // namespace sanguinewarps
 
 #endif  // WARPS_DSP_MODULATOR_H_

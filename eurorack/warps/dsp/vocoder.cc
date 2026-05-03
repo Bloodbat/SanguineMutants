@@ -33,7 +33,7 @@
 #include "stmlib/dsp/cosine_oscillator.h"
 #include "stmlib/dsp/units.h"
 
-namespace warps {
+namespace sanguinewarps {
 
   using namespace std;
   using namespace stmlib;
@@ -123,4 +123,4 @@ namespace warps {
     limiter_.Process(out, 1.4f, size);
   }
 
-}  // namespace warps
+}  // namespace sanguinewarps
