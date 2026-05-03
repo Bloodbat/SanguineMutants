@@ -23,7 +23,7 @@ namespace sanguineplaits {
       if (frequency >= 0.5f) {
         frequency = 0.5f;
       }
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
 
       while (size--) {
         phase_ += fm.Next();

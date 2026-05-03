@@ -42,7 +42,7 @@ namespace sanguineplaits {
     VirtualAnalogVCFEngine() {}
     ~VirtualAnalogVCFEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters,
@@ -52,7 +52,7 @@ namespace sanguineplaits {
       bool* already_enveloped) override;
 
   private:
-    stmlib::Svf svf_[2];
+    sanguinestmlib::Svf svf_[2];
     VariableShapeOscillator oscillator_;
     VariableShapeOscillator sub_oscillator_;
 

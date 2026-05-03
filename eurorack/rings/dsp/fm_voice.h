@@ -42,7 +42,7 @@
 
 namespace sanguinerings {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	class FMVoice {
 	public:

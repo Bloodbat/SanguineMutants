@@ -47,7 +47,7 @@ namespace sanguineclouds {
 #ifdef USE_ARM_FFT
   typedef arm_rfft_fast_instance_f32 FFT;
 #else
-  typedef stmlib::ShyFFT<float, kMaxFftSize, stmlib::RotationPhasor> FFT;
+  typedef sanguinestmlib::ShyFFT<float, kMaxFftSize, sanguinestmlib::RotationPhasor> FFT;
 #endif  // USE_ARM_FFT
 
   typedef class FrameTransformation Modifier;

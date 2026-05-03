@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void GrainEngine::Init(BufferAllocator* allocator) {
     grainlet_[0].Init();

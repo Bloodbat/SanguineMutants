@@ -59,11 +59,11 @@ namespace sanguinewarps {
       size_t size) {
       float normalized_frequency = frequency * one_hertz_;
       CONSTRAIN(normalized_frequency, -0.25f, 0.25f);
-      stmlib::ParameterInterpolator frequency_parameter(
+      sanguinestmlib::ParameterInterpolator frequency_parameter(
         &frequency_,
         normalized_frequency,
         size);
-      stmlib::ParameterInterpolator shape_parameter(&shape_, shape, size);
+      sanguinestmlib::ParameterInterpolator shape_parameter(&shape_, shape, size);
 
       float phase = phase_;
       while (size--) {
@@ -80,12 +80,12 @@ namespace sanguinewarps {
 
         float iq[2];
         for (int32_t component = 0; component < 2; ++component) {
-          float a = stmlib::Interpolate(
+          float a = sanguinestmlib::Interpolate(
             wav_table[2 * shape_integral + component],
             phase,
             1024);
 
-          float b = stmlib::Interpolate(
+          float b = sanguinestmlib::Interpolate(
             wav_table[2 * shape_integral + 2 + component],
             phase,
             1024);

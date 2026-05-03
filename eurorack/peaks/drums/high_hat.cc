@@ -37,7 +37,7 @@
 
 namespace sanguinepeaks {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void HighHat::Init() {
     noise_.Init();

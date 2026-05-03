@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
 	using namespace std;
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void SpeechEngine::Init(BufferAllocator* allocator) {
 		sam_speech_synth_.Init();

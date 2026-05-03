@@ -38,7 +38,7 @@
 #include "braids/resources.h"
 
 namespace sanguinebraids {
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   static const uint16_t kHighestNote = 140 * 128;
   static const uint16_t kPitchTableStart = 128 * 128;

@@ -78,7 +78,7 @@ namespace fluctus {
 		NUM_SLICE_STEP_MODES = 8
 	};
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	class KammerlPlayer {
 	public:
@@ -143,7 +143,7 @@ namespace fluctus {
 				break;
 			default:
 			case RANDOM_STEP:
-				slice_step += stmlib::Random::GetFloat() * (kNumMaxSlices - 1)
+				slice_step += sanguinestmlib::Random::GetFloat() * (kNumMaxSlices - 1)
 					+ 0.5;
 				break;
 			}
@@ -165,7 +165,7 @@ namespace fluctus {
 
 				const bool slice_still_playing = num_remaining_samples_in_slice_ >
 					latest_trigger_interval_samples / 2;
-				const float rand_percentage = stmlib::Random::GetFloat();
+				const float rand_percentage = sanguinestmlib::Random::GetFloat();
 				const bool trigger_slice = !slice_still_playing &&
 					((rand_percentage < parameters.kammerl.probability) || parameters.freeze ||
 						playback_mode_ == PLAYBACK_MODE_UNINITIALIZED);

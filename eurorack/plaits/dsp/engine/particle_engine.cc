@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void ParticleEngine::Init(BufferAllocator* allocator) {
     for (int i = 0; i < kNumParticles; ++i) {

@@ -39,77 +39,77 @@
 
 namespace mutuus {
 
-const int32_t kNumBands = 20;
-const int32_t kLowFactor = 4;
-const int32_t kMidFactor = 3;
-const int32_t kDelayLineSize = 6144;
-const int32_t kMaxFilterBankBlockSize = 96;
-const int32_t kSampleMemorySize = kMaxFilterBankBlockSize * kNumBands / 2;
+  const int32_t kNumBands = 20;
+  const int32_t kLowFactor = 4;
+  const int32_t kMidFactor = 3;
+  const int32_t kDelayLineSize = 6144;
+  const int32_t kMaxFilterBankBlockSize = 96;
+  const int32_t kSampleMemorySize = kMaxFilterBankBlockSize * kNumBands / 2;
 
-class PooledDelayLine {
- public:
-  PooledDelayLine() { }
-  ~PooledDelayLine() { }
-  
-  void Init(float* ptr, int32_t delay) {
-    delay_line_ = ptr;
-    size_ = delay + 1;
-    head_ = 0;
-    std::fill(&ptr[0], &ptr[size_], 0.0f);
-  }
-  
-  inline int32_t size() const { return size_; }
-  
-  float ReadWrite(float value) {
-    delay_line_[head_] = value;
-    head_ = (head_ + 1) % size_;
-    return delay_line_[head_];
+  class PooledDelayLine {
+  public:
+    PooledDelayLine() {}
+    ~PooledDelayLine() {}
+
+    void Init(float* ptr, int32_t delay) {
+      delay_line_ = ptr;
+      size_ = delay + 1;
+      head_ = 0;
+      std::fill(&ptr[0], &ptr[size_], 0.0f);
+    }
+
+    inline int32_t size() const { return size_; }
+
+    float ReadWrite(float value) {
+      delay_line_[head_] = value;
+      head_ = (head_ + 1) % size_;
+      return delay_line_[head_];
+    };
+
+  private:
+    float* delay_line_;
+    int32_t size_;
+    int32_t head_;
+
+    DISALLOW_COPY_AND_ASSIGN(PooledDelayLine);
   };
-  
- private:
-  float* delay_line_;
-  int32_t size_;
-  int32_t head_;
-  
-  DISALLOW_COPY_AND_ASSIGN(PooledDelayLine);
-};
 
-struct Band {
-  int32_t group;
-  float sample_rate;
-  float post_gain;
-  stmlib::CrossoverSvf svf[2];
-  int32_t decimation_factor;
-  float* samples;
-  PooledDelayLine delay_line;
-  int32_t delay;
-};
+  struct Band {
+    int32_t group;
+    float sample_rate;
+    float post_gain;
+    sanguinestmlib::CrossoverSvf svf[2];
+    int32_t decimation_factor;
+    float* samples;
+    PooledDelayLine delay_line;
+    int32_t delay;
+  };
 
-class FilterBank {
- public:
-  FilterBank() { }
-  ~FilterBank() { }
-  void Init(float sample_rate);
-  void Analyze(const float* in, size_t size);
-  void Synthesize(float* out, size_t size);
-  const Band& band(int32_t index) {
-    return band_[index];
-  }
-  
- private:
-  SampleRateConverter<SRC_DOWN, kMidFactor, 36> mid_src_down_;
-  SampleRateConverter<SRC_UP, kMidFactor, 36> mid_src_up_;
-  SampleRateConverter<SRC_DOWN, kLowFactor, 48> low_src_down_;
-  SampleRateConverter<SRC_UP, kLowFactor, 48> low_src_up_;
-  
-  float tmp_[2][kMaxFilterBankBlockSize];
-  float samples_[kSampleMemorySize];
-  float delay_buffer_[kDelayLineSize];
-  
-  Band band_[kNumBands + 1];
-  
-  DISALLOW_COPY_AND_ASSIGN(FilterBank);
-};
+  class FilterBank {
+  public:
+    FilterBank() {}
+    ~FilterBank() {}
+    void Init(float sample_rate);
+    void Analyze(const float* in, size_t size);
+    void Synthesize(float* out, size_t size);
+    const Band& band(int32_t index) {
+      return band_[index];
+    }
+
+  private:
+    SampleRateConverter<SRC_DOWN, kMidFactor, 36> mid_src_down_;
+    SampleRateConverter<SRC_UP, kMidFactor, 36> mid_src_up_;
+    SampleRateConverter<SRC_DOWN, kLowFactor, 48> low_src_down_;
+    SampleRateConverter<SRC_UP, kLowFactor, 48> low_src_up_;
+
+    float tmp_[2][kMaxFilterBankBlockSize];
+    float samples_[kSampleMemorySize];
+    float delay_buffer_[kDelayLineSize];
+
+    Band band_[kNumBands + 1];
+
+    DISALLOW_COPY_AND_ASSIGN(FilterBank);
+  };
 
 }  // namespace mutuus
 

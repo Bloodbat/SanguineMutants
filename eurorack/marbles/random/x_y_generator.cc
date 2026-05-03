@@ -35,7 +35,7 @@
 namespace sanguinemarbles {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void XYGenerator::Init(RandomStream* random_stream, float sr) {
     for (size_t i = 0; i < kNumChannels; ++i) {

@@ -51,7 +51,7 @@ namespace sanguineplaits {
     void Render(bool sync, float frequency, float* out, size_t size) {
       CONSTRAIN(frequency, 0.0f, 1.0f);
 
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
 
       float next_sample = next_sample_;
       float sample = sample_;
@@ -65,7 +65,7 @@ namespace sanguineplaits {
         next_sample = 0.0f;
 
         const float frequency = fm.Next();
-        const float raw_sample = stmlib::Random::GetFloat() * 2.0f - 1.0f;
+        const float raw_sample = sanguinestmlib::Random::GetFloat() * 2.0f - 1.0f;
         float raw_amount = 4.0f * (frequency - 0.25f);
         CONSTRAIN(raw_amount, 0.0f, 1.0f);
 
@@ -76,8 +76,8 @@ namespace sanguineplaits {
           float t = phase_ / frequency;
           float new_sample = raw_sample;
           float discontinuity = new_sample - sample;
-          this_sample += discontinuity * stmlib::ThisBlepSample(t);
-          next_sample += discontinuity * stmlib::NextBlepSample(t);
+          this_sample += discontinuity * sanguinestmlib::ThisBlepSample(t);
+          next_sample += discontinuity * sanguinestmlib::NextBlepSample(t);
           sample = new_sample;
         }
         next_sample += sample;

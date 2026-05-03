@@ -67,7 +67,7 @@ namespace sanguineplaits {
 
       frequency = std::min(frequency, 0.25f);
 
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
 
       float next_sample = next_sample_;
       while (size--) {
@@ -90,8 +90,8 @@ namespace sanguineplaits {
           float discontinuity = 4.0f * frequency * tri_gain;
           if (discontinuity) {
             float t = (phase_ - 0.5f) / frequency;
-            this_sample -= stmlib::ThisIntegratedBlepSample(t) * discontinuity;
-            next_sample -= stmlib::NextIntegratedBlepSample(t) * discontinuity;
+            this_sample -= sanguinestmlib::ThisIntegratedBlepSample(t) * discontinuity;
+            next_sample -= sanguinestmlib::NextIntegratedBlepSample(t) * discontinuity;
           }
           ascending_ = false;
         }
@@ -119,8 +119,8 @@ namespace sanguineplaits {
           if (discontinuity) {
             float frac = (phase_ * num_steps_f - static_cast<float>(next_step));
             float t = frac / (frequency * num_steps_f);
-            this_sample += stmlib::ThisBlepSample(t) * discontinuity;
-            next_sample += stmlib::NextBlepSample(t) * discontinuity;
+            this_sample += sanguinestmlib::ThisBlepSample(t) * discontinuity;
+            next_sample += sanguinestmlib::NextBlepSample(t) * discontinuity;
           }
 
           // Handle the discontinuity at the bottom of the naive triangle.
@@ -128,8 +128,8 @@ namespace sanguineplaits {
             float discontinuity = 4.0f * frequency * tri_gain;
             if (discontinuity) {
               float t = phase_ / frequency;
-              this_sample += stmlib::ThisIntegratedBlepSample(t) * discontinuity;
-              next_sample += stmlib::NextIntegratedBlepSample(t) * discontinuity;
+              this_sample += sanguinestmlib::ThisIntegratedBlepSample(t) * discontinuity;
+              next_sample += sanguinestmlib::NextIntegratedBlepSample(t) * discontinuity;
             }
             ascending_ = true;
           }

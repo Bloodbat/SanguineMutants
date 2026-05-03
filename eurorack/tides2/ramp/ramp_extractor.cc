@@ -44,7 +44,7 @@ best performing one is selected (à la early Scheirer/Goto beat trackers).
 
 namespace sanguinetides2 {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   const float kPulseWidthTolerance = 0.05f;
 

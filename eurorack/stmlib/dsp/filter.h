@@ -27,15 +27,15 @@
 // Zero-delay-feedback filters (one pole and SVF).
 // Naive SVF.
 
-#ifndef STMLIB_DSP_FILTER_H_
-#define STMLIB_DSP_FILTER_H_
+#ifndef SANGUINE_STMLIB_DSP_FILTER_H_
+#define SANGUINE_STMLIB_DSP_FILTER_H_
 
 #include "stmlib/stmlib.h"
 
 #include <cmath>
 #include <algorithm>
 
-namespace stmlib {
+namespace sanguinestmlib {
   enum FilterMode {
     FILTER_MODE_LOW_PASS,
     FILTER_MODE_BAND_PASS,
@@ -759,5 +759,5 @@ namespace stmlib {
 
     DISALLOW_COPY_AND_ASSIGN(CrossoverSvf);
   };
-}  // namespace stmlib
-#endif  // STMLIB_DSP_FILTER_H_
+}  // namespace sanguinestmlib
+#endif  // SANGUINE_STMLIB_DSP_FILTER_H_

@@ -26,51 +26,51 @@
 //
 // Linear interpolation of parameters in rendering loops.
 
-#ifndef STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
-#define STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
+#ifndef SANGUINE_STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
+#define SANGUINE_STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
 
 #include "stmlib/stmlib.h"
 
-namespace stmlib {
+namespace sanguinestmlib {
 
-class ParameterInterpolator {
- public:
-  ParameterInterpolator() { }
-  ParameterInterpolator(float* state, float new_value, size_t size) {
-    Init(state, new_value, size);
-  }
+  class ParameterInterpolator {
+  public:
+    ParameterInterpolator() {}
+    ParameterInterpolator(float* state, float new_value, size_t size) {
+      Init(state, new_value, size);
+    }
 
-  ParameterInterpolator(float* state, float new_value, float step) {
-    state_ = state;
-    value_ = *state;
-    increment_ = (new_value - *state) * step;
-  }
+    ParameterInterpolator(float* state, float new_value, float step) {
+      state_ = state;
+      value_ = *state;
+      increment_ = (new_value - *state) * step;
+    }
 
-  ~ParameterInterpolator() {
-    *state_ = value_;
-  }
-  
-  inline void Init(float* state, float new_value, size_t size) {
-    state_ = state;
-    value_ = *state;
-    increment_ = (new_value - *state) / static_cast<float>(size);
-  }
+    ~ParameterInterpolator() {
+      *state_ = value_;
+    }
 
-  inline float Next() {
-    value_ += increment_;
-    return value_;
-  }
+    inline void Init(float* state, float new_value, size_t size) {
+      state_ = state;
+      value_ = *state;
+      increment_ = (new_value - *state) / static_cast<float>(size);
+    }
 
-  inline float subsample(float t) {
-    return value_ + increment_ * t;
-  }
-  
- private:
-  float* state_;
-  float value_;
-  float increment_;
-};
+    inline float Next() {
+      value_ += increment_;
+      return value_;
+    }
 
-}  // namespace stmlib
+    inline float subsample(float t) {
+      return value_ + increment_ * t;
+    }
 
-#endif  // STMLIB_DSP_PARAMETER_INTERPOLATOR_H_
+  private:
+    float* state_;
+    float value_;
+    float increment_;
+  };
+
+}  // namespace sanguinestmlib
+
+#endif  // SANGUINE_STMLIB_DSP_PARAMETER_INTERPOLATOR_H_

@@ -39,7 +39,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void Resonator::Init(float position, int resolution) {
     resolution_ = min(resolution, kMaxNumModes);

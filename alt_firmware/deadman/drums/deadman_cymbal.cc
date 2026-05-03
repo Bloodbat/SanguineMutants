@@ -37,7 +37,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 
 
@@ -102,8 +102,7 @@ namespace deadman {
 			// The 808-style VCA clipping 
 			if (filtered_noise1 < clip_ - 32767) {
 				filtered_noise1 = clip_ - 32767;
-			}
-			else if (filtered_noise1 > 32767) {
+			} else if (filtered_noise1 > 32767) {
 				filtered_noise1 = 32767;
 			}
 

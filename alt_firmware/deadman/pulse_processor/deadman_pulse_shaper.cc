@@ -36,7 +36,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void PulseShaper::Init() {
 		initial_delay_ = 0;
@@ -94,20 +94,17 @@ namespace deadman {
 					}
 					if (p.delay_counter) {
 						--p.delay_counter;
-					}
-					else {
+					} else {
 						// Retrigger
 						--p.repetition_counter;
 						p.duration_counter = duration();
 						p.delay_counter = delay();
 					}
-				}
-				else {
+				} else {
 					// Still in pre-delay phase...
 					--p.initial_delay_counter;
 				}
-			}
-			else {
+			} else {
 				if (new_pulse) {
 					p.repetition_counter = num_repetitions_ + 1;
 					p.initial_delay_counter = initial_delay();

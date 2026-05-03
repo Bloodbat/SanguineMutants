@@ -85,13 +85,13 @@ namespace sanguinemarbles {
 
     void Init(RandomStream* random_stream, float sr);
 
-    void Process(bool use_external_clock, const stmlib::GateFlags* external_clock,
+    void Process(bool use_external_clock, const sanguinestmlib::GateFlags* external_clock,
       const Ramps& ramps, bool* gate, size_t size) {
       bool reset = false;
       Process(use_external_clock, &reset, external_clock, ramps, gate, size);
     }
 
-    void Process(bool use_external_clock, bool* reset, const stmlib::GateFlags* external_clock,
+    void Process(bool use_external_clock, bool* reset, const sanguinestmlib::GateFlags* external_clock,
       Ramps ramps, bool* gate, size_t size);
 
     inline void set_model(TGeneratorModel model) {
@@ -192,8 +192,8 @@ namespace sanguinemarbles {
 
     SlaveRamp slave_ramp_[kNumTChannels];
 
-    stmlib::HysteresisQuantizer2 bias_quantizer_;
-    stmlib::HysteresisQuantizer2 rate_quantizer_;
+    sanguinestmlib::HysteresisQuantizer2 bias_quantizer_;
+    sanguinestmlib::HysteresisQuantizer2 rate_quantizer_;
 
     static DividerPattern divider_patterns[kNumDividerPatterns];
     static DividerPattern fixed_divider_patterns[kNumDividerPatterns];

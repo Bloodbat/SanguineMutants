@@ -71,19 +71,19 @@ namespace sanguineplaits {
         formant_frequency_2 = kMaxFrequency;
       }
 
-      stmlib::ParameterInterpolator f0_modulation(
+      sanguinestmlib::ParameterInterpolator f0_modulation(
         &carrier_frequency_,
         carrier_frequency,
         size);
-      stmlib::ParameterInterpolator f1_modulation(
+      sanguinestmlib::ParameterInterpolator f1_modulation(
         &formant_1_frequency_,
         formant_frequency_1,
         size);
-      stmlib::ParameterInterpolator f2_modulation(
+      sanguinestmlib::ParameterInterpolator f2_modulation(
         &formant_2_frequency_,
         formant_frequency_2,
         size);
-      stmlib::ParameterInterpolator carrier_shape_modulation(
+      sanguinestmlib::ParameterInterpolator carrier_shape_modulation(
         &carrier_shape_,
         carrier_shape,
         size);

@@ -56,7 +56,7 @@ namespace sanguinetides2 {
     void Reset();
 
     float Process(bool smooth_audio_rate_tracking, bool force_integer_period, Ratio r,
-      const stmlib::GateFlags* gate_flags, float* ramp, size_t size);
+      const sanguinestmlib::GateFlags* gate_flags, float* ramp, size_t size);
 
   private:
     struct Pulse {
@@ -72,7 +72,7 @@ namespace sanguinetides2 {
     float PredictNextPeriod();
 
     template<bool smooth_audio_rate_tracking>
-    inline float ProcessInternal(bool force_integer_period, Ratio r, const stmlib::GateFlags* gate_flags,
+    inline float ProcessInternal(bool force_integer_period, Ratio r, const sanguinestmlib::GateFlags* gate_flags,
       float* ramp, size_t size);
 
     size_t current_pulse_;

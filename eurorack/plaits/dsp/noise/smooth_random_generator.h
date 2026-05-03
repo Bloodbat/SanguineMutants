@@ -50,7 +50,7 @@ namespace sanguineplaits {
       if (phase_ >= 1.0f) {
         phase_ -= 1.0f;
         from_ += interval_;
-        interval_ = stmlib::Random::GetFloat() * 2.0f - 1.0f - from_;
+        interval_ = sanguinestmlib::Random::GetFloat() * 2.0f - 1.0f - from_;
       }
       float t = phase_ * phase_ * (3.0f - 2.0f * phase_);
       return from_ + interval_ * t;

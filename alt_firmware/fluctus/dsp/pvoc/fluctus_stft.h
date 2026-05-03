@@ -34,32 +34,32 @@
 // #define USE_ARM_FFT
 
 #ifdef USE_ARM_FFT
-  #include <arm_math.h>
+#include <arm_math.h>
 #else
-  #include "stmlib/fft/shy_fft.h"
+#include "stmlib/fft/shy_fft.h"
 #endif  // USE_ARM_FFT
 
 namespace fluctus {
 
-struct Parameters;
+  struct Parameters;
 
-const size_t kMaxFftSize = 4096;
+  const size_t kMaxFftSize = 4096;
 #ifdef USE_ARM_FFT
   typedef arm_rfft_fast_instance_f32 FFT;
 #else
-  typedef stmlib::ShyFFT<float, kMaxFftSize, stmlib::RotationPhasor> FFT;
+  typedef sanguinestmlib::ShyFFT<float, kMaxFftSize, sanguinestmlib::RotationPhasor> FFT;
 #endif  // USE_ARM_FFT
 
-typedef class SpectralCloudsTransformation Modifier;
+  typedef class SpectralCloudsTransformation Modifier;
 
-class STFT {
- public:
-  STFT() { }
-  ~STFT() { }
-  
-  struct Frame { short l; short r; };
-  
-  void Init(
+  class STFT {
+  public:
+    STFT() {}
+    ~STFT() {}
+
+    struct Frame { short l; short r; };
+
+    void Init(
       FFT* fft,
       size_t fft_size,
       size_t hop_size,
@@ -69,49 +69,49 @@ class STFT {
       short* stft_frame_processor_buffer,
       Modifier* modifier);
 
-  void Reset();
+    void Reset();
 
-  void Process(
+    void Process(
       const Parameters& parameters,
       const float* input,
       float* output,
       size_t size,
       size_t stride);
 
-  void Buffer();
-  
- private:
-  FFT* fft_;
-  size_t fft_size_;
-  size_t fft_num_passes_;
-  size_t hop_size_;
-  size_t buffer_size_;
-  float* fft_in_;
-  float* fft_out_;
-  float* ifft_out_;
-  float* ifft_in_;
-  
-  const float* window_;
-  size_t window_stride_;
+    void Buffer();
 
-  short* analysis_;
-  short* synthesis_;
-  
-  size_t buffer_ptr_;
-  size_t process_ptr_;
-  size_t block_size_;
-  
-  size_t ready_;
-  size_t done_;
-  
-  const Parameters* parameters_;
-  
-  Modifier* modifier_;
-  
-  bool trigger_received_;
+  private:
+    FFT* fft_;
+    size_t fft_size_;
+    size_t fft_num_passes_;
+    size_t hop_size_;
+    size_t buffer_size_;
+    float* fft_in_;
+    float* fft_out_;
+    float* ifft_out_;
+    float* ifft_in_;
 
-  DISALLOW_COPY_AND_ASSIGN(STFT);
-};
+    const float* window_;
+    size_t window_stride_;
+
+    short* analysis_;
+    short* synthesis_;
+
+    size_t buffer_ptr_;
+    size_t process_ptr_;
+    size_t block_size_;
+
+    size_t ready_;
+    size_t done_;
+
+    const Parameters* parameters_;
+
+    Modifier* modifier_;
+
+    bool trigger_received_;
+
+    DISALLOW_COPY_AND_ASSIGN(STFT);
+  };
 
 }  // namespace fluctus
 

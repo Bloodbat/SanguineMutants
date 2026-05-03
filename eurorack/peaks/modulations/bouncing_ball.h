@@ -88,7 +88,7 @@ namespace sanguinepeaks {
     }
 
     inline void set_gravity(uint16_t gravity) {
-      gravity_ = stmlib::Interpolate88(lut_gravity, gravity);
+      gravity_ = sanguinestmlib::Interpolate88(lut_gravity, gravity);
     }
 
     inline void set_bounce_loss(uint16_t bounce_loss) {

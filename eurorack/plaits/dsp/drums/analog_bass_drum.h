@@ -89,9 +89,9 @@ namespace sanguineplaits {
       const float kRetrigPulseDuration = 0.05f * kSampleRate;
 
       const float scale = 0.001f / f0;
-      const float q = 1500.0f * stmlib::SemitonesToRatio(decay * 80.0f);
+      const float q = 1500.0f * sanguinestmlib::SemitonesToRatio(decay * 80.0f);
       const float tone_f = std::min(
-        4.0f * f0 * stmlib::SemitonesToRatio(tone * 108.0f),
+        4.0f * f0 * sanguinestmlib::SemitonesToRatio(tone * 108.0f),
         1.0f);
       const float exciter_leak = 0.08f * (tone + 0.25f);
 
@@ -103,7 +103,7 @@ namespace sanguineplaits {
         lp_out_ = 0.0f;
       }
 
-      stmlib::ParameterInterpolator sustain_gain(
+      sanguinestmlib::ParameterInterpolator sustain_gain(
         &sustain_gain_,
         accent * decay,
         size);
@@ -156,9 +156,9 @@ namespace sanguineplaits {
         if (sustain) {
           oscillator_.Next(f, sustain_gain.Next(), &resonator_out, &lp_out_);
         } else {
-          resonator_.set_f_q<stmlib::FREQUENCY_DIRTY>(f, 1.0f + q * f);
-          resonator_.Process<stmlib::FILTER_MODE_BAND_PASS,
-            stmlib::FILTER_MODE_LOW_PASS>(
+          resonator_.set_f_q<sanguinestmlib::FREQUENCY_DIRTY>(f, 1.0f + q * f);
+          resonator_.Process<sanguinestmlib::FILTER_MODE_BAND_PASS,
+            sanguinestmlib::FILTER_MODE_LOW_PASS>(
               (pulse - retrig_pulse_ * 0.2f) * scale,
               &resonator_out,
               &lp_out_);
@@ -182,7 +182,7 @@ namespace sanguineplaits {
     float tone_lp_;
     float sustain_gain_;
 
-    stmlib::Svf resonator_;
+    sanguinestmlib::Svf resonator_;
 
     // Replace the resonator in "free running" (sustain) mode.
     SineOscillator oscillator_;

@@ -35,7 +35,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void FmDrum::Init() {
 		phase_ = 0;

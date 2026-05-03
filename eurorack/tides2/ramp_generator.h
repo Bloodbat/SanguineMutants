@@ -91,13 +91,13 @@ namespace sanguinetides2 {
     }
 
     template<RampMode ramp_mode, OutputMode output_mode, Range range, bool use_ramp>
-    inline void Step(const float f0, const float* pw, stmlib::GateFlags gate_flags, float ramp) {
+    inline void Step(const float f0, const float* pw, sanguinestmlib::GateFlags gate_flags, float ramp) {
 
       const size_t n = output_mode == OUTPUT_MODE_FREQUENCY ||
         (output_mode == OUTPUT_MODE_SLOPE_PHASE && ramp_mode == RAMP_MODE_AR) ? num_channels : 1;
 
       if (ramp_mode == RAMP_MODE_AD) {
-        if (gate_flags & stmlib::GATE_FLAG_RISING) {
+        if (gate_flags & sanguinestmlib::GATE_FLAG_RISING) {
           std::fill(&phase_[0], &phase_[n], 0.0f);
         }
 
@@ -121,7 +121,7 @@ namespace sanguinetides2 {
           }
         }
 
-        const bool should_ramp_up = use_ramp ? ramp < 0.5f : gate_flags & stmlib::GATE_FLAG_HIGH;
+        const bool should_ramp_up = use_ramp ? ramp < 0.5f : gate_flags & sanguinestmlib::GATE_FLAG_HIGH;
 
         float clip_at = should_ramp_up ? 0.5f : 1.0f;
         for (size_t i = 0; i < n; ++i) {
@@ -144,7 +144,7 @@ namespace sanguinetides2 {
           smooth frequency changes.
           */
           bool reset = false;
-          if (gate_flags & stmlib::GATE_FLAG_RISING) {
+          if (gate_flags & sanguinestmlib::GATE_FLAG_RISING) {
             std::fill(&phase_[0], &phase_[n], 0.0f);
             reset = true;
           }
@@ -176,7 +176,7 @@ namespace sanguinetides2 {
             master_phase_ = ramp;
           } else {
             bool reset = false;
-            if (gate_flags & stmlib::GATE_FLAG_RISING) {
+            if (gate_flags & sanguinestmlib::GATE_FLAG_RISING) {
               master_phase_ = 0.0f;
               std::copy(&next_ratio_[0], &next_ratio_[n], &ratio_[0]);
               std::fill(&wrap_counter_[0], &wrap_counter_[n], 0);

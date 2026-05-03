@@ -99,7 +99,7 @@ namespace sanguineplaits {
         phase_ += scale * frequency_;
         if (phase_ >= 1.0f) {
           phase_ -= 1.0f;
-          random_value_ = stmlib::Random::GetFloat();
+          random_value_ = sanguinestmlib::Random::GetFloat();
         }
         value_ = value();
 
@@ -115,7 +115,7 @@ namespace sanguineplaits {
           phase_ = phase_fractional;
         if (phase_integral != phase_integral_) {
           phase_integral_ = phase_integral;
-          random_value_ = stmlib::Random::GetFloat();
+          random_value_ = sanguinestmlib::Random::GetFloat();
         }
         value_ = value();
 

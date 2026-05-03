@@ -50,7 +50,7 @@ namespace sanguinewarps {
 
     inline float midi_to_increment(float midi_pitch) const {
       int32_t pitch = static_cast<int32_t>(midi_pitch * 256.0f);
-      pitch = 32768 + stmlib::Clip16(pitch - 20480);
+      pitch = 32768 + sanguinestmlib::Clip16(pitch - 20480);
       float increment = lut_midi_to_f_high[pitch >> 8] * lut_midi_to_f_low[pitch & 0xff];
       return increment;
     }
@@ -84,7 +84,7 @@ namespace sanguinewarps {
     float one_hertz_;
 
     static RenderFn fn_table_[];
-    stmlib::Svf filter_;
+    sanguinestmlib::Svf filter_;
 
     DISALLOW_COPY_AND_ASSIGN(Oscillator);
   };

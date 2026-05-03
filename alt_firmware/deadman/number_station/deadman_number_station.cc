@@ -37,7 +37,7 @@ namespace deadman {
 
 	const uint8_t kDownsample = 4;
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void NumberStation::Init() {
 		tone_amplitude_ = 0;

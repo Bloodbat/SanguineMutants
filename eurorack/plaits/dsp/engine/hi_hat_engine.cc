@@ -31,7 +31,7 @@
 
 namespace sanguineplaits {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void HiHatEngine::Init(BufferAllocator* allocator) {
     hi_hat_1_.Init();

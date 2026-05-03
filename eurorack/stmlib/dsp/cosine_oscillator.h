@@ -27,8 +27,8 @@
 // Cosine oscillator. Generates a cosine between 0.0 and 1.0 with minimal
 // CPU use.
 
-#ifndef STMLIB_DSP_COSINE_OSCILLATOR_H_
-#define STMLIB_DSP_COSINE_OSCILLATOR_H_
+#ifndef SANGUINE_STMLIB_DSP_COSINE_OSCILLATOR_H_
+#define SANGUINE_STMLIB_DSP_COSINE_OSCILLATOR_H_
 
 #include "stmlib/stmlib.h"
 
@@ -38,7 +38,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace stmlib {
+namespace sanguinestmlib {
 
   enum CosineOscillatorMode {
     COSINE_OSCILLATOR_APPROXIMATE,
@@ -102,6 +102,6 @@ namespace stmlib {
     DISALLOW_COPY_AND_ASSIGN(CosineOscillator);
   };
 
-}  // namespace stmlib
+}  // namespace sanguinestmlib
 
-#endif  // STMLIB_DSP_COSINE_OSCILLATOR_H_
+#endif  // SANGUINE_STMLIB_DSP_COSINE_OSCILLATOR_H_

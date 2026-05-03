@@ -88,7 +88,7 @@ namespace sanguineplaits {
     SixOpEngine() {}
     ~SixOpEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override;
     virtual void Render(const EngineParameters& parameters, float* out, float* aux, size_t size,
@@ -97,7 +97,7 @@ namespace sanguineplaits {
     void LoadBank(int bank);
 
   private:
-    stmlib::HysteresisQuantizer2 patch_index_quantizer_;
+    sanguinestmlib::HysteresisQuantizer2 patch_index_quantizer_;
     fm::Algorithms<6> algorithms_;
     fm::Patch* patches_;
     FMVoice voice_[kNumSixOpVoices];

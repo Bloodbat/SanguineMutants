@@ -37,7 +37,7 @@ using namespace std;
 namespace sanguineplaits {
 
     using namespace std;
-    using namespace stmlib;
+    using namespace sanguinestmlib;
 
     void VirtualAnalogVCFEngine::Init(BufferAllocator* allocator) {
         oscillator_.Init();

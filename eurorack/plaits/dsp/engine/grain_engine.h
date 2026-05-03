@@ -43,7 +43,7 @@ namespace sanguineplaits {
     GrainEngine() {}
     ~GrainEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters,
@@ -56,7 +56,7 @@ namespace sanguineplaits {
     GrainletOscillator grainlet_[2];
     // VOSIMOscillator vosim_oscillator_;
     ZOscillator z_oscillator_;
-    stmlib::OnePole dc_blocker_[2];
+    sanguinestmlib::OnePole dc_blocker_[2];
 
     float grain_balance_;
 

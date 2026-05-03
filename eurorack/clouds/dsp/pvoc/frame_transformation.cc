@@ -40,7 +40,7 @@
 namespace sanguineclouds {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void FrameTransformation::Init(float* buffer, int32_t fft_size, int32_t num_textures) {
     fft_size_ = fft_size;
@@ -92,7 +92,7 @@ namespace sanguineclouds {
     if (!glitch) {
       /* Decide on which glitch algorithm will be used next time... if glitch
          is enabled on the next frame! */
-      glitch_algorithm_ = stmlib::Random::GetSample() & 3;
+      glitch_algorithm_ = sanguinestmlib::Random::GetSample() & 3;
     }
 
     ifft_in[0] = 0.0f;
@@ -122,7 +122,7 @@ namespace sanguineclouds {
     r *= r;
     int32_t amount = static_cast<int32_t>(r * 32768.0f);
     for (int32_t i = 0; i < size_; ++i) {
-      synthesis_phase[i] += static_cast<int32_t>(stmlib::Random::GetSample()) * amount >> 14;
+      synthesis_phase[i] += static_cast<int32_t>(sanguinestmlib::Random::GetSample()) * amount >> 14;
     }
   }
 
@@ -147,7 +147,7 @@ namespace sanguineclouds {
       // Create trails
       float held = 0.0;
       for (int32_t i = 0; i < size_; ++i) {
-        if ((stmlib::Random::GetSample() & 15) == 0) {
+        if ((sanguinestmlib::Random::GetSample() & 15) == 0) {
           held = x[i];
         }
         x[i] = held;
@@ -158,7 +158,7 @@ namespace sanguineclouds {
 
           // Spectral shift up with aliasing.
     case 1: {
-      float factor = 1.0f + (stmlib::Random::GetSample() & 7) / 4.0f;
+      float factor = 1.0f + (sanguinestmlib::Random::GetSample() & 7) / 4.0f;
       float source = 0.0f;
       for (int32_t i = 0; i < size_; ++i) {
         source += factor;
@@ -179,7 +179,7 @@ namespace sanguineclouds {
       // Nasty high-pass
     case 3: {
       for (int32_t i = 0; i < size_; ++i) {
-        uint32_t random = stmlib::Random::GetSample() & 15;
+        uint32_t random = sanguinestmlib::Random::GetSample() & 15;
         if (random == 0) {
           x[i] *= static_cast<float>(i) / 16.0f;
         }

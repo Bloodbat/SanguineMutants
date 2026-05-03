@@ -35,7 +35,7 @@
 namespace sanguinewarps {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void FilterBank::Init(float sample_rate) {
     low_src_down_.Init();

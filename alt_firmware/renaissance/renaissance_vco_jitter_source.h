@@ -39,12 +39,12 @@
 
 namespace renaissance {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	class VcoJitterSource {
 	public:
-		VcoJitterSource() { }
-		~VcoJitterSource() { }
+		VcoJitterSource() {}
+		~VcoJitterSource() {}
 
 		inline void Init() {
 			external_temperature_ = 0;

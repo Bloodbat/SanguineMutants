@@ -93,7 +93,7 @@ namespace sanguinemarbles {
       ClockSource clock_source,
       const GroupSettings& x_settings,
       const GroupSettings& y_settings,
-      const stmlib::GateFlags* external_clock,
+      const sanguinestmlib::GateFlags* external_clock,
       const Ramps& ramps,
       float* output,
       size_t size) {
@@ -114,7 +114,7 @@ namespace sanguinemarbles {
       const GroupSettings& x_settings,
       const GroupSettings& y_settings,
       bool* reset,
-      const stmlib::GateFlags* external_clock,
+      const sanguinestmlib::GateFlags* external_clock,
       const Ramps& ramps,
       float* output,
       size_t size);

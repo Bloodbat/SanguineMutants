@@ -78,7 +78,7 @@ namespace sanguinewarps {
     int32_t group;
     float sample_rate;
     float post_gain;
-    stmlib::CrossoverSvf svf[2];
+    sanguinestmlib::CrossoverSvf svf[2];
     int32_t decimation_factor;
     float* samples;
     PooledDelayLine delay_line;

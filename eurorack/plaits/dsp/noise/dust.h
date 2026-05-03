@@ -33,15 +33,15 @@
 
 namespace sanguineplaits {
 
-inline float Dust(float frequency) {
-  float inv_frequency = 1.0f / frequency;
-  float u = stmlib::Random::GetFloat();
-  if (u < frequency) {
-    return u * inv_frequency;
-  } else {
-    return 0.0f;
+  inline float Dust(float frequency) {
+    float inv_frequency = 1.0f / frequency;
+    float u = sanguinestmlib::Random::GetFloat();
+    if (u < frequency) {
+      return u * inv_frequency;
+    } else {
+      return 0.0f;
+    }
   }
-}
 
 }  // namespace sanguineplaits
 

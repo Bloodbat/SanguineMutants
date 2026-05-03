@@ -26,73 +26,73 @@
 //
 // Stream buffer for serialization.
 
-#ifndef STMLIB_UTILS_STREAM_BUFFER_H_
-#define STMLIB_UTILS_STREAM_BUFFER_H_
+#ifndef SANGUINE_STMLIB_UTILS_STREAM_BUFFER_H_
+#define SANGUINE_STMLIB_UTILS_STREAM_BUFFER_H_
 
 #include "stmlib/stmlib.h"
 
 #include <cstring>
 #include <algorithm>
 
-namespace stmlib {
+namespace sanguinestmlib {
 
-template<size_t buffer_size>
-class StreamBuffer {
- public:
-  StreamBuffer() { Clear(); }
-  
-  void Clear() {
-    ptr_ = 0;
-    std::fill(&buffer_[0], &buffer_[buffer_size], 0);
-  }
-  
-  inline size_t position() const {
-    return ptr_;
-  }
+  template<size_t buffer_size>
+  class StreamBuffer {
+  public:
+    StreamBuffer() { Clear(); }
 
-  inline const uint8_t* bytes() const {
-    return buffer_;
-  }
-
-  inline uint8_t* mutable_bytes() {
-    return buffer_;
-  }
-
-  void Write(const void* data, size_t size) {
-    if (ptr_ + size > buffer_size) {
-      return;
+    void Clear() {
+      ptr_ = 0;
+      std::fill(&buffer_[0], &buffer_[buffer_size], 0);
     }
-    memcpy(&buffer_[ptr_], data, size);
-    ptr_ += size;
-  }
-  
-  template<typename T>
-  void Write(const T& value) {
-    Write(&value, sizeof(T));
-  }
 
-  template<typename T>
-  void Read(T* value) {
-    if (ptr_ + sizeof(T) > buffer_size) {
-      return;
+    inline size_t position() const {
+      return ptr_;
     }
-    memcpy((void*)value, &buffer_[ptr_], sizeof(T));
-    ptr_ += sizeof(T);
-  }
-  
-  inline void Seek(size_t position) {
-    ptr_ = position;
-  }
-  
-  inline void Rewind() { Seek(0); }
 
- private:
-  uint8_t buffer_[buffer_size];
-  size_t ptr_;
+    inline const uint8_t* bytes() const {
+      return buffer_;
+    }
 
-  DISALLOW_COPY_AND_ASSIGN(StreamBuffer);
-};
+    inline uint8_t* mutable_bytes() {
+      return buffer_;
+    }
 
-}  // namespace stmlib
+    void Write(const void* data, size_t size) {
+      if (ptr_ + size > buffer_size) {
+        return;
+      }
+      memcpy(&buffer_[ptr_], data, size);
+      ptr_ += size;
+    }
 
-#endif   // STMLIB_UTILS_STREAM_BUFFER_H_
+    template<typename T>
+    void Write(const T& value) {
+      Write(&value, sizeof(T));
+    }
+
+    template<typename T>
+    void Read(T* value) {
+      if (ptr_ + sizeof(T) > buffer_size) {
+        return;
+      }
+      memcpy((void*)value, &buffer_[ptr_], sizeof(T));
+      ptr_ += sizeof(T);
+    }
+
+    inline void Seek(size_t position) {
+      ptr_ = position;
+    }
+
+    inline void Rewind() { Seek(0); }
+
+  private:
+    uint8_t buffer_[buffer_size];
+    size_t ptr_;
+
+    DISALLOW_COPY_AND_ASSIGN(StreamBuffer);
+  };
+
+}  // namespace sanguinestmlib
+
+#endif   // SANGUINE_STMLIB_UTILS_STREAM_BUFFER_H_

@@ -37,7 +37,7 @@
 
 namespace sanguinetides {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   const int16_t kOctave = 12 * 128;
   const uint16_t kSlopeBits = 12;

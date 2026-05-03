@@ -36,7 +36,7 @@
 
 namespace sanguinepeaks {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void PulseShaper::Init() {
     initial_delay_ = 0;

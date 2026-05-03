@@ -44,8 +44,8 @@ namespace deadman {
 
 	class Svf {
 	public:
-		Svf() { }
-		~Svf() { }
+		Svf() {}
+		~Svf() {}
 
 		inline void Init() {
 			lp_ = 0;
@@ -73,8 +73,8 @@ namespace deadman {
 		template<SvfMode mode>
 		inline int32_t Process(int32_t in) {
 			if (dirty_) {
-				f_ = stmlib::Interpolate824(lut_svf_cutoff, frequency_ << 17);
-				damp_ = stmlib::Interpolate824(lut_svf_damp, resonance_ << 17);
+				f_ = sanguinestmlib::Interpolate824(lut_svf_cutoff, frequency_ << 17);
+				damp_ = sanguinestmlib::Interpolate824(lut_svf_damp, resonance_ << 17);
 				dirty_ = false;
 			}
 			int32_t f = f_;

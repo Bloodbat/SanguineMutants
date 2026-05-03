@@ -48,19 +48,19 @@ namespace sanguineplaits {
       lp_ = 0.0f;
       hp_ = 0.0f;
       filter_.Init();
-      filter_.set_f_q<stmlib::FREQUENCY_FAST>(5000.0f / kSampleRate, 2.0f);
+      filter_.set_f_q<sanguinestmlib::FREQUENCY_FAST>(5000.0f / kSampleRate, 2.0f);
     }
 
     float Process(float in) {
       SLOPE(lp_, in, 0.5f, 0.1f);
       ONE_POLE(hp_, lp_, 0.04f);
-      return filter_.Process<stmlib::FILTER_MODE_LOW_PASS>(lp_ - hp_);
+      return filter_.Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(lp_ - hp_);
     }
 
   private:
     float lp_;
     float hp_;
-    stmlib::Svf filter_;
+    sanguinestmlib::Svf filter_;
 
     DISALLOW_COPY_AND_ASSIGN(SyntheticBassDrumClick);
   };
@@ -76,7 +76,7 @@ namespace sanguineplaits {
     }
 
     float Render() {
-      float sample = stmlib::Random::GetFloat();
+      float sample = sanguinestmlib::Random::GetFloat();
       ONE_POLE(lp_, sample, 0.05f);
       ONE_POLE(hp_, lp_, 0.005f);
       return lp_ - hp_;
@@ -141,7 +141,7 @@ namespace sanguineplaits {
       decay *= decay;
       fm_envelope_decay *= fm_envelope_decay;
 
-      stmlib::ParameterInterpolator f0_mod(&f0_, f0, size);
+      sanguinestmlib::ParameterInterpolator f0_mod(&f0_, f0, size);
 
       dirtiness *= std::max(1.0f - 8.0f * f0, 0.0f);
 
@@ -149,10 +149,10 @@ namespace sanguineplaits {
         1.0f / (0.008f * (1.0f + fm_envelope_decay * 4.0f) * kSampleRate);
 
       const float body_env_decay = 1.0f - 1.0f / (0.02f * kSampleRate) * \
-        stmlib::SemitonesToRatio(-decay * 60.0f);
+        sanguinestmlib::SemitonesToRatio(-decay * 60.0f);
       const float transient_env_decay = 1.0f - 1.0f / (0.005f * kSampleRate);
       const float tone_f = std::min(
-        4.0f * f0 * stmlib::SemitonesToRatio(tone * 108.0f),
+        4.0f * f0 * sanguinestmlib::SemitonesToRatio(tone * 108.0f),
         1.0f);
       const float transient_level = tone;
 
@@ -163,13 +163,13 @@ namespace sanguineplaits {
         fm_pulse_width_ = kSampleRate * 0.0013f;
       }
 
-      stmlib::ParameterInterpolator sustain_gain(
+      sanguinestmlib::ParameterInterpolator sustain_gain(
         &sustain_gain_,
         accent * decay,
         size);
 
       while (size--) {
-        ONE_POLE(phase_noise_, stmlib::Random::GetFloat() - 0.5f, 0.002f);
+        ONE_POLE(phase_noise_, sanguinestmlib::Random::GetFloat() - 0.5f, 0.002f);
 
         float mix = 0.0f;
 

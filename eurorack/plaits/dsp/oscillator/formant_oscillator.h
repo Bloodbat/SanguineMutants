@@ -65,11 +65,11 @@ namespace sanguineplaits {
         formant_frequency = kMaxFrequency;
       }
 
-      stmlib::ParameterInterpolator carrier_fm(
+      sanguinestmlib::ParameterInterpolator carrier_fm(
         &carrier_frequency_, carrier_frequency, size);
-      stmlib::ParameterInterpolator formant_fm(
+      sanguinestmlib::ParameterInterpolator formant_fm(
         &formant_frequency_, formant_frequency, size);
-      stmlib::ParameterInterpolator pm(&phase_shift_, phase_shift, size);
+      sanguinestmlib::ParameterInterpolator pm(&phase_shift_, phase_shift, size);
 
       float next_sample = next_sample_;
 
@@ -92,8 +92,8 @@ namespace sanguineplaits {
             formant_phase_at_reset + pm.subsample(1.0f - reset_time));
           float after = Sine(0.0f + pm.subsample(1.0f));
           float discontinuity = after - before;
-          this_sample += discontinuity * stmlib::ThisBlepSample(reset_time);
-          next_sample += discontinuity * stmlib::NextBlepSample(reset_time);
+          this_sample += discontinuity * sanguinestmlib::ThisBlepSample(reset_time);
+          next_sample += discontinuity * sanguinestmlib::NextBlepSample(reset_time);
           formant_phase_ = reset_time * formant_frequency;
         } else {
           formant_phase_ += formant_frequency;

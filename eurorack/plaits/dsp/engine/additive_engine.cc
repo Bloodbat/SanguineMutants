@@ -35,7 +35,7 @@
 
 namespace sanguineplaits {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void AdditiveEngine::Init(BufferAllocator* allocator) {
     amplitudes_ = allocator->Allocate<float>(kNumHarmonics);

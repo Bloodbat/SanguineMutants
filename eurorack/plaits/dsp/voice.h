@@ -97,14 +97,14 @@ namespace sanguineplaits {
         lpg_.Process(post_gain * low_pass_gate_gain, low_pass_gate_frequency, low_pass_gate_hf_bleed, in, out, size, stride);
       } else {
         while (size--) {
-          *out = stmlib::Clip16(1 + static_cast<int32_t>(*in++ * post_gain));
+          *out = sanguinestmlib::Clip16(1 + static_cast<int32_t>(*in++ * post_gain));
           out += stride;
         }
       }
     }
 
   private:
-    stmlib::Limiter limiter_;
+    sanguinestmlib::Limiter limiter_;
     LowPassGate lpg_;
 
     DISALLOW_COPY_AND_ASSIGN(ChannelPostProcessor);
@@ -181,7 +181,7 @@ namespace sanguineplaits {
       short aux;
     };
 
-    void Init(stmlib::BufferAllocator* allocator, UserData* user_data);
+    void Init(sanguinestmlib::BufferAllocator* allocator, UserData* user_data);
     void ReloadUserData() {
       reload_user_data_ = true;
     }
@@ -232,7 +232,7 @@ namespace sanguineplaits {
 
     FastSineOscillator sine_oscillator_;
     SquareOscillator square_oscillator_;
-    stmlib::HysteresisQuantizer2 engine_quantizer_;
+    sanguinestmlib::HysteresisQuantizer2 engine_quantizer_;
 
     UserData* user_data_;
 

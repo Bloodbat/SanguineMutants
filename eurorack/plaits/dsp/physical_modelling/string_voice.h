@@ -41,7 +41,7 @@ namespace sanguineplaits {
     StringVoice() {}
     ~StringVoice() {}
 
-    void Init(stmlib::BufferAllocator* allocator);
+    void Init(sanguinestmlib::BufferAllocator* allocator);
     void Reset();
     void Render(
       bool sustain,
@@ -57,7 +57,7 @@ namespace sanguineplaits {
       size_t size);
 
   private:
-    stmlib::Svf excitation_filter_;
+    sanguinestmlib::Svf excitation_filter_;
     String string_;
     size_t remaining_noise_samples_;
 

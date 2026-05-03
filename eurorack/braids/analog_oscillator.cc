@@ -34,7 +34,7 @@
 #include "braids/parameter_interpolation.h"
 
 namespace sanguinebraids {
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   static const size_t kNumZones = 15;
 

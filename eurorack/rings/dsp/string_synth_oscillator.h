@@ -37,7 +37,7 @@
 
 namespace sanguinerings {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   enum OscillatorShape {
     OSCILLATOR_SHAPE_BRIGHT_SQUARE,

@@ -72,8 +72,8 @@ namespace sanguineplaits {
     float frequency_;
     size_t click_duration_;
 
-    stmlib::Svf filter_[kNaiveSpeechNumFormants];
-    stmlib::Svf pulse_coloration_;
+    sanguinestmlib::Svf filter_[kNaiveSpeechNumFormants];
+    sanguinestmlib::Svf pulse_coloration_;
 
     static const Phoneme phonemes_[kNaiveSpeechNumPhonemes][kNaiveSpeechNumRegisters];
 

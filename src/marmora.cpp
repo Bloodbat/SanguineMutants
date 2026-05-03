@@ -134,10 +134,10 @@ struct Marmora : SanguineModule {
 	dsp::SchmittTrigger stXReset;
 
 	// Buffers.
-	stmlib::GateFlags tClocks[marmora::kBlockSize] = {};
-	stmlib::GateFlags lastTClock = 0;
-	stmlib::GateFlags xyClocks[marmora::kBlockSize] = {};
-	stmlib::GateFlags lastXYClock = 0;
+	sanguinestmlib::GateFlags tClocks[marmora::kBlockSize] = {};
+	sanguinestmlib::GateFlags lastTClock = 0;
+	sanguinestmlib::GateFlags xyClocks[marmora::kBlockSize] = {};
+	sanguinestmlib::GateFlags lastXYClock = 0;
 
 	float rampMaster[marmora::kBlockSize] = {};
 	float rampExternal[marmora::kBlockSize] = {};
@@ -314,11 +314,11 @@ struct Marmora : SanguineModule {
 	void setupCommon() {
 		// Clocks.
 		bool bTClockGate = inputs[INPUT_T_CLOCK].getVoltage() >= 1.7f;
-		lastTClock = stmlib::ExtractGateFlags(lastTClock, bTClockGate);
+		lastTClock = sanguinestmlib::ExtractGateFlags(lastTClock, bTClockGate);
 		tClocks[blockIndex] = lastTClock;
 
 		bool bXClockGate = inputs[INPUT_X_CLOCK].getVoltage() >= 1.7f;
-		lastXYClock = stmlib::ExtractGateFlags(lastXYClock, bXClockGate);
+		lastXYClock = sanguinestmlib::ExtractGateFlags(lastXYClock, bXClockGate);
 		xyClocks[blockIndex] = lastXYClock;
 
 		// Lock modes.

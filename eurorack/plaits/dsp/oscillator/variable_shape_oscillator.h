@@ -110,13 +110,13 @@ namespace sanguineplaits {
         CONSTRAIN(pw, frequency * 2.0f, 1.0f - 2.0f * frequency);
       }
 
-      stmlib::ParameterInterpolator master_fm(
+      sanguinestmlib::ParameterInterpolator master_fm(
         &master_frequency_, master_frequency, size);
-      stmlib::ParameterInterpolator fm(&slave_frequency_, frequency, size);
-      stmlib::ParameterInterpolator pwm(&pw_, pw, size);
-      stmlib::ParameterInterpolator waveshape_modulation(
+      sanguinestmlib::ParameterInterpolator fm(&slave_frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator pwm(&pw_, pw, size);
+      sanguinestmlib::ParameterInterpolator waveshape_modulation(
         &waveshape_, waveshape, size);
-      stmlib::ParameterInterpolator phase_modulation(
+      sanguinestmlib::ParameterInterpolator phase_modulation(
         &phase_modulation_, phase_modulation_amount, size);
 
       float next_sample = next_sample_;
@@ -163,8 +163,8 @@ namespace sanguineplaits {
               slope_down,
               triangle_amount,
               square_amount);
-            this_sample -= value * stmlib::ThisBlepSample(reset_time);
-            next_sample -= value * stmlib::NextBlepSample(reset_time);
+            this_sample -= value * sanguinestmlib::ThisBlepSample(reset_time);
+            next_sample -= value * sanguinestmlib::NextBlepSample(reset_time);
           }
         } else if (output_phase) {
           master_phase_ += master_frequency;
@@ -183,10 +183,10 @@ namespace sanguineplaits {
             float triangle_step = (slope_up + slope_down) * slave_frequency;
             triangle_step *= triangle_amount;
 
-            this_sample += square_amount * stmlib::ThisBlepSample(t);
-            next_sample += square_amount * stmlib::NextBlepSample(t);
-            this_sample -= triangle_step * stmlib::ThisIntegratedBlepSample(t);
-            next_sample -= triangle_step * stmlib::NextIntegratedBlepSample(t);
+            this_sample += square_amount * sanguinestmlib::ThisBlepSample(t);
+            next_sample += square_amount * sanguinestmlib::NextBlepSample(t);
+            this_sample -= triangle_step * sanguinestmlib::ThisIntegratedBlepSample(t);
+            next_sample -= triangle_step * sanguinestmlib::NextIntegratedBlepSample(t);
             high_ = true;
           }
 
@@ -199,10 +199,10 @@ namespace sanguineplaits {
             float triangle_step = (slope_up + slope_down) * slave_frequency;
             triangle_step *= triangle_amount;
 
-            this_sample -= (1.0f - triangle_amount) * stmlib::ThisBlepSample(t);
-            next_sample -= (1.0f - triangle_amount) * stmlib::NextBlepSample(t);
-            this_sample += triangle_step * stmlib::ThisIntegratedBlepSample(t);
-            next_sample += triangle_step * stmlib::NextIntegratedBlepSample(t);
+            this_sample -= (1.0f - triangle_amount) * sanguinestmlib::ThisBlepSample(t);
+            next_sample -= (1.0f - triangle_amount) * sanguinestmlib::NextBlepSample(t);
+            this_sample += triangle_step * sanguinestmlib::ThisIntegratedBlepSample(t);
+            next_sample += triangle_step * sanguinestmlib::NextIntegratedBlepSample(t);
             high_ = false;
           }
         }

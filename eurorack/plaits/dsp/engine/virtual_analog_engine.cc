@@ -35,7 +35,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void VirtualAnalogEngine::Init(BufferAllocator* allocator) {
     primary_.Init();

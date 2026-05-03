@@ -48,7 +48,7 @@ namespace sanguineclouds {
 
   const int32_t kMaxNumGrains = 64;
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   class GranularSamplePlayer {
   public:

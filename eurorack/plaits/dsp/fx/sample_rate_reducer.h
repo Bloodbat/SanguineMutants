@@ -86,8 +86,8 @@ namespace sanguineplaits {
           float new_sample = \
             previous_sample + (*in_out - previous_sample) * (1.0f - t);
           float discontinuity = new_sample - sample;
-          this_sample += discontinuity * stmlib::ThisBlepSample(t);
-          next_sample += discontinuity * stmlib::NextBlepSample(t);
+          this_sample += discontinuity * sanguinestmlib::ThisBlepSample(t);
+          next_sample += discontinuity * sanguinestmlib::NextBlepSample(t);
           sample = new_sample;
         }
         next_sample += sample;

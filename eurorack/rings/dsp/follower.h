@@ -38,7 +38,7 @@
 
 namespace sanguinerings {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   class Follower {
   public:
