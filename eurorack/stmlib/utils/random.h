@@ -26,40 +26,40 @@
 //
 // Fast 16-bit pseudo random number generator.
 
-#ifndef STMLIB_UTILS_RANDOM_H_
-#define STMLIB_UTILS_RANDOM_H_
+#ifndef SANGUINE_STMLIB_UTILS_RANDOM_H_
+#define SANGUINE_STMLIB_UTILS_RANDOM_H_
 
 #include "stmlib/stmlib.h"
 
-namespace stmlib {
+namespace sanguinestmlib {
 
-class Random {
- public:
-  static inline uint32_t state() { return rng_state_; }
+  class Random {
+  public:
+    static inline uint32_t state() { return rng_state_; }
 
-  static inline void Seed(uint32_t seed) {
-    rng_state_ = seed;
-  }
+    static inline void Seed(uint32_t seed) {
+      rng_state_ = seed;
+    }
 
-  static inline uint32_t GetWord() {
-    rng_state_ = rng_state_ * 1664525L + 1013904223L;
-    return state();
-  }
-  
-  static inline int16_t GetSample() {
-    return static_cast<int16_t>(GetWord() >> 16);
-  }
+    static inline uint32_t GetWord() {
+      rng_state_ = rng_state_ * 1664525L + 1013904223L;
+      return state();
+    }
 
-  static inline float GetFloat() {
-    return static_cast<float>(GetWord()) / 4294967296.0f;
-  }
+    static inline int16_t GetSample() {
+      return static_cast<int16_t>(GetWord() >> 16);
+    }
 
- private:
-  static uint32_t rng_state_;
+    static inline float GetFloat() {
+      return static_cast<float>(GetWord()) / 4294967296.0f;
+    }
 
-  DISALLOW_COPY_AND_ASSIGN(Random);
-};
+  private:
+    static uint32_t rng_state_;
 
-}  // namespace stmlib
+    DISALLOW_COPY_AND_ASSIGN(Random);
+  };
 
-#endif  // STMLIB_UTILS_RANDOM_H_
+}  // namespace sanguinestmlib
+
+#endif  // SANGUINE_STMLIB_UTILS_RANDOM_H_

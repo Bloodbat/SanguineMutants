@@ -45,7 +45,7 @@ namespace sanguineplaits {
       NO_ENVELOPE = 2
     };
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters, float* out, float* aux, size_t size,
@@ -61,7 +61,7 @@ namespace sanguineplaits {
 
     ChordBank chords_;
     Arpeggiator arpeggiator_;
-    stmlib::HysteresisQuantizer2 arpeggiator_pattern_selector_;
+    sanguinestmlib::HysteresisQuantizer2 arpeggiator_pattern_selector_;
 
     float envelope_shape_;
     float envelope_state_;

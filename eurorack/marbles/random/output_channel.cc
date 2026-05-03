@@ -37,7 +37,7 @@
 
 namespace sanguinemarbles {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   const size_t kNumReacquisitions = 20; // 6.4 samples per millisecond
 

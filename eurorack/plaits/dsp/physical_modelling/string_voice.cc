@@ -38,7 +38,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void StringVoice::Init(BufferAllocator* allocator) {
     excitation_filter_.Init();

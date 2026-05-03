@@ -37,7 +37,7 @@
 namespace sanguinewarps {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void Modulator::Init(float sample_rate) {
     easter_egg_ = false;

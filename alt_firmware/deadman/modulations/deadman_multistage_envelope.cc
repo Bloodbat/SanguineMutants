@@ -36,7 +36,7 @@
 #include "deadman/deadman_resources.h"
 
 namespace deadman {
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void MultistageEnvelope::Init() {
 		set_adsr(0, 8192, 16384, 32767);
@@ -236,7 +236,7 @@ namespace deadman {
 				segment_ = 0;
 				phase_ = 0;
 				// Randomise values here.
-				uint32_t random_offset = stmlib::Random::GetWord();
+				uint32_t random_offset = sanguinestmlib::Random::GetWord();
 				int32_t level_random_offset = ((random_offset >> 16) * level_randomness_) >> 17;
 				int32_t decay_random_offset = ((random_offset >> 16) * decay_randomness_) >> 17;
 				int32_t randomised_level = base_level_[1] - level_random_offset;

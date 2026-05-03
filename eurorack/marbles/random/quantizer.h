@@ -80,7 +80,7 @@ namespace sanguinemarbles {
     float base_interval_;
     float base_interval_reciprocal_;
     int num_degrees_;
-    stmlib::HysteresisQuantizer level_quantizer_;
+    sanguinestmlib::HysteresisQuantizer level_quantizer_;
 
     DISALLOW_COPY_AND_ASSIGN(Quantizer);
   };

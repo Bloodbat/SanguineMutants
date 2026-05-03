@@ -40,7 +40,7 @@
 namespace sanguinerings {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void String::Init(bool enable_dispersion) {
     enable_dispersion_ = enable_dispersion;

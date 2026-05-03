@@ -52,7 +52,7 @@ namespace deadman {
 			turing_prob_ = 0;
 			turing_divider_ = 1;
 			turing_span_ = 0;
-			turing_shift_register_ = stmlib::Random::GetWord();
+			turing_shift_register_ = sanguinestmlib::Random::GetWord();
 			turing_lsb_ = turing_shift_register_ & static_cast<uint32_t>(1);
 			turing_remainder_lsb_ = false;
 			turing_value_ = 0;
@@ -137,7 +137,7 @@ namespace deadman {
 						}
 						// Decide whether to re-initialise and skip the rest, or not
 						if (false) {
-							turing_shift_register_ = stmlib::Random::GetWord();
+							turing_shift_register_ = sanguinestmlib::Random::GetWord();
 							turing_lsb_ = turing_shift_register_ & static_cast<uint32_t>(1);
 						} else {
 							// read the LSB
@@ -163,7 +163,7 @@ namespace deadman {
 								}
 							}
 							// decide whether to flip the LSB
-							uint16_t random = stmlib::Random::GetSample();
+							uint16_t random = sanguinestmlib::Random::GetSample();
 							if (random < turing_prob_) {
 								// bit-flip the LSB
 								turing_shift_register_ = turing_shift_register_ ^ static_cast<uint32_t>(1);

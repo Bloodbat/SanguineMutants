@@ -33,7 +33,7 @@
 
 namespace sanguinewarps {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   const float kToFloat = 1.0f / 4294967296.0f;
   const float kToUint32 = 4294967296.0f;
@@ -169,7 +169,7 @@ namespace sanguinewarps {
 
   float Oscillator::RenderNoise(float note, float* modulation, float* out, size_t size) {
     for (size_t i = 0; i < size; ++i) {
-      float noise = static_cast<float>(stmlib::Random::GetWord()) * kToFloat;
+      float noise = static_cast<float>(sanguinestmlib::Random::GetWord()) * kToFloat;
       out[i] = 2.0f * noise - 1.0f;
     }
     Duck(out, modulation, out, size);

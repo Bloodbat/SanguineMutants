@@ -79,8 +79,8 @@ namespace sanguinerings {
     }
 
   private:
-    stmlib::Svf svf_;
-    stmlib::DelayLine<float, 256> comb_filter_;
+    sanguinestmlib::Svf svf_;
+    sanguinestmlib::DelayLine<float, 256> comb_filter_;
     size_t remaining_samples_;
     float comb_filter_period_;
     float comb_filter_gain_;

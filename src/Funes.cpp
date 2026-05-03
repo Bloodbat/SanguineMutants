@@ -100,7 +100,7 @@ struct Funes : SanguineModule {
 
 	funes::SuboscillatorModes suboscillatorMode = funes::SUBOSCILLATOR_OFF;
 
-	stmlib::HysteresisQuantizer2 octaveQuantizer;
+	sanguinestmlib::HysteresisQuantizer2 octaveQuantizer;
 
 	dsp::SampleRateConverter<PORT_MAX_CHANNELS * 2> srcOutputs;
 	dsp::DoubleRingBuffer<dsp::Frame<PORT_MAX_CHANNELS * 2>, 256> drbOutputBuffers;
@@ -173,7 +173,7 @@ struct Funes : SanguineModule {
 		configOutput(OUTPUT_AUX, "Auxiliary");
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			stmlib::BufferAllocator allocator(sharedBuffers[channel], sizeof(sharedBuffers[channel]));
+			sanguinestmlib::BufferAllocator allocator(sharedBuffers[channel], sizeof(sharedBuffers[channel]));
 			voices[channel].Init(&allocator, &userData);
 		}
 

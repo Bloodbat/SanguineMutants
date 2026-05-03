@@ -80,25 +80,25 @@ namespace sanguineplaits {
       const float decay_xt = decay * (1.0f + decay * (decay - 1.0f));
       fm_amount *= fm_amount;
       const float drum_decay = 1.0f - 1.0f / (0.015f * kSampleRate) * \
-        stmlib::SemitonesToRatio(
+        sanguinestmlib::SemitonesToRatio(
           -decay_xt * 72.0f - fm_amount * 12.0f + snappy * 7.0f);
       const float snare_decay = 1.0f - 1.0f / (0.01f * kSampleRate) * \
-        stmlib::SemitonesToRatio(-decay * 60.0f - snappy * 7.0f);
+        sanguinestmlib::SemitonesToRatio(-decay * 60.0f - snappy * 7.0f);
       const float fm_decay = 1.0f - 1.0f / (0.007f * kSampleRate);
 
       snappy = snappy * 1.1f - 0.05f;
       CONSTRAIN(snappy, 0.0f, 1.0f);
 
-      const float drum_level = stmlib::Sqrt(1.0f - snappy);
-      const float snare_level = stmlib::Sqrt(snappy);
+      const float drum_level = sanguinestmlib::Sqrt(1.0f - snappy);
+      const float snare_level = sanguinestmlib::Sqrt(snappy);
 
       const float snare_f_min = std::min(10.0f * f0, 0.5f);
       const float snare_f_max = std::min(35.0f * f0, 0.5f);
 
-      snare_hp_.set_f<stmlib::FREQUENCY_FAST>(snare_f_min);
-      snare_lp_.set_f_q<stmlib::FREQUENCY_FAST>(snare_f_max,
+      snare_hp_.set_f<sanguinestmlib::FREQUENCY_FAST>(snare_f_min);
+      snare_lp_.set_f_q<sanguinestmlib::FREQUENCY_FAST>(snare_f_max,
         0.5f + 2.0f * snappy);
-      drum_lp_.set_f<stmlib::FREQUENCY_FAST>(3.0f * f0);
+      drum_lp_.set_f<sanguinestmlib::FREQUENCY_FAST>(3.0f * f0);
 
       if (trigger) {
         snare_amplitude_ = drum_amplitude_ = 0.3f + 0.7f * accent;
@@ -107,7 +107,7 @@ namespace sanguineplaits {
         hold_counter_ = static_cast<int>((0.04f + decay * 0.03f) * kSampleRate);
       }
 
-      stmlib::ParameterInterpolator sustain_gain(
+      sanguinestmlib::ParameterInterpolator sustain_gain(
         &sustain_gain_,
         accent * decay,
         size);
@@ -167,11 +167,11 @@ namespace sanguineplaits {
         drum += DistortedSine(phase_[0]) * 0.60f;
         drum += DistortedSine(phase_[1]) * 0.25f;
         drum *= drum_amplitude_ * drum_level;
-        drum = drum_lp_.Process<stmlib::FILTER_MODE_LOW_PASS>(drum);
+        drum = drum_lp_.Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(drum);
 
-        float noise = stmlib::Random::GetFloat();
-        float snare = snare_lp_.Process<stmlib::FILTER_MODE_LOW_PASS>(noise);
-        snare = snare_hp_.Process<stmlib::FILTER_MODE_HIGH_PASS>(snare);
+        float noise = sanguinestmlib::Random::GetFloat();
+        float snare = snare_lp_.Process<sanguinestmlib::FILTER_MODE_LOW_PASS>(noise);
+        snare = snare_hp_.Process<sanguinestmlib::FILTER_MODE_HIGH_PASS>(snare);
         snare = (snare + 0.1f) * (snare_amplitude_ + fm_) * snare_level;
 
         *out++ = snare + drum;  // It's a snare, it's a drum, it's a snare drum.
@@ -186,9 +186,9 @@ namespace sanguineplaits {
     float sustain_gain_;
     int hold_counter_;
 
-    stmlib::OnePole drum_lp_;
-    stmlib::OnePole snare_hp_;
-    stmlib::Svf snare_lp_;
+    sanguinestmlib::OnePole drum_lp_;
+    sanguinestmlib::OnePole snare_hp_;
+    sanguinestmlib::Svf snare_lp_;
 
     DISALLOW_COPY_AND_ASSIGN(SyntheticSnareDrum);
   };

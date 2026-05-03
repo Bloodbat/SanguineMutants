@@ -41,31 +41,31 @@
 //  |
 // GATE_FLAG_LOW
 
-#ifndef STMLIB_UTILS_GATE_FLAGS_H_
-#define STMLIB_UTILS_GATE_FLAGS_H_
+#ifndef SANGUINE_STMLIB_UTILS_GATE_FLAGS_H_
+#define SANGUINE_STMLIB_UTILS_GATE_FLAGS_H_
 
 #include "stmlib/stmlib.h"
 
-namespace stmlib {
+namespace sanguinestmlib {
 
-enum GateFlagsBits {
-  GATE_FLAG_LOW = 0,
-  GATE_FLAG_HIGH = 1,
-  GATE_FLAG_RISING = 2,
-  GATE_FLAG_FALLING = 4,
-};
+  enum GateFlagsBits {
+    GATE_FLAG_LOW = 0,
+    GATE_FLAG_HIGH = 1,
+    GATE_FLAG_RISING = 2,
+    GATE_FLAG_FALLING = 4,
+  };
 
-typedef uint8_t GateFlags;
+  typedef uint8_t GateFlags;
 
-inline GateFlags ExtractGateFlags(GateFlags previous, bool current) {
-  previous &= GATE_FLAG_HIGH;
-  if (current) {
-    return previous ? GATE_FLAG_HIGH : (GATE_FLAG_RISING | GATE_FLAG_HIGH);
-  } else {
-    return previous ? GATE_FLAG_FALLING : GATE_FLAG_LOW;
+  inline GateFlags ExtractGateFlags(GateFlags previous, bool current) {
+    previous &= GATE_FLAG_HIGH;
+    if (current) {
+      return previous ? GATE_FLAG_HIGH : (GATE_FLAG_RISING | GATE_FLAG_HIGH);
+    } else {
+      return previous ? GATE_FLAG_FALLING : GATE_FLAG_LOW;
+    }
   }
-}
 
-}  // namespace stmlib
+}  // namespace sanguinestmlib
 
-#endif  // STMLIB_UTILS_GATE_FLAGS_H_
+#endif  // SANGUINE_STMLIB_UTILS_GATE_FLAGS_H_

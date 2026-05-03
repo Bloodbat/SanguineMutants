@@ -102,8 +102,8 @@ namespace sanguineplaits {
         CONSTRAIN(pw, fabsf(frequency) * 2.0f, 1.0f - 2.0f * fabsf(frequency))
       }
 
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
-      stmlib::ParameterInterpolator pwm(&pw_, pw, size);
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator pwm(&pw_, pw, size);
 
       float next_sample = next_sample_;
 
@@ -131,13 +131,13 @@ namespace sanguineplaits {
           if (phase_ >= 1.0f) {
             phase_ -= 1.0f;
             float t = phase_ / frequency;
-            this_sample -= stmlib::ThisBlepSample(t);
-            next_sample -= stmlib::NextBlepSample(t);
+            this_sample -= sanguinestmlib::ThisBlepSample(t);
+            next_sample -= sanguinestmlib::NextBlepSample(t);
           } else if (through_zero_fm && phase_ < 0.0f) {
             float t = phase_ / frequency;
             phase_ += 1.0f;
-            this_sample += stmlib::ThisBlepSample(t);
-            next_sample += stmlib::NextBlepSample(t);
+            this_sample += sanguinestmlib::ThisBlepSample(t);
+            next_sample += sanguinestmlib::NextBlepSample(t);
           }
           next_sample += phase_;
 
@@ -161,23 +161,23 @@ namespace sanguineplaits {
             if (through_zero_fm && frequency < 0.0f) {
               discontinuity = -discontinuity;
             }
-            this_sample -= stmlib::ThisIntegratedBlepSample(t) * discontinuity;
-            next_sample -= stmlib::NextIntegratedBlepSample(t) * discontinuity;
+            this_sample -= sanguinestmlib::ThisIntegratedBlepSample(t) * discontinuity;
+            next_sample -= sanguinestmlib::NextIntegratedBlepSample(t) * discontinuity;
             high_ = phase_ < pw;
           }
           if (phase_ >= 1.0f) {
             phase_ -= 1.0f;
             float t = phase_ / frequency;
             float discontinuity = (slope_up + slope_down) * frequency;
-            this_sample += stmlib::ThisIntegratedBlepSample(t) * discontinuity;
-            next_sample += stmlib::NextIntegratedBlepSample(t) * discontinuity;
+            this_sample += sanguinestmlib::ThisIntegratedBlepSample(t) * discontinuity;
+            next_sample += sanguinestmlib::NextIntegratedBlepSample(t) * discontinuity;
             high_ = true;
           } else if (through_zero_fm && phase_ < 0.0f) {
             float t = phase_ / frequency;
             phase_ += 1.0f;
             float discontinuity = (slope_up + slope_down) * frequency;
-            this_sample -= stmlib::ThisIntegratedBlepSample(t) * discontinuity;
-            next_sample -= stmlib::NextIntegratedBlepSample(t) * discontinuity;
+            this_sample -= sanguinestmlib::ThisIntegratedBlepSample(t) * discontinuity;
+            next_sample -= sanguinestmlib::NextIntegratedBlepSample(t) * discontinuity;
             high_ = false;
           }
           next_sample += high_
@@ -191,21 +191,21 @@ namespace sanguineplaits {
             if (through_zero_fm && frequency < 0.0f) {
               discontinuity = -discontinuity;
             }
-            this_sample += stmlib::ThisBlepSample(t) * discontinuity;
-            next_sample += stmlib::NextBlepSample(t) * discontinuity;
+            this_sample += sanguinestmlib::ThisBlepSample(t) * discontinuity;
+            next_sample += sanguinestmlib::NextBlepSample(t) * discontinuity;
             high_ = phase_ >= pw;
           }
           if (phase_ >= 1.0f) {
             phase_ -= 1.0f;
             float t = phase_ / frequency;
-            this_sample -= stmlib::ThisBlepSample(t);
-            next_sample -= stmlib::NextBlepSample(t);
+            this_sample -= sanguinestmlib::ThisBlepSample(t);
+            next_sample -= sanguinestmlib::NextBlepSample(t);
             high_ = false;
           } else if (through_zero_fm && phase_ < 0.0f) {
             float t = phase_ / frequency;
             phase_ += 1.0f;
-            this_sample += stmlib::ThisBlepSample(t);
-            next_sample += stmlib::NextBlepSample(t);
+            this_sample += sanguinestmlib::ThisBlepSample(t);
+            next_sample += sanguinestmlib::NextBlepSample(t);
             high_ = true;
           }
           next_sample += phase_ < pw ? 0.0f : 1.0f;

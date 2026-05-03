@@ -64,7 +64,7 @@ namespace sanguinerings {
 
     static inline T Compress(float value) {
       return static_cast<uint16_t>(
-        stmlib::Clip16(static_cast<int32_t>(value * 4096.0f)));
+        sanguinestmlib::Clip16(static_cast<int32_t>(value * 4096.0f)));
     }
   };
 
@@ -78,7 +78,7 @@ namespace sanguinerings {
 
     static inline T Compress(float value) {
       return static_cast<uint16_t>(
-        stmlib::Clip16(static_cast<int32_t>(value * 32768.0f)));
+        sanguinestmlib::Clip16(static_cast<int32_t>(value * 32768.0f)));
     }
   };
 
@@ -263,7 +263,7 @@ namespace sanguinerings {
     };
 
     inline void SetLFOFrequency(LFOIndex index, float frequency) {
-      lfo_[index].template Init<stmlib::COSINE_OSCILLATOR_APPROXIMATE>(frequency * 32.0f);
+      lfo_[index].template Init<sanguinestmlib::COSINE_OSCILLATOR_APPROXIMATE>(frequency * 32.0f);
     }
 
     inline void Start(Context* c) {
@@ -291,7 +291,7 @@ namespace sanguinerings {
 
     int32_t write_ptr_;
     T* buffer_;
-    stmlib::CosineOscillator lfo_[2];
+    sanguinestmlib::CosineOscillator lfo_[2];
 
     DISALLOW_COPY_AND_ASSIGN(FxEngine);
   };

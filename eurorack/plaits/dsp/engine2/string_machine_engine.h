@@ -40,7 +40,7 @@ namespace sanguineplaits {
     StringMachineEngine() {}
     ~StringMachineEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters, float* out, float* aux, size_t size,
@@ -53,7 +53,7 @@ namespace sanguineplaits {
 
     Ensemble ensemble_;
     StringSynthOscillator divide_down_voice_[kChordNumNotes];
-    stmlib::NaiveSvf svf_[2];
+    sanguinestmlib::NaiveSvf svf_[2];
 
     float morph_lp_;
     float timbre_lp_;

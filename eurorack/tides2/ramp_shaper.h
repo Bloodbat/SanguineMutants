@@ -73,8 +73,8 @@ namespace sanguinetides2 {
         if (frequency < 0.0f) {
           discontinuity = -discontinuity;
         }
-        this_sample += stmlib::ThisBlepSample(t) * discontinuity;
-        next_sample += stmlib::NextBlepSample(t) * discontinuity;
+        this_sample += sanguinestmlib::ThisBlepSample(t) * discontinuity;
+        next_sample += sanguinestmlib::NextBlepSample(t) * discontinuity;
       }
 
       next_sample += phase < pw ? 0.0f : 1.0f;
@@ -162,8 +162,8 @@ namespace sanguinetides2 {
         if (frequency < 0.0f) {
           discontinuity = -discontinuity;
         }
-        this_sample += stmlib::ThisIntegratedBlepSample(t) * discontinuity;
-        next_sample += stmlib::NextIntegratedBlepSample(t) * discontinuity;
+        this_sample += sanguinestmlib::ThisIntegratedBlepSample(t) * discontinuity;
+        next_sample += sanguinestmlib::NextIntegratedBlepSample(t) * discontinuity;
       }
 
       next_sample += phase < pw ? phase * slope_up : 1.0f - (phase - pw) * slope_down;

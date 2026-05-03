@@ -161,7 +161,7 @@ namespace sanguineplaits {
           pitch_envelope_.RenderAtSample(envelope_sample, gate_duration) :
           pitch_envelope_.Render(parameters.gate, envelope_rate, ad_scale, r_scale);
         const float pitch_mod = pitch_envelope + parameters.pitch_mod;
-        const float f0 = a0_ * 0.25f * stmlib::SemitonesToRatioSafe(parameters.note - 9.0f + pitch_mod * 12.0f);
+        const float f0 = a0_ * 0.25f * sanguinestmlib::SemitonesToRatioSafe(parameters.note - 9.0f + pitch_mod * 12.0f);
 
         /*
            Sample the note and velocity (used for scaling) only when a trigger

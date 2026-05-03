@@ -147,7 +147,7 @@ namespace sanguineplaits {
     inline float NormalizeVelocity(float velocity) {
       // float cube_root = stmlib::Sqrt(
       //     0.7f * stmlib::Sqrt(velocity) + 0.3f * velocity);
-      const float cube_root = stmlib::Interpolate(lut_cube_root, velocity, 16);
+      const float cube_root = sanguinestmlib::Interpolate(lut_cube_root, velocity, 16);
       return 16.0f * (cube_root - 0.918f);
     }
 
@@ -196,7 +196,7 @@ namespace sanguineplaits {
         : float(int(op.coarse & 3) * 100 + op.fine) * 0.39864f;
       base += (float(op.detune) - 7.0f) * 0.015f;
 
-      return stmlib::SemitonesToRatioSafe(base) * detune;
+      return sanguinestmlib::SemitonesToRatioSafe(base) * detune;
     }
 
   }  // namespace fm

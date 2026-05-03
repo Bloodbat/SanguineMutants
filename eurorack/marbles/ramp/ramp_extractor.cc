@@ -43,7 +43,7 @@
 namespace sanguinemarbles {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   const float kLogOneFourth = 1.189207115f;
   const float kPulseWidthTolerance = 0.05f;

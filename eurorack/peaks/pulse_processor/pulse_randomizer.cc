@@ -37,7 +37,7 @@
 
 namespace sanguinepeaks {
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void PulseRandomizer::Init() {
     repetition_probability_ = 32767;

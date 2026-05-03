@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void SwarmEngine::Init(BufferAllocator* allocator) {
     swarm_voice_ = allocator->Allocate<SwarmVoice>(kNumSwarmVoices);

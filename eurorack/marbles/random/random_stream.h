@@ -71,7 +71,7 @@ namespace sanguinemarbles {
     }
 
   private:
-    stmlib::RingBuffer<uint32_t, 128> buffer_;
+    sanguinestmlib::RingBuffer<uint32_t, 128> buffer_;
     RandomGenerator* fallback_generator_;
 
     DISALLOW_COPY_AND_ASSIGN(RandomStream);

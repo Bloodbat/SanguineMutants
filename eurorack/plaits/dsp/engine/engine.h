@@ -38,7 +38,7 @@ namespace sanguineplaits {
   inline float NoteToFrequency(float midi_note) {
     midi_note -= 9.0f;
     CONSTRAIN(midi_note, -128.0f, 127.0f);
-    return a0 * 0.25f * stmlib::SemitonesToRatio(midi_note);
+    return a0 * 0.25f * sanguinestmlib::SemitonesToRatio(midi_note);
   }
 
   enum TriggerState {
@@ -81,7 +81,7 @@ namespace sanguineplaits {
   public:
     Engine() {}
     ~Engine() {}
-    virtual void Init(stmlib::BufferAllocator* allocator) = 0;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) = 0;
     virtual void Reset() = 0;
     virtual void LoadUserData(const uint8_t* user_data) = 0;
     virtual void Render(const EngineParameters& parameters, float* out, float* aux, size_t size,

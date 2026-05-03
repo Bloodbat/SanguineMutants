@@ -42,7 +42,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void ModalVoice::Init() {
     excitation_filter_.Init();

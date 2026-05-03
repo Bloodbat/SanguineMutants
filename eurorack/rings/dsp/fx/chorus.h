@@ -67,10 +67,10 @@ namespace sanguinerings {
         if (phase_2_ >= 1.0f) {
           phase_2_ -= 1.0f;
         }
-        float sin_1 = stmlib::Interpolate(lut_sine, phase_1_, 4096.0f);
-        float cos_1 = stmlib::Interpolate(lut_sine, phase_1_ + 0.25f, 4096.0f);
-        float sin_2 = stmlib::Interpolate(lut_sine, phase_2_, 4096.0f);
-        float cos_2 = stmlib::Interpolate(lut_sine, phase_2_ + 0.25f, 4096.0f);
+        float sin_1 = sanguinestmlib::Interpolate(lut_sine, phase_1_, 4096.0f);
+        float cos_1 = sanguinestmlib::Interpolate(lut_sine, phase_1_ + 0.25f, 4096.0f);
+        float sin_2 = sanguinestmlib::Interpolate(lut_sine, phase_2_, 4096.0f);
+        float cos_2 = sanguinestmlib::Interpolate(lut_sine, phase_2_ + 0.25f, 4096.0f);
 
         float wet;
 

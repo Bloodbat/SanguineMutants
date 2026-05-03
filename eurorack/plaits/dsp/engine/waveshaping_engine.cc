@@ -39,7 +39,7 @@
 namespace sanguineplaits {
 
     using namespace std;
-    using namespace stmlib;
+    using namespace sanguinestmlib;
 
     void WaveshapingEngine::Init(BufferAllocator* allocator) {
         slope_.Init();

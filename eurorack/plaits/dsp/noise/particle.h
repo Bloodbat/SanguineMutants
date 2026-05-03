@@ -55,7 +55,7 @@ namespace sanguineplaits {
       float* out,
       float* aux,
       size_t size) {
-      float u = stmlib::Random::GetFloat();
+      float u = sanguinestmlib::Random::GetFloat();
       if (sync) {
         u = density;
       }
@@ -65,25 +65,25 @@ namespace sanguineplaits {
         if (u <= density) {
           s = u * gain;
           if (can_radomize_frequency) {
-            const float u = 2.0f * stmlib::Random::GetFloat() - 1.0f;
+            const float u = 2.0f * sanguinestmlib::Random::GetFloat() - 1.0f;
             const float f = std::min(
-              stmlib::SemitonesToRatio(spread * u) * frequency,
+              sanguinestmlib::SemitonesToRatio(spread * u) * frequency,
               0.25f);
-            pre_gain_ = 0.5f / stmlib::Sqrt(q * f * stmlib::Sqrt(density));
-            filter_.set_f_q<stmlib::FREQUENCY_DIRTY>(f, q);
+            pre_gain_ = 0.5f / sanguinestmlib::Sqrt(q * f * sanguinestmlib::Sqrt(density));
+            filter_.set_f_q<sanguinestmlib::FREQUENCY_DIRTY>(f, q);
             // Keep the cutoff constant for this whole block.
             can_radomize_frequency = false;
           }
         }
         *aux++ += s;
-        *out++ += filter_.Process<stmlib::FILTER_MODE_BAND_PASS>(pre_gain_ * s);
-        u = stmlib::Random::GetFloat();
+        *out++ += filter_.Process<sanguinestmlib::FILTER_MODE_BAND_PASS>(pre_gain_ * s);
+        u = sanguinestmlib::Random::GetFloat();
       }
     }
 
   private:
     float pre_gain_;
-    stmlib::Svf filter_;
+    sanguinestmlib::Svf filter_;
 
     DISALLOW_COPY_AND_ASSIGN(Particle);
   };

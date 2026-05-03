@@ -33,7 +33,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void ModalEngine::Init(BufferAllocator* allocator) {
     temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize);

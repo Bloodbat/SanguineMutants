@@ -35,7 +35,7 @@
 
 namespace sanguineplaits {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void WaveTerrainEngine::Init(BufferAllocator* allocator) {
     path_.Init();

@@ -91,20 +91,20 @@ namespace sanguineplaits {
         &unshifted_registration[7 - shift],
         &registration[shift]);
 
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
-      stmlib::ParameterInterpolator saw_8_gain_modulation(
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator saw_8_gain_modulation(
         &saw_8_gain_,
         (registration[0] + 2.0f * registration[1]) * gain,
         size);
-      stmlib::ParameterInterpolator saw_4_gain_modulation(
+      sanguinestmlib::ParameterInterpolator saw_4_gain_modulation(
         &saw_4_gain_,
         (registration[2] - registration[1] + 2.0f * registration[3]) * gain,
         size);
-      stmlib::ParameterInterpolator saw_2_gain_modulation(
+      sanguinestmlib::ParameterInterpolator saw_2_gain_modulation(
         &saw_2_gain_,
         (registration[4] - registration[3] + 2.0f * registration[5]) * gain,
         size);
-      stmlib::ParameterInterpolator saw_1_gain_modulation(
+      sanguinestmlib::ParameterInterpolator saw_1_gain_modulation(
         &saw_1_gain_,
         (registration[6] - registration[5]) * gain,
         size);
@@ -141,8 +141,8 @@ namespace sanguineplaits {
           if (discontinuity != 0.0f) {
             float fraction = phase - static_cast<float>(next_segment);
             float t = fraction / frequency;
-            this_sample += stmlib::ThisBlepSample(t) * discontinuity;
-            next_sample += stmlib::NextBlepSample(t) * discontinuity;
+            this_sample += sanguinestmlib::ThisBlepSample(t) * discontinuity;
+            next_sample += sanguinestmlib::NextBlepSample(t) * discontinuity;
           }
         }
         segment = next_segment;

@@ -32,7 +32,7 @@
 #include "renaissance/renaissance_resources.h"
 
 namespace renaissance {
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	enum EnvelopeSegment {
 		ENV_SEGMENT_ATTACK = 0,

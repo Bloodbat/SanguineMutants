@@ -34,7 +34,7 @@
 
 namespace sanguineplaits {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   const int kNumBanks = 4;
   const int kNumWavesPerBank = 64;

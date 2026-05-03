@@ -38,7 +38,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void LPCSpeechSynth::Init() {
     phase_ = 0.0f;

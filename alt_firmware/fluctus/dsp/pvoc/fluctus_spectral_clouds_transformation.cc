@@ -43,7 +43,7 @@
 namespace fluctus {
 
 	using namespace std;
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	static const size_t kMaxFilterBankBands = 128;
 	static const size_t kMaxRandTriggerValue = 30;
@@ -92,7 +92,7 @@ namespace fluctus {
 		const bool freeze = parameters.freeze;
 
 		bool rand_trigger = rand_trigger_parameter < 0.1 ? false :
-			(stmlib::Random::GetWord() % static_cast<uint32_t>((1.0f - rand_trigger_parameter) *
+			(sanguinestmlib::Random::GetWord() % static_cast<uint32_t>((1.0f - rand_trigger_parameter) *
 				kMaxRandTriggerValue + 1) == 0);
 
 		const float parameter_low_pass = parameter_low_pass_parameter < 0.1 ? 0.0f :
@@ -100,7 +100,7 @@ namespace fluctus {
 
 		if (trigger || rand_trigger) {
 			for (size_t i = 0; i < kMaxFilterBankBands; ++i) {
-				band_gain_target_[i] = static_cast<uint16_t>(stmlib::Random::GetWord() & 0xFFFFU);
+				band_gain_target_[i] = static_cast<uint16_t>(sanguinestmlib::Random::GetWord() & 0xFFFFU);
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace fluctus {
 
 		int32_t amount = static_cast<int32_t>(phase_randomization_parameter * 32768.0f);
 		for (int32_t i = 1; i < size_ - 1; ++i) {
-			phases_[i] += static_cast<int32_t>(stmlib::Random::GetSample()) * amount >> 14;
+			phases_[i] += static_cast<int32_t>(sanguinestmlib::Random::GetSample()) * amount >> 14;
 		}
 		size_t band_idx = 0;
 		const float base = Interpolate(lut_freq_log, current_num_freq_bands_parameter_, LUT_FREQ_LOG_SIZE - 1);

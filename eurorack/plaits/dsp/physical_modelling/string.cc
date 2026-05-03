@@ -41,7 +41,7 @@
 namespace sanguineplaits {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void String::Init(BufferAllocator* allocator) {
     string_.Init(allocator->Allocate<float>(kDelayLineSize));

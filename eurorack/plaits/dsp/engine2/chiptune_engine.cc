@@ -32,7 +32,7 @@
 
 namespace sanguineplaits {
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void ChiptuneEngine::Init(BufferAllocator* allocator) {
     bass_.Init();

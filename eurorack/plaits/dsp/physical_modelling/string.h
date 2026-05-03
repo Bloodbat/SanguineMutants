@@ -52,7 +52,7 @@ namespace sanguineplaits {
     String() {}
     ~String() {}
 
-    void Init(stmlib::BufferAllocator* allocator);
+    void Init(sanguinestmlib::BufferAllocator* allocator);
     void Reset();
     void Process(
       float f0,
@@ -77,8 +77,8 @@ namespace sanguineplaits {
     DelayLine<float, kDelayLineSize> string_;
     DelayLine<float, kDelayLineSize / 4> stretch_;
 
-    stmlib::Svf iir_damping_filter_;
-    stmlib::DCBlocker dc_blocker_;
+    sanguinestmlib::Svf iir_damping_filter_;
+    sanguinestmlib::DCBlocker dc_blocker_;
 
     float delay_;
     float dispersion_noise_;

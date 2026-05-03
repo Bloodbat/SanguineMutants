@@ -39,7 +39,7 @@
 
 namespace deadman {
 
-	using namespace stmlib;
+	using namespace sanguinestmlib;
 
 	void HighHat::Init() {
 		noise_.Init();
@@ -59,7 +59,7 @@ namespace deadman {
 
 				// Randomise parameters.
 				// Frequency.
-				uint32_t random_value = stmlib::Random::GetWord();
+				uint32_t random_value = sanguinestmlib::Random::GetWord();
 				bool freq_up = (random_value > 2147483647) ? true : false;
 				int32_t randomised_frequency = freq_up ?
 					(last_frequency_ + (frequency_randomness_ >> 2)) :
@@ -81,7 +81,7 @@ namespace deadman {
 				last_frequency_ = randomised_frequency;
 
 				// Decay.
-				random_value = stmlib::Random::GetWord();
+				random_value = sanguinestmlib::Random::GetWord();
 				freq_up = (random_value > 2147483647) ? true : false;
 				randomised_frequency = freq_up ?
 					(last_decay_ + (decay_randomness_ >> 2)) :

@@ -74,12 +74,12 @@ namespace sanguineplaits {
 
       if (randomize) {
         from_ += interval_;
-        interval_ = stmlib::Random::GetFloat() - from_;
+        interval_ = sanguinestmlib::Random::GetFloat() - from_;
         // Randomize the duration of the grain.
         if (burst_mode) {
-          fm_ *= 0.8f + 0.2f * stmlib::Random::GetFloat();
+          fm_ *= 0.8f + 0.2f * sanguinestmlib::Random::GetFloat();
         } else {
-          fm_ = 0.5f + 1.5f * stmlib::Random::GetFloat();
+          fm_ = 0.5f + 1.5f * sanguinestmlib::Random::GetFloat();
         }
       }
     }
@@ -146,8 +146,8 @@ namespace sanguineplaits {
       if (frequency >= kMaxFrequency) {
         frequency = kMaxFrequency;
       }
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
-      stmlib::ParameterInterpolator gain(&gain_, level, size);
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator gain(&gain_, level, size);
 
       float next_sample = next_sample_;
       float phase = phase_;
@@ -163,8 +163,8 @@ namespace sanguineplaits {
         if (phase >= 1.0f) {
           phase -= 1.0f;
           float t = phase / frequency;
-          this_sample -= stmlib::ThisBlepSample(t);
-          next_sample -= stmlib::NextBlepSample(t);
+          this_sample -= sanguinestmlib::ThisBlepSample(t);
+          next_sample -= sanguinestmlib::NextBlepSample(t);
         }
 
         next_sample += phase;
@@ -214,7 +214,7 @@ namespace sanguineplaits {
       const float amplitude = envelope_.amplitude(size_ratio) * scale;
 
       const float expo_amount = envelope_.frequency(size_ratio);
-      f0 *= stmlib::SemitonesToRatio(48.0f * expo_amount * spread * rank_);
+      f0 *= sanguinestmlib::SemitonesToRatio(48.0f * expo_amount * spread * rank_);
 
       const float linear_amount = rank_ * (rank_ + 0.01f) * spread * 0.25f;
       f0 *= 1.0f + linear_amount;
@@ -236,7 +236,7 @@ namespace sanguineplaits {
     SwarmEngine() {}
     ~SwarmEngine() {}
 
-    virtual void Init(stmlib::BufferAllocator* allocator) override;
+    virtual void Init(sanguinestmlib::BufferAllocator* allocator) override;
     virtual void Reset() override;
     virtual void LoadUserData(const uint8_t* user_data) override {}
     virtual void Render(const EngineParameters& parameters,

@@ -251,7 +251,7 @@ namespace sanguinetides {
     uint32_t target_phase_increment_;
     uint32_t eor_counter_;
 
-    stmlib::PatternPredictor<32, 8> pattern_predictor_;
+    sanguinestmlib::PatternPredictor<32, 8> pattern_predictor_;
 
     int64_t uni_lp_state_[2];
     int64_t bi_lp_state_[2];

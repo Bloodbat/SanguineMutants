@@ -73,9 +73,9 @@ namespace sanguineplaits {
         CONSTRAIN(pw, frequency * 2.0f, 1.0f - 2.0f * frequency);
       }
 
-      stmlib::ParameterInterpolator fm(&frequency_, frequency, size);
-      stmlib::ParameterInterpolator pwm(&pw_, pw, size);
-      stmlib::ParameterInterpolator waveshape_modulation(
+      sanguinestmlib::ParameterInterpolator fm(&frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator pwm(&pw_, pw, size);
+      sanguinestmlib::ParameterInterpolator waveshape_modulation(
         &waveshape_, waveshape, size);
 
       float next_sample = next_sample_;
@@ -98,20 +98,20 @@ namespace sanguineplaits {
           const float triangle_step = (slope_up + slope_down) * frequency * triangle_amount;
           const float notch = (kVariableSawNotchDepth + 1.0f - pw) * notch_amount;
           const float t = (phase_ - pw) / (previous_pw_ - pw + frequency);
-          this_sample += notch * stmlib::ThisBlepSample(t);
-          next_sample += notch * stmlib::NextBlepSample(t);
-          this_sample -= triangle_step * stmlib::ThisIntegratedBlepSample(t);
-          next_sample -= triangle_step * stmlib::NextIntegratedBlepSample(t);
+          this_sample += notch * sanguinestmlib::ThisBlepSample(t);
+          next_sample += notch * sanguinestmlib::NextBlepSample(t);
+          this_sample -= triangle_step * sanguinestmlib::ThisIntegratedBlepSample(t);
+          next_sample -= triangle_step * sanguinestmlib::NextIntegratedBlepSample(t);
           high_ = true;
         } else if (phase_ >= 1.0f) {
           phase_ -= 1.0f;
           const float triangle_step = (slope_up + slope_down) * frequency * triangle_amount;
           const float notch = (kVariableSawNotchDepth + 1.0f) * notch_amount;
           const float t = phase_ / frequency;
-          this_sample -= notch * stmlib::ThisBlepSample(t);
-          next_sample -= notch * stmlib::NextBlepSample(t);
-          this_sample += triangle_step * stmlib::ThisIntegratedBlepSample(t);
-          next_sample += triangle_step * stmlib::NextIntegratedBlepSample(t);
+          this_sample -= notch * sanguinestmlib::ThisBlepSample(t);
+          next_sample -= notch * sanguinestmlib::NextBlepSample(t);
+          this_sample += triangle_step * sanguinestmlib::ThisIntegratedBlepSample(t);
+          next_sample += triangle_step * sanguinestmlib::NextIntegratedBlepSample(t);
           high_ = false;
         }
 

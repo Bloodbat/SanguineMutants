@@ -45,7 +45,7 @@ namespace sanguineclouds {
 
   const float kCrossfadeDuration = 64.0f;
 
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   class LoopingSamplePlayer {
   public:

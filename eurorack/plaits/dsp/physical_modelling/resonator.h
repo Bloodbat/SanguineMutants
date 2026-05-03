@@ -50,7 +50,7 @@ namespace sanguineplaits {
       }
     }
 
-    template<stmlib::FilterMode mode, bool add>
+    template<sanguinestmlib::FilterMode mode, bool add>
     void Process(
       const float* f,
       const float* q,
@@ -66,7 +66,7 @@ namespace sanguineplaits {
       float state_2[batch_size];
       float gains[batch_size];
       for (int i = 0; i < batch_size; ++i) {
-        g[i] = stmlib::OnePole::tan<stmlib::FREQUENCY_FAST>(f[i]);
+        g[i] = sanguinestmlib::OnePole::tan<sanguinestmlib::FREQUENCY_FAST>(f[i]);
         r[i] = 1.0f / q[i];
         h[i] = 1.0f / (1.0f + r[i] * g[i] + g[i] * g[i]);
         r_plus_g[i] = r[i] + g[i];
@@ -84,7 +84,7 @@ namespace sanguineplaits {
           state_1[i] = g[i] * hp + bp;
           const float lp = g[i] * bp + state_2[i];
           state_2[i] = g[i] * bp + lp;
-          s_out += gains[i] * ((mode == stmlib::FILTER_MODE_LOW_PASS) ? lp : bp);
+          s_out += gains[i] * ((mode == sanguinestmlib::FILTER_MODE_LOW_PASS) ? lp : bp);
         }
         if (add) {
           *out++ += s_out;

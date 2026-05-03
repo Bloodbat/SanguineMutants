@@ -72,9 +72,9 @@ namespace sanguineplaits {
         frequency = kMaxFrequency;
       }
 
-      stmlib::ParameterInterpolator master_fm(
+      sanguinestmlib::ParameterInterpolator master_fm(
         &master_frequency_, master_frequency, size);
-      stmlib::ParameterInterpolator fm(&slave_frequency_, frequency, size);
+      sanguinestmlib::ParameterInterpolator fm(&slave_frequency_, frequency, size);
 
       float next_sample = next_sample_;
 
@@ -105,8 +105,8 @@ namespace sanguineplaits {
             transition_during_reset = true;
           }
           float value = slave_phase_at_reset < 0.5f ? 0.0f : 1.0f;
-          this_sample -= value * stmlib::ThisBlepSample(reset_time);
-          next_sample -= value * stmlib::NextBlepSample(reset_time);
+          this_sample -= value * sanguinestmlib::ThisBlepSample(reset_time);
+          next_sample -= value * sanguinestmlib::NextBlepSample(reset_time);
         }
 
         slave_phase_ += slave_frequency;
@@ -116,8 +116,8 @@ namespace sanguineplaits {
               break;
             }
             float t = (slave_phase_ - 0.5f) / slave_frequency;
-            this_sample += stmlib::ThisBlepSample(t);
-            next_sample += stmlib::NextBlepSample(t);
+            this_sample += sanguinestmlib::ThisBlepSample(t);
+            next_sample += sanguinestmlib::NextBlepSample(t);
             high_ = true;
           }
 
@@ -127,8 +127,8 @@ namespace sanguineplaits {
             }
             slave_phase_ -= 1.0f;
             float t = slave_phase_ / slave_frequency;
-            this_sample -= stmlib::ThisBlepSample(t);
-            next_sample -= stmlib::NextBlepSample(t);
+            this_sample -= sanguinestmlib::ThisBlepSample(t);
+            next_sample -= sanguinestmlib::NextBlepSample(t);
             high_ = false;
           }
         }

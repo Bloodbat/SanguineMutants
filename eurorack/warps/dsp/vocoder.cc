@@ -36,7 +36,7 @@
 namespace sanguinewarps {
 
   using namespace std;
-  using namespace stmlib;
+  using namespace sanguinestmlib;
 
   void Vocoder::Init(float sample_rate) {
     modulator_filter_bank_.Init(sample_rate);
