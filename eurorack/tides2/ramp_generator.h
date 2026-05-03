@@ -25,8 +25,8 @@
 // -----------------------------------------------------------------------------
 
 // Generates several ramps, in lockstep or with various frequency/slope ratios.
-#ifndef TIDES_RAMP_GENERATOR_H_
-#define TIDES_RAMP_GENERATOR_H_
+#ifndef TIDES2_RAMP_GENERATOR_H_
+#define TIDES2_RAMP_GENERATOR_H_
 
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/parameter_interpolator.h"
@@ -222,4 +222,4 @@ namespace tides2 {
     DISALLOW_COPY_AND_ASSIGN(RampGenerator);
   };
 }  // namespace tides2
-#endif  // TIDES_RAMP_GENERATOR_H_
+#endif  // TIDES2_RAMP_GENERATOR_H_
