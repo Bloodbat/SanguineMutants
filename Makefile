@@ -38,10 +38,6 @@ SOURCES += eurorack/peaks/pulse_processor/pulse_shaper.cc
 SOURCES += eurorack/peaks/pulse_processor/pulse_randomizer.cc
 SOURCES += eurorack/peaks/number_station/number_station.cc
 
-SOURCES += eurorack/tides2/poly_slope_generator.cc
-SOURCES += eurorack/tides2/ramp/ramp_extractor.cc
-SOURCES += eurorack/tides2/resources.cc
-
 SOURCES += eurorack/braids/macro_oscillator.cc
 SOURCES += eurorack/braids/analog_oscillator.cc
 SOURCES += eurorack/braids/digital_oscillator.cc
