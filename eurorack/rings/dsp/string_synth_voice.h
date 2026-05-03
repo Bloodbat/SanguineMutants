@@ -33,43 +33,43 @@
 
 #include "rings/dsp/string_synth_oscillator.h"
 
-namespace rings {
+namespace sanguinerings {
 
-template<size_t num_harmonics>
-class StringSynthVoice {
- public:
-  StringSynthVoice() { }
-  ~StringSynthVoice() { }
-  
-  void Init() {
-    for (size_t i = 0; i < num_harmonics; ++i) {
-      oscillator_[i].Init();
+  template<size_t num_harmonics>
+  class StringSynthVoice {
+  public:
+    StringSynthVoice() {}
+    ~StringSynthVoice() {}
+
+    void Init() {
+      for (size_t i = 0; i < num_harmonics; ++i) {
+        oscillator_[i].Init();
+      }
     }
-  }
-  
-  void Render(
+
+    void Render(
       float frequency,
       const float* amplitudes,
       size_t summed_harmonics,
       float* out,
       size_t size) {
-    oscillator_[0].template Render<OSCILLATOR_SHAPE_DARK_SQUARE, true>(
+      oscillator_[0].template Render<OSCILLATOR_SHAPE_DARK_SQUARE, true>(
         frequency, amplitudes[0], amplitudes[1], out, size);
-    amplitudes += 2;
-    
-    for (size_t i = 1; i < summed_harmonics; ++i) {
-      frequency *= 2.0f;
-      oscillator_[i].template Render<OSCILLATOR_SHAPE_BRIGHT_SQUARE, false>(
-          frequency, amplitudes[0], amplitudes[1], out, size);
       amplitudes += 2;
+
+      for (size_t i = 1; i < summed_harmonics; ++i) {
+        frequency *= 2.0f;
+        oscillator_[i].template Render<OSCILLATOR_SHAPE_BRIGHT_SQUARE, false>(
+          frequency, amplitudes[0], amplitudes[1], out, size);
+        amplitudes += 2;
+      }
     }
-  }
 
- private:
-  StringSynthOscillator oscillator_[num_harmonics];
-  DISALLOW_COPY_AND_ASSIGN(StringSynthVoice);
-};
+  private:
+    StringSynthOscillator oscillator_[num_harmonics];
+    DISALLOW_COPY_AND_ASSIGN(StringSynthVoice);
+  };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_STRING_SYNTH_VOICE_H_

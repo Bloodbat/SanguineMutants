@@ -38,7 +38,7 @@
 
 #include "rings/dsp/dsp.h"
 
-namespace rings {
+namespace sanguinerings {
 
   const size_t kDelayLineSize = 2048;
 
@@ -162,6 +162,6 @@ namespace rings {
     DISALLOW_COPY_AND_ASSIGN(String);
   };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_STRING_H_

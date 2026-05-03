@@ -37,7 +37,7 @@
 
 #include "rings/resources.h"
 
-namespace rings {
+namespace sanguinerings {
 
   using namespace std;
   using namespace stmlib;
@@ -202,4 +202,4 @@ namespace rings {
     }
   }
 
-}  // namespace rings
+}  // namespace sanguinerings

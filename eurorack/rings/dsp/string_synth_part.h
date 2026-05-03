@@ -44,7 +44,7 @@
 #include "rings/dsp/string_synth_envelope.h"
 #include "rings/dsp/string_synth_voice.h"
 
-namespace rings {
+namespace sanguinerings {
 
   const int32_t kMaxStringSynthPolyphony = 4;
   const int32_t kStringSynthVoices = 12;
@@ -135,6 +135,6 @@ namespace rings {
     DISALLOW_COPY_AND_ASSIGN(StringSynthPart);
   };
 
-}  // namespace rings
+}  // namespace sanguinerings
 
 #endif  // RINGS_DSP_STRING_SYNTH_VOICE_H_

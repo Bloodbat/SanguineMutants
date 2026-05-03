@@ -34,9 +34,9 @@
 // #define MIC_W
 #define BRYAN_CHORDS
 
-namespace rings {
+namespace sanguinerings {
     static const float kSampleRate = 48000.0f;
     const float a3 = 440.0f / kSampleRate;
     const size_t kMaxBlockSize = 24;
-}  // namespace rings
+}  // namespace sanguinerings
 #endif  // RINGS_DSP_DSP_H_
