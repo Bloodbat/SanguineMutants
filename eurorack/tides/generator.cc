@@ -35,7 +35,7 @@
 
 #include "tides/resources.h"
 
-namespace tides {
+namespace sanguinetides {
   using namespace std;
   using namespace stmlib;
 
@@ -778,4 +778,4 @@ namespace tides {
     bi_lp_state_[0] = lp_state_0;
     bi_lp_state_[1] = lp_state_1;
   }
-}  // namespace tides
+}  // namespace sanguinetides

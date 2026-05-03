@@ -34,7 +34,7 @@
 #include "stmlib/algorithms/pattern_predictor.h"
 #include "stmlib/utils/ring_buffer.h"
 
-namespace tides {
+namespace sanguinetides {
   enum GeneratorRange {
     GENERATOR_RANGE_HIGH,
     GENERATOR_RANGE_MEDIUM,
@@ -268,5 +268,5 @@ namespace tides {
 
     DISALLOW_COPY_AND_ASSIGN(Generator);
   };
-}  // namespace tides
+}  // namespace sanguinetides
 #endif  // TIDES_GENERATOR_H_

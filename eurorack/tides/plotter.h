@@ -31,7 +31,7 @@
 
 #include "stmlib/stmlib.h"
 
-namespace tides {
+namespace sanguinetides {
   enum PlotCommand {
     PLOT_MOVE_TO,
     PLOT_LINE_TO
@@ -284,5 +284,5 @@ namespace tides {
 
     DISALLOW_COPY_AND_ASSIGN(Plotter);
   };
-}  // namespace tides
+}  // namespace sanguinetides
 #endif  // TIDES_PLOTTER_H_

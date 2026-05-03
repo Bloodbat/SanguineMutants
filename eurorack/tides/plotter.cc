@@ -28,7 +28,7 @@
 
 #include "tides/plotter.h"
 
-namespace tides {
+namespace sanguinetides {
   void Plotter::Run() {
     const PlotInstruction& instruction = program_[pc_];
     if (instruction.command == PLOT_MOVE_TO) {
@@ -56,4 +56,4 @@ namespace tides {
       pc_ = 0;
     }
   }
-}  // namespace tides
+}  // namespace sanguinetides
