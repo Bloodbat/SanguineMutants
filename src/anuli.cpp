@@ -102,8 +102,7 @@ struct Anuli : SanguineModule {
 
 	bool bUseFrequencyOffset = true;
 
-	bool bOddConnected = false;
-	bool bEvenConnected = false;
+	bool connectedOutputs[OUTPUTS_COUNT] = { false, false };
 	bool bModeConnected = false;
 	bool bFxConnected = false;
 
@@ -321,7 +320,7 @@ struct Anuli : SanguineModule {
 			*/
 			float_4 outVoltagesOdd;
 			float_4 outVoltagesEven;
-			if (bEvenConnected & bOddConnected) {
+			if (connectedOutputs[OUTPUT_ODD] & connectedOutputs[OUTPUT_EVEN]) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					currentSample = channel << 1;
 					outVoltagesOdd[0] = outputFrames.samples[currentSample];
@@ -563,15 +562,7 @@ struct Anuli : SanguineModule {
 			break;
 
 		case Port::OUTPUT:
-			switch (e.portId) {
-			case OUTPUT_ODD:
-				bOddConnected = e.connecting;
-				break;
-
-			case OUTPUT_EVEN:
-				bEvenConnected = e.connecting;
-				break;
-			}
+			connectedOutputs[e.portId] = e.connecting;
 			break;
 		}
 	}
