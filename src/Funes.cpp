@@ -115,12 +115,12 @@ struct Funes : SanguineModule {
 
 	bool bWantHoldModulations = false;
 
-	bool bHaveInputEngine = false;
-	bool bHaveInputFrequency = false;
-	bool bHaveInputLevel = false;
-	bool bHaveInputTimbre = false;
-	bool bHaveInputMorph = false;
-	bool bHaveInputTrigger = false;
+	bool bEngineConnected = false;
+	bool bFrequencyConnected = false;
+	bool bLevelConnected = false;
+	bool bTimbreConnected = false;
+	bool bMorphConnected = false;
+	bool bTriggerConnected = false;
 
 	std::string displayText = "";
 
@@ -195,7 +195,7 @@ struct Funes : SanguineModule {
 			int knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
 
 			// Switch models
-			if (bHaveInputEngine && bNotesModelSelection) {
+			if (bEngineConnected && bNotesModelSelection) {
 				float currentModelVoltage = inputs[INPUT_ENGINE].getVoltage();
 				if (currentModelVoltage != lastModelVoltage) {
 					lastModelVoltage = currentModelVoltage;
@@ -295,11 +295,11 @@ struct Funes : SanguineModule {
 				// Triggers at around 0.7 V
 				modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
 
-				modulations[channel].frequency_patched = bHaveInputFrequency;
-				modulations[channel].level_patched = bHaveInputLevel;
-				modulations[channel].timbre_patched = bHaveInputTimbre;
-				modulations[channel].morph_patched = bHaveInputMorph;
-				modulations[channel].trigger_patched = bHaveInputTrigger;
+				modulations[channel].frequency_patched = bFrequencyConnected;
+				modulations[channel].level_patched = bLevelConnected;
+				modulations[channel].timbre_patched = bTimbreConnected;
+				modulations[channel].morph_patched = bMorphConnected;
+				modulations[channel].trigger_patched = bTriggerConnected;
 
 				// Render frames
 				sanguineplaits::Voice::Frame output[sanguineplaits::kBlockSize];
@@ -467,22 +467,22 @@ struct Funes : SanguineModule {
 		if (e.type == Port::INPUT) {
 			switch (e.portId) {
 			case INPUT_ENGINE:
-				bHaveInputEngine = e.connecting;
+				bEngineConnected = e.connecting;
 				break;
 			case INPUT_FREQUENCY:
-				bHaveInputFrequency = e.connecting;
+				bFrequencyConnected = e.connecting;
 				break;
 			case INPUT_LEVEL:
-				bHaveInputLevel = e.connecting;
+				bLevelConnected = e.connecting;
 				break;
 			case INPUT_TIMBRE:
-				bHaveInputTimbre = e.connecting;
+				bTimbreConnected = e.connecting;
 				break;
 			case INPUT_MORPH:
-				bHaveInputMorph = e.connecting;
+				bMorphConnected = e.connecting;
 				break;
 			case INPUT_TRIGGER:
-				bHaveInputTrigger = e.connecting;
+				bTriggerConnected = e.connecting;
 				break;
 			default:
 				break;
