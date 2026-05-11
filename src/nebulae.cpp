@@ -135,7 +135,7 @@ struct Nebulae : SanguineModule {
 	bool bTriggersAreGates = true;
 	bool lastTriggered[PORT_MAX_CHANNELS];
 
-	bool bHaveModeCable = false;
+	bool bModeConnected = false;
 	bool bRightInputConnected = false;
 	bool bLeftOutputConnected = false;
 	bool bRightOutputConnected = false;
@@ -532,7 +532,7 @@ struct Nebulae : SanguineModule {
 
 			channelModes.fill(knobPlaybackMode);
 
-			if (bHaveModeCable) {
+			if (bModeConnected) {
 				float_4 modeVoltages;
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
@@ -643,7 +643,7 @@ struct Nebulae : SanguineModule {
 		case Port::INPUT:
 			switch (e.portId) {
 			case INPUT_MODE:
-				bHaveModeCable = e.connecting;
+				bModeConnected = e.connecting;
 				break;
 
 			case INPUT_RIGHT:
