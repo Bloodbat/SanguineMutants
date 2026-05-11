@@ -177,20 +177,7 @@ struct Aleae : SanguineModule {
 			break;
 
 		case Port::OUTPUT:
-			switch (e.portId) {
-			case OUTPUT_OUT_1A:
-				outputsConnected[0] = e.connecting;
-				break;
-			case OUTPUT_OUT_2A:
-				outputsConnected[1] = e.connecting;
-				break;
-			case OUTPUT_OUT_1B:
-				outputsConnected[2] = e.connecting;
-				break;
-			case OUTPUT_OUT_2B:
-				outputsConnected[3] = e.connecting;
-				break;
-			}
+			outputsConnected[e.portId] = e.connecting;
 			break;
 		}
 	}
