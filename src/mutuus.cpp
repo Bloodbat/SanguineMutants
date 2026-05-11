@@ -67,7 +67,7 @@ struct Mutuus : SanguineModule {
 
 	bool bNotesModeSelection = false;
 
-	bool bHaveModeCable = false;
+	bool bModeConnected = false;
 
 	float lastAlgorithmValue = 0.f;
 
@@ -156,7 +156,7 @@ struct Mutuus : SanguineModule {
 
 		channelFeatureModes.fill(static_cast<mutuus::FeatureMode>(featureMode));
 
-		if (bHaveModeCable) {
+		if (bModeConnected) {
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				float_4 modeVoltages;
 
@@ -330,7 +330,7 @@ struct Mutuus : SanguineModule {
 
 	void onPortChange(const PortChangeEvent& e) override {
 		if (e.type == Port::INPUT && e.portId == INPUT_MODE) {
-			bHaveModeCable = e.connecting;
+			bModeConnected = e.connecting;
 		}
 	}
 
