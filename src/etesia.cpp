@@ -144,8 +144,7 @@ struct Etesia : SanguineModule {
 
 	bool bModeConnected = false;
 	bool bRightInputConnected = false;
-	bool bLeftOutputConnected = false;
-	bool bRightOutputConnected = false;
+	bool connectedOutputs[OUTPUTS_COUNT] = { false, false };
 
 	bool bWantLoFi = false;
 	bool bFrozen = false;
@@ -469,7 +468,7 @@ struct Etesia : SanguineModule {
 				outChannelGains += knobOutputGain;
 				outChannelGains = simd::clamp(outChannelGains, 0.f, 2.f);
 
-				if (bLeftOutputConnected) {
+				if (connectedOutputs[OUTPUT_LEFT]) {
 					outVoltagesLeft[0] = outputFrames.samples[currentChannel];
 					outVoltagesLeft[1] = outputFrames.samples[currentChannel + 2];
 					outVoltagesLeft[2] = outputFrames.samples[currentChannel + 4];
@@ -481,7 +480,7 @@ struct Etesia : SanguineModule {
 					outputs[OUTPUT_LEFT].setVoltageSimd(outVoltagesLeft, channel);
 				}
 
-				if (bRightOutputConnected) {
+				if (connectedOutputs[OUTPUT_RIGHT]) {
 					outVoltagesRight[0] = outputFrames.samples[currentChannel + 1];
 					outVoltagesRight[1] = outputFrames.samples[currentChannel + 3];
 					outVoltagesRight[2] = outputFrames.samples[currentChannel + 5];
@@ -686,15 +685,7 @@ struct Etesia : SanguineModule {
 			break;
 
 		case Port::OUTPUT:
-			switch (e.portId) {
-			case OUTPUT_LEFT:
-				bLeftOutputConnected = e.connecting;
-				break;
-
-			case OUTPUT_RIGHT:
-				bRightOutputConnected = e.connecting;
-				break;
-			}
+			connectedOutputs[e.portId] = e.connecting;
 			break;
 		}
 	}
