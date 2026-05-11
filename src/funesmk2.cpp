@@ -120,16 +120,16 @@ struct FunesMk2 : SanguineModule {
 
     bool bWantHoldModulations = false;
 
-    bool bHaveInputModel = false;
-    bool bHaveInputTimbre = false;
-    bool bHaveInputFrequency = false;
-    bool bHaveInputMorph = false;
-    bool bHaveInputTrigger = false;
-    bool bHaveInputLevel = false;
-    bool bHaveInputLpgColor = false;
-    bool bHaveInputLpgDecay = false;
-    bool bHaveInputChordBank = false;
-    bool bHaveInputAuxSuboscillator = false;
+    bool bModelConnected = false;
+    bool bTimbreConnected = false;
+    bool bFrequencyConnected = false;
+    bool bMorphConnected = false;
+    bool bTriggerConnected = false;
+    bool bLevelConnected = false;
+    bool bLpgColorConnected = false;
+    bool bLpgDecayConnected = false;
+    bool bChordBankConnected = false;
+    bool bAuxSuboscillatorConnected = false;
 
     bool holdModulations[PORT_MAX_CHANNELS] = {};
 
@@ -259,7 +259,7 @@ struct FunesMk2 : SanguineModule {
             for (int channel = 0; channel < channelCount; channel += 4) {
                 currentChannel = channel >> 2;
 
-                if (!bHaveInputChordBank) {
+                if (!bChordBankConnected) {
                     chordBanks[channel] = selectedChordBank;
                     chordBanks[channel + 1] = selectedChordBank;
                     chordBanks[channel + 2] = selectedChordBank;
@@ -275,7 +275,7 @@ struct FunesMk2 : SanguineModule {
                     chordBanks[channel + 3] = static_cast<uint8_t>(chordBankVoltages[currentChannel][3]);
                 }
 
-                if (!bHaveInputAuxSuboscillator) {
+                if (!bAuxSuboscillatorConnected) {
                     auxSubOscillators[currentChannel] = selectedSubOscillator;
                 } else {
                     auxSubOscillators[currentChannel] =
@@ -286,7 +286,7 @@ struct FunesMk2 : SanguineModule {
                         simd::clamp(auxSubOscillators[currentChannel], 0.f, 4.f);
                 }
 
-                if (bHaveInputModel && bNotesModelSelection) {
+                if (bModelConnected && bNotesModelSelection) {
                     selectedModels[currentChannel] = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
                     selectedModels[currentChannel] += 4.f;
                     selectedModels[currentChannel] *= 12.f;
@@ -296,7 +296,7 @@ struct FunesMk2 : SanguineModule {
                     selectedModels[currentChannel] = knobModel;
                 }
 
-                if (!bHaveInputLpgColor) {
+                if (!bLpgColorConnected) {
                     lpgColorVoltages[currentChannel] = knobLpgColor;
                 } else {
                     lpgColorVoltages[currentChannel] = inputs[INPUT_LPG_COLOR].getVoltageSimd<float_4>(channel);
@@ -306,7 +306,7 @@ struct FunesMk2 : SanguineModule {
                     lpgColorVoltages[currentChannel] = simd::clamp(lpgColorVoltages[currentChannel], 0.f, 1.f);
                 }
 
-                if (!bHaveInputLpgDecay) {
+                if (!bLpgDecayConnected) {
                     lpgDecayVoltages[channel] = knobLpgDecay;
                 } else {
                     lpgDecayVoltages[currentChannel] = inputs[INPUT_LPG_DECAY].getVoltageSimd<float_4>(channel);
@@ -403,11 +403,11 @@ struct FunesMk2 : SanguineModule {
                 // Triggers at around 0.7 V
                 modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
 
-                modulations[channel].frequency_patched = bHaveInputFrequency;
-                modulations[channel].level_patched = bHaveInputLevel;
-                modulations[channel].timbre_patched = bHaveInputTimbre;
-                modulations[channel].morph_patched = bHaveInputMorph;
-                modulations[channel].trigger_patched = bHaveInputTrigger;
+                modulations[channel].frequency_patched = bFrequencyConnected;
+                modulations[channel].level_patched = bLevelConnected;
+                modulations[channel].timbre_patched = bTimbreConnected;
+                modulations[channel].morph_patched = bMorphConnected;
+                modulations[channel].trigger_patched = bTriggerConnected;
 
                 // Render frames
                 sanguineplaits::Voice::Frame output[sanguineplaits::kBlockSize];
@@ -562,34 +562,34 @@ struct FunesMk2 : SanguineModule {
         if (e.type == Port::INPUT) {
             switch (e.portId) {
             case INPUT_MODEL:
-                bHaveInputModel = e.connecting;
+                bModelConnected = e.connecting;
                 break;
             case INPUT_FREQUENCY:
-                bHaveInputFrequency = e.connecting;
+                bFrequencyConnected = e.connecting;
                 break;
             case INPUT_LEVEL:
-                bHaveInputLevel = e.connecting;
+                bLevelConnected = e.connecting;
                 break;
             case INPUT_TIMBRE:
-                bHaveInputTimbre = e.connecting;
+                bTimbreConnected = e.connecting;
                 break;
             case INPUT_MORPH:
-                bHaveInputMorph = e.connecting;
+                bMorphConnected = e.connecting;
                 break;
             case INPUT_TRIGGER:
-                bHaveInputTrigger = e.connecting;
+                bTriggerConnected = e.connecting;
                 break;
             case INPUT_LPG_COLOR:
-                bHaveInputLpgColor = e.connecting;
+                bLpgColorConnected = e.connecting;
                 break;
             case INPUT_LPG_DECAY:
-                bHaveInputLpgDecay = e.connecting;
+                bLpgDecayConnected = e.connecting;
                 break;
             case INPUT_CHORD_BANK:
-                bHaveInputChordBank = e.connecting;
+                bChordBankConnected = e.connecting;
                 break;
             case INPUT_AUX_SUBOSCILLATOR:
-                bHaveInputAuxSuboscillator = e.connecting;
+                bAuxSuboscillatorConnected = e.connecting;
                 break;
             default:
                 break;
@@ -670,19 +670,19 @@ struct FunesMk2 : SanguineModule {
 
         std::string filePath;
         for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-            bool bHaveChannel = getJsonInt(rootJ, string::f("channelEngine%d", channel).c_str(), intValue);
+            bool bChannelStored = getJsonInt(rootJ, string::f("channelEngine%d", channel).c_str(), intValue);
 
-            if (bHaveChannel) {
+            if (bChannelStored) {
                 customDataStates[channel] = intValue;
             }
 
-            bool bHavePath = getJsonString(rootJ, string::f("customDataPath%d", channel).c_str(), filePath);
+            bool bPathStored = getJsonString(rootJ, string::f("customDataPath%d", channel).c_str(), filePath);
 
-            if (bHavePath) {
+            if (bPathStored) {
                 customDataPaths[channel] = filePath;
             }
 
-            if ((bHaveChannel && isEngineCustomizable(intValue)) && bHavePath) {
+            if ((bChannelStored && isEngineCustomizable(intValue)) && bPathStored) {
                 loadCustomData(filePath, channel, intValue);
             }
         }
