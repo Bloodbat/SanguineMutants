@@ -230,10 +230,10 @@ struct Scalaria : SanguineModule {
         if (lightsDivider.process()) {
             const float sampleTime = jitteredLightsFrequency * args.sampleTime;
 
-            bool bHaveInternalOscillator = internalOscillator != 0;
+            bool bInternalOscillatorInUse = internalOscillator != 0;
 
-            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(!bHaveInternalOscillator * kSanguineButtonLightValue,
-                sampleTime);
+            lights[LIGHT_INTERNAL_OSCILLATOR_OFF].setBrightnessSmooth(
+                !bInternalOscillatorInUse * kSanguineButtonLightValue, sampleTime);
 
             lights[LIGHT_INTERNAL_OSCILLATOR_TRIANGLE].setBrightnessSmooth((internalOscillator == 1) *
                 kSanguineButtonLightValue, sampleTime);
@@ -244,10 +244,10 @@ struct Scalaria : SanguineModule {
             lights[LIGHT_INTERNAL_OSCILLATOR_SQUARE].setBrightnessSmooth((internalOscillator == 3) *
                 kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bHaveInternalOscillator *
+            lights[LIGHT_CHANNEL_1_FREQUENCY].setBrightnessSmooth(bInternalOscillatorInUse *
                 kSanguineButtonLightValue, sampleTime);
 
-            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(!bHaveInternalOscillator *
+            lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(!bInternalOscillatorInUse *
                 kSanguineButtonLightValue, sampleTime);
 
             for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
