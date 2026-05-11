@@ -53,8 +53,8 @@ struct Aleae : SanguineModule {
 
 	aleae::RollModes rollModes[kMaxModuleSections] = { aleae::ROLL_DIRECT, aleae::ROLL_DIRECT };
 	aleae::OutModes outModes[kMaxModuleSections] = { aleae::OUT_MODE_TRIGGER, aleae::OUT_MODE_TRIGGER };
-	bool bOutputsConnected[OUTPUTS_COUNT] = {};
-	bool bHaveSection2Input = false;
+	bool outputsConnected[OUTPUTS_COUNT] = {};
+	bool bInput2Connected = false;
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -81,7 +81,7 @@ struct Aleae : SanguineModule {
 			// Get input.
 			Input* input = &inputs[INPUT_IN_1 + section];
 			// 2nd input is normalized to 1st.
-			if (section == 1 && !bHaveSection2Input) {
+			if (section == 1 && !bInput2Connected) {
 				input = &inputs[INPUT_IN_1];
 			}
 			channelCount = std::max(input->getChannels(), 1);
@@ -125,10 +125,10 @@ struct Aleae : SanguineModule {
 				}
 			}
 
-			if (bOutputsConnected[section]) {
+			if (outputsConnected[section]) {
 				outputs[OUTPUT_OUT_1A + section].setChannels(channelCount);
 			}
-			if (bOutputsConnected[2 + section]) {
+			if (outputsConnected[2 + section]) {
 				outputs[OUTPUT_OUT_1B + section].setChannels(channelCount);
 			}
 
@@ -169,7 +169,7 @@ struct Aleae : SanguineModule {
 		case Port::INPUT:
 			switch (e.portId) {
 			case INPUT_IN_2:
-				bHaveSection2Input = e.connecting;
+				bInput2Connected = e.connecting;
 				break;
 			default:
 				break;
@@ -179,16 +179,16 @@ struct Aleae : SanguineModule {
 		case Port::OUTPUT:
 			switch (e.portId) {
 			case OUTPUT_OUT_1A:
-				bOutputsConnected[0] = e.connecting;
+				outputsConnected[0] = e.connecting;
 				break;
 			case OUTPUT_OUT_2A:
-				bOutputsConnected[1] = e.connecting;
+				outputsConnected[1] = e.connecting;
 				break;
 			case OUTPUT_OUT_1B:
-				bOutputsConnected[2] = e.connecting;
+				outputsConnected[2] = e.connecting;
 				break;
 			case OUTPUT_OUT_2B:
-				bOutputsConnected[3] = e.connecting;
+				outputsConnected[3] = e.connecting;
 				break;
 			}
 			break;
