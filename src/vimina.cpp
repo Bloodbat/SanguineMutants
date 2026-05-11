@@ -124,8 +124,8 @@ struct Vimina : SanguineModule {
 	bool inputGateStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	bool multipliesDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
-	bool bHaveReset = false;
-	bool bHaveClock = false;
+	bool bResetConnected = false;
+	bool bClockConnected = false;
 
 
 	SectionFunctions sectionFunctions[kMaxModuleSections] = {
@@ -209,12 +209,12 @@ struct Vimina : SanguineModule {
 				bIsTrigger = true;
 			}
 
-			if (bHaveReset) {
+			if (bResetConnected) {
 				resetRequests[0] |= isRisingEdge(kResetChannel, INPUT_RESET, kEdgeVoltageThreshold, channel);
 				resetRequests[1] |= isRisingEdge(kResetChannel, INPUT_RESET, kEdgeVoltageThreshold, channel);
 			}
 
-			if (bHaveClock) {
+			if (bClockConnected) {
 				// Section 1
 				sectionFunctions[0] = functionSection1;
 				switch (sectionFunctions[0])
@@ -572,10 +572,10 @@ struct Vimina : SanguineModule {
 		if (e.type == Port::INPUT) {
 			switch (e.portId) {
 			case INPUT_RESET:
-				bHaveReset = e.connecting;
+				bResetConnected = e.connecting;
 				break;
 			case INPUT_CLOCK:
-				bHaveClock = e.connecting;
+				bClockConnected = e.connecting;
 			default:
 				break;
 			}
