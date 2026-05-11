@@ -133,9 +133,9 @@ struct Contextus : SanguineModule {
 	bool bFlattenEnabled = false;
 	bool bVCAEnabled = false;
 
-	bool bHaveMetaCable = false;
-	bool bHaveAttackCable = false;
-	bool bHaveDecayCable = false;
+	bool bMetaConnected = false;
+	bool bAttackConnected = false;
+	bool bDecayConnected = false;
 
 	bool bWantLowCpu = false;
 
@@ -329,7 +329,7 @@ struct Contextus : SanguineModule {
 
 				// Set model.
 				int model = knobModel;
-				if (bHaveMetaCable) {
+				if (bMetaConnected) {
 					model += roundf(inputs[INPUT_META].getVoltage(channel) / 10.f *
 						renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
 					model = clamp(model, 0, renaissance::MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META);
@@ -480,7 +480,7 @@ struct Contextus : SanguineModule {
 				if (channel < channelCount && (channel % 4) == 0) {
 					float_4 inVoltages;
 
-					if (bHaveAttackCable) {
+					if (bAttackConnected) {
 						inVoltages = inputs[INPUT_ATTACK].getVoltageSimd<float_4>(channel);
 						inVoltages = simd::round(inVoltages);
 						inVoltages = simd::rescale(inVoltages, -5.f, 5.f, -15.f, 15.f);
@@ -492,7 +492,7 @@ struct Contextus : SanguineModule {
 						modulatedAttacks[channel + 3] = static_cast<uint8_t>(inVoltages[3]);
 					}
 
-					if (bHaveDecayCable) {
+					if (bDecayConnected) {
 						inVoltages = inputs[INPUT_DECAY].getVoltageSimd<float_4>(channel);
 						inVoltages = simd::round(inVoltages);
 						inVoltages = simd::rescale(inVoltages, -5.f, 5.f, -15.f, 15.f);
@@ -626,12 +626,12 @@ struct Contextus : SanguineModule {
 		const uint8_t* arraySettings = &settings[displayChannel].shape;
 		for (int setting = 0; setting <= renaissance::SETTING_LAST_EDITABLE_SETTING; ++setting) {
 			if (arraySettings[setting] != arrayLastSettings[setting]) {
-				if (bHaveAttackCable && setting == renaissance::SETTING_AD_ATTACK) {
+				if (bAttackConnected && setting == renaissance::SETTING_AD_ATTACK) {
 					lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 					break;
 				}
 
-				if (bHaveDecayCable && setting == renaissance::SETTING_AD_DECAY) {
+				if (bDecayConnected && setting == renaissance::SETTING_AD_DECAY) {
 					lastSettingChanged = renaissance::SETTING_OSCILLATOR_SHAPE;
 					break;
 				}
@@ -648,15 +648,15 @@ struct Contextus : SanguineModule {
 		if (e.type == Port::INPUT) {
 			switch (e.portId) {
 			case INPUT_META:
-				bHaveMetaCable = e.connecting;
+				bMetaConnected = e.connecting;
 				break;
 
 			case INPUT_ATTACK:
-				bHaveAttackCable = e.connecting;
+				bAttackConnected = e.connecting;
 				break;
 
 			case INPUT_DECAY:
-				bHaveDecayCable = e.connecting;
+				bDecayConnected = e.connecting;
 				break;
 
 			default:
