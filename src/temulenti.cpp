@@ -119,7 +119,7 @@ struct Temulenti : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Temulenti* moduleTemulenti = static_cast<Temulenti*>(module);
-			if (!moduleTemulenti->bHaveExternalSync) {
+			if (!moduleTemulenti->bUseExternalSync) {
 				return aestusCommon::rangeMenuLabels[moduleTemulenti->generators[moduleTemulenti->displayChannel].range()];
 			} else {
 				return aestusCommon::rangeMenuLabels[3];
@@ -135,7 +135,7 @@ struct Temulenti : SanguineModule {
 	bool bRangeConnected = false;
 	bool bQuantizerConnected = false;
 
-	bool bHaveExternalSync = false;
+	bool bUseExternalSync = false;
 
 	static const int kLightsFrequency = 16;
 	int jitteredLightsFrequency;
@@ -229,7 +229,7 @@ struct Temulenti : SanguineModule {
 		float unipolarFlags[PORT_MAX_CHANNELS];
 
 		selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
-		bHaveExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
+		bUseExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
 		knobQuantizer = params[PARAM_QUANTIZER].getValue();
 		knobFrequency = params[PARAM_FREQUENCY].getValue();
 		knobFm = params[PARAM_FM].getValue();
@@ -243,7 +243,7 @@ struct Temulenti : SanguineModule {
 			channelModes.fill(selectedMode);
 		}
 
-		if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bHaveExternalSync) {
+		if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
 			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
 			channelRanges.fill(selectedRange);
 		}
@@ -271,9 +271,9 @@ struct Temulenti : SanguineModule {
 			if (generators[channel].writable_block()) {
 				// Sync.
 				// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-				if (bHaveExternalSync != lastExternalSyncs[channel]) {
-					generators[channel].set_sync(bHaveExternalSync);
-					lastExternalSyncs[channel] = bHaveExternalSync;
+				if (bUseExternalSync != lastExternalSyncs[channel]) {
+					generators[channel].set_sync(bUseExternalSync);
+					lastExternalSyncs[channel] = bUseExternalSync;
 				}
 
 				inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
@@ -416,7 +416,7 @@ struct Temulenti : SanguineModule {
 							channelModes[channel + 3] = static_cast<bumps::GeneratorMode>(selectorVoltages[3]);
 						}
 
-						if (!bHaveExternalSync && bRangeConnected) {
+						if (!bUseExternalSync && bRangeConnected) {
 							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
 							selectorVoltages = simd::round(selectorVoltages);
@@ -479,9 +479,9 @@ struct Temulenti : SanguineModule {
 			bool bIsSystemTime = !(getSystemTimeMs() & 128);
 
 			lights[LIGHT_RANGE].setBrightnessSmooth((((displayRange == bumps::GENERATOR_RANGE_LOW) &
-				(!bHaveExternalSync)) | ((bHaveExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
+				(!bUseExternalSync)) | ((bUseExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
 			lights[LIGHT_RANGE + 1].setBrightnessSmooth((((displayRange == bumps::GENERATOR_RANGE_HIGH) &
-				(!bHaveExternalSync)) | ((bHaveExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
+				(!bUseExternalSync)) | ((bUseExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
 
 			if (samples[displayChannel].flags & bumps::FLAG_END_OF_ATTACK) {
 				unipolarFlags[displayChannel] *= -1.f;
@@ -489,7 +489,7 @@ struct Temulenti : SanguineModule {
 			lights[LIGHT_PHASE].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 			lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
 
-			lights[LIGHT_SYNC].setBrightnessSmooth(static_cast<int>(bHaveExternalSync) *
+			lights[LIGHT_SYNC].setBrightnessSmooth(static_cast<int>(bUseExternalSync) *
 				kSanguineButtonLightValue, sampleTime);
 
 			lights[LIGHT_QUANTIZER1].setBrightnessSmooth(quantizers[displayChannel] & 1, sampleTime);
