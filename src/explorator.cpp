@@ -88,20 +88,20 @@ struct Explorator : SanguineModule {
 
 	noiseModes noiseMode = NOISE_PRISM;
 
-	bool bhaveInput1To3 = false;
-	bool bHaveInputSign = false;
-	bool bHaveInput2To2A = false;
-	bool bHaveInput2To2B = false;
-	bool bHaveInputLogicA = false;
-	bool bHaveInputLogicB = false;
-	bool bHaveInput3To1A = false;
-	bool bHaveInput3To1B = false;
-	bool bHaveInput3To1C = false;
-	bool bHaveInputTrigger = false;
-	bool bHaveInputVoltage = false;
+	bool b1To3Connected = false;
+	bool bSignConnected = false;
+	bool b2To2AConnected = false;
+	bool b2To2BConnected = false;
+	bool bLogicAConnected = false;
+	bool bLogicBConnected = false;
+	bool b3To1AConnected = false;
+	bool b3To1BConnected = false;
+	bool b3To1CConnected = false;
+	bool bTriggerConnected = false;
+	bool bInputVoltageConnected = false;
 
-	bool bHaveOutputNoise = false;
-	bool bHaveOutputVoltage = false;
+	bool bNoiseConnected = false;
+	bool bOutputVoltageConnected = false;
 
 	Explorator() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -153,7 +153,7 @@ struct Explorator : SanguineModule {
 		// 1:3
 		int channels1to3 = inputs[INPUT_1_TO_3].getChannels();
 
-		if (bhaveInput1To3) {
+		if (b1To3Connected) {
 			float_4 voltages1to3;
 			for (int channel = 0; channel < channels1to3; channel += 4) {
 				voltages1to3 = inputs[INPUT_1_TO_3].getVoltageSimd<float_4>(channel);
@@ -170,7 +170,7 @@ struct Explorator : SanguineModule {
 		// Sign
 		int channelsSign = inputs[INPUT_SIGN].getChannels();
 
-		if (bHaveInputSign) {
+		if (bSignConnected) {
 			float_4 voltagesSign;
 			for (int channel = 0; channel < channelsSign; channel += 4) {
 				voltagesSign = inputs[INPUT_SIGN].getVoltageSimd<float_4>(channel);
@@ -187,7 +187,7 @@ struct Explorator : SanguineModule {
 		// 2:2
 		int channels2to2 = std::max(std::max(inputs[INPUT_2_TO_2_A].getChannels(), inputs[INPUT_2_TO_2_B].getChannels()), 0);
 
-		if (bHaveInput2To2A || bHaveInput2To2B) {
+		if (b2To2AConnected || b2To2BConnected) {
 			float_4 voltages2to2;
 
 			for (int channel = 0; channel < channels2to2; channel += 4) {
@@ -204,7 +204,7 @@ struct Explorator : SanguineModule {
 		// Logic
 		int channelsLogic = std::max(std::max(inputs[INPUT_LOGIC_A].getChannels(), inputs[INPUT_LOGIC_B].getChannels()), 0);
 
-		if (bHaveInputLogicA || bHaveInputLogicB) {
+		if (bLogicAConnected || bLogicBConnected) {
 			for (int channel = 0; channel < channelsLogic; channel += 4) {
 				float_4 voltagesLogicA = inputs[INPUT_LOGIC_A].getVoltageSimd<float_4>(channel);
 				float_4 voltagesLogicB = inputs[INPUT_LOGIC_B].getVoltageSimd<float_4>(channel);
@@ -220,7 +220,7 @@ struct Explorator : SanguineModule {
 		int channels3to1 = std::max(std::max(std::max(inputs[INPUT_3_TO_1_A].getChannels(), inputs[INPUT_3_TO_1_B].getChannels()),
 			inputs[INPUT_3_TO_1_C].getChannels()), 0);
 
-		if (bHaveInput3To1A || bHaveInput3To1B || bHaveInput3To1C) {
+		if (b3To1AConnected || b3To1BConnected || b3To1CConnected) {
 			for (int channel = 0; channel < channels3to1; channel += 4) {
 				float_4 voltages3to1A = inputs[INPUT_3_TO_1_A].getVoltageSimd<float_4>(channel);
 				float_4 voltages3to1B = inputs[INPUT_3_TO_1_B].getVoltageSimd<float_4>(channel);
@@ -251,7 +251,7 @@ struct Explorator : SanguineModule {
 		int noiseChannels = std::max(channelsSampleAndHold, 1);
 		outputs[OUTPUT_SH_NOISE].setChannels(noiseChannels);
 
-		if (bHaveOutputNoise || (bHaveInputTrigger && !bHaveInputVoltage)) {
+		if (bNoiseConnected || (bTriggerConnected && !bInputVoltageConnected)) {
 			switch (noiseMode) {
 			case NOISE_SANGUINE_WHITE:
 				for (int channel = 0; channel < noiseChannels; ++channel) {
@@ -273,10 +273,10 @@ struct Explorator : SanguineModule {
 			}
 		}
 
-		if (bHaveInputTrigger) {
+		if (bTriggerConnected) {
 			for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
 				if (stSampleAndHolds[channel].process(inputs[INPUT_SH_TRIGGER].getVoltage(channel))) {
-					if (bHaveInputVoltage) {
+					if (bInputVoltageConnected) {
 						sampleAndHoldVoltages[channel] = inputs[INPUT_SH_VOLTAGE].getVoltage(channel);
 					} else {
 						sampleAndHoldVoltages[channel] = noises[channel];
@@ -285,11 +285,11 @@ struct Explorator : SanguineModule {
 			}
 		}
 
-		if (bHaveOutputVoltage && lastSampleAndHoldChannels > 0) {
+		if (bOutputVoltageConnected && lastSampleAndHoldChannels > 0) {
 			outputs[OUTPUT_SH_VOLTAGE].writeVoltages(sampleAndHoldVoltages);
 		}
 
-		if (bHaveOutputNoise) {
+		if (bNoiseConnected) {
 			for (int channel = 0; channel < noiseChannels; ++channel) {
 				outputs[OUTPUT_SH_NOISE].setVoltage(noises[channel], channel);
 			}
@@ -455,47 +455,47 @@ struct Explorator : SanguineModule {
 		case Port::INPUT:
 			switch (e.portId) {
 			case INPUT_1_TO_3:
-				bhaveInput1To3 = e.connecting;
+				b1To3Connected = e.connecting;
 				break;
 
 			case INPUT_SIGN:
-				bHaveInputSign = e.connecting;
+				bSignConnected = e.connecting;
 				break;
 
 			case INPUT_2_TO_2_A:
-				bHaveInput2To2A = e.connecting;
+				b2To2AConnected = e.connecting;
 				break;
 
 			case INPUT_2_TO_2_B:
-				bHaveInput2To2B = e.connecting;
+				b2To2BConnected = e.connecting;
 				break;
 
 			case INPUT_LOGIC_A:
-				bHaveInputLogicA = e.connecting;
+				bLogicAConnected = e.connecting;
 				break;
 
 			case INPUT_LOGIC_B:
-				bHaveInputLogicB = e.connecting;
+				bLogicBConnected = e.connecting;
 				break;
 
 			case INPUT_3_TO_1_A:
-				bHaveInput3To1A = e.connecting;
+				b3To1AConnected = e.connecting;
 				break;
 
 			case INPUT_3_TO_1_B:
-				bHaveInput3To1B = e.connecting;
+				b3To1BConnected = e.connecting;
 				break;
 
 			case INPUT_3_TO_1_C:
-				bHaveInput3To1C = e.connecting;
+				b3To1CConnected = e.connecting;
 				break;
 
 			case INPUT_SH_TRIGGER:
-				bHaveInputTrigger = e.connecting;
+				bTriggerConnected = e.connecting;
 				break;
 
 			case INPUT_SH_VOLTAGE:
-				bHaveInputVoltage = e.connecting;
+				bInputVoltageConnected = e.connecting;
 				break;
 			}
 			break;
@@ -503,11 +503,11 @@ struct Explorator : SanguineModule {
 		case Port::OUTPUT:
 			switch (e.portId) {
 			case OUTPUT_SH_NOISE:
-				bHaveOutputNoise = e.connecting;
+				bNoiseConnected = e.connecting;
 				break;
 
 			case OUTPUT_SH_VOLTAGE:
-				bHaveOutputVoltage = e.connecting;
+				bOutputVoltageConnected = e.connecting;
 				break;
 
 			default:
