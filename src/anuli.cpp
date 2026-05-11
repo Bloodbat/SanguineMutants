@@ -102,10 +102,10 @@ struct Anuli : SanguineModule {
 
 	bool bUseFrequencyOffset = true;
 
-	bool bHaveOutputOdd = false;
-	bool bHaveOutputEven = false;
-	bool bHaveModeCable = false;
-	bool bHaveFxCable = false;
+	bool bOddConnected = false;
+	bool bEvenConnected = false;
+	bool bModeConnected = false;
+	bool bFxConnected = false;
 
 	int channelCount = 0;
 	int polyphonyMode = 1;
@@ -321,7 +321,7 @@ struct Anuli : SanguineModule {
 			*/
 			float_4 outVoltagesOdd;
 			float_4 outVoltagesEven;
-			if (bHaveOutputEven & bHaveOutputOdd) {
+			if (bEvenConnected & bOddConnected) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					currentSample = channel << 1;
 					outVoltagesOdd[0] = outputFrames.samples[currentSample];
@@ -397,7 +397,7 @@ struct Anuli : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				if (channel < channelCount && (channel % 4 == 0)) {
 					float_4 inputVoltages;
-					if (bHaveModeCable) {
+					if (bModeConnected) {
 						if (!bNotesModeSelection) {
 							inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 							inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
@@ -418,7 +418,7 @@ struct Anuli : SanguineModule {
 						}
 					}
 
-					if (bHaveFxCable) {
+					if (bFxConnected) {
 						inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
 						inputVoltages = simd::round(inputVoltages);
 						inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
@@ -550,11 +550,11 @@ struct Anuli : SanguineModule {
 				break;
 
 			case INPUT_MODE:
-				bHaveModeCable = e.connecting;
+				bModeConnected = e.connecting;
 				break;
 
 			case INPUT_FX:
-				bHaveFxCable = e.connecting;
+				bFxConnected = e.connecting;
 				break;
 
 			default:
@@ -565,11 +565,11 @@ struct Anuli : SanguineModule {
 		case Port::OUTPUT:
 			switch (e.portId) {
 			case OUTPUT_ODD:
-				bHaveOutputOdd = e.connecting;
+				bOddConnected = e.connecting;
 				break;
 
 			case OUTPUT_EVEN:
-				bHaveOutputEven = e.connecting;
+				bEvenConnected = e.connecting;
 				break;
 			}
 			break;
