@@ -64,7 +64,7 @@ struct Velamina : SanguineModule {
 
 	bool signalInputsConnected[kMaxChannels];
 	bool cvInputsConnected[kMaxChannels];
-	bool outputsConnected[kMaxChannels];
+	bool outputsConnected[kMaxChannels] = { false, false, false, false };
 
 	Velamina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -83,7 +83,6 @@ struct Velamina : SanguineModule {
 
 			signalInputsConnected[channel] = false;
 			cvInputsConnected[channel] = false;
-			outputsConnected[channel] = false;
 		}
 	}
 
@@ -231,23 +230,7 @@ struct Velamina : SanguineModule {
 			break;
 
 		case Port::OUTPUT:
-			switch (e.portId) {
-			case OUTPUT_1:
-				outputsConnected[0] = e.connecting;
-				break;
-
-			case OUTPUT_2:
-				outputsConnected[1] = e.connecting;
-				break;
-
-			case OUTPUT_3:
-				outputsConnected[2] = e.connecting;
-				break;
-
-			case OUTPUT_4:
-				outputsConnected[3] = e.connecting;
-				break;
-			}
+			outputsConnected[e.portId] = e.connecting;
 			break;
 		}
 	}
