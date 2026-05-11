@@ -104,7 +104,7 @@ struct Aestus : SanguineModule {
 	struct RangeParam : ParamQuantity {
 		std::string getDisplayValueString() override {
 			Aestus* moduleAestus = static_cast<Aestus*>(module);
-			if (!moduleAestus->bHaveExternalSync) {
+			if (!moduleAestus->bUseExternalSync) {
 				return aestusCommon::rangeMenuLabels[moduleAestus->generators[moduleAestus->displayChannel].range()];
 			} else {
 				return aestusCommon::rangeMenuLabels[3];
@@ -123,7 +123,7 @@ struct Aestus : SanguineModule {
 	bool bModeConnected = false;
 	bool bRangeConnected = false;
 
-	bool bHaveExternalSync = false;
+	bool bUseExternalSync = false;
 	bool bClockConnected = false;
 
 	size_t frames[PORT_MAX_CHANNELS];
@@ -215,14 +215,14 @@ struct Aestus : SanguineModule {
 
 			bSheepSelected = params[PARAM_MODEL].getValue() > 0.f;
 
-			bHaveExternalSync = ((!bSheepSelected) & (bClockConnected)) | (static_cast<int>(params[PARAM_SYNC].getValue()));
+			bUseExternalSync = ((!bSheepSelected) & (bClockConnected)) | (static_cast<int>(params[PARAM_SYNC].getValue()));
 
 			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
 				selectedMode = static_cast<sanguinetides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
 				channelModes.fill(selectedMode);
 			}
 
-			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bHaveExternalSync) {
+			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
 				selectedRange = static_cast<sanguinetides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
 				channelRanges.fill(selectedRange);
 			}
@@ -250,9 +250,9 @@ struct Aestus : SanguineModule {
 
 					// Sync.
 					// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
-					if (bHaveExternalSync != lastExternalSyncs[channel]) {
-						generators[channel].set_sync(bHaveExternalSync);
-						lastExternalSyncs[channel] = bHaveExternalSync;
+					if (bUseExternalSync != lastExternalSyncs[channel]) {
+						generators[channel].set_sync(bUseExternalSync);
+						lastExternalSyncs[channel] = bUseExternalSync;
 					}
 
 					inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
@@ -353,7 +353,7 @@ struct Aestus : SanguineModule {
 							channelModes[channel + 3] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[3]);
 						}
 
-						if (!bHaveExternalSync && bRangeConnected) {
+						if (!bUseExternalSync && bRangeConnected) {
 							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
 
 							selectorVoltages = simd::round(selectorVoltages);
@@ -397,9 +397,9 @@ struct Aestus : SanguineModule {
 				bool bIsSystemTime = !(getSystemTimeMs() & 128);
 
 				lights[LIGHT_RANGE].setBrightnessSmooth((((displayRange == sanguinetides::GENERATOR_RANGE_LOW) &
-					(!bHaveExternalSync)) | ((bHaveExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
+					(!bUseExternalSync)) | ((bUseExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
 				lights[LIGHT_RANGE + 1].setBrightnessSmooth((((displayRange == sanguinetides::GENERATOR_RANGE_HIGH) &
-					(!bHaveExternalSync)) | ((bHaveExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
+					(!bUseExternalSync)) | ((bUseExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
 
 				if (samples[displayChannel].flags & sanguinetides::FLAG_END_OF_ATTACK) {
 					unipolarFlags[displayChannel] *= -1.f;
@@ -407,7 +407,7 @@ struct Aestus : SanguineModule {
 				lights[LIGHT_PHASE].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
 
-				lights[LIGHT_SYNC].setBrightnessSmooth(static_cast<int>(bHaveExternalSync) *
+				lights[LIGHT_SYNC].setBrightnessSmooth(static_cast<int>(bUseExternalSync) *
 					kSanguineButtonLightValue, sampleTime);
 
 				displayModel = aestus::displayModels[static_cast<int>(channelIsSheep[displayChannel])];
