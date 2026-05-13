@@ -237,16 +237,6 @@ struct Temulenti : SanguineModule {
 		knobValues[3] = params[PARAM_SMOOTHNESS].getValue();
 
 
-		if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
-			selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-			channelModes.fill(selectedMode);
-		}
-
-		if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
-			selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-			channelRanges.fill(selectedRange);
-		}
-
 		if (!bModelConnected) {
 			channelModels.fill(selectedFeatureMode);
 		}
@@ -385,6 +375,16 @@ struct Temulenti : SanguineModule {
 
 		if (lightsDivider.process()) {
 			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
+
+			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
+				selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+				channelModes.fill(selectedMode);
+			}
+
+			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
+				selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+				channelRanges.fill(selectedRange);
+			}
 
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				if (channel < channelCount) {

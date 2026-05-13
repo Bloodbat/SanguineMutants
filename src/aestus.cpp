@@ -215,16 +215,6 @@ struct Aestus : SanguineModule {
 
 			bUseExternalSync = ((!bSheepSelected) & (bClockConnected)) | (static_cast<int>(params[PARAM_SYNC].getValue()));
 
-			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
-				selectedMode = static_cast<sanguinetides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-				channelModes.fill(selectedMode);
-			}
-
-			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
-				selectedRange = static_cast<sanguinetides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-				channelRanges.fill(selectedRange);
-			}
-
 			knobFrequency = params[PARAM_FREQUENCY].getValue();
 			knobFm = params[PARAM_FM].getValue();
 			knobValues[1] = params[PARAM_SHAPE].getValue();
@@ -331,6 +321,16 @@ struct Aestus : SanguineModule {
 
 			if (bIsLightsTurn) {
 				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
+
+				if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
+					selectedMode = static_cast<sanguinetides::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
+					channelModes.fill(selectedMode);
+				}
+
+				if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
+					selectedRange = static_cast<sanguinetides::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
+					channelRanges.fill(selectedRange);
+				}
 
 				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 					channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
