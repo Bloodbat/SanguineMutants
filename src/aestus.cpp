@@ -152,11 +152,9 @@ struct Aestus : SanguineModule {
 
 	float knobFrequency = 0.f;
 	float knobFm = 0.f;
-	float knobShape = 0.f;
-	float knobSlope = 0.f;
-	float knobSmoothness = 0.f;
 
 	float_4 inputVoltages;
+	float_4 knobValues = 0.f;
 	float_4 selectorVoltages;
 
 	Aestus() {
@@ -229,9 +227,9 @@ struct Aestus : SanguineModule {
 
 			knobFrequency = params[PARAM_FREQUENCY].getValue();
 			knobFm = params[PARAM_FM].getValue();
-			knobShape = params[PARAM_SHAPE].getValue();
-			knobSlope = params[PARAM_SLOPE].getValue();
-			knobSmoothness = params[PARAM_SMOOTHNESS].getValue();
+			knobValues[1] = params[PARAM_SHAPE].getValue();
+			knobValues[2] = params[PARAM_SLOPE].getValue();
+			knobValues[3] = params[PARAM_SMOOTHNESS].getValue();
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (lastModes[channel] != channelModes[channel]) {
@@ -273,9 +271,7 @@ struct Aestus : SanguineModule {
 					generators[channel].set_pitch(static_cast<int>(clamp(pitch * 128.f, -32768.f, 32767.f)));
 
 					// Shape, slope, smoothness.
-					inputVoltages[1] += knobShape;
-					inputVoltages[2] += knobSlope;
-					inputVoltages[3] += knobSmoothness;
+					inputVoltages += knobValues;
 
 					inputVoltages = simd::clamp(inputVoltages, -1.f, 1.f);
 					inputVoltages *= 32767.f;
