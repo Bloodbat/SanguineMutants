@@ -334,35 +334,35 @@ struct Aestus : SanguineModule {
 					channelRanges.fill(selectedRange);
 				}
 
-				for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+				for (int channel = 0; channel < channelCount; channel += 4) {
+					if (bModeConnected) {
+						selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+						selectorVoltages = simd::round(selectorVoltages);
+						selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
+
+						channelModes[channel] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[0]);
+						channelModes[channel + 1] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[1]);
+						channelModes[channel + 2] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[2]);
+						channelModes[channel + 3] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[3]);
+					}
+
+					if (!bUseExternalSync && bRangeConnected) {
+						selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
+
+						selectorVoltages = simd::round(selectorVoltages);
+						selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
+
+						channelRanges[channel] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[0]);
+						channelRanges[channel + 1] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[1]);
+						channelRanges[channel + 2] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[2]);
+						channelRanges[channel + 3] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[3]);
+					}
+				}
+
+				for (int channel = 0; channel < channelCount; ++channel) {
 					channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
 						(bModelConnected && inputs[INPUT_MODEL].getVoltage(channel) >= 1.f);
-
-					if (channel < channelCount && (channel % 4 == 0)) {
-						if (bModeConnected) {
-							selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-
-							selectorVoltages = simd::round(selectorVoltages);
-							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
-
-							channelModes[channel] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[0]);
-							channelModes[channel + 1] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[1]);
-							channelModes[channel + 2] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[2]);
-							channelModes[channel + 3] = static_cast<sanguinetides::GeneratorMode>(selectorVoltages[3]);
-						}
-
-						if (!bUseExternalSync && bRangeConnected) {
-							selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
-
-							selectorVoltages = simd::round(selectorVoltages);
-							selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
-
-							channelRanges[channel] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[0]);
-							channelRanges[channel + 1] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[1]);
-							channelRanges[channel + 2] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[2]);
-							channelRanges[channel + 3] = static_cast<sanguinetides::GeneratorRange>(selectorVoltages[3]);
-						}
-					}
 
 					if (lastSheepFirmwares[channel] != channelIsSheep[channel]) {
 						generators[channel].set_mode(lastModes[channel]);
@@ -371,13 +371,18 @@ struct Aestus : SanguineModule {
 					}
 
 					int currentLight = LIGHT_CHANNEL_1 + channel * 3;
-					bool bIsChannelActive = channel < channelCount;
 
 					lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth((bIsChannelActive) &
-						(!channelIsSheep[channel]), sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth((bIsChannelActive) &
-						(channelIsSheep[channel]), sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth((!channelIsSheep[channel]), sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth((channelIsSheep[channel]), sampleTime);
+				}
+
+				for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+					int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+
+					lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 				}
 
 				if (displayChannel >= channelCount) {
