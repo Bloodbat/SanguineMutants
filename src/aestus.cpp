@@ -233,9 +233,7 @@ struct Aestus : SanguineModule {
 				}
 
 				// Buffer loop.
-				if (++frames[channel] >= sanguinetides::kBlockSize) {
-					frames[channel] = 0;
-
+				if (generators[channel].writable_block()) {
 					// Sync.
 					// This takes a moment to catch up if sync is on and patches or presets have just been loaded!
 					if (bUseExternalSync != lastExternalSyncs[channel]) {
