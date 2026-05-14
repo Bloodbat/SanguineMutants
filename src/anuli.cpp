@@ -115,13 +115,13 @@ struct Anuli : SanguineModule {
 
 	int displayChannel = 0;
 
-	std::array<int, PORT_MAX_CHANNELS> channelModes = {};
+	int32_t channelModes[PORT_MAX_CHANNELS] = {};
+
+	int32_t channelFx[PORT_MAX_CHANNELS] = {};
 
 	sanguinerings::ResonatorModel resonatorModels[PORT_MAX_CHANNELS] = {};
 
 	sanguinerings::FxType fxModel = sanguinerings::FX_FORMANT;
-
-	std::array<sanguinerings::FxType, PORT_MAX_CHANNELS> channelFx = {};
 
 	std::string displayText = "";
 
@@ -222,11 +222,11 @@ struct Anuli : SanguineModule {
 
 			fxModel = static_cast<sanguinerings::FxType>(params[PARAM_FX].getValue());
 
-			channelFx.fill(fxModel);
+			std::fill(&channelFx[0], &channelFx[PORT_MAX_CHANNELS], static_cast<int32_t>(fxModel));
 
-			int knobMode = static_cast<int>(params[PARAM_MODE].getValue());
+			int32_t knobMode = static_cast<int32_t>(params[PARAM_MODE].getValue());
 
-			channelModes.fill(knobMode);
+			std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS], knobMode);
 
 			parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
 			parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
@@ -269,7 +269,7 @@ struct Anuli : SanguineModule {
 						stringSynths[channel].set_polyphony(polyphonyMode);
 					}
 
-					stringSynths[channel].set_fx(sanguinerings::FxType(channelFx[channel]));
+					stringSynths[channel].set_fx(static_cast<sanguinerings::FxType>(channelFx[channel]));
 
 					setupPatch(channel, patch, structure);
 					setupPerformance(channel, performanceStates[channel], structure);
@@ -389,65 +389,60 @@ struct Anuli : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			int currentLight;
-			bool bIsChannelActive;
-			LightModes lightMode;
-			float lightValue;
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-				if (channel < channelCount && (channel % 4 == 0)) {
-					float_4 inputVoltages;
-					if (bModeConnected) {
-						if (!bNotesModeSelection) {
-							inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-							inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
-							channelModes[channel] = static_cast<int>(inputVoltages[0]);
-							channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
-							channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
-							channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
-
-						} else {
-							inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-							inputVoltages *= 12.f;
-							inputVoltages = simd::round(inputVoltages);
-							inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
-							channelModes[channel] = static_cast<int>(inputVoltages[0]);
-							channelModes[channel + 1] = static_cast<int>(inputVoltages[1]);
-							channelModes[channel + 2] = static_cast<int>(inputVoltages[2]);
-							channelModes[channel + 3] = static_cast<int>(inputVoltages[3]);
-						}
-					}
-
-					if (bFxConnected) {
-						inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				float_4 inputVoltages;
+				simd::int32_4 int32Voltages;
+				if (bModeConnected) {
+					inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					if (bNotesModeSelection) {
+						inputVoltages *= 12.f;
 						inputVoltages = simd::round(inputVoltages);
-						inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
-						channelFx[channel] = static_cast<sanguinerings::FxType>(inputVoltages[0]);
-						channelFx[channel + 1] = static_cast<sanguinerings::FxType>(inputVoltages[1]);
-						channelFx[channel + 2] = static_cast<sanguinerings::FxType>(inputVoltages[2]);
-						channelFx[channel + 3] = static_cast<sanguinerings::FxType>(inputVoltages[3]);
 					}
+					inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+					int32Voltages = inputVoltages;
+					int32Voltages.store(&channelModes[channel]);
 				}
 
-				resonatorModels[channel] = channelModes[channel] == 6 ? sanguinerings::RESONATOR_MODEL_MODAL :
+				if (bFxConnected) {
+					inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
+					inputVoltages = simd::round(inputVoltages);
+					inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
+					int32Voltages = inputVoltages;
+					int32Voltages.store(&channelFx[channel]);
+				}
+			}
+
+			int currentLight;
+			LightModes lightMode;
+			float lightValue;
+			for (int channel = 0; channel < channelCount; ++channel) {
+				resonatorModels[channel] = channelModes[channel] == 6 ?
+					sanguinerings::RESONATOR_MODEL_MODAL :
 					static_cast<sanguinerings::ResonatorModel>(channelModes[channel]);
 
 				currentLight = LIGHT_RESONATOR + channel * 3;
-				bIsChannelActive = channel < channelCount;
-
 				lightMode = anuli::modeLights[channelModes[channel]][0];
-				lightValue = static_cast<float>(bIsChannelActive &
-					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
+				lightValue = static_cast<float>(((lightMode == LIGHT_ON) |
+					((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
 				lights[currentLight].setBrightnessSmooth(lightValue, sampleTime);
 
 				lightMode = anuli::modeLights[channelModes[channel]][1];
-				lightValue = static_cast<float>(bIsChannelActive &
-					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
+				lightValue = static_cast<float>(((lightMode == LIGHT_ON) |
+					((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
 				lights[currentLight + 1].setBrightnessSmooth(lightValue, sampleTime);
 
 				lightMode = anuli::modeLights[channelModes[channel]][2];
-				lightValue = static_cast<float>(bIsChannelActive &
-					((lightMode == LIGHT_ON) | ((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
+				lightValue = static_cast<float>(((lightMode == LIGHT_ON) |
+					((lightMode == LIGHT_BLINK) & bIsTrianglePulse)));
 				lights[currentLight + 2].setBrightnessSmooth(lightValue, sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				currentLight = LIGHT_RESONATOR + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			lightValue = ((channelModes[displayChannel] == 6) &
