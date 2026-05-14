@@ -400,7 +400,7 @@ struct Aestus : SanguineModule {
 					(!bUseExternalSync)) | ((bUseExternalSync) & (bIsSystemTime))) * kSanguineButtonLightValue, sampleTime);
 
 				if (samples[displayChannel].flags & sanguinetides::FLAG_END_OF_ATTACK) {
-					unipolarFlags[displayChannel] *= -1.f;
+					unipolarFlags[displayChannel] = -unipolarFlags[displayChannel];
 				}
 				lights[LIGHT_PHASE].setBrightnessSmooth(fmaxf(0.f, unipolarFlags[displayChannel]), sampleTime);
 				lights[LIGHT_PHASE + 1].setBrightnessSmooth(fmaxf(0.f, -unipolarFlags[displayChannel]), sampleTime);
