@@ -25,6 +25,8 @@ without the backticks.
 
 ## Fixes
 
+- Aestus family: High and Low tide outputs when modules are set to AR or AD modes.
+
 - Nebulae family: proper tooltips on startup.
 
 ## Additions
