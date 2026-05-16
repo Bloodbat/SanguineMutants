@@ -117,7 +117,7 @@ struct Nebulae : SanguineModule {
 	sanguineclouds::PlaybackMode knobPlaybackMode = sanguineclouds::PLAYBACK_MODE_GRANULAR;
 	sanguineclouds::PlaybackMode lastPlaybackMode = sanguineclouds::PLAYBACK_MODE_LAST;
 
-	std::array<sanguineclouds::PlaybackMode, PORT_MAX_CHANNELS> channelModes;
+	int32_t channelModes[PORT_MAX_CHANNELS];
 
 	int channelCount;
 	int displayChannel = 0;
@@ -235,7 +235,8 @@ struct Nebulae : SanguineModule {
 				buffersSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
 
-		channelModes.fill(sanguineclouds::PLAYBACK_MODE_GRANULAR);
+		std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+			static_cast<int32_t>(sanguineclouds::PLAYBACK_MODE_GRANULAR));
 	}
 
 	~Nebulae() {
@@ -353,7 +354,8 @@ struct Nebulae : SanguineModule {
 				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
 
 				// Set up Clouds processor.
-				cloudsProcessors[channel]->set_playback_mode(channelModes[channel]);
+				cloudsProcessors[channel]->set_playback_mode(
+					static_cast<sanguineclouds::PlaybackMode>(channelModes[channel]));
 
 				cloudsProcessors[channel]->set_num_channels(stereoChannels);
 				cloudsProcessors[channel]->set_low_fidelity(bWantLoFi);
@@ -527,21 +529,20 @@ struct Nebulae : SanguineModule {
 			knobPlaybackMode = sanguineclouds::PlaybackMode(params[PARAM_MODE].getValue());
 			sanguineclouds::PlaybackMode channelPlaybackMode = knobPlaybackMode;
 
-			channelModes.fill(knobPlaybackMode);
+			std::fill(&channelModes[0], &channelModes[channelCount], static_cast<int32_t>(knobPlaybackMode));
 
 			if (bModeConnected) {
 				float_4 modeVoltages;
+				simd::int32_4 int32Voltages;
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 					modeVoltages = simd::round(modeVoltages);
 					modeVoltages = simd::clamp(modeVoltages, 0.f, 3.f);
-					channelModes[channel] = static_cast<sanguineclouds::PlaybackMode>(modeVoltages[0]);
-					channelModes[channel + 1] = static_cast<sanguineclouds::PlaybackMode>(modeVoltages[1]);
-					channelModes[channel + 2] = static_cast<sanguineclouds::PlaybackMode>(modeVoltages[2]);
-					channelModes[channel + 3] = static_cast<sanguineclouds::PlaybackMode>(modeVoltages[3]);
+					int32Voltages = modeVoltages;
+					int32Voltages.store(&channelModes[channel]);
 				}
 
-				channelPlaybackMode = channelModes[displayChannel];
+				channelPlaybackMode = static_cast<sanguineclouds::PlaybackMode>(channelModes[displayChannel]);
 			}
 
 			int currentLight;
