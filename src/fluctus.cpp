@@ -121,7 +121,7 @@ struct Fluctus : SanguineModule {
 	fluctus::PlaybackMode knobPlaybackMode = fluctus::PLAYBACK_MODE_GRANULAR;
 	fluctus::PlaybackMode lastPlaybackMode = fluctus::PLAYBACK_MODE_LAST;
 
-	std::array<fluctus::PlaybackMode, PORT_MAX_CHANNELS> channelModes;
+	int32_t channelModes[PORT_MAX_CHANNELS];
 
 	int channelCount;
 	int displayChannel = 0;
@@ -239,7 +239,8 @@ struct Fluctus : SanguineModule {
 				buffersSmall[channel], cloudyCommon::kSmallBufferLength);
 		}
 
-		channelModes.fill(fluctus::PLAYBACK_MODE_GRANULAR);
+		std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+			static_cast<int32_t>(fluctus::PLAYBACK_MODE_GRANULAR));
 	}
 
 	~Fluctus() {
@@ -357,7 +358,8 @@ struct Fluctus : SanguineModule {
 				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
 
 				// Set up Fluctus processor.
-				fluctusProcessors[channel]->set_playback_mode(channelModes[channel]);
+				fluctusProcessors[channel]->set_playback_mode(
+					static_cast<fluctus::PlaybackMode>(channelModes[channel]));
 
 				fluctusProcessors[channel]->set_num_channels(stereoChannels);
 				fluctusProcessors[channel]->set_low_fidelity(bWantLoFi);
@@ -545,21 +547,21 @@ struct Fluctus : SanguineModule {
 			knobPlaybackMode = fluctus::PlaybackMode(params[PARAM_MODE].getValue());
 			fluctus::PlaybackMode channelPlaybackMode = knobPlaybackMode;
 
-			channelModes.fill(knobPlaybackMode);
+			std::fill(&channelModes[0], &channelModes[channelCount],
+				static_cast<int32_t>(knobPlaybackMode));
 
 			if (bModeConnected) {
 				float_4 modeVoltages;
+				simd::int32_4 int32Voltages;
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 					modeVoltages = simd::round(modeVoltages);
 					modeVoltages = simd::clamp(modeVoltages, 0.f, 4.f);
-					channelModes[channel] = static_cast<fluctus::PlaybackMode>(modeVoltages[0]);
-					channelModes[channel + 1] = static_cast<fluctus::PlaybackMode>(modeVoltages[1]);
-					channelModes[channel + 2] = static_cast<fluctus::PlaybackMode>(modeVoltages[2]);
-					channelModes[channel + 3] = static_cast<fluctus::PlaybackMode>(modeVoltages[3]);
+					int32Voltages = modeVoltages;
+					int32Voltages.store(&channelModes[channel]);
 				}
 
-				channelPlaybackMode = channelModes[displayChannel];
+				channelPlaybackMode = static_cast<fluctus::PlaybackMode>(channelModes[displayChannel]);
 			}
 
 			int currentLight;
