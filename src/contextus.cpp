@@ -469,10 +469,11 @@ struct Contextus : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
+			int selectedModel = settings[displayChannel].shape;
 			// Handle model light.
-			lights[LIGHT_MODEL].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].red, sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].green, sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[settings[displayChannel].shape].blue, sampleTime);
+			lights[LIGHT_MODEL].setBrightnessSmooth(contextus::lightColors[selectedModel].red, sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(contextus::lightColors[selectedModel].green, sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(contextus::lightColors[selectedModel].blue, sampleTime);
 
 			float_4 inVoltages;
 			simd::int32_4 int32Voltages;
@@ -501,18 +502,25 @@ struct Contextus : SanguineModule {
 				}
 			}
 
-			bool bIsChannelActive;
 			int currentLight;
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
-				bIsChannelActive = channel < channelCount;
 
-				lights[currentLight].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].red *
-					bIsChannelActive, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].green *
-					bIsChannelActive, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[settings[channel].shape].blue *
-					bIsChannelActive, sampleTime);
+				selectedModel = settings[channel].shape;
+				lights[currentLight].setBrightnessSmooth(contextus::lightColors[selectedModel].red,
+					sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(contextus::lightColors[selectedModel].green,
+					sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(contextus::lightColors[selectedModel].blue,
+					sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			lights[LIGHT_VCA].setBrightnessSmooth(bVCAEnabled * kSanguineButtonLightValue, sampleTime);
@@ -615,7 +623,6 @@ struct Contextus : SanguineModule {
 			default:
 				break;
 			}
-
 			++displayTimeout;
 		}
 

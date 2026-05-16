@@ -478,10 +478,11 @@ struct Nodi : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
+			int selectedModel = settings[displayChannel].shape;
 			// Handle model light.
-			lights[LIGHT_MODEL].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].red, sampleTime);
-			lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].green, sampleTime);
-			lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[settings[displayChannel].shape].blue, sampleTime);
+			lights[LIGHT_MODEL].setBrightnessSmooth(nodi::lightColors[selectedModel].red, sampleTime);
+			lights[LIGHT_MODEL + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green, sampleTime);
+			lights[LIGHT_MODEL + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue, sampleTime);
 
 			float_4 inVoltages;
 			simd::int32_4 int32Voltages;
@@ -510,19 +511,22 @@ struct Nodi : SanguineModule {
 				}
 			}
 
-			bool bIsChannelActive;
 			int currentLight;
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
-				bIsChannelActive = channel < channelCount;
 
-				int selectedModel = settings[channel].shape;
-				lights[currentLight].setBrightnessSmooth(nodi::lightColors[selectedModel].red *
-					bIsChannelActive, sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green *
-					bIsChannelActive, sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue *
-					bIsChannelActive, sampleTime);
+				selectedModel = settings[channel].shape;
+				lights[currentLight].setBrightnessSmooth(nodi::lightColors[selectedModel].red, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(nodi::lightColors[selectedModel].green, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(nodi::lightColors[selectedModel].blue, sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				currentLight = LIGHT_CHANNEL_MODEL + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			lights[LIGHT_MORSE].setBrightnessSmooth(bPaques * kSanguineButtonLightValue, sampleTime);
@@ -625,7 +629,6 @@ struct Nodi : SanguineModule {
 
 			default:
 				break;
-
 			}
 			++displayTimeout;
 		}
