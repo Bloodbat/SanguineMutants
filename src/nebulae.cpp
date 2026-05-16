@@ -547,20 +547,26 @@ struct Nebulae : SanguineModule {
 
 			int currentLight;
 			sanguineclouds::PlaybackMode currentChannelMode;
-			bool bIsChannelActive;
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				currentLight = LIGHT_CHANNEL_1 + channel * 3;
 				currentChannelMode = cloudsProcessors[channel]->playback_mode();
-				bIsChannelActive = channel < channelCount;
 
-				lights[currentLight].setBrightnessSmooth(bIsChannelActive &
+				lights[currentLight].setBrightnessSmooth(
 					((currentChannelMode == sanguineclouds::PLAYBACK_MODE_STRETCH) |
 						(currentChannelMode == sanguineclouds::PLAYBACK_MODE_LOOPING_DELAY)), sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(bIsChannelActive &
+				lights[currentLight + 1].setBrightnessSmooth(
 					((currentChannelMode == sanguineclouds::PLAYBACK_MODE_GRANULAR) |
 						(currentChannelMode == sanguineclouds::PLAYBACK_MODE_STRETCH)), sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(bIsChannelActive &
+				lights[currentLight + 2].setBrightnessSmooth(
 					(currentChannelMode == sanguineclouds::PLAYBACK_MODE_SPECTRAL), sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				currentLight = LIGHT_CHANNEL_1 + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
