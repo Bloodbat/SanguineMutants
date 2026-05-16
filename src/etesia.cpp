@@ -564,24 +564,29 @@ struct Etesia : SanguineModule {
 
 			int currentLight;
 			etesia::PlaybackMode currentChannelMode;
-			bool bIsChannelActive;
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				currentLight = LIGHT_CHANNEL_1 + channel * 3;
 				currentChannelMode = etesiaProcessors[channel]->playback_mode();
-				bIsChannelActive = channel < channelCount;
-
-				lights[currentLight].setBrightnessSmooth(bIsChannelActive &
+				lights[currentLight].setBrightnessSmooth(
 					((currentChannelMode == etesia::PLAYBACK_MODE_STRETCH) |
 						(currentChannelMode == etesia::PLAYBACK_MODE_LOOPING_DELAY) |
 						(currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB)), sampleTime);
-				lights[currentLight + 1].setBrightnessSmooth(bIsChannelActive &
+				lights[currentLight + 1].setBrightnessSmooth(
 					((currentChannelMode == etesia::PLAYBACK_MODE_GRANULAR) |
 						(currentChannelMode == etesia::PLAYBACK_MODE_STRETCH) |
 						(currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR)), sampleTime);
-				lights[currentLight + 2].setBrightnessSmooth(bIsChannelActive &
+				lights[currentLight + 2].setBrightnessSmooth(
 					((currentChannelMode == etesia::PLAYBACK_MODE_SPECTRAL) |
 						(currentChannelMode == etesia::PLAYBACK_MODE_OLIVERB) |
 						(currentChannelMode == etesia::PLAYBACK_MODE_RESONESTOR)), sampleTime);
+			}
+
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				currentLight = LIGHT_CHANNEL_1 + channel * 3;
+
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 
 			if (channelPlaybackMode != lastPlaybackMode) {
