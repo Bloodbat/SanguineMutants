@@ -222,11 +222,11 @@ struct Anuli : SanguineModule {
 
 			fxModel = static_cast<sanguinerings::FxType>(params[PARAM_FX].getValue());
 
-			std::fill(&channelFx[0], &channelFx[PORT_MAX_CHANNELS], static_cast<int32_t>(fxModel));
+			std::fill(&channelFx[0], &channelFx[channelCount], static_cast<int32_t>(fxModel));
 
 			int32_t knobMode = static_cast<int32_t>(params[PARAM_MODE].getValue());
 
-			std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS], knobMode);
+			std::fill(&channelModes[0], &channelModes[channelCount], knobMode);
 
 			parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
 			parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
