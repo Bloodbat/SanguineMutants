@@ -156,8 +156,10 @@ struct Nebulae : SanguineModule {
 	float knobInputGain = 0.5f;
 	float knobOutputGain = 1.f;
 
+	dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[sanguineclouds::kMaxBlockSize];
 	dsp::Frame<PORT_MAX_CHANNELS * 2> inputFrames;
 	dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = {};
+	dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[sanguineclouds::kMaxBlockSize];
 
 	Nebulae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -254,7 +256,6 @@ struct Nebulae : SanguineModule {
 		int currentChannel;
 		// Get input.
 		if (!drbInputBuffers.full()) {
-
 			float_4 inChannelGains;
 			float_4 inVoltagesLeft;
 			float_4 inVoltagesRight;
@@ -297,7 +298,6 @@ struct Nebulae : SanguineModule {
 		// Render frames.
 		if (drbOutputBuffers.empty()) {
 			// Convert input buffer.
-			dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[sanguineclouds::kMaxBlockSize];
 			int inputLength = drbInputBuffers.size();
 			int outputLength = sanguineclouds::kMaxBlockSize;
 			srcInputs.setChannels(channelCount << 1);
@@ -328,8 +328,6 @@ struct Nebulae : SanguineModule {
 
 			knobInputGain = params[PARAM_IN_GAIN].getValue();
 			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
-
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[sanguineclouds::kMaxBlockSize];
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				currentChannel = channel << 1;

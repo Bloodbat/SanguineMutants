@@ -160,8 +160,10 @@ struct Fluctus : SanguineModule {
 	float knobInputGain = 0.5f;
 	float knobOutputGain = 1.f;
 
+	dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[fluctus::kMaxBlockSize];
 	dsp::Frame<PORT_MAX_CHANNELS * 2> inputFrames;
 	dsp::Frame<PORT_MAX_CHANNELS * 2> outputFrames = {};
+	dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[fluctus::kMaxBlockSize];
 
 	Fluctus() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -300,7 +302,6 @@ struct Fluctus : SanguineModule {
 		// Render frames.
 		if (drbOutputBuffers.empty()) {
 			// Convert input buffer.
-			dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[fluctus::kMaxBlockSize];
 			int inputLength = drbInputBuffers.size();
 			int outputLength = fluctus::kMaxBlockSize;
 			srcInputs.setChannels(channelCount << 1);
@@ -331,8 +332,6 @@ struct Fluctus : SanguineModule {
 
 			knobInputGain = params[PARAM_IN_GAIN].getValue();
 			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
-
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderedFrames[fluctus::kMaxBlockSize];
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				currentChannel = channel << 1;
@@ -417,8 +416,8 @@ struct Fluctus : SanguineModule {
 				float pitchVoltage = inputs[INPUT_PITCH].getVoltage(channel);
 
 				// TODO: the firmware subtracts -0.5f from incoming voltage...
-				fluctusParameters[channel]->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(), -2.f, 2.f, 0.f, 1.f) +
-					pitchVoltage / 5.f), 0.f, 1.f);
+				fluctusParameters[channel]->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(),
+					-2.f, 2.f, 0.f, 1.f) + pitchVoltage / 5.f), 0.f, 1.f);
 				fluctusParameters[channel]->pitch = clamp((paramPitch + pitchVoltage) * 12.f, -48.f, 48.f);
 
 				if (bFrozen && !lastFrozen[channel]) {
@@ -497,7 +496,6 @@ struct Fluctus : SanguineModule {
 				}
 			}
 		}
-
 
 		outputs[OUTPUT_LEFT].setChannels(channelCount);
 		outputs[OUTPUT_RIGHT].setChannels(channelCount);
