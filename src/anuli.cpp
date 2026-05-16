@@ -389,21 +389,32 @@ struct Anuli : SanguineModule {
 				displayChannel = channelCount - 1;
 			}
 
-			for (int channel = 0; channel < channelCount; channel += 4) {
-				float_4 inputVoltages;
-				simd::int32_4 int32Voltages;
-				if (bModeConnected) {
-					inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
-					if (bNotesModeSelection) {
+			float_4 inputVoltages;
+			simd::int32_4 int32Voltages;
+
+			if (bModeConnected) {
+				if (!bNotesModeSelection) {
+					for (int channel = 0; channel < channelCount; channel += 4) {
+						inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+
+						inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+						int32Voltages = inputVoltages;
+						int32Voltages.store(&channelModes[channel]);
+					}
+				} else {
+					for (int channel = 0; channel < channelCount; channel += 4) {
+						inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
 						inputVoltages *= 12.f;
 						inputVoltages = simd::round(inputVoltages);
+						inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
+						int32Voltages = inputVoltages;
+						int32Voltages.store(&channelModes[channel]);
 					}
-					inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
-					int32Voltages = inputVoltages;
-					int32Voltages.store(&channelModes[channel]);
 				}
+			}
 
-				if (bFxConnected) {
+			if (bFxConnected) {
+				for (int channel = 0; channel < channelCount; channel += 4) {
 					inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
 					inputVoltages = simd::round(inputVoltages);
 					inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
