@@ -149,7 +149,6 @@ struct Fluctus : SanguineModule {
 	fluctus::FluctusGranularProcessor* fluctusProcessors[PORT_MAX_CHANNELS];
 	fluctus::Parameters* fluctusParameters[PORT_MAX_CHANNELS];
 
-	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
 	float knobPitch = 0.f;
@@ -704,10 +703,12 @@ struct Fluctus : SanguineModule {
 				lastPlaybackMode = channelPlaybackMode;
 			}
 
-			rescaledLightsGreen[0] = fluctusParameters[displayChannel]->position;
-			rescaledLightsGreen[1] = fluctusParameters[displayChannel]->density;
-			rescaledLightsGreen[2] = fluctusParameters[displayChannel]->size;
-			rescaledLightsGreen[3] = fluctusParameters[displayChannel]->texture;
+			float_4 rescaledLightsGreen = {
+				fluctusParameters[displayChannel]->position,
+				fluctusParameters[displayChannel]->density,
+				fluctusParameters[displayChannel]->size,
+				fluctusParameters[displayChannel]->texture
+			};
 
 			rescaledLightsRed = simd::ifelse(rescaledLightsGreen < 0.5f,
 				simd::rescale(rescaledLightsGreen, 0.f, 0.5f, 1.f, 0.f), 0.f);

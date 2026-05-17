@@ -145,7 +145,6 @@ struct Nebulae : SanguineModule {
 	sanguineclouds::GranularProcessor* cloudsProcessors[PORT_MAX_CHANNELS];
 	sanguineclouds::Parameters* cloudsParameters[PORT_MAX_CHANNELS];
 
-	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
 	float knobPitch = 0.f;
@@ -668,10 +667,12 @@ struct Nebulae : SanguineModule {
 				lastPlaybackMode = channelPlaybackMode;
 			}
 
-			rescaledLightsGreen[0] = cloudsParameters[displayChannel]->position;
-			rescaledLightsGreen[1] = cloudsParameters[displayChannel]->density;
-			rescaledLightsGreen[2] = cloudsParameters[displayChannel]->size;
-			rescaledLightsGreen[3] = cloudsParameters[displayChannel]->texture;
+			float_4 rescaledLightsGreen = {
+				cloudsParameters[displayChannel]->position,
+				cloudsParameters[displayChannel]->density,
+				cloudsParameters[displayChannel]->size,
+				cloudsParameters[displayChannel]->texture
+			};
 
 			rescaledLightsRed = simd::ifelse(rescaledLightsGreen < 0.5f,
 				simd::rescale(rescaledLightsGreen, 0.f, 0.5f, 1.f, 0.f), 0.f);
