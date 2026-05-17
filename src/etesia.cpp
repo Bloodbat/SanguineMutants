@@ -153,9 +153,6 @@ struct Etesia : SanguineModule {
 	etesia::EtesiaGranularProcessor* etesiaProcessors[PORT_MAX_CHANNELS];
 	etesia::Parameters* etesiaParameters[PORT_MAX_CHANNELS];
 
-	float_4 knobValues;
-	float_4 sliderValues;
-	float_4 voltages1[PORT_MAX_CHANNELS];
 	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
@@ -163,6 +160,28 @@ struct Etesia : SanguineModule {
 
 	float knobInputGain = 0.5f;
 	float knobOutputGain = 1.f;
+
+	float sliderPosition;
+	float sliderDensity;
+	float sliderSize;
+	float sliderTexture;
+	float knobBlend;
+	float knobSpread;
+	float knobFeedback;
+	float knobReverb;
+
+	float voltagesPosition[PORT_MAX_CHANNELS] = {};
+	float voltagesSize[PORT_MAX_CHANNELS] = {};
+	float voltagesPitch[PORT_MAX_CHANNELS] = {};
+	float voltagesDensity[PORT_MAX_CHANNELS] = {};
+	float voltagesTexture[PORT_MAX_CHANNELS] = {};
+	float voltagesDryWet[PORT_MAX_CHANNELS] = {};
+	float voltagesSpread[PORT_MAX_CHANNELS] = {};
+	float voltagesFeedback[PORT_MAX_CHANNELS] = {};
+	float voltagesReverb[PORT_MAX_CHANNELS] = {};
+	float voltagesTrigger[PORT_MAX_CHANNELS] = {};
+	float voltagesFreeze[PORT_MAX_CHANNELS] = {};
+	float voltagesReverse[PORT_MAX_CHANNELS] = {};
 
 	dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[etesia::kMaxBlockSize];
 	dsp::Frame<PORT_MAX_CHANNELS * 2> inputFrames;
@@ -328,20 +347,85 @@ struct Etesia : SanguineModule {
 			bReversed = static_cast<bool>(static_cast<int>(params[PARAM_REVERSE].getValue()));
 #endif
 
-			knobValues[0] = params[PARAM_BLEND].getValue();
-			knobValues[1] = params[PARAM_SPREAD].getValue();
-			knobValues[2] = params[PARAM_FEEDBACK].getValue();
-			knobValues[3] = params[PARAM_REVERB].getValue();
-
-			sliderValues[0] = params[PARAM_POSITION].getValue();
-			sliderValues[1] = params[PARAM_DENSITY].getValue();
-			sliderValues[2] = params[PARAM_SIZE].getValue();
-			sliderValues[3] = params[PARAM_TEXTURE].getValue();
-
 			knobPitch = params[PARAM_PITCH].getValue();
 
 			knobInputGain = params[PARAM_IN_GAIN].getValue();
 			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
+
+			sliderPosition = params[PARAM_POSITION].getValue();
+			sliderDensity = params[PARAM_DENSITY].getValue();
+			sliderSize = params[PARAM_SIZE].getValue();
+			sliderTexture = params[PARAM_TEXTURE].getValue();
+			knobBlend = params[PARAM_BLEND].getValue();
+			knobSpread = params[PARAM_SPREAD].getValue();
+			knobFeedback = params[PARAM_FEEDBACK].getValue();
+			knobReverb = params[PARAM_REVERB].getValue();
+
+			float_4 inVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				inVoltages = inputs[INPUT_POSITION].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderPosition;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesPosition[channel]);
+
+				inVoltages = inputs[INPUT_DENSITY].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderDensity;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesDensity[channel]);
+
+				inVoltages = inputs[INPUT_SIZE].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderSize;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesSize[channel]);
+
+				inVoltages = inputs[INPUT_TEXTURE].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderTexture;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesTexture[channel]);
+
+				inVoltages = inputs[INPUT_BLEND].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobBlend;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesDryWet[channel]);
+
+				inVoltages = inputs[INPUT_SPREAD].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobSpread;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesSpread[channel]);
+
+				inVoltages = inputs[INPUT_FEEDBACK].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobFeedback;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesFeedback[channel]);
+
+				inVoltages = inputs[INPUT_REVERB].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobReverb;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesReverb[channel]);
+
+				inVoltages = inputs[INPUT_PITCH].getVoltageSimd<float_4>(channel);
+				inVoltages += knobPitch;
+				inVoltages *= 12.f;
+				inVoltages = simd::clamp(inVoltages, -48.f, 48.f);
+				inVoltages.store(&voltagesPitch[channel]);
+
+				inVoltages = inputs[INPUT_TRIGGER].getVoltageSimd<float_4>(channel);
+				inVoltages.store(&voltagesTrigger[channel]);
+
+				inVoltages = inputs[INPUT_FREEZE].getVoltageSimd<float_4>(channel);
+				inVoltages.store(&voltagesFreeze[channel]);
+
+				inVoltages = inputs[INPUT_REVERSE].getVoltageSimd<float_4>(channel);
+				inVoltages.store(&voltagesReverse[channel]);
+			}
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				currentChannel = channel << 1;
@@ -361,11 +445,6 @@ struct Etesia : SanguineModule {
 
 				etesiaParameters[channel] = etesiaProcessors[channel]->mutable_parameters();
 
-				voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
-				voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
-				voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
-				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
-
 				// Set up Etesia processor.
 				etesiaProcessors[channel]->set_playback_mode(
 					static_cast<etesia::PlaybackMode>(channelModes[channel]));
@@ -374,38 +453,18 @@ struct Etesia : SanguineModule {
 				etesiaProcessors[channel]->set_low_fidelity(bWantLoFi);
 				etesiaProcessors[channel]->Prepare();
 
-				float_4 scaledVoltages;
+				etesiaParameters[channel]->position = voltagesPosition[channel];
+				etesiaParameters[channel]->density = voltagesDensity[channel];
+				etesiaParameters[channel]->size = voltagesSize[channel];
+				etesiaParameters[channel]->texture = voltagesTexture[channel];
 
-				scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage(channel);
-				scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage(channel);
-				scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage(channel);
-				scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage(channel);
-
-				scaledVoltages /= 5.f;
-
-				scaledVoltages += knobValues;
-
-				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-				etesiaParameters[channel]->dry_wet = scaledVoltages[0];
-				etesiaParameters[channel]->stereo_spread = scaledVoltages[1];
-				etesiaParameters[channel]->feedback = scaledVoltages[2];
-				etesiaParameters[channel]->reverb = scaledVoltages[3];
-
-				scaledVoltages = voltages1[channel];
-				scaledVoltages /= 5.f;
-
-				scaledVoltages += sliderValues;
-
-				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-				etesiaParameters[channel]->position = scaledVoltages[0];
-				etesiaParameters[channel]->density = scaledVoltages[1];
-				etesiaParameters[channel]->size = scaledVoltages[2];
-				etesiaParameters[channel]->texture = scaledVoltages[3];
+				etesiaParameters[channel]->dry_wet = voltagesDryWet[channel];
+				etesiaParameters[channel]->stereo_spread = voltagesSpread[channel];
+				etesiaParameters[channel]->feedback = voltagesFeedback[channel];
+				etesiaParameters[channel]->reverb = voltagesReverb[channel];
 
 				// Trigger.
-				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
+				bool bIsGate = voltagesTrigger[channel] >= 1.f;
 
 				etesiaParameters[channel]->trigger = (bTriggersAreGates & bIsGate) |
 					((!bTriggersAreGates) & (bIsGate & (!lastTriggered[channel])));
@@ -413,10 +472,11 @@ struct Etesia : SanguineModule {
 
 				lastTriggered[channel] = bIsGate;
 
-				etesiaParameters[channel]->freeze = ((inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f) | bFrozen);
-				etesiaParameters[channel]->granular.reverse = ((inputs[INPUT_REVERSE].getVoltage(channel) >= 1.f) | bReversed);
+				etesiaParameters[channel]->freeze = ((voltagesFreeze[channel] >= 1.f) | bFrozen);
+				etesiaParameters[channel]->granular.reverse = ((voltagesReverse[channel] >= 1.f) |
+					bReversed);
 
-				etesiaParameters[channel]->pitch = clamp((knobPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
+				etesiaParameters[channel]->pitch = voltagesPitch[channel];
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
