@@ -303,8 +303,8 @@ namespace fluctus {
 
     for (size_t i = 0; i < size; ++i) {
       if (playback_mode_ == PLAYBACK_MODE_SPECTRAL_CLOUD) {
-        WarmDistortion(&out_[i].l, parameters_.kammerl.pitch_mode);
-        WarmDistortion(&out_[i].r, parameters_.kammerl.pitch_mode);
+        WarmDistortion(&out_[i].l, parameters_.feedback);
+        WarmDistortion(&out_[i].r, parameters_.feedback);
       }
 
       output[i].l = SoftConvert(out_[i].l);

@@ -36,10 +36,14 @@ namespace fluctus {
     float position;
     float size;
     float pitch;
+    // Kammerl size modulation.
     float density;
     float texture;
+    // Kammerl probability.
     float dry_wet;
+    // Kammerl clock divider.
     float stereo_spread;
+    // Kammerl pitch mode.
     float feedback;
     float reverb;
 
@@ -55,13 +59,8 @@ namespace fluctus {
     } granular;
 
     struct Kammerl {
-      float probability;
-      float pitch_mode;
-      float clock_divider;
-      float distortion;
       float slice_selection;
       float slice_modulation;
-      float size_modulation;
       float pitch;
     } kammerl;
   };
