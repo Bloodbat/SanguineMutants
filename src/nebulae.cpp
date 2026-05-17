@@ -130,10 +130,10 @@ struct Nebulae : SanguineModule {
 	uint8_t* buffersLarge[PORT_MAX_CHANNELS];
 	uint8_t* buffersSmall[PORT_MAX_CHANNELS];
 
-	bool lastFrozen[PORT_MAX_CHANNELS];
+	bool lastFrozen[PORT_MAX_CHANNELS] = {};
 	bool bDisplaySwitched = false;
 	bool bTriggersAreGates = true;
-	bool lastTriggered[PORT_MAX_CHANNELS];
+	bool lastTriggered[PORT_MAX_CHANNELS] = {};
 
 	bool bModeConnected = false;
 	bool bRightInputConnected = false;
@@ -241,9 +241,6 @@ struct Nebulae : SanguineModule {
 		configBypass(INPUT_RIGHT, OUTPUT_RIGHT);
 
 		for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
-			lastTriggered[channel] = false;
-			lastFrozen[channel] = false;
-
 			buffersLarge[channel] = new uint8_t[cloudyCommon::kBigBufferLength]();
 			buffersSmall[channel] = new uint8_t[cloudyCommon::kSmallBufferLength]();
 			cloudsProcessors[channel] = new sanguineclouds::GranularProcessor();
