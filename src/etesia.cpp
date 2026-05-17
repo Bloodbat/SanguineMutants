@@ -153,7 +153,6 @@ struct Etesia : SanguineModule {
 	etesia::EtesiaGranularProcessor* etesiaProcessors[PORT_MAX_CHANNELS];
 	etesia::Parameters* etesiaParameters[PORT_MAX_CHANNELS];
 
-	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
 	float knobPitch = 0.f;
@@ -703,10 +702,12 @@ struct Etesia : SanguineModule {
 				lastPlaybackMode = channelPlaybackMode;
 			}
 
-			rescaledLightsGreen[0] = etesiaParameters[displayChannel]->position;
-			rescaledLightsGreen[1] = etesiaParameters[displayChannel]->density;
-			rescaledLightsGreen[2] = etesiaParameters[displayChannel]->size;
-			rescaledLightsGreen[3] = etesiaParameters[displayChannel]->texture;
+			float_4 rescaledLightsGreen = {
+				etesiaParameters[displayChannel]->position,
+				etesiaParameters[displayChannel]->density,
+				etesiaParameters[displayChannel]->size,
+				etesiaParameters[displayChannel]->texture
+			};
 
 			rescaledLightsRed = simd::ifelse(rescaledLightsGreen < 0.5f,
 				simd::rescale(rescaledLightsGreen, 0.f, 0.5f, 1.f, 0.f), 0.f);
