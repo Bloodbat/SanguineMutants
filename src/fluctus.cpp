@@ -383,11 +383,6 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->feedback = scaledVoltages[2];
 				fluctusParameters[channel]->reverb = scaledVoltages[3];
 
-				fluctusParameters[channel]->kammerl.probability = fluctusParameters[channel]->dry_wet;
-				fluctusParameters[channel]->kammerl.clock_divider = fluctusParameters[channel]->stereo_spread;
-				fluctusParameters[channel]->kammerl.pitch_mode = fluctusParameters[channel]->feedback;
-				fluctusParameters[channel]->kammerl.distortion = fluctusParameters[channel]->reverb;
-
 				scaledVoltages = voltages1[channel];
 				scaledVoltages /= 5.f;
 
@@ -402,7 +397,6 @@ struct Fluctus : SanguineModule {
 				fluctusParameters[channel]->size = scaledVoltages[2];
 				fluctusParameters[channel]->texture = scaledVoltages[3];
 				fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
-				fluctusParameters[channel]->kammerl.size_modulation = fluctusParameters[channel]->density;
 
 				// Trigger.
 				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
