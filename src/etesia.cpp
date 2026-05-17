@@ -159,7 +159,7 @@ struct Etesia : SanguineModule {
 	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
-	float paramPitch = 0.f;
+	float knobPitch = 0.f;
 
 	float knobInputGain = 0.5f;
 	float knobOutputGain = 1.f;
@@ -338,7 +338,7 @@ struct Etesia : SanguineModule {
 			sliderValues[2] = params[PARAM_SIZE].getValue();
 			sliderValues[3] = params[PARAM_TEXTURE].getValue();
 
-			paramPitch = params[PARAM_PITCH].getValue();
+			knobPitch = params[PARAM_PITCH].getValue();
 
 			knobInputGain = params[PARAM_IN_GAIN].getValue();
 			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
@@ -416,7 +416,7 @@ struct Etesia : SanguineModule {
 				etesiaParameters[channel]->freeze = ((inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f) | bFrozen);
 				etesiaParameters[channel]->granular.reverse = ((inputs[INPUT_REVERSE].getVoltage(channel) >= 1.f) | bReversed);
 
-				etesiaParameters[channel]->pitch = clamp((paramPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
+				etesiaParameters[channel]->pitch = clamp((knobPitch + inputs[INPUT_PITCH].getVoltage(channel)) * 12.f, -48.f, 48.f);
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;

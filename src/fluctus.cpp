@@ -155,7 +155,7 @@ struct Fluctus : SanguineModule {
 	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
-	float paramPitch = 0.f;
+	float knobPitch = 0.f;
 
 	float knobInputGain = 0.5f;
 	float knobOutputGain = 1.f;
@@ -329,7 +329,7 @@ struct Fluctus : SanguineModule {
 			sliderValues[2] = params[PARAM_SIZE].getValue();
 			sliderValues[3] = params[PARAM_TEXTURE].getValue();
 
-			paramPitch = params[PARAM_PITCH].getValue();
+			knobPitch = params[PARAM_PITCH].getValue();
 
 			knobInputGain = params[PARAM_IN_GAIN].getValue();
 			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
@@ -420,7 +420,7 @@ struct Fluctus : SanguineModule {
 				// TODO: the firmware subtracts -0.5f from incoming voltage...
 				fluctusParameters[channel]->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(),
 					-2.f, 2.f, 0.f, 1.f) + pitchVoltage / 5.f), 0.f, 1.f);
-				fluctusParameters[channel]->pitch = clamp((paramPitch + pitchVoltage) * 12.f, -48.f, 48.f);
+				fluctusParameters[channel]->pitch = clamp((knobPitch + pitchVoltage) * 12.f, -48.f, 48.f);
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
