@@ -84,7 +84,7 @@ namespace fluctus {
 		float parameter_low_pass_parameter = parameters.density; //parameters.kammerl.pitch;
 		CONSTRAIN(parameter_low_pass_parameter, 0.0f, 1.0f);
 
-		float rand_trigger_parameter = parameters.kammerl.clock_divider;
+		float rand_trigger_parameter = parameters.stereo_spread;
 		CONSTRAIN(rand_trigger_parameter, 0.0f, 1.0f);
 		float phase_randomization_parameter = parameters.texture;
 		CONSTRAIN(phase_randomization_parameter, 0.0f, 1.0f);

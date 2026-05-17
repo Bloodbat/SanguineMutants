@@ -167,7 +167,7 @@ namespace fluctus {
 					latest_trigger_interval_samples / 2;
 				const float rand_percentage = sanguinestmlib::Random::GetFloat();
 				const bool trigger_slice = !slice_still_playing &&
-					((rand_percentage < parameters.kammerl.probability) || parameters.freeze ||
+					((rand_percentage < parameters.dry_wet) || parameters.freeze ||
 						playback_mode_ == PLAYBACK_MODE_UNINITIALIZED);
 
 				if (!trigger_slice && !slice_still_playing) {
@@ -175,7 +175,7 @@ namespace fluctus {
 				}
 
 				if (trigger_slice) {
-					int clock_divider_value = parameters.kammerl.clock_divider * kMaxClockDividerLog2 + 0.5f;
+					int clock_divider_value = parameters.stereo_spread * kMaxClockDividerLog2 + 0.5f;
 					CONSTRAIN(clock_divider_value, 0, kMaxClockDividerLog2);
 					slice_size_samples_ = latest_trigger_interval_samples << clock_divider_value;
 					num_remaining_samples_in_slice_ = slice_size_samples_;
@@ -198,7 +198,7 @@ namespace fluctus {
 					slice_play_direction_ = 1.0f;
 
 					// Set playback mode and loop configuration.
-					int playback_mode_enum = parameters.kammerl.pitch_mode * (kNumPitchModes - 1) + 0.5f;
+					int playback_mode_enum = parameters.feedback * (kNumPitchModes - 1) + 0.5f;
 					CONSTRAIN(playback_mode_enum, 0, kNumPitchModes - 1);
 					playback_mode_ = static_cast<PlaybackModes>(PLAYBACK_MODE_FIXED_PITCH + playback_mode_enum);
 					slice_loop_begin_percent_ = quantizeSize(parameters.position);
@@ -216,8 +216,8 @@ namespace fluctus {
 			// Get pitch and loop scaling parameters.
 			float pitch_parameter = parameters.kammerl.pitch;
 			CONSTRAIN(pitch_parameter, 0.0f, 1.0f);
-			float loop_scaling_parameter = parameters.kammerl.size_modulation > 0.1f ?
-				parameters.kammerl.size_modulation : 0.0f;
+			float loop_scaling_parameter = parameters.density > 0.1f ?
+				parameters.density : 0.0f;
 			CONSTRAIN(loop_scaling_parameter, 0.0f, 1.0f);
 
 			while (size--) {
