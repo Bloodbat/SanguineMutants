@@ -149,9 +149,6 @@ struct Fluctus : SanguineModule {
 	fluctus::FluctusGranularProcessor* fluctusProcessors[PORT_MAX_CHANNELS];
 	fluctus::Parameters* fluctusParameters[PORT_MAX_CHANNELS];
 
-	float_4 knobValues;
-	float_4 sliderValues;
-	float_4 voltages1[PORT_MAX_CHANNELS];
 	float_4 rescaledLightsGreen;
 	float_4 rescaledLightsRed;
 
@@ -159,6 +156,31 @@ struct Fluctus : SanguineModule {
 
 	float knobInputGain = 0.5f;
 	float knobOutputGain = 1.f;
+
+	float sliderPosition;
+	float sliderDensity;
+	float sliderSize;
+	float sliderTexture;
+	float knobBlend;
+	float knobSpread;
+	float knobFeedback;
+	float knobReverb;
+
+	float rescaledPitch;
+
+	float voltagesPosition[PORT_MAX_CHANNELS] = {};
+	float voltagesSize[PORT_MAX_CHANNELS] = {};
+	float voltagesPitch[PORT_MAX_CHANNELS] = {};
+	float voltagesDensity[PORT_MAX_CHANNELS] = {};
+	float voltagesTexture[PORT_MAX_CHANNELS] = {};
+	float voltagesDryWet[PORT_MAX_CHANNELS] = {};
+	float voltagesSpread[PORT_MAX_CHANNELS] = {};
+	float voltagesFeedback[PORT_MAX_CHANNELS] = {};
+	float voltagesReverb[PORT_MAX_CHANNELS] = {};
+	float voltagesTrigger[PORT_MAX_CHANNELS] = {};
+	float voltagesFreeze[PORT_MAX_CHANNELS] = {};
+	float voltagesSliceSelection[PORT_MAX_CHANNELS] = {};
+	float voltagesPitchRaw[PORT_MAX_CHANNELS] = {};
 
 	dsp::Frame<PORT_MAX_CHANNELS * 2> convertedFrames[fluctus::kMaxBlockSize];
 	dsp::Frame<PORT_MAX_CHANNELS * 2> inputFrames;
@@ -319,20 +341,92 @@ struct Fluctus : SanguineModule {
 			bFrozen = static_cast<bool>(static_cast<int>(params[PARAM_FREEZE].getValue()));
 #endif
 
-			knobValues[0] = params[PARAM_BLEND].getValue();
-			knobValues[1] = params[PARAM_SPREAD].getValue();
-			knobValues[2] = params[PARAM_FEEDBACK].getValue();
-			knobValues[3] = params[PARAM_REVERB].getValue();
-
-			sliderValues[0] = params[PARAM_POSITION].getValue();
-			sliderValues[1] = params[PARAM_DENSITY].getValue();
-			sliderValues[2] = params[PARAM_SIZE].getValue();
-			sliderValues[3] = params[PARAM_TEXTURE].getValue();
-
 			knobPitch = params[PARAM_PITCH].getValue();
 
 			knobInputGain = params[PARAM_IN_GAIN].getValue();
 			knobOutputGain = params[PARAM_OUT_GAIN].getValue();
+
+			sliderPosition = params[PARAM_POSITION].getValue();
+			sliderDensity = params[PARAM_DENSITY].getValue();
+			sliderSize = params[PARAM_SIZE].getValue();
+			sliderTexture = params[PARAM_TEXTURE].getValue();
+			knobBlend = params[PARAM_BLEND].getValue();
+			knobSpread = params[PARAM_SPREAD].getValue();
+			knobFeedback = params[PARAM_FEEDBACK].getValue();
+			knobReverb = params[PARAM_REVERB].getValue();
+
+			rescaledPitch = math::rescale(knobPitch, -2.f, 2.f, 0.f, 1.f);
+
+			float_4 inVoltages;
+			float_4 extraVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				inVoltages = inputs[INPUT_POSITION].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderPosition;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesPosition[channel]);
+
+				inVoltages = inputs[INPUT_DENSITY].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderDensity;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesDensity[channel]);
+
+				inVoltages = inputs[INPUT_SIZE].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += sliderSize;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesSize[channel]);
+
+				inVoltages = inputs[INPUT_TEXTURE].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				extraVoltages = inVoltages;
+				inVoltages += sliderTexture;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				extraVoltages = clamp(extraVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesTexture[channel]);
+				extraVoltages.store(&voltagesSliceSelection[channel]);
+
+				inVoltages = inputs[INPUT_BLEND].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobBlend;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesDryWet[channel]);
+
+				inVoltages = inputs[INPUT_SPREAD].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobSpread;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesSpread[channel]);
+
+				inVoltages = inputs[INPUT_FEEDBACK].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobFeedback;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesFeedback[channel]);
+
+				inVoltages = inputs[INPUT_REVERB].getVoltageSimd<float_4>(channel);
+				inVoltages /= 5.f;
+				inVoltages += knobReverb;
+				inVoltages = clamp(inVoltages, 0.f, 1.f);
+				inVoltages.store(&voltagesReverb[channel]);
+
+				inVoltages = inputs[INPUT_PITCH].getVoltageSimd<float_4>(channel);
+				extraVoltages = inVoltages;
+				inVoltages += knobPitch;
+				inVoltages *= 12.f;
+				inVoltages = simd::clamp(inVoltages, -48.f, 48.f);
+				inVoltages.store(&voltagesPitch[channel]);
+				// TODO: the Beat Repear firmware subtracts -0.5f from incoming voltage...
+				extraVoltages /= 5.f;
+				extraVoltages.store(&voltagesPitchRaw[channel]);
+
+				inVoltages = inputs[INPUT_TRIGGER].getVoltageSimd<float_4>(channel);
+				inVoltages.store(&voltagesTrigger[channel]);
+
+				inVoltages = inputs[INPUT_FREEZE].getVoltageSimd<float_4>(channel);
+				inVoltages.store(&voltagesFreeze[channel]);
+			}
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				currentChannel = channel << 1;
@@ -352,11 +446,6 @@ struct Fluctus : SanguineModule {
 
 				fluctusParameters[channel] = fluctusProcessors[channel]->mutable_parameters();
 
-				voltages1[channel][0] = inputs[INPUT_POSITION].getVoltage(channel);
-				voltages1[channel][1] = inputs[INPUT_DENSITY].getVoltage(channel);
-				voltages1[channel][2] = inputs[INPUT_SIZE].getVoltage(channel);
-				voltages1[channel][3] = inputs[INPUT_TEXTURE].getVoltage(channel);
-
 				// Set up Fluctus processor.
 				fluctusProcessors[channel]->set_playback_mode(
 					static_cast<fluctus::PlaybackMode>(channelModes[channel]));
@@ -365,41 +454,21 @@ struct Fluctus : SanguineModule {
 				fluctusProcessors[channel]->set_low_fidelity(bWantLoFi);
 				fluctusProcessors[channel]->Prepare();
 
-				float_4 scaledVoltages;
+				fluctusParameters[channel]->position = voltagesPosition[channel];
+				fluctusParameters[channel]->density = voltagesDensity[channel];
+				fluctusParameters[channel]->size = voltagesSize[channel];
+				fluctusParameters[channel]->texture = voltagesTexture[channel];
+				fluctusParameters[channel]->kammerl.slice_modulation = sliderTexture;
 
-				scaledVoltages[0] = inputs[INPUT_BLEND].getVoltage(channel);
-				scaledVoltages[1] = inputs[INPUT_SPREAD].getVoltage(channel);
-				scaledVoltages[2] = inputs[INPUT_FEEDBACK].getVoltage(channel);
-				scaledVoltages[3] = inputs[INPUT_REVERB].getVoltage(channel);
+				fluctusParameters[channel]->dry_wet = voltagesDryWet[channel];
+				fluctusParameters[channel]->stereo_spread = voltagesSpread[channel];
+				fluctusParameters[channel]->feedback = voltagesFeedback[channel];
+				fluctusParameters[channel]->reverb = voltagesReverb[channel];
 
-				scaledVoltages /= 5.f;
-
-				scaledVoltages += knobValues;
-
-				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-				fluctusParameters[channel]->dry_wet = scaledVoltages[0];
-				fluctusParameters[channel]->stereo_spread = scaledVoltages[1];
-				fluctusParameters[channel]->feedback = scaledVoltages[2];
-				fluctusParameters[channel]->reverb = scaledVoltages[3];
-
-				scaledVoltages = voltages1[channel];
-				scaledVoltages /= 5.f;
-
-				fluctusParameters[channel]->kammerl.slice_selection = clamp(scaledVoltages[3], 0.f, 1.f);
-
-				scaledVoltages += sliderValues;
-
-				scaledVoltages = clamp(scaledVoltages, 0.f, 1.f);
-
-				fluctusParameters[channel]->position = scaledVoltages[0];
-				fluctusParameters[channel]->density = scaledVoltages[1];
-				fluctusParameters[channel]->size = scaledVoltages[2];
-				fluctusParameters[channel]->texture = scaledVoltages[3];
-				fluctusParameters[channel]->kammerl.slice_modulation = sliderValues[3];
+				fluctusParameters[channel]->kammerl.slice_selection = voltagesSliceSelection[channel];
 
 				// Trigger.
-				bool bIsGate = inputs[INPUT_TRIGGER].getVoltage(channel) >= 1.f;
+				bool bIsGate = voltagesTrigger[channel] >= 1.f;
 
 				fluctusParameters[channel]->trigger = (bTriggersAreGates & bIsGate) |
 					((!bTriggersAreGates) & (bIsGate & (!lastTriggered[channel])));
@@ -407,14 +476,11 @@ struct Fluctus : SanguineModule {
 
 				lastTriggered[channel] = bIsGate;
 
-				fluctusParameters[channel]->freeze = ((inputs[INPUT_FREEZE].getVoltage(channel) >= 1.f) | bFrozen);
+				fluctusParameters[channel]->freeze = ((voltagesFreeze[channel] >= 1.f) | bFrozen);
 
-				float pitchVoltage = inputs[INPUT_PITCH].getVoltage(channel);
-
-				// TODO: the firmware subtracts -0.5f from incoming voltage...
-				fluctusParameters[channel]->kammerl.pitch = clamp((math::rescale(params[PARAM_PITCH].getValue(),
-					-2.f, 2.f, 0.f, 1.f) + pitchVoltage / 5.f), 0.f, 1.f);
-				fluctusParameters[channel]->pitch = clamp((knobPitch + pitchVoltage) * 12.f, -48.f, 48.f);
+				fluctusParameters[channel]->kammerl.pitch =
+					clamp(rescaledPitch + voltagesPitchRaw[channel], 0.f, 1.f);
+				fluctusParameters[channel]->pitch = voltagesPitch[channel];
 
 				if (bFrozen && !lastFrozen[channel]) {
 					lastFrozen[channel] = true;
