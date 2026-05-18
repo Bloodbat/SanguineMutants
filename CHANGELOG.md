@@ -27,6 +27,12 @@ without the backticks.
 
 - Explorator: Sanguine white noise model.
 
+## Changes
+
+- Plugin: performance tweaks.
+
+- Vimina: reset module logic when disconnecting clock input.
+
 
 ---
 

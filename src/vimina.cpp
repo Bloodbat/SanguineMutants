@@ -576,6 +576,10 @@ struct Vimina : SanguineModule {
 				break;
 			case INPUT_CLOCK:
 				bClockConnected = e.connecting;
+
+				if (!bClockConnected) {
+					init();
+				}
 			default:
 				break;
 			}
