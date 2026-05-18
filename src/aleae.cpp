@@ -56,7 +56,7 @@ struct Aleae : SanguineModule {
 	bool outputsConnected[OUTPUTS_COUNT] = {};
 	bool bInput2Connected = false;
 
-	aleae::ActiveLights activeLights[aleae::kMaxModuleSections] = {};
+	aleae::ActiveGates activeGates[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
 	float voltagesTrigger[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	float voltagesThreshold[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
@@ -123,25 +123,25 @@ struct Aleae : SanguineModule {
 						aleae::ROLL_HEADS : aleae::ROLL_TAILS;
 					if (rollModes[section] == aleae::ROLL_TOGGLE) {
 						rollResults[section][channel] =
-							static_cast<aleae::RollResults>(lastRollResults[section][channel] ^ rollResults[section][channel]);
+							static_cast<aleae::RollResults>(lastRollResults[section][channel] ^
+								rollResults[section][channel]);
 					}
 					lastRollResults[section][channel] = rollResults[section][channel];
 				}
 
 				// Output gate logic
-				bool bIsGateAActive = ((rollResults[section][channel] == aleae::ROLL_HEADS) &
-					((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
-				bool bIsGateBActive = ((rollResults[section][channel] == aleae::ROLL_TAILS) &
-					((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
+				activeGates[section][channel].gateA =
+					((rollResults[section][channel] == aleae::ROLL_HEADS) &
+						((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
+				activeGates[section][channel].gateB =
+					((rollResults[section][channel] == aleae::ROLL_TAILS) &
+						((outModes[section] == aleae::OUT_MODE_LATCH) | bIsGatePresent));
 
 				// Set output gates
-				outputs[OUTPUT_OUT_1A + section].setVoltage(bIsGateAActive * 10.f, channel);
-				outputs[OUTPUT_OUT_1B + section].setVoltage(bIsGateBActive * 10.f, channel);
-
-				if (channel == ledsChannel) {
-					activeLights[section].gateAActive = bIsGateAActive;
-					activeLights[section].gateBActive = bIsGateBActive;
-				}
+				outputs[OUTPUT_OUT_1A + section].setVoltage(
+					activeGates[section][channel].gateA * 10.f, channel);
+				outputs[OUTPUT_OUT_1B + section].setVoltage(
+					activeGates[section][channel].gateB * 10.f, channel);
 			}
 
 			outputs[OUTPUT_OUT_1A + section].setChannels(channelCount);
@@ -157,8 +157,10 @@ struct Aleae : SanguineModule {
 
 			for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_STATE + (section << 1);
-				lights[currentLight + 1].setBrightnessSmooth(activeLights[section].gateAActive, sampleTime);
-				lights[currentLight].setBrightnessSmooth(activeLights[section].gateBActive, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(
+					activeGates[section][ledsChannel].gateA, sampleTime);
+				lights[currentLight].setBrightnessSmooth(
+					activeGates[section][ledsChannel].gateB, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + (section << 1);
 				lights[currentLight].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT *
