@@ -58,6 +58,9 @@ struct Aleae : SanguineModule {
 
 	aleae::AleaeActiveLights aleaeActiveLights[aleae::kMaxModuleSections] = {};
 
+	float voltagesTrigger[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	float voltagesThreshold[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
@@ -80,6 +83,8 @@ struct Aleae : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		bool bIsLightsTurn = lightsDivider.process();
 
 		// 2nd input is normalized to 1st.
@@ -97,14 +102,23 @@ struct Aleae : SanguineModule {
 
 			float sectionThreshold = params[PARAM_THRESHOLD_1 + section].getValue();
 
+			float_4 inputVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				inputVoltages = sectionInputs[section]->getVoltageSimd<float_4>(channel);
+				inputVoltages.store(&voltagesTrigger[section][channel]);
+
+				inputVoltages = inputs[INPUT_P_1 + section].getPolyVoltageSimd<float_4>(channel);
+				inputVoltages /= 10.f;
+				inputVoltages.store(&voltagesThreshold[section][channel]);
+			}
+
 			// Process triggers.
 			for (int channel = 0; channel < channelCount; ++channel) {
-				bool bIsGatePresent = sectionInputs[section]->getVoltage(channel) >= 2.f;
+				bool bIsGatePresent = voltagesTrigger[section][channel] >= 2.f;
 				if (btGateTriggers[section][channel].process(bIsGatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
-					float threshold = sectionThreshold +
-						inputs[INPUT_P_1 + section].getPolyVoltage(channel) / 10.f;
+					float threshold = sectionThreshold + voltagesThreshold[section][channel];
 					rollResults[section][channel] = (random::uniform() >= threshold) ?
 						aleae::ROLL_HEADS : aleae::ROLL_TAILS;
 					if (rollModes[section] == aleae::ROLL_TOGGLE) {
