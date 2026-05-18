@@ -48,6 +48,8 @@ struct Vimina : SanguineModule {
 		CHANNEL_GENERATED
 	};
 
+	typedef float arrayChannelsFloat[PORT_MAX_CHANNELS];
+
 	static const int kTimingErrorCorrectionAmount = 12;
 
 	static const int kLightsFrequency = 16;
@@ -121,6 +123,11 @@ struct Vimina : SanguineModule {
 
 	float sectionKnobValues[kMaxModuleSections];
 
+	arrayChannelsFloat voltagesClock = {};
+	arrayChannelsFloat voltagesReset = {};
+	arrayChannelsFloat voltagesCvSection1 = {};
+	arrayChannelsFloat voltagesCvSection2 = {};
+
 	bool inputGateStates[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	bool multipliesDebouncing[kMaxModuleSections][PORT_MAX_CHANNELS];
 
@@ -174,6 +181,8 @@ struct Vimina : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
+		using simd::float_4;
+
 		channelCount = std::max(inputs[INPUT_CLOCK].getChannels(), 1);
 
 		bool resetRequests[kMaxModuleSections] = {};
@@ -189,11 +198,32 @@ struct Vimina : SanguineModule {
 		sectionKnobValues[0] = params[PARAM_FACTOR_1].getValue();
 		sectionKnobValues[1] = params[PARAM_FACTOR_2].getValue();
 
+		float_4 inVoltages;
+		for (int channel = 0; channel < channelCount; channel += 4) {
+			inVoltages = inputs[INPUT_CLOCK].getVoltageSimd<float_4>(channel);
+			inVoltages.store(&voltagesClock[channel]);
+
+			inVoltages = inputs[INPUT_RESET].getVoltageSimd<float_4>(channel);
+			inVoltages.store(&voltagesReset[channel]);
+
+			inVoltages = inputs[INPUT_CV1].getVoltageSimd<float_4>(channel);
+			inVoltages /= 10.f;
+			inVoltages += sectionKnobValues[0];
+			inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+			inVoltages.store(&voltagesCvSection1[channel]);
+
+			inVoltages = inputs[INPUT_CV2].getVoltageSimd<float_4>(channel);
+			inVoltages /= 10.f;
+			inVoltages += sectionKnobValues[1];
+			inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+			inVoltages.store(&voltagesCvSection2[channel]);
+		}
+
 		for (int channel = 0; channel < channelCount; ++channel) {
 			++tmrModuleClocks[channel];
 			bool bIsTrigger = false;
 
-			if (isRisingEdge(kClockChannel, INPUT_CLOCK, kEdgeVoltageThreshold, channel)) {
+			if (isRisingEdge(kClockChannel, voltagesClock, kEdgeVoltageThreshold, channel)) {
 				/*
 				   Pulse tracker is always recording. this should help smooth transitions
 				   between functions even though divide doesn't use it.
@@ -210,8 +240,8 @@ struct Vimina : SanguineModule {
 			}
 
 			if (bResetConnected) {
-				resetRequests[0] |= isRisingEdge(kResetChannel, INPUT_RESET, kEdgeVoltageThreshold, channel);
-				resetRequests[1] |= isRisingEdge(kResetChannel, INPUT_RESET, kEdgeVoltageThreshold, channel);
+				resetRequests[0] |= isRisingEdge(kResetChannel, voltagesReset, kEdgeVoltageThreshold, channel);
+				resetRequests[1] |= isRisingEdge(kResetChannel, voltagesReset, kEdgeVoltageThreshold, channel);
 			}
 
 			if (bClockConnected) {
@@ -220,11 +250,11 @@ struct Vimina : SanguineModule {
 				switch (sectionFunctions[0])
 				{
 				case FUNCTION_SWING:
-					handleSwing(0, channel, resetRequests[0], bIsTrigger);
+					handleSwing(0, channel, resetRequests[0], bIsTrigger, voltagesCvSection1);
 					break;
 
 				case FUNCTION_FACTORER:
-					handleFactorer(0, channel, resetRequests[0], bIsTrigger);
+					handleFactorer(0, channel, resetRequests[0], bIsTrigger, voltagesCvSection1);
 					break;
 				}
 
@@ -233,11 +263,11 @@ struct Vimina : SanguineModule {
 				switch (sectionFunctions[1])
 				{
 				case FUNCTION_SWING:
-					handleSwing(1, channel, resetRequests[1], bIsTrigger);
+					handleSwing(1, channel, resetRequests[1], bIsTrigger, voltagesCvSection2);
 					break;
 
 				case FUNCTION_FACTORER:
-					handleFactorer(1, channel, resetRequests[1], bIsTrigger);
+					handleFactorer(1, channel, resetRequests[1], bIsTrigger, voltagesCvSection2);
 					break;
 				}
 			}
@@ -281,13 +311,14 @@ struct Vimina : SanguineModule {
 		updateChannelLeds(1, args.sampleTime, ledsChannel);
 	}
 
-	void handleSwing(const int section, const int channel, const bool wantReset, const bool haveTrigger) {
+	void handleSwing(const int section, const int channel, const bool wantReset, const bool haveTrigger,
+		const arrayChannelsFloat& voltagesCv) {
 		if (wantReset) {
 			resetSwing(section, channel);
 		}
 
 		// Set up channel.
-		getSectionFactor(section, channel);
+		getSectionFactor(section, channel, voltagesCv);
 
 		channelSwings[section][channel] = channelVoltages[section][channel] /
 			kSwingConversionFactor + kSwingFactorMin;
@@ -321,13 +352,14 @@ struct Vimina : SanguineModule {
 
 	}
 
-	void handleFactorer(const int section, const int channel, const bool wantReset, const bool haveTrigger) {
+	void handleFactorer(const int section, const int channel, const bool wantReset, const bool haveTrigger,
+		const arrayChannelsFloat& voltagesCv) {
 		if (wantReset) {
 			resetDivision(section, channel);
 		}
 
 		// Set up channel.
-		getSectionFactor(section, channel);
+		getSectionFactor(section, channel, voltagesCv);
 
 		int factorIndex;
 		factorIndex = std::round(channelVoltages[section][channel] /
@@ -392,9 +424,8 @@ struct Vimina : SanguineModule {
 		}
 	}
 
-	void getSectionFactor(const int section, const int channel) {
-		channelVoltages[section][channel] = clamp(sectionKnobValues[section] +
-			(inputs[INPUT_CV1 + section].getVoltage(channel) / 10.f), 0.f, 1.f);
+	void getSectionFactor(const int section, const int channel, const arrayChannelsFloat& voltagesCv) {
+		channelVoltages[section][channel] = voltagesCv[channel];
 	}
 
 	void updateChannelLeds(const uint8_t section, const float sampleTime, const int channel) {
@@ -479,9 +510,9 @@ struct Vimina : SanguineModule {
 		return pulseTrackerRecordedCounts[channel] >= kPulseTrackerBufferSize;
 	}
 
-	bool isRisingEdge(const uint8_t section, const int port, const float threshold, const int channel) {
+	bool isRisingEdge(const uint8_t section, const arrayChannelsFloat& channelarray, const float threshold, const int channel) {
 		bool bLastGateState = inputGateStates[section][channel];
-		inputGateStates[section][channel] = inputs[port].getVoltage(channel) >= threshold;
+		inputGateStates[section][channel] = channelarray[channel] >= threshold;
 		return inputGateStates[section][channel] & (!bLastGateState);
 	}
 
