@@ -25,4 +25,9 @@ namespace aleae {
         "Trigger",
         "Latch"
     };
+
+    struct AleaeActiveLights {
+        bool gateAActive;
+        bool gateBActive;
+    };
 }
