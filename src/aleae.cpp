@@ -46,6 +46,8 @@ struct Aleae : SanguineModule {
 	dsp::BooleanTrigger btGateTriggers[aleae::kMaxModuleSections][PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
 
+	Input* sectionInputs[aleae::kMaxModuleSections];
+
 	aleae::RollResults rollResults[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	aleae::RollResults lastRollResults[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
@@ -71,20 +73,24 @@ struct Aleae : SanguineModule {
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
 				lastRollResults[section][channel] = aleae::ROLL_HEADS;
 			}
+
+			sectionInputs[0] = &inputs[INPUT_IN_1];
+			sectionInputs[1] = &inputs[INPUT_IN_2];
 		}
 	}
 
 	void process(const ProcessArgs& args) override {
 		bool bIsLightsTurn = lightsDivider.process();
 
+		// 2nd input is normalized to 1st.
+		if (!bInput2Connected) {
+			sectionInputs[1] = &inputs[INPUT_IN_1];
+		} else {
+			sectionInputs[1] = &inputs[INPUT_IN_2];
+		}
+
 		for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
-			// Get input.
-			Input* input = &inputs[INPUT_IN_1 + section];
-			// 2nd input is normalized to 1st.
-			if (section == 1 && !bInput2Connected) {
-				input = &inputs[INPUT_IN_1];
-			}
-			channelCount = std::max(input->getChannels(), 1);
+			channelCount = std::max(sectionInputs[section]->getChannels(), 1);
 
 			rollModes[section] = static_cast<aleae::RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
 			outModes[section] = static_cast<aleae::OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
@@ -93,7 +99,7 @@ struct Aleae : SanguineModule {
 
 			// Process triggers.
 			for (int channel = 0; channel < channelCount; ++channel) {
-				bool bIsGatePresent = input->getVoltage(channel) >= 2.f;
+				bool bIsGatePresent = sectionInputs[section]->getVoltage(channel) >= 2.f;
 				if (btGateTriggers[section][channel].process(bIsGatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
