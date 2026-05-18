@@ -56,7 +56,7 @@ struct Aleae : SanguineModule {
 	bool outputsConnected[OUTPUTS_COUNT] = {};
 	bool bInput2Connected = false;
 
-	aleae::AleaeActiveLights aleaeActiveLights[aleae::kMaxModuleSections] = {};
+	aleae::ActiveLights activeLights[aleae::kMaxModuleSections] = {};
 
 	float voltagesTrigger[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 	float voltagesThreshold[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
@@ -139,8 +139,8 @@ struct Aleae : SanguineModule {
 				outputs[OUTPUT_OUT_1B + section].setVoltage(bIsGateBActive * 10.f, channel);
 
 				if (channel == ledsChannel) {
-					aleaeActiveLights[section].gateAActive = bIsGateAActive;
-					aleaeActiveLights[section].gateBActive = bIsGateBActive;
+					activeLights[section].gateAActive = bIsGateAActive;
+					activeLights[section].gateBActive = bIsGateBActive;
 				}
 			}
 
@@ -161,8 +161,8 @@ struct Aleae : SanguineModule {
 
 			for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_STATE + (section << 1);
-				lights[currentLight + 1].setBrightnessSmooth(aleaeActiveLights[section].gateAActive, sampleTime);
-				lights[currentLight].setBrightnessSmooth(aleaeActiveLights[section].gateBActive, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(activeLights[section].gateAActive, sampleTime);
+				lights[currentLight].setBrightnessSmooth(activeLights[section].gateBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + (section << 1);
 				lights[currentLight].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT *
