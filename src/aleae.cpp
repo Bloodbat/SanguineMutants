@@ -39,28 +39,26 @@ struct Aleae : SanguineModule {
 		LIGHTS_COUNT
 	};
 
-	static const int kLightsFrequency = 16;
-	static const int kMaxModuleSections = 2;
 	int ledsChannel = 0;
 	int channelCount = 0;
 	int jitteredLightsFrequency;
 
-	dsp::BooleanTrigger btGateTriggers[kMaxModuleSections][PORT_MAX_CHANNELS];
+	dsp::BooleanTrigger btGateTriggers[aleae::kMaxModuleSections][PORT_MAX_CHANNELS];
 	dsp::ClockDivider lightsDivider;
 
-	aleae::RollResults rollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
-	aleae::RollResults lastRollResults[kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	aleae::RollResults rollResults[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
+	aleae::RollResults lastRollResults[aleae::kMaxModuleSections][PORT_MAX_CHANNELS] = {};
 
-	aleae::RollModes rollModes[kMaxModuleSections] = { aleae::ROLL_DIRECT, aleae::ROLL_DIRECT };
-	aleae::OutModes outModes[kMaxModuleSections] = { aleae::OUT_MODE_TRIGGER, aleae::OUT_MODE_TRIGGER };
+	aleae::RollModes rollModes[aleae::kMaxModuleSections] = { aleae::ROLL_DIRECT, aleae::ROLL_DIRECT };
+	aleae::OutModes outModes[aleae::kMaxModuleSections] = { aleae::OUT_MODE_TRIGGER, aleae::OUT_MODE_TRIGGER };
 	bool outputsConnected[OUTPUTS_COUNT] = {};
 	bool bInput2Connected = false;
 
-	aleae::AleaeActiveLights aleaeActiveLights[kMaxModuleSections] = {};
+	aleae::AleaeActiveLights aleaeActiveLights[aleae::kMaxModuleSections] = {};
 
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
-		for (int section = 0; section < kMaxModuleSections; ++section) {
+		for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
 			const int sectionNumber = section + 1;
 
 			configParam(PARAM_THRESHOLD_1 + section, 0.f, 1.f, 0.5f, string::f("Channel %d probability", sectionNumber), "%", 0, 100);
@@ -79,7 +77,7 @@ struct Aleae : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		bool bIsLightsTurn = lightsDivider.process();
 
-		for (int section = 0; section < kMaxModuleSections; ++section) {
+		for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
 			// Get input.
 			Input* input = &inputs[INPUT_IN_1 + section];
 			// 2nd input is normalized to 1st.
@@ -139,7 +137,7 @@ struct Aleae : SanguineModule {
 				ledsChannel = channelCount - 1;
 			}
 
-			for (int section = 0; section < kMaxModuleSections; ++section) {
+			for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_STATE + (section << 1);
 				lights[currentLight + 1].setBrightnessSmooth(aleaeActiveLights[section].gateAActive, sampleTime);
 				lights[currentLight].setBrightnessSmooth(aleaeActiveLights[section].gateBActive, sampleTime);
@@ -157,7 +155,7 @@ struct Aleae : SanguineModule {
 	}
 
 	void onReset(const ResetEvent& e) override {
-		for (int section = 0; section < kMaxModuleSections; ++section) {
+		for (int section = 0; section < aleae::kMaxModuleSections; ++section) {
 			params[PARAM_ROLL_MODE_1 + section].setValue(0);
 			params[PARAM_OUT_MODE_1 + section].setValue(0);
 			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
@@ -185,7 +183,7 @@ struct Aleae : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = aleae::kLightsFrequency + (getId() % aleae::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 

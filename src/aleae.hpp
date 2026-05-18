@@ -26,6 +26,9 @@ namespace aleae {
         "Latch"
     };
 
+    static const int kLightsFrequency = 16;
+    static const int kMaxModuleSections = 2;
+
     struct AleaeActiveLights {
         bool gateAActive;
         bool gateBActive;
