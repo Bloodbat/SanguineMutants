@@ -29,8 +29,8 @@ namespace aleae {
     static const int kLightsFrequency = 16;
     static const int kMaxModuleSections = 2;
 
-    struct ActiveLights {
-        bool gateAActive;
-        bool gateBActive;
+    struct ActiveGates {
+        bool gateA;
+        bool gateB;
     };
 }
