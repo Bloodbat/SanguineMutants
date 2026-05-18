@@ -97,6 +97,8 @@ without the backticks.
 
 - Nodi family: use a more discrete and modern LED window for channel LEDs.
 
+- Vimina: reset module logic when disconnecting clock input.
+
 ## Removals
 
 - Anuli: Note polyphony display.
