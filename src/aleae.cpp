@@ -89,13 +89,15 @@ struct Aleae : SanguineModule {
 			rollModes[section] = static_cast<aleae::RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
 			outModes[section] = static_cast<aleae::OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
 
+			float sectionThreshold = params[PARAM_THRESHOLD_1 + section].getValue();
+
 			// Process triggers.
 			for (int channel = 0; channel < channelCount; ++channel) {
 				bool bIsGatePresent = input->getVoltage(channel) >= 2.f;
 				if (btGateTriggers[section][channel].process(bIsGatePresent)) {
 					// Trigger.
 					// Don't have to clamp here because the threshold comparison works without it.
-					float threshold = params[PARAM_THRESHOLD_1 + section].getValue() +
+					float threshold = sectionThreshold +
 						inputs[INPUT_P_1 + section].getPolyVoltage(channel) / 10.f;
 					rollResults[section][channel] = (random::uniform() >= threshold) ?
 						aleae::ROLL_HEADS : aleae::ROLL_TAILS;
