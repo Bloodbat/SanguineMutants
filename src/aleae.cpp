@@ -56,6 +56,8 @@ struct Aleae : SanguineModule {
 	bool outputsConnected[OUTPUTS_COUNT] = {};
 	bool bInput2Connected = false;
 
+	aleae::AleaeActiveLights aleaeActiveLights[kMaxModuleSections] = {};
+
 	Aleae() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 		for (int section = 0; section < kMaxModuleSections; ++section) {
@@ -89,9 +91,6 @@ struct Aleae : SanguineModule {
 			rollModes[section] = static_cast<aleae::RollModes>(params[PARAM_ROLL_MODE_1 + section].getValue());
 			outModes[section] = static_cast<aleae::OutModes>(params[PARAM_OUT_MODE_1 + section].getValue());
 
-			bool bIsLightAActive = false;
-			bool bIsLightBActive = false;
-
 			// Process triggers.
 			for (int channel = 0; channel < channelCount; ++channel) {
 				bool bIsGatePresent = input->getVoltage(channel) >= 2.f;
@@ -120,8 +119,8 @@ struct Aleae : SanguineModule {
 				outputs[OUTPUT_OUT_1B + section].setVoltage(bIsGateBActive * 10.f, channel);
 
 				if (channel == ledsChannel) {
-					bIsLightAActive = bIsGateAActive;
-					bIsLightBActive = bIsGateBActive;
+					aleaeActiveLights[section].gateAActive = bIsGateAActive;
+					aleaeActiveLights[section].gateBActive = bIsGateBActive;
 				}
 			}
 
@@ -131,16 +130,19 @@ struct Aleae : SanguineModule {
 			if (outputsConnected[2 + section]) {
 				outputs[OUTPUT_OUT_1B + section].setChannels(channelCount);
 			}
+		}
 
-			if (bIsLightsTurn) {
-				if (ledsChannel >= channelCount) {
-					ledsChannel = channelCount - 1;
-				}
+		if (bIsLightsTurn) {
+			const float sampleTime = args.sampleTime * jitteredLightsFrequency;
 
-				const float sampleTime = args.sampleTime * jitteredLightsFrequency;
+			if (ledsChannel >= channelCount) {
+				ledsChannel = channelCount - 1;
+			}
+
+			for (int section = 0; section < kMaxModuleSections; ++section) {
 				int currentLight = LIGHTS_STATE + (section << 1);
-				lights[currentLight + 1].setBrightnessSmooth(bIsLightAActive, sampleTime);
-				lights[currentLight].setBrightnessSmooth(bIsLightBActive, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(aleaeActiveLights[section].gateAActive, sampleTime);
+				lights[currentLight].setBrightnessSmooth(aleaeActiveLights[section].gateBActive, sampleTime);
 
 				currentLight = LIGHTS_ROLL_MODE + (section << 1);
 				lights[currentLight].setBrightnessSmooth(rollModes[section] == aleae::ROLL_DIRECT *
