@@ -144,12 +144,8 @@ struct Aleae : SanguineModule {
 				}
 			}
 
-			if (outputsConnected[section]) {
-				outputs[OUTPUT_OUT_1A + section].setChannels(channelCount);
-			}
-			if (outputsConnected[2 + section]) {
-				outputs[OUTPUT_OUT_1B + section].setChannels(channelCount);
-			}
+			outputs[OUTPUT_OUT_1A + section].setChannels(channelCount);
+			outputs[OUTPUT_OUT_1B + section].setChannels(channelCount);
 		}
 
 		if (bIsLightsTurn) {
