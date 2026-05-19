@@ -268,35 +268,108 @@ struct Apices : SanguineModule {
 					expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
 				}
 
-				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-					if (nixExpander->getChannel1PortConnected(knob) ||
-						nixExpander->getChannel1PortChanged(knob)) {
-						switch (editMode) {
-						case apicesCommon::EDIT_MODE_TWIN:
+				int lightParamRed;
+				int currentLightGreen;
+				int currentLightBlue;
+
+				size_t knob;
+
+				switch (editMode) {
+				case apicesCommon::EDIT_MODE_TWIN:
+					for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+						if (nixExpander->getChannel1PortConnected(knob) ||
+							nixExpander->getChannel1PortChanged(knob)) {
 							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
 							processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
-							break;
 
-						case apicesCommon::EDIT_MODE_SPLIT:
-							if (knob < 2) {
-								processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-							} else {
-								processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
-							}
-							break;
+							nixExpander->setChannel1PortChanged(knob, false);
+						}
+					}
+					if (bIsLightsTurn) {
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1).setBrightnessSmooth(0.f, sampleTime);
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
 
-						case apicesCommon::EDIT_MODE_FIRST:
-						case apicesCommon::EDIT_MODE_SECOND:
-							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-							break;
-						default:
-							break;
+						for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+							lightParamRed = Nix::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
+
+							nixExpander->getLight(lightParamRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						}
 
-						nixExpander->setChannel1PortChanged(knob, false);
+						switchExpanderChannel2Lights(false, sampleTime);
+					}
+					break;
+
+				case apicesCommon::EDIT_MODE_SPLIT:
+					for (knob = 0; knob < 2; ++knob) {
+						if (nixExpander->getChannel1PortConnected(knob) ||
+							nixExpander->getChannel1PortChanged(knob)) {
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+
+							nixExpander->setChannel1PortChanged(knob, false);
+						}
+					}
+					for (knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
+						if (nixExpander->getChannel1PortConnected(knob) ||
+							nixExpander->getChannel1PortChanged(knob)) {
+							processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
+
+							nixExpander->setChannel1PortChanged(knob, false);
+						}
 					}
 
-					if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
+					if (bIsLightsTurn) {
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1).setBrightnessSmooth(0.f, sampleTime);
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2).setBrightnessSmooth(0.f, sampleTime);
+
+						for (size_t knob = 0; knob < 2; ++knob) {
+							lightParamRed = Nix::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
+
+							nixExpander->getLight(lightParamRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
+						}
+
+						for (size_t knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
+							lightParamRed = Nix::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
+
+							nixExpander->getLight(lightParamRed).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						}
+
+						switchExpanderChannel2Lights(false, sampleTime);
+					}
+					break;
+
+				case apicesCommon::EDIT_MODE_FIRST:
+				case apicesCommon::EDIT_MODE_SECOND:
+					for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+						if (nixExpander->getChannel1PortConnected(knob) ||
+							nixExpander->getChannel1PortChanged(knob)) {
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+
+							nixExpander->setChannel1PortChanged(knob, false);
+						}
+
 						if (nixExpander->getChannel2PortConnected(knob) ||
 							nixExpander->getChannel2PortChanged(knob)) {
 							processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
@@ -306,67 +379,29 @@ struct Apices : SanguineModule {
 					}
 
 					if (bIsLightsTurn) {
-						int currentLightRed = Nix::LIGHT_PARAM_1 + knob * 3;
-						int currentLightGreen = (Nix::LIGHT_PARAM_1 + knob * 3) + 1;
-						int currentLightBlue = (Nix::LIGHT_PARAM_1 + knob * 3) + 2;
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1).setBrightnessSmooth(0.f, sampleTime);
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
+						nixExpander->
+							getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2).setBrightnessSmooth(0.f, sampleTime);
 
-						switch (editMode) {
-						case apicesCommon::EDIT_MODE_TWIN:
-							nixExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							break;
+						for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+							lightParamRed = Nix::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
 
-						case apicesCommon::EDIT_MODE_SPLIT:
-							if (knob < 2) {
-								nixExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-								nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-								nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-							} else {
-								nixExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
-								nixExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-								nixExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							}
-							break;
-
-						case apicesCommon::EDIT_MODE_FIRST:
-						case apicesCommon::EDIT_MODE_SECOND:
-							nixExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
+							nixExpander->getLight(lightParamRed).setBrightnessSmooth(0.f, sampleTime);
 							nixExpander->getLight(currentLightGreen).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 							nixExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-							break;
-						default:
-							break;
 						}
 
-						Light& channel1LightRed = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1);
-						Light& channel1LightGreen = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 1);
-						Light& channel1LightBlue = nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_1 + 2);
-
-						switch (editMode) {
-						case apicesCommon::EDIT_MODE_FIRST:
-						case apicesCommon::EDIT_MODE_SECOND:
-							channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-							channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-							switchExpanderChannel2Lights(true, sampleTime);
-							break;
-						case apicesCommon::EDIT_MODE_TWIN:
-							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-							channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							switchExpanderChannel2Lights(false, sampleTime);
-							break;
-						case apicesCommon::EDIT_MODE_SPLIT:
-							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-							switchExpanderChannel2Lights(false, sampleTime);
-							break;
-						default:
-							break;
-						}
+						switchExpanderChannel2Lights(true, sampleTime);
 					}
+					break;
+				default:
+					break;
 				}
 			}
 		}
