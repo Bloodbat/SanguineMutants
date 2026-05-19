@@ -281,35 +281,108 @@ struct Mortuus : SanguineModule {
 					expanderModulatedValues2 = clamp(expanderModulatedValues2, 0, 65535);
 				}
 
-				for (size_t knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
-					if (ansaExpander->getChannel1PortConnected(knob) ||
-						ansaExpander->getChannel1PortChanged(knob)) {
-						switch (editMode) {
-						case apicesCommon::EDIT_MODE_TWIN:
+				int lightParamRed;
+				int currentLightGreen;
+				int currentLightBlue;
+
+				size_t knob;
+
+				switch (editMode) {
+				case apicesCommon::EDIT_MODE_TWIN:
+					for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+						if (ansaExpander->getChannel1PortConnected(knob) ||
+							ansaExpander->getChannel1PortChanged(knob)) {
 							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
 							processors[1].set_parameter(knob, expanderModulatedValues1[knob]);
-							break;
 
-						case apicesCommon::EDIT_MODE_SPLIT:
-							if (knob < 2) {
-								processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-							} else {
-								processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
-							}
-							break;
+							ansaExpander->setChannel1PortChanged(knob, false);
+						}
+					}
+					if (bIsLightsTurn) {
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1).setBrightnessSmooth(0.f, sampleTime);
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
 
-						case apicesCommon::EDIT_MODE_FIRST:
-						case apicesCommon::EDIT_MODE_SECOND:
-							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
-							break;
-						default:
-							break;
+						for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+							lightParamRed = Ansa::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
+
+							ansaExpander->getLight(lightParamRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 						}
 
-						ansaExpander->setChannel1PortChanged(knob, false);
+						switchExpanderChannel2Lights(false, sampleTime);
+					}
+					break;
+
+				case apicesCommon::EDIT_MODE_SPLIT:
+					for (knob = 0; knob < 2; ++knob) {
+						if (ansaExpander->getChannel1PortConnected(knob) ||
+							ansaExpander->getChannel1PortChanged(knob)) {
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+
+							ansaExpander->setChannel1PortChanged(knob, false);
+						}
+					}
+					for (knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
+						if (ansaExpander->getChannel1PortConnected(knob) ||
+							ansaExpander->getChannel1PortChanged(knob)) {
+							processors[1].set_parameter(knob - 2, expanderModulatedValues1[knob]);
+
+							ansaExpander->setChannel1PortChanged(knob, false);
+						}
 					}
 
-					if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
+					if (bIsLightsTurn) {
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1).setBrightnessSmooth(0.f, sampleTime);
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2).setBrightnessSmooth(0.f, sampleTime);
+
+						for (size_t knob = 0; knob < 2; ++knob) {
+							lightParamRed = Ansa::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
+
+							ansaExpander->getLight(lightParamRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
+						}
+
+						for (size_t knob = 2; knob < apicesCommon::kKnobCount; ++knob) {
+							lightParamRed = Ansa::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
+
+							ansaExpander->getLight(lightParamRed).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
+						}
+
+						switchExpanderChannel2Lights(false, sampleTime);
+					}
+					break;
+
+				case apicesCommon::EDIT_MODE_FIRST:
+				case apicesCommon::EDIT_MODE_SECOND:
+					for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+						if (ansaExpander->getChannel1PortConnected(knob) ||
+							ansaExpander->getChannel1PortChanged(knob)) {
+							processors[0].set_parameter(knob, expanderModulatedValues1[knob]);
+
+							ansaExpander->setChannel1PortChanged(knob, false);
+						}
+
 						if (ansaExpander->getChannel2PortConnected(knob) ||
 							ansaExpander->getChannel2PortChanged(knob)) {
 							processors[1].set_parameter(knob, expanderModulatedValues2[knob]);
@@ -319,67 +392,29 @@ struct Mortuus : SanguineModule {
 					}
 
 					if (bIsLightsTurn) {
-						int currentLightRed = Ansa::LIGHT_PARAM_1 + knob * 3;
-						int currentLightGreen = (Ansa::LIGHT_PARAM_1 + knob * 3) + 1;
-						int currentLightBlue = (Ansa::LIGHT_PARAM_1 + knob * 3) + 2;
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1).setBrightnessSmooth(0.f, sampleTime);
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1).setBrightnessSmooth(kSanguineButtonLightValue,
+								sampleTime);
+						ansaExpander->
+							getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2).setBrightnessSmooth(0.f, sampleTime);
 
-						switch (editMode) {
-						case apicesCommon::EDIT_MODE_TWIN:
-							ansaExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							break;
+						for (knob = 0; knob < apicesCommon::kKnobCount; ++knob) {
+							lightParamRed = Ansa::LIGHT_PARAM_1 + knob * 3;
+							currentLightGreen = lightParamRed + 1;
+							currentLightBlue = lightParamRed + 2;
 
-						case apicesCommon::EDIT_MODE_SPLIT:
-							if (knob < 2) {
-								ansaExpander->getLight(currentLightRed).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-								ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-								ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-							} else {
-								ansaExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
-								ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(0.f, sampleTime);
-								ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							}
-							break;
-
-						case apicesCommon::EDIT_MODE_FIRST:
-						case apicesCommon::EDIT_MODE_SECOND:
-							ansaExpander->getLight(currentLightRed).setBrightnessSmooth(0.f, sampleTime);
+							ansaExpander->getLight(lightParamRed).setBrightnessSmooth(0.f, sampleTime);
 							ansaExpander->getLight(currentLightGreen).setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
 							ansaExpander->getLight(currentLightBlue).setBrightnessSmooth(0.f, sampleTime);
-							break;
-						default:
-							break;
 						}
 
-						Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
-						Light& channel1LightGreen = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 1);
-						Light& channel1LightBlue = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1 + 2);
-
-						switch (editMode) {
-						case apicesCommon::EDIT_MODE_FIRST:
-						case apicesCommon::EDIT_MODE_SECOND:
-							channel1LightRed.setBrightnessSmooth(0.f, sampleTime);
-							channel1LightGreen.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-							switchExpanderChannel2Lights(true, sampleTime);
-							break;
-						case apicesCommon::EDIT_MODE_TWIN:
-							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-							channel1LightBlue.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							switchExpanderChannel2Lights(false, sampleTime);
-							break;
-						case apicesCommon::EDIT_MODE_SPLIT:
-							channel1LightRed.setBrightnessSmooth(kSanguineButtonLightValue, sampleTime);
-							channel1LightGreen.setBrightnessSmooth(0.f, sampleTime);
-							channel1LightBlue.setBrightnessSmooth(0.f, sampleTime);
-							switchExpanderChannel2Lights(false, sampleTime);
-							break;
-						default:
-							break;
-						}
+						switchExpanderChannel2Lights(true, sampleTime);
 					}
+					break;
+				default:
+					break;
 				}
 			}
 		}
