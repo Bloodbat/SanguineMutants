@@ -143,7 +143,7 @@ struct Apices : SanguineModule {
 	Apices() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		configSwitch(PARAM_MODE, 0.f, 9.f, 0.f, "Mode", apices::modeKnobLabels);
+		configSwitch(PARAM_MODE, 0.f, apices::FUNCTION_LAST - 1, 0.f, "Mode", apices::modeKnobLabels);
 
 		configParam(PARAM_KNOB_1, 0.f, 65535.f, 32678.f, "Knob 1", "%", 0.f, (1.f / 65535.f) * 100);
 		configParam(PARAM_KNOB_2, 0.f, 65535.f, 32678.f, "Knob 2", "%", 0.f, (1.f / 65535.f) * 100);
@@ -596,6 +596,7 @@ struct Apices : SanguineModule {
 				bSnapped[knobId] = true;
 			}
 			break;
+
 		case apicesCommon::EDIT_MODE_LAST:
 			break;
 		}
@@ -1038,7 +1039,8 @@ struct Apices : SanguineModule {
 	}
 
 	void setExpanderChannel2Lights(bool lightIsOn) {
-		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness((lightIsOn) * (kSanguineButtonLightValue));
+		nixExpander->getLight(Nix::LIGHT_SPLIT_CHANNEL_2).setBrightness((lightIsOn) *
+			(kSanguineButtonLightValue));
 
 		for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
 			nixExpander->getLight(Nix::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
@@ -1066,8 +1068,8 @@ struct Apices : SanguineModule {
 
 		json_t* potValuesJ = json_array();
 		for (int pot : potValues) {
-			json_t* pJ = json_integer(pot);
-			json_array_append_new(potValuesJ, pJ);
+			json_t* potJ = json_integer(pot);
+			json_array_append_new(potValuesJ, potJ);
 		}
 		json_object_set_new(rootJ, "pot_values", potValuesJ);
 
@@ -1102,10 +1104,10 @@ struct Apices : SanguineModule {
 
 		json_t* potValuesJ = json_object_get(rootJ, "pot_values");
 		size_t potValueId;
-		json_t* pJ;
-		json_array_foreach(potValuesJ, potValueId, pJ) {
+		json_t* potJ;
+		json_array_foreach(potValuesJ, potValueId, potJ) {
 			if (potValueId < apicesCommon::kPotCount) {
-				settings.potValues[potValueId] = json_integer_value(pJ);
+				settings.potValues[potValueId] = json_integer_value(potJ);
 			}
 		}
 

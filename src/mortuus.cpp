@@ -625,6 +625,7 @@ struct Mortuus : SanguineModule {
 				processSwitch(apicesCommon::SWITCH_TWIN_MODE + button);
 			}
 		}
+
 		refreshLeds(args, sampleTime);
 	}
 
@@ -800,6 +801,11 @@ struct Mortuus : SanguineModule {
 
 	void onReset(const ResetEvent& e) override {
 		init();
+	}
+
+	void onAdd(const AddEvent& e) override {
+		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
 	void init() {
@@ -995,11 +1001,6 @@ struct Mortuus : SanguineModule {
 		srcOutput.setRates(apicesCommon::kHardwareRate, static_cast<int>(e.sampleRate));
 	}
 
-	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
-		lightsDivider.setDivision(jitteredLightsFrequency);
-	}
-
 #ifndef METAMODULE
 	void setExpanderChannel1Lights(bool lightIsOn) {
 		Light& channel1LightRed = ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_1);
@@ -1067,8 +1068,8 @@ struct Mortuus : SanguineModule {
 	}
 
 	void setExpanderChannel2Lights(bool lightIsOn) {
-		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness(lightIsOn ?
-			kSanguineButtonLightValue : 0.f);
+		ansaExpander->getLight(Ansa::LIGHT_SPLIT_CHANNEL_2).setBrightness((lightIsOn) *
+			(kSanguineButtonLightValue));
 
 		for (size_t light = 0; light < apicesCommon::kKnobCount; ++light) {
 			ansaExpander->getLight(Ansa::LIGHT_PARAM_CHANNEL_2_1 + light).setBrightness(lightIsOn);
@@ -1124,7 +1125,7 @@ struct Mortuus : SanguineModule {
 	void dataFromJson(json_t* rootJ) override {
 		SanguineModule::dataFromJson(rootJ);
 
-		json_int_t intValue = 0;
+		json_int_t intValue;
 
 		if (getJsonInt(rootJ, "edit_mode", intValue)) {
 			settings.editMode = static_cast<apicesCommon::EditModes>(intValue);
@@ -1142,10 +1143,10 @@ struct Mortuus : SanguineModule {
 
 		json_t* potValuesJ = json_object_get(rootJ, "pot_values");
 		size_t potValueId;
-		json_t* pJ;
-		json_array_foreach(potValuesJ, potValueId, pJ) {
+		json_t* potJ;
+		json_array_foreach(potValuesJ, potValueId, potJ) {
 			if (potValueId < apicesCommon::kPotCount) {
-				settings.potValues[potValueId] = json_integer_value(pJ);
+				settings.potValues[potValueId] = json_integer_value(potJ);
 			}
 		}
 
