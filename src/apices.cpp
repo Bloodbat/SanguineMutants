@@ -160,8 +160,7 @@ struct Apices : SanguineModule {
 		settings.processorFunctions[1] = apices::FUNCTION_ENVELOPE;
 		settings.snapMode = false;
 
-		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel)
-		{
+		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
 			memset(&processors[channel], 0, sizeof(sanguinepeaks::Processors));
 			processors[channel].Init(channel);
 		}
@@ -205,59 +204,64 @@ struct Apices : SanguineModule {
 
 			if (bExpanderAvailable) {
 				// Channel 1 strip.
-				simd::float_4 expanderCVValues1;
+				simd::float_4 expanderCVValues1 = {
+					nixExpander->getInput(Nix::INPUT_PARAM_CV_1).getVoltage(),
+					nixExpander->getInput(Nix::INPUT_PARAM_CV_2).getVoltage(),
+					nixExpander->getInput(Nix::INPUT_PARAM_CV_3).getVoltage(),
+					nixExpander->getInput(Nix::INPUT_PARAM_CV_4).getVoltage()
+				};
 
-				expanderCVValues1[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_1).getVoltage();
-				expanderCVValues1[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_2).getVoltage();
-				expanderCVValues1[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_3).getVoltage();
-				expanderCVValues1[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_4).getVoltage();
+				simd::float_4 expanderKnobValues1 = {
+					nixExpander->getParam(Nix::PARAM_PARAM_CV_1).getValue(),
+					nixExpander->getParam(Nix::PARAM_PARAM_CV_2).getValue(),
+					nixExpander->getParam(Nix::PARAM_PARAM_CV_3).getValue(),
+					nixExpander->getParam(Nix::PARAM_PARAM_CV_4).getValue()
+				};
 
 				expanderCVValues1 /= 5.f;
 				expanderCVValues1 = clamp(expanderCVValues1, -1.f, 1.f);
 				expanderCVValues1 *= 255.f;
 
-				expanderCVValues1[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_1).getValue();
-				expanderCVValues1[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_2).getValue();
-				expanderCVValues1[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_3).getValue();
-				expanderCVValues1[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_4).getValue();
+				expanderCVValues1 *= expanderKnobValues1;
 
+				simd::int32_4 moduleKnobValues1 = { potValues[0], potValues[1],potValues[2], potValues[3] };
 				simd::int32_4 expanderModulatedValues1 = expanderCVValues1;
 
-				expanderModulatedValues1[0] += potValues[0];
-				expanderModulatedValues1[1] += potValues[1];
-				expanderModulatedValues1[2] += potValues[2];
-				expanderModulatedValues1[3] += potValues[3];
+				expanderModulatedValues1 += moduleKnobValues1;
 
 				expanderModulatedValues1 = expanderModulatedValues1 << 8;
 
 				expanderModulatedValues1 = clamp(expanderModulatedValues1, 0, 65535);
 
 				// Channel 2 strip.
-				simd::int32_4 expanderModulatedValues2 = {};
+				simd::int32_4 expanderModulatedValues2;
 
 				if (editMode > apicesCommon::EDIT_MODE_SPLIT) {
-					simd::float_4 expanderCVValues2 = {};
+					simd::float_4 expanderCVValues2 = {
+						nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage(),
+						nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage(),
+						nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage(),
+						nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage()
+					};
 
-					expanderCVValues2[0] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_1).getVoltage();
-					expanderCVValues2[1] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_2).getVoltage();
-					expanderCVValues2[2] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_3).getVoltage();
-					expanderCVValues2[3] = nixExpander->getInput(Nix::INPUT_PARAM_CV_CHANNEL_2_4).getVoltage();
+					simd::float_4 expanderKnobValues2 = {
+						nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_1).getValue(),
+						nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_2).getValue(),
+						nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_3).getValue(),
+						nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_4).getValue()
+					};
 
 					expanderCVValues2 /= 5.f;
 					expanderCVValues2 = clamp(expanderCVValues2, -1.f, 1.f);
 					expanderCVValues2 *= 255.f;
 
-					expanderCVValues2[0] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_1).getValue();
-					expanderCVValues2[1] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_2).getValue();
-					expanderCVValues2[2] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_3).getValue();
-					expanderCVValues2[3] *= nixExpander->getParam(Nix::PARAM_PARAM_CV_CHANNEL_2_4).getValue();
+					expanderCVValues2 *= expanderKnobValues2;
+
+					simd::int32_4 moduleKnobValues2 = { potValues[4], potValues[5],potValues[6], potValues[7] };
 
 					expanderModulatedValues2 = expanderCVValues2;
 
-					expanderModulatedValues2[0] += potValues[4];
-					expanderModulatedValues2[1] += potValues[5];
-					expanderModulatedValues2[2] += potValues[6];
-					expanderModulatedValues2[3] += potValues[7];
+					expanderModulatedValues2 += moduleKnobValues2;
 
 					expanderModulatedValues2 = expanderModulatedValues2 << 8;
 
