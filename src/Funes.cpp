@@ -385,17 +385,18 @@ struct Funes : SanguineModule {
 			const int baseEngine = patch.engine;
 			const int clampedEngine = baseEngine % 8;
 			for (int led = 0; led < funes::kModelLightsCount; ++led) {
-				const int currentLight = led << 1;
-				float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
-				float brightnessGreen = static_cast<float>(activeLights[currentLight]);
+				const int currentLightGreen = led << 1;
+				const int currentLightRed = currentLightGreen + 1;
+				float brightnessRed = static_cast<float>(activeLights[currentLightRed]);
+				float brightnessGreen = static_cast<float>(activeLights[currentLightGreen]);
 
 				if (bPulseLight && clampedEngine == led) {
 					brightnessRed = ((baseEngine < 8) | (baseEngine & 0x10)) * tri;
 					brightnessGreen = ((baseEngine < 16)) * tri;
 				}
 				// Lights are GreenRed and need a signal on each pin.
-				lights[LIGHT_MODEL + currentLight].setBrightness(brightnessGreen);
-				lights[LIGHT_MODEL + currentLight + 1].setBrightness(brightnessRed);
+				lights[LIGHT_MODEL + currentLightGreen].setBrightness(brightnessGreen);
+				lights[LIGHT_MODEL + currentLightRed].setBrightness(brightnessRed);
 			}
 		}
 
