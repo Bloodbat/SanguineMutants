@@ -82,6 +82,16 @@ struct Funes : SanguineModule {
 	float triPhase = 0.f;
 	float lastModelVoltage = 0.f;
 
+	float voltagesAuxCrossFade[PORT_MAX_CHANNELS] = {};
+	float voltagesEngine[PORT_MAX_CHANNELS] = {};
+	float voltagesFrequency[PORT_MAX_CHANNELS] = {};
+	float voltagesHarmonics[PORT_MAX_CHANNELS] = {};
+	float voltagesLevel[PORT_MAX_CHANNELS] = {};
+	float voltagesMorph[PORT_MAX_CHANNELS] = {};
+	float voltagesNote[PORT_MAX_CHANNELS] = {};
+	float voltagesTimbre[PORT_MAX_CHANNELS] = {};
+	float voltagesTrigger[PORT_MAX_CHANNELS] = {};
+
 	int frequencyMode = funes::FM_FULL;
 	int displayModelNum = 0;
 
@@ -256,40 +266,66 @@ struct Funes : SanguineModule {
 
 			bool bPulseLight = false;
 
-			// Render output buffer for each voice.
 			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
-			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[sanguineplaits::kBlockSize];
-			for (int channel = 0; channel < channelCount; ++channel) {
-				float_4 inputVoltages;
-
-				inputVoltages[0] = inputs[INPUT_ENGINE].getVoltage(channel);
-				inputVoltages[1] = inputs[INPUT_HARMONICS].getVoltage(channel);
-				inputVoltages[2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
-
+			float_4 inputVoltages;
+			for (int channel = 0; channel < channelCount; channel += 4) {
+				inputVoltages = inputs[INPUT_ENGINE].getVoltageSimd<float_4>(channel);
 				inputVoltages /= 5.f;
+				inputVoltages.store(&voltagesEngine[channel]);
 
-				// Construct modulations.
-				if (!bNotesModelSelection) {
-					modulations[channel].engine = inputVoltages[0];
-				}
-				modulations[channel].harmonics = inputVoltages[1] * attenHarmonics;
-				modulations[channel].auxCrossfade = inputVoltages[2];
+				inputVoltages = inputs[INPUT_HARMONICS].getVoltageSimd<float_4>(channel);
+				inputVoltages /= 5.f;
+				inputVoltages *= attenHarmonics;
+				inputVoltages.store(&voltagesHarmonics[channel]);
 
-				inputVoltages[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
-				inputVoltages[1] = inputs[INPUT_MORPH].getVoltage(channel);
-				inputVoltages[2] = inputs[INPUT_LEVEL].getVoltage(channel);
+				inputVoltages = inputs[INPUT_AUX_CROSSFADE].getVoltageSimd<float_4>(channel);
+				inputVoltages /= 5.f;
+				inputVoltages.store(&voltagesAuxCrossFade[channel]);
 
+				inputVoltages = inputs[INPUT_TIMBRE].getVoltageSimd<float_4>(channel);
 				inputVoltages /= 8.f;
+				inputVoltages.store(&voltagesTimbre[channel]);
 
-				modulations[channel].timbre = inputVoltages[0];
-				modulations[channel].morph = inputVoltages[1];
-				modulations[channel].level = inputVoltages[2];
+				inputVoltages = inputs[INPUT_MORPH].getVoltageSimd<float_4>(channel);
+				inputVoltages /= 8.f;
+				inputVoltages.store(&voltagesMorph[channel]);
 
-				modulations[channel].note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
-				modulations[channel].frequency = inputs[INPUT_FREQUENCY].getVoltage(channel) * 6.f;
+				inputVoltages = inputs[INPUT_LEVEL].getVoltageSimd<float_4>(channel);
+				inputVoltages /= 8.f;
+				inputVoltages.store(&voltagesLevel[channel]);
+
+				inputVoltages = inputs[INPUT_NOTE].getVoltageSimd<float_4>(channel);
+				inputVoltages *= 12.f;
+				inputVoltages.store(&voltagesNote[channel]);
+
+				inputVoltages = inputs[INPUT_FREQUENCY].getVoltageSimd<float_4>(channel);
+				inputVoltages *= 6.f;
+				inputVoltages.store(&voltagesFrequency[channel]);
 
 				// Triggers at around 0.7 V
-				modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
+				inputVoltages = inputs[INPUT_TRIGGER].getVoltageSimd<float_4>(channel);
+				inputVoltages /= 3.f;
+				inputVoltages.store(&voltagesTrigger[channel]);
+			}
+
+			// Render output buffer for each voice.
+			dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[sanguineplaits::kBlockSize];
+			for (int channel = 0; channel < channelCount; ++channel) {
+				// Construct modulations.
+				if (!bNotesModelSelection) {
+					modulations[channel].engine = voltagesEngine[channel];
+				}
+				modulations[channel].harmonics = voltagesHarmonics[channel];
+				modulations[channel].auxCrossfade = voltagesAuxCrossFade[channel];
+
+				modulations[channel].timbre = voltagesTimbre[channel];
+				modulations[channel].morph = voltagesMorph[channel];
+				modulations[channel].level = voltagesLevel[channel];
+
+				modulations[channel].note = voltagesNote[channel];
+				modulations[channel].frequency = voltagesFrequency[channel];
+
+				modulations[channel].trigger = voltagesTrigger[channel];
 
 				modulations[channel].frequency_patched = bFrequencyConnected;
 				modulations[channel].level_patched = bLevelConnected;
