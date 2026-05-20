@@ -85,8 +85,6 @@ struct FunesMk2 : SanguineModule {
     // Hardware uses 16384; but new chords crash Rack on mode change if left as such.
     uint8_t sharedBuffers[PORT_MAX_CHANNELS][50176] = {};
 
-    static const int kLightsFrequency = 16;
-
     int jitteredLightsFrequency;
 
     int frequencyMode = funes::FM_FULL;
@@ -602,7 +600,7 @@ struct FunesMk2 : SanguineModule {
     }
 
     void onAdd(const AddEvent& e) override {
-        jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+        jitteredLightsFrequency = funes::kLightsFrequency + (getId() % funes::kLightsFrequency);
         lightsDivider.setDivision(jitteredLightsFrequency);
 
         const int64_t moduleId = getId();
