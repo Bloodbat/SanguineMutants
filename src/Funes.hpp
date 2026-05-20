@@ -109,4 +109,8 @@ namespace funes {
     "Sine minus 1 octave",
     "Sine minus 2 octaves",
   };
+
+  static const int kLightsFrequency = 16;
+
+  static const int kModelLightsCount = 8;
 }
