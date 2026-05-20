@@ -82,10 +82,6 @@ struct Funes : SanguineModule {
 	float triPhase = 0.f;
 	float lastModelVoltage = 0.f;
 
-	static const int kLightsFrequency = 16;
-
-	static const int kModelLightsCount = 8;
-
 	int frequencyMode = funes::FM_FULL;
 	int displayModelNum = 0;
 
@@ -256,7 +252,7 @@ struct Funes : SanguineModule {
 
 			patch.wantHoldModulations = bWantHoldModulations;
 
-			bool activeLights[kModelLightsCount * 2] = {};
+			bool activeLights[funes::kModelLightsCount * 2] = {};
 
 			bool bPulseLight = false;
 
@@ -352,7 +348,7 @@ struct Funes : SanguineModule {
 			// Set model lights.
 			const int baseEngine = patch.engine;
 			const int clampedEngine = baseEngine % 8;
-			for (int led = 0; led < kModelLightsCount; ++led) {
+			for (int led = 0; led < funes::kModelLightsCount; ++led) {
 				const int currentLight = led << 1;
 				float brightnessRed = static_cast<float>(activeLights[currentLight + 1]);
 				float brightnessGreen = static_cast<float>(activeLights[currentLight]);
@@ -498,7 +494,7 @@ struct Funes : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = funes::kLightsFrequency + (getId() % funes::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
@@ -587,7 +583,7 @@ struct Funes : SanguineModule {
 				customDataState = patch.engine;
 			} else {
 				errorTimeOut = static_cast<int>((APP->engine->getSampleRate() * 2) /
-					static_cast<float>(kLightsFrequency));
+					static_cast<float>(funes::kLightsFrequency));
 			}
 		}
 	}
