@@ -318,19 +318,23 @@ struct Anuli : SanguineModule {
 				"Note: you need to insert a jack into each output to split the signals:
 					   when only one jack is inserted, both signals are mixed together."
 			*/
-			float_4 outVoltagesOdd;
-			float_4 outVoltagesEven;
 			if (connectedOutputs[OUTPUT_ODD] & connectedOutputs[OUTPUT_EVEN]) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					currentSample = channel << 1;
-					outVoltagesOdd[0] = outputFrames.samples[currentSample];
-					outVoltagesEven[0] = outputFrames.samples[currentSample + 1];
-					outVoltagesOdd[1] = outputFrames.samples[currentSample + 2];
-					outVoltagesEven[1] = outputFrames.samples[currentSample + 3];
-					outVoltagesOdd[2] = outputFrames.samples[currentSample + 4];
-					outVoltagesEven[2] = outputFrames.samples[currentSample + 5];
-					outVoltagesOdd[3] = outputFrames.samples[currentSample + 6];
-					outVoltagesEven[3] = outputFrames.samples[currentSample + 7];
+
+					float_4 outVoltagesOdd = {
+						outputFrames.samples[currentSample] ,
+						outputFrames.samples[currentSample + 2],
+						outputFrames.samples[currentSample + 4],
+						outputFrames.samples[currentSample + 6]
+					};
+
+					float_4 outVoltagesEven = {
+						outputFrames.samples[currentSample + 1],
+						outputFrames.samples[currentSample + 3],
+						outputFrames.samples[currentSample + 5],
+						outputFrames.samples[currentSample + 7]
+					};
 
 					outVoltagesOdd = simd::clamp(outVoltagesOdd, -1.f, 1.f);
 					outVoltagesEven = simd::clamp(outVoltagesEven, -1.f, 1.f);
@@ -344,14 +348,20 @@ struct Anuli : SanguineModule {
 			} else {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					currentSample = channel << 1;
-					outVoltagesOdd[0] = outputFrames.samples[currentSample];
-					outVoltagesEven[0] = outputFrames.samples[currentSample + 1];
-					outVoltagesOdd[1] = outputFrames.samples[currentSample + 2];
-					outVoltagesEven[1] = outputFrames.samples[currentSample + 3];
-					outVoltagesOdd[2] = outputFrames.samples[currentSample + 4];
-					outVoltagesEven[2] = outputFrames.samples[currentSample + 5];
-					outVoltagesOdd[3] = outputFrames.samples[currentSample + 6];
-					outVoltagesEven[3] = outputFrames.samples[currentSample + 7];
+
+					float_4 outVoltagesOdd = {
+						outputFrames.samples[currentSample] ,
+						outputFrames.samples[currentSample + 2],
+						outputFrames.samples[currentSample + 4],
+						outputFrames.samples[currentSample + 6]
+					};
+
+					float_4 outVoltagesEven = {
+						outputFrames.samples[currentSample + 1],
+						outputFrames.samples[currentSample + 3],
+						outputFrames.samples[currentSample + 5],
+						outputFrames.samples[currentSample + 7]
+					};
 
 					outVoltagesOdd += outVoltagesEven;
 
