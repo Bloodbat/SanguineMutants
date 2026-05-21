@@ -606,16 +606,16 @@ struct ReticulaWidget : SanguineModuleWidget {
 
         addParam(createLightParamCentered<VCVLightBezel<RedLight>>(millimetersToPixelsVec(6.107, 49.725), module,
             Reticula::PARAM_RUN, Reticula::LIGHT_RUN));
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(21.208, 49.725), module, Reticula::INPUT_RUN));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(21.846, 49.725), module, Reticula::INPUT_RUN));
 
-        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(60.065, 49.725), module, Reticula::INPUT_RESET));
+        addInput(createInputCentered<BananutPurple>(millimetersToPixelsVec(59.428, 49.725), module, Reticula::INPUT_RESET));
         addParam(createLightParamCentered<VCVLightBezel<YellowLight>>(millimetersToPixelsVec(75.169, 49.725), module,
             Reticula::PARAM_RESET, Reticula::LIGHT_RESET));
 
-        addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(33.421, 49.725),
+        addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(34.707, 49.725),
             module, Reticula::PARAM_SEQUENCER_MODE, Reticula::LIGHT_SEQUENCER_MODE));
 
-        addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(47.757, 49.725),
+        addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(46.567, 49.725),
             module, Reticula::PARAM_CLOCK_OUTPUT_SOURCE, Reticula::LIGHT_CLOCK_OUTPUT_SOURCE));
 
         addParam(createParam<Sanguine1PRed>(millimetersToPixelsVec(7.176, 60.635), module, Reticula::PARAM_SWING));
