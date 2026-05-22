@@ -24,6 +24,7 @@ struct Reticula : SanguineModule {
         PARAM_HH_DENSITY,
         PARAM_RESET,
         PARAM_CLOCK_OUTPUT_SOURCE,
+        PARAM_PPQN,
         PARAMS_COUNT
     };
 
@@ -62,6 +63,7 @@ struct Reticula : SanguineModule {
         LIGHT_CHANNEL_HH,
         LIGHT_RESET,
         ENUMS(LIGHT_CLOCK_OUTPUT_SOURCE, 2),
+        ENUMS(LIGHT_PPQN, 2),
         LIGHTS_COUNT
     };
 
@@ -186,6 +188,7 @@ struct Reticula : SanguineModule {
 
         configInput(INPUT_RUN, "Run");
 
+        configSwitch(PARAM_PPQN, 0.f, 2.f, 2.f, "External clock resolution", reticula::clockResolutionLabels);
         configSwitch(PARAM_SEQUENCER_MODE, 0.f, 2.f, 0.f, "Sequencer mode", reticula::sequencerModeLabels);
         configSwitch(PARAM_CLOCK_OUTPUT_SOURCE, 0.f, 2.f, 0.f, "Clock output source", reticula::clockOutputSourceLabels);
 
@@ -278,6 +281,8 @@ struct Reticula : SanguineModule {
         sequencerMode = static_cast<reticula::PatternGeneratorModes>(params[PARAM_SEQUENCER_MODE].getValue());
 
         clockOutputSource = static_cast<reticula::ClockOutputSources>(params[PARAM_CLOCK_OUTPUT_SOURCE].getValue());
+
+        extClockResolution = static_cast<reticula::ExternalClockResolutions>(params[PARAM_PPQN].getValue());
 
         if (bIsModuleRunning) {
             if (tempoParam >= 30 && tempoParam <= 480) {
@@ -469,8 +474,15 @@ struct Reticula : SanguineModule {
                 if (tempo < 100) {
                     tempoDisplay.insert(0, 1, '0');
                 }
+                lights[LIGHT_PPQN].setBrightnessSmooth(0.f, sampleTime);
+                lights[LIGHT_PPQN + 1].setBrightnessSmooth(0.f, sampleTime);
             } else {
                 tempoDisplay = reticula::externalClockLabel;
+
+                lights[LIGHT_PPQN].setBrightnessSmooth((extClockResolution > reticula::RESOLUTION_4_PPQN) *
+                    kSanguineButtonLightValue, sampleTime);
+                lights[LIGHT_PPQN + 1].setBrightnessSmooth((extClockResolution < reticula::RESOLUTION_24_PPQN) *
+                    kSanguineButtonLightValue, sampleTime);
             }
         }
     }
@@ -572,6 +584,10 @@ struct Reticula : SanguineModule {
     void setClockOutputSource(int newMode) {
         params[PARAM_CLOCK_OUTPUT_SOURCE].setValue(newMode);
     }
+
+    void setExternalClockResoultion(int newResolution) {
+        params[PARAM_PPQN].setValue(static_cast<float>(newResolution));
+    }
 };
 
 struct ReticulaWidget : SanguineModuleWidget {
@@ -589,16 +605,20 @@ struct ReticulaWidget : SanguineModuleWidget {
         FramebufferWidget* reticulaFramebuffer = new FramebufferWidget();
         addChild(reticulaFramebuffer);
 
-        addInput(createInput<BananutGreen>(millimetersToPixelsVec(2.107, 9.143), module, Reticula::INPUT_EXTERNAL_CLOCK));
+        addParam(createLightParamCentered<VCVLightBezel<GreenRedLight>>(millimetersToPixelsVec(6.107, 10.06), module,
+            Reticula::PARAM_TAP, Reticula::LIGHT_TAP));
 
         addParam(createParam<Sanguine2PSRed>(millimetersToPixelsVec(13.833, 12.321), module, Reticula::PARAM_CLOCK));
+
+        addChild(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(6.107, 22.506),
+            module, Reticula::PARAM_PPQN, Reticula::LIGHT_PPQN));
 
         addParam(createParam<Sanguine1PBlue>(millimetersToPixelsVec(34.688, 14.874), module, Reticula::PARAM_MAP_X));
         addParam(createParam<Sanguine1PBlue>(millimetersToPixelsVec(51.199, 14.874), module, Reticula::PARAM_MAP_Y));
         addParam(createParam<Sanguine1PPurple>(millimetersToPixelsVec(67.71, 14.874), module, Reticula::PARAM_CHAOS));
 
-        addParam(createLightParam<VCVLightBezel<GreenRedLight>>(millimetersToPixelsVec(2.607, 23.512), module,
-            Reticula::PARAM_TAP, Reticula::LIGHT_TAP));
+        addInput(createInputCentered<BananutGreen>(millimetersToPixelsVec(6.107, 35.452), module,
+            Reticula::INPUT_EXTERNAL_CLOCK));
 
         addInput(createInput<BananutPurple>(millimetersToPixelsVec(35.963, 31.452), module, Reticula::INPUT_MAP_X));
         addInput(createInput<BananutPurple>(millimetersToPixelsVec(52.474, 31.452), module, Reticula::INPUT_MAP_Y));
@@ -623,9 +643,12 @@ struct ReticulaWidget : SanguineModuleWidget {
         addParam(createParam<Sanguine1PPurple>(millimetersToPixelsVec(44.756, 60.635), module, Reticula::PARAM_SD_DENSITY));
         addParam(createParam<Sanguine1PPurple>(millimetersToPixelsVec(63.550, 60.635), module, Reticula::PARAM_HH_DENSITY));
 
-        addChild(createLight<MediumLight<RedLight>>(millimetersToPixelsVec(29.703, 79.699), module, Reticula::LIGHT_CHANNEL_BD));
-        addChild(createLight<MediumLight<RedLight>>(millimetersToPixelsVec(48.493, 79.699), module, Reticula::LIGHT_CHANNEL_SD));
-        addChild(createLight<MediumLight<RedLight>>(millimetersToPixelsVec(67.287, 79.699), module, Reticula::LIGHT_CHANNEL_HH));
+        addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(31.241, 80.425), module,
+            Reticula::LIGHT_CHANNEL_BD));
+        addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(50.031, 80.425), module,
+            Reticula::LIGHT_CHANNEL_SD));
+        addChild(createLightCentered<MediumLight<RedLight>>(millimetersToPixelsVec(68.825, 80.425), module,
+            Reticula::LIGHT_CHANNEL_HH));
 
         addInput(createInput<BananutPurple>(millimetersToPixelsVec(8.451, 83.340), module, Reticula::INPUT_SWING));
         addInput(createInput<BananutPurple>(millimetersToPixelsVec(27.241, 83.340), module, Reticula::INPUT_FILL_BD));
@@ -691,7 +714,7 @@ struct ReticulaWidget : SanguineModuleWidget {
 
                 menu->addChild(createIndexSubmenuItem("External clock resolution", reticula::clockResolutionLabels,
                     [=]() {return module->extClockResolution; },
-                    [=](int i) {module->extClockResolution = static_cast<reticula::ExternalClockResolutions>(i); }
+                    [=](int i) {module->setExternalClockResoultion(i); }
                 ));
             }
         ));
