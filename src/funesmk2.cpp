@@ -94,12 +94,14 @@ struct FunesMk2 : SanguineModule {
     int channelCount = 0;
     int errorTimeOut = 0;
 
-    int knobModel = 8;
 
     int customDataStates[PORT_MAX_CHANNELS];
 
-    uint8_t selectedChordBank = 0;
-    uint8_t chordBanks[PORT_MAX_CHANNELS] = {};
+    int32_t selectedChordBank = 0;
+    int32_t knobModel = 8;
+    int32_t chordBanks[PORT_MAX_CHANNELS] = {};
+    int32_t auxSubOscillators[PORT_MAX_CHANNELS] = {};
+    int32_t selectedModels[PORT_MAX_CHANNELS] = {};
 
     funes::SuboscillatorModes suboscillatorModes[PORT_MAX_CHANNELS] = {};
 
@@ -136,18 +138,37 @@ struct FunesMk2 : SanguineModule {
 
     dsp::ClockDivider lightsDivider;
 
+    float knobLpgColor;
+    float attenLpgColor;
+
+    float knobLpgDecay;
+    float attenLpgDecay;
+
+    float knobFrequency;
+
+    float knobHarmonics;
+    float knobTimbre;
+    float knobMorph;
+    float knobAuxCrossfade;
+
+    float attenFm;
+    float attenHarmonics;
+    float attenTimbre;
+    float attenMorph;
+
     float selectedSubOscillator = 0.f;
-
-    float_4 inputVoltages[PORT_MAX_CHANNELS];
-
-    float_4 auxSubOscillators[4];
-
-    float_4 selectedModels[4];
-
-    float_4 lpgColorVoltages[4];
-    float_4 lpgDecayVoltages[4];
-
-    float_4 chordBankVoltages[4];
+    float voltagesLpgColor[PORT_MAX_CHANNELS] = {};
+    float voltagesLpgDecay[PORT_MAX_CHANNELS] = {};
+    float voltagesModel[PORT_MAX_CHANNELS] = {};
+    float voltagesHarmonics[PORT_MAX_CHANNELS] = {};
+    float voltagesAuxCrossfade[PORT_MAX_CHANNELS] = {};
+    float voltagesTimbre[PORT_MAX_CHANNELS] = {};
+    float voltagesMorph[PORT_MAX_CHANNELS] = {};
+    float voltagesLevel[PORT_MAX_CHANNELS] = {};
+    float voltagesHoldModulations[PORT_MAX_CHANNELS] = {};
+    float voltagesNote[PORT_MAX_CHANNELS] = {};
+    float voltagesFrequency[PORT_MAX_CHANNELS] = {};
+    float voltagesTrigger[PORT_MAX_CHANNELS] = {};
 
     FunesMk2() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -213,35 +234,32 @@ struct FunesMk2 : SanguineModule {
         channelCount = std::max(std::max(inputs[INPUT_NOTE].getChannels(),
             inputs[INPUT_TRIGGER].getChannels()), 1);
 
-        selectedChordBank = static_cast<uint8_t>(params[PARAM_CHORD_BANK].getValue());
+        selectedChordBank = static_cast<int32_t>(params[PARAM_CHORD_BANK].getValue());
 
         bWantHoldModulations = static_cast<bool>(params[PARAM_HOLD_MODULATIONS].getValue());
 
         selectedSubOscillator = params[PARAM_AUX_SUBOSCILLATOR].getValue();
 
-        float knobLpgColor = params[PARAM_LPG_COLOR].getValue();
-        float attenLpgColor = params[PARAM_LPG_COLOR_CV].getValue();
+        knobLpgColor = params[PARAM_LPG_COLOR].getValue();
+        attenLpgColor = params[PARAM_LPG_COLOR_CV].getValue();
 
-        float knobLpgDecay = params[PARAM_LPG_DECAY].getValue();
-        float attenLpgDecay = params[PARAM_LPG_DECAY_CV].getValue();
+        knobLpgDecay = params[PARAM_LPG_DECAY].getValue();
+        attenLpgDecay = params[PARAM_LPG_DECAY_CV].getValue();
 
-        float knobFrequency = params[PARAM_FREQUENCY].getValue();
+        knobFrequency = params[PARAM_FREQUENCY].getValue();
 
-        float knobHarmonics = params[PARAM_HARMONICS].getValue();
-        float knobTimbre = params[PARAM_TIMBRE].getValue();
-        float knobMorph = params[PARAM_MORPH].getValue();
-        float knobAuxCrossfade = params[PARAM_AUX_CROSSFADE].getValue();
+        knobHarmonics = params[PARAM_HARMONICS].getValue();
+        knobTimbre = params[PARAM_TIMBRE].getValue();
+        knobMorph = params[PARAM_MORPH].getValue();
+        knobAuxCrossfade = params[PARAM_AUX_CROSSFADE].getValue();
 
-        float attenFm = params[PARAM_FREQUENCY_CV].getValue();
-        float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
-        float attenTimbre = params[PARAM_TIMBRE_CV].getValue();
-        float attenMorph = params[PARAM_MORPH_CV].getValue();
+        attenFm = params[PARAM_FREQUENCY_CV].getValue();
+        attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
+        attenTimbre = params[PARAM_TIMBRE_CV].getValue();
+        attenMorph = params[PARAM_MORPH_CV].getValue();
 
-        knobModel = static_cast<int>(params[PARAM_MODEL].getValue());
+        knobModel = static_cast<int32_t>(params[PARAM_MODEL].getValue());
 
-        int currentChannel;
-
-        int individualChannel;
         bool bIsSubOscillatorOctave;
 
         // Calculate pitch for low cpu mode, if needed.
@@ -251,74 +269,121 @@ struct FunesMk2 : SanguineModule {
         }
 
         if (drbOutputBuffers.empty()) {
+            simd::int32_4 int32Voltages;
+            float_4 inVoltages;
+
             for (int channel = 0; channel < channelCount; channel += 4) {
-                currentChannel = channel >> 2;
-
                 if (!bChordBankConnected) {
-                    chordBanks[channel] = selectedChordBank;
-                    chordBanks[channel + 1] = selectedChordBank;
-                    chordBanks[channel + 2] = selectedChordBank;
-                    chordBanks[channel + 3] = selectedChordBank;
+                    int32Voltages = selectedChordBank;
+                    int32Voltages.store(&chordBanks[channel]);
                 } else {
-                    chordBankVoltages[currentChannel] = inputs[INPUT_CHORD_BANK].getVoltageSimd<float_4>(channel);
-                    chordBankVoltages[currentChannel] = simd::round(chordBankVoltages[currentChannel]);
-                    chordBankVoltages[currentChannel] = simd::clamp(chordBankVoltages[currentChannel], 0.f, 2.f);
+                    inVoltages = inputs[INPUT_CHORD_BANK].getVoltageSimd<float_4>(channel);
+                    inVoltages = simd::round(inVoltages);
+                    inVoltages = simd::clamp(inVoltages, 0.f, 2.f);
 
-                    chordBanks[channel] = static_cast<uint8_t>(chordBankVoltages[currentChannel][0]);
-                    chordBanks[channel + 1] = static_cast<uint8_t>(chordBankVoltages[currentChannel][1]);
-                    chordBanks[channel + 2] = static_cast<uint8_t>(chordBankVoltages[currentChannel][2]);
-                    chordBanks[channel + 3] = static_cast<uint8_t>(chordBankVoltages[currentChannel][3]);
+                    int32Voltages = inVoltages;
+
+                    int32Voltages.store(&chordBanks[channel]);
                 }
 
                 if (!bAuxSuboscillatorConnected) {
-                    auxSubOscillators[currentChannel] = selectedSubOscillator;
+                    int32Voltages = static_cast<int32_t>(selectedSubOscillator);
                 } else {
-                    auxSubOscillators[currentChannel] =
-                        inputs[INPUT_AUX_SUBOSCILLATOR].getVoltageSimd<float_4>(channel);
-                    auxSubOscillators[currentChannel] =
-                        simd::round(auxSubOscillators[currentChannel]);
-                    auxSubOscillators[currentChannel] =
-                        simd::clamp(auxSubOscillators[currentChannel], 0.f, 4.f);
+                    inVoltages = inputs[INPUT_AUX_SUBOSCILLATOR].getVoltageSimd<float_4>(channel);
+                    inVoltages = simd::round(inVoltages);
+                    inVoltages = simd::clamp(inVoltages, 0.f, 4.f);
+
+                    int32Voltages = inVoltages;
+
+                    int32Voltages.store(&auxSubOscillators[channel]);
                 }
 
                 if (bModelConnected && bNotesModelSelection) {
-                    selectedModels[currentChannel] = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
-                    selectedModels[currentChannel] += 4.f;
-                    selectedModels[currentChannel] *= 12.f;
-                    selectedModels[currentChannel] = simd::round(selectedModels[currentChannel]);
-                    selectedModels[currentChannel] = simd::clamp(selectedModels[currentChannel], 0.f, 23.f);
+                    inVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+                    inVoltages += 4.f;
+                    inVoltages *= 12.f;
+                    inVoltages = simd::round(inVoltages);
+                    inVoltages = simd::clamp(inVoltages, 0.f, 23.f);
+
+                    int32Voltages = inVoltages;
+                    int32Voltages.store(&selectedModels[channel]);
                 } else {
-                    selectedModels[currentChannel] = knobModel;
+                    int32Voltages = knobModel;
+                    int32Voltages.store(&selectedModels[channel]);
                 }
 
                 if (!bLpgColorConnected) {
-                    lpgColorVoltages[currentChannel] = knobLpgColor;
+                    inVoltages = knobLpgColor;
+                    inVoltages.store(&voltagesLpgColor[channel]);
                 } else {
-                    lpgColorVoltages[currentChannel] = inputs[INPUT_LPG_COLOR].getVoltageSimd<float_4>(channel);
-                    lpgColorVoltages[currentChannel] /= 5.f;
-                    lpgColorVoltages[currentChannel] *= attenLpgColor;
-                    lpgColorVoltages[currentChannel] += knobLpgColor;
-                    lpgColorVoltages[currentChannel] = simd::clamp(lpgColorVoltages[currentChannel], 0.f, 1.f);
+                    inVoltages = inputs[INPUT_LPG_COLOR].getVoltageSimd<float_4>(channel);
+                    inVoltages /= 5.f;
+                    inVoltages *= attenLpgColor;
+                    inVoltages += knobLpgColor;
+                    inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+                    inVoltages.store(&voltagesLpgColor[channel]);
                 }
 
                 if (!bLpgDecayConnected) {
-                    lpgDecayVoltages[channel] = knobLpgDecay;
+                    inVoltages = knobLpgDecay;
+                    inVoltages.store(&voltagesLpgDecay[channel]);
                 } else {
-                    lpgDecayVoltages[currentChannel] = inputs[INPUT_LPG_DECAY].getVoltageSimd<float_4>(channel);
-                    lpgDecayVoltages[currentChannel] /= 5.f;
-                    lpgDecayVoltages[currentChannel] *= attenLpgDecay;
-                    lpgDecayVoltages[currentChannel] += knobLpgDecay;
-                    lpgDecayVoltages[currentChannel] = simd::clamp(lpgDecayVoltages[currentChannel], 0.f, 1.f);
+                    inVoltages = inputs[INPUT_LPG_DECAY].getVoltageSimd<float_4>(channel);
+                    inVoltages /= 5.f;
+                    inVoltages *= attenLpgDecay;
+                    inVoltages += knobLpgDecay;
+                    inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+                    inVoltages.store(&voltagesLpgDecay[channel]);
                 }
+
+                inVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+                inVoltages /= 5.f;
+                inVoltages.store(&voltagesModel[channel]);
+
+                inVoltages = inputs[INPUT_AUX_CROSSFADE].getVoltageSimd<float_4>(channel);
+                inVoltages /= 5.f;
+                inVoltages.store(&voltagesAuxCrossfade[channel]);
+
+                inVoltages = inputs[INPUT_HARMONICS].getVoltageSimd<float_4>(channel);
+                inVoltages /= 5.f;
+                inVoltages *= attenHarmonics;
+                inVoltages.store(&voltagesHarmonics[channel]);
+
+                inVoltages = inputs[INPUT_TIMBRE].getVoltageSimd<float_4>(channel);
+                inVoltages /= 8.f;
+                inVoltages.store(&voltagesTimbre[channel]);
+
+                inVoltages = inputs[INPUT_MORPH].getVoltageSimd<float_4>(channel);
+                inVoltages /= 8.f;
+                inVoltages.store(&voltagesMorph[channel]);
+
+                inVoltages = inputs[INPUT_LEVEL].getVoltageSimd<float_4>(channel);
+                inVoltages /= 8.f;
+                inVoltages.store(&voltagesLevel[channel]);
+
+                inVoltages = inputs[INPUT_HOLD_MODULATIONS].getVoltageSimd<float_4>(channel);
+                inVoltages.store(&voltagesHoldModulations[channel]);
+
+                inVoltages = inputs[INPUT_NOTE].getVoltageSimd<float_4>(channel);
+                inVoltages *= 12.f;
+                inVoltages.store(&voltagesNote[channel]);
+
+                inVoltages = inputs[INPUT_FREQUENCY].getVoltageSimd<float_4>(channel);
+                inVoltages *= 6.f;
+                inVoltages.store(&voltagesFrequency[channel]);
+
+                // Triggers at around 0.7 V
+                inVoltages = inputs[INPUT_TRIGGER].getVoltageSimd<float_4>(channel);
+                inVoltages /= 3.f;
+                inVoltages.store(&voltagesTrigger[channel]);
             }
 
             dsp::Frame<PORT_MAX_CHANNELS * 2> renderFrames[sanguineplaits::kBlockSize];
 
-            for (int channel = 0; channel < channelCount; ++channel) {
-                currentChannel = channel >> 2;
-                individualChannel = channel % 4;
+            const float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
 
-                int selectedModel = static_cast<int>(selectedModels[currentChannel][individualChannel]);
+            for (int channel = 0; channel < channelCount; ++channel) {
+                int selectedModel = static_cast<int>(selectedModels[channel]);
 
                 // Switch models.
                 if (selectedModel != patches[channel].engine) {
@@ -333,7 +398,6 @@ struct FunesMk2 : SanguineModule {
                     patches[channel].note = -48.37f + pitch * 15.f;
                     break;
                 case funes::FM_OCTAVES: {
-                    float fineTune = params[PARAM_FREQUENCY_ROOT].getValue() / 4.f;
                     patches[channel].note = 53.f + fineTune * 14.f + 12.f *
                         static_cast<float>(octaveQuantizers[channel].Process(0.5f * pitch / 4.f + 0.5f) - 4.f);
                     break;
@@ -349,54 +413,41 @@ struct FunesMk2 : SanguineModule {
                 patches[channel].harmonics = knobHarmonics;
                 patches[channel].timbre = knobTimbre;
                 patches[channel].morph = knobMorph;
-                patches[channel].lpg_colour = lpgColorVoltages[currentChannel][individualChannel];
-                patches[channel].decay = lpgDecayVoltages[currentChannel][individualChannel];
+                patches[channel].lpg_colour = voltagesLpgColor[channel];
+                patches[channel].decay = voltagesLpgDecay[channel];
                 patches[channel].frequency_modulation_amount = attenFm;
                 patches[channel].timbre_modulation_amount = attenTimbre;
                 patches[channel].morph_modulation_amount = attenMorph;
-                patches[channel].chordBank = chordBanks[channel];
+                patches[channel].chordBank = static_cast<uint8_t>(chordBanks[channel]);
                 patches[channel].auxCrossfade = knobAuxCrossfade;
-                suboscillatorModes[channel] =
-                    static_cast<funes::SuboscillatorModes>(auxSubOscillators[currentChannel][individualChannel]);
+                suboscillatorModes[channel] = static_cast<funes::SuboscillatorModes>(auxSubOscillators[channel]);
                 bIsSubOscillatorOctave = suboscillatorModes[channel] > funes::SUBOSCILLATOR_SINE;
                 patches[channel].auxSuboscillatorWave = bIsSubOscillatorOctave ? funes::SUBOSCILLATOR_SINE :
                     suboscillatorModes[channel];
                 patches[channel].auxSuboscillatorOctave = (suboscillatorModes[channel] - 2) * bIsSubOscillatorOctave;
 
                 holdModulations[channel] = bWantHoldModulations |
-                    (inputs[INPUT_HOLD_MODULATIONS].getVoltage(channel) >= 1.f);
+                    (voltagesHoldModulations[channel] >= 1.f);
                 patches[channel].wantHoldModulations = holdModulations[channel];
 
                 // Render output buffer for each channel.
-                inputVoltages[channel][0] = inputs[INPUT_MODEL].getVoltage(channel);
-                inputVoltages[channel][1] = inputs[INPUT_HARMONICS].getVoltage(channel);
-                inputVoltages[channel][2] = inputs[INPUT_AUX_CROSSFADE].getVoltage(channel);
-
-                inputVoltages[channel] /= 5.f;
 
                 // Construct modulations.
                 if (!bNotesModelSelection) {
-                    modulations[channel].engine = inputVoltages[channel][0];
+                    modulations[channel].engine = voltagesModel[channel];
                 }
 
-                modulations[channel].harmonics = inputVoltages[channel][1] * attenHarmonics;
-                modulations[channel].auxCrossfade = inputVoltages[channel][2];
+                modulations[channel].harmonics = voltagesHarmonics[channel];
+                modulations[channel].auxCrossfade = voltagesAuxCrossfade[channel];
 
-                inputVoltages[0] = inputs[INPUT_TIMBRE].getVoltage(channel);
-                inputVoltages[1] = inputs[INPUT_MORPH].getVoltage(channel);
-                inputVoltages[2] = inputs[INPUT_LEVEL].getVoltage(channel);
+                modulations[channel].timbre = voltagesTimbre[channel];
+                modulations[channel].morph = voltagesMorph[channel];
+                modulations[channel].level = voltagesLevel[channel];
 
-                inputVoltages[channel] /= 8.f;
+                modulations[channel].note = voltagesNote[channel];
+                modulations[channel].frequency = voltagesFrequency[channel];
 
-                modulations[channel].timbre = inputVoltages[channel][0];
-                modulations[channel].morph = inputVoltages[channel][1];
-                modulations[channel].level = inputVoltages[channel][2];
-
-                modulations[channel].note = inputs[INPUT_NOTE].getVoltage(channel) * 12.f;
-                modulations[channel].frequency = inputs[INPUT_FREQUENCY].getVoltage(channel) * 6.f;
-
-                // Triggers at around 0.7 V
-                modulations[channel].trigger = inputs[INPUT_TRIGGER].getVoltage(channel) / 3.f;
+                modulations[channel].trigger = voltagesTrigger[channel];
 
                 modulations[channel].frequency_patched = bFrequencyConnected;
                 modulations[channel].level_patched = bLevelConnected;
