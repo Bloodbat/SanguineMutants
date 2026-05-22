@@ -13,8 +13,6 @@
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 
 struct Mutuus : SanguineModule {
-	static const int kModeCount = 9;
-
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -45,7 +43,7 @@ struct Mutuus : SanguineModule {
 		ENUMS(LIGHT_ALGORITHM, 3),
 		LIGHT_MODE_SWITCH,
 		LIGHT_STEREO,
-		ENUMS(LIGHT_MODE, kModeCount),
+		ENUMS(LIGHT_MODE, warpiescommon::kModeCount),
 		ENUMS(LIGHT_CHANNEL_MODE, PORT_MAX_CHANNELS * 3),
 		LIGHTS_COUNT
 	};
@@ -53,7 +51,6 @@ struct Mutuus : SanguineModule {
 	int featureMode = 0;
 	int frames[PORT_MAX_CHANNELS] = {};
 
-	static const int kLightsFrequency = 128;
 	int jitteredLightsFrequency;
 
 	dsp::BooleanTrigger btModeSwitch;
@@ -255,7 +252,7 @@ struct Mutuus : SanguineModule {
 
 			lights[LIGHT_STEREO].setBrightness(modulators[0].alt_feature_mode() * kSanguineButtonLightValue);
 
-			for (int mode = 0; mode < kModeCount; ++mode) {
+			for (int mode = 0; mode < warpiescommon::kModeCount; ++mode) {
 				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode, sampleTime);
 			}
 
@@ -336,7 +333,7 @@ struct Mutuus : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = warpiescommon::kLightsFrequency + (getId() % warpiescommon::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 

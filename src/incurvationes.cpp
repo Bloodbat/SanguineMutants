@@ -43,7 +43,6 @@ struct Incurvationes : SanguineModule {
 
 
 	int frames[PORT_MAX_CHANNELS] = {};
-	static const int kLightsFrequency = 128;
 	int jitteredLightsFrequency;
 
 	sanguinewarps::Modulator modulators[PORT_MAX_CHANNELS];
@@ -217,7 +216,7 @@ struct Incurvationes : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = warpiescommon::kLightsFrequency + (getId() % warpiescommon::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 };

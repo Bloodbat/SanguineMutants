@@ -15,8 +15,6 @@
 using namespace sanguineCommonCode;
 
 struct Distortiones : SanguineModule {
-	static const int kModeCount = 9;
-
 	enum ParamIds {
 		PARAM_ALGORITHM,
 		PARAM_TIMBRE,
@@ -45,7 +43,7 @@ struct Distortiones : SanguineModule {
 		ENUMS(LIGHT_CARRIER, 2),
 		ENUMS(LIGHT_ALGORITHM, 3),
 		LIGHT_MODE_SWITCH,
-		ENUMS(LIGHT_MODE, kModeCount),
+		ENUMS(LIGHT_MODE, warpiescommon::kModeCount),
 		ENUMS(LIGHT_CHANNEL_MODE, PORT_MAX_CHANNELS * 3),
 		LIGHTS_COUNT
 	};
@@ -53,7 +51,6 @@ struct Distortiones : SanguineModule {
 	int featureMode = 0;
 	int frames[PORT_MAX_CHANNELS] = {};
 
-	static const int kLightsFrequency = 128;
 	int jitteredLightsFrequency;
 
 	dsp::BooleanTrigger btModeSwitch;
@@ -238,7 +235,7 @@ struct Distortiones : SanguineModule {
 
 			lights[LIGHT_MODE_SWITCH].setBrightness(bModeSwitchEnabled * kSanguineButtonLightValue);
 
-			for (int mode = 0; mode < kModeCount; ++mode) {
+			for (int mode = 0; mode < warpiescommon::kModeCount; ++mode) {
 				lights[LIGHT_MODE + mode].setBrightnessSmooth(featureMode == mode, sampleTime);
 			}
 
@@ -318,7 +315,7 @@ struct Distortiones : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = warpiescommon::kLightsFrequency + (getId() % warpiescommon::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
