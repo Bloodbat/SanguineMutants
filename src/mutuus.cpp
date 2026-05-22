@@ -301,29 +301,30 @@ struct Mutuus : SanguineModule {
 					(warpiespals::paletteParasiteFeatureMode[featureMode][2] * tri) >> 8) / 255.f, sampleTime);
 			}
 
-			for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+			for (int channel = 0; channel < channelCount; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
-				if (channel < channelCount) {
-					mutuus::FeatureMode featureMode = modulators[channel].feature_mode();
+				mutuus::FeatureMode featureMode = modulators[channel].feature_mode();
 
-					float_4 rawFeatureMode;
+				float_4 rawFeatureMode = {
+					static_cast<float>(warpiespals::paletteParasiteFeatureMode[featureMode][0]),
+					static_cast<float>(warpiespals::paletteParasiteFeatureMode[featureMode][1]),
+					static_cast<float>(warpiespals::paletteParasiteFeatureMode[featureMode][2]),
+					0.f
+				};
 
-					rawFeatureMode[0] = warpiespals::paletteParasiteFeatureMode[featureMode][0];
-					rawFeatureMode[1] = warpiespals::paletteParasiteFeatureMode[featureMode][1];
-					rawFeatureMode[2] = warpiespals::paletteParasiteFeatureMode[featureMode][2];
+				rawFeatureMode /= 255.f;
 
-					rawFeatureMode /= 255.f;
+				lights[currentLight].setBrightnessSmooth(rawFeatureMode[0], sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(rawFeatureMode[1], sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(rawFeatureMode[2], sampleTime);
+			}
 
-					lights[currentLight].setBrightnessSmooth(rawFeatureMode[0], sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(rawFeatureMode[1], sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(rawFeatureMode[2], sampleTime);
-				} else {
-					lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
-					lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
-				}
-
+			for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
+				lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+				lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
 			}
 		}
 	}
