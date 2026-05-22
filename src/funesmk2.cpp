@@ -474,17 +474,19 @@ struct FunesMk2 : SanguineModule {
 
             int currentLight;
             int currentModel;
-            bool bIsChannelActive;
-            for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            for (int channel = 0; channel < channelCount; ++channel) {
                 currentLight = LIGHT_CHANNEL + channel * 3;
                 currentModel = voices[channel].active_engine();
-                bIsChannelActive = channel < channelCount;
-                lights[currentLight].setBrightnessSmooth(funesmk2::lightColors[currentModel].red *
-                    bIsChannelActive, sampleTime);
-                lights[currentLight + 1].setBrightnessSmooth(funesmk2::lightColors[currentModel].green *
-                    bIsChannelActive, sampleTime);
-                lights[currentLight + 2].setBrightnessSmooth(funesmk2::lightColors[currentModel].blue *
-                    bIsChannelActive, sampleTime);
+                lights[currentLight].setBrightnessSmooth(funesmk2::lightColors[currentModel].red, sampleTime);
+                lights[currentLight + 1].setBrightnessSmooth(funesmk2::lightColors[currentModel].green, sampleTime);
+                lights[currentLight + 2].setBrightnessSmooth(funesmk2::lightColors[currentModel].blue, sampleTime);
+            }
+
+            for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+                currentLight = LIGHT_CHANNEL + channel * 3;
+                lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+                lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+                lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
             }
 
             frequencyMode = params[PARAM_FREQ_MODE].getValue();
@@ -520,12 +522,10 @@ struct FunesMk2 : SanguineModule {
 
             lights[LIGHT_AUX_SUBOSCILLATOR].setBrightness(
                 (suboscillatorModes[displayChannel] > funes::SUBOSCILLATOR_SQUARE) * kSanguineButtonLightValue);
-
             lights[LIGHT_AUX_SUBOSCILLATOR + 1].setBrightness(
                 ((suboscillatorModes[displayChannel] == funes::SUBOSCILLATOR_SQUARE) |
                     (suboscillatorModes[displayChannel] == funes::SUBOSCILLATOR_SINE_MINUS_ONE)) *
                 kSanguineButtonLightValue);
-
             lights[LIGHT_AUX_SUBOSCILLATOR + 2].setBrightness(
                 (suboscillatorModes[displayChannel] == funes::SUBOSCILLATOR_SINE_MINUS_TWO) *
                 kSanguineButtonLightValue);
