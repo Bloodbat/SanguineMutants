@@ -111,29 +111,29 @@ struct Incurvationes : SanguineModule {
 
 			modulators[channel].set_easter_egg(bEasterEggEnabled);
 
-			float_4 f4Voltages;
-
 			// Buffer loop
 			if (++frames[channel] >= warpiescommon::kBlockSize) {
 				frames[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
-				f4Voltages[1] = inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel);
-				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
-				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
+				float_4 inVoltages = {
+					inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel),
+					inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel),
+					inputs[INPUT_ALGORITHM].getVoltage(channel),
+					inputs[INPUT_TIMBRE].getVoltage(channel)
+				};
 
-				f4Voltages /= 5.f;
+				inVoltages /= 5.f;
 
-				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * f4Voltages[0], 0.f, 1.f);
-				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * inVoltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * inVoltages[1], 0.f, 1.f);
 
-				parameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
+				parameters[channel]->modulation_algorithm = clamp(algorithmValue + inVoltages[2], 0.f, 1.f);
 
-				parameters[channel]->modulation_parameter = clamp(knobTimbre + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(knobTimbre + inVoltages[3], 0.f, 1.f);
 
 				parameters[channel]->frequency_shift_pot = algorithmValue;
-				parameters[channel]->frequency_shift_cv = clamp(f4Voltages[2], -1.f, 1.f);
+				parameters[channel]->frequency_shift_cv = clamp(inVoltages[2], -1.f, 1.f);
 				parameters[channel]->phase_shift = parameters[channel]->modulation_algorithm;
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f *
