@@ -180,25 +180,25 @@ struct Mutuus : SanguineModule {
 
 			modulators[channel].set_alt_feature_mode(bWantStereo);
 
-			float_4 f4Voltages;
-
 			// Buffer loop
 			if (++frames[channel] >= warpiescommon::kBlockSize) {
 				frames[channel] = 0;
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
-				f4Voltages[0] = inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel);
-				f4Voltages[1] = inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel);
-				f4Voltages[2] = inputs[INPUT_ALGORITHM].getVoltage(channel);
-				f4Voltages[3] = inputs[INPUT_TIMBRE].getVoltage(channel);
+				float_4 inVoltages = {
+					inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel),
+					inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel),
+					inputs[INPUT_ALGORITHM].getVoltage(channel),
+					inputs[INPUT_TIMBRE].getVoltage(channel)
+				};
 
-				f4Voltages /= 5.f;
+				inVoltages /= 5.f;
 
-				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * f4Voltages[0], 0.f, 1.f);
-				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * inVoltages[0], 0.f, 1.f);
+				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * inVoltages[1], 0.f, 1.f);
 
-				parameters[channel]->raw_level_cv[0] = clamp(f4Voltages[0], 0.f, 1.f);
-				parameters[channel]->raw_level_cv[1] = clamp(f4Voltages[1], 0.f, 1.f);
+				parameters[channel]->raw_level_cv[0] = clamp(inVoltages[0], 0.f, 1.f);
+				parameters[channel]->raw_level_cv[1] = clamp(inVoltages[1], 0.f, 1.f);
 
 				parameters[channel]->raw_level[0] = parameters[channel]->channel_drive[0];
 				parameters[channel]->raw_level[1] = parameters[channel]->channel_drive[1];
@@ -209,16 +209,16 @@ struct Mutuus : SanguineModule {
 				if (!bModeSwitchEnabled) {
 					parameters[channel]->raw_algorithm_pot = algorithmValue;
 
-					parameters[channel]->raw_algorithm_cv = clamp(f4Voltages[2], -1.f, 1.f);
+					parameters[channel]->raw_algorithm_cv = clamp(inVoltages[2], -1.f, 1.f);
 
-					parameters[channel]->modulation_algorithm = clamp(algorithmValue + f4Voltages[2], 0.f, 1.f);
+					parameters[channel]->modulation_algorithm = clamp(algorithmValue + inVoltages[2], 0.f, 1.f);
 					parameters[channel]->raw_algorithm = parameters[channel]->modulation_algorithm;
 				}
 
-				parameters[channel]->modulation_parameter = clamp(knobTimbre + f4Voltages[3], 0.f, 1.f);
+				parameters[channel]->modulation_parameter = clamp(knobTimbre + inVoltages[3], 0.f, 1.f);
 				parameters[channel]->raw_modulation = parameters[channel]->modulation_parameter;
 				parameters[channel]->raw_modulation_pot = knobTimbre;
-				parameters[channel]->raw_modulation_cv = clamp(f4Voltages[3], -1.f, 1.f);
+				parameters[channel]->raw_modulation_cv = clamp(inVoltages[3], -1.f, 1.f);
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f
 					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
