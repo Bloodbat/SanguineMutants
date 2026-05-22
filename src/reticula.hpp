@@ -1,12 +1,6 @@
 #pragma once
 
 namespace reticula {
-    enum ExternalClockResolutions {
-        RESOLUTION_4_PPQN,
-        RESOLUTION_8_PPQN,
-        RESOLUTION_24_PPQN,
-    };
-
     enum ClockOutputSources {
         CLOCK_SOURCE_FIRST_BEAT,
         CLOCK_SOURCE_BEAT,
