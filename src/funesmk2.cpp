@@ -288,6 +288,7 @@ struct FunesMk2 : SanguineModule {
 
                 if (!bAuxSuboscillatorConnected) {
                     int32Voltages = static_cast<int32_t>(selectedSubOscillator);
+                    int32Voltages.store(&auxSubOscillators[channel]);
                 } else {
                     inVoltages = inputs[INPUT_AUX_SUBOSCILLATOR].getVoltageSimd<float_4>(channel);
                     inVoltages = simd::round(inVoltages);
