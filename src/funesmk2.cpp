@@ -149,9 +149,6 @@ struct FunesMk2 : SanguineModule {
 
     float_4 chordBankVoltages[4];
 
-    float_4 outVoltages;
-    float_4 auxVoltages;
-
     FunesMk2() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -439,14 +436,10 @@ struct FunesMk2 : SanguineModule {
             for (int channel = 0; channel < channelCount; channel += 4) {
                 currentSample = channel << 1;
                 // Inverting op-amp on outputs
-                outVoltages[0] = -outputFrames.samples[currentSample];
-                auxVoltages[0] = -outputFrames.samples[currentSample + 1];
-                outVoltages[1] = -outputFrames.samples[currentSample + 2];
-                auxVoltages[1] = -outputFrames.samples[currentSample + 3];
-                outVoltages[2] = -outputFrames.samples[currentSample + 4];
-                auxVoltages[2] = -outputFrames.samples[currentSample + 5];
-                outVoltages[3] = -outputFrames.samples[currentSample + 6];
-                auxVoltages[3] = -outputFrames.samples[currentSample + 7];
+                float_4 outVoltages = { -outputFrames.samples[currentSample], -outputFrames.samples[currentSample + 2],
+                    -outputFrames.samples[currentSample + 4], -outputFrames.samples[currentSample + 6] };
+                float_4 auxVoltages = { -outputFrames.samples[currentSample + 1], -outputFrames.samples[currentSample + 3],
+                     -outputFrames.samples[currentSample + 5], -outputFrames.samples[currentSample + 7] };
                 outVoltages *= 5.f;
                 auxVoltages *= 5.f;
 
