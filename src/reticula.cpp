@@ -82,7 +82,7 @@ struct Reticula : SanguineModule {
     reticula::GateModes outputMode = reticula::MODE_TRIGGER;
     reticula::ClockOutputSources clockOutputSource = reticula::CLOCK_SOURCE_FIRST_BEAT;
 
-    reticula::ExternalClockResolutions extClockResolution = reticula::RESOLUTION_24_PPQN;
+    reticula::ClockResolutions extClockResolution = reticula::CLOCK_RESOLUTION_24_PPQN;
 
     bool bNeedNextStep = false;
     bool bUseExternalClock = false;
@@ -282,7 +282,7 @@ struct Reticula : SanguineModule {
 
         clockOutputSource = static_cast<reticula::ClockOutputSources>(params[PARAM_CLOCK_OUTPUT_SOURCE].getValue());
 
-        extClockResolution = static_cast<reticula::ExternalClockResolutions>(params[PARAM_PPQN].getValue());
+        extClockResolution = static_cast<reticula::ClockResolutions>(params[PARAM_PPQN].getValue());
 
         if (bIsModuleRunning) {
             if (tempoParam >= 30 && tempoParam <= 480) {
@@ -479,9 +479,9 @@ struct Reticula : SanguineModule {
             } else {
                 tempoDisplay = reticula::externalClockLabel;
 
-                lights[LIGHT_PPQN].setBrightnessSmooth((extClockResolution > reticula::RESOLUTION_4_PPQN) *
+                lights[LIGHT_PPQN].setBrightnessSmooth((extClockResolution > reticula::CLOCK_RESOLUTION_4_PPQN) *
                     kSanguineButtonLightValue, sampleTime);
-                lights[LIGHT_PPQN + 1].setBrightnessSmooth((extClockResolution < reticula::RESOLUTION_24_PPQN) *
+                lights[LIGHT_PPQN + 1].setBrightnessSmooth((extClockResolution < reticula::CLOCK_RESOLUTION_24_PPQN) *
                     kSanguineButtonLightValue, sampleTime);
             }
         }
@@ -561,7 +561,7 @@ struct Reticula : SanguineModule {
         }
 
         if (getJsonInt(rootJ, "ExternalClockResolution", intValue)) {
-            extClockResolution = static_cast<reticula::ExternalClockResolutions>(intValue);
+            extClockResolution = static_cast<reticula::ClockResolutions>(intValue);
         }
 
         getJsonBoolean(rootJ, "WantSequencerResets", bWantSequencerResets);
