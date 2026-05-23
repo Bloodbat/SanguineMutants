@@ -79,8 +79,6 @@ struct Scalaria : SanguineModule {
     float knobFrequency = 0.f;
     float knobResonance = 0.5f;
 
-    float_4 f4KnobValues;
-
     Scalaria() {
         config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -114,28 +112,23 @@ struct Scalaria : SanguineModule {
             modulators[channel].Init(scalaria::kInternalOscillatorSampleRate);
             parameters[channel] = modulators[channel].mutableParameters();
         }
-
-        f4KnobValues[0] = 0.66f;
-        f4KnobValues[1] = 0.66f;
-        f4KnobValues[2] = 0.f;
-        f4KnobValues[3] = 0.f;
     }
 
     void process(const ProcessArgs& args) override {
         int channelCount = std::max(std::max(inputs[INPUT_CHANNEL_1].getChannels(),
             inputs[INPUT_CHANNEL_2].getChannels()), 1);
 
-        float_4 f4Voltages;
-
         knobFrequency = params[PARAM_FREQUENCY].getValue();
         knobResonance = params[PARAM_RESONANCE].getValue();
 
         internalOscillator = params[PARAM_INTERNAL_OSCILLATOR].getValue();
 
-        f4KnobValues[0] = params[PARAM_CHANNEL_1_LEVEL].getValue();
-        f4KnobValues[1] = params[PARAM_CHANNEL_2_LEVEL].getValue();
-        f4KnobValues[2] = params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue();
-        f4KnobValues[3] = params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue();
+        float_4 f4KnobValues = {
+            params[PARAM_CHANNEL_1_LEVEL].getValue(),
+            params[PARAM_CHANNEL_2_LEVEL].getValue(),
+            params[PARAM_FREQUENCY_CV_ATTENUVERTER].getValue(),
+            params[PARAM_RESONANCE_CV_ATTENUVERTER].getValue()
+        };
 
         for (int channel = 0; channel < channelCount; ++channel) {
             parameters[channel]->oscillatorShape = internalOscillator;
@@ -145,26 +138,28 @@ struct Scalaria : SanguineModule {
                 frames[channel] = 0;
 
                 // CHANNEL_1_LEVEL and CHANNEL_2_LEVEL are normalized values: from cv_scaler.cc and a PR by Brian Head to AI's repository.
-                f4Voltages[0] = inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(5.f, channel);
-                f4Voltages[1] = inputs[INPUT_CHANNEL_2_LEVEL].getNormalVoltage(5.f, channel);
-                f4Voltages[2] = inputs[INPUT_FREQUENCY].getVoltage(channel);
-                f4Voltages[3] = inputs[INPUT_RESONANCE].getVoltage(channel);
+                float_4 inVoltages = {
+                    inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(5.f, channel),
+                    inputs[INPUT_CHANNEL_2_LEVEL].getNormalVoltage(5.f, channel),
+                    inputs[INPUT_FREQUENCY].getVoltage(channel),
+                    inputs[INPUT_RESONANCE].getVoltage(channel)
+                };
 
-                f4Voltages /= 5.f;
+                inVoltages /= 5.f;
 
-                f4Voltages *= f4KnobValues;
+                inVoltages *= f4KnobValues;
 
-                f4Voltages[2] += knobFrequency;
-                f4Voltages[3] += knobResonance;
+                inVoltages[2] += knobFrequency;
+                inVoltages[3] += knobResonance;
 
-                f4Voltages = simd::clamp(f4Voltages, 0.f, 1.f);
+                inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
 
-                parameters[channel]->channel_drive[0] = f4Voltages[0];
-                parameters[channel]->channel_drive[1] = f4Voltages[1];
+                parameters[channel]->channel_drive[0] = inVoltages[0];
+                parameters[channel]->channel_drive[1] = inVoltages[1];
 
-                parameters[channel]->rawFrequency = f4Voltages[2];
+                parameters[channel]->rawFrequency = inVoltages[2];
 
-                parameters[channel]->rawResonance = f4Voltages[3];
+                parameters[channel]->rawResonance = inVoltages[3];
 
                 parameters[channel]->note = 60.f * f4KnobValues[0] + 12.f *
                     inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
@@ -177,8 +172,6 @@ struct Scalaria : SanguineModule {
 
         float_4 inVoltagesChannel1;
         float_4 inVoltagesChannel2;
-        float_4 outVoltagesChannel1;
-        float_4 outVoltagesAux;
         int currentChannel;
         for (int channel = 0; channel < channelCount; channel += 4) {
             inVoltagesChannel1 = inputs[INPUT_CHANNEL_1].getVoltageSimd<float_4>(channel);
@@ -194,26 +187,32 @@ struct Scalaria : SanguineModule {
 
             inputFrames[channel][frames[channel]].l = static_cast<short>(inVoltagesChannel1[0]);
             inputFrames[channel][frames[channel]].r = static_cast<short>(inVoltagesChannel2[0]);
-            outVoltagesChannel1[0] = static_cast<float>(outputFrames[channel][frames[channel]].l);
-            outVoltagesAux[0] = static_cast<float>(outputFrames[channel][frames[channel]].r);
 
             currentChannel = channel + 1;
             inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[1]);
             inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[1]);
-            outVoltagesChannel1[1] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].l);
-            outVoltagesAux[1] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].r);
 
             currentChannel = channel + 2;
             inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[2]);
             inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[2]);
-            outVoltagesChannel1[2] = static_cast<float>(outputFrames[currentChannel][currentChannel].l);
-            outVoltagesAux[2] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].r);
 
             currentChannel = channel + 3;
             inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[3]);
             inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[3]);
-            outVoltagesChannel1[3] = static_cast<float>(outputFrames[currentChannel][currentChannel].l);
-            outVoltagesAux[3] = static_cast<float>(outputFrames[currentChannel][frames[currentChannel]].r);
+
+            float_4 outVoltagesChannel1 = {
+                static_cast<float>(outputFrames[channel][frames[channel]].l),
+                static_cast<float>(outputFrames[channel + 1][frames[channel + 1]].l),
+                static_cast<float>(outputFrames[channel + 2][frames[channel + 2]].l),
+                static_cast<float>(outputFrames[channel + 3][frames[channel + 3]].l)
+            };
+
+            float_4 outVoltagesAux = {
+                static_cast<float>(outputFrames[channel][frames[channel]].r),
+                static_cast<float>(outputFrames[channel + 1][frames[channel + 1]].r),
+                static_cast<float>(outputFrames[channel + 2][frames[channel + 2]].r),
+                static_cast<float>(outputFrames[channel + 3][frames[channel + 3]].r)
+            };
 
             outVoltagesChannel1 /= 32768.f;
             outVoltagesAux /= 32768.f;
