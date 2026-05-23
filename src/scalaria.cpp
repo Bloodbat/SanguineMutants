@@ -250,43 +250,44 @@ struct Scalaria : SanguineModule {
             lights[LIGHT_CHANNEL_1_LEVEL].setBrightnessSmooth(!bInternalOscillatorInUse *
                 kSanguineButtonLightValue, sampleTime);
 
-            for (int channel = 0; channel < PORT_MAX_CHANNELS; ++channel) {
+            for (int channel = 0; channel < channelCount; ++channel) {
                 const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+                float zone;
 
-                if (channel < channelCount) {
-                    float zone;
+                zone = 8.f * parameters[channel]->rawFrequency;
+                MAKE_INTEGRAL_FRACTIONAL(zone);
+                int integerZoneFractional = static_cast<int>(zone_fractional * 256);
 
-                    zone = 8.f * parameters[channel]->rawFrequency;
-                    MAKE_INTEGRAL_FRACTIONAL(zone);
-                    int integerZoneFractional = static_cast<int>(zone_fractional * 256);
+                int aRed = scalaria::paletteFrequencies[zone_integral][0];
+                int bRed = scalaria::paletteFrequencies[zone_integral + 1][0];
 
-                    int aRed = scalaria::paletteFrequencies[zone_integral][0];
-                    int bRed = scalaria::paletteFrequencies[zone_integral + 1][0];
+                int aGreen = scalaria::paletteFrequencies[zone_integral][1];
+                int bGreen = scalaria::paletteFrequencies[zone_integral + 1][1];
 
-                    int aGreen = scalaria::paletteFrequencies[zone_integral][1];
-                    int bGreen = scalaria::paletteFrequencies[zone_integral + 1][1];
+                int aBlue = scalaria::paletteFrequencies[zone_integral][2];
+                int bBlue = scalaria::paletteFrequencies[zone_integral + 1][2];
 
-                    int aBlue = scalaria::paletteFrequencies[zone_integral][2];
-                    int bBlue = scalaria::paletteFrequencies[zone_integral + 1][2];
+                float_4 colorValues = {
+                    static_cast<float>(aRed + ((bRed - aRed) * integerZoneFractional >> 8)),
+                    static_cast<float>(aGreen + ((bGreen - aGreen) * integerZoneFractional >> 8)),
+                    static_cast<float>(aBlue + ((bBlue - aBlue) * integerZoneFractional >> 8)),
+                    0.f
+                };
 
-                    float_4 colorValues;
+                colorValues /= 255.f;
 
-                    colorValues[0] = static_cast<float>(aRed + ((bRed - aRed) * integerZoneFractional >> 8));
-                    colorValues[1] = static_cast<float>(aGreen + ((bGreen - aGreen) * integerZoneFractional >> 8));
-                    colorValues[2] = static_cast<float>(aBlue + ((bBlue - aBlue) * integerZoneFractional >> 8));
+                colorValues = simd::rescale(colorValues, 0.f, 1.f, 0.f, kSanguineButtonLightValue);
 
-                    colorValues /= 255.f;
+                lights[currentLight].setBrightnessSmooth(colorValues[0], sampleTime);
+                lights[currentLight + 1].setBrightnessSmooth(colorValues[1], sampleTime);
+                lights[currentLight + 2].setBrightnessSmooth(colorValues[2], sampleTime);
+            }
 
-                    colorValues = simd::rescale(colorValues, 0.f, 1.f, 0.f, kSanguineButtonLightValue);
-
-                    lights[currentLight].setBrightnessSmooth(colorValues[0], sampleTime);
-                    lights[currentLight + 1].setBrightnessSmooth(colorValues[1], sampleTime);
-                    lights[currentLight + 2].setBrightnessSmooth(colorValues[2], sampleTime);
-                } else {
-                    lights[currentLight].setBrightnessSmooth(0, sampleTime);
-                    lights[currentLight + 1].setBrightnessSmooth(0, sampleTime);
-                    lights[currentLight + 2].setBrightnessSmooth(0, sampleTime);
-                }
+            for (int channel = channelCount; channel < PORT_MAX_CHANNELS; ++channel) {
+                const int currentLight = LIGHT_CHANNEL_1 + channel * 3;
+                lights[currentLight].setBrightnessSmooth(0.f, sampleTime);
+                lights[currentLight + 1].setBrightnessSmooth(0.f, sampleTime);
+                lights[currentLight + 2].setBrightnessSmooth(0.f, sampleTime);
             }
         }
     }
