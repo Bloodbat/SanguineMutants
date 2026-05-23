@@ -101,6 +101,10 @@ struct Marmora : SanguineModule {
 	sanguinemarbles::ScaleRecorder scaleRecorder;
 	sanguinemarbles::ClockSource xClockSourceInternal = sanguinemarbles::CLOCK_SOURCE_INTERNAL_T1_T2_T3;
 
+	// Parameters
+	sanguinemarbles::GroupSettings x;
+	sanguinemarbles::GroupSettings y;
+
 	bool bDejaVuTEnabled = false;
 	bool bDejaVuXEnabled = false;
 	bool bTClockSourceExternal = false;
@@ -157,8 +161,7 @@ struct Marmora : SanguineModule {
 
 		void setDisplayValue(float 	displayValue) override {
 			int inputValue = static_cast<int>(displayValue);
-			switch (inputValue)
-			{
+			switch (inputValue) {
 			case 1:
 				displayValue = 0.f;
 				break;
@@ -513,12 +516,28 @@ struct Marmora : SanguineModule {
 	void setupTGenerator(const float dejaVu, const int dejaVuLength, const sanguinemarbles::Ramps& ramps) {
 		tGenerator.set_model(static_cast<sanguinemarbles::TGeneratorModel>(params[PARAM_T_MODE].getValue()));
 		tGenerator.set_range(static_cast<sanguinemarbles::TGeneratorRange>(params[PARAM_T_RANGE].getValue()));
-		float tRate = 60.f * (params[PARAM_T_RATE].getValue() + inputs[INPUT_T_RATE].getVoltage() / 5.f);
-		tGenerator.set_rate(tRate);
-		float tBias = clamp(params[PARAM_T_BIAS].getValue() + inputs[INPUT_T_BIAS].getVoltage() / 5.f, 0.f, 1.f);
-		tGenerator.set_bias(tBias);
-		float tJitter = clamp(params[PARAM_T_JITTER].getValue() + inputs[INPUT_T_JITTER].getVoltage() / 5.f, 0.f, 1.f);
-		tGenerator.set_jitter(tJitter);
+
+		simd::float_4 inVoltages = {
+			inputs[INPUT_T_RATE].getVoltage(),
+			inputs[INPUT_T_BIAS].getVoltage(),
+			inputs[INPUT_T_JITTER].getVoltage(),
+			0.f
+		};
+
+		inVoltages /= 5.f;
+
+		inVoltages[0] += params[PARAM_T_RATE].getValue();
+		inVoltages[0] *= 60.f;
+		inVoltages[1] += params[PARAM_T_BIAS].getValue();
+		inVoltages[2] += params[PARAM_T_JITTER].getValue();
+
+		tGenerator.set_rate(inVoltages[0]);
+
+		inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+
+		tGenerator.set_bias(inVoltages[1]);
+		tGenerator.set_jitter(inVoltages[2]);
+
 		if (dejaVuLockModeT != marmora::DEJA_VU_SUPER_LOCK) {
 			tGenerator.set_deja_vu(bDejaVuTEnabled * dejaVu);
 		} else {
@@ -539,23 +558,39 @@ struct Marmora : SanguineModule {
 			xClockSource = sanguinemarbles::CLOCK_SOURCE_EXTERNAL;
 		}
 
-		sanguinemarbles::GroupSettings x;
 		x.control_mode = static_cast<sanguinemarbles::ControlMode>(params[PARAM_X_MODE].getValue());
 		x.voltage_range = static_cast<sanguinemarbles::VoltageRange>(params[PARAM_X_RANGE].getValue());
+
+		simd::float_4 inVoltages = {
+			inputs[INPUT_X_SPREAD].getVoltage(),
+			inputs[INPUT_X_BIAS].getVoltage(),
+			inputs[INPUT_X_STEPS].getVoltage(),
+			0.f
+		};
+
+		inVoltages /= 5.f;
+
+		inVoltages[0] += params[PARAM_X_SPREAD].getValue();
+		inVoltages[1] += params[PARAM_X_BIAS].getValue();
+		inVoltages[2] += params[PARAM_X_STEPS].getValue();
+
 		// TODO: Fix the scaling.
 		/*
 		   I think the double multiplication by 0.5f (both in the next line and when assigning "u" might be wrong:
 		   custom scales seem to behave nicely when NOT doing that...) -Bat
 		*/
-		float noteCV = 0.5f * (params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f);
+		float noteCv = 0.5f * inVoltages[0];
+
+		inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+
 		// NOTE: WTF is u? (A leftover from marbles.cc -Bat Ed.)
-		float u = noteFilter.Process(0.5f * (noteCV + 1.f));
+		float u = noteFilter.Process(0.5f * (noteCv + 1.f));
 		x.register_mode = params[PARAM_EXTERNAL].getValue();
 		x.register_value = u;
 
-		x.spread = clamp(params[PARAM_X_SPREAD].getValue() + inputs[INPUT_X_SPREAD].getVoltage() / 5.f, 0.f, 1.f);
-		x.bias = clamp(params[PARAM_X_BIAS].getValue() + inputs[INPUT_X_BIAS].getVoltage() / 5.f, 0.f, 1.f);
-		x.steps = clamp(params[PARAM_X_STEPS].getValue() + inputs[INPUT_X_STEPS].getVoltage() / 5.f, 0.f, 1.f);
+		x.spread = inVoltages[0];
+		x.bias = inVoltages[1];
+		x.steps = inVoltages[2];
 		if (dejaVuLockModeX != marmora::DEJA_VU_SUPER_LOCK) {
 			x.deja_vu = bDejaVuXEnabled * dejaVu;
 		} else {
@@ -566,7 +601,6 @@ struct Marmora : SanguineModule {
 		x.ratio.q = 1;
 		x.scale_index = xScale;
 
-		sanguinemarbles::GroupSettings y;
 		y.control_mode = sanguinemarbles::CONTROL_MODE_IDENTICAL;
 		y.voltage_range = sanguinemarbles::VOLTAGE_RANGE_FULL;
 		y.register_mode = false;
