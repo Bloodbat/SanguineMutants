@@ -29,6 +29,8 @@ without the backticks.
 
 - Nebulae family: proper tooltips on startup.
 
+- Scalaria: frame handling for certain polyphonic channels sent to Input 1.
+
 ## Additions
 
 - Aestus family: modules are fully polyphonic.
