@@ -2,6 +2,7 @@
 #include "sanguinecomponents.hpp"
 #include "sanguinedsp.hpp"
 #include "sanguinehelpers.hpp"
+#include "velamina.hpp"
 
 using simd::float_4;
 
@@ -58,18 +59,16 @@ struct Velamina : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	SaturatorFloat_4 saturator;
 
-	static const int kLightsFrequency = 64;
-	static const int kMaxChannels = 4;
 	int jitteredLightsFrequency;
 
-	bool signalInputsConnected[kMaxChannels];
-	bool cvInputsConnected[kMaxChannels];
-	bool outputsConnected[kMaxChannels] = { false, false, false, false };
+	bool signalInputsConnected[velamina::kMaxChannels];
+	bool cvInputsConnected[velamina::kMaxChannels];
+	bool outputsConnected[velamina::kMaxChannels] = { false, false, false, false };
 
 	Velamina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
-		for (int channel = 0; channel < kMaxChannels; ++channel) {
+		for (int channel = 0; channel < velamina::kMaxChannels; ++channel) {
 			int channelNumber = channel + 1;
 			configParam(PARAM_GAIN_1 + channel, 0.f, 1.f, 0.f,
 				string::f("Channel %d gain", channelNumber), "%", 0.f, 100.f);
@@ -87,8 +86,8 @@ struct Velamina : SanguineModule {
 	}
 
 	void process(const ProcessArgs& args) override {
-		float_4 outVoltages[kMaxChannels] = {};
-		float_4 portVoltages[kMaxChannels][4] = {};
+		float_4 outVoltages[velamina::kMaxChannels] = {};
+		float_4 portVoltages[velamina::kMaxChannels][4] = {};
 		int polyChannelCount = 1;
 
 		bool bIsLightsTurn = lightsDivider.process();
@@ -98,7 +97,7 @@ struct Velamina : SanguineModule {
 				std::max(inputs[INPUT_IN_3].getChannels(), inputs[INPUT_IN_4].getChannels())), 1);
 		}
 
-		for (int channel = 0; channel < kMaxChannels; ++channel) {
+		for (int channel = 0; channel < velamina::kMaxChannels; ++channel) {
 			float_4 gains[4] = {};
 			float_4 inVoltages[4] = {};
 
@@ -234,7 +233,8 @@ struct Velamina : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = velamina::kLightsFrequency +
+			(getId() % velamina::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 };
