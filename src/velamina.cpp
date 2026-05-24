@@ -89,14 +89,9 @@ struct Velamina : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		float_4 outVoltages[kMaxChannels] = {};
 		float_4 portVoltages[kMaxChannels][4] = {};
-		float sampleTime;
 		int polyChannelCount = 1;
 
 		bool bIsLightsTurn = lightsDivider.process();
-
-		if (bIsLightsTurn) {
-			sampleTime = jitteredLightsFrequency * args.sampleTime;
-		}
 
 		if (signalInputsConnected[0] | signalInputsConnected[1] | signalInputsConnected[2] | signalInputsConnected[3]) {
 			polyChannelCount = std::max(std::max(std::max(inputs[INPUT_IN_1].getChannels(), inputs[INPUT_IN_2].getChannels()),
@@ -132,7 +127,8 @@ struct Velamina : SanguineModule {
 
 					float_4 isAbove10 = simd::abs(outVoltages[currentChannel]) > 10.f;
 
-					outVoltages[currentChannel] = simd::ifelse(isAbove10, saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
+					outVoltages[currentChannel] = simd::ifelse(isAbove10,
+						saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
 				}
 				portVoltages[channel][currentChannel] = outVoltages[currentChannel];
 
@@ -143,6 +139,8 @@ struct Velamina : SanguineModule {
 			}
 
 			if (bIsLightsTurn) {
+				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
+
 				int outputLight = LIGHT_OUT_1 + channel * 3;
 				int channelLight = channel << 1;
 
