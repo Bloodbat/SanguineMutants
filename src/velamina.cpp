@@ -59,11 +59,14 @@ struct Velamina : SanguineModule {
 	dsp::ClockDivider lightsDivider;
 	SaturatorFloat_4 saturator;
 
+	float voltagesOutput[velamina::kMaxChannels][PORT_MAX_CHANNELS] = {};
+	float voltagesGain[velamina::kMaxChannels][PORT_MAX_CHANNELS] = {};
+
 	int jitteredLightsFrequency;
 
-	bool signalInputsConnected[velamina::kMaxChannels];
-	bool cvInputsConnected[velamina::kMaxChannels];
-	bool outputsConnected[velamina::kMaxChannels] = { false, false, false, false };
+	bool signalInputsConnected[velamina::kMaxChannels] = {};
+	bool cvInputsConnected[velamina::kMaxChannels] = {};
+	bool outputsConnected[velamina::kMaxChannels] = {};
 
 	Velamina() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -79,15 +82,11 @@ struct Velamina : SanguineModule {
 			configInput(INPUT_IN_1 + channel, string::f("Channel %d", channelNumber));
 			configInput(INPUT_CV_1 + channel, string::f("Channel %d CV", channelNumber));
 			configOutput(OUTPUT_1 + channel, string::f("Channel %d", channelNumber));
-
-			signalInputsConnected[channel] = false;
-			cvInputsConnected[channel] = false;
 		}
 	}
 
 	void process(const ProcessArgs& args) override {
 		float_4 outVoltages[velamina::kMaxChannels] = {};
-		float_4 portVoltages[velamina::kMaxChannels][4] = {};
 		int polyChannelCount = 1;
 
 		bool bIsLightsTurn = lightsDivider.process();
@@ -98,38 +97,39 @@ struct Velamina : SanguineModule {
 		}
 
 		for (int channel = 0; channel < velamina::kMaxChannels; ++channel) {
-			float_4 gains[4] = {};
-			float_4 inVoltages[4] = {};
-
 			float sliderGain = params[PARAM_GAIN_1 + channel].getValue();
 			float knobOffset = params[PARAM_OFFSET_1 + channel].getValue();
 			float knobResponse = params[PARAM_RESPONSE_1 + channel].getValue();
 
 			for (int polyChannel = 0; polyChannel < polyChannelCount; polyChannel += 4) {
-				uint8_t currentChannel = polyChannel >> 2;
+				int currentChannel = polyChannel >> 2;
+
+				float_4 gains;
 				if (cvInputsConnected[channel]) {
 					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
-					gains[currentChannel] = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
+					gains = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
 						sliderGain + knobOffset), 0.f, 8.f) / 5.f, 0.f);
-					gains[currentChannel] = simd::pow(gains[currentChannel], 1 / (0.1f + 0.9f * knobResponse));
+					gains = simd::pow(gains, 1 / (0.1f + 0.9f * knobResponse));
 				} else {
-					gains[currentChannel] = sliderGain + knobOffset;
+					gains = sliderGain + knobOffset;
 				}
 
+				gains.store(&voltagesGain[channel][polyChannel]);
+
 				if (signalInputsConnected[channel]) {
-					inVoltages[currentChannel] = inputs[INPUT_IN_1 + channel].getVoltageSimd<float_4>(polyChannel);
+					float_4 inVoltages = inputs[INPUT_IN_1 + channel].getVoltageSimd<float_4>(polyChannel);
 
-					float_4 voltages = inVoltages[currentChannel];
-					voltages *= gains[currentChannel];
+					inVoltages *= gains;
 
-					outVoltages[currentChannel] += voltages;
+					outVoltages[currentChannel] += inVoltages;
 
 					float_4 isAbove10 = simd::abs(outVoltages[currentChannel]) > 10.f;
 
 					outVoltages[currentChannel] = simd::ifelse(isAbove10,
 						saturator.next(outVoltages[currentChannel]), outVoltages[currentChannel]);
 				}
-				portVoltages[channel][currentChannel] = outVoltages[currentChannel];
+
+				outVoltages[currentChannel].store(&voltagesOutput[channel][polyChannel]);
 
 				if (outputsConnected[channel]) {
 					outputs[OUTPUT_1 + channel].setVoltageSimd(outVoltages[currentChannel], polyChannel);
@@ -137,16 +137,20 @@ struct Velamina : SanguineModule {
 				}
 			}
 
-			if (bIsLightsTurn) {
-				const float sampleTime = jitteredLightsFrequency * args.sampleTime;
+			outputs[OUTPUT_1 + channel].setChannels(polyChannelCount);
+		}
 
+		if (bIsLightsTurn) {
+			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
+
+			for (int channel = 0; channel < velamina::kMaxChannels; ++channel) {
 				int outputLight = LIGHT_OUT_1 + channel * 3;
 				int channelLight = channel << 1;
 
 				if (polyChannelCount < 2) {
 					float channelVoltage = 0.f;
 					if (polyChannelCount > 0) {
-						channelVoltage = clamp(portVoltages[channel][0][0], -10.f, 10.f);
+						channelVoltage = clamp(voltagesOutput[channel][0], -10.f, 10.f);
 					}
 
 					float rescaledLight = rescale(channelVoltage, 0.f, 10.f, 0.f, 1.f);
@@ -155,17 +159,15 @@ struct Velamina : SanguineModule {
 					lights[outputLight + 2].setBrightnessSmooth(0.f, sampleTime);
 
 					lights[LIGHT_GAIN_1 + channelLight].setBrightnessSmooth(0.f, sampleTime);
-					lights[(LIGHT_GAIN_1 + channelLight) + 1].setBrightnessSmooth(rescale(gains[0][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
+					lights[(LIGHT_GAIN_1 + channelLight) + 1].setBrightnessSmooth(
+						rescale(voltagesGain[channel][0], 0.f, 5.f, 0.f, 1.f), sampleTime);
 				} else {
 					float voltageSum = 0.f;
 					float gainSum = 0.f;
-					int currentChannel;
-					for (int offset = 0; offset < 4; ++offset) {
-						for (int polyChannel = 0; polyChannel < polyChannelCount; ++polyChannel) {
-							currentChannel = polyChannel % 4;
-							voltageSum += portVoltages[channel][offset][currentChannel];
-							gainSum += gains[offset][currentChannel];
-						}
+
+					for (int polyChannel = 0; polyChannel < polyChannelCount; ++polyChannel) {
+						voltageSum += voltagesOutput[channel][polyChannel];
+						gainSum += voltagesGain[channel][polyChannel];
 					}
 
 					voltageSum /= polyChannelCount;
@@ -183,8 +185,6 @@ struct Velamina : SanguineModule {
 					lights[(LIGHT_GAIN_1 + channelLight) + 1].setBrightnessSmooth(rescaledLight, sampleTime);
 				}
 			}
-
-			outputs[OUTPUT_1 + channel].setChannels(polyChannelCount);
 		}
 	}
 
