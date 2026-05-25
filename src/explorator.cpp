@@ -222,14 +222,12 @@ struct Explorator : SanguineModule {
 
 		if (b3To1AConnected || b3To1BConnected || b3To1CConnected) {
 			for (int channel = 0; channel < channels3to1; channel += 4) {
-				float_4 voltages3to1A = inputs[INPUT_3_TO_1_A].getVoltageSimd<float_4>(channel);
-				float_4 voltages3to1B = inputs[INPUT_3_TO_1_B].getVoltageSimd<float_4>(channel);
-				float_4 voltages3to1C = inputs[INPUT_3_TO_1_C].getVoltageSimd<float_4>(channel);
-
-				float_4 voltages3to1 = voltages3to1A + voltages3to1B + voltages3to1C;
+				float_4 voltages3to1 = inputs[INPUT_3_TO_1_A].getVoltageSimd<float_4>(channel);
+				voltages3to1 += inputs[INPUT_3_TO_1_B].getVoltageSimd<float_4>(channel);
+				voltages3to1 += inputs[INPUT_3_TO_1_C].getVoltageSimd<float_4>(channel);
 
 				if (bWantAverager) {
-					voltages3to1 /= 3;
+					voltages3to1 /= 3.f;
 				}
 
 				outputs[OUTPUT_3_TO_1].setVoltageSimd(voltages3to1, channel);
