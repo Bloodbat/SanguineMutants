@@ -169,8 +169,6 @@ struct Temulenti : SanguineModule {
 	float knobFm = 0.f;
 	float knobQuantizer = 0.f;
 
-	float_4 inputVoltages;
-	float_4 knobValues = 0.f;
 	float_4 selectorVoltages;
 
 	Temulenti() {
@@ -232,10 +230,12 @@ struct Temulenti : SanguineModule {
 		knobFrequency = params[PARAM_FREQUENCY].getValue();
 		knobFm = params[PARAM_FM].getValue();
 
-		knobValues[1] = params[PARAM_SHAPE].getValue();
-		knobValues[2] = params[PARAM_SLOPE].getValue();
-		knobValues[3] = params[PARAM_SMOOTHNESS].getValue();
-
+		float_4 knobValues = {
+			params[PARAM_SHAPE].getValue(),
+			params[PARAM_SLOPE].getValue(),
+			params[PARAM_SMOOTHNESS].getValue(),
+			0.f
+		};
 
 		if (!bModelConnected) {
 			channelModels.fill(selectedFeatureMode);
@@ -265,10 +265,12 @@ struct Temulenti : SanguineModule {
 					lastExternalSyncs[channel] = bUseExternalSync;
 				}
 
-				inputVoltages[0] = inputs[INPUT_FM].getNormalVoltage(0.1f, channel);
-				inputVoltages[1] = inputs[INPUT_SHAPE].getVoltage(channel);
-				inputVoltages[2] = inputs[INPUT_SLOPE].getVoltage(channel);
-				inputVoltages[3] = inputs[INPUT_SMOOTHNESS].getVoltage(channel);
+				float_4 inputVoltages = {
+					inputs[INPUT_FM].getNormalVoltage(0.1f, channel),
+					inputs[INPUT_SHAPE].getVoltage(channel),
+					inputs[INPUT_SLOPE].getVoltage(channel),
+					inputs[INPUT_SMOOTHNESS].getVoltage(channel)
+				};
 
 				inputVoltages /= 5.f;
 
