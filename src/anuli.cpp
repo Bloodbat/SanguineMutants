@@ -503,12 +503,12 @@ struct Anuli : SanguineModule {
 	}
 
 	void setupPatch(const int channel, sanguinerings::Patch& patch, float& structure) {
-		float_4 voltages;
-
-		voltages[0] = inputs[INPUT_STRUCTURE_CV].getVoltage(channel);
-		voltages[1] = inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel);
-		voltages[2] = inputs[INPUT_DAMPING_CV].getVoltage(channel);
-		voltages[3] = inputs[INPUT_POSITION_CV].getVoltage(channel);
+		float_4 voltages = {
+			inputs[INPUT_STRUCTURE_CV].getVoltage(channel),
+			inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel),
+			inputs[INPUT_DAMPING_CV].getVoltage(channel),
+			inputs[INPUT_POSITION_CV].getVoltage(channel)
+		};
 
 		voltages /= 5.f;
 		voltages *= 3.3f;
