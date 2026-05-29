@@ -231,10 +231,10 @@ struct Temulenti : SanguineModule {
 		knobFm = params[PARAM_FM].getValue();
 
 		float_4 knobValues = {
+			0.f,
 			params[PARAM_SHAPE].getValue(),
 			params[PARAM_SLOPE].getValue(),
 			params[PARAM_SMOOTHNESS].getValue(),
-			0.f
 		};
 
 		if (!bModelConnected) {

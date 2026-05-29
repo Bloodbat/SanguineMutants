@@ -217,10 +217,10 @@ struct Aestus : SanguineModule {
 			knobFm = params[PARAM_FM].getValue();
 
 			float_4 knobValues = {
+				0.f,
 				params[PARAM_SHAPE].getValue(),
 				params[PARAM_SLOPE].getValue(),
 				params[PARAM_SMOOTHNESS].getValue(),
-				0.f
 			};
 
 			for (int channel = 0; channel < channelCount; ++channel) {
