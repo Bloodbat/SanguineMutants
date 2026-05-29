@@ -271,21 +271,11 @@ struct Aestus : SanguineModule {
 					inputVoltages = simd::clamp(inputVoltages, -1.f, 1.f);
 					inputVoltages *= 32767.f;
 
-					int16_t shape = static_cast<int16_t>(inputVoltages[1]);
-					int16_t slope = static_cast<int16_t>(inputVoltages[2]);
-					int16_t smoothness = static_cast<int16_t>(inputVoltages[3]);
-					generators[channel].set_shape(shape);
-					generators[channel].set_slope(slope);
-					generators[channel].set_smoothness(smoothness);
+					generators[channel].set_shape(static_cast<int16_t>(inputVoltages[1]));
+					generators[channel].set_slope(static_cast<int16_t>(inputVoltages[2]));
+					generators[channel].set_smoothness(static_cast<int16_t>(inputVoltages[3]));
 
 					generators[channel].Process(channelIsSheep[channel]);
-				}
-
-				// Level.
-				uint16_t level = static_cast<uint16_t>(
-					clamp(inputs[INPUT_LEVEL].getNormalPolyVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
-				if (level < 32) {
-					level = 0;
 				}
 
 				uint8_t gate = 0;
@@ -313,10 +303,17 @@ struct Aestus : SanguineModule {
 				uint32_t uni = samples[channel].unipolar;
 				int32_t bi = samples[channel].bipolar;
 
+				// Level.
+				uint16_t level = static_cast<uint16_t>(
+					clamp(inputs[INPUT_LEVEL].getNormalPolyVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+				if (level < 32) {
+					level = 0;
+				}
+
 				uni = uni * level >> 16;
 				bi = -bi * level >> 16;
-				unipolarFlags[channel] = static_cast<float>(uni) / 65535;
-				float bipolarFlag = static_cast<float>(bi) / 32768;
+				unipolarFlags[channel] = static_cast<float>(uni) / 65535.f;
+				float bipolarFlag = static_cast<float>(bi) / 32768.f;
 
 				outputs[OUTPUT_HIGH].setVoltage((samples[channel].flags & sanguinetides::FLAG_END_OF_ATTACK) ?
 					5.f : 0.f, channel);
