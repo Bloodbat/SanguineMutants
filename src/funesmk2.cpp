@@ -277,7 +277,7 @@ struct FunesMk2 : SanguineModule {
                     int32Voltages = selectedChordBank;
                     int32Voltages.store(&chordBanks[channel]);
                 } else {
-                    inVoltages = inputs[INPUT_CHORD_BANK].getVoltageSimd<float_4>(channel);
+                    inVoltages = inputs[INPUT_CHORD_BANK].getPolyVoltageSimd<float_4>(channel);
                     inVoltages = simd::round(inVoltages);
                     inVoltages = simd::clamp(inVoltages, 0.f, 2.f);
 
@@ -290,7 +290,7 @@ struct FunesMk2 : SanguineModule {
                     int32Voltages = static_cast<int32_t>(selectedSubOscillator);
                     int32Voltages.store(&auxSubOscillators[channel]);
                 } else {
-                    inVoltages = inputs[INPUT_AUX_SUBOSCILLATOR].getVoltageSimd<float_4>(channel);
+                    inVoltages = inputs[INPUT_AUX_SUBOSCILLATOR].getPolyVoltageSimd<float_4>(channel);
                     inVoltages = simd::round(inVoltages);
                     inVoltages = simd::clamp(inVoltages, 0.f, 4.f);
 
@@ -300,7 +300,7 @@ struct FunesMk2 : SanguineModule {
                 }
 
                 if (bModelConnected && bNotesModelSelection) {
-                    inVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+                    inVoltages = inputs[INPUT_MODEL].getPolyVoltageSimd<float_4>(channel);
                     inVoltages += 4.f;
                     inVoltages *= 12.f;
                     inVoltages = simd::round(inVoltages);
@@ -317,7 +317,7 @@ struct FunesMk2 : SanguineModule {
                     inVoltages = knobLpgColor;
                     inVoltages.store(&voltagesLpgColor[channel]);
                 } else {
-                    inVoltages = inputs[INPUT_LPG_COLOR].getVoltageSimd<float_4>(channel);
+                    inVoltages = inputs[INPUT_LPG_COLOR].getPolyVoltageSimd<float_4>(channel);
                     inVoltages /= 5.f;
                     inVoltages *= attenLpgColor;
                     inVoltages += knobLpgColor;
@@ -329,7 +329,7 @@ struct FunesMk2 : SanguineModule {
                     inVoltages = knobLpgDecay;
                     inVoltages.store(&voltagesLpgDecay[channel]);
                 } else {
-                    inVoltages = inputs[INPUT_LPG_DECAY].getVoltageSimd<float_4>(channel);
+                    inVoltages = inputs[INPUT_LPG_DECAY].getPolyVoltageSimd<float_4>(channel);
                     inVoltages /= 5.f;
                     inVoltages *= attenLpgDecay;
                     inVoltages += knobLpgDecay;
@@ -337,44 +337,44 @@ struct FunesMk2 : SanguineModule {
                     inVoltages.store(&voltagesLpgDecay[channel]);
                 }
 
-                inVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_MODEL].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 5.f;
                 inVoltages.store(&voltagesModel[channel]);
 
-                inVoltages = inputs[INPUT_AUX_CROSSFADE].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_AUX_CROSSFADE].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 5.f;
                 inVoltages.store(&voltagesAuxCrossfade[channel]);
 
-                inVoltages = inputs[INPUT_HARMONICS].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_HARMONICS].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 5.f;
                 inVoltages *= attenHarmonics;
                 inVoltages.store(&voltagesHarmonics[channel]);
 
-                inVoltages = inputs[INPUT_TIMBRE].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_TIMBRE].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 8.f;
                 inVoltages.store(&voltagesTimbre[channel]);
 
-                inVoltages = inputs[INPUT_MORPH].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_MORPH].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 8.f;
                 inVoltages.store(&voltagesMorph[channel]);
 
-                inVoltages = inputs[INPUT_LEVEL].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_LEVEL].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 8.f;
                 inVoltages.store(&voltagesLevel[channel]);
 
-                inVoltages = inputs[INPUT_HOLD_MODULATIONS].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_HOLD_MODULATIONS].getPolyVoltageSimd<float_4>(channel);
                 inVoltages.store(&voltagesHoldModulations[channel]);
 
-                inVoltages = inputs[INPUT_NOTE].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_NOTE].getPolyVoltageSimd<float_4>(channel);
                 inVoltages *= 12.f;
                 inVoltages.store(&voltagesNote[channel]);
 
-                inVoltages = inputs[INPUT_FREQUENCY].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_FREQUENCY].getPolyVoltageSimd<float_4>(channel);
                 inVoltages *= 6.f;
                 inVoltages.store(&voltagesFrequency[channel]);
 
                 // Triggers at around 0.7 V
-                inVoltages = inputs[INPUT_TRIGGER].getVoltageSimd<float_4>(channel);
+                inVoltages = inputs[INPUT_TRIGGER].getPolyVoltageSimd<float_4>(channel);
                 inVoltages /= 3.f;
                 inVoltages.store(&voltagesTrigger[channel]);
             }
