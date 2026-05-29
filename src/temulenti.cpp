@@ -266,16 +266,16 @@ struct Temulenti : SanguineModule {
 				}
 
 				float_4 inputVoltages = {
-					inputs[INPUT_FM].getNormalVoltage(0.1f, channel),
-					inputs[INPUT_SHAPE].getVoltage(channel),
-					inputs[INPUT_SLOPE].getVoltage(channel),
-					inputs[INPUT_SMOOTHNESS].getVoltage(channel)
+					inputs[INPUT_FM].getNormalPolyVoltage(0.1f, channel),
+					inputs[INPUT_SHAPE].getPolyVoltage(channel),
+					inputs[INPUT_SLOPE].getPolyVoltage(channel),
+					inputs[INPUT_SMOOTHNESS].getPolyVoltage(channel)
 				};
 
 				inputVoltages /= 5.f;
 
 				// Pitch.
-				float pitchParam = knobFrequency + (inputs[INPUT_PITCH].getVoltage(channel) +
+				float pitchParam = knobFrequency + (inputs[INPUT_PITCH].getPolyVoltage(channel) +
 					aestusCommon::calibrationOffsets[bUseCalibrationOffset]) * 12.f;
 				float fm = clamp(inputVoltages[0] * knobFm / 12.f, -1.f, 1.f) * 1536.f;
 
@@ -326,20 +326,20 @@ struct Temulenti : SanguineModule {
 
 			// Level.
 			uint16_t level = static_cast<uint16_t>(
-				clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+				clamp(inputs[INPUT_LEVEL].getNormalPolyVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
 			if (level < 32) {
 				level = 0;
 			}
 
 			uint8_t gate = 0;
 
-			if (inputs[INPUT_FREEZE].getVoltage(channel) >= 0.7f) {
+			if (inputs[INPUT_FREEZE].getPolyVoltage(channel) >= 0.7f) {
 				gate |= bumps::CONTROL_FREEZE;
 			}
-			if (inputs[INPUT_TRIGGER].getVoltage(channel) >= 0.7f) {
+			if (inputs[INPUT_TRIGGER].getPolyVoltage(channel) >= 0.7f) {
 				gate |= bumps::CONTROL_GATE;
 			}
-			if (inputs[INPUT_CLOCK].getVoltage(channel) >= 0.7f) {
+			if (inputs[INPUT_CLOCK].getPolyVoltage(channel) >= 0.7f) {
 				gate |= bumps::CONTROL_CLOCK;
 			}
 
@@ -392,7 +392,7 @@ struct Temulenti : SanguineModule {
 
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				if (bModelConnected) {
-					selectorVoltages = inputs[INPUT_MODEL].getVoltageSimd<float_4>(channel);
+					selectorVoltages = inputs[INPUT_MODEL].getPolyVoltageSimd<float_4>(channel);
 
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
@@ -404,7 +404,7 @@ struct Temulenti : SanguineModule {
 				}
 
 				if (bModeConnected) {
-					selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+					selectorVoltages = inputs[INPUT_MODE].getPolyVoltageSimd<float_4>(channel);
 
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
@@ -416,7 +416,7 @@ struct Temulenti : SanguineModule {
 				}
 
 				if (!bUseExternalSync && bRangeConnected) {
-					selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
+					selectorVoltages = inputs[INPUT_RANGE].getPolyVoltageSimd<float_4>(channel);
 
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
@@ -428,7 +428,7 @@ struct Temulenti : SanguineModule {
 				}
 
 				if (bQuantizerConnected) {
-					selectorVoltages = inputs[INPUT_QUANTIZER].getVoltageSimd<float_4>(channel);
+					selectorVoltages = inputs[INPUT_QUANTIZER].getPolyVoltageSimd<float_4>(channel);
 
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 7.f);
