@@ -244,17 +244,17 @@ struct Aestus : SanguineModule {
 					}
 
 					float_4 inputVoltages = {
-						inputs[INPUT_FM].getNormalVoltage(0.1f, channel),
-						inputs[INPUT_SHAPE].getVoltage(channel),
-						inputs[INPUT_SLOPE].getVoltage(channel),
-						inputs[INPUT_SMOOTHNESS].getVoltage(channel)
+						inputs[INPUT_FM].getNormalPolyVoltage(0.1f, channel),
+						inputs[INPUT_SHAPE].getPolyVoltage(channel),
+						inputs[INPUT_SLOPE].getPolyVoltage(channel),
+						inputs[INPUT_SMOOTHNESS].getPolyVoltage(channel)
 					};
 
 					inputVoltages /= 5.f;
 
 					// Pitch.
 					float pitch = knobFrequency;
-					pitch += 12.f * (inputs[INPUT_PITCH].getVoltage(channel) +
+					pitch += 12.f * (inputs[INPUT_PITCH].getPolyVoltage(channel) +
 						aestusCommon::calibrationOffsets[bUseCalibrationOffset]);
 					pitch += knobFm * inputVoltages[0];
 					pitch += 60.f;
@@ -280,19 +280,19 @@ struct Aestus : SanguineModule {
 
 				// Level.
 				uint16_t level = static_cast<uint16_t>(
-					clamp(inputs[INPUT_LEVEL].getNormalVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
+					clamp(inputs[INPUT_LEVEL].getNormalPolyVoltage(8.f, channel) / 8.f, 0.f, 1.f)) * 65535;
 				if (level < 32) {
 					level = 0;
 				}
 
 				uint8_t gate = 0;
-				if (inputs[INPUT_FREEZE].getVoltage(channel) >= 0.7f) {
+				if (inputs[INPUT_FREEZE].getPolyVoltage(channel) >= 0.7f) {
 					gate |= sanguinetides::CONTROL_FREEZE;
 				}
-				if (inputs[INPUT_TRIGGER].getVoltage(channel) >= 0.7f) {
+				if (inputs[INPUT_TRIGGER].getPolyVoltage(channel) >= 0.7f) {
 					gate |= sanguinetides::CONTROL_GATE;
 				}
-				if (inputs[INPUT_CLOCK].getVoltage(channel) >= 0.7f) {
+				if (inputs[INPUT_CLOCK].getPolyVoltage(channel) >= 0.7f) {
 					gate |= sanguinetides::CONTROL_CLOCK;
 				}
 				if (!(lastGates[channel] & sanguinetides::CONTROL_CLOCK) && (gate & sanguinetides::CONTROL_CLOCK)) {
@@ -338,7 +338,7 @@ struct Aestus : SanguineModule {
 
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					if (bModeConnected) {
-						selectorVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+						selectorVoltages = inputs[INPUT_MODE].getPolyVoltageSimd<float_4>(channel);
 
 						selectorVoltages = simd::round(selectorVoltages);
 						selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
@@ -350,7 +350,7 @@ struct Aestus : SanguineModule {
 					}
 
 					if (!bUseExternalSync && bRangeConnected) {
-						selectorVoltages = inputs[INPUT_RANGE].getVoltageSimd<float_4>(channel);
+						selectorVoltages = inputs[INPUT_RANGE].getPolyVoltageSimd<float_4>(channel);
 
 						selectorVoltages = simd::round(selectorVoltages);
 						selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
@@ -364,7 +364,7 @@ struct Aestus : SanguineModule {
 
 				for (int channel = 0; channel < channelCount; ++channel) {
 					channelIsSheep[channel] = (!bModelConnected && bSheepSelected) ||
-						(bModelConnected && inputs[INPUT_MODEL].getVoltage(channel) >= 1.f);
+						(bModelConnected && inputs[INPUT_MODEL].getPolyVoltage(channel) >= 1.f);
 
 					if (lastSheepFirmwares[channel] != channelIsSheep[channel]) {
 						generators[channel].set_mode(lastModes[channel]);
