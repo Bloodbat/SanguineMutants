@@ -141,6 +141,9 @@ struct Temulenti : SanguineModule {
 	int channelCount = 1;
 	int displayChannel = 0;
 
+	int32_t quantizers[PORT_MAX_CHANNELS];
+	int32_t knobQuantizer = 0;
+
 	bumps::GeneratorMode selectedMode = bumps::GENERATOR_MODE_LOOPING;
 	bumps::GeneratorMode lastModes[PORT_MAX_CHANNELS];
 	bumps::GeneratorRange selectedRange = bumps::GENERATOR_RANGE_MEDIUM;
@@ -149,12 +152,6 @@ struct Temulenti : SanguineModule {
 	bumps::Generator::FeatureMode lastFeatureModes[PORT_MAX_CHANNELS];
 
 	uint8_t lastGates[PORT_MAX_CHANNELS];
-	std::array<uint8_t, PORT_MAX_CHANNELS> quantizers;
-
-	std::array<bumps::GeneratorMode, PORT_MAX_CHANNELS> channelModes;
-	std::array<bumps::GeneratorRange, PORT_MAX_CHANNELS> channelRanges;
-
-	std::array<bumps::Generator::FeatureMode, PORT_MAX_CHANNELS> channelModels;
 
 	bumps::Generator generators[PORT_MAX_CHANNELS];
 	dsp::SchmittTrigger stMode;
@@ -166,9 +163,10 @@ struct Temulenti : SanguineModule {
 
 	float knobFrequency = 0.f;
 	float knobFm = 0.f;
-	float knobQuantizer = 0.f;
 
-	float_4 selectorVoltages;
+	float channelModes[PORT_MAX_CHANNELS];
+	float channelRanges[PORT_MAX_CHANNELS];
+	float channelModels[PORT_MAX_CHANNELS];
 
 	Temulenti() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
@@ -211,8 +209,10 @@ struct Temulenti : SanguineModule {
 			generators[channel].Init();
 		}
 
-		channelModes.fill(bumps::GENERATOR_MODE_LOOPING);
-		channelRanges.fill(bumps::GENERATOR_RANGE_MEDIUM);
+		std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+			static_cast<float>(bumps::GENERATOR_MODE_LOOPING));
+		std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+			static_cast<float>(bumps::GENERATOR_RANGE_MEDIUM));
 
 		init();
 	}
@@ -225,7 +225,7 @@ struct Temulenti : SanguineModule {
 
 		selectedFeatureMode = bumps::Generator::FeatureMode(params[PARAM_MODEL].getValue());
 		bUseExternalSync = static_cast<bool>(params[PARAM_SYNC].getValue());
-		knobQuantizer = params[PARAM_QUANTIZER].getValue();
+		knobQuantizer = static_cast<int32_t>(params[PARAM_QUANTIZER].getValue());
 		knobFrequency = params[PARAM_FREQUENCY].getValue();
 		knobFm = params[PARAM_FM].getValue();
 
@@ -237,22 +237,27 @@ struct Temulenti : SanguineModule {
 		};
 
 		if (!bModelConnected) {
-			channelModels.fill(selectedFeatureMode);
+			std::fill(&channelModels[0], &channelModels[channelCount],
+				static_cast<float>(selectedFeatureMode));
 		}
 
 		if (!bQuantizerConnected) {
-			quantizers.fill(static_cast<uint8_t>(knobQuantizer));
+			std::fill(&quantizers[0], &quantizers[channelCount], knobQuantizer);
 		}
 
 		for (int channel = 0; channel < channelCount; ++channel) {
 			if (lastModes[channel] != channelModes[channel]) {
-				generators[channel].set_mode(channelModes[channel]);
-				lastModes[channel] = channelModes[channel];
+				bumps::GeneratorMode newMode =
+					static_cast<bumps::GeneratorMode>(channelModes[channel]);
+				generators[channel].set_mode(newMode);
+				lastModes[channel] = newMode;
 			}
 
 			if (lastRanges[channel] != channelRanges[channel]) {
-				generators[channel].set_range(channelRanges[channel]);
-				lastRanges[channel] = channelRanges[channel];
+				bumps::GeneratorRange newRange =
+					static_cast<bumps::GeneratorRange>(channelRanges[channel]);
+				generators[channel].set_range(newRange);
+				lastRanges[channel] = newRange;
 			}
 
 			//Buffer loop.
@@ -381,14 +386,16 @@ struct Temulenti : SanguineModule {
 
 			if (stMode.process(params[PARAM_MODE].getValue()) && !bModeConnected) {
 				selectedMode = static_cast<bumps::GeneratorMode>((static_cast<int>(selectedMode) + 1) % 3);
-				channelModes.fill(selectedMode);
+				std::fill(&channelModes[0], &channelModes[channelCount], static_cast<float>(selectedMode));
 			}
 
 			if (stRange.process(params[PARAM_RANGE].getValue()) && !bRangeConnected && !bUseExternalSync) {
 				selectedRange = static_cast<bumps::GeneratorRange>((static_cast<int>(selectedRange) - 1 + 3) % 3);
-				channelRanges.fill(selectedRange);
+				std::fill(&channelRanges[0], &channelRanges[channelCount], static_cast<float>(selectedRange));
 			}
 
+			float_4 selectorVoltages;
+			simd::int32_4 intVoltages;
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				if (bModelConnected) {
 					selectorVoltages = inputs[INPUT_MODEL].getPolyVoltageSimd<float_4>(channel);
@@ -396,10 +403,7 @@ struct Temulenti : SanguineModule {
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 3.f);
 
-					channelModels[channel] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[0]);
-					channelModels[channel + 1] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[1]);
-					channelModels[channel + 2] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[2]);
-					channelModels[channel + 3] = static_cast<bumps::Generator::FeatureMode>(selectorVoltages[3]);
+					selectorVoltages.store(&channelModels[channel]);
 				}
 
 				if (bModeConnected) {
@@ -408,10 +412,7 @@ struct Temulenti : SanguineModule {
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
 
-					channelModes[channel] = static_cast<bumps::GeneratorMode>(selectorVoltages[0]);
-					channelModes[channel + 1] = static_cast<bumps::GeneratorMode>(selectorVoltages[1]);
-					channelModes[channel + 2] = static_cast<bumps::GeneratorMode>(selectorVoltages[2]);
-					channelModes[channel + 3] = static_cast<bumps::GeneratorMode>(selectorVoltages[3]);
+					selectorVoltages.store(&channelModes[channel]);
 				}
 
 				if (!bUseExternalSync && bRangeConnected) {
@@ -420,10 +421,7 @@ struct Temulenti : SanguineModule {
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 2.f);
 
-					channelRanges[channel] = static_cast<bumps::GeneratorRange>(selectorVoltages[0]);
-					channelRanges[channel + 1] = static_cast<bumps::GeneratorRange>(selectorVoltages[1]);
-					channelRanges[channel + 2] = static_cast<bumps::GeneratorRange>(selectorVoltages[2]);
-					channelRanges[channel + 3] = static_cast<bumps::GeneratorRange>(selectorVoltages[3]);
+					selectorVoltages.store(&channelRanges[channel]);
 				}
 
 				if (bQuantizerConnected) {
@@ -432,19 +430,20 @@ struct Temulenti : SanguineModule {
 					selectorVoltages = simd::round(selectorVoltages);
 					selectorVoltages = simd::clamp(selectorVoltages, 0.f, 7.f);
 
-					quantizers[channel] = static_cast<uint8_t>(selectorVoltages[0]);
-					quantizers[channel + 1] = static_cast<uint8_t>(selectorVoltages[1]);
-					quantizers[channel + 2] = static_cast<uint8_t>(selectorVoltages[2]);
-					quantizers[channel + 3] = static_cast<uint8_t>(selectorVoltages[3]);
+					intVoltages = selectorVoltages;
+
+					intVoltages.store(&quantizers[channel]);
 				}
 			}
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (lastFeatureModes[channel] != channelModels[channel]) {
-					generators[channel].feature_mode_ = channelModels[channel];
+					bumps::Generator::FeatureMode newFeatureMode =
+						static_cast<bumps::Generator::FeatureMode>(channelModels[channel]);
+					generators[channel].feature_mode_ = newFeatureMode;
 					generators[channel].set_mode(lastModes[channel]);
 					generators[channel].set_range(lastRanges[channel]);
-					lastFeatureModes[channel] = channelModels[channel];
+					lastFeatureModes[channel] = newFeatureMode;
 				}
 
 				int currentLight = LIGHT_CHANNEL_1 + channel * 3;
@@ -553,25 +552,28 @@ struct Temulenti : SanguineModule {
 			case INPUT_MODEL:
 				bModelConnected = e.connecting;
 				if (!bModelConnected) {
-					channelModels.fill(selectedFeatureMode);
+					std::fill(&channelModels[0], &channelModels[PORT_MAX_CHANNELS],
+						static_cast<float>(selectedFeatureMode));
 				}
 				break;
 			case INPUT_RANGE:
 				bRangeConnected = e.connecting;
 				if (!bRangeConnected) {
-					channelRanges.fill(selectedRange);
+					std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+						static_cast<float>(selectedRange));
 				}
 				break;
 			case INPUT_MODE:
 				bModeConnected = e.connecting;
 				if (!bModeConnected) {
-					channelModes.fill(selectedMode);
+					std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+						static_cast<float>(selectedMode));
 				}
 				break;
 			case INPUT_QUANTIZER:
 				bQuantizerConnected = e.connecting;
 				if (!bQuantizerConnected) {
-					quantizers.fill(static_cast<uint8_t>(knobQuantizer));
+					std::fill(&quantizers[0], &quantizers[PORT_MAX_CHANNELS], knobQuantizer);
 				}
 				break;
 			default:
@@ -598,12 +600,14 @@ struct Temulenti : SanguineModule {
 
 		if (getJsonInt(rootJ, "mode", intValue)) {
 			selectedMode = static_cast<bumps::GeneratorMode>(intValue);
-			channelModes.fill(selectedMode);
+			std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+				static_cast<float>(selectedMode));
 		}
 
 		if (getJsonInt(rootJ, "range", intValue)) {
 			selectedRange = static_cast<bumps::GeneratorRange>(intValue);
-			channelRanges.fill(selectedRange);
+			std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+				static_cast<float>(selectedRange));
 		}
 
 		getJsonBoolean(rootJ, "useCalibrationOffset", bUseCalibrationOffset);
