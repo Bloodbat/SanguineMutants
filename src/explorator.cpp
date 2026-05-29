@@ -191,8 +191,8 @@ struct Explorator : SanguineModule {
 			float_4 voltages2to2;
 
 			for (int channel = 0; channel < channels2to2; channel += 4) {
-				voltages2to2 = inputs[INPUT_2_TO_2_A].getVoltageSimd<float_4>(channel);
-				voltages2to2 += inputs[INPUT_2_TO_2_B].getVoltageSimd<float_4>(channel);
+				voltages2to2 = inputs[INPUT_2_TO_2_A].getPolyVoltageSimd<float_4>(channel);
+				voltages2to2 += inputs[INPUT_2_TO_2_B].getPolyVoltageSimd<float_4>(channel);
 				outputs[OUTPUT_2_TO_2_A].setVoltageSimd(voltages2to2, channel);
 				outputs[OUTPUT_2_TO_2_B].setVoltageSimd(voltages2to2, channel);
 			}
@@ -206,8 +206,8 @@ struct Explorator : SanguineModule {
 
 		if (bLogicAConnected || bLogicBConnected) {
 			for (int channel = 0; channel < channelsLogic; channel += 4) {
-				float_4 voltagesLogicA = inputs[INPUT_LOGIC_A].getVoltageSimd<float_4>(channel);
-				float_4 voltagesLogicB = inputs[INPUT_LOGIC_B].getVoltageSimd<float_4>(channel);
+				float_4 voltagesLogicA = inputs[INPUT_LOGIC_A].getPolyVoltageSimd<float_4>(channel);
+				float_4 voltagesLogicB = inputs[INPUT_LOGIC_B].getPolyVoltageSimd<float_4>(channel);
 				outputs[OUTPUT_LOGIC_MIN].setVoltageSimd(fmin(voltagesLogicA, voltagesLogicB), channel);
 				outputs[OUTPUT_LOGIC_MAX].setVoltageSimd(fmax(voltagesLogicA, voltagesLogicB), channel);
 			}
@@ -222,9 +222,9 @@ struct Explorator : SanguineModule {
 
 		if (b3To1AConnected || b3To1BConnected || b3To1CConnected) {
 			for (int channel = 0; channel < channels3to1; channel += 4) {
-				float_4 voltages3to1 = inputs[INPUT_3_TO_1_A].getVoltageSimd<float_4>(channel);
-				voltages3to1 += inputs[INPUT_3_TO_1_B].getVoltageSimd<float_4>(channel);
-				voltages3to1 += inputs[INPUT_3_TO_1_C].getVoltageSimd<float_4>(channel);
+				float_4 voltages3to1 = inputs[INPUT_3_TO_1_A].getPolyVoltageSimd<float_4>(channel);
+				voltages3to1 += inputs[INPUT_3_TO_1_B].getPolyVoltageSimd<float_4>(channel);
+				voltages3to1 += inputs[INPUT_3_TO_1_C].getPolyVoltageSimd<float_4>(channel);
 
 				if (bWantAverager) {
 					voltages3to1 /= 3.f;
@@ -273,9 +273,9 @@ struct Explorator : SanguineModule {
 
 		if (bTriggerConnected) {
 			for (int channel = 0; channel < lastSampleAndHoldChannels; ++channel) {
-				if (stSampleAndHolds[channel].process(inputs[INPUT_SH_TRIGGER].getVoltage(channel))) {
+				if (stSampleAndHolds[channel].process(inputs[INPUT_SH_TRIGGER].getPolyVoltage(channel))) {
 					if (bInputVoltageConnected) {
-						sampleAndHoldVoltages[channel] = inputs[INPUT_SH_VOLTAGE].getVoltage(channel);
+						sampleAndHoldVoltages[channel] = inputs[INPUT_SH_VOLTAGE].getPolyVoltage(channel);
 					} else {
 						sampleAndHoldVoltages[channel] = noises[channel];
 					}
