@@ -201,7 +201,7 @@ struct Anuli : SanguineModule {
 			float_4 inVoltages;
 			dsp::Frame<PORT_MAX_CHANNELS> frames = {};
 			for (int channel = 0; channel < channelCount; channel += 4) {
-				inVoltages = inputs[INPUT_IN].getVoltageSimd<float_4>(channel);
+				inVoltages = inputs[INPUT_IN].getPolyVoltageSimd<float_4>(channel);
 				inVoltages /= 5.f;
 				inVoltages.store(&frames.samples[channel]);
 			}
@@ -258,7 +258,7 @@ struct Anuli : SanguineModule {
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				if (!strums[channel]) {
-					strums[channel] = inputs[INPUT_STRUM].getVoltage(channel) >= 1.f;
+					strums[channel] = inputs[INPUT_STRUM].getPolyVoltage(channel) >= 1.f;
 				}
 
 				float out[sanguinerings::kMaxBlockSize];
@@ -413,7 +413,7 @@ struct Anuli : SanguineModule {
 			if (bModeConnected) {
 				if (!bNotesModeSelection) {
 					for (int channel = 0; channel < channelCount; channel += 4) {
-						inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+						inputVoltages = inputs[INPUT_MODE].getPolyVoltageSimd<float_4>(channel);
 
 						inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
 						int32Voltages = inputVoltages;
@@ -421,7 +421,7 @@ struct Anuli : SanguineModule {
 					}
 				} else {
 					for (int channel = 0; channel < channelCount; channel += 4) {
-						inputVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+						inputVoltages = inputs[INPUT_MODE].getPolyVoltageSimd<float_4>(channel);
 						inputVoltages *= 12.f;
 						inputVoltages = simd::round(inputVoltages);
 						inputVoltages = simd::clamp(inputVoltages, 0.f, 6.f);
@@ -433,7 +433,7 @@ struct Anuli : SanguineModule {
 
 			if (bFxConnected) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
-					inputVoltages = inputs[INPUT_FX].getVoltageSimd<float_4>(channel);
+					inputVoltages = inputs[INPUT_FX].getPolyVoltageSimd<float_4>(channel);
 					inputVoltages = simd::round(inputVoltages);
 					inputVoltages = simd::clamp(inputVoltages, 0.f, 5.f);
 					int32Voltages = inputVoltages;
@@ -504,10 +504,10 @@ struct Anuli : SanguineModule {
 
 	void setupPatch(const int channel, sanguinerings::Patch& patch, float& unclampedStructure) {
 		float_4 voltages = {
-			inputs[INPUT_STRUCTURE_CV].getVoltage(channel),
-			inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel),
-			inputs[INPUT_DAMPING_CV].getVoltage(channel),
-			inputs[INPUT_POSITION_CV].getVoltage(channel)
+			inputs[INPUT_STRUCTURE_CV].getPolyVoltage(channel),
+			inputs[INPUT_BRIGHTNESS_CV].getPolyVoltage(channel),
+			inputs[INPUT_DAMPING_CV].getPolyVoltage(channel),
+			inputs[INPUT_POSITION_CV].getPolyVoltage(channel)
 		};
 
 		voltages /= 5.f;
@@ -528,7 +528,7 @@ struct Anuli : SanguineModule {
 	}
 
 	void setupPerformance(const int channel, sanguinerings::PerformanceState& performanceState, const float& unclampedStructure) {
-		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
+		float note = std::fmaxf(inputs[INPUT_PITCH].getPolyVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
 
@@ -540,7 +540,7 @@ struct Anuli : SanguineModule {
 		performanceState.tonic = 12.f + clamp(transpose, 0.f, 60.f);
 
 		performanceState.fm = clamp(48.f * 3.3f * parametersInfo.modFrequency *
-			inputs[INPUT_FREQUENCY_CV].getNormalVoltage(anuli::kVoltPerOctave, channel) / 5.f, -48.f, 48.f);
+			inputs[INPUT_FREQUENCY_CV].getNormalPolyVoltage(anuli::kVoltPerOctave, channel) / 5.f, -48.f, 48.f);
 
 		performanceState.internal_exciter = parametersInfo.useInternalExciter;
 		performanceState.internal_strum = parametersInfo.useInternalStrum;
