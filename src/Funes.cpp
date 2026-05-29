@@ -269,41 +269,41 @@ struct Funes : SanguineModule {
 			float attenHarmonics = params[PARAM_HARMONICS_CV].getValue();
 			float_4 inputVoltages;
 			for (int channel = 0; channel < channelCount; channel += 4) {
-				inputVoltages = inputs[INPUT_ENGINE].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_ENGINE].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 5.f;
 				inputVoltages.store(&voltagesEngine[channel]);
 
-				inputVoltages = inputs[INPUT_HARMONICS].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_HARMONICS].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 5.f;
 				inputVoltages *= attenHarmonics;
 				inputVoltages.store(&voltagesHarmonics[channel]);
 
-				inputVoltages = inputs[INPUT_AUX_CROSSFADE].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_AUX_CROSSFADE].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 5.f;
 				inputVoltages.store(&voltagesAuxCrossFade[channel]);
 
-				inputVoltages = inputs[INPUT_TIMBRE].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_TIMBRE].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 8.f;
 				inputVoltages.store(&voltagesTimbre[channel]);
 
-				inputVoltages = inputs[INPUT_MORPH].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_MORPH].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 8.f;
 				inputVoltages.store(&voltagesMorph[channel]);
 
-				inputVoltages = inputs[INPUT_LEVEL].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_LEVEL].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 8.f;
 				inputVoltages.store(&voltagesLevel[channel]);
 
-				inputVoltages = inputs[INPUT_NOTE].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_NOTE].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages *= 12.f;
 				inputVoltages.store(&voltagesNote[channel]);
 
-				inputVoltages = inputs[INPUT_FREQUENCY].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_FREQUENCY].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages *= 6.f;
 				inputVoltages.store(&voltagesFrequency[channel]);
 
 				// Triggers at around 0.7 V
-				inputVoltages = inputs[INPUT_TRIGGER].getVoltageSimd<float_4>(channel);
+				inputVoltages = inputs[INPUT_TRIGGER].getPolyVoltageSimd<float_4>(channel);
 				inputVoltages /= 3.f;
 				inputVoltages.store(&voltagesTrigger[channel]);
 			}
