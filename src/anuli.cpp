@@ -228,19 +228,27 @@ struct Anuli : SanguineModule {
 
 			std::fill(&channelModes[0], &channelModes[channelCount], knobMode);
 
-			parametersInfo.knobValues[0] = params[PARAM_STRUCTURE].getValue();
-			parametersInfo.knobValues[1] = params[PARAM_BRIGHTNESS].getValue();
-			parametersInfo.knobValues[2] = params[PARAM_DAMPING].getValue();
-			parametersInfo.knobValues[3] = params[PARAM_POSITION].getValue();
+			float_4 newKnobs = {
+				params[PARAM_STRUCTURE].getValue(),
+				params[PARAM_BRIGHTNESS].getValue(),
+				params[PARAM_DAMPING].getValue(),
+				params[PARAM_POSITION].getValue()
+			};
 
-			parametersInfo.frequency = params[PARAM_FREQUENCY].getValue();
+			float_4 newMods = {
+				params[PARAM_STRUCTURE_MOD].getValue(),
+				params[PARAM_BRIGHTNESS_MOD].getValue(),
+				params[PARAM_DAMPING_MOD].getValue(),
+				params[PARAM_POSITION_MOD].getValue()
+			};
 
-			parametersInfo.modValues[0] = params[PARAM_STRUCTURE_MOD].getValue();
-			parametersInfo.modValues[1] = params[PARAM_BRIGHTNESS_MOD].getValue();
-			parametersInfo.modValues[2] = params[PARAM_DAMPING_MOD].getValue();
-			parametersInfo.modValues[3] = params[PARAM_POSITION_MOD].getValue();
+			parametersInfo.knobValues = newKnobs;
+
+			parametersInfo.modValues = newMods;
 
 			parametersInfo.modValues = dsp::quadraticBipolar(parametersInfo.modValues);
+
+			parametersInfo.frequency = params[PARAM_FREQUENCY].getValue();
 
 			parametersInfo.modFrequency = dsp::quarticBipolar(params[PARAM_FREQUENCY_MOD].getValue());
 
