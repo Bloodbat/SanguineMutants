@@ -163,13 +163,13 @@ struct Vimina : SanguineModule {
 			inVoltages = inputs[INPUT_RESET].getVoltageSimd<float_4>(channel);
 			inVoltages.store(&voltagesReset[channel]);
 
-			inVoltages = inputs[INPUT_CV1].getVoltageSimd<float_4>(channel);
+			inVoltages = inputs[INPUT_CV1].getPolyVoltageSimd<float_4>(channel);
 			inVoltages /= 10.f;
 			inVoltages += sectionKnobValues[0];
 			inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
 			inVoltages.store(&voltagesCvSection1[channel]);
 
-			inVoltages = inputs[INPUT_CV2].getVoltageSimd<float_4>(channel);
+			inVoltages = inputs[INPUT_CV2].getPolyVoltageSimd<float_4>(channel);
 			inVoltages /= 10.f;
 			inVoltages += sectionKnobValues[1];
 			inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
