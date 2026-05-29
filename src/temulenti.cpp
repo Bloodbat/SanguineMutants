@@ -137,7 +137,6 @@ struct Temulenti : SanguineModule {
 
 	bool bUseExternalSync = false;
 
-	static const int kLightsFrequency = 16;
 	int jitteredLightsFrequency;
 	int channelCount = 1;
 	int displayChannel = 0;
@@ -620,7 +619,8 @@ struct Temulenti : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = aestusCommon::kLightsFrequency +
+			(getId() % aestusCommon::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 

@@ -127,7 +127,6 @@ struct Aestus : SanguineModule {
 	bool bClockConnected = false;
 
 	size_t frames[PORT_MAX_CHANNELS];
-	static const int kLightsFrequency = 16;
 	int channelCount = 1;
 	int displayChannel = 0;
 	int jitteredLightsFrequency;
@@ -522,7 +521,8 @@ struct Aestus : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = aestusCommon::kLightsFrequency +
+			(getId() % aestusCommon::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 

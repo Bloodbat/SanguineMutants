@@ -34,4 +34,6 @@ namespace aestusCommon {
 	};
 
 	static const float kHardwareRate = 48000.f;
+
+	static const int kLightsFrequency = 16;
 }
