@@ -263,7 +263,7 @@ struct Anuli : SanguineModule {
 
 				float out[sanguinerings::kMaxBlockSize];
 				float aux[sanguinerings::kMaxBlockSize];
-				float structure;
+				float unclampedStructure;
 
 				sanguinerings::Patch patch;
 
@@ -279,8 +279,8 @@ struct Anuli : SanguineModule {
 
 					stringSynths[channel].set_fx(static_cast<sanguinerings::FxType>(channelFx[channel]));
 
-					setupPatch(channel, patch, structure);
-					setupPerformance(channel, performanceStates[channel], structure);
+					setupPatch(channel, patch, unclampedStructure);
+					setupPerformance(channel, performanceStates[channel], unclampedStructure);
 
 					// Process audio.
 					strummers[channel].Process(NULL, sanguinerings::kMaxBlockSize, &performanceStates[channel]);
@@ -294,8 +294,8 @@ struct Anuli : SanguineModule {
 
 					parts[channel].set_model(resonatorModels[channel]);
 
-					setupPatch(channel, patch, structure);
-					setupPerformance(channel, performanceStates[channel], structure);
+					setupPatch(channel, patch, unclampedStructure);
+					setupPerformance(channel, performanceStates[channel], unclampedStructure);
 
 					// Process audio.
 					strummers[channel].Process(in, sanguinerings::kMaxBlockSize, &performanceStates[channel]);
@@ -502,7 +502,7 @@ struct Anuli : SanguineModule {
 		}
 	}
 
-	void setupPatch(const int channel, sanguinerings::Patch& patch, float& structure) {
+	void setupPatch(const int channel, sanguinerings::Patch& patch, float& unclampedStructure) {
 		float_4 voltages = {
 			inputs[INPUT_STRUCTURE_CV].getVoltage(channel),
 			inputs[INPUT_BRIGHTNESS_CV].getVoltage(channel),
@@ -516,7 +516,7 @@ struct Anuli : SanguineModule {
 		voltages *= parametersInfo.modValues;
 		voltages += parametersInfo.knobValues;
 
-		structure = voltages[0];
+		unclampedStructure = voltages[0];
 
 		patch.brightness = clamp(voltages[1], 0.f, 1.f);
 
@@ -527,7 +527,7 @@ struct Anuli : SanguineModule {
 		patch.position = voltages[3];
 	}
 
-	void setupPerformance(const int channel, sanguinerings::PerformanceState& performanceState, const float& structure) {
+	void setupPerformance(const int channel, sanguinerings::PerformanceState& performanceState, const float& unclampedStructure) {
 		float note = std::fmaxf(inputs[INPUT_PITCH].getVoltage(channel), -6.f) +
 			anuli::frequencyOffsets[static_cast<int>(bUseFrequencyOffset)];
 		performanceState.note = 12.f * note;
@@ -551,7 +551,7 @@ struct Anuli : SanguineModule {
 		lastStrums[channel] = strums[channel];
 		strums[channel] = false;
 
-		performanceState.chord = clamp(static_cast<int>(roundf(structure * (sanguinerings::kNumChords - 1))),
+		performanceState.chord = clamp(static_cast<int>(roundf(unclampedStructure * (sanguinerings::kNumChords - 1))),
 			0, sanguinerings::kNumChords - 1);
 	}
 
