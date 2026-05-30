@@ -87,6 +87,8 @@ without the backticks.
 
 - Funes: use a more discrete and modern LED window for channel LEDs.
 
+- Incurvationes family: default Level knobs to a lower value that doesn't distort.
+
 - Nebulae family: OLED display text tweaks.
 
 - Nebulae family: use a more discrete and modern LED window for channel
