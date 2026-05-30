@@ -369,6 +369,18 @@
         "Speech",
         "Synth voice"
       ]
+    },
+    {
+      "slug" : "Sanguine-Undae",
+      "name" : "Undae",
+      "description" : "Versatile four-pole filter with 3 modes and a built-in VCA for one of the outputs; based on Mutable Instrument's Ripples",
+      "keywords" : "Ripples Low-pass LP Band-pass BP",
+      "tags" : [
+        "Filter",
+        "Hardware clone",
+        "Polyphonic",
+        "Voltage-controlled amplifier"
+      ]
     }
   ]
 }

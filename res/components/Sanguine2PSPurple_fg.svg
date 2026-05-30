@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   enable-background="new 0 0 43.34375 43.34759"
+   height="43.34759"
+   viewBox="0 0 43.34375 43.34759"
+   width="43.34375"
+   version="1.1"
+   id="svg13"
+   sodipodi:docname="Sanguine2PSPurple_fg.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs17" />
+  <sodipodi:namedview
+     id="namedview15"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="14.695165"
+     inkscape:cx="20.312804"
+     inkscape:cy="21.741845"
+     inkscape:window-width="1718"
+     inkscape:window-height="861"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg13"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
+  <linearGradient
+     id="a"
+     gradientUnits="userSpaceOnUse"
+     x1="21.671841"
+     x2="21.671841"
+     y1="8.92556"
+     y2="33.390362">
+    <stop
+       offset="0"
+       stop-color="#0ff7ff"
+       id="stop2"
+       style="stop-color:#ff7ef9;stop-opacity:1;" />
+    <stop
+       offset="1"
+       stop-color="#005d60"
+       id="stop4"
+       style="stop-color:#4d0049;stop-opacity:1;" />
+  </linearGradient>
+  <circle
+     cx="21.671841"
+     cy="22.18569"
+     opacity=".31"
+     r="12.2324"
+     id="circle7" />
+  <circle
+     cx="21.671841"
+     cy="21.157961"
+     fill="url(#a)"
+     r="12.2324"
+     id="circle9" />
+  <circle
+     cx="21.671841"
+     cy="21.157961"
+     fill="#00cdd4"
+     r="11.35784"
+     id="circle11"
+     style="fill:#b900b0;fill-opacity:1" />
+</svg>

@@ -40,6 +40,7 @@ void init(rack::Plugin* p)
 	p->addModel(modelScalaria);
 	p->addModel(modelReticula);
 	p->addModel(modelFunesMk2);
+	p->addModel(modelUndae);
 
 	// MetaModule disabled modules go here!
 #ifndef METAMODULE
