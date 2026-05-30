@@ -81,8 +81,8 @@ struct Distortiones : SanguineModule {
 
 		configParam(PARAM_TIMBRE, 0.f, 1.f, 0.5f, "Timbre", "%", 0, 100);
 
-		configParam(PARAM_LEVEL_1, 0.f, 1.f, 1.f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
-		configParam(PARAM_LEVEL_2, 0.f, 1.f, 1.f, "Modulator amplitude", "%", 0, 100);
+		configParam(PARAM_LEVEL_1, 0.f, 1.f, 0.65f, "External oscillator amplitude / internal oscillator frequency", "%", 0, 100);
+		configParam(PARAM_LEVEL_2, 0.f, 1.f, 0.65f, "Modulator amplitude", "%", 0, 100);
 
 		configInput(INPUT_LEVEL_1, "Level 1");
 		configInput(INPUT_LEVEL_2, "Level 2");
