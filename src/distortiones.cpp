@@ -187,22 +187,31 @@ struct Distortiones : SanguineModule {
 
 				inVoltages /= 5.f;
 
-				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * inVoltages[0], 0.f, 1.f);
-				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * inVoltages[1], 0.f, 1.f);
+				float algorithmCv = inVoltages[2];
+
+				inVoltages[0] *= knobLevel1;
+				inVoltages[1] *= knobLevel2;
+				inVoltages[2] += algorithmValue;
+				inVoltages[3] += knobTimbre;
+
+				inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+
+				parameters[channel]->channel_drive[0] = inVoltages[0];
+				parameters[channel]->channel_drive[1] = inVoltages[1];
 
 				parameters[channel]->raw_level[0] = parameters[channel]->channel_drive[0];
 				parameters[channel]->raw_level[1] = parameters[channel]->channel_drive[1];
 
+				parameters[channel]->modulation_parameter = inVoltages[3];
+
 				if (!bModeSwitchEnabled) {
 					parameters[channel]->raw_algorithm_pot = algorithmValue;
 
-					parameters[channel]->raw_algorithm_cv = clamp(inVoltages[2], -1.f, 1.f);
+					parameters[channel]->raw_algorithm_cv = clamp(algorithmCv, -1.f, 1.f);
 
-					parameters[channel]->modulation_algorithm = clamp(algorithmValue + inVoltages[2], 0.f, 1.f);
+					parameters[channel]->modulation_algorithm = inVoltages[2];
 					parameters[channel]->raw_algorithm = parameters[channel]->modulation_algorithm;
 				}
-
-				parameters[channel]->modulation_parameter = clamp(knobTimbre + inVoltages[3], 0.f, 1.f);
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f *
 					inputs[INPUT_LEVEL_1].getNormalPolyVoltage(2.f, channel) + 12.f;
