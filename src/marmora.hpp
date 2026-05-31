@@ -248,4 +248,6 @@ namespace marmora {
                 12, 12, 14, 14, 16,
                 16
     };
+
+    static const int kLightsFrequency = 64;
 }
