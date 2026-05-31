@@ -138,10 +138,10 @@ struct Scalaria : SanguineModule {
 
                 // CHANNEL_1_LEVEL and CHANNEL_2_LEVEL are normalized values: from cv_scaler.cc and a PR by Brian Head to AI's repository.
                 float_4 inVoltages = {
-                    inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(5.f, channel),
-                    inputs[INPUT_CHANNEL_2_LEVEL].getNormalVoltage(5.f, channel),
-                    inputs[INPUT_FREQUENCY].getVoltage(channel),
-                    inputs[INPUT_RESONANCE].getVoltage(channel)
+                    inputs[INPUT_CHANNEL_1_LEVEL].getNormalPolyVoltage(5.f, channel),
+                    inputs[INPUT_CHANNEL_2_LEVEL].getNormalPolyVoltage(5.f, channel),
+                    inputs[INPUT_FREQUENCY].getPolyVoltage(channel),
+                    inputs[INPUT_RESONANCE].getPolyVoltage(channel)
                 };
 
                 inVoltages /= 5.f;
@@ -161,7 +161,7 @@ struct Scalaria : SanguineModule {
                 parameters[channel]->rawResonance = inVoltages[3];
 
                 parameters[channel]->note = 60.f * f4KnobValues[0] + 12.f *
-                    inputs[INPUT_CHANNEL_1_LEVEL].getNormalVoltage(2.f, channel) + 12.f;
+                    inputs[INPUT_CHANNEL_1_LEVEL].getNormalPolyVoltage(2.f, channel) + 12.f;
                 parameters[channel]->note += log2f(scalaria::kInternalOscillatorSampleRate *
                     args.sampleTime) * 12.f;
 
@@ -173,8 +173,8 @@ struct Scalaria : SanguineModule {
         float_4 inVoltagesChannel2;
         int currentChannel;
         for (int channel = 0; channel < channelCount; channel += 4) {
-            inVoltagesChannel1 = inputs[INPUT_CHANNEL_1].getVoltageSimd<float_4>(channel);
-            inVoltagesChannel2 = inputs[INPUT_CHANNEL_2].getVoltageSimd<float_4>(channel);
+            inVoltagesChannel1 = inputs[INPUT_CHANNEL_1].getPolyVoltageSimd<float_4>(channel);
+            inVoltagesChannel2 = inputs[INPUT_CHANNEL_2].getPolyVoltageSimd<float_4>(channel);
 
             inVoltagesChannel1 /= 8.f;
             inVoltagesChannel2 /= 8.f;
