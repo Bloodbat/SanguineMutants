@@ -130,7 +130,6 @@ struct Marmora : SanguineModule {
 	int blockIndex = 0;
 	uint32_t userSeed = 1;
 
-	static const int kLightsFrequency = 64;
 	int jitteredLightsFrequency;
 
 	dsp::ClockDivider lightsDivider;
@@ -737,7 +736,7 @@ struct Marmora : SanguineModule {
 	}
 
 	void onAdd(const AddEvent& e) override {
-		jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+		jitteredLightsFrequency = marmora::kLightsFrequency + (getId() % marmora::kLightsFrequency);
 		lightsDivider.setDivision(jitteredLightsFrequency);
 	}
 
