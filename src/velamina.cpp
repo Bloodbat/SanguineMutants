@@ -107,7 +107,7 @@ struct Velamina : SanguineModule {
 				float_4 gains;
 				if (cvInputsConnected[channel]) {
 					// From graph here: https://www.desmos.com/calculator/hfy87xjw7u referenced by the hardware's manual.
-					gains = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getVoltageSimd<float_4>(polyChannel) *
+					gains = simd::fmax(simd::clamp((inputs[INPUT_CV_1 + channel].getPolyVoltageSimd<float_4>(polyChannel) *
 						sliderGain + knobOffset), 0.f, 8.f) / 5.f, 0.f);
 					gains = simd::pow(gains, 1 / (0.1f + 0.9f * knobResponse));
 				} else {
@@ -117,7 +117,7 @@ struct Velamina : SanguineModule {
 				gains.store(&voltagesGain[channel][polyChannel]);
 
 				if (signalInputsConnected[channel]) {
-					float_4 inVoltages = inputs[INPUT_IN_1 + channel].getVoltageSimd<float_4>(polyChannel);
+					float_4 inVoltages = inputs[INPUT_IN_1 + channel].getPolyVoltageSimd<float_4>(polyChannel);
 
 					inVoltages *= gains;
 
