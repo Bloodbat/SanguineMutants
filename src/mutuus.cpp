@@ -116,7 +116,8 @@ struct Mutuus : SanguineModule {
 
 		std::array <mutuus::FeatureMode, PORT_MAX_CHANNELS> channelFeatureModes;
 
-		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(), inputs[INPUT_MODULATOR].getChannels()), 1);
+		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(),
+			inputs[INPUT_MODULATOR].getChannels()), 1);
 
 		int32_t internalOscillator = static_cast<int32_t>(params[PARAM_CARRIER].getValue());
 
@@ -157,7 +158,7 @@ struct Mutuus : SanguineModule {
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				float_4 modeVoltages;
 
-				modeVoltages = inputs[INPUT_MODE].getVoltageSimd<float_4>(channel);
+				modeVoltages = inputs[INPUT_MODE].getPolyVoltageSimd<float_4>(channel);
 
 				if (bNotesModeSelection) {
 					modeVoltages *= 12.f;
@@ -186,10 +187,10 @@ struct Mutuus : SanguineModule {
 
 				// LEVEL1 and LEVEL2 normalized values from cv_scaler.cc and a PR by Brian Head to AI's repository.
 				float_4 inVoltages = {
-					inputs[INPUT_LEVEL_1].getNormalVoltage(5.f, channel),
-					inputs[INPUT_LEVEL_2].getNormalVoltage(5.f, channel),
-					inputs[INPUT_ALGORITHM].getVoltage(channel),
-					inputs[INPUT_TIMBRE].getVoltage(channel)
+					inputs[INPUT_LEVEL_1].getNormalPolyVoltage(5.f, channel),
+					inputs[INPUT_LEVEL_2].getNormalPolyVoltage(5.f, channel),
+					inputs[INPUT_ALGORITHM].getPolyVoltage(channel),
+					inputs[INPUT_TIMBRE].getPolyVoltage(channel)
 				};
 
 				inVoltages /= 5.f;
@@ -220,18 +221,18 @@ struct Mutuus : SanguineModule {
 				parameters[channel]->raw_modulation_pot = knobTimbre;
 				parameters[channel]->raw_modulation_cv = clamp(inVoltages[3], -1.f, 1.f);
 
-				parameters[channel]->note = 60.f * knobLevel1 + 12.f
-					* inputs[INPUT_LEVEL_1].getNormalVoltage(2.f, channel) + 12.f;
+				parameters[channel]->note = 60.f * knobLevel1 + 12.f *
+					inputs[INPUT_LEVEL_1].getNormalPolyVoltage(2.f, channel) + 12.f;
 				parameters[channel]->note += log2f(mutuus::kInternalOscillatorSampleRate *
 					args.sampleTime) * 12.f;
 
 				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
-			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(inputs[INPUT_CARRIER].getVoltage(channel) / 8.f * 32768),
-				-32768, 32767);
-			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(inputs[INPUT_MODULATOR].getVoltage(channel) / 8.f * 32768),
-				-32768, 32767);
+			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(
+				inputs[INPUT_CARRIER].getPolyVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(
+				inputs[INPUT_MODULATOR].getPolyVoltage(channel) / 8.f * 32768), -32768, 32767);
 
 			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
 			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
