@@ -64,7 +64,6 @@ struct Scalaria : SanguineModule {
 
     short frames[PORT_MAX_CHANNELS] = {};
 
-    static const int kLightsFrequency = 128;
     int jitteredLightsFrequency;
 
     int32_t internalOscillator = 0.f;
@@ -292,7 +291,7 @@ struct Scalaria : SanguineModule {
     }
 
     void onAdd(const AddEvent& e) override {
-        jitteredLightsFrequency = kLightsFrequency + (getId() % kLightsFrequency);
+        jitteredLightsFrequency = scalaria::kLightsFrequency + (getId() % scalaria::kLightsFrequency);
         lightsDivider.setDivision(jitteredLightsFrequency);
     }
 };
