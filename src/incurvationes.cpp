@@ -152,13 +152,33 @@ struct Incurvationes : SanguineModule {
 				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
-			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(
-				inputs[INPUT_CARRIER].getPolyVoltage(channel) / 8.f * 32768), -32768, 32767);
-			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(
-				inputs[INPUT_MODULATOR].getPolyVoltage(channel) / 8.f * 32768), -32768, 32767);
+			float_4 signalVoltages = {
+				inputs[INPUT_CARRIER].getPolyVoltage(channel),
+				inputs[INPUT_MODULATOR].getPolyVoltage(channel),
+				0.f,
+				0.f
+			};
 
-			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) / 32768 * 5.f, channel);
-			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) / 32768 * 5.f, channel);
+			signalVoltages /= 8.f;
+			signalVoltages *= 32768;
+
+			signalVoltages = simd::clamp(signalVoltages, -32768.f, 32767.f);
+
+			inputFrames[channel][frames[channel]].l = static_cast<short>(signalVoltages[0]);
+			inputFrames[channel][frames[channel]].r = static_cast<short>(signalVoltages[1]);
+
+			float_4 outVoltages = {
+				static_cast<float>(outputFrames[channel][frames[channel]].l),
+				static_cast<float>(outputFrames[channel][frames[channel]].r),
+				0.f,
+				0.f
+			};
+
+			outVoltages /= 32768.f;
+			outVoltages *= 5.f;
+
+			outputs[OUTPUT_MODULATOR].setVoltage(outVoltages[0]);
+			outputs[OUTPUT_AUX].setVoltage(outVoltages[1]);
 		}
 
 		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
