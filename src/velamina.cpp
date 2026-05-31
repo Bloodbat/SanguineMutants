@@ -117,7 +117,7 @@ struct Velamina : SanguineModule {
 				gains.store(&voltagesGain[channel][polyChannel]);
 
 				if (signalInputsConnected[channel]) {
-					float_4 inVoltages = inputs[INPUT_IN_1 + channel].getPolyVoltageSimd<float_4>(polyChannel);
+					float_4 inVoltages = inputs[INPUT_IN_1 + channel].getVoltageSimd<float_4>(polyChannel);
 
 					inVoltages *= gains;
 
