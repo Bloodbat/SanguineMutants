@@ -67,6 +67,8 @@ struct Scalaria : SanguineModule {
     int jitteredLightsFrequency;
 
     int32_t internalOscillator = 0.f;
+    int32_t voltagesChannel1[PORT_MAX_CHANNELS] = {};
+    int32_t voltagesChannel22[PORT_MAX_CHANNELS] = {};
 
     dsp::ClockDivider lightsDivider;
     scalaria::ScalariaModulator modulators[PORT_MAX_CHANNELS];
@@ -171,7 +173,9 @@ struct Scalaria : SanguineModule {
 
         float_4 inVoltagesChannel1;
         float_4 inVoltagesChannel2;
-        int currentChannel;
+
+        simd::int32_4 intVoltagesChannel1;
+        simd::int32_4 intVoltagesChannel2;
         for (int channel = 0; channel < channelCount; channel += 4) {
             inVoltagesChannel1 = inputs[INPUT_CHANNEL_1].getPolyVoltageSimd<float_4>(channel);
             inVoltagesChannel2 = inputs[INPUT_CHANNEL_2].getPolyVoltageSimd<float_4>(channel);
@@ -184,21 +188,19 @@ struct Scalaria : SanguineModule {
             inVoltagesChannel1 = simd::clamp(inVoltagesChannel1, -32768.f, 32767.f);
             inVoltagesChannel2 = simd::clamp(inVoltagesChannel2, -32768.f, 32767.f);
 
-            inputFrames[channel][frames[channel]].l = static_cast<short>(inVoltagesChannel1[0]);
-            inputFrames[channel][frames[channel]].r = static_cast<short>(inVoltagesChannel2[0]);
+            intVoltagesChannel1 = inVoltagesChannel1;
+            intVoltagesChannel2 = inVoltagesChannel2;
 
-            currentChannel = channel + 1;
-            inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[1]);
-            inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[1]);
+            intVoltagesChannel1.store(&voltagesChannel1[channel]);
+            intVoltagesChannel2.store(&voltagesChannel22[channel]);
+        }
 
-            currentChannel = channel + 2;
-            inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[2]);
-            inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[2]);
+        for (int channel = 0; channel < channelCount; ++channel) {
+            inputFrames[channel][frames[channel]].l = static_cast<short>(voltagesChannel1[channel]);
+            inputFrames[channel][frames[channel]].r = static_cast<short>(voltagesChannel22[channel]);
+        }
 
-            currentChannel = channel + 3;
-            inputFrames[currentChannel][frames[currentChannel]].l = static_cast<short>(inVoltagesChannel1[3]);
-            inputFrames[currentChannel][frames[currentChannel]].r = static_cast<short>(inVoltagesChannel2[3]);
-
+        for (int channel = 0; channel < channelCount; channel += 4) {
             float_4 outVoltagesChannel1 = {
                 static_cast<float>(outputFrames[channel][frames[channel]].l),
                 static_cast<float>(outputFrames[channel + 1][frames[channel + 1]].l),
