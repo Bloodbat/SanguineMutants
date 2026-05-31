@@ -126,15 +126,23 @@ struct Incurvationes : SanguineModule {
 
 				inVoltages /= 5.f;
 
-				parameters[channel]->channel_drive[0] = clamp(knobLevel1 * inVoltages[0], 0.f, 1.f);
-				parameters[channel]->channel_drive[1] = clamp(knobLevel2 * inVoltages[1], 0.f, 1.f);
+				parameters[channel]->frequency_shift_cv = clamp(inVoltages[2], -1.f, 1.f);
 
-				parameters[channel]->modulation_algorithm = clamp(algorithmValue + inVoltages[2], 0.f, 1.f);
+				inVoltages[0] *= knobLevel1;
+				inVoltages[1] *= knobLevel2;
+				inVoltages[2] += algorithmValue;
+				inVoltages[3] += knobTimbre;
 
-				parameters[channel]->modulation_parameter = clamp(knobTimbre + inVoltages[3], 0.f, 1.f);
+				inVoltages = simd::clamp(inVoltages, 0.f, 1.f);
+
+				parameters[channel]->channel_drive[0] = inVoltages[0];
+				parameters[channel]->channel_drive[1] = inVoltages[1];
+
+				parameters[channel]->modulation_algorithm = inVoltages[2];
+
+				parameters[channel]->modulation_parameter = inVoltages[3];
 
 				parameters[channel]->frequency_shift_pot = algorithmValue;
-				parameters[channel]->frequency_shift_cv = clamp(inVoltages[2], -1.f, 1.f);
 				parameters[channel]->phase_shift = parameters[channel]->modulation_algorithm;
 
 				parameters[channel]->note = 60.f * knobLevel1 + 12.f *
