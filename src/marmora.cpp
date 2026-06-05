@@ -265,6 +265,13 @@ struct Marmora : SanguineModule {
 		}
 
 		init();
+
+		y.control_mode = sanguinemarbles::CONTROL_MODE_IDENTICAL;
+		y.voltage_range = sanguinemarbles::VOLTAGE_RANGE_FULL;
+		y.register_mode = false;
+		y.register_value = 0.f;
+		y.deja_vu = 0.f;
+		y.length = 1;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -600,15 +607,9 @@ struct Marmora : SanguineModule {
 		x.ratio.q = 1;
 		x.scale_index = xScale;
 
-		y.control_mode = sanguinemarbles::CONTROL_MODE_IDENTICAL;
-		y.voltage_range = sanguinemarbles::VOLTAGE_RANGE_FULL;
-		y.register_mode = false;
-		y.register_value = 0.f;
 		y.spread = params[PARAM_Y_SPREAD].getValue();
 		y.bias = params[PARAM_Y_BIAS].getValue();
 		y.steps = params[PARAM_Y_STEPS].getValue();
-		y.deja_vu = 0.f;
-		y.length = 1;
 
 		unsigned int index = params[PARAM_Y_RATE].getValue() * LENGTHOF(marmora::yDividerRatios);
 		if (index < LENGTHOF(marmora::yDividerRatios)) {
