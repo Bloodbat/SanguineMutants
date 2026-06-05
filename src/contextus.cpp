@@ -475,7 +475,9 @@ struct Contextus : SanguineModule {
 			float_4 inVoltages;
 			simd::int32_4 int32Voltages;
 
-			memset(modulatedAttacks, knobAttack, sizeof(int32_t) * channelCount);
+			const int fillSize = sizeof(int32_t) * channelCount;
+
+			memset(modulatedAttacks, knobAttack, fillSize);
 			if (bAttackConnected) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					inVoltages = inputs[INPUT_ATTACK].getVoltageSimd<float_4>(channel);
@@ -488,7 +490,7 @@ struct Contextus : SanguineModule {
 				}
 			}
 
-			memset(modulatedDecays, knobDecay, sizeof(int32_t) * channelCount);
+			memset(modulatedDecays, knobDecay, fillSize);
 			if (bDecayConnected) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					inVoltages = inputs[INPUT_DECAY].getVoltageSimd<float_4>(channel);
@@ -709,8 +711,11 @@ struct Contextus : SanguineModule {
 
 		knobAttack = params[PARAM_ATTACK].getValue();
 		knobDecay = params[PARAM_DECAY].getValue();
-		memset(modulatedAttacks, knobAttack, sizeof(int32_t) * PORT_MAX_CHANNELS);
-		memset(modulatedDecays, knobDecay, sizeof(int32_t) * PORT_MAX_CHANNELS);
+
+		const int fillSize = sizeof(int32_t) * PORT_MAX_CHANNELS;
+
+		memset(modulatedAttacks, knobAttack, fillSize);
+		memset(modulatedDecays, knobDecay, fillSize);
 	}
 
 	void setWaveShaperSeed(uint32_t seed) {
