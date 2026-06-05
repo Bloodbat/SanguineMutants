@@ -263,7 +263,7 @@ struct Aestus : SanguineModule {
 					pitch += 60.f;
 					// Scale to the global sample rate.
 					pitch += log2SampleRate;
-					generators[channel].set_pitch(static_cast<int>(clamp(pitch * 128.f, -32768.f, 32767.f)));
+					generators[channel].set_pitch(clamp(static_cast<int>(pitch) * 128, -32768, 32767));
 
 					// Shape, slope, smoothness.
 					inputVoltages += knobValues;
