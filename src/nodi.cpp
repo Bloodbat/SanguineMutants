@@ -714,8 +714,8 @@ struct Nodi : SanguineModule {
 
 		knobAttack = params[PARAM_ATTACK].getValue();
 		knobDecay = params[PARAM_DECAY].getValue();
-		memset(modulatedAttacks, knobAttack, sizeof(int32_t) * channelCount);
-		memset(modulatedDecays, knobDecay, sizeof(int32_t) * channelCount);
+		memset(modulatedAttacks, knobAttack, sizeof(int32_t) * PORT_MAX_CHANNELS);
+		memset(modulatedDecays, knobDecay, sizeof(int32_t) * PORT_MAX_CHANNELS);
 	}
 
 	void setWaveShaperSeed(uint32_t seed) {
