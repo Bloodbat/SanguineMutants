@@ -90,7 +90,7 @@ struct Nodi : SanguineModule {
 	sanguinebraids::Quantizer quantizers[PORT_MAX_CHANNELS];
 
 	int32_t modulatedAttacks[PORT_MAX_CHANNELS] = {};
-	int32_t modulatedDecays[PORT_MAX_CHANNELS];
+	int32_t modulatedDecays[PORT_MAX_CHANNELS] = {};
 
 	int16_t previousPitches[PORT_MAX_CHANNELS] = {};
 
@@ -271,9 +271,6 @@ struct Nodi : SanguineModule {
 			knobColor = params[PARAM_COLOR].getValue();
 			knobCoarse = params[PARAM_COARSE].getValue();
 			knobFine = params[PARAM_FINE].getValue();
-
-			memset(modulatedAttacks, knobAttack, sizeof(int32_t) * channelCount);
-			memset(modulatedDecays, knobDecay, sizeof(int32_t) * channelCount);
 
 			for (int channel = 0; channel < channelCount; ++channel) {
 				settings[channel].quantizer_scale = knobScale;
@@ -487,6 +484,7 @@ struct Nodi : SanguineModule {
 			float_4 inVoltages;
 			simd::int32_4 int32Voltages;
 
+			memset(modulatedAttacks, knobAttack, sizeof(int32_t) * channelCount);
 			if (bAttackConnected) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					inVoltages = inputs[INPUT_ATTACK].getVoltageSimd<float_4>(channel);
@@ -499,6 +497,7 @@ struct Nodi : SanguineModule {
 				}
 			}
 
+			memset(modulatedDecays, knobDecay, sizeof(int32_t) * channelCount);
 			if (bDecayConnected) {
 				for (int channel = 0; channel < channelCount; channel += 4) {
 					inVoltages = inputs[INPUT_DECAY].getVoltageSimd<float_4>(channel);
@@ -712,6 +711,11 @@ struct Nodi : SanguineModule {
 			setWaveShaperSeed(userSignSeed);
 			bNeedSignSeed = false;
 		}
+
+		knobAttack = params[PARAM_ATTACK].getValue();
+		knobDecay = params[PARAM_DECAY].getValue();
+		memset(modulatedAttacks, knobAttack, sizeof(int32_t) * channelCount);
+		memset(modulatedDecays, knobDecay, sizeof(int32_t) * channelCount);
 	}
 
 	void setWaveShaperSeed(uint32_t seed) {
