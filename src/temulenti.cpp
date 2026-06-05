@@ -300,7 +300,7 @@ struct Temulenti : SanguineModule {
 				}
 
 				// Scale to the global sample rate.
-				pitch += log2SampleRate;
+				pitch = static_cast<int16_t>(static_cast<float>(pitch) + log2SampleRate);
 
 				if (generators[channel].feature_mode_ == bumps::Generator::FEAT_MODE_HARMONIC) {
 					generators[channel].set_pitch_high_range(clamp(pitch, -32768, 32767), fm);
