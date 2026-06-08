@@ -33,6 +33,8 @@ without the backticks.
 
 ## Additions
 
+- Plugin: new Galena theme.
+
 - Aestus family: modules are fully polyphonic.
 
 - Aestus family: signal the Range button and input are disabled when Clock
