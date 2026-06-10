@@ -64,7 +64,7 @@ namespace scalaria {
 
     float resonanceAtt = previousParameters_.rawResonance;
     // Compute the amplification using an exponential function: extend the frequency knob's range.
-    float exponentialFrequencyAtt = (expf(3.f * (previousParameters_.rawFrequency - 0.75f)) / 2) - 0.05f;
+    float exponentialFrequencyAtt = (expf(3.f * (previousParameters_.rawFrequency - 0.75f)) / 2.f) - 0.05f;
     moogLadderFilter.SetResonance(resonanceAtt * 4.f);
     moogLadderFilter.SetFrequency(exponentialFrequencyAtt * 2500.f);
 
