@@ -137,6 +137,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 | Explorator    | 10HP |
 | Fluctus       | 27HP |
 | Funes         | 27HP |
+| Funes Mk2     | 17HP |
 | Incurvationes | 10HP |
 | Marmora       | 28HP |
 | Mortuus       | 22HP |
@@ -144,6 +145,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 | Nebulae       | 27HP |
 | Nix           | 9HP  |
 | Nodi          | 28HP |
+| Reticula      | 16HP |
 | Scalaria      | 9HP  |
 | Temulenti     | 14HP |
 | Velamina      | 10HP |

@@ -13,7 +13,7 @@
     {
       "slug" : "Funes",
       "name" : "Funes",
-      "description" : "Powerful, polyphonic macro oscillator based on Mutable Instruments' Plaits 1.2",
+      "description" : "Powerful, polyphonic macro oscillator based on Mutable Instruments' Plaits 1.2 [27HP]",
       "keywords" : "Plaits",
       "tags" : [
         "Digital",
@@ -29,7 +29,7 @@
     {
       "slug" : "Sanguine-Mutants-Blank",
       "name" : "Sanguine Mutants Blank",
-      "description" : "Rack sleekerizer: add the Mutants goblin and a glowing Mutants logo to your rack!",
+      "description" : "Rack sleekerizer: add the Mutants goblin and a glowing Mutants logo to your rack! [10HP]",
       "keywords" : "Goblin",
       "tags" : [
         "Blank",
@@ -39,7 +39,7 @@
     {
       "slug" : "Sanguine-Apices",
       "name" : "Apices",
-      "description" : "Versatile complement to any patch, based on Mutable Instruments' Peaks",
+      "description" : "Versatile complement to any patch, based on Mutable Instruments' Peaks [22HP]",
       "keywords" : "Peaks",
       "tags" : [
         "Delay",
@@ -56,7 +56,7 @@
     {
       "slug" : "Sanguine-Aleae",
       "name" : "Aleae",
-      "description" : "Pair of polyphonic Bernoully gates based on Mutable Instruments' Branches",
+      "description" : "Pair of polyphonic Bernoully gates based on Mutable Instruments' Branches [6HP]",
       "keywords" : "Branches",
       "tags" : [
         "Random",
@@ -68,7 +68,7 @@
     {
       "slug" : "Sanguine-Nodi",
       "name" : "Nodi",
-      "description" : "Adaptable, polyphonic macro oscillator based on Mutable Instruments' Braids",
+      "description" : "Adaptable, polyphonic macro oscillator based on Mutable Instruments' Braids [28HP]",
       "keywords" : "Braids Analog",
       "tags" : [
         "Digital",
@@ -84,7 +84,7 @@
     {
       "slug" : "Sanguine-Contextus",
       "name" : "Contextus",
-      "description" : "Multipurpose, polyphonic macro oscillator based on the Renaissance alternative firmware for Mutable Instruments' Braids",
+      "description" : "Multipurpose, polyphonic macro oscillator based on the Renaissance alternative firmware for Mutable Instruments' Braids [28HP]",
       "keywords" : "Braids Renaissance Analog",
       "tags" : [
         "Digital",
@@ -100,7 +100,7 @@
     {
       "slug" : "Sanguine-Nebulae",
       "name" : "Nebulae",
-      "description" : "Polyphonic texture synthesizer based on the Monsoon version of Mutable Instruments' Clouds",
+      "description" : "Polyphonic texture synthesizer based on the Monsoon version of Mutable Instruments' Clouds [27HP]",
       "keywords" : "Clouds Monsoon",
       "tags" : [
         "Delay",
@@ -115,7 +115,7 @@
     {
       "slug" : "Sanguine-Etesia",
       "name" : "Etesia",
-      "description" : "Polyphonic texture synthesizer based on the Parasite firmware for Mutable Instruments' Clouds",
+      "description" : "Polyphonic texture synthesizer based on the Parasite firmware for Mutable Instruments' Clouds [27HP]",
       "keywords" : "Clouds Parasite Monsoon",
       "tags" : [
         "Delay",
@@ -130,7 +130,7 @@
     {
       "slug" : "Sanguine-Mortuus",
       "name" : "Mortuus",
-      "description" : "All-around gap filler based on the Dead Man's Catch firmware, with some additions, for Mutable Instruments' Peaks",
+      "description" : "All-around gap filler based on the Dead Man's Catch firmware, with some additions, for Mutable Instruments' Peaks [22HP]",
       "keywords" : "Peaks Dead Man Catch bytebeats",
       "tags" : [
         "Delay",
@@ -147,7 +147,7 @@
     {
       "slug" : "Sanguine-Fluctus",
       "name" : "Fluctus",
-      "description" : "Polyphonic texture synthesizer based on the Kammerl Beat-Repeat firmware for Mutable Instruments' Clouds",
+      "description" : "Polyphonic texture synthesizer based on the Kammerl Beat-Repeat firmware for Mutable Instruments' Clouds [27HP]",
       "keywords" : "Clouds Beat-repeat Beat Repeat Monsoon beatrepeat",
       "tags" : [
         "Delay",
@@ -162,7 +162,7 @@
     {
       "slug" : "Sanguine-Incurvationes",
       "name" : "Incurvationes",
-      "description" : "Polyphonic meta modulator based on Mutable Instruments' Warps",
+      "description" : "Polyphonic meta modulator based on Mutable Instruments' Warps [10HP]",
       "keywords" : "Warps",
       "tags" : [
         "Digital",
@@ -178,7 +178,7 @@
     {
       "slug" : "Sanguine-Distortiones",
       "name" : "Distortiones",
-      "description" : "Doctored, flexible and fully polyphonic meta-modulator based on the Parasite alternative firmware for Mutable Instruments' Warps",
+      "description" : "Doctored, flexible and fully polyphonic meta-modulator based on the Parasite alternative firmware for Mutable Instruments' Warps [10HP]",
       "keywords" : "Warps Parasite Tape",
       "tags" : [
         "Delay",
@@ -195,7 +195,7 @@
     {
       "slug" : "Sanguine-Mutuus",
       "name" : "Mutuus",
-      "description" : "Experimental, polyphonic and multifaceted meta-modulator based on the Symbiote firmware for Mutable Instruments' Warps",
+      "description" : "Experimental, polyphonic and multifaceted meta-modulator based on the Symbiote firmware for Mutable Instruments' Warps [10HP]",
       "keywords" : "Warps Symbiote",
       "tags" : [
         "Delay",
@@ -214,7 +214,7 @@
     {
       "slug" : "Sanguine-Explorator",
       "name" : "Explorator",
-      "description" : "Polyphonic multiple, mixer, noise source, sample and hold, inverter, rectifier and logic unit, based on Mutable Instruments' Links and Kinks",
+      "description" : "Polyphonic multiple, mixer, noise source, sample and hold, inverter, rectifier and logic unit, based on Mutable Instruments' Links and Kinks [10HP]",
       "keywords" : "Links Kinks Aliasing",
       "tags" : [
         "Hardware clone",
@@ -231,7 +231,7 @@
     {
       "slug" : "Sanguine-Marmora",
       "name" : "Marmora",
-      "description" : "Random sampler based on Mutable Instruments' Marbles",
+      "description" : "Random sampler based on Mutable Instruments' Marbles [28HP]",
       "keywords" : "Marbles",
       "tags" : [
         "Clock generator",
@@ -246,7 +246,7 @@
     {
       "slug" : "Sanguine-Anuli",
       "name" : "Anuli",
-      "description" : "Polyphonic resonator based on Mutable Instruments' Rings",
+      "description" : "Polyphonic resonator based on Mutable Instruments' Rings [21HP]",
       "keywords" : "Rings Modal Resonator Organ String Machine",
       "tags" : [
         "Effect",
@@ -260,7 +260,7 @@
     {
       "slug" : "Sanguine-Velamina",
       "name" : "Velamina",
-      "description" : "Tetrad of polyphonic voltage controller amplifiers based on the revised Veils from Mutable Instruments",
+      "description" : "Tetrad of polyphonic voltage controller amplifiers based on the revised Veils from Mutable Instruments [10HP]",
       "keywords" : "Veils 2020",
       "tags" : [
         "Mixer",
@@ -272,7 +272,7 @@
     {
       "slug" : "Sanguine-Aestus",
       "name" : "Aestus",
-      "description" : "Polyphonic modulator based on Mutable Instruments' Tides",
+      "description" : "Polyphonic modulator based on Mutable Instruments' Tides [14HP]",
       "keywords" : "Tides",
       "tags" : [
         "Clock generator",
@@ -289,7 +289,7 @@
     {
       "slug" : "Sanguine-Temulenti",
       "name" : "Temulenti",
-      "description" : "Multifaceted, polyphonic modulator based on the Parasite firmware for Mutable Instruments' Tides",
+      "description" : "Multifaceted, polyphonic modulator based on the Parasite firmware for Mutable Instruments' Tides [14HP]",
       "keywords" : "Tides Parasite",
       "tags" : [
         "Clock generator",
@@ -306,7 +306,7 @@
     {
       "slug" : "Sanguine-Vimina",
       "name" : "Vimina",
-      "description" : "Polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for Mutable Instruments' Branches",
+      "description" : "Polyphonic dual clock divider, multiplier and swinger based on the Twigs firmware for Mutable Instruments' Branches [6HP]",
       "keywords" : "Branches Twigs Divider Multiplier",
       "tags" : [
         "Clock modulator",
@@ -319,7 +319,7 @@
     {
       "slug" : "Sanguine-Nix",
       "name" : "Nix",
-      "description" : "Expander for Apices: adds CV modulation to function knobs",
+      "description" : "Expander for Apices: adds CV modulation to function knobs [9HP]",
       "keywords" : "Peaks CV Voltage Control Rainier",
       "tags" : [
         "Expander"
@@ -328,7 +328,7 @@
     {
       "slug" : "Sanguine-Ansa",
       "name" : "Ansa",
-      "description" : "Expander for Mortuus: adds CV modulation to function knobs",
+      "description" : "Expander for Mortuus: adds CV modulation to function knobs [9HP]",
       "keywords" : "Peaks CV Voltage Control Dead Man Catch Rainier",
       "tags" : [
         "Expander"
@@ -337,7 +337,7 @@
     {
       "slug" : "Sanguine-Scalaria",
       "name" : "Scalaria",
-      "description" : "Polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for Mutable Instruments' Warps",
+      "description" : "Polyphonic Moog inspired low-pass ladder filter from the original Symbiote firmware for Mutable Instruments' Warps [9HP]",
       "keywords" : "Warps Moog Symbiote Low-pass LP",
       "tags" : [
         "Filter",
@@ -348,7 +348,7 @@
     {
       "slug" : "Sanguine-Reticula",
       "name" : "Reticula",
-      "description" : "Topographic drum sequencer based on Mutable Instruments' Grids",
+      "description" : "Topographic drum sequencer based on Mutable Instruments' Grids [16HP]",
       "keywords" : "Grids",
       "tags" : [
         "Hardware clone",
@@ -358,7 +358,7 @@
     {
       "slug" : "FunesMk2",
       "name" : "Funes Mk2",
-      "description" : "Remixed polyphonic macro oscillator based on Mutable Instruments' Plaits 1.2 with more polyphonic capabilities and all of Funes' power with a smaller footprint.",
+      "description" : "Remixed polyphonic macro oscillator based on Mutable Instruments' Plaits 1.2 with more polyphonic capabilities and all of Funes' power with a smaller footprint [17HP]",
       "keywords" : "Plaits",
       "tags" : [
         "Digital",
