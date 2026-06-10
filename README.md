@@ -140,6 +140,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 | Nebulae       | 27HP |
 | Nix           | 9HP  |
 | Nodi          | 28HP |
+| Reticula      | 16HP |
 | Scalaria      | 9HP  |
 | Temulenti     | 14HP |
 | Velamina      | 10HP |
