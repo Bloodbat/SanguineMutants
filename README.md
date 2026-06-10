@@ -137,6 +137,7 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 | Explorator    | 10HP |
 | Fluctus       | 27HP |
 | Funes         | 27HP |
+| Funes Mk2     | 17HP |
 | Incurvationes | 10HP |
 | Marmora       | 28HP |
 | Mortuus       | 22HP |
