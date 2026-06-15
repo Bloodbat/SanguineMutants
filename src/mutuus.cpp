@@ -333,12 +333,12 @@ struct Mutuus : SanguineModule {
 			for (int channel = 0; channel < channelCount; ++channel) {
 				const int currentLight = LIGHT_CHANNEL_MODE + channel * 3;
 
-				mutuus::FeatureMode featureMode = modulators[channel].feature_mode();
+				mutuus::FeatureMode lightFeatureMode = modulators[channel].feature_mode();
 
 				float_4 rawFeatureMode = {
-					static_cast<float>(warpiespals::paletteParasiteFeatureMode[featureMode][0]),
-					static_cast<float>(warpiespals::paletteParasiteFeatureMode[featureMode][1]),
-					static_cast<float>(warpiespals::paletteParasiteFeatureMode[featureMode][2]),
+					static_cast<float>(warpiespals::paletteParasiteFeatureMode[lightFeatureMode][0]),
+					static_cast<float>(warpiespals::paletteParasiteFeatureMode[lightFeatureMode][1]),
+					static_cast<float>(warpiespals::paletteParasiteFeatureMode[lightFeatureMode][2]),
 					0.f
 				};
 
