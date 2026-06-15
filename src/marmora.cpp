@@ -878,7 +878,7 @@ struct Marmora : SanguineModule {
 		xyGenerator.LoadScale(currentScale, marmoraScales[currentScale].scale);
 	}
 
-	void copyScale(const sanguinemarbles::Scale& source, sanguinemarbles::Scale& destination) {
+	static void copyScale(const sanguinemarbles::Scale& source, sanguinemarbles::Scale& destination) {
 		destination.base_interval = source.base_interval;
 		destination.num_degrees = source.num_degrees;
 
