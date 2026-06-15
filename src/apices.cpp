@@ -1148,15 +1148,15 @@ struct Apices : SanguineModule {
 		lightsBrightness[channel] = value;
 	}
 
-	inline void processChannels(Block* block, size_t size) {
+	inline void processChannels(Block* inBlock, size_t size) {
 		for (size_t channel = 0; channel < apicesCommon::kChannelCount; ++channel) {
-			processors[channel].Process(block->input[channel], output, size);
+			processors[channel].Process(inBlock->input[channel], output, size);
 			setLedBrightness(channel, output[0]);
 			for (size_t blockNum = 0; blockNum < size; ++blockNum) {
 				// From calibration_data.h, shifting signed to unsigned values.
 				int32_t shiftedValue = 32767 + static_cast<int32_t>(output[blockNum]);
 				shiftedValue = clamp(shiftedValue, 0, 65535);
-				block->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
+				inBlock->output[channel][blockNum] = static_cast<uint16_t>(shiftedValue);
 			}
 		}
 	}
