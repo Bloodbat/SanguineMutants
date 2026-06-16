@@ -179,15 +179,9 @@ struct Anuli : SanguineModule {
 		parametersInfo.useInternalStrum = true;
 
 		parametersInfo.frequency = 30.f;
-		parametersInfo.knobValues[0] = 0.5f;
-		parametersInfo.knobValues[1] = 0.5f;
-		parametersInfo.knobValues[2] = 0.5f;
-		parametersInfo.knobValues[3] = 0.5f;
+		parametersInfo.knobValues = 0.5f;
 
-		parametersInfo.modValues[0] = 0.f;
-		parametersInfo.modValues[1] = 0.f;
-		parametersInfo.modValues[2] = 0.f;
-		parametersInfo.modValues[3] = 0.f;
+		parametersInfo.modValues = 0.f;
 
 		parametersInfo.modFrequency = 0.f;
 	}
