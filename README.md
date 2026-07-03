@@ -107,6 +107,34 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 - ### Velamina
 
   A polyphonic tetrad of voltage controlled amplifiers; my attempt at recreating MI's Veils... the 2020 version. Outputs beyond 10V are saturated.
+  
+## Module HP sizes
+
+| Module        | Size |
+| :------------ | :--- |
+| Aestus        | 14HP |
+| Aleae         | 6HP  |
+| Ansa          | 9HP  |
+| Anuli         | 21HP |
+| Apices        | 22HP |
+| Blank         | 10HP |
+| Contextus     | 28HP |
+| Distortiones  | 10HP |
+| Etesia        | 27HP |
+| Explorator    | 10HP |
+| Fluctus       | 27HP |
+| Funes         | 27HP |
+| Incurvationes | 10HP |
+| Marmora       | 28HP |
+| Mortuus       | 22HP |
+| Mutuus        | 10HP |
+| Nebulae       | 27HP |
+| Nix           | 9HP  |
+| Nodi          | 28HP |
+| Scalaria      | 9HP  |
+| Temulenti     | 14HP |
+| Velamina      | 10HP |
+| Vimina        | 6HP  |
 
 ## MetaModule port
 
