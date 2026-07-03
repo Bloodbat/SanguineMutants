@@ -1,0 +1,18 @@
+name: Check for correct pull request source branch
+on:
+    pull_request_target:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - edited
+jobs:
+    check-branches:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check for proper branch
+              run: |
+                  if [ ${{ github.head_ref }} != "mutantsdev" ] && [ ${{ github.base_ref }} == "main" ]; then
+                    echo "Pull requests should target the mutantsdev branch."
+                    exit 1
+                  fi
