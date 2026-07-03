@@ -228,8 +228,8 @@ struct Reticula : SanguineModule {
         using simd::float_4;
 
         if (runMode == reticula::MODE_TRIGGER) {
-            if ((!bIsRunConnected && (btRun.process(params[PARAM_RUN].getValue())) ||
-                stRun.process(inputs[INPUT_RUN].getVoltage()))) {
+            if (btRun.process(params[PARAM_RUN].getValue()) ||
+                stRun.process(inputs[INPUT_RUN].getVoltage())) {
                 bIsModuleRunning = !bIsModuleRunning;
             }
         } else {
