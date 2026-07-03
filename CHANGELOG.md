@@ -27,6 +27,8 @@ without the backticks.
 
 - Aestus family: High and Low tide outputs when modules are set to AR or AD modes.
 
+- Aleae: typo in manifest (Thanks Don!).
+
 - Nebulae family: proper tooltips on startup.
 
 - Scalaria: frame handling for certain polyphonic channels sent to Input 1.
