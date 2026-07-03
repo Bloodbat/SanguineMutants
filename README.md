@@ -108,6 +108,12 @@ Base modules are listed in alphabetical order, with their alternative firmwares 
 
   A polyphonic tetrad of voltage controlled amplifiers; my attempt at recreating MI's Veils... the 2020 version. Outputs beyond 10V are saturated.
 
+## MetaModule port
+
+A port for MetaModule, courtesy of Eric Gao, is available!
+
+Keep in mind we're not in charge of building or releasing the MetaModule plugin; so available modules and their faceplates may be out of sync with those presented here.
+
 ## Pull requests
 
 Development happens in the "mutantsdev" branch, so make sure you make it against that branch and not against "main": that one is reserved for releases and urgent bug fixes!
