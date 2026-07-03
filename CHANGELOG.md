@@ -11,6 +11,10 @@ without the backticks.
 
 # Next version
 
+## Fixes
+
+- Aleae: typo in manifest (Thanks Don!).
+
 
 ---
 
