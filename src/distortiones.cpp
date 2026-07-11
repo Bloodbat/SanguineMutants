@@ -70,6 +70,11 @@ struct Distortiones : SanguineModule {
 
 	distortiones::Parameters* parameters[PORT_MAX_CHANNELS];
 
+	float voltagesCarrier[PORT_MAX_CHANNELS] = {};
+	float voltagesModulator[PORT_MAX_CHANNELS] = {};
+	float voltages1x2[PORT_MAX_CHANNELS] = {};
+	float voltagesAux[PORT_MAX_CHANNELS] = {};
+
 	Distortiones() {
 		config(PARAMS_COUNT, INPUTS_COUNT, OUTPUTS_COUNT, LIGHTS_COUNT);
 
@@ -114,6 +119,9 @@ struct Distortiones : SanguineModule {
 
 		int channelCount = std::max(std::max(inputs[INPUT_CARRIER].getChannels(),
 			inputs[INPUT_MODULATOR].getChannels()), 1);
+
+		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
+		outputs[OUTPUT_AUX].setChannels(channelCount);
 
 		int32_t internalOscillator = static_cast<int32_t>(params[PARAM_CARRIER].getValue());
 
@@ -221,19 +229,43 @@ struct Distortiones : SanguineModule {
 				modulators[channel].Process(inputFrames[channel], outputFrames[channel], warpiescommon::kBlockSize);
 			}
 
-			inputFrames[channel][frames[channel]].l = clamp(static_cast<int>(
-				inputs[INPUT_CARRIER].getPolyVoltage(channel) / 8.f * 32768), -32768, 32767);
-			inputFrames[channel][frames[channel]].r = clamp(static_cast<int>(
-				inputs[INPUT_MODULATOR].getPolyVoltage(channel) / 8.f * 32768), -32768, 32767);
+			inputFrames[channel][frames[channel]].l = static_cast<int>(voltagesCarrier[channel]);
+			inputFrames[channel][frames[channel]].r = static_cast<int>(voltagesModulator[channel]);
 
-			outputs[OUTPUT_MODULATOR].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].l) /
-				32768 * 5.f, channel);
-			outputs[OUTPUT_AUX].setVoltage(static_cast<float>(outputFrames[channel][frames[channel]].r) /
-				32768 * 5.f, channel);
+			voltages1x2[channel] = static_cast<float>(outputFrames[channel][frames[channel]].l);
+			voltagesAux[channel] = static_cast<float>(outputFrames[channel][frames[channel]].r);
 		}
 
-		outputs[OUTPUT_MODULATOR].setChannels(channelCount);
-		outputs[OUTPUT_AUX].setChannels(channelCount);
+		float_4 workVoltages1;
+		float_4 workVoltages2;
+		for (int channel = 0; channel < channelCount; channel += 4) {
+			workVoltages1 = inputs[INPUT_CARRIER].getPolyVoltageSimd<float_4>(channel);
+			workVoltages2 = inputs[INPUT_MODULATOR].getPolyVoltageSimd<float_4>(channel);
+
+			workVoltages1 /= 8.f;
+			workVoltages2 /= 8.f;
+
+			workVoltages1 *= 32768.f;
+			workVoltages2 *= 32768.f;
+
+			workVoltages1 = simd::clamp(workVoltages1, -32768, 32767);
+			workVoltages2 = simd::clamp(workVoltages2, -32768, 32767);
+
+			workVoltages1.store(&voltagesCarrier[channel]);
+			workVoltages2.store(&voltagesModulator[channel]);
+
+			workVoltages1 = float_4::load(&voltages1x2[channel]);
+			workVoltages2 = float_4::load(&voltagesAux[channel]);
+
+			workVoltages1 /= 32768.f;
+			workVoltages2 /= 32768.f;
+
+			workVoltages1 *= 5.f;
+			workVoltages2 *= 5.f;
+
+			outputs[OUTPUT_MODULATOR].setVoltageSimd(workVoltages1, channel);
+			outputs[OUTPUT_AUX].setVoltageSimd(workVoltages2, channel);
+		}
 
 		if (lightsDivider.process()) {
 			const float sampleTime = jitteredLightsFrequency * args.sampleTime;
