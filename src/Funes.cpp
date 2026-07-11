@@ -407,24 +407,24 @@ struct Funes : SanguineModule {
 			for (int channel = 0; channel < channelCount; channel += 4) {
 				currentSample = channel << 1;
 				// Inverting op-amp on outputs
-				float_4 outVoltages = {
+				float_4 voltagesOut = {
 					-outputFrames.samples[currentSample],
 					-outputFrames.samples[currentSample + 2],
 					-outputFrames.samples[currentSample + 4],
 					-outputFrames.samples[currentSample + 6]
 				};
-				float_4 auxVoltages = {
+				float_4 voltagesAux = {
 					-outputFrames.samples[currentSample + 1],
 					-outputFrames.samples[currentSample + 3],
 					-outputFrames.samples[currentSample + 5],
 					-outputFrames.samples[currentSample + 7]
 				};
 
-				outVoltages *= 5.f;
-				auxVoltages *= 5.f;
+				voltagesOut *= 5.f;
+				voltagesAux *= 5.f;
 
-				outputs[OUTPUT_OUT].setVoltageSimd(outVoltages, channel);
-				outputs[OUTPUT_AUX].setVoltageSimd(auxVoltages, channel);
+				outputs[OUTPUT_OUT].setVoltageSimd(voltagesOut, channel);
+				outputs[OUTPUT_AUX].setVoltageSimd(voltagesAux, channel);
 			}
 		}
 		outputs[OUTPUT_OUT].setChannels(channelCount);
