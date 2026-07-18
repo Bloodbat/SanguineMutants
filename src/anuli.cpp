@@ -106,6 +106,8 @@ struct Anuli : SanguineModule {
 	bool bModeConnected = false;
 	bool bFxConnected = false;
 
+	bool bEventDrivenCables = true;
+
 	int channelCount = 0;
 	int polyphonyMode = 1;
 	int strummingFlagCounter = 0;
@@ -189,6 +191,18 @@ struct Anuli : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(std::max(inputs[INPUT_STRUM].getChannels(), inputs[INPUT_PITCH].getChannels()),
 			inputs[INPUT_IN].getChannels()), 1);
+
+		if (!bEventDrivenCables) {
+			parametersInfo.useInternalExciter = !inputs[INPUT_IN].isConnected();
+			parametersInfo.useInternalStrum = !inputs[INPUT_STRUM].isConnected();
+			bool bPitchConnected = inputs[INPUT_PITCH].isConnected();
+			parametersInfo.useInternalNote = !bPitchConnected;
+			parametersInfo.havePitchCable = bPitchConnected;
+			bModeConnected = inputs[INPUT_MODE].isConnected();
+			bFxConnected = inputs[INPUT_FX].isConnected();
+			connectedOutputs[OUTPUT_ODD] = outputs[OUTPUT_ODD].isConnected();
+			connectedOutputs[OUTPUT_EVEN] = outputs[OUTPUT_EVEN].isConnected();
+		}
 
 		// TODO: "Normalized to a pulse/burst generator that reacts to note changes on the V/OCT input."
 		if (!drbInputBuffers.full()) {
@@ -550,38 +564,40 @@ struct Anuli : SanguineModule {
 	}
 
 	void onPortChange(const PortChangeEvent& e) override {
-		switch (e.type) {
-		case Port::INPUT:
-			switch (e.portId) {
-			case INPUT_IN:
-				parametersInfo.useInternalExciter = !(e.connecting);
+		if (bEventDrivenCables) {
+			switch (e.type) {
+			case Port::INPUT:
+				switch (e.portId) {
+				case INPUT_IN:
+					parametersInfo.useInternalExciter = !(e.connecting);
+					break;
+
+				case INPUT_STRUM:
+					parametersInfo.useInternalStrum = !(e.connecting);
+					break;
+
+				case INPUT_PITCH:
+					parametersInfo.useInternalNote = !(e.connecting);
+					parametersInfo.havePitchCable = e.connecting;
+					break;
+
+				case INPUT_MODE:
+					bModeConnected = e.connecting;
+					break;
+
+				case INPUT_FX:
+					bFxConnected = e.connecting;
+					break;
+
+				default:
+					break;
+				}
 				break;
 
-			case INPUT_STRUM:
-				parametersInfo.useInternalStrum = !(e.connecting);
-				break;
-
-			case INPUT_PITCH:
-				parametersInfo.useInternalNote = !(e.connecting);
-				parametersInfo.havePitchCable = e.connecting;
-				break;
-
-			case INPUT_MODE:
-				bModeConnected = e.connecting;
-				break;
-
-			case INPUT_FX:
-				bFxConnected = e.connecting;
-				break;
-
-			default:
+			case Port::OUTPUT:
+				connectedOutputs[e.portId] = e.connecting;
 				break;
 			}
-			break;
-
-		case Port::OUTPUT:
-			connectedOutputs[e.portId] = e.connecting;
-			break;
 		}
 	}
 
@@ -601,6 +617,7 @@ struct Anuli : SanguineModule {
 		setJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 		setJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
 		setJsonInt(rootJ, "displayChannel", displayChannel);
+		setJsonBoolean(rootJ, "eventDrivenCables", bEventDrivenCables);
 
 		return rootJ;
 	}
@@ -610,6 +627,7 @@ struct Anuli : SanguineModule {
 
 		getJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 		getJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
+		getJsonBoolean(rootJ, "eventDrivenCables", bEventDrivenCables);
 
 		json_int_t intValue;
 
@@ -766,6 +784,10 @@ struct AnuliWidget : SanguineModuleWidget {
 				menu->addChild(new MenuSeparator);
 
 				menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
+
+				menu->addChild(new MenuSeparator);
+
+				menu->addChild(createBoolPtrMenuItem("Event driven cable detection", "", &module->bEventDrivenCables));
 			}
 		));
 
