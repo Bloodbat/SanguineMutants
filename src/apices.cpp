@@ -1233,6 +1233,9 @@ struct ApicesWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: main module should handle expander cable detection stuff!
+		bShowSanguineOptions = false;
+
 		FramebufferWidget* apicesFramebuffer = new FramebufferWidget();
 		addChild(apicesFramebuffer);
 

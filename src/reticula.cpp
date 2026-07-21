@@ -602,6 +602,9 @@ struct ReticulaWidget : SanguineModuleWidget {
 
         addScrews(SCREW_ALL);
 
+        // TODO: tie the option to something actually useful and remove the line below!
+        bShowSanguineOptions = false;
+
         FramebufferWidget* reticulaFramebuffer = new FramebufferWidget();
         addChild(reticulaFramebuffer);
 

@@ -1284,6 +1284,9 @@ struct MortuusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: main module should handle expander cable detection stuff!
+		bShowSanguineOptions = false;
+
 		FramebufferWidget* mortuusFramebuffer = new FramebufferWidget();
 		addChild(mortuusFramebuffer);
 

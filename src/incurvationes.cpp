@@ -275,6 +275,8 @@ struct IncurvationesWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		bShowSanguineOptions = false;
+
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<RedLight>>>(millimetersToPixelsVec(45.963, 12.897),
 			module, Incurvationes::PARAM_EASTER_EGG, Incurvationes::LIGHT_EASTER_EGG));
 

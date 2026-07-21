@@ -906,6 +906,9 @@ struct MarmoraWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: tie the option to something actually useful and remove the line below!
+		bShowSanguineOptions = false;
+
 		addParam(createParam<Sanguine1PSPurple>(millimetersToPixelsVec(64.430, 5.618), module, Marmora::PARAM_DEJA_VU));
 
 		addParam(createLightParam<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(8.677, 26.586), module,

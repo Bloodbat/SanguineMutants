@@ -236,8 +236,10 @@ struct AleaeWidget : SanguineModuleWidget {
 
 		makePanel();
 
-
 		addScrews(SCREW_TOP_LEFT | SCREW_BOTTOM_LEFT);
+
+		// TODO: tie the option to something actually useful and remove the line below!
+		bShowSanguineOptions = false;
 
 		// Channel 1
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<GreenRedLight>>>(millimetersToPixelsVec(4.622, 16.723), module,

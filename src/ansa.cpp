@@ -67,6 +67,9 @@ struct AnsaWidget : SanguineModuleWidget {
 
         addScrews(SCREW_ALL);
 
+        // TODO: main module should handle expander cable detection stuff!
+        bShowSanguineOptions = false;
+
         addChild(createLightCentered<SmallLight<OrangeLight>>(millimetersToPixelsVec(2.8, 5.573), module, Ansa::LIGHT_MASTER_MODULE));
 
         addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(10.859, 20.72), module, Ansa::PARAM_PARAM_CV_1));

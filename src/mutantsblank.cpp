@@ -22,6 +22,8 @@ struct MutantsBlankWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		bShowSanguineOptions = false;
+
 #ifndef METAMODULE
 		SanguineShapedLight* mutantsLight = new SanguineShapedLight(module, "res/mutants_glowy_blank.svg", 25.914, 51.81);
 		addChild(mutantsLight);
