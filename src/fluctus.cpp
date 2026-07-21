@@ -835,6 +835,9 @@ struct FluctusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: tie the option to something actually useful and remove the line below!
+		bShowSanguineOptions = false;
+
 		FramebufferWidget* fluctusFramebuffer = new FramebufferWidget();
 		addChild(fluctusFramebuffer);
 

@@ -551,6 +551,9 @@ struct ExploratorWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: tie the option to something actually useful and remove the line below!
+		bShowSanguineOptions = false;
+
 		// 1:3
 		addInput(createInputCentered<BananutGreenPoly>(millimetersToPixelsVec(5.49, 23.491), module, Explorator::INPUT_1_TO_3));
 		addOutput(createOutputCentered<BananutRedPoly>(millimetersToPixelsVec(18.897, 23.491), module, Explorator::OUTPUT_1_TO_3_A));

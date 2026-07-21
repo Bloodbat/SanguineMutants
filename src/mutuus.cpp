@@ -435,6 +435,9 @@ struct MutuusWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: tie the option to something actually useful and remove the line below!
+		bShowSanguineOptions = false;
+
 		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<YellowLight>>>(millimetersToPixelsVec(4.836, 16.119),
 			module, Mutuus::PARAM_STEREO, Mutuus::LIGHT_STEREO));
 

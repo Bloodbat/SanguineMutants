@@ -252,6 +252,9 @@ struct VelaminaWidget : SanguineModuleWidget {
 
 		addScrews(SCREW_ALL);
 
+		// TODO: tie the option to something actually useful and remove the line below!
+		bShowSanguineOptions = false;
+
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(8.326, 19.457), module, Velamina::PARAM_RESPONSE_1));
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(19.82, 19.457), module, Velamina::PARAM_RESPONSE_2));
 		addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(31.323, 19.457), module, Velamina::PARAM_RESPONSE_3));

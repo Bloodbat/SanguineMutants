@@ -514,6 +514,8 @@ struct ScalariaWidget : SanguineModuleWidget {
 
         addScrews(SCREW_ALL);
 
+        bShowSanguineOptions = false;
+
         addParam(createParamCentered<Sanguine3PSRed>(millimetersToPixelsVec(22.86, 21.855), module, Scalaria::PARAM_FREQUENCY));
 
         addParam(createParamCentered<Trimpot>(millimetersToPixelsVec(5.856, 18.858), module, Scalaria::PARAM_FREQUENCY_CV_ATTENUVERTER));
