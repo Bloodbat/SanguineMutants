@@ -106,8 +106,6 @@ struct Anuli : SanguineModule {
 	bool bModeConnected = false;
 	bool bFxConnected = false;
 
-	bool bEventDrivenCables = true;
-
 	int channelCount = 0;
 	int polyphonyMode = 1;
 	int strummingFlagCounter = 0;
@@ -617,7 +615,6 @@ struct Anuli : SanguineModule {
 		setJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 		setJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
 		setJsonInt(rootJ, "displayChannel", displayChannel);
-		setJsonBoolean(rootJ, "eventDrivenCables", bEventDrivenCables);
 
 		return rootJ;
 	}
@@ -627,7 +624,6 @@ struct Anuli : SanguineModule {
 
 		getJsonBoolean(rootJ, "NotesModeSelection", bNotesModeSelection);
 		getJsonBoolean(rootJ, "useFrequencyOffset", bUseFrequencyOffset);
-		getJsonBoolean(rootJ, "eventDrivenCables", bEventDrivenCables);
 
 		json_int_t intValue;
 
@@ -784,10 +780,6 @@ struct AnuliWidget : SanguineModuleWidget {
 				menu->addChild(new MenuSeparator);
 
 				menu->addChild(createBoolPtrMenuItem("C4-F#4 direct mode selection", "", &module->bNotesModeSelection));
-
-				menu->addChild(new MenuSeparator);
-
-				menu->addChild(createBoolPtrMenuItem("Event driven cable detection", "", &module->bEventDrivenCables));
 			}
 		));
 
