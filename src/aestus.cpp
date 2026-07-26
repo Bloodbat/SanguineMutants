@@ -202,6 +202,21 @@ struct Aestus : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
+		if (!bEventDrivenCables) {
+			bModelConnected = inputs[INPUT_MODEL].isConnected();
+			bRangeConnected = inputs[INPUT_RANGE].isConnected();
+			if (!bRangeConnected) {
+				std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+					static_cast<float>(selectedRange));
+			}
+			bModeConnected = inputs[INPUT_MODE].isConnected();
+			if (!bModeConnected) {
+				std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+					static_cast<float>(selectedMode));
+			}
+			bClockConnected = inputs[INPUT_CLOCK].isConnected();
+		}
+
 		bool bIsLightsTurn = lightsDivider.process();
 
 		if (!bWantPeacocks) {
@@ -490,30 +505,32 @@ struct Aestus : SanguineModule {
 	}
 
 	void onPortChange(const PortChangeEvent& e) override {
-		if (e.type == Port::INPUT) {
-			switch (e.portId) {
-			case INPUT_MODEL:
-				bModelConnected = e.connecting;
-				break;
-			case INPUT_RANGE:
-				bRangeConnected = e.connecting;
-				if (!bRangeConnected) {
-					std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
-						static_cast<float>(selectedRange));
+		if (bEventDrivenCables) {
+			if (e.type == Port::INPUT) {
+				switch (e.portId) {
+				case INPUT_MODEL:
+					bModelConnected = e.connecting;
+					break;
+				case INPUT_RANGE:
+					bRangeConnected = e.connecting;
+					if (!bRangeConnected) {
+						std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+							static_cast<float>(selectedRange));
+					}
+					break;
+				case INPUT_MODE:
+					bModeConnected = e.connecting;
+					if (!bModeConnected) {
+						std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+							static_cast<float>(selectedMode));
+					}
+					break;
+				case INPUT_CLOCK:
+					bClockConnected = e.connecting;
+					break;
+				default:
+					break;
 				}
-				break;
-			case INPUT_MODE:
-				bModeConnected = e.connecting;
-				if (!bModeConnected) {
-					std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
-						static_cast<float>(selectedMode));
-				}
-				break;
-			case INPUT_CLOCK:
-				bClockConnected = e.connecting;
-				break;
-			default:
-				break;
 			}
 		}
 	}
@@ -590,9 +607,6 @@ struct AestusWidget : SanguineModuleWidget {
 		makePanel();
 
 		addScrews(SCREW_ALL);
-
-		// TODO: tie the option to something actually useful and remove the line below!
-		bShowSanguineOptions = false;
 
 		FramebufferWidget* aestusFrameBuffer = new FramebufferWidget();
 		addChild(aestusFrameBuffer);
