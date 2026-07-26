@@ -71,6 +71,8 @@ without the backticks.
 
 - Plugin: performance tweaks.
 
+- Plugin: reorganize Sanguine Modules context menu: Themes can now be found under the "Sanguine modules options" item.
+
 - Aestus family: reorganize the faceplates to accommodate the polyphonic
   versions of the modules.
 
