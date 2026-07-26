@@ -220,6 +220,28 @@ struct Temulenti : SanguineModule {
 	void process(const ProcessArgs& args) override {
 		channelCount = std::max(std::max(inputs[INPUT_PITCH].getChannels(), inputs[INPUT_TRIGGER].getChannels()), 1);
 
+		if (!bEventDrivenCables) {
+			bModelConnected = inputs[INPUT_MODEL].isConnected();
+			if (!bModelConnected) {
+				std::fill(&channelModels[0], &channelModels[PORT_MAX_CHANNELS],
+					static_cast<float>(selectedFeatureMode));
+			}
+			bRangeConnected = inputs[INPUT_RANGE].isConnected();
+			if (!bRangeConnected) {
+				std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+					static_cast<float>(selectedRange));
+			}
+			bModeConnected = inputs[INPUT_MODE].isConnected();
+			if (!bModeConnected) {
+				std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+					static_cast<float>(selectedMode));
+			}
+			bQuantizerConnected = inputs[INPUT_QUANTIZER].isConnected();
+			if (!bQuantizerConnected) {
+				std::fill(&quantizers[0], &quantizers[PORT_MAX_CHANNELS], knobQuantizer);
+			}
+		}
+
 		bumps::GeneratorSample samples[PORT_MAX_CHANNELS];
 		float unipolarFlags[PORT_MAX_CHANNELS];
 
@@ -544,37 +566,39 @@ struct Temulenti : SanguineModule {
 	}
 
 	void onPortChange(const PortChangeEvent& e) override {
-		if (e.type == Port::INPUT) {
-			switch (e.portId) {
-			case INPUT_MODEL:
-				bModelConnected = e.connecting;
-				if (!bModelConnected) {
-					std::fill(&channelModels[0], &channelModels[PORT_MAX_CHANNELS],
-						static_cast<float>(selectedFeatureMode));
+		if (bEventDrivenCables) {
+			if (e.type == Port::INPUT) {
+				switch (e.portId) {
+				case INPUT_MODEL:
+					bModelConnected = e.connecting;
+					if (!bModelConnected) {
+						std::fill(&channelModels[0], &channelModels[PORT_MAX_CHANNELS],
+							static_cast<float>(selectedFeatureMode));
+					}
+					break;
+				case INPUT_RANGE:
+					bRangeConnected = e.connecting;
+					if (!bRangeConnected) {
+						std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
+							static_cast<float>(selectedRange));
+					}
+					break;
+				case INPUT_MODE:
+					bModeConnected = e.connecting;
+					if (!bModeConnected) {
+						std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
+							static_cast<float>(selectedMode));
+					}
+					break;
+				case INPUT_QUANTIZER:
+					bQuantizerConnected = e.connecting;
+					if (!bQuantizerConnected) {
+						std::fill(&quantizers[0], &quantizers[PORT_MAX_CHANNELS], knobQuantizer);
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case INPUT_RANGE:
-				bRangeConnected = e.connecting;
-				if (!bRangeConnected) {
-					std::fill(&channelRanges[0], &channelRanges[PORT_MAX_CHANNELS],
-						static_cast<float>(selectedRange));
-				}
-				break;
-			case INPUT_MODE:
-				bModeConnected = e.connecting;
-				if (!bModeConnected) {
-					std::fill(&channelModes[0], &channelModes[PORT_MAX_CHANNELS],
-						static_cast<float>(selectedMode));
-				}
-				break;
-			case INPUT_QUANTIZER:
-				bQuantizerConnected = e.connecting;
-				if (!bQuantizerConnected) {
-					std::fill(&quantizers[0], &quantizers[PORT_MAX_CHANNELS], knobQuantizer);
-				}
-				break;
-			default:
-				break;
 			}
 		}
 	}
@@ -653,9 +677,6 @@ struct TemulentiWidget : SanguineModuleWidget {
 		makePanel();
 
 		addScrews(SCREW_ALL);
-
-		// TODO: tie the option to something actually useful and remove the line below!
-		bShowSanguineOptions = false;
 
 		FramebufferWidget* temulentiFrameBuffer = new FramebufferWidget();
 
