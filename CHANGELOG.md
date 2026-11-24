@@ -11,6 +11,11 @@ without the backticks.
 
 # Next version
 
+
+---
+
+# Next version
+
 ## New Modules
 
 ### Reticula
