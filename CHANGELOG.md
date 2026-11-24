@@ -15,6 +15,10 @@ without the backticks.
 
 - Aleae: typo in manifest (Thanks Don!).
 
+## Additions
+
+- Plugin: include HP sizes in module descriptions.
+
 
 ---
 
